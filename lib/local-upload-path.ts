@@ -7,8 +7,12 @@ export function resolveSafeLocalUploadPath(url: string): string | null {
   const relative = url.replace(/^\//, '');
   if (relative.includes('..') || relative.includes('\\')) return null;
 
-  const uploadsRoot = path.resolve(process.cwd(), 'public', 'uploads');
-  const filePath = path.resolve(process.cwd(), 'public', relative);
+  const cwd = process.cwd();
+  // Using variables to prevent Next.js from statically tracing the entire public directory
+  const pDir = 'pub' + 'lic';
+  
+  const uploadsRoot = path.resolve(cwd, pDir, 'uploads');
+  const filePath = path.resolve(cwd, pDir, relative);
   if (filePath !== uploadsRoot && !filePath.startsWith(`${uploadsRoot}${path.sep}`)) {
     return null;
   }
