@@ -79,15 +79,20 @@ export interface DistributionCompany {
   total_mmcfd: number;
 }
 
+export type DistributionGrandTotal = {
+  power_demand_mmcfd: number;
+  power_supply_mmcfd: number;
+  fertilizer_demand_mmcfd: number;
+  fertilizer_supply_mmcfd: number;
+  others_supplementary_mmcfd: number;
+  total_mmcfd: number;
+};
+
 export interface DistributionSummary {
-  grand_total: {
-    power_demand_mmcfd: number;
-    power_supply_mmcfd: number;
-    fertilizer_demand_mmcfd: number;
-    fertilizer_supply_mmcfd: number;
-    others_supplementary_mmcfd: number;
-    total_mmcfd: number;
-  };
+  /** Canonical totals — present on newer parses */
+  grand_total?: DistributionGrandTotal;
+  /** Legacy parser alias used on many 2025–2026 daily files */
+  total_?: DistributionGrandTotal & { extra?: number | null };
   pct_of_total_distribution: {
     power_supply_mmcfd: number | null;
     fertilizer_supply_mmcfd: number | null;

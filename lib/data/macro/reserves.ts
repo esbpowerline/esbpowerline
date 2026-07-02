@@ -84,16 +84,24 @@ export type ReservesDepletionRow = (typeof reservesDepletionData)[number];
 export function reservesChartSeries() {
   return reservesDepletionData.map((row) => {
     const y = Number(row.year);
-    const isAudited = y <= RESERVES_AUDITED_META.forecastStartYear;
-    const isForecast = y >= RESERVES_AUDITED_META.forecastStartYear;
+    const isAudited = y < RESERVES_AUDITED_META.forecastStartYear;
+    const isFork = y >= RESERVES_AUDITED_META.forecastStartYear;
     return {
       year: row.year,
-      audited: isAudited ? row.bau : null,
-      lowGrowth: isForecast ? row.lowGrowth : null,
-      bau: isForecast ? row.bau : null,
-      highGrowth: isForecast ? row.highGrowth : null,
+      audited: isAudited ? row.bau : y === RESERVES_AUDITED_META.forecastStartYear ? row.bau : null,
+      lowGrowth: isFork ? row.lowGrowth : null,
+      bau: isFork ? row.bau : null,
+      highGrowth: isFork ? row.highGrowth : null,
     };
   });
+}
+
+/** Y-axis ceiling — snug headroom above peak remaining (12.27 Tcf, 2020) so decline reads clearly */
+export function reservesChartYMax() {
+  const peakRemaining = Math.max(
+    ...reservesDepletionData.map((r) => Math.max(r.bau, r.lowGrowth, r.highGrowth)),
+  );
+  return Math.ceil(peakRemaining + 1.5);
 }
 
 export function reserveDepletionPct(year: string): number {

@@ -8,18 +8,10 @@ import {
   latestOkDate,
   resolveArchiveGasDay,
 } from '@/lib/data/petrobangla/compute';
-import {
-  loadArchiveDay,
-  loadArchiveIndex,
-  loadArchiveTimeline,
-} from '@/lib/data/petrobangla/loadArchive';
+import { loadArchiveDay } from '@/lib/data/petrobangla/loadArchive';
+import { usePetrobanglaBootstrap } from '../PetrobanglaBootstrap';
 import { ARCHIVE_INSIGHTS, ARCHIVE_START_DATE } from '@/lib/data/petrobangla/constants';
-import type {
-  AudienceMode,
-  PetrobanglaDaily,
-  PetrobanglaIndex,
-  PetrobanglaTimelineSummary,
-} from '@/lib/data/petrobangla/types';
+import type { AudienceMode, PetrobanglaDaily } from '@/lib/data/petrobangla/types';
 import {
   ArchiveInsightCallout,
   ArchiveSyncNotice,
@@ -55,16 +47,14 @@ export function PetrobanglaArchivePanel({
   unified = false,
   depletionEmbed = false,
 }: PetrobanglaArchivePanelProps) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [index, setIndex] = useState<PetrobanglaIndex | null>(null);
-  const [timeline, setTimeline] = useState<PetrobanglaTimelineSummary | null>(null);
+  const { index, timeline, loading, error: bootstrapError } = usePetrobanglaBootstrap();
   const [selectedDay, setSelectedDay] = useState<PetrobanglaDaily | null>(null);
   const [dayLoading, setDayLoading] = useState(false);
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
   const [activeView, setActiveView] = useState<ArchiveStoryView>('timeline');
-  const [chartsReady, setChartsReady] = useState(false);
+  const chartsReady = true;
+  const error = bootstrapError;
 
   const archiveResolution = useMemo(() => {
     if (!index) return { resolved: null as string | null, exact: false };
@@ -72,31 +62,6 @@ export function PetrobanglaArchivePanel({
   }, [index, selectedDate]);
 
   const latestArchiveDate = index ? latestOkDate(index) : '';
-
-  useEffect(() => {
-    const t = setTimeout(() => setChartsReady(true), 120);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [idx, tl] = await Promise.all([loadArchiveIndex(), loadArchiveTimeline()]);
-        if (!cancelled) {
-          setIndex(idx);
-          setTimeline(tl);
-        }
-      } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load archive');
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     const archiveDate = archiveResolution.resolved;

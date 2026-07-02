@@ -69,6 +69,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const canPostComment = signedIn && can(role, 'comment.create');
   const staffComment = can(role, 'comment.moderate_any');
 
+  const paragraphs = article.content.split('</p>');
+  const middleIndex = Math.floor(paragraphs.length / 2);
+  const firstHalf = paragraphs.slice(0, middleIndex).join('</p>') + (middleIndex > 0 ? '</p>' : '');
+  const secondHalf = paragraphs.slice(middleIndex).join('</p>');
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -197,7 +202,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
 
 
-      <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe" dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.content) }} />
+      <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe">
+        <div dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(firstHalf) }} />
+
+        {/* In-Article Ad Space */}
+        {paragraphs.length > 3 && (
+          <div className="my-10 p-6 border border-border/40 bg-muted/20 rounded-2xl flex flex-col items-center justify-center text-muted-foreground/60 w-full overflow-hidden relative group min-h-[140px]">
+            <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.03)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.03)_50%,transparent_75%)] bg-[length:10px_10px]" />
+            <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Advertisement</span>
+            <span className="text-sm font-medium">In-Body Ad Header</span>
+          </div>
+        )}
+
+        <div dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(secondHalf) }} />
+      </div>
 
       {(() => {
         const displayTags = article.tags && article.tags.length > 0

@@ -4,10 +4,10 @@ import json
 import datetime
 from concurrent.futures import ThreadPoolExecutor
 
-PGCB_DIR = r"C:\Users\hamim\Desktop\PGCB\Daily Reports - D\Daily Reports Parsed"
-PB_DIR = r"C:\Users\hamim\Desktop\Petrobangla\Daily Gas Reports - D\Daily Gas Reports Parsed"
-OUTPUT_DIR = r"C:\Users\hamim\esbpowerline\public\data\daily"
-DATES_OUTPUT_PATH = r"C:\Users\hamim\esbpowerline\lib\available-dates.json"
+PGCB_DIR = r"C:\Users\user\Desktop\PGCB\Daily Reports - D\Daily Reports Parsed"
+PB_DIR = r"C:\Users\user\Desktop\Petrobangla\Daily Gas Reports - D\Daily Gas Reports Parsed"
+OUTPUT_DIR = r"C:\Users\user\esbpowerline\public\data\daily"
+DATES_OUTPUT_PATH = r"C:\Users\user\esbpowerline\lib\available-dates.json"
 
 def clean_float(val_str):
     if not val_str:
@@ -322,29 +322,43 @@ def parse_pgcb_file(filepath, op_date):
             'pct': round(pct, 1)
         })
 
-    # Extract hourly load data from L-Curve
+    # Extract hourly load data from L-Curve (TOTAL column = index 3 in ERP pipe layout)
     hourly_load_data = []
     lcurve = get_sheet_content(content, 'L-Curve')
     if lcurve:
         for line in lcurve.split('\n'):
-            if '|' in line:
-                parts = [p.strip() for p in line.split('|') if p.strip()]
-                if len(parts) >= 5 and re.match(r'^\d{2}:\d{2}:\d{2}$', parts[0]):
-                    time_str = parts[0][:5]
-                    if time_str.endswith(':00'):
-                        gen_val = clean_float(parts[4])
-                        total_shed = sum(regional_loadshed.values())
-                        hour_shed = 0.0
-                        hour_int = int(time_str[:2])
-                        if 18 <= hour_int <= 23 and total_shed > 0.0:
-                            hour_shed = total_shed * 0.8
-                        demand_val = gen_val + hour_shed
-                        hourly_load_data.append({
-                            'time': time_str,
-                            'generation': gen_val,
-                            'loadShed': round(hour_shed, 2),
-                            'demand': round(demand_val, 2)
-                        })
+            if '|' not in line:
+                continue
+            parts = [p.strip() for p in line.split('|')]
+            while parts and not parts[0]:
+                parts.pop(0)
+            if not parts:
+                continue
+            time_match = re.match(r'^(\d{2}:\d{2})(?::\d{2})?$', parts[0])
+            if not time_match:
+                continue
+            time_str = time_match.group(1)
+            if not time_str.endswith(':00'):
+                continue
+            gen_val = 0.0
+            if len(parts) >= 4 and parts[3]:
+                gen_val = clean_float(parts[3])
+            elif len(parts) >= 5:
+                gen_val = clean_float(parts[4])
+            if gen_val <= 0:
+                continue
+            total_shed = sum(regional_loadshed.values())
+            hour_shed = 0.0
+            hour_int = int(time_str[:2])
+            if 18 <= hour_int <= 23 and total_shed > 0.0:
+                hour_shed = total_shed * 0.8
+            demand_val = gen_val + hour_shed
+            hourly_load_data.append({
+                'time': time_str,
+                'generation': gen_val,
+                'loadShed': round(hour_shed, 2),
+                'demand': round(demand_val, 2)
+            })
     if not hourly_load_data:
         for h in range(24):
             time_str = f"{h:02d}:00"

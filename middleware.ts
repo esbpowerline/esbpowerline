@@ -31,12 +31,24 @@ function isDailyJsonPath(pathname: string): boolean {
   return /^\/data\/daily\/\d{4}-\d{2}-\d{2}\.json$/.test(pathname);
 }
 
+function isPetrobanglaJsonPath(pathname: string): boolean {
+  return /^\/data\/petrobangla\/(daily\/\d{4}-\d{2}-\d{2}\.json|_index\.json|timeline-summary\.json|_live_week\.json)$/.test(
+    pathname,
+  );
+}
+
+function isProtectedDataJsonPath(pathname: string): boolean {
+  return isDailyJsonPath(pathname) || isPetrobanglaJsonPath(pathname);
+}
+
 function dailyScrapeBlocked(request: NextRequest, ip: string): boolean {
   const burstKey = edgeRateLimitKey('daily-json-burst', ip);
   const burst = checkRateLimit(burstKey, DAILY_BURST_LIMIT, DAILY_BURST_WINDOW_MS);
   if (!burst.allowed) return true;
 
-  const match = request.nextUrl.pathname.match(/\/data\/daily\/(\d{4}-\d{2}-\d{2})\.json$/);
+  const match = request.nextUrl.pathname.match(
+    /\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/,
+  );
   if (!match) return false;
 
   const now = Date.now();
@@ -105,7 +117,7 @@ function redirectWithCookies(
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  if (isDailyJsonPath(pathname)) {
+  if (isProtectedDataJsonPath(pathname)) {
     const ip = clientIpFromForwarded(
       request.headers.get('x-forwarded-for'),
       request.headers.get('x-real-ip'),
@@ -133,8 +145,8 @@ export async function middleware(request: NextRequest) {
     const { response, supabase, user } = await updateSession(request);
     const { active, role, gridPlan } = await resolveEdgeSession(user, supabase);
 
-    const dateMatch = pathname.match(/\/data\/daily\/(\d{4}-\d{2}-\d{2})\.json$/);
-    const isoDate = dateMatch?.[1];
+    const dailyMatch = pathname.match(/\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/);
+    const isoDate = dailyMatch?.[1];
     const latestDate = getLatestAvailableDate();
 
     if (isoDate && latestDate) {
@@ -193,6 +205,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/data/daily/:path*.json',
+    '/data/petrobangla/:path*.json',
     '/((?!_next/static|_next/image|images|favicon.ico|robots.txt|sitemap.xml|api/cron).*)',
   ],
 };

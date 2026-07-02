@@ -1,4 +1,4 @@
-import { getFieldGas, getRpgclGas, stressedPlants } from './compute';
+import { getDistributionGrandTotal, getFieldGas, getRpgclGas, powerFulfillmentPct, stressedPlants } from './compute';
 import type { LiveWeekKpis, PetrobanglaDaily, PetrobanglaLiveWeekBundle } from './types';
 
 export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeekKpis {
@@ -10,7 +10,7 @@ export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeek
   const weekMin = Math.min(...gases);
   const weekMax = Math.max(...gases);
   const latestGas = latest.production.grand_total.gas_mmcfd;
-  const gt = latest.distribution.summary.grand_total;
+  const gt = getDistributionGrandTotal(latest);
   const lng = getRpgclGas(latest.production.fields);
   const bibiyana = getFieldGas(latest.production.fields, 'Bibiyana');
   const bibField = latest.production.fields.find((f) => f.field === 'Bibiyana');
@@ -21,10 +21,7 @@ export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeek
     latestDate: latest.report.report_date_end,
     latestGasDelta: prev ? latestGas - prev.production.grand_total.gas_mmcfd : null,
     weekAvgGas: gases.reduce((a, b) => a + b, 0) / gases.length,
-    powerFulfillmentPct:
-      gt.power_demand_mmcfd > 0
-        ? (gt.power_supply_mmcfd / gt.power_demand_mmcfd) * 100
-        : 0,
+    powerFulfillmentPct: powerFulfillmentPct(latest),
     powerSupply: gt.power_supply_mmcfd,
     powerDemand: gt.power_demand_mmcfd,
     lngSharePct: latestGas > 0 ? (lng / latestGas) * 100 : 0,
@@ -39,17 +36,14 @@ export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeek
 
 export function liveWeekTimelinePoints(bundle: PetrobanglaLiveWeekBundle) {
   return bundle.days.map((d) => {
-    const gt = d.distribution.summary.grand_total;
+    const gt = getDistributionGrandTotal(d);
     return {
       date: d.report.report_date_end,
       label: d.report.report_date_label,
       totalGas: d.production.grand_total.gas_mmcfd,
       powerDemand: gt.power_demand_mmcfd,
       powerSupply: gt.power_supply_mmcfd,
-      fulfillment:
-        gt.power_demand_mmcfd > 0
-          ? (gt.power_supply_mmcfd / gt.power_demand_mmcfd) * 100
-          : 0,
+      fulfillment: powerFulfillmentPct(d),
     };
   });
 }
@@ -69,10 +63,8 @@ export function fieldSparklines(bundle: PetrobanglaLiveWeekBundle): Map<string, 
 export function dayOverDayDelta(left: PetrobanglaDaily, right: PetrobanglaDaily) {
   const lngL = getRpgclGas(left.production.fields);
   const lngR = getRpgclGas(right.production.fields);
-  const gtL = left.distribution.summary.grand_total;
-  const gtR = right.distribution.summary.grand_total;
-  const fulL = gtL.power_demand_mmcfd > 0 ? (gtL.power_supply_mmcfd / gtL.power_demand_mmcfd) * 100 : 0;
-  const fulR = gtR.power_demand_mmcfd > 0 ? (gtR.power_supply_mmcfd / gtR.power_demand_mmcfd) * 100 : 0;
+  const fulL = powerFulfillmentPct(left);
+  const fulR = powerFulfillmentPct(right);
 
   const movers: { field: string; delta: number }[] = [];
   const lm = new Map(left.production.fields.map((f) => [f.field, f.gas_mmcfd]));

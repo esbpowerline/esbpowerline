@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -29,11 +30,14 @@ import {
   formatAxisMmcfd,
   formatPgcbMonthlyTick,
   gridChartAxisTick,
+  gridChartSplitUnitTick,
   gridChartXAxisProps,
   gridChartYAxisProps,
+  GridRechartsTooltip,
 } from '@/components/news/PowerGridChartUI';
-import { getArchiveFallback } from '@/lib/data/grid/archive-fallback';
 import type { GridDailyData } from '@/lib/data/grid/types';
+import { shouldUseArchiveFallback } from '@/lib/data/grid/daily-access';
+import { getCachedDailyReport, peekLatestCachedReport, setCachedDailyReport } from '@/lib/data/grid/daily-cache';
 import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
@@ -51,8 +55,6 @@ import { globalVsDomesticData, historicalExchangeRates } from '@/lib/data/macro/
 import { macroInfrastructureData } from '@/lib/data/macro/infrastructure';
 import { nationalBudgetData } from '@/lib/data/macro/budget';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
-import { GasTab } from '@/components/news/power-grid/GasTab';
-import { GasReserveDepletionTab } from '@/components/news/power-grid/GasReserveDepletionTab';
 import { MethodologyReconciliationBanner } from '@/components/news/power-grid/MethodologyReconciliationBanner';
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
@@ -60,7 +62,18 @@ import { GridLockedContent } from '@/components/news/power-grid/GridLockedConten
 import { subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
 import { sredaItemsWithIcons } from '@/components/news/power-grid/sreda-icons';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
-import { LongitudinalStudyCharts } from '@/components/news/power-grid/LongitudinalStudy';
+const GasTab = dynamic(
+  () => import('@/components/news/power-grid/GasTab').then((m) => m.GasTab),
+  { ssr: false, loading: () => <div className="grid-explorer-skeleton h-64 rounded-2xl" /> },
+);
+const GasReserveDepletionTab = dynamic(
+  () => import('@/components/news/power-grid/GasReserveDepletionTab').then((m) => m.GasReserveDepletionTab),
+  { ssr: false, loading: () => <div className="grid-explorer-skeleton h-96 rounded-2xl" /> },
+);
+const LongitudinalStudyCharts = dynamic(
+  () => import('@/components/news/power-grid/LongitudinalStudy').then((m) => m.LongitudinalStudyCharts),
+  { ssr: false, loading: () => <div className="grid-explorer-skeleton h-80 rounded-2xl" /> },
+);
 
 const sredaRenewablesWithIcons = sredaItemsWithIcons(sredaRenewablesData);
 
@@ -88,16 +101,14 @@ export function PowerGridExplorer({
   }, []);
 
   const latestDate = gridAccess.latestDate;
-  const latestFallbackData = useMemo(
-    () => getArchiveFallback(latestDate),
-    [latestDate],
-  );
   const [selectedDate, setSelectedDate] = useState<string>(latestDate);
   const [tierLockRequired, setTierLockRequired] = useState<ReturnType<typeof gridAccess.requiredTierForDate> | null>(null);
-  const [activeData, setActiveData] = useState<GridDailyData>(
-    () => getArchiveFallback(latestDate) ?? getArchiveFallback('2026-06-22')!,
+  const [activeData, setActiveData] = useState<GridDailyData | null>(() => getCachedDailyReport(latestDate) ?? null);
+  const [isLoadingDaily, setIsLoadingDaily] = useState<boolean>(() => !getCachedDailyReport(latestDate));
+  const latestCachedReport = useMemo(
+    () => peekLatestCachedReport(latestDate) ?? (selectedDate === latestDate ? activeData : null),
+    [latestDate, selectedDate, activeData],
   );
-  const [isLoadingDaily, setIsLoadingDaily] = useState<boolean>(true);
   const [isDataMissing, setIsDataMissing] = useState<boolean>(false);
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
   const [showMethodologyBanner, setShowMethodologyBanner] = useState(true);
@@ -300,7 +311,7 @@ export function PowerGridExplorer({
     selectAccessibleDate(`${selectedYear}-${selectedMonth}-${newDay}`);
   };
 
-  // Dynamic Fetch Effect
+  // Dynamic Fetch Effect — stale-while-revalidate when date is already cached
   useEffect(() => {
     let isMounted = true;
     if (!selectedDate || gridAccess.loading) return;
@@ -313,9 +324,16 @@ export function PowerGridExplorer({
     }
 
     setTierLockRequired(null);
-    setIsLoadingDaily(true);
-    fetchDailyReport(selectedDate)
-      .then((result) => {
+    const cached = getCachedDailyReport(selectedDate);
+    if (cached) {
+      setActiveData(cached);
+      setIsLoadingDaily(false);
+    } else {
+      setIsLoadingDaily(true);
+    }
+
+    fetchDailyReport(selectedDate, { refresh: Boolean(cached) })
+      .then(async (result) => {
         if (!isMounted) return;
         if (result.ok) {
           setActiveData(result.data);
@@ -323,9 +341,16 @@ export function PowerGridExplorer({
         } else if (!result.ok && result.status === 403) {
           setTierLockRequired(gridAccess.requiredTierForDate(selectedDate));
           setIsDataMissing(false);
+        } else if (!result.ok && shouldUseArchiveFallback(result.status ?? null)) {
+          const { getArchiveFallback } = await import('@/lib/data/grid/archive-fallback');
+          const fallback = getArchiveFallback(selectedDate);
+          if (fallback) {
+            setCachedDailyReport(selectedDate, fallback);
+            setActiveData(fallback);
+          }
+          setIsDataMissing(true);
+          console.error(result.error);
         } else {
-          const fallback = getArchiveFallback(selectedDate) ?? latestFallbackData;
-          if (fallback) setActiveData(fallback);
           setIsDataMissing(true);
           console.error(result.error);
         }
@@ -339,7 +364,6 @@ export function PowerGridExplorer({
     };
   }, [
     selectedDate,
-    latestFallbackData,
     gridAccess.loading,
     gridAccess.canAccessDate,
     gridAccess.requiredTierForDate,
@@ -390,7 +414,31 @@ export function PowerGridExplorer({
     regionalDemandData = [],
     dailyOutages = [],
     hourlyLoadData = [],
-  } = activeData;
+  } = activeData ?? {
+    systemStats: {
+      date: '',
+      dayPeakGen: 0,
+      eveningPeakGen: 0,
+      dayPeakDemand: 0,
+      eveningPeakDemand: 0,
+      minGen: 0,
+      maxGen: 0,
+      totalEnergyGen: 0,
+      totalEnergyUnserved: 0,
+      totalEnergyDemand: 0,
+      maxTemp: 0,
+      totalGasSuppliedPower: 0,
+      avgProductionCost: 0,
+      totalDailyCost: 0,
+    },
+    generationData: [] as GridDailyData['generationData'],
+    gasProductionData: [] as GridDailyData['gasProductionData'],
+    gasDistributionData: [] as GridDailyData['gasDistributionData'],
+    borderImportsData: [] as GridDailyData['borderImportsData'],
+    regionalDemandData: [] as GridDailyData['regionalDemandData'],
+    dailyOutages: [] as GridDailyData['dailyOutages'],
+    hourlyLoadData: [] as GridDailyData['hourlyLoadData'],
+  };
 
   // Dynamic Gas Production & Supply calculations
   const safeGasProductionData = gasProductionData || [];
@@ -552,7 +600,7 @@ export function PowerGridExplorer({
     setMacroSubTab(subTabId);
   };
   const [reportsCompany, setReportsCompany] = useState<'bpdb' | 'petrobangla'>('bpdb');
-  const [chartsReady, setChartsReady] = useState(false);
+  const chartsReady = true;
 
   const nationalBudgetMergedData = useMemo(() => {
     const infraByYear = Object.fromEntries(
@@ -673,10 +721,6 @@ export function PowerGridExplorer({
     { label: 'All Owners', value: 'all' },
     ...owners.map((o) => ({ label: o, value: o })),
   ];
-
-  useEffect(() => {
-    setChartsReady(true);
-  }, []);
 
   // Click outside listener for all custom dropdowns
   useEffect(() => {
@@ -1024,7 +1068,7 @@ export function PowerGridExplorer({
       {/* KPI Strip */}
       <div className="grid-explorer-kpi-strip relative z-30" ref={kpiStripRef}>
         <div 
-          className="grid-explorer-kpi stat group !overflow-visible hover:z-[100] cursor-pointer select-none"
+          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
           onClick={() => toggleKpiTooltip('gen')}
         >
           <Zap className="grid-explorer-kpi__icon" />
@@ -1074,7 +1118,7 @@ export function PowerGridExplorer({
         </div>
 
         <div 
-          className="grid-explorer-kpi stat group !overflow-visible hover:z-[100] cursor-pointer select-none"
+          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
           onClick={() => toggleKpiTooltip('demand')}
         >
           <Activity className="grid-explorer-kpi__icon text-amber-500" />
@@ -1124,7 +1168,7 @@ export function PowerGridExplorer({
         </div>
 
         <div 
-          className="grid-explorer-kpi stat group !overflow-visible hover:z-[100] cursor-pointer select-none"
+          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
           onClick={() => toggleKpiTooltip('gas')}
         >
           <Droplet className="grid-explorer-kpi__icon text-sky-500" />
@@ -1184,7 +1228,7 @@ export function PowerGridExplorer({
         </div>
 
         <div 
-          className="grid-explorer-kpi stat group !overflow-visible hover:z-[100] cursor-pointer select-none"
+          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
           onClick={() => toggleKpiTooltip('renew')}
         >
           <Sun className="grid-explorer-kpi__icon text-yellow-500" />
@@ -1238,7 +1282,7 @@ export function PowerGridExplorer({
         </div>
 
         <div 
-          className="grid-explorer-kpi stat group !overflow-visible hover:z-[100] cursor-pointer select-none"
+          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
           onClick={() => toggleKpiTooltip('cost')}
         >
           <TakaIcon className="grid-explorer-kpi__icon text-emerald-500" />
@@ -1316,7 +1360,7 @@ export function PowerGridExplorer({
 
       {/* Tab Panels */}
       <div className="relative min-h-[400px]">
-        {isLoadingDaily && (
+        {isLoadingDaily && !activeData && (
           <div className="absolute inset-0 bg-background/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-2xl transition-all duration-300">
             <div className="flex flex-col items-center gap-3 bg-card/60 px-6 py-4 rounded-2xl border border-border/50 shadow-2xl backdrop-blur-md animate-in zoom-in-95 duration-150">
               <div className="relative">
@@ -1338,16 +1382,16 @@ export function PowerGridExplorer({
               <p className="text-xs text-muted-foreground max-w-sm mb-4">
                 The daily grid status report and Petrobangla production telemetry for {selectedDate} have not been finalized or published by PGCB/NLDC.
               </p>
-              {latestFallbackData?.systemStats && (
+              {latestCachedReport?.systemStats && (
                 <div className="bg-muted/10 p-4 rounded-xl border border-border/20 font-sans text-xs text-foreground max-w-md w-full text-left">
                   <div className="font-bold text-amber-500 uppercase tracking-wider text-[10px] mb-2">Latest Available Report:</div>
                   <div className="font-semibold text-foreground mb-1">
-                    Date: {latestFallbackData.systemStats.date || isoDateToLegacy(latestDate) || latestDate}
+                    Date: {latestCachedReport.systemStats.date || isoDateToLegacy(latestDate) || latestDate}
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-2 pt-2 border-t border-border/10 leading-relaxed">
-                    Peak Gen: {formatNumber(latestFallbackData.systemStats.eveningPeakGen, 1)} MW / Demand:{' '}
-                    {formatNumber(latestFallbackData.systemStats.eveningPeakDemand, 1)} MW / Energy:{' '}
-                    {formatNumber(latestFallbackData.systemStats.totalEnergyGen, 1)} MKWh
+                    Peak Gen: {formatNumber(latestCachedReport.systemStats.eveningPeakGen, 1)} MW / Demand:{' '}
+                    {formatNumber(latestCachedReport.systemStats.eveningPeakDemand, 1)} MW / Energy:{' '}
+                    {formatNumber(latestCachedReport.systemStats.totalEnergyGen, 1)} MKWh
                   </div>
                 </div>
               )}
@@ -1427,7 +1471,7 @@ export function PowerGridExplorer({
                       );
                     })}
                   </Pie>
-                  <Tooltip
+                  <GridRechartsTooltip
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null;
                       const row = payload[0].payload;
@@ -1458,7 +1502,7 @@ export function PowerGridExplorer({
                         </div>
                       );
                     }}
-                    wrapperStyle={{ outline: 'none', zIndex: 20 }}
+
                   />
                   <g className="pointer-events-none select-none">
                     <text
@@ -4315,26 +4359,24 @@ export function PowerGridExplorer({
                         />
                         <YAxis
                           yAxisId="left"
-                          width={GRID_Y_AXIS_WIDTH.dual}
-                          tick={gridChartAxisTick(chartTheme)}
+                          width={GRID_Y_AXIS_WIDTH.splitUnitDual}
+                          tick={gridChartSplitUnitTick(chartTheme, 'Cr')}
                           axisLine={false}
                           tickLine={false}
-                          tickMargin={4}
+                          tickMargin={6}
                           domain={[0, 'auto']}
                           allowDecimals={false}
-                          tickFormatter={formatAxisCrore}
                         />
                         <YAxis
                           yAxisId="right"
                           orientation="right"
-                          width={GRID_Y_AXIS_WIDTH.dual}
-                          tick={gridChartAxisTick(chartTheme)}
+                          width={GRID_Y_AXIS_WIDTH.splitUnitDual}
+                          tick={gridChartSplitUnitTick(chartTheme, 'MW')}
                           axisLine={false}
                           tickLine={false}
-                          tickMargin={4}
+                          tickMargin={6}
                           domain={[0, 'auto']}
                           allowDecimals={false}
-                          tickFormatter={formatAxisMw}
                         />
                         
                         <Tooltip
@@ -4664,13 +4706,24 @@ export function PowerGridExplorer({
                     <span className="grid-explorer-chip">LNG Reliance</span>
                   </div>
 
-                  <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
-                    {chartsReady ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={macroGasData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                  {chartsReady ? (
+                  <GridChartFrame
+                    className="mt-4"
+                    legend={[
+                      { id: 'domestic', label: 'Domestic gas', color: '#0ea5e9', variant: 'area' },
+                      { id: 'lng', label: 'Imported LNG', color: '#a855f7', variant: 'area' },
+                    ]}
+                  >
+                    <ComposedChart accessibilityLayer={false} data={macroGasData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
-                          <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${formatAxisMmcfd(v)} MMCFD`, domain: [0, 'auto'] })} tick={{ fontSize: 11, fill: chartTheme.axisTick }} />
+                          <YAxis
+                            {...gridChartYAxisProps(chartTheme, {
+                              splitUnit: 'MMCFD',
+                              domain: [0, 'auto'],
+                              width: GRID_Y_AXIS_WIDTH.splitUnit,
+                            })}
+                          />
                           <Tooltip
                             content={({ active, payload }) => {
                               if (!active || !payload?.length) return null;
@@ -4709,15 +4762,15 @@ export function PowerGridExplorer({
                               );
                             }}
                           />
-                          <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
-                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.15} strokeWidth={2} />
-                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke="#a855f7" fill="#a855f7" fillOpacity={0.2} strokeWidth={2} />
+                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.22} strokeWidth={2} legendType="none" isAnimationActive={false} />
+                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke="#a855f7" fill="#a855f7" fillOpacity={0.28} strokeWidth={2} legendType="none" isAnimationActive={false} />
                         </ComposedChart>
-                      </ResponsiveContainer>
-                    ) : (
+                  </GridChartFrame>
+                  ) : (
+                    <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                       <div className="grid-explorer-skeleton" />
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* Card Explanation Block */}
                   <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
@@ -4971,7 +5024,7 @@ export function PowerGridExplorer({
                                         </div>
                                       );
                                     }}
-                                    wrapperStyle={{ outline: 'none', zIndex: 20 }}
+                
                                   />
                                   <g className="pointer-events-none select-none">
                                     <text

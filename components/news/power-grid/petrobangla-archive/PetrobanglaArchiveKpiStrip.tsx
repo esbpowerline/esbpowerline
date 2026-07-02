@@ -147,7 +147,7 @@ export function PetrobanglaArchiveKpiStrip({
   const powerShortfall = Math.max(0, kpis.powerDemand - kpis.powerSupply);
   const domesticSharePct = kpis.totalGas > 0 ? (kpis.domesticGas / kpis.totalGas) * 100 : 0;
 
-  const kpiShell = 'grid-explorer-kpi stat group !overflow-visible hover:z-[100] cursor-pointer select-none min-w-0';
+  const kpiShell = 'grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none min-w-0';
 
   return (
     <>

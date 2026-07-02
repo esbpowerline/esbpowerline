@@ -17,7 +17,6 @@ import {
   ReferenceArea,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -26,8 +25,9 @@ import {
   GRID_EXPLORER_CHART_MARGIN,
   GridChartExternalLegend,
   GridChartTooltipShell,
+  GridRechartsTooltip,
+  gridChartSplitUnitTick,
   gridChartXAxisProps,
-  gridChartYAxisProps,
 } from '@/components/news/PowerGridChartUI';
 import {
   RESERVE_SCENARIO_COLORS,
@@ -35,6 +35,7 @@ import {
   RESERVES_AUDITED_META,
   reserveDepletionPct,
   reservesChartSeries,
+  reservesChartYMax,
   type ReserveScenarioId,
 } from '@/lib/data/macro/reserves';
 import { PetrobanglaMacroGasSection } from './PetrobanglaMacroGasSection';
@@ -152,6 +153,7 @@ export function GasReserveDepletionTab({
   const chartHighlight = highlightScenario ?? selectedScenario;
   const [audienceMode, setAudienceMode] = useState<AudienceMode>('simple');
   const chartData = useMemo(() => reservesChartSeries(), []);
+  const chartYMax = useMemo(() => reservesChartYMax(), []);
 
   const extractedPct =
     (RESERVES_AUDITED_META.cumulativeExtracted2026Tcf / RESERVES_AUDITED_META.initialRecoverableTcf) * 100;
@@ -254,17 +256,13 @@ export function GasReserveDepletionTab({
                   <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.28} vertical={false} />
                   <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'year' })} />
                   <YAxis
-                    {...gridChartYAxisProps(chartTheme, {
-                      tickFormatter: (v) => `${v}`,
-                      domain: [0, 14],
-                    })}
-                    label={{
-                      value: 'Tcf remaining',
-                      angle: -90,
-                      position: 'insideLeft',
-                      offset: 12,
-                      style: { fontSize: 10, fill: chartTheme.axisTick },
-                    }}
+                    width={48}
+                    tick={gridChartSplitUnitTick(chartTheme, 'Tcf')}
+                    axisLine={false}
+                    tickLine={false}
+                    tickMargin={6}
+                    domain={[0, chartYMax]}
+                    allowDecimals={false}
                   />
                   <ReferenceArea
                     x1={String(RESERVES_AUDITED_META.archiveStartYear)}
@@ -292,7 +290,7 @@ export function GasReserveDepletionTab({
                     }}
                   />
                   <ReferenceLine y={0} stroke={chartTheme.destructive} strokeOpacity={0.35} strokeDasharray="3 3" />
-                  <Tooltip content={<ReservesDepletionTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+                  <GridRechartsTooltip content={<ReservesDepletionTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
                   <Line
                     type="monotone"
                     dataKey="audited"
@@ -302,6 +300,7 @@ export function GasReserveDepletionTab({
                     dot={{ fill: RESERVE_SCENARIO_COLORS.audited, r: 4, strokeWidth: 0 }}
                     activeDot={{ r: 6 }}
                     connectNulls={false}
+                    isAnimationActive={false}
                   />
                   {RESERVE_SCENARIOS.map((s) => (
                     <Line
@@ -315,6 +314,7 @@ export function GasReserveDepletionTab({
                       opacity={chartHighlight && chartHighlight !== s.id ? 0.35 : 1}
                       dot={{ fill: s.color, r: 3, strokeWidth: 0 }}
                       connectNulls
+                      isAnimationActive={false}
                     />
                   ))}
                 </ComposedChart>

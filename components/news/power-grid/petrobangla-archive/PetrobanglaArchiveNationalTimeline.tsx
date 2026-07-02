@@ -7,7 +7,6 @@ import {
   ComposedChart,
   Line,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -16,6 +15,7 @@ import {
   GRID_EXPLORER_CHART_MARGIN,
   GridChartExternalLegend,
   GridChartTooltipShell,
+  GridRechartsTooltip,
   gridChartXAxisProps,
   gridChartYAxisProps,
   type GridChartLegendItem,
@@ -169,7 +169,7 @@ export function PetrobanglaArchiveNationalTimeline({
                   domain: [0, 'auto'],
                 })}
               />
-              <Tooltip
+              <GridRechartsTooltip
                 content={({ active, payload }) => {
                   if (!active || !payload?.length) return null;
                   const d = payload[0].payload as (typeof chartData)[0];

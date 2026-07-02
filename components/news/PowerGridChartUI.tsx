@@ -1,7 +1,7 @@
 'use client';
 
 import React, { cloneElement, isValidElement } from 'react';
-import { Legend, type LegendProps } from 'recharts';
+import { Legend, Tooltip, type LegendProps, type YAxisProps } from 'recharts';
 import { cn, formatNumber } from '@/lib/utils';
 import type { ChartTheme } from '@/hooks/useChartTheme';
 
@@ -10,6 +10,9 @@ export const GRID_Y_AXIS_WIDTH = {
   single: 54,
   dual: 56,
   wide: 62,
+  /** Room for two-line ticks: value over unit */
+  splitUnit: 48,
+  splitUnitDual: 50,
 } as const;
 
 /** Standard margins — bottom room fits x-axis ticks; legends sit outside the plot */
@@ -45,6 +48,7 @@ type GridChartYAxisOptions = {
   orientation?: 'left' | 'right';
   width?: number;
   tickFormatter?: (value: number) => string;
+  splitUnit?: string;
   domain?: [number | string | ((n: number) => number), number | string | ((n: number) => number)];
   allowDecimals?: boolean;
 };
@@ -62,16 +66,25 @@ export function gridChartXAxisProps(chartTheme: ChartTheme, options: GridChartXA
   };
 }
 
-export function gridChartYAxisProps(chartTheme: ChartTheme, options: GridChartYAxisOptions = {}) {
+export function gridChartYAxisProps(
+  chartTheme: ChartTheme,
+  options: GridChartYAxisOptions = {},
+): Partial<YAxisProps> {
+  const splitUnit = options.splitUnit;
+  const defaultWidth = splitUnit ? GRID_Y_AXIS_WIDTH.splitUnit : GRID_Y_AXIS_WIDTH.single;
+  const tick: YAxisProps['tick'] = splitUnit
+    ? gridChartSplitUnitTick(chartTheme, splitUnit)
+    : { ...gridChartAxisTick(chartTheme), ...Y_TICK_STYLE };
+
   return {
     ...(options.yAxisId ? { yAxisId: options.yAxisId } : {}),
     ...(options.orientation ? { orientation: options.orientation } : {}),
-    width: options.width ?? GRID_Y_AXIS_WIDTH.single,
-    tick: { ...gridChartAxisTick(chartTheme), ...Y_TICK_STYLE },
-    axisLine: false as const,
-    tickLine: false as const,
-    tickMargin: 4,
-    ...(options.tickFormatter ? { tickFormatter: options.tickFormatter } : {}),
+    width: options.width ?? defaultWidth,
+    tick,
+    axisLine: false,
+    tickLine: false,
+    tickMargin: splitUnit ? 6 : 4,
+    ...(options.tickFormatter && !splitUnit ? { tickFormatter: options.tickFormatter } : {}),
     ...(options.domain ? { domain: options.domain } : {}),
     ...(options.allowDecimals !== undefined ? { allowDecimals: options.allowDecimals } : {}),
   };
@@ -79,6 +92,12 @@ export function gridChartYAxisProps(chartTheme: ChartTheme, options: GridChartYA
 
 /** Explicit plot height — ResponsiveContainer needs a numeric fallback when % height collapses */
 export const GRID_CHART_PLOT_HEIGHT = 344;
+
+/** Numeric portion for split-line Y-axis ticks (unit rendered on second line). */
+export function formatAxisValueOnly(value: number) {
+  if (value >= 1000) return `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}k`;
+  return `${Math.round(value)}`;
+}
 
 export function formatAxisCrore(value: number) {
   if (value >= 1000) return `${(value / 1000).toFixed(0)}k Cr`;
@@ -93,6 +112,43 @@ export function formatAxisMw(value: number) {
 export function formatAxisCkm(value: number) {
   if (value >= 1000) return `${(value / 1000).toFixed(1)}k ckm`;
   return `${value} ckm`;
+}
+
+type SplitUnitTickProps = {
+  x?: string | number;
+  y?: string | number;
+  payload?: { value?: number };
+  unit: string;
+  chartTheme: ChartTheme;
+};
+
+export function GridChartSplitUnitTick({ x = 0, y = 0, payload, unit, chartTheme }: SplitUnitTickProps) {
+  const value = Number(payload?.value ?? 0);
+  const num = formatAxisValueOnly(value);
+  const tx = typeof x === 'number' ? x : Number(x);
+  const ty = typeof y === 'number' ? y : Number(y);
+  return (
+    <g transform={`translate(${tx},${ty})`}>
+      <text
+        textAnchor="end"
+        fill={chartTheme.axisTick}
+        fontSize={10}
+        fontWeight={500}
+      >
+        <tspan x={0} dy={-5}>{num}</tspan>
+        <tspan x={0} dy={12} fontSize={9} fill={chartTheme.axisTick} opacity={0.82}>
+          {unit}
+        </tspan>
+      </text>
+    </g>
+  );
+}
+
+export function gridChartSplitUnitTick(chartTheme: ChartTheme, unit: string): NonNullable<YAxisProps['tick']> {
+  const Tick = (props: { x?: string | number; y?: string | number; payload?: { value?: number } }) => (
+    <GridChartSplitUnitTick {...props} unit={unit} chartTheme={chartTheme} />
+  );
+  return Tick as NonNullable<YAxisProps['tick']>;
 }
 
 export function formatAxisMmcfd(value: number) {
@@ -281,6 +337,39 @@ export function mixColor(chartTheme: ChartTheme, index: number) {
 
 export function mixShare(value: number, total: number) {
   return total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+}
+
+/** Shared Recharts tooltip defaults — escape viewbox + consistent z-index */
+export const GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE: React.CSSProperties = {
+  outline: 'none',
+  zIndex: 50,
+  pointerEvents: 'none',
+};
+
+export const GRID_RECHARTS_TOOLTIP_PROPS = {
+  wrapperStyle: GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE,
+  allowEscapeViewBox: { x: true, y: true },
+} as const;
+
+export function GridRechartsTooltip({
+  content,
+  cursor,
+  wrapperStyle,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: React.ComponentType<any> | React.ReactElement | ((props: any) => React.ReactNode);
+  cursor?: object;
+  wrapperStyle?: React.CSSProperties;
+}) {
+  return (
+    <Tooltip
+      // Recharts ContentType is narrower than our shared tooltip union
+      content={content as React.ComponentProps<typeof Tooltip>['content']}
+      wrapperStyle={{ ...GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE, ...wrapperStyle }}
+      allowEscapeViewBox={{ x: true, y: true }}
+      cursor={cursor}
+    />
+  );
 }
 
 export function GridChartTooltipShell({

@@ -6,6 +6,7 @@ import type { AudienceMode } from '@/lib/data/petrobangla/types';
 import { ARCHIVE_INSIGHTS } from '@/lib/data/petrobangla/constants';
 import { PetrobanglaArchivePanel } from './petrobangla-archive/PetrobanglaArchivePanel';
 import { PetrobanglaLiveWeekPanel } from './petrobangla-live/PetrobanglaLiveWeekPanel';
+import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
 import { AudienceModeToggle, PetrobanglaOfficialSourceLink } from './petrobangla-archive/PetrobanglaArchiveShared';
 import { GasExplanationBlock, GasSourceFooter, LiveBadge } from './GasTabShared';
 import { MacroGasInnerSection } from './MacroGasSectionChrome';
@@ -64,13 +65,22 @@ export function PetrobanglaMacroGasSection({
         </div>
       </div>
 
+      <PetrobanglaBootstrapProvider>
       <div className="gas-reserve-evidence__body">
         {!hideLiveWeek && (
           <MacroGasInnerSection
             icon={Database}
             title="This week"
             badge={<LiveBadge />}
-            subtitle="Rolling gas-days — supply, power allocation, LNG share"
+            subtitle={
+              audienceMode === 'simple'
+                ? 'Last 7–30 gas-days — national supply vs power plant allocation'
+                : audienceMode === 'investor'
+                  ? 'Short-window volatility — power fulfillment and LNG share drive fuel-cost risk'
+                  : audienceMode === 'researcher'
+                    ? 'Rolling window with raw JSON links — 7 / 15 / 30 day presets'
+                    : 'Rolling gas-days — sparklines, plant stress, and day-over-day compare'
+            }
           >
             <PetrobanglaLiveWeekPanel
               selectedDate={selectedDate}
@@ -101,6 +111,7 @@ export function PetrobanglaMacroGasSection({
           />
         </div>
       </div>
+      </PetrobanglaBootstrapProvider>
     </section>
   );
 }

@@ -7,7 +7,6 @@ import {
   ComposedChart,
   Line,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -15,6 +14,7 @@ import { useChartTheme } from '@/hooks/useChartTheme';
 import {
   GRID_EXPLORER_CHART_MARGIN,
   GridChartTooltipShell,
+  GridRechartsTooltip,
   gridChartXAxisProps,
   gridChartYAxisProps,
   GridRechartsLegend,
@@ -132,7 +132,7 @@ export function PetrobanglaArchiveSectorDistribution({
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
               <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
-              <Tooltip content={<SectorTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+              <GridRechartsTooltip content={<SectorTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
               <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
               <Area type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} />
               <Area type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} />

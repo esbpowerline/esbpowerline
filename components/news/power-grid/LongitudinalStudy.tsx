@@ -10,10 +10,9 @@ import {
   GridChartFrame,
   GRID_CHART_MARGIN,
   GRID_Y_AXIS_WIDTH,
-  formatAxisCkm,
-  formatAxisMw,
   formatChartTooltipValue,
   gridChartAxisTick,
+  gridChartSplitUnitTick,
   gridChartXAxisProps,
 } from '@/components/news/PowerGridChartUI';
 import { formatNumber } from '@/lib/utils';
@@ -30,20 +29,52 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
   const baseGeneration = baseYearData.Installed_Generation_MW || 7296;
   const baseDemand = baseYearData.Peak_Demand_MW || 4890;
 
-  const processedData = useMemo(() => data.map((d: any, i: number) => {
-    const prev = i > 0 ? data[i - 1] : null;
-    const genAdded = prev && d.Installed_Generation_MW && prev.Installed_Generation_MW
-      ? Math.max(0, d.Installed_Generation_MW - prev.Installed_Generation_MW)
-      : 0;
-    return {
-      ...d,
-      Generation_Added_MW: genAdded,
-      Budget_Index: d.Power_Division_Budget_TkCr ? (d.Power_Division_Budget_TkCr / baseBudget) * 100 : null,
-      Transmission_Index: d.Total_Transmission_ckm ? (d.Total_Transmission_ckm / baseTransmission) * 100 : null,
-      Generation_Index: d.Installed_Generation_MW ? (d.Installed_Generation_MW / baseGeneration) * 100 : null,
-      Demand_Index: d.Peak_Demand_MW ? (d.Peak_Demand_MW / baseDemand) * 100 : null,
-    };
-  }), [data, baseBudget, baseTransmission, baseGeneration, baseDemand]);
+  const processedData = useMemo(() => {
+    const BASE_MIX = { v400: 0.022, v230: 0.326, v132: 0.652 };
+    let lastMix: { v400: number; v230: number; v132: number } | null = null;
+
+    return data.map((d: any, i: number) => {
+      const prev = i > 0 ? data[i - 1] : null;
+      const genAdded = prev && d.Installed_Generation_MW && prev.Installed_Generation_MW
+        ? Math.max(0, d.Installed_Generation_MW - prev.Installed_Generation_MW)
+        : 0;
+
+      const hasVoltage =
+        d.Transmission_400kV_ckm != null &&
+        d.Transmission_230kV_ckm != null &&
+        d.Transmission_132kV_ckm != null;
+
+      let v400 = d.Transmission_400kV_ckm;
+      let v230 = d.Transmission_230kV_ckm;
+      let v132 = d.Transmission_132kV_ckm;
+
+      if (hasVoltage) {
+        lastMix = { v400: v400!, v230: v230!, v132: v132! };
+      } else if (d.Total_Transmission_ckm && lastMix) {
+        const lastTotal = lastMix.v400 + lastMix.v230 + lastMix.v132;
+        const scale = lastTotal > 0 ? d.Total_Transmission_ckm / lastTotal : 1;
+        v400 = lastMix.v400 * scale;
+        v230 = lastMix.v230 * scale;
+        v132 = lastMix.v132 * scale;
+      } else if (d.Total_Transmission_ckm) {
+        v400 = d.Total_Transmission_ckm * BASE_MIX.v400;
+        v230 = d.Total_Transmission_ckm * BASE_MIX.v230;
+        v132 = d.Total_Transmission_ckm * BASE_MIX.v132;
+      }
+
+      return {
+        ...d,
+        Transmission_400kV_ckm: v400,
+        Transmission_230kV_ckm: v230,
+        Transmission_132kV_ckm: v132,
+        Generation_Added_MW: genAdded,
+        Budget_Index: d.Power_Division_Budget_TkCr ? (d.Power_Division_Budget_TkCr / baseBudget) * 100 : null,
+        Transmission_Index: d.Total_Transmission_ckm ? (d.Total_Transmission_ckm / baseTransmission) * 100 : null,
+        Generation_Index: d.Installed_Generation_MW ? (d.Installed_Generation_MW / baseGeneration) * 100 : null,
+        Demand_Index: d.Peak_Demand_MW ? (d.Peak_Demand_MW / baseDemand) * 100 : null,
+      };
+    });
+  }, [data, baseBudget, baseTransmission, baseGeneration, baseDemand]);
 
   const formatSeriesTooltipValue = (entry: { name?: string; value?: number | null }) => {
     const name = entry.name ?? '';
@@ -132,7 +163,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
           <LineChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
-              <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={gridChartAxisTick(chartTheme)} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisCkm} />
+              <YAxis width={GRID_Y_AXIS_WIDTH.splitUnit} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
               <Tooltip content={
                 <CustomTooltip 
                   title="Voltage Evolution" 
@@ -191,7 +222,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
           <AreaChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
-              <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={gridChartAxisTick(chartTheme)} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisCkm} />
+              <YAxis width={GRID_Y_AXIS_WIDTH.splitUnit} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
               <Tooltip content={
                 <CustomTooltip 
                   title="Cumulative Capacity" 
@@ -250,8 +281,8 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
           <ComposedChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.dualAxis} barCategoryGap="18%">
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
-              <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={gridChartAxisTick(chartTheme)} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisCkm} />
-              <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.dual} tick={gridChartAxisTick(chartTheme)} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMw} />
+              <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.splitUnitDual} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
+              <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.splitUnitDual} tick={gridChartSplitUnitTick(chartTheme, 'MW')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
               <Tooltip content={
                 <CustomTooltip 
                   title="Annual Physical Additions" 

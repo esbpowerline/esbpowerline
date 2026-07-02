@@ -6,7 +6,6 @@ import {
   ComposedChart,
   Line,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -15,6 +14,7 @@ import {
   GRID_EXPLORER_CHART_MARGIN,
   GridChartExternalLegend,
   GridChartTooltipShell,
+  GridRechartsTooltip,
   gridChartXAxisProps,
   gridChartYAxisProps,
 } from '@/components/news/PowerGridChartUI';
@@ -93,9 +93,15 @@ export function PbLiveTimeline({
   fillHeight?: boolean;
 }) {
   const chartTheme = useChartTheme();
-  const data = liveWeekTimelinePoints(bundle).map((p) => ({
+  const dayCount = bundle.days.length;
+  const data = liveWeekTimelinePoints(bundle).map((p, i) => ({
     ...p,
-    shortLabel: p.label?.split(',')[0] ?? p.date.slice(5),
+    shortLabel:
+      dayCount > 15
+        ? (i === 0 || i === dayCount - 1 || i % 5 === 0 ? p.date.slice(5) : '')
+        : dayCount > 7
+          ? (i % 2 === 0 ? p.date.slice(5) : '')
+          : (p.label?.split(',')[0] ?? p.date.slice(5)),
     highlight: p.date === highlightDate,
   }));
 
@@ -106,7 +112,7 @@ export function PbLiveTimeline({
     <div className={cn('flex flex-col', fillHeight ? 'flex-1 min-h-0 gap-2' : 'space-y-3')}>
       {!compact && (
         <h4 className="grid-explorer-chart-card__title text-sm shrink-0">
-          7-day timeline<LiveBadge />
+          {dayCount}-day timeline<LiveBadge />
         </h4>
       )}
       <div className="gas-reserve-archive-chart-block">
@@ -123,7 +129,7 @@ export function PbLiveTimeline({
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'shortLabel' })} />
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [2400, 'auto'] })} />
-              <Tooltip content={<LiveWeekTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+              <GridRechartsTooltip content={<LiveWeekTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
 
               <Area
                 yAxisId="left"
@@ -169,7 +175,11 @@ export function PbLiveTimeline({
         />
       </div>
       <p className={cn('text-[10px] text-muted-foreground leading-relaxed flex flex-wrap items-center gap-x-2', fillHeight && 'shrink-0')}>
-        <span>{compact ? 'National supply, power demand, and allocation.' : 'Supply, power demand, and allocation — seven days.'}</span>
+        <span>
+          {compact
+            ? 'National supply, power demand, and allocation.'
+            : `Supply, power demand, and allocation — ${dayCount} gas-days.`}
+        </span>
         {highlightDate && data.some((d) => d.highlight) && (
           <span className="text-[10px] font-semibold text-primary px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
             Grid date highlighted

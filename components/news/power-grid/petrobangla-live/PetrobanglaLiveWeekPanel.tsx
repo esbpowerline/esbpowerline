@@ -1,21 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Droplet, Loader2 } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { computeLiveWeekKpis } from '@/lib/data/petrobangla/computeLiveWeek';
 import {
-  clearLiveWeekCache,
   formatLiveWeekDate,
   isDateInLiveWeek,
-  loadLiveWeekBundle,
   LIVE_WEEK_COUNT,
   LIVE_WEEK_PRESETS,
   sliceLiveWeekBundle,
   type LiveWeekPreset,
 } from '@/lib/data/petrobangla/getLiveWeek';
-import { refreshPetrobanglaLiveWeek } from '@/lib/data/petrobangla/ingestHotFolder';
-import type { AudienceMode, PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
+import { usePetrobanglaBootstrap } from '../PetrobanglaBootstrap';
+import type { AudienceMode } from '@/lib/data/petrobangla/types';
 import {
   ArchiveInsightCallout,
   AudienceModeToggle,
@@ -51,35 +49,11 @@ export function PetrobanglaLiveWeekPanel({
   underChart = false,
   fillColumn = false,
 }: Props) {
-  const [bundle, setBundle] = useState<PetrobanglaLiveWeekBundle | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { liveWeek: bundle, loading } = usePetrobanglaBootstrap();
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
-  const [chartsReady, setChartsReady] = useState(false);
+  const chartsReady = true;
   const [rangeDays, setRangeDays] = useState<LiveWeekPreset>(7);
-
-  useEffect(() => {
-    const t = setTimeout(() => setChartsReady(true), 100);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      await refreshPetrobanglaLiveWeek().catch(() => ({ ok: false }));
-      clearLiveWeekCache();
-      try {
-        const b = await loadLiveWeekBundle();
-        if (!cancelled) setBundle(b);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const activeBundle = useMemo(() => {
     if (!bundle?.days.length) return null;

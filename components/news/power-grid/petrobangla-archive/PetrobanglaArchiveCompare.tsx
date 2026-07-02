@@ -4,10 +4,22 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowRight, Copy, GitCompare } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { ARCHIVE_BASELINE_DATE, ARCHIVE_START_DATE } from '@/lib/data/petrobangla/constants';
-import { computeArchiveKpis, getRpgclGas, resolveArchiveGasDay } from '@/lib/data/petrobangla/compute';
+import {
+  computeArchiveKpis,
+  getRpgclGas,
+  powerFulfillmentPct,
+  resolveArchiveGasDay,
+} from '@/lib/data/petrobangla/compute';
 import { loadArchiveDay, loadArchiveTimeline } from '@/lib/data/petrobangla/loadArchive';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaIndex } from '@/lib/data/petrobangla/types';
-import { ArchiveBadge, ArchiveDateGridPicker } from './PetrobanglaArchiveShared';
+import { ArchiveBadge, ArchiveDateGridPicker, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
+
+const COMPARE_MODE_HINT: Record<AudienceMode, string> = {
+  simple: 'Side-by-side gas-day snapshot — national total, power fulfillment, and top fields.',
+  analyst: 'Full field tables unlocked. Use presets to benchmark against Jan 2020 or the verified baseline.',
+  investor: 'Watch power fulfillment and LNG share deltas — these drive fuel-cost and dispatch risk.',
+  researcher: 'Validation flags and raw JSON links available. Copy summary exports a markdown table.',
+};
 
 export function PetrobanglaArchiveCompare({
   index,
@@ -126,6 +138,8 @@ export function PetrobanglaArchiveCompare({
         </div>
       )}
 
+      <ArchiveInsightCallout>{COMPARE_MODE_HINT[mode]}</ArchiveInsightCallout>
+
       <div className="gas-reserve-compare-toolbar">
         <div className="gas-reserve-compare-toolbar__dates">
           <ArchiveDateGridPicker
@@ -135,7 +149,7 @@ export function PetrobanglaArchiveCompare({
             dates={okDates}
             accent="sky"
           />
-          <div className="gas-reserve-compare-toolbar__arrow" aria-hidden>
+          <div className="gas-reserve-compare-toolbar__arrow" aria-hidden title="Compare direction">
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </div>
           <ArchiveDateGridPicker
@@ -183,6 +197,8 @@ export function PetrobanglaArchiveCompare({
 
       {left && right && !loading && (
         <>
+          <CompareDeltaStrip left={left} right={right} leftDate={leftDate} rightDate={rightDate} mode={mode} />
+
           <div className="gas-reserve-compare-panels">
             <ComparePanel day={left} label={leftDate} mode={mode} side="left" />
             <ComparePanel day={right} label={rightDate} mode={mode} side="right" other={left} />
@@ -211,6 +227,75 @@ export function PetrobanglaArchiveCompare({
   );
 }
 
+function CompareDeltaStrip({
+  left,
+  right,
+  leftDate,
+  rightDate,
+  mode,
+}: {
+  left: PetrobanglaDaily;
+  right: PetrobanglaDaily;
+  leftDate: string;
+  rightDate: string;
+  mode: AudienceMode;
+}) {
+  const gasL = left.production.grand_total.gas_mmcfd;
+  const gasR = right.production.grand_total.gas_mmcfd;
+  const fulL = powerFulfillmentPct(left);
+  const fulR = powerFulfillmentPct(right);
+  const lngL = getRpgclGas(left.production.fields);
+  const lngR = getRpgclGas(right.production.fields);
+  const lngShareL = gasL > 0 ? (lngL / gasL) * 100 : 0;
+  const lngShareR = gasR > 0 ? (lngR / gasR) * 100 : 0;
+
+  const items = [
+    {
+      label: 'National gas',
+      delta: gasR - gasL,
+      unit: 'MMCFD',
+      fmt: (v: number) => formatNumber(v, 1),
+    },
+    {
+      label: 'Power fulfillment',
+      delta: fulR - fulL,
+      unit: 'pp',
+      fmt: (v: number) => v.toFixed(1),
+    },
+    ...(mode !== 'simple'
+      ? [{
+          label: 'LNG share',
+          delta: lngShareR - lngShareL,
+          unit: 'pp',
+          fmt: (v: number) => v.toFixed(1),
+        }]
+      : []),
+  ];
+
+  return (
+    <div className="gas-reserve-compare-delta-strip">
+      <p className="gas-reserve-compare-delta-strip__title">
+        {leftDate} → {rightDate}
+      </p>
+      <div className="gas-reserve-compare-delta-strip__grid">
+        {items.map((item) => (
+          <div key={item.label} className="gas-reserve-compare-delta-strip__item">
+            <span className="gas-reserve-compare-delta-strip__label">{item.label}</span>
+            <span
+              className={cn(
+                'gas-reserve-compare-delta-strip__value',
+                item.delta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500',
+              )}
+            >
+              {item.delta >= 0 ? '+' : ''}{item.fmt(item.delta)} {item.unit}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ComparePanel({
   day,
   label,
@@ -224,8 +309,7 @@ function ComparePanel({
   side: 'left' | 'right';
   other?: PetrobanglaDaily;
 }) {
-  const gt = day.distribution.summary.grand_total;
-  const fulfillment = gt.power_demand_mmcfd > 0 ? (gt.power_supply_mmcfd / gt.power_demand_mmcfd) * 100 : 0;
+  const fulfillment = powerFulfillmentPct(day);
   const lng = getRpgclGas(day.production.fields);
   const total = day.production.grand_total.gas_mmcfd;
   const lngShare = total > 0 ? (lng / total) * 100 : 0;

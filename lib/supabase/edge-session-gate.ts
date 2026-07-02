@@ -43,8 +43,6 @@ async function loadProfileRow(
 function resolveGridPlanFromUser(user: User): GridPlanId {
   const appPlan = user.app_metadata?.grid_plan;
   if (typeof appPlan === 'string') return parseGridPlanId(appPlan);
-  const metaPlan = user.user_metadata?.grid_plan;
-  if (typeof metaPlan === 'string') return parseGridPlanId(metaPlan);
   return 'none';
 }
 

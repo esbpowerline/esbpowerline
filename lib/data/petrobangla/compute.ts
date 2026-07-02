@@ -30,6 +30,37 @@ export function getFieldGas(fields: ProductionField[], name: string): number {
   return row?.gas_mmcfd ?? 0;
 }
 
+const EMPTY_DISTRIBUTION_TOTAL = {
+  power_demand_mmcfd: 0,
+  power_supply_mmcfd: 0,
+  fertilizer_demand_mmcfd: 0,
+  fertilizer_supply_mmcfd: 0,
+  others_supplementary_mmcfd: 0,
+  total_mmcfd: 0,
+} as const;
+
+/** Older daily JSON uses summary.total_ instead of summary.grand_total */
+export function getDistributionGrandTotal(day: PetrobanglaDaily) {
+  const summary = day.distribution?.summary;
+  const row = summary?.grand_total ?? summary?.total_;
+  if (!row) return { ...EMPTY_DISTRIBUTION_TOTAL };
+  return {
+    power_demand_mmcfd: Number(row.power_demand_mmcfd) || 0,
+    power_supply_mmcfd: Number(row.power_supply_mmcfd) || 0,
+    fertilizer_demand_mmcfd: Number(row.fertilizer_demand_mmcfd) || 0,
+    fertilizer_supply_mmcfd: Number(row.fertilizer_supply_mmcfd) || 0,
+    others_supplementary_mmcfd: Number(row.others_supplementary_mmcfd) || 0,
+    total_mmcfd: Number(row.total_mmcfd) || 0,
+  };
+}
+
+export function powerFulfillmentPct(day: PetrobanglaDaily): number {
+  const gt = getDistributionGrandTotal(day);
+  return gt.power_demand_mmcfd > 0
+    ? (gt.power_supply_mmcfd / gt.power_demand_mmcfd) * 100
+    : 0;
+}
+
 export function computeStressScore(
   day: PetrobanglaDaily,
   peakGas: number,
@@ -39,11 +70,7 @@ export function computeStressScore(
   const domestic = getDomesticGas(fields);
   const lng = getRpgclGas(fields);
   const bibiyana = getFieldGas(fields, 'Bibiyana');
-  const gt = day.distribution.summary.grand_total;
-  const fulfillment =
-    gt.power_demand_mmcfd > 0
-      ? (gt.power_supply_mmcfd / gt.power_demand_mmcfd) * 100
-      : 50;
+  const fulfillment = powerFulfillmentPct(day) || 50;
 
   const domesticShare = grandTotal > 0 ? (domestic / grandTotal) * 100 : 0;
   const lngShare = grandTotal > 0 ? (lng / grandTotal) * 100 : 0;
@@ -75,7 +102,7 @@ export function computeArchiveKpis(
   const domestic = getDomesticGas(fields);
   const lng = getRpgclGas(fields);
   const bibiyana = getFieldGas(fields, 'Bibiyana');
-  const gt = day.distribution.summary.grand_total;
+  const gt = getDistributionGrandTotal(day);
   const peakGas = timeline.peak?.gas ?? grandTotal;
   const date = day.report.report_date_start;
 

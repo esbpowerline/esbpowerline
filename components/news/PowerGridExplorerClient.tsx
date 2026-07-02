@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { PowerGridExplorerErrorBoundary } from '@/components/news/PowerGridExplorerErrorBoundary';
 
 const PowerGridExplorer = dynamic(
   () => import('@/components/news/PowerGridExplorer').then((mod) => mod.PowerGridExplorer),
@@ -15,5 +16,9 @@ const PowerGridExplorer = dynamic(
 export function PowerGridExplorerClient(props: {
   initialLines?: Array<{ name: string; status: string; capacity: string; owner: string; load: number }>;
 }) {
-  return <PowerGridExplorer initialLines={props.initialLines} />;
+  return (
+    <PowerGridExplorerErrorBoundary>
+      <PowerGridExplorer initialLines={props.initialLines} />
+    </PowerGridExplorerErrorBoundary>
+  );
 }

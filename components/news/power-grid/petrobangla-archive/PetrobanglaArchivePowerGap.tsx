@@ -7,7 +7,6 @@ import {
   ComposedChart,
   Line,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
@@ -15,6 +14,7 @@ import { useChartTheme } from '@/hooks/useChartTheme';
 import {
   GRID_EXPLORER_CHART_MARGIN,
   GridChartTooltipShell,
+  GridRechartsTooltip,
   gridChartXAxisProps,
   gridChartYAxisProps,
   GridRechartsLegend,
@@ -140,7 +140,7 @@ export function PetrobanglaArchivePowerGap({
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
               <YAxis yAxisId="right" orientation="right" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v}%`, domain: [0, 100] })} />
-              <Tooltip content={<PowerGapTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+              <GridRechartsTooltip content={<PowerGapTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
               <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
               <Area
                 yAxisId="left"

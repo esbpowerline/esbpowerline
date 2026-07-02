@@ -134,7 +134,25 @@ export default async function Home() {
 
             <aside className="home-editorial__rail" aria-label="Sidebar">
               <HomeTrendingSection trending={trending} layout="hero-rail" />
+              
+              {/* Sidebar Box Ad Space */}
+              <div className="mt-12 sticky top-[11rem] bg-muted/30 border border-border/40 rounded-2xl h-[400px] flex flex-col items-center justify-center text-muted-foreground/60 overflow-hidden relative group">
+                <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:10px_10px]" />
+                <span className="text-[10px] font-bold tracking-widest uppercase mb-2">Advertisement</span>
+                <span className="text-sm font-medium">Box Ad Space</span>
+              </div>
             </aside>
+          </div>
+
+          {/* 2-Column Pre-Footer Ad Space */}
+          <div className="mt-12 mb-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-muted/30 border border-border/40 rounded-2xl h-[120px] md:h-[160px] flex flex-col items-center justify-center text-muted-foreground/60 overflow-hidden relative group">
+                <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:10px_10px]" />
+                <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Advertisement</span>
+                <span className="text-sm font-medium">Pre-Footer Ad Space</span>
+              </div>
+            ))}
           </div>
 
           <HomeBottomRow

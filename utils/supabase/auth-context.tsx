@@ -51,7 +51,7 @@ const SESSION_BOOTSTRAP_TIMEOUT_MS = 10_000;
 async function buildAuthUser(
   supabase: ReturnType<typeof createClient>,
   supaUser: User,
-): Promise<AuthUser> {
+): Promise<AuthUser | null> {
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, full_name, avatar_url')
@@ -65,16 +65,15 @@ async function buildAuthUser(
     email;
 
   const appGridPlan = supaUser.app_metadata?.grid_plan;
-  const metaGridPlan = supaUser.user_metadata?.grid_plan;
-  const gridPlan = parseGridPlanId(
-    typeof appGridPlan === 'string' ? appGridPlan : metaGridPlan,
-  );
+  const gridPlan = parseGridPlanId(typeof appGridPlan === 'string' ? appGridPlan : undefined);
+  const role = resolveRoleFromSupabaseUser(supaUser, profile?.role ?? null);
+  if (!role) return null;
 
   return {
     id: supaUser.id,
     email,
     name: resolveStaffDisplayName(email, rawName),
-    role: (resolveRoleFromSupabaseUser(supaUser, profile?.role ?? null) ?? 'SUBSCRIBER') as Role,
+    role,
     image: profile?.avatar_url ?? null,
     gridPlan,
   };
@@ -111,6 +110,11 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       }
 
       const resolvedUser = await buildAuthUser(supabase, supaUser);
+      if (!resolvedUser) {
+        setUser(null);
+        setStatus('unauthenticated');
+        return;
+      }
       setUser(resolvedUser);
       setStatus('authenticated');
     } catch (error) {

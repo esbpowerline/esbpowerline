@@ -15,7 +15,7 @@ HOT_FOLDER = Path(r"C:\Users\user\Desktop\New weeks")
 PARSE_CLI = Path(r"C:\Users\user\Desktop\grid_backlog\parse_petrobangla.py")
 PUBLIC = ROOT / "public" / "data" / "petrobangla"
 PUBLIC_DAILY = PUBLIC / "daily"
-LIVE_WEEK_COUNT = 7
+LIVE_WEEK_COUNT = 30
 QUARANTINE = {
     "2020-02-04", "2020-02-05", "2020-03-06", "2020-09-17", "2020-10-16",
     "2020-10-17", "2020-10-18", "2020-10-19", "2025-05-20", "2025-05-21",
