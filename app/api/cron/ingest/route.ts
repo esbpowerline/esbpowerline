@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { runIngestionPipeline } from '@/scripts/ingest-energy-reports';
+import { runIngestionPipeline } from '@/lib/cron/energy-ingest';
 
 export const dynamic = 'force-dynamic';
 

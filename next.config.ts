@@ -10,6 +10,16 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
 
+  // Cron ingest uses runtime temp downloads — keep bulky local datasets out of the serverless bundle.
+  outputFileTracingExcludes: {
+    '/api/cron/ingest': [
+      './public/data/**/*',
+      './scratch/**/*',
+      './public/uploads/**/*',
+      './agent-tools/**/*',
+    ],
+  },
+
   env: {
     NEXT_PUBLIC_APP_SURFACE: surface,
   },

@@ -7,13 +7,17 @@ import {
 } from '@/lib/data/sreda/parse-sreda-html';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
 
-const SREDA_CONFIG = {
-  baseUrl: 'https://ndre.sreda.gov.bd',
-  homeUrl: 'https://ndre.sreda.gov.bd/',
-  mixUrl: 'https://ndre.sreda.gov.bd/index.php?id=7',
-  dailyDir: path.join(process.cwd(), 'public', 'data', 'sreda', 'daily'),
-  availableDatesPath: path.join(process.cwd(), 'lib', 'sreda-available-dates.json'),
-};
+const SREDA_BASE_URL = 'https://ndre.sreda.gov.bd';
+const SREDA_HOME_URL = 'https://ndre.sreda.gov.bd/';
+const SREDA_MIX_URL = 'https://ndre.sreda.gov.bd/index.php?id=7';
+
+function getSredaDailyDir(): string {
+  return path.join(process.cwd(), 'public', 'data', 'sreda', 'daily');
+}
+
+function getSredaAvailableDatesPath(): string {
+  return path.join(process.cwd(), 'lib', 'sreda-available-dates.json');
+}
 
 function ensureDir(dirPath: string) {
   if (!fs.existsSync(dirPath)) {
@@ -42,9 +46,10 @@ async function fetchSredaPage(url: string): Promise<string | null> {
 }
 
 function readAvailableDates(): string[] {
-  if (!fs.existsSync(SREDA_CONFIG.availableDatesPath)) return [];
+  const availableDatesPath = getSredaAvailableDatesPath();
+  if (!fs.existsSync(availableDatesPath)) return [];
   try {
-    const raw = JSON.parse(fs.readFileSync(SREDA_CONFIG.availableDatesPath, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(availableDatesPath, 'utf8'));
     return Array.isArray(raw) ? raw.map(String) : [];
   } catch {
     return [];
@@ -53,20 +58,21 @@ function readAvailableDates(): string[] {
 
 function writeAvailableDates(dates: string[]) {
   const unique = [...new Set(dates)].sort();
-  fs.writeFileSync(SREDA_CONFIG.availableDatesPath, JSON.stringify(unique, null, 2) + '\n', 'utf8');
+  fs.writeFileSync(getSredaAvailableDatesPath(), JSON.stringify(unique, null, 2) + '\n', 'utf8');
 }
 
 function writeDailySnapshot(data: SredaDailyData): string {
-  ensureDir(SREDA_CONFIG.dailyDir);
-  const filePath = path.join(SREDA_CONFIG.dailyDir, `${data.date}.json`);
+  const dailyDir = getSredaDailyDir();
+  ensureDir(dailyDir);
+  const filePath = path.join(dailyDir, `${data.date}.json`);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2) + '\n', 'utf8');
   return filePath;
 }
 
 export async function scrapeSredaDailySnapshot(): Promise<SredaDailyData | null> {
   const [homeHtml, mixHtml] = await Promise.all([
-    fetchSredaPage(SREDA_CONFIG.homeUrl),
-    fetchSredaPage(SREDA_CONFIG.mixUrl),
+    fetchSredaPage(SREDA_HOME_URL),
+    fetchSredaPage(SREDA_MIX_URL),
   ]);
 
   if (!homeHtml && !mixHtml) {
@@ -76,7 +82,7 @@ export async function scrapeSredaDailySnapshot(): Promise<SredaDailyData | null>
 
   const scrapedAt = new Date().toISOString();
   const home = homeHtml
-    ? parseSredaHomepageHtml(homeHtml, SREDA_CONFIG.homeUrl)
+    ? parseSredaHomepageHtml(homeHtml, SREDA_HOME_URL)
     : {};
   const mix = mixHtml ? parseSredaGenerationMixHtml(mixHtml) : {};
 
@@ -111,7 +117,7 @@ export async function runSredaIngestion(): Promise<SredaIngestResult> {
     return { ok: false, error: 'SREDA scrape produced no usable data' };
   }
 
-  const filePath = path.join(SREDA_CONFIG.dailyDir, `${snapshot.date}.json`);
+  const filePath = path.join(getSredaDailyDir(), `${snapshot.date}.json`);
   if (fs.existsSync(filePath)) {
     const existing = JSON.parse(fs.readFileSync(filePath, 'utf8')) as SredaDailyData;
     if (existing.lastUpdate === snapshot.lastUpdate) {
