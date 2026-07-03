@@ -14,9 +14,9 @@ export function safeAuthRedirectPath(raw: string | null | undefined, fallback: s
     const hostname = url.hostname;
     const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
     const isProdDomain =
-      hostname === 'esbpower.com' ||
-      hostname.endsWith('.esbpower.com') ||
-      hostname === 'esbpower' ||
+      hostname === 'esbpowerline.com' ||
+      hostname.endsWith('.esbpowerline.com') ||
+      hostname === 'esbpowerline' ||
       hostname.endsWith('.vercel.app');
 
     if (isLocal || isProdDomain) {
