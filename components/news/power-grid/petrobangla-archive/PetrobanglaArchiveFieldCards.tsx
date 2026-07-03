@@ -75,6 +75,9 @@ export function PetrobanglaArchiveFieldCards({
       const trend30 = recent30.length >= 2
         ? recent30[recent30.length - 1].gas - recent30[0].gas
         : 0;
+      const declineRate30 = (recent30.length >= 2 && recent30[0].gas > 0)
+        ? (trend30 / recent30[0].gas) * 100
+        : 0;
 
       return {
         fieldName,
@@ -90,13 +93,14 @@ export function PetrobanglaArchiveFieldCards({
         meta,
         recentAvg,
         trend30,
+        declineRate30,
       };
     });
   }, [timeline, latestDay]);
 
   const sorted = [...cards].sort((a, b) => {
     if (sort === 'largest') return b.current - a.current;
-    if (sort === 'decline') return a.pctFromPeak - b.pctFromPeak;
+    if (sort === 'decline') return a.declineRate30 - b.declineRate30;
     return a.pctFromPeak - b.pctFromPeak;
   });
 
