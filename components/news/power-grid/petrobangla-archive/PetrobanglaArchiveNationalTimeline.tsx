@@ -119,7 +119,7 @@ export function PetrobanglaArchiveNationalTimeline({
       {compact ? (
         <div className="gas-reserve-archive-view-toolbar">
           <div className="min-w-0">
-            <p className="gas-reserve-archive-view-toolbar__title">National timeline</p>
+            <p className="gas-reserve-archive-view-toolbar__title">National Timeline</p>
             <p className="gas-reserve-archive-view-toolbar__sub">
               {timeline.ok_days.toLocaleString()} verified days · domestic vs LNG
             </p>
