@@ -165,15 +165,15 @@ export function PetrobanglaLiveWeekPanel({
 
       {mode === 'researcher' && (
         <div className="flex flex-wrap gap-2 text-[10px]">
-          {activeBundle.days.map((d) => (
+          {activeBundle.index_entries.map((entry) => (
             <a
-              key={d.report.report_date_end}
-              href={`/data/petrobangla/daily/${d.report.report_date_end}.json`}
+              key={entry.date}
+              href={`/data/petrobangla/daily/${entry.json_file}`}
               target="_blank"
               rel="noopener noreferrer"
               className="grid-explorer-chip text-primary hover:underline"
             >
-              {d.report.report_date_end}.json
+              {entry.json_file}
             </a>
           ))}
         </div>

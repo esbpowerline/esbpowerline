@@ -28,9 +28,9 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
           value={leftIdx}
           onChange={(e) => setLeftIdx(Number(e.target.value))}
         >
-          {bundle.days.map((d, i) => (
-            <option key={d.report.report_date_end} value={i}>
-              {d.report.report_date_label}
+          {bundle.index_entries.map((entry, i) => (
+            <option key={entry.date} value={i}>
+              {entry.date_label}
             </option>
           ))}
         </select>
@@ -40,9 +40,9 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
           value={rightIdx}
           onChange={(e) => setRightIdx(Number(e.target.value))}
         >
-          {bundle.days.map((d, i) => (
-            <option key={d.report.report_date_end} value={i}>
-              {d.report.report_date_label}
+          {bundle.index_entries.map((entry, i) => (
+            <option key={entry.date} value={i}>
+              {entry.date_label}
             </option>
           ))}
         </select>
