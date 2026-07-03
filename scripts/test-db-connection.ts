@@ -1,9 +1,12 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-const result = dotenv.config({ path: path.resolve(process.cwd(), '.env.production.local') });
-if (result.error) {
-  console.error('Failed to load .env.production.local:', result.error.message);
+import { existsSync } from 'fs';
+
+dotenv.config({ path: '.env' });
+if (existsSync('.env.local')) dotenv.config({ path: '.env.local', override: true });
+if (existsSync('.env.production.local')) {
+  dotenv.config({ path: '.env.production.local', override: true });
 }
 
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'PRESENT' : 'MISSING');

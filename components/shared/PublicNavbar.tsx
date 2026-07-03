@@ -250,19 +250,15 @@ export function PublicNavbar({
               <div className="public-nav-bar__start">
                 <div className="public-nav-bar__pill-cluster public-nav-bar__start-cluster">
                   <div className="public-nav-bar__utilities">
-                    <a
+                    <Link
                       href="/"
                       className={`public-nav-bar__pill-btn public-nav-bar__pill-btn--paired public-nav-bar__home${
                         pathname === '/' ? ' public-nav-bar__home--active' : ''
                       }`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        window.location.href = '/';
-                      }}
                     >
                       <Home className="icon-sm" aria-hidden />
                       <span className="public-nav-bar__pill-label">{t('nav.home')}</span>
-                    </a>
+                    </Link>
 
                     <span className="public-nav-bar__pill-divider hidden sm:block" aria-hidden />
 

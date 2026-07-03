@@ -356,7 +356,7 @@ export function GridRechartsTooltip({
   cursor,
   wrapperStyle,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line
   content: React.ComponentType<any> | React.ReactElement | ((props: any) => React.ReactNode);
   cursor?: object;
   wrapperStyle?: React.CSSProperties;

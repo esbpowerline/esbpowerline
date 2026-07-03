@@ -16,7 +16,7 @@
     "build:vercel": "prisma generate && node scripts/migrate-deploy-prod.mjs && next build",
     "db:deploy": "prisma migrate deploy",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",

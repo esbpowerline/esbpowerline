@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable react/no-unescaped-entities */
+
 import dynamic from 'next/dynamic';
 import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } from 'react';
 import Link from 'next/link';

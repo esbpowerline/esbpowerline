@@ -361,7 +361,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
         <div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
           <p><strong>Structural Decoupling in the Power Sector</strong></p>
           <p className="leading-relaxed">
-            This chart indexes all metrics to <strong>FY2011 = 100</strong> to compare their relative growth rates. It highlights a critical structural decoupling in Bangladesh's energy infrastructure:
+            This chart indexes all metrics to <strong>FY2011 = 100</strong> to compare their relative growth rates. It highlights a critical structural decoupling in Bangladesh&apos;s energy infrastructure:
           </p>
           <ul className="list-disc pl-4 space-y-1">
             <li><strong className="text-[#f59e0b]">Fiscal Allocation:</strong> The Power Division budget has skyrocketed by <strong>594.8%</strong>, representing massive capital injection.</li>

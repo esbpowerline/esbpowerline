@@ -304,7 +304,17 @@ export function ArticlePreviewPanel({
     };
   }, [title, excerpt]);
 
-  const { label: originalDeviceLabel } = usePreviewDeviceWidth(device, active);
+  const desktopWidthResult = usePreviewDeviceWidth('desktop', active);
+  const tabletWidthResult = usePreviewDeviceWidth('tablet', active);
+  const mobileWidthResult = usePreviewDeviceWidth('mobile', active);
+
+  const deviceWidths = useMemo(() => ({
+    desktop: desktopWidthResult,
+    tablet: tabletWidthResult,
+    mobile: mobileWidthResult,
+  }), [desktopWidthResult, tabletWidthResult, mobileWidthResult]);
+
+  const originalDeviceLabel = deviceWidths[device].label;
 
   const deviceLabel = useMemo(() => {
     const currentTelemetry = telemetry[device];
@@ -832,7 +842,7 @@ export function ArticlePreviewPanel({
 
   const renderDeviceFrame = (dev: PreviewDevice) => {
     const isDevDesktop = dev === 'desktop';
-    const { width: devWidth, label: rawLabel } = usePreviewDeviceWidth(dev, active);
+    const { width: devWidth, label: rawLabel } = deviceWidths[dev];
     const currentTelemetry = telemetry[dev];
 
     const targetWidth = dev === 'desktop' ? 1280 : dev === 'tablet' ? 768 : 390;
