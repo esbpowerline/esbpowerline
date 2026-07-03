@@ -1,6 +1,17 @@
 const { Pool } = require('pg');
+const path = require('path');
+const dotenv = require('dotenv');
 
-const databaseUrl = "postgresql://postgres.sxgokpmrbgdndstygapc:esbpowerline007@aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres";
+// Load env variables
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  console.error('Error: DIRECT_URL or DATABASE_URL environment variable is not defined.');
+  process.exit(1);
+}
 
 async function main() {
   const pool = new Pool({ connectionString: databaseUrl });
