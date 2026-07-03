@@ -24,7 +24,7 @@ export function PowerGridExportControls({ className = '' }: { className?: string
 
   return (
     <Link
-      href="/members/login?callbackUrl=/data-reports/power-grid"
+      href="/members/login?callbackUrl=/grid-explorer"
       className={cn(
         'btn btn-secondary custom-tooltip-trigger flex items-center justify-center gap-1.5 text-xs w-full py-2 hover:bg-secondary transition-colors',
         className
@@ -36,3 +36,4 @@ export function PowerGridExportControls({ className = '' }: { className?: string
     </Link>
   );
 }
+

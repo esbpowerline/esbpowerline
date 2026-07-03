@@ -462,7 +462,7 @@ async function main() {
             label: 'MEMBER ACCESS',
             title: 'Save articles & magazine issues, download data, comment, and unlock in-depth analysis.',
             primaryLabel: 'Open Grid Explorer',
-            primaryHref: '/data-reports/power-grid',
+            primaryHref: '/grid-explorer',
             secondaryLabel: 'Member login',
             secondaryHref: '/members/login',
           },
@@ -607,3 +607,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

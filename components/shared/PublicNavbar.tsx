@@ -131,7 +131,7 @@ export function PublicNavbar({
   }, [mounted]);
 
   useEffect(() => {
-    const targetPaths = ['/data-reports/power-grid', '/articles', '/magazine', '/about', '/contact'];
+    const targetPaths = ['/grid-explorer', '/articles', '/magazine', '/about', '/contact'];
     const isTarget = targetPaths.some(p => pathname.startsWith(p));
     
     if (isTarget && prevPathname.current !== pathname) {
@@ -295,7 +295,7 @@ export function PublicNavbar({
                   </PublicNavLink>
 
                   <PublicNavLink
-                    href="/data-reports/power-grid"
+                    href="/grid-explorer"
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--grid${
                       pathname.includes('/power-grid') ? ' public-nav-bar__hub-link--active' : ''
                     }`}

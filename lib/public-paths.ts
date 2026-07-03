@@ -6,5 +6,5 @@ export const PUBLIC_REVALIDATE_PATHS = [
   '/categories',
   '/search',
   '/tags',
-  '/data-reports/power-grid',
+  '/grid-explorer',
 ] as const;

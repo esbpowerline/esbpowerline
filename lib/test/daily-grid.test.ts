@@ -114,24 +114,24 @@ describe('daily-loader-core status handling', () => {
 
 describe('daily-access gate', () => {
   it('normalizes www and apex hosts', () => {
-    expect(normalizeSiteHost('www.esbpowerline.com')).toBe('esbpowerline.com');
-    expect(normalizeSiteHost('ESBPowerLine.com:443')).toBe('esbpowerline.com');
+    expect(normalizeSiteHost('www.esbpower.com')).toBe('esbpower.com');
+    expect(normalizeSiteHost('esbpower.com:443')).toBe('esbpower.com');
   });
 
   it('allows same-origin via Referer or Origin in production', () => {
     expect(
       isSameOriginDailyAccess(
-        'https://www.esbpowerline.com/data-reports/power-grid',
+        'https://www.esbpower.com/grid-explorer',
         null,
-        'esbpowerline.com',
+        'esbpower.com',
         'production',
       ),
     ).toBe(true);
     expect(
       isSameOriginDailyAccess(
         null,
-        'https://esbpowerline.com',
-        'www.esbpowerline.com',
+        'https://esbpower.com',
+        'www.esbpower.com',
         'production',
       ),
     ).toBe(true);
@@ -139,7 +139,7 @@ describe('daily-access gate', () => {
       isSameOriginDailyAccess(
         'https://evil.example/data',
         null,
-        'esbpowerline.com',
+        'esbpower.com',
         'production',
       ),
     ).toBe(false);
@@ -244,3 +244,4 @@ describe('home-snapshot', () => {
     expect(stats[11].value).toBe(5.56);
   });
 });
+

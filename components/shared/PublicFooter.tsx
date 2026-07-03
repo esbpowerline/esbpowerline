@@ -83,7 +83,7 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
     { label: t('footer.latestNews'), href: '/articles' },
     { label: t('footer.allCategories'), href: '/categories' },
     { label: t('footer.monthlyMagazine'), href: '/magazine' },
-    { label: t('footer.gridExplorer'), href: '/data-reports/power-grid' },
+    { label: t('footer.gridExplorer'), href: '/grid-explorer' },
     { label: t('footer.search'), href: '/search' },
   ];
 

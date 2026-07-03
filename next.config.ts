@@ -45,9 +45,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '**.supabase.co' },
-      { protocol: 'https', hostname: 'esbpowerline.com' },
-      { protocol: 'https', hostname: 'www.esbpowerline.com' },
-      { protocol: 'https', hostname: '**.esbpowerline.com' },
+      { protocol: 'https', hostname: 'esbpower.com' },
+      { protocol: 'https', hostname: 'www.esbpower.com' },
+      { protocol: 'https', hostname: '**.esbpower.com' },
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1920],

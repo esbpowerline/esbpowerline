@@ -94,7 +94,7 @@ export default async function AdminDashboardPage() {
               <AdminMetricRow label="Published this month" value={formatNumber(stats.publishedThisMonth)} />
               <AdminMetricRow label="Added this month" value={formatNumber(stats.addedThisMonth)} highlight />
             </AdminListStack>
-            <AdminCardFooter href={publicPathUrl('/data-reports/power-grid')} external className="admin-card-footer--link">
+            <AdminCardFooter href={publicPathUrl('/grid-explorer')} external className="admin-card-footer--link">
               Open live grid data →
             </AdminCardFooter>
           </AdminCard>

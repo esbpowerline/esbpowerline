@@ -219,7 +219,7 @@ function SnapshotSegment({
       <div className="home-snapshot-segment__card">
         <header className="home-snapshot-segment__head">
           <div className="home-snapshot-segment__title-block">
-            <Link href="/data-reports/power-grid" className="home-snapshot-segment__title-link group">
+            <Link href="/grid-explorer" className="home-snapshot-segment__title-link group">
               <BarChart3 className="home-snapshot-segment__icon" aria-hidden />
               <h2 id="home-snapshot-title" className="home-snapshot-segment__title">
                 {t('home.systemSnapshot')}

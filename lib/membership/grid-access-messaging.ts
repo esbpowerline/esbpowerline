@@ -14,7 +14,7 @@ export type GridAccessMessage = {
   showPaymentSoon: boolean;
 };
 
-const CALLBACK = '/data-reports/power-grid';
+const CALLBACK = '/grid-explorer';
 const LOGIN = `/members/login?callbackUrl=${encodeURIComponent(CALLBACK)}`;
 
 /** Copy shown when user hits a locked date — keyed by tier required to unlock. */

@@ -50,7 +50,7 @@ esbpowerline/
 
 All data reports are mapped to their designated placeholders in the database (`DashboardStat` and `SiteSetting` tables) and served in dynamic formats:
 
-1. **Power Grid Explorer (`/data-reports/power-grid`)**: Real-time rendering of generation capacity, peak demand, fuel cost averages, and unserved energy.
+1. **Power Grid Explorer (`/grid-explorer`)**: Real-time rendering of generation capacity, peak demand, fuel cost averages, and unserved energy.
 2. **Interactive Visualizations**: Dynamic charts powered by Recharts showing historical capacity vs. demand growth.
 3. **Macro-Economic Studies**: Decoupling metrics and tariff analysis indexing parameters relative to **FY2011 = 100** for structural grid diagnostics.
 4. **Offline Export Formats**:
@@ -122,3 +122,4 @@ npm test
 
 ---
 © 2026 ESB PowerLine. All rights reserved.
+

@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpower.com';
 
   const routes = [
     '',
-    '/data-reports/power-grid',
+    '/grid-explorer',
     '/login',
     '/members/login',
   ].map((route) => ({

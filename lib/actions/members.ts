@@ -358,7 +358,7 @@ export async function triggerGridRefresh() {
   try {
     const { runIngestionPipeline } = await import('@/scripts/ingest-energy-reports');
     await runIngestionPipeline();
-    revalidatePath('/data-reports/power-grid');
+    revalidatePath('/grid-explorer');
     return { success: true };
   } catch (error: any) {
     console.error('Failed to refresh grid data:', error);

@@ -82,7 +82,7 @@ export default async function MemberOverviewPage() {
         <div className="flex flex-wrap gap-3">
           <Link href="/articles" className="btn btn-secondary text-sm">Latest news</Link>
           <Link href="/magazine" className="btn btn-secondary text-sm">Monthly magazine</Link>
-          <Link href="/data-reports/power-grid" className="btn btn-secondary text-sm">Grid Explorer</Link>
+          <Link href="/grid-explorer" className="btn btn-secondary text-sm">Grid Explorer</Link>
         </div>
       </section>
     </div>
