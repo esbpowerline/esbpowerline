@@ -33,6 +33,7 @@ ERP_BY_ENERGY: dict[str, int] = {
     "2026-06-28": 5050,
     "2026-06-29": 5051,
     "2026-06-30": 5052,
+    "2026-07-01": 5053,
 }
 
 
@@ -237,8 +238,8 @@ def main():
     if pb_text:
         print(f"[pb] gas text extracted ({pb_text.stat().st_size} bytes)")
 
-    # Backlog catch-up: Jun 29 (report 2026-06-30) + Jun 30 (report 2026-07-01).
-    targets = ["2026-06-29", "2026-06-30"]
+    # Backlog catch-up: Jun 29 (report 2026-06-30) + Jun 30 (report 2026-07-01) + Jul 1 (report 2026-07-02).
+    targets = ["2026-06-29", "2026-06-30", "2026-07-01"]
 
     written = []
     missing = []
@@ -271,13 +272,13 @@ def main():
     if written:
         update_dates_index(written)
 
-    if "2026-06-30" in missing:
-        print("\nJun 30 energy day requires PGCB report dated 2026-07-01 (ERP ~5052), not yet on erp.powergrid.gov.bd.")
+    if "2026-07-01" in missing:
+        print("\nJul 1 energy day requires PGCB report dated 2026-07-02 (ERP ~5053), not yet on erp.powergrid.gov.bd.")
         if written:
             latest = max(written)
             print(f"Latest ingested energy day: {latest}.")
 
-    return 0 if "2026-06-30" in written else 2
+    return 0 if "2026-07-01" in written else 2
 
 
 if __name__ == "__main__":

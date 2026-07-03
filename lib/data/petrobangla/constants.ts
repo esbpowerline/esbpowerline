@@ -138,8 +138,8 @@ export const ARCHIVE_INSIGHTS = {
   lngRamp: { from: 592, to: 1003, pct: 69 },
   powerFulfillmentCollapse: { from: 55.2, to: 39.6 },
   totalFieldRecords: 51948,
-  coverageDays: 2246,
-  coverageEnd: '2026-06-30', // latest ok gas-day in archive index
+  coverageDays: 2247,
+  coverageEnd: '2026-07-01', // latest ok gas-day in archive index
 } as const;
 
 export function isQuarantined(date: string): boolean {

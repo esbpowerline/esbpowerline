@@ -157,9 +157,9 @@ describe('available-dates sanitization', () => {
     expect(isDateAvailable('0219-11-03')).toBe(false);
   });
 
-  it('includes latest June 2026 backlog date', () => {
-    expect(getLatestAvailableDate()).toBe('2026-06-30');
-    expect(isDateAvailable('2026-06-30')).toBe(true);
+  it('includes latest July 2026 backlog date', () => {
+    expect(getLatestAvailableDate()).toBe('2026-07-01');
+    expect(isDateAvailable('2026-07-01')).toBe(true);
   });
 });
 
