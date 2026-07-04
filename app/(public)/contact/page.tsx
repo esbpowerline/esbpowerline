@@ -99,10 +99,10 @@ export default function ContactPage() {
                         Email Address
                       </h5>
                        <a
-                        href="mailto:contact@esbpowerline.com"
+                        href="mailto:esbplbd@gmail.com"
                         className="block text-sm text-muted-foreground hover:text-primary transition-colors"
                       >
-                        contact@esbpowerline.com
+                        esbplbd@gmail.com
                       </a>
                     </div>
                   </div>

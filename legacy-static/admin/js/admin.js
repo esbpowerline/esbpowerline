@@ -859,7 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                                 <div class="form-group">
                                     <label>Contact Email</label>
-                                    <input type="email" class="form-control" value="contact@esbpowerline.com">
+                                    <input type="email" class="form-control" value="esbplbd@gmail.com">
                                 </div>
                                 <div class="form-group">
                                     <label>Items Per Page</label>

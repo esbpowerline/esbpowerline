@@ -155,7 +155,7 @@ export function HomePowerSector({
                 {(index === 1 || index === 7) && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6" suppressHydrationWarning>
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-                      <Image src="/images/Ad Banners/001-2.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" />
+                      <Image src="/images/Ad Banners/009.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
                     </Link>
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
                       <Image src="/images/Ad Banners/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
