@@ -74,7 +74,7 @@ export function CustomDropdown({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'w-full relative flex items-center justify-center gap-2 px-3.5 py-2 text-xs md:text-sm border border-border/40 rounded-xl text-foreground focus:outline-none focus:border-primary/50 transition-all duration-150 font-medium shadow-sm pr-8',
+          'w-full relative flex items-center justify-center gap-2 px-3.5 py-2 text-xs border border-border/40 rounded-xl text-foreground focus:outline-none focus:border-primary/50 transition-all duration-150 font-semibold shadow-sm pr-8',
           noBackground
             ? 'bg-transparent hover:bg-muted/10 hover:border-primary/30'
             : 'bg-muted/20 hover:bg-muted/30 hover:border-primary/30',

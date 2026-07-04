@@ -4,6 +4,8 @@ import { HomePowerSector } from '@/components/home/HomePowerSector';
 import { HomeSnapshotPanel } from '@/components/home/HomeSnapshotPanel';
 import { HomeTrendingSection } from '@/components/home/HomeTrendingSection';
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
+import Image from 'next/image';
+import Link from 'next/link';
 import { FeaturedCarousel } from '@/components/news/FeaturedCarousel';
 import { InterviewsSection } from '@/components/news/InterviewsSection';
 import { normalizeInterviews } from '@/lib/interview-content';
@@ -135,24 +137,21 @@ export default async function Home() {
             <aside className="home-editorial__rail" aria-label="Sidebar">
               <HomeTrendingSection trending={trending} layout="hero-rail" />
               
-              {/* Sidebar Box Ad Space */}
-              <div className="mt-12 sticky top-[11rem] bg-muted/30 border border-border/40 rounded-2xl h-[400px] flex flex-col items-center justify-center text-muted-foreground/60 overflow-hidden relative group">
-                <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:10px_10px]" />
-                <span className="text-[10px] font-bold tracking-widest uppercase mb-2">Advertisement</span>
-                <span className="text-sm font-medium">Box Ad Space</span>
-              </div>
+              {/* Sidebar Ad Block */}
+              <Link href="/advertising" className="mt-12 sticky top-[11rem] rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+                <Image src="/images/Ad Banners/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover" suppressHydrationWarning />
+              </Link>
             </aside>
           </div>
 
           {/* 2-Column Pre-Footer Ad Space */}
-          <div className="mt-12 mb-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="bg-muted/30 border border-border/40 rounded-2xl h-[120px] md:h-[160px] flex flex-col items-center justify-center text-muted-foreground/60 overflow-hidden relative group">
-                <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:10px_10px]" />
-                <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Advertisement</span>
-                <span className="text-sm font-medium">Pre-Footer Ad Space</span>
-              </div>
-            ))}
+          <div className="mt-12 mb-12 grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
+            <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+              <Image src="/images/Ad Banners/006.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+            </Link>
+            <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+              <Image src="/images/Ad Banners/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+            </Link>
           </div>
 
           <HomeBottomRow

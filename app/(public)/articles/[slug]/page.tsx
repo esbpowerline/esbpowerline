@@ -207,10 +207,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
         {/* In-Article Ad Space */}
         {paragraphs.length > 3 && (
-          <div className="my-10 p-6 border border-border/40 bg-muted/20 rounded-2xl flex flex-col items-center justify-center text-muted-foreground/60 w-full overflow-hidden relative group min-h-[140px]">
-            <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.03)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.03)_50%,transparent_75%)] bg-[length:10px_10px]" />
-            <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Advertisement</span>
-            <span className="text-sm font-medium">In-Body Ad Header</span>
+          <div className="article-body-ad-block my-12" suppressHydrationWarning>
+            <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
+              <Image src="/images/Ad Banners/008.png" alt="Advertisement" width={2136} height={420} className="w-full h-auto object-cover" suppressHydrationWarning />
+            </Link>
           </div>
         )}
 

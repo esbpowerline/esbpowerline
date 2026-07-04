@@ -167,8 +167,9 @@ export function formatAxisTk(value: number) {
 /** PGCB monthly archive — January shows full year, July shows mid-year anchor */
 export function formatPgcbMonthlyTick(dateKey: string): string {
   const [year, month] = dateKey.split('-');
-  if (month === '01') return year;
-  if (month === '07') return `’${year.slice(2)}`;
+  const shortYear = year.slice(2);
+  if (month === '01') return `Jan ’${shortYear}`;
+  if (month === '07') return `Jul ’${shortYear}`;
   return '';
 }
 
@@ -186,15 +187,23 @@ export function formatChartTooltipValue(
 }
 
 export const REGIONAL_ZONE_COLORS: Record<string, string> = {
-  east: '#0ea5e9',
+  // Region divisions
+  dhaka: '#f97316',       // orange
+  chittagong: '#3b82f6',  // vivid blue
+  khulna: '#06b6d4',      // cyan
+  rajshahi: '#10b981',    // emerald
+  barisal: '#eab308',     // amber
+  sylhet: '#ef4444',      // red
+  rangpur: '#ec4899',     // pink
+  mymensingh: '#6366f1',  // indigo
+  comilla: '#a855f7',     // purple
+  
+  // Division groups / fallbacks
+  central: '#f97316',
+  east: '#3b82f6',
   west: '#06b6d4',
   north: '#10b981',
   south: '#a855f7',
-  central: '#f97316',
-  mymensingh: '#64748b',
-  sylhet: '#ef4444',
-  barisal: '#eab308',
-  rangpur: '#ec4899',
 };
 
 export const BDT_TO_CRORE = 10_000_000;

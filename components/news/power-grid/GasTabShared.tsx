@@ -63,10 +63,7 @@ export function GasSourceFooter({
 }) {
   return (
     <div
-      className={cn(
-        'flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80',
-        className,
-      )}
+      className={cn('grid-explorer-card-footer', className)}
     >
       <span>
         Source: {source}

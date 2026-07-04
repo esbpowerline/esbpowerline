@@ -154,7 +154,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('stress')}>
         <Gauge className={cn('grid-explorer-kpi__icon shrink-0', stressClass)} />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Supply stress</div>
+          <div className="grid-explorer-kpi__label">Supply stress<sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
           <div className={cn('grid-explorer-kpi__value', stressClass)}>{kpis.stressScore}</div>
           <p className="text-[9px] text-muted-foreground mt-1 leading-snug">{stressLabel}</p>
         </div>
@@ -190,7 +190,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('total')}>
         <Droplet className="grid-explorer-kpi__icon text-sky-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">National gas</div>
+          <div className="grid-explorer-kpi__label">National gas<sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
           <div className="grid-explorer-kpi__value">{formatNumber(kpis.totalGas, 1)}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {kpis.totalGas < 2800 && <span className="text-red-500 font-bold">▼ </span>}
@@ -235,7 +235,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('power')}>
         <Flame className="grid-explorer-kpi__icon text-red-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Power fulfillment</div>
+          <div className="grid-explorer-kpi__label">Power fulfillment<sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
           <div className="grid-explorer-kpi__value">{kpis.powerFulfillmentPct.toFixed(1)}%</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             Plants got {formatNumber(kpis.powerSupply, 1)} of {formatNumber(kpis.powerDemand, 1)} MMCFD
@@ -272,7 +272,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('lng')}>
         <Layers className="grid-explorer-kpi__icon text-purple-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">LNG share</div>
+          <div className="grid-explorer-kpi__label">LNG share<sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
           <div className="grid-explorer-kpi__value">{kpis.lngSharePct.toFixed(1)}%</div>
           <p className="text-[9px] text-muted-foreground mt-1">{formatNumber(kpis.lngGasMmcfd, 1)} MMCFD imported</p>
         </div>
@@ -302,7 +302,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('domestic')}>
         <Activity className="grid-explorer-kpi__icon text-sky-600 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Domestic output</div>
+          <div className="grid-explorer-kpi__label">Domestic output<sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
           <div className="grid-explorer-kpi__value">{formatNumber(kpis.domesticGas, 1)}</div>
           <p className="text-[9px] text-muted-foreground mt-1">Own gas, excluding imports</p>
         </div>
@@ -336,7 +336,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('wells')}>
         <AlertTriangle className="grid-explorer-kpi__icon text-amber-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Active wells</div>
+          <div className="grid-explorer-kpi__label">Active wells<sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
           <div className="grid-explorer-kpi__value">{Math.round(kpis.activeWells)}</div>
           {mode !== 'simple' && (
             <p className="text-[9px] text-muted-foreground mt-1">

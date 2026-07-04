@@ -11,6 +11,7 @@ type GridDataLockedGateProps = {
   selectedDate: string;
   className?: string;
   variant?: 'overlay' | 'inline';
+  onTryDemo?: () => void;
 };
 
 export function GridDataLockedGate({
@@ -18,6 +19,7 @@ export function GridDataLockedGate({
   selectedDate,
   className,
   variant = 'overlay',
+  onTryDemo,
 }: GridDataLockedGateProps) {
   const msg = getLockedDateMessage(requiredTier, selectedDate);
 
@@ -85,6 +87,16 @@ export function GridDataLockedGate({
             </Link>
           )}
         </div>
+        {onTryDemo && (
+          <div className="mt-4 pt-4 border-t border-border/50 text-center">
+            <button
+              onClick={onTryDemo}
+              className="text-xs font-semibold text-primary hover:text-primary-hover underline underline-offset-4 decoration-primary/30 hover:decoration-primary transition-all"
+            >
+              Test the Premium Features in our Interactive Demo Sandbox
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

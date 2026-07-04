@@ -19,7 +19,7 @@ import { formatNumber } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { Activity, Layers, TrendingUp, BarChart3 } from 'lucide-react';
 
-export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
+export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allowedYears = null }: { chartTheme: any; isTruncated?: boolean; allowedYears?: number | null }) {
   const data = longitudinalStudyData;
 
   // Base year (FY2011) parameters for indexing
@@ -75,6 +75,12 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
       };
     });
   }, [data, baseBudget, baseTransmission, baseGeneration, baseDemand]);
+
+  const sliceForLine = isTruncated ? Math.max(allowedYears ?? 2, 3) : processedData.length;
+  const sliceForBar = isTruncated ? (allowedYears ?? 2) : processedData.length;
+  
+  const displayData3Years = processedData.slice(-sliceForLine);
+  const displayData2Years = processedData.slice(-sliceForBar);
 
   const formatSeriesTooltipValue = (entry: { name?: string; value?: number | null }) => {
     const name = entry.name ?? '';
@@ -147,7 +153,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             <Layers className="w-5 h-5 text-blue-500" />
             <div>
               <h3 className="grid-explorer-chart-card__title font-display font-bold">Network Evolution by Voltage Level</h3>
-              <p className="grid-explorer-chart-card__sub text-muted-foreground">Growth trajectories of ultra-high vs high voltage transmission corridors</p>
+              <p className="grid-explorer-chart-card__sub text-muted-foreground">Growth trajectories of ultra-high vs high voltage transmission corridors • <span className="text-primary font-semibold text-xs">Tracked since FY 2011</span></p>
             </div>
           </div>
           <span className="grid-explorer-chip bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20">Voltage Mix</span>
@@ -160,7 +166,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             { id: '132', label: '132kV Corridor', color: '#10b981', variant: 'line' },
           ]}
         >
-          <LineChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.legend}>
+          <LineChart accessibilityLayer={false} data={displayData3Years} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis width={GRID_Y_AXIS_WIDTH.splitUnit} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
@@ -192,7 +198,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+        <div className="grid-explorer-card-footer">
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Annual Progress Reports</a></span>
           <span>Verified by: PGCB System Planning &amp; Project Management Departments</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025</span>
@@ -206,7 +212,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             <Activity className="w-5 h-5 text-emerald-500" />
             <div>
               <h3 className="grid-explorer-chart-card__title font-display font-bold">Cumulative Grid Build-out</h3>
-              <p className="grid-explorer-chart-card__sub text-muted-foreground">Stacked area showing historical carrying capacity composition</p>
+              <p className="grid-explorer-chart-card__sub text-muted-foreground">Stacked area showing historical carrying capacity composition • <span className="text-primary font-semibold text-xs">Tracked since FY 2011</span></p>
             </div>
           </div>
           <span className="grid-explorer-chip bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">Grid Composition</span>
@@ -219,7 +225,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             { id: '400a', label: '400kV Ultra', color: '#8b5cf6', variant: 'area' },
           ]}
         >
-          <AreaChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.legend}>
+          <AreaChart accessibilityLayer={false} data={displayData3Years} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis width={GRID_Y_AXIS_WIDTH.splitUnit} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
@@ -252,7 +258,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+        <div className="grid-explorer-card-footer">
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Transmission System Studies</a></span>
           <span>Verified by: NLDC (National Load Despatch Centre) System Map</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025</span>
@@ -266,7 +272,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             <BarChart3 className="w-5 h-5 text-sky-500" />
             <div>
               <h3 className="grid-explorer-chart-card__title font-display font-bold">Transmission Expansion Pace</h3>
-              <p className="grid-explorer-chart-card__sub text-muted-foreground">New circuit km added to the national grid per year</p>
+              <p className="grid-explorer-chart-card__sub text-muted-foreground">New circuit km added to the national grid per year • <span className="text-primary font-semibold text-xs">Tracked since FY 2011</span></p>
             </div>
           </div>
           <span className="grid-explorer-chip bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20">Expansion Rate</span>
@@ -278,7 +284,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             { id: 'gen', label: 'Gen Cap. Added', color: '#f97316', variant: 'line' },
           ]}
         >
-          <ComposedChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.dualAxis} barCategoryGap="18%">
+          <ComposedChart accessibilityLayer={false} data={displayData2Years} margin={GRID_CHART_MARGIN.dualAxis} barCategoryGap="18%">
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.splitUnitDual} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
@@ -309,7 +315,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+        <div className="grid-explorer-card-footer">
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Project Audit Summaries</a></span>
           <span>Verified by: Ministry of Power, Energy and Mineral Resources (MPEMR)</span>
           <span className="font-medium">Reporting Period: FY 2012 - FY 2025</span>
@@ -323,7 +329,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             <TrendingUp className="w-5 h-5 text-orange-500" />
             <div>
               <h3 className="grid-explorer-chart-card__title font-display font-bold">Long-term Trajectories (Indexed)</h3>
-              <p className="grid-explorer-chart-card__sub text-muted-foreground">Base Year FY2011 = 100 for true comparative percentage growth</p>
+              <p className="grid-explorer-chart-card__sub text-muted-foreground">Base Year FY2011 = 100 for true comparative percentage growth • <span className="text-primary font-semibold text-xs">Tracked since FY 2011</span></p>
             </div>
           </div>
           <span className="grid-explorer-chip bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20">Index Baseline</span>
@@ -337,7 +343,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
             { id: 'tx', label: 'Transmission Index', color: '#10b981', variant: 'dashed' },
           ]}
         >
-          <LineChart accessibilityLayer={false} data={processedData} margin={GRID_CHART_MARGIN.legend}>
+          <LineChart accessibilityLayer={false} data={displayData2Years} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={gridChartAxisTick(chartTheme)} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={(v) => `${Math.round(v)}%`} />
@@ -375,7 +381,7 @@ export function LongitudinalStudyCharts({ chartTheme }: { chartTheme: any }) {
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+        <div className="grid-explorer-card-footer">
           <span>Source: <a href="https://www.mof.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">MOF Budget Briefs</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB/PGCB Statistics</a></span>
           <span>Audited by: Comptroller &amp; Auditor General (CAG) &amp; IMED, Bangladesh</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025 Baseline Study</span>

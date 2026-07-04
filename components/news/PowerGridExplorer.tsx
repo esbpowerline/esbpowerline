@@ -90,6 +90,7 @@ interface GridLineItem {
 interface PowerGridExplorerProps {
   initialLines?: GridLineItem[];
 }
+const DEMO_DATE = '2026-06-22';
 
 export function PowerGridExplorer({
   initialLines,
@@ -351,10 +352,18 @@ export function PowerGridExplorer({
             setActiveData(fallback);
           }
           setIsDataMissing(true);
-          console.error(result.error);
+          if (result.status !== 404 && result.status !== 429) {
+            console.error(result.error);
+          } else if (result.status === 429) {
+            console.warn('Rate limit reached (HTTP 429). Please slow down your requests.');
+          }
         } else {
           setIsDataMissing(true);
-          console.error(result.error);
+          if (result.status !== 404 && result.status !== 429) {
+            console.error(result.error);
+          } else if (result.status === 429) {
+            console.warn('Rate limit reached (HTTP 429). Please slow down your requests.');
+          }
         }
       })
       .finally(() => {
@@ -1061,12 +1070,7 @@ export function PowerGridExplorer({
         </div>
       </div>
 
-      <GridLockedContent
-        locked={tierLockRequired !== null}
-        requiredTier={tierLockRequired}
-        selectedDate={selectedDate}
-        className="min-h-[280px]"
-      >
+      <div className="min-h-[280px]">
       {/* KPI Strip */}
       <div className="grid-explorer-kpi-strip relative z-30" ref={kpiStripRef}>
         <div 
@@ -1417,7 +1421,7 @@ export function PowerGridExplorer({
               </div>
             </div>
           </div>
-        ) : <div className="grid-explorer-panel space-y-6">
+        ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
           {methodologyBanner}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Generation Pie Chart */}
@@ -1425,7 +1429,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head">
               <div>
                 <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh) • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+                <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
               <GridLiveBadge label={`Report: ${systemStats.date}`} />
             </div>
@@ -1568,7 +1572,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head">
               <div>
                 <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type (Total: {(totalCostBdt / 10000000).toFixed(1)} Cr Tk.) • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type (Total: {(totalCostBdt / 10000000).toFixed(1)} Cr Tk.) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
               <span className="grid-explorer-chip">Cost Analysis</span>
             </div>
@@ -1687,7 +1691,7 @@ export function PowerGridExplorer({
           <div className="grid-explorer-chart-card__head">
             <div>
               <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-              <p className="grid-explorer-chart-card__sub">SCADA demand, actual generation, and load shedding profile (Date: {systemStats.date}) • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+              <p className="grid-explorer-chart-card__sub">SCADA demand, actual generation, and load shedding profile (Date: {systemStats.date}) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
             </div>
             <span className="grid-explorer-chip bg-destructive/10 text-destructive border-destructive/20">NLDC SCADA Curve</span>
           </div>
@@ -1795,6 +1799,7 @@ export function PowerGridExplorer({
           </div>
         </div>
       </div>
+      </GridLockedContent> )
     )}
 
       {!isDataMissing && activeTab === 'gen' && (
@@ -1813,14 +1818,14 @@ export function PowerGridExplorer({
               </div>
             </div>
           </div>
-        ) : <div className="grid-explorer-panel space-y-6">
+        ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
           {methodologyBanner}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
               <Zap className="h-5 w-5 text-primary shrink-0" />
               <div>
                 <h3 className="grid-explorer-chart-card__title">Generation &amp; Production Cost Breakdown<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                  <p className="grid-explorer-chart-card__sub">System performance data logged on {systemStats.date} • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+                  <p className="grid-explorer-chart-card__sub">System performance data logged on {systemStats.date} • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
             </div>
 
@@ -1879,7 +1884,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head">
               <div>
                 <h3 className="grid-explorer-chart-card__title">Daily Operational Milestones<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                <p className="grid-explorer-chart-card__sub">Key metrics on system margin, load shedding demand, and gas-to-power allocations</p>
+                <p className="grid-explorer-chart-card__sub">Key metrics on system margin, load shedding demand, and gas-to-power allocations • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
             </div>
 
@@ -1929,6 +1934,7 @@ export function PowerGridExplorer({
             </div>
           </div>
         </div>
+        </GridLockedContent> )
       )}
 
       {!isDataMissing && activeTab === 'gas' && (
@@ -1941,6 +1947,9 @@ export function PowerGridExplorer({
             gasDistributionData={gasDistributionData || []}
             totalGasSupply={totalGasSupply}
             totalCondensate={totalCondensate}
+            isLocked={tierLockRequired !== null}
+            requiredTier={tierLockRequired as any}
+            onTryDemo={() => setSelectedDate(DEMO_DATE)}
           />
         </div>
       )}
@@ -1961,14 +1970,14 @@ export function PowerGridExplorer({
               </div>
             </div>
           </div>
-        ) : <div className="grid-explorer-panel space-y-6">
+        ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
           {methodologyBanner}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
               <Globe className="h-5 w-5 text-purple-500 shrink-0" />
               <div>
                 <h3 className="grid-explorer-chart-card__title">Cross-Border Power Imports Tracker<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                  <p className="grid-explorer-chart-card__sub">Real-time import allocations and daily power trade (Report: {systemStats.date}) • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+                  <p className="grid-explorer-chart-card__sub">Real-time import allocations and daily power trade (Report: {systemStats.date}) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
             </div>
 
@@ -2024,9 +2033,11 @@ export function PowerGridExplorer({
             </div>
           </div>
         </div>
+        </GridLockedContent> )
       )}
 
       {!isDataMissing && activeTab === 'renewables' && (
+        <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}>
         <div className="grid-explorer-panel grid lg:grid-cols-2 gap-6">
           {/* Renewables Table */}
           <div className="grid-explorer-chart-card card">
@@ -2135,6 +2146,7 @@ export function PowerGridExplorer({
             </div>
           </div>
         </div>
+        </GridLockedContent>
       )}
 
       {!isDataMissing && activeTab === 'transmission' && (
@@ -2153,7 +2165,7 @@ export function PowerGridExplorer({
               </div>
             </div>
           </div>
-        ) : <div className="grid-explorer-panel space-y-6">
+        ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
           <div className="grid lg:grid-cols-12 gap-8 items-start">
             {/* Mobile/Tablet Sub-tab Navigation */}
             <div className="lg:hidden w-full relative z-40 bg-card border border-border/60 p-3 rounded-2xl shadow-sm">
@@ -4102,6 +4114,7 @@ export function PowerGridExplorer({
             </div>
           </div>
         </div>
+        </GridLockedContent> )
       )}
 
       {!isDataMissing && activeTab === 'regional' && (
@@ -4120,7 +4133,7 @@ export function PowerGridExplorer({
               </div>
             </div>
           </div>
-        ) : <div className="grid-explorer-panel space-y-6">
+        ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Regional Table */}
             <div className="grid-explorer-chart-card card lg:col-span-2">
@@ -4128,7 +4141,7 @@ export function PowerGridExplorer({
                 <Cable className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <h3 className="grid-explorer-chart-card__title">Zone-wise Demand &amp; Load-Shedding<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                  <p className="grid-explorer-chart-card__sub">SCADA readings recorded at evening peak hour (21:00 Hr.) • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+                  <p className="grid-explorer-chart-card__sub">SCADA readings recorded at evening peak hour (21:00 Hr.) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
                 </div>
               </div>
 
@@ -4191,7 +4204,7 @@ export function PowerGridExplorer({
                 <FileText className="h-5 w-5 text-amber-500 shrink-0" />
                 <div>
                   <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
-                  <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold">Tracked since December 31, 2013</span></p>
+                  <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
                 </div>
               </div>
 
@@ -4226,7 +4239,7 @@ export function PowerGridExplorer({
                 <Cable className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <h3 className="grid-explorer-chart-card__title">Transmission Grid Assets</h3>
-                  <p className="grid-explorer-chart-card__sub">Major transmission line parameters and load status</p>
+                    <p className="grid-explorer-chart-card__sub">Major transmission line parameters and load status — <span className="text-primary font-semibold text-xs">Tracked since 2014</span></p>
                 </div>
               </div>
               <div className="grid-explorer-table-wrap">
@@ -4277,10 +4290,48 @@ export function PowerGridExplorer({
             </div>
           </div>
         </div>
+        </GridLockedContent> )
       )}
 
-      {!isDataMissing && activeTab === 'macro' && (
+      {!isDataMissing && activeTab === 'macro' && (() => {
+        const allowedYears = gridAccess.isStaff || gridAccess.tier === 'plan_999' ? null : (gridAccess.isMember || gridAccess.tier === 'plan_499' ? 5 : 2);
+        const isTruncated = allowedYears !== null;
+        
+        const truncate = <T extends readonly any[]>(arr: T, itemsPerYear: number = 1): T => {
+          if (!isTruncated) return arr;
+          return arr.slice(-(allowedYears * itemsPerYear)) as unknown as T;
+        };
+
+        const localPgcbMonthlyData = truncate(pgcbMonthlyData, 12);
+        const localMacroEconomicData = truncate(macroEconomicData, 1);
+        const localBpdbAuditedFinancials = truncate(bpdbAuditedFinancials, 1);
+        const localMacroTariffData = truncate(macroTariffData, 1);
+        const localMacroGasData = truncate(macroGasData, 1);
+        const localPetrobanglaAuditedFinancials = truncate(petrobanglaAuditedFinancials, 1);
+        const localGlobalVsDomesticData = truncate(globalVsDomesticData, 1);
+        const localHistoricalExchangeRates = historicalExchangeRates;
+        const localMacroInfrastructureData = truncate(macroInfrastructureData, 1);
+        const budgetLimit = allowedYears === 5 ? 6 : 5;
+        const localNationalBudgetMergedData = isTruncated ? nationalBudgetMergedData.slice(-budgetLimit) : nationalBudgetMergedData;
+        
+        const visibleMonths = isTruncated ? allowedYears * 12 : pgcbMonthlyData.length;
+        const hiddenPercentage = Math.max(0, Math.round((1 - (visibleMonths / Math.max(pgcbMonthlyData.length, visibleMonths))) * 100));
+
+        return (
         <div className="grid-explorer-panel space-y-6">
+          {isTruncated && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+              <div className="flex items-start gap-3">
+                <History className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                <div>
+                  <h4 className="text-sm font-semibold text-amber-500">Historical Preview Mode</h4>
+                  <p className="text-[11.5px] text-muted-foreground mt-1">
+                    You are viewing a {allowedYears}-year preview of the macro trends. {gridAccess.isMember ? 'Upgrade your plan' : 'Subscribe'} to unlock the full historical backlog (you are missing {hiddenPercentage}% of the data spanning 15+ years).
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Sub-tab Navigation */}
           <div id="macro-subtabs-nav" className="flex flex-wrap gap-1.5 border-b border-border/40 pb-3">
             {[
@@ -4324,7 +4375,7 @@ export function PowerGridExplorer({
                   <Landmark className="h-5 w-5 text-emerald-500 shrink-0" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title">National Budget vs Capacity &amp; Peak Generation</h3>
-                    <p className="grid-explorer-chart-card__sub">Power sector fiscal allocation (Crore Tk) plotted against installed capacity and peak generation (MW)</p>
+                    <p className="grid-explorer-chart-card__sub">Power sector fiscal allocation (Crore Tk) plotted against installed capacity and peak generation (MW) — <span className="text-primary font-semibold text-xs">Tracked since 2011</span></p>
                   </div>
                   <span className="grid-explorer-chip bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 ml-auto">FY 2011 - 2027</span>
                 </div>
@@ -4339,7 +4390,7 @@ export function PowerGridExplorer({
                 >
                   <ComposedChart
                     accessibilityLayer={false}
-                    data={nationalBudgetMergedData}
+                    data={localNationalBudgetMergedData}
                     margin={GRID_CHART_MARGIN.dualAxis}
                     barCategoryGap="18%"
                   >
@@ -4450,7 +4501,7 @@ export function PowerGridExplorer({
                   <BarChart3 className="h-5 w-5 text-primary shrink-0" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title">Historical Pricing &amp; Tariff Comparison</h3>
-                    <p className="grid-explorer-chart-card__sub">Analyze the exact BPDB weighted average bulk tariff vs average generation &amp; procurement cost</p>
+                    <p className="grid-explorer-chart-card__sub">Analyze the exact BPDB weighted average bulk tariff vs average generation &amp; procurement cost — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                   </div>
                 </div>
 
@@ -4460,12 +4511,12 @@ export function PowerGridExplorer({
                       Icon: Zap,
                       iconColor: "text-primary",
                       label: "Current Bulk:",
-                      value: `${macroTariffData[macroTariffData.length - 1].tariff.toFixed(2)} Tk/KWh`,
+                      value: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/KWh`,
                       valueColor: "text-primary",
                       tooltipTitle: "BERC Approved",
                       tooltipDesc: "The latest official wholesale bulk tariff set by the Bangladesh Energy Regulatory Commission (BERC) for utility distribution.",
                       highlightLabel: "Official Rate",
-                      highlightValue: `${macroTariffData[macroTariffData.length - 1].tariff.toFixed(2)} Tk/KWh`,
+                      highlightValue: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/KWh`,
                       highlightStyles: "bg-primary/10 text-primary border-primary/20",
                       roundedClasses: "rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none"
                     },
@@ -4473,12 +4524,12 @@ export function PowerGridExplorer({
                       Icon: History,
                       iconColor: "text-orange-500",
                       label: "2010 Baseline:",
-                      value: `${macroTariffData[0].tariff.toFixed(2)} Tk/KWh`,
+                      value: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/KWh`,
                       valueColor: "text-orange-600 dark:text-orange-400",
                       tooltipTitle: "Historical Anchor",
                       tooltipDesc: "The earliest recorded BERC bulk tariff in our dataset, establishing the historical cost baseline from March 2010.",
                       highlightLabel: "Initial Rate",
-                      highlightValue: `${macroTariffData[0].tariff.toFixed(2)} Tk/KWh`,
+                      highlightValue: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/KWh`,
                       highlightStyles: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
                       roundedClasses: ""
                     },
@@ -4491,7 +4542,7 @@ export function PowerGridExplorer({
                       tooltipTitle: "Real Production Cost",
                       tooltipDesc: "BPDB's current blended per-unit generation and procurement cost, factoring in fuel prices and IPP capacity payments.",
                       highlightLabel: "Tariff Deficit",
-                      highlightValue: `${(systemStats.avgProductionCost - macroTariffData[macroTariffData.length - 1].tariff).toFixed(2)} Tk Gap`,
+                      highlightValue: `${(systemStats.avgProductionCost - localMacroTariffData[localMacroTariffData.length - 1].tariff).toFixed(2)} Tk Gap`,
                       highlightStyles: "bg-destructive/10 text-destructive border-destructive/20",
                       roundedClasses: "rounded-b-xl sm:rounded-r-xl sm:rounded-bl-none"
                     }
@@ -4501,6 +4552,7 @@ export function PowerGridExplorer({
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors duration-200 leading-none mt-0.5">
                         {stat.label}
                       </span>
+                      <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2010</div>
                       <span className={`font-bold leading-none mt-0.5 ${stat.valueColor}`}>
                         {stat.value}
                       </span>
@@ -4533,7 +4585,7 @@ export function PowerGridExplorer({
                     { id: 'cost', label: 'BPDB Gen. Cost (Tk/kWh)', color: chartTheme.destructive, variant: 'line' },
                   ]}
                 >
-                  <ComposedChart accessibilityLayer={false} data={macroTariffData} margin={GRID_CHART_MARGIN.legend} barCategoryGap="20%">
+                  <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_CHART_MARGIN.legend} barCategoryGap="20%">
                         <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                         <XAxis
                           dataKey="year"
@@ -4606,7 +4658,7 @@ export function PowerGridExplorer({
 
               {/* Comprehensive Macro-Economic Study */}
               <div className="mt-8">
-                <LongitudinalStudyCharts chartTheme={chartTheme} />
+                <LongitudinalStudyCharts chartTheme={chartTheme} isTruncated={isTruncated} allowedYears={allowedYears} />
               </div>
             </div>
           )}
@@ -4620,7 +4672,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-card__head">
                     <div>
                       <h3 className="grid-explorer-chart-card__title">Wholesale Tariff vs. Unit Production Cost</h3>
-                      <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/KWh)</p>
+                    <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                     </div>
                     <span className="grid-explorer-chip">Bulk Tariff Gap</span>
                   </div>
@@ -4628,7 +4680,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                     {chartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={macroTariffData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                        <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
                           <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v} Tk` })} tick={{ fontSize: 11, fill: chartTheme.axisTick }} />
@@ -4703,7 +4755,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-card__head">
                     <div>
                       <h3 className="grid-explorer-chart-card__title">Gas Supply Transition: Domestic vs. Imported LNG</h3>
-                      <p className="grid-explorer-chart-card__sub">Historical shift towards imported liquefied natural gas (MMCFD)</p>
+                    <p className="grid-explorer-chart-card__sub">Historical shift towards imported liquefied natural gas (MMCFD) — <span className="text-primary font-semibold text-xs">Tracked since 2000</span></p>
                     </div>
                     <span className="grid-explorer-chip">LNG Reliance</span>
                   </div>
@@ -4716,7 +4768,7 @@ export function PowerGridExplorer({
                       { id: 'lng', label: 'Imported LNG', color: '#a855f7', variant: 'area' },
                     ]}
                   >
-                    <ComposedChart accessibilityLayer={false} data={macroGasData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                    <ComposedChart accessibilityLayer={false} data={localMacroGasData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
                           <YAxis
@@ -4837,9 +4889,9 @@ export function PowerGridExplorer({
             <div className="space-y-6 grid-explorer-subpanel">
               {/* Month/Year Selection Control Panel */}
               {(() => {
-                const currentMonthlyData = pgcbMonthlyData.find(d => d.date_key === selectedMonthlyKey) || pgcbMonthlyData[pgcbMonthlyData.length - 1];
-                const availableYears = Array.from(new Set(pgcbMonthlyData.map(d => d.year))).sort((a, b) => b - a);
-                const availableMonths = pgcbMonthlyData.filter(d => d.year === currentMonthlyData?.year);
+                const currentMonthlyData = localPgcbMonthlyData.find(d => d.date_key === selectedMonthlyKey) || localPgcbMonthlyData[localPgcbMonthlyData.length - 1];
+                const availableYears = Array.from(new Set(localPgcbMonthlyData.map(d => d.year))).sort((a, b) => b - a);
+                const availableMonths = localPgcbMonthlyData.filter(d => d.year === currentMonthlyData?.year);
                 
                 const yearOptions = availableYears.map(y => ({ label: String(y), value: String(y) }));
                 const monthOptions = availableMonths.map(d => ({ label: d.month, value: d.month }));
@@ -4870,7 +4922,7 @@ export function PowerGridExplorer({
                             value={String(currentMonthlyData?.year)}
                             onChange={(val) => {
                               const newYear = parseInt(val);
-                              const firstMonth = pgcbMonthlyData.find(d => d.year === newYear);
+                              const firstMonth = localPgcbMonthlyData.find(d => d.year === newYear);
                               if (firstMonth) setSelectedMonthlyKey(firstMonth.date_key);
                             }}
                             options={yearOptions}
@@ -4892,7 +4944,7 @@ export function PowerGridExplorer({
                           <CustomDropdown
                             value={currentMonthlyData?.month}
                             onChange={(val) => {
-                              const targetData = pgcbMonthlyData.find(d => d.year === currentMonthlyData.year && d.month === val);
+                              const targetData = localPgcbMonthlyData.find(d => d.year === currentMonthlyData.year && d.month === val);
                               if (targetData) setSelectedMonthlyKey(targetData.date_key);
                             }}
                             options={monthOptions}
@@ -4917,6 +4969,7 @@ export function PowerGridExplorer({
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Max Peak Generation</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-primary tabular-nums">
                           {currentMonthlyData ? formatNumber(currentMonthlyData.max_evening_peak_gen) : 0} <span className="text-xs font-medium text-muted-foreground">MW</span>
                         </div>
@@ -4925,6 +4978,7 @@ export function PowerGridExplorer({
 
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Estimated Peak Demand</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-foreground tabular-nums">
                           {currentMonthlyData ? formatNumber(currentMonthlyData.max_evening_peak_demand) : 0} <span className="text-xs font-medium text-muted-foreground">MW</span>
                         </div>
@@ -4933,6 +4987,7 @@ export function PowerGridExplorer({
 
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Peak Deficit / Load Shed</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-destructive tabular-nums">
                           {currentMonthlyData && currentMonthlyData.max_evening_peak_demand > currentMonthlyData.max_evening_peak_gen
                             ? formatNumber(Math.round(currentMonthlyData.max_evening_peak_demand - currentMonthlyData.max_evening_peak_gen))
@@ -4944,6 +4999,7 @@ export function PowerGridExplorer({
 
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Total Net Energy</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-amber-500 tabular-nums">
                           {currentMonthlyData ? formatNumber(currentMonthlyData.total_net_generation, 1) : 0}{' '}
                           <span className="text-xs font-medium text-muted-foreground">MKWh<sup className="text-[9px] font-bold ml-0.5">r</sup></span>
@@ -4959,6 +5015,7 @@ export function PowerGridExplorer({
                       <div className="grid-explorer-chart-card card">
                         <div className="mb-4">
                           <h3 className="grid-explorer-chart-card__title">Energy Fuel Mix<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
+                    <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                           <p className="grid-explorer-chart-card__sub text-xs text-muted-foreground mt-0.5 leading-relaxed">
                             Net generation by fuel source in {currentMonthlyData?.month} {currentMonthlyData?.year} (MKWh)
                           </p>
@@ -5097,9 +5154,9 @@ export function PowerGridExplorer({
                       <div className="grid-explorer-chart-card card">
                         <div className="mb-4">
                           <h3 className="grid-explorer-chart-card__title">Regional Maximum Peak Supply<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
-                          <p className="grid-explorer-chart-card__sub">
+                    <p className="grid-explorer-chart-card__sub">
                             Substation peak loads served by grid zone in {currentMonthlyData?.month} {currentMonthlyData?.year} (MW)
-                          </p>
+                           — <span className="text-primary font-semibold text-xs">Tracked since 2014</span></p>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
                           {/* Left Column: Chart */}
@@ -5203,7 +5260,7 @@ export function PowerGridExplorer({
                 <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:pr-4">
                   <div>
                     <h3 className="grid-explorer-chart-card__title">PGCB 13-Year Historical Growth Trends<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
-                    <p className="grid-explorer-chart-card__sub">Grid operational metrics charted monthly from 2013 to 2026 • <span className="text-primary font-semibold">Tracked since January 2013</span></p>
+                    <p className="grid-explorer-chart-card__sub">Grid operational metrics charted monthly from 2013 to 2026 • <span className="text-primary font-semibold text-xs">Tracked since January 2013</span></p>
                   </div>
                   
                   {/* Selector Controls for Chart */}
@@ -5276,7 +5333,7 @@ export function PowerGridExplorer({
                   {chartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       {monthlyTrendMetric === 'peaks' ? (
-                        <ComposedChart accessibilityLayer={false} data={pgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis
                             dataKey="date_key"
@@ -5301,7 +5358,7 @@ export function PowerGridExplorer({
                               const d = payload[0].payload;
                               
                               // YoY calculation
-                              const prevData = pgcbMonthlyData.find(m => m.year === d.year - 1 && m.month === d.month);
+                              const prevData = localPgcbMonthlyData.find(m => m.year === d.year - 1 && m.month === d.month);
                               const genYoY = prevData && prevData.max_evening_peak_gen > 0
                                 ? ((d.max_evening_peak_gen - prevData.max_evening_peak_gen) / prevData.max_evening_peak_gen) * 100
                                 : null;
@@ -5389,7 +5446,7 @@ export function PowerGridExplorer({
                           <Line type="monotone" dataKey="max_evening_peak_gen" name="Maximum Peak Generation" stroke={chartTheme.primary} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
                         </ComposedChart>
                       ) : monthlyTrendMetric === 'energy' ? (
-                        <ComposedChart accessibilityLayer={false} data={pgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis
                             dataKey="date_key"
@@ -5414,7 +5471,7 @@ export function PowerGridExplorer({
                               const d = payload[0].payload;
                               
                               // YoY calculation
-                              const prevData = pgcbMonthlyData.find(m => m.year === d.year - 1 && m.month === d.month);
+                              const prevData = localPgcbMonthlyData.find(m => m.year === d.year - 1 && m.month === d.month);
                               const energyYoY = prevData && prevData.total_net_generation > 0
                                 ? ((d.total_net_generation - prevData.total_net_generation) / prevData.total_net_generation) * 100
                                 : null;
@@ -5495,7 +5552,7 @@ export function PowerGridExplorer({
                               const fuelVal = d.fuelTrendMkwh ?? 0;
                               
                               // YoY calculation
-                              const prevData = pgcbMonthlyData.find(m => m.year === d.year - 1 && m.month === d.month);
+                              const prevData = localPgcbMonthlyData.find(m => m.year === d.year - 1 && m.month === d.month);
                               const prevFuelVal = prevData ? (prevData.generation_by_fuel[selectedFuelTrend] || 0) : 0;
                               const fuelYoY = prevFuelVal > 0
                                 ? ((fuelVal - prevFuelVal) / prevFuelVal) * 100
@@ -5588,7 +5645,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-card__head">
                     <div>
                       <h3 className="grid-explorer-chart-card__title">Macro Pressure Variables (2021 - 2026)</h3>
-                      <p className="grid-explorer-chart-card__sub">Devaluation of BDT/USD vs. National Inflation Rate (CPI %)</p>
+                    <p className="grid-explorer-chart-card__sub">Devaluation of BDT/USD vs. National Inflation Rate (CPI %) — <span className="text-primary font-semibold text-xs">Tracked since 2021</span></p>
                     </div>
                     <span className="grid-explorer-chip">Macro Factors</span>
                   </div>
@@ -5596,7 +5653,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                     {chartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={macroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis dataKey="year" tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} Tk`} />
@@ -5662,7 +5719,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-card__head">
                     <div>
                       <h3 className="grid-explorer-chart-card__title">Global Fuel Commodity Import Costs</h3>
-                      <p className="grid-explorer-chart-card__sub">Spot LNG (USD/MMBtu) vs. Import Coal (USD/Metric Ton)</p>
+                    <p className="grid-explorer-chart-card__sub">Spot LNG (USD/MMBtu) vs. Import Coal (USD/Metric Ton) — <span className="text-primary font-semibold text-xs">Tracked since 2021</span></p>
                     </div>
                     <span className="grid-explorer-chip">Import Costs</span>
                   </div>
@@ -5670,7 +5727,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                     {chartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={macroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis dataKey="year" tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} $/MMBtu`} />
@@ -5738,7 +5795,7 @@ export function PowerGridExplorer({
                   <TrendingUp className="h-5 w-5 text-primary shrink-0" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title">Retail Fuel &amp; Macro Pricing Benchmarks</h3>
-                    <p className="grid-explorer-chart-card__sub">Historical correlation between BDT devaluation and retail petroleum price hikes</p>
+                    <p className="grid-explorer-chart-card__sub">Historical correlation between BDT devaluation and retail petroleum price hikes — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                   </div>
                 </div>
 
@@ -5756,7 +5813,7 @@ export function PowerGridExplorer({
                       </tr>
                     </thead>
                     <tbody>
-                      {macroEconomicData.map((d, idx) => (
+                      {localMacroEconomicData.map((d, idx) => (
                         <tr key={idx}>
                           <td className="font-semibold">{d.year}</td>
                           <td className="text-left tabular-nums">{d.retailDiesel.toFixed(2)} Tk</td>
@@ -5821,14 +5878,14 @@ export function PowerGridExplorer({
                     <div className="grid-explorer-chart-card__head">
                       <div>
                         <h3 className="grid-explorer-chart-card__title">BPDB Annual Cost, Revenue &amp; Subsidy Profile (Crore BDT)</h3>
-                        <p className="grid-explorer-chart-card__sub">Historical audited gap showing rising purchase costs vs treasury transfers</p>
+                    <p className="grid-explorer-chart-card__sub">Historical audited gap showing rising purchase costs vs treasury transfers — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                       </div>
                     </div>
 
                     <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
                       {chartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart accessibilityLayer={false} data={bpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                          <ComposedChart accessibilityLayer={false} data={localBpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                             <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                             <YAxis width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={formatAxisCrore} />
@@ -5905,7 +5962,7 @@ export function PowerGridExplorer({
                           </tr>
                         </thead>
                         <tbody>
-                          {bpdbAuditedFinancials.map((d, idx) => (
+                          {localBpdbAuditedFinancials.map((d, idx) => (
                             <tr key={idx}>
                               <td className="font-semibold">{d.year}</td>
                               <td className="text-left tabular-nums">{formatNumber(d.revenue)}</td>
@@ -5933,14 +5990,14 @@ export function PowerGridExplorer({
                     <div className="grid-explorer-chart-card__head">
                       <div>
                         <h3 className="grid-explorer-chart-card__title">Petrobangla Annual Revenue &amp; LNG Import Costs</h3>
-                        <p className="grid-explorer-chart-card__sub">Audited historical financials illustrating LNG import cost burden (Crore BDT)</p>
+                    <p className="grid-explorer-chart-card__sub">Audited historical financials illustrating LNG import cost burden (Crore BDT) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                       </div>
                     </div>
 
                     <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
                       {chartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart accessibilityLayer={false} data={petrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                          <ComposedChart accessibilityLayer={false} data={localPetrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                             <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                             <YAxis width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={formatAxisCrore} />
@@ -6013,7 +6070,7 @@ export function PowerGridExplorer({
                           </tr>
                         </thead>
                         <tbody>
-                          {petrobanglaAuditedFinancials.map((d, idx) => (
+                          {localPetrobanglaAuditedFinancials.map((d, idx) => (
                             <tr key={idx}>
                               <td className="font-semibold">{d.year}</td>
                               <td className="text-left tabular-nums">{formatNumber(d.revenue)}</td>
@@ -6057,7 +6114,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-card__head">
                     <div>
                       <h3 className="grid-explorer-chart-card__title">Brent Crude vs. Retail Diesel</h3>
-                      <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) since 1975</p>
+                    <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) — <span className="text-primary font-semibold text-xs">Tracked since 1975</span></p>
                     </div>
                     <span className="grid-explorer-chip bg-blue-500/5 text-blue-500 border-blue-500/10">Petroleum</span>
                   </div>
@@ -6065,7 +6122,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
                     {chartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={globalVsDomesticData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Brent Crude ($/bbl)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
@@ -6074,7 +6131,7 @@ export function PowerGridExplorer({
                             content={({ active, payload }) => {
                               if (!active || !payload?.length) return null;
                               const d = payload[0].payload;
-                              const exRate = historicalExchangeRates[d.year] || 122.0;
+                              const exRate = localHistoricalExchangeRates[d.year] || 122.0;
                               // 1 bbl = 158.987 L
                               const brentBdtL = (d.globalOil * exRate) / 158.987;
                               const difference = d.bdDiesel - brentBdtL;
@@ -6142,7 +6199,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-card__head">
                     <div>
                       <h3 className="grid-explorer-chart-card__title">Global LNG Benchmark vs. Gas Tariff</h3>
-                      <p className="grid-explorer-chart-card__sub">Global Gas/LNG (USD/MMBtu) vs. BD Avg Tariff (Tk/CM) since 2010</p>
+                    <p className="grid-explorer-chart-card__sub">Global Gas/LNG (USD/MMBtu) vs. BD Avg Tariff (Tk/CM) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                     </div>
                     <span className="grid-explorer-chip bg-violet-500/5 text-violet-500 border-violet-500/10">Natural Gas</span>
                   </div>
@@ -6150,7 +6207,7 @@ export function PowerGridExplorer({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
                     {chartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={globalVsDomesticData.filter(x => parseInt(x.year) >= 2010)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2010)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                           <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Global LNG ($/MMBtu)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
@@ -6159,7 +6216,7 @@ export function PowerGridExplorer({
                             content={({ active, payload }) => {
                               if (!active || !payload?.length) return null;
                               const d = payload[0].payload;
-                              const exRate = historicalExchangeRates[d.year] || 122.0;
+                              const exRate = localHistoricalExchangeRates[d.year] || 122.0;
                               // 1 MMBtu = 28.3 CM (Cubic Meters)
                               const globalGasBdtCm = (d.globalGas * exRate) / 28.3;
                               const difference = d.bdGas - globalGasBdtCm;
@@ -6228,7 +6285,7 @@ export function PowerGridExplorer({
                 <div className="grid-explorer-chart-card__head">
                   <div>
                     <h3 className="grid-explorer-chart-card__title">Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff</h3>
-                    <p className="grid-explorer-chart-card__sub">Global Average Solar LCOE vs. Domestic Solar Contracts (Tk/KWh) since 2015</p>
+                    <p className="grid-explorer-chart-card__sub">Global Average Solar LCOE vs. Domestic Solar Contracts (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2015</span></p>
                   </div>
                   <span className="grid-explorer-chip bg-teal-500/5 text-teal-500 border-teal-500/10">Solar Energy</span>
                 </div>
@@ -6236,7 +6293,7 @@ export function PowerGridExplorer({
                 <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
                   {chartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart accessibilityLayer={false} data={globalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                      <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                         <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                         <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                         <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
@@ -6244,7 +6301,7 @@ export function PowerGridExplorer({
                           content={({ active, payload }) => {
                             if (!active || !payload?.length) return null;
                             const d = payload[0].payload;
-                            const exRate = historicalExchangeRates[d.year] || 122.0;
+                            const exRate = localHistoricalExchangeRates[d.year] || 122.0;
                             // globalSolar LCOE is in cents/kWh, convert to BDT: cents * exRate / 100
                             const globalSolarBdt = (d.globalSolar * exRate) / 100;
                             const premium = d.bdSolar - globalSolarBdt;
@@ -6458,7 +6515,8 @@ export function PowerGridExplorer({
             </div>
           )}
         </div>
-      )}
+        );
+      })()}
       </div>
 
       {/* Footer / Notes */}
@@ -6511,7 +6569,7 @@ export function PowerGridExplorer({
           </div>
         </div>
       </div>
-      </GridLockedContent>
+      </div>
 
       {tierLockRequired === null && (
         <GridArchiveTeaser

@@ -10,8 +10,8 @@ import type {
 
 
 export const LIVE_WEEK_COUNT = 7;
-export const LIVE_WEEK_MAX = 30;
-export const LIVE_WEEK_PRESETS = [7, 15, 30] as const;
+export const LIVE_WEEK_MAX = 4000;
+export const LIVE_WEEK_PRESETS = [7, 15, 30, 180, 365, 4000] as const;
 export type LiveWeekPreset = (typeof LIVE_WEEK_PRESETS)[number];
 
 let liveWeekCache: PetrobanglaLiveWeekBundle | null = null;

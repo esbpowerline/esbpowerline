@@ -12,6 +12,7 @@ import {
   sliceLiveWeekBundle,
   type LiveWeekPreset,
 } from '@/lib/data/petrobangla/getLiveWeek';
+import { useGridTierAccess } from '@/hooks/useGridTierAccess';
 import { usePetrobanglaBootstrap } from '../PetrobanglaBootstrap';
 import type { AudienceMode } from '@/lib/data/petrobangla/types';
 import {
@@ -49,6 +50,7 @@ export function PetrobanglaLiveWeekPanel({
   underChart = false,
   fillColumn = false,
 }: Props) {
+  const { tier } = useGridTierAccess();
   const { liveWeek: bundle, loading } = usePetrobanglaBootstrap();
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
@@ -129,7 +131,11 @@ export function PetrobanglaLiveWeekPanel({
       )}
 
       <div className="gas-reserve-live-week-range" role="group" aria-label="Live window">
-        {LIVE_WEEK_PRESETS.map((preset) => (
+        {LIVE_WEEK_PRESETS.filter(p => {
+          if (tier === 'visitor') return p <= 7;
+          if (tier === 'member') return p <= 15;
+          return true; // Premium gets all
+        }).map((preset) => (
           <button
             key={preset}
             type="button"
@@ -139,7 +145,7 @@ export function PetrobanglaLiveWeekPanel({
               rangeDays === preset && 'gas-reserve-archive-range__btn--active',
             )}
           >
-            {preset}D
+            {preset === 180 ? '6M' : preset === 365 ? '1Y' : preset === 4000 ? 'All' : `${preset}D`}
           </button>
         ))}
       </div>

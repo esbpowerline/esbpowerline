@@ -252,7 +252,7 @@ export function GasReserveScenarioRail({ activeScenario, onScenarioHover, embedd
               <strong>What changes:</strong> Industrial load, power-sector gas burn, and efficiency assumptions — not the starting reserve audit.
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+          <div className="grid-explorer-card-footer">
             <span>Source: MPEMR multi-scenario audit</span>
             <span>Audited by: MPEMR · CAG Bangladesh</span>
             <span className="font-medium">Forked {FORECAST_START}–2038</span>

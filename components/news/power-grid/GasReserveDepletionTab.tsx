@@ -338,7 +338,7 @@ export function GasReserveDepletionTab({
             Steeper lines mean faster depletion.
           </p>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-5 py-3 border-t border-border/40 text-[10px] text-muted-foreground/80">
+        <div className="grid-explorer-card-footer">
           <span>
             Source:{' '}
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">

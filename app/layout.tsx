@@ -48,11 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Critical theme CSS injected before paint to avoid flash */}
         <style dangerouslySetInnerHTML={{ __html: SITE_THEME_CRITICAL_CSS }} suppressHydrationWarning />
+        {/* Theme + locale hydration — must run before React tree */}
+        <script dangerouslySetInnerHTML={{ __html: SITE_THEME_INIT_SCRIPT }} suppressHydrationWarning />
+        <script dangerouslySetInnerHTML={{ __html: SITE_LOCALE_INIT_SCRIPT }} suppressHydrationWarning />
       </head>
       <body suppressHydrationWarning className={bodyClass}>
-        {/* Theme + locale hydration — must run before React tree */}
-        <script id="theme-init" dangerouslySetInnerHTML={{ __html: SITE_THEME_INIT_SCRIPT }} />
-        <script id="locale-init" dangerouslySetInnerHTML={{ __html: SITE_LOCALE_INIT_SCRIPT }} />
 
 
         <ProvidersShell>

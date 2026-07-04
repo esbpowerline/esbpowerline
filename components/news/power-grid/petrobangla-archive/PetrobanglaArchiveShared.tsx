@@ -89,7 +89,7 @@ export function ArchiveChartFooter({
         </>
       )}
       {!embedded && (
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80">
+        <div className="grid-explorer-card-footer">
           <span>
             Source:{' '}
             <PetrobanglaOfficialSourceLink />

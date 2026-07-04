@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight,
   Zap,
@@ -152,24 +153,24 @@ export function HomePowerSector({
 
                 {/* 3 Proportional Ad Spaces */}
                 {(index === 1 || index === 7) && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className={`bg-muted/30 border border-border/40 rounded-2xl h-[120px] md:h-[160px] flex flex-col items-center justify-center text-muted-foreground/60 overflow-hidden relative group ${i > 1 ? 'hidden md:flex' : ''}`}>
-                        <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:10px_10px]" />
-                        <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Advertisement</span>
-                        <span className="text-sm font-medium">Proportional Ad</span>
-                      </div>
-                    ))}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6" suppressHydrationWarning>
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
+                      <Image src="/images/Ad Banners/001-2.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" />
+                    </Link>
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
+                      <Image src="/images/Ad Banners/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                    </Link>
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
+                      <Image src="/images/Ad Banners/003.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                    </Link>
                   </div>
                 )}
 
                 {/* 1 Large Full-Width Ad Space */}
                 {(index === 4 || index === 10) && (
-                  <div className="bg-muted/30 border border-border/40 rounded-2xl h-[120px] md:h-[160px] flex flex-col items-center justify-center text-muted-foreground/60 overflow-hidden relative group w-full">
-                    <div className="absolute inset-0 -z-10 opacity-30 bg-[linear-gradient(45deg,transparent_25%,rgba(0,0,0,0.05)_50%,transparent_75%)] dark:bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.05)_50%,transparent_75%)] bg-[length:10px_10px]" />
-                    <span className="text-[10px] font-bold tracking-widest uppercase mb-1">Advertisement</span>
-                    <span className="text-sm font-medium">Large Ad Space</span>
-                  </div>
+                  <Link href="/advertising" className="rounded-2xl overflow-hidden relative group w-full block" suppressHydrationWarning>
+                    <Image src="/images/Ad Banners/005.png" alt="Advertisement" width={3126} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                  </Link>
                 )}
               </React.Fragment>
             );

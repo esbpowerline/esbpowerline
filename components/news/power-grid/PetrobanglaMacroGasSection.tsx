@@ -101,7 +101,7 @@ export function PetrobanglaMacroGasSection({
 
         <div className="gas-reserve-evidence__notes">
           <GasExplanationBlock
-            what="Seven-day live window plus full archive from January 2020. Use the date selector above to inspect any gas-day — field output, plant allocation, and sector splits."
+            what={<>Seven-day live window plus full archive from January 2020. Use the date selector above to inspect any gas-day — field output, plant allocation, and sector splits. • <span className="text-primary font-semibold text-xs">Tracked since Jan 2020</span></>}
             insight="Domestic output is declining, LNG is filling the gap, and power plants receive roughly 40% of requested gas — the pattern the reserve depletion curve projects forward."
           />
           <GasSourceFooter

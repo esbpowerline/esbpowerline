@@ -3,6 +3,7 @@
 import { Database, Droplet, Info } from 'lucide-react';
 import type { GasDistributionItem, GasProductionItem } from '@/lib/data/grid/types';
 import { formatNumber } from '@/lib/utils';
+import { GridLockedContent } from './GridLockedContent';
 
 interface GasTabProps {
   selectedDate: string;
@@ -11,6 +12,9 @@ interface GasTabProps {
   gasDistributionData: GasDistributionItem[];
   totalGasSupply: number;
   totalCondensate: number;
+  isLocked?: boolean;
+  requiredTier?: string;
+  onTryDemo?: () => void;
 }
 
 export function GasTab({
@@ -20,6 +24,9 @@ export function GasTab({
   gasDistributionData,
   totalGasSupply,
   totalCondensate,
+  isLocked,
+  requiredTier,
+  onTryDemo,
 }: GasTabProps) {
   if (selectedDate < '2020-01-12') {
     return (
@@ -78,6 +85,13 @@ export function GasTab({
         </div>
 
         <div className="grid-explorer-table-wrap">
+          <GridLockedContent
+            locked={isLocked || false}
+            requiredTier={requiredTier as any}
+            selectedDate={selectedDate}
+            variant="micro"
+            onTryDemo={onTryDemo}
+          >
           <table className="grid-explorer-table">
             <thead>
               <tr>
@@ -107,6 +121,7 @@ export function GasTab({
               </tr>
             </tbody>
           </table>
+          </GridLockedContent>
         </div>
 
         <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
@@ -115,7 +130,7 @@ export function GasTab({
           <p className="leading-relaxed"><strong>Analytical Insight:</strong> Chevron (operating the Bibiyana field) remains the dominant producer of natural gas in Bangladesh, supplying over 50% of domestic gas. The high dependency on a single field and company exposes the entire gas-to-power supply chain to operational vulnerability and highlights the urgency of expanding national exploration or gas import capacity.</p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+        <div className="grid-explorer-card-footer">
           <span>
             Source:{' '}
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
@@ -143,6 +158,13 @@ export function GasTab({
         </div>
 
         <div className="grid-explorer-table-wrap">
+          <GridLockedContent
+            locked={isLocked || false}
+            requiredTier={requiredTier as any}
+            selectedDate={selectedDate}
+            variant="micro"
+            onTryDemo={onTryDemo}
+          >
           <table className="grid-explorer-table">
             <thead>
               <tr>
@@ -172,6 +194,7 @@ export function GasTab({
               </tr>
             </tbody>
           </table>
+          </GridLockedContent>
         </div>
 
         <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
@@ -212,7 +235,7 @@ export function GasTab({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+        <div className="grid-explorer-card-footer">
           <span>
             Source:{' '}
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
