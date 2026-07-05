@@ -5,15 +5,21 @@ import { Database, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   computeArchiveKpis,
+  computeArchiveKpisPreview,
   latestOkDate,
   resolveArchiveGasDay,
 } from '@/lib/data/petrobangla/compute';
-import { loadArchiveDay } from '@/lib/data/petrobangla/loadArchive';
+import {
+  filterTimelineByPreset,
+  type ArchiveRangePreset,
+} from '@/lib/data/petrobangla/archiveRange';
+import { loadArchiveDay, lookupIndexDay } from '@/lib/data/petrobangla/loadArchive';
 import { usePetrobanglaBootstrap } from '../PetrobanglaBootstrap';
-import { ARCHIVE_INSIGHTS, ARCHIVE_START_DATE } from '@/lib/data/petrobangla/constants';
+import { ARCHIVE_INSIGHTS, ARCHIVE_PEAK, ARCHIVE_START_DATE } from '@/lib/data/petrobangla/constants';
 import type { AudienceMode, PetrobanglaDaily } from '@/lib/data/petrobangla/types';
 import {
   ArchiveInsightCallout,
+  ArchiveRangeToolbar,
   ArchiveSyncNotice,
   AudienceModeToggle,
   PetrobanglaOfficialSourceLink,
@@ -27,6 +33,8 @@ import { PetrobanglaArchiveFieldCards } from './PetrobanglaArchiveFieldCards';
 import { PetrobanglaArchivePowerGap } from './PetrobanglaArchivePowerGap';
 import { PetrobanglaArchiveSectorDistribution } from './PetrobanglaArchiveSectorDistribution';
 import { PetrobanglaArchiveCompare } from './PetrobanglaArchiveCompare';
+
+const TIMELINE_VIEWS = new Set<ArchiveStoryView>(['timeline', 'fields', 'power-gap', 'sectors']);
 
 interface PetrobanglaArchivePanelProps {
   /** Grid backlog date (year/month/day selector at top of explorer) */
@@ -47,12 +55,20 @@ export function PetrobanglaArchivePanel({
   unified = false,
   depletionEmbed = false,
 }: PetrobanglaArchivePanelProps) {
-  const { index, timeline, loading, error: bootstrapError } = usePetrobanglaBootstrap();
+  const {
+    index,
+    timeline,
+    archiveLoading,
+    timelineLoading,
+    error: bootstrapError,
+    ensureTimeline,
+  } = usePetrobanglaBootstrap();
   const [selectedDay, setSelectedDay] = useState<PetrobanglaDaily | null>(null);
-  const [dayLoading, setDayLoading] = useState(false);
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
   const [activeView, setActiveView] = useState<ArchiveStoryView>('timeline');
+  const [rangePreset, setRangePreset] = useState<ArchiveRangePreset>('1Y');
+  const [showMa, setShowMa] = useState(false);
   const chartsReady = true;
   const error = bootstrapError;
 
@@ -64,42 +80,65 @@ export function PetrobanglaArchivePanel({
   const latestArchiveDate = index ? latestOkDate(index) : '';
 
   useEffect(() => {
+    if (TIMELINE_VIEWS.has(activeView)) {
+      void ensureTimeline();
+    }
+  }, [activeView, ensureTimeline]);
+
+  useEffect(() => {
+    if (mode === 'analyst') setShowMa(true);
+  }, [mode]);
+
+  useEffect(() => {
+    void loadArchiveDay(selectedDate, { allowPartial: true }).catch(() => {});
+  }, [selectedDate]);
+
+  useEffect(() => {
     const archiveDate = archiveResolution.resolved;
     if (!archiveDate) {
       setSelectedDay(null);
       return;
     }
     let cancelled = false;
-    setDayLoading(true);
+    setSelectedDay(null);
     loadArchiveDay(archiveDate, { allowPartial: mode === 'analyst' })
       .then((d) => {
         if (!cancelled) setSelectedDay(d);
       })
       .catch(() => {
         if (!cancelled) setSelectedDay(null);
-      })
-      .finally(() => {
-        if (!cancelled) setDayLoading(false);
       });
     return () => {
       cancelled = true;
     };
   }, [archiveResolution.resolved, mode]);
 
+  const rangeEnd = archiveResolution.resolved ?? '';
+
+  const chartRangeDays = useMemo(() => {
+    if (!timeline || !rangeEnd) return [];
+    return filterTimelineByPreset(timeline.days, rangePreset, rangeEnd, { decimate: true });
+  }, [timeline, rangePreset, rangeEnd]);
+
+  const fieldRangeDays = useMemo(() => {
+    if (!timeline || !rangeEnd) return [];
+    return filterTimelineByPreset(timeline.days, rangePreset, rangeEnd, { decimate: false, maxPoints: 800 });
+  }, [timeline, rangePreset, rangeEnd]);
+
   const shellClass = unified ? '' : 'grid-explorer-chart-card card p-8';
 
-  if (loading) {
+  if (archiveLoading) {
     return (
       <div className={cn('flex items-center justify-center gap-3 min-h-[120px]', shellClass)}>
         <Loader2 className={cn('animate-spin text-primary', unified ? 'h-5 w-5' : 'h-6 w-6')} />
         <span className="text-sm text-muted-foreground">
-          Loading archive ({ARCHIVE_INSIGHTS.coverageDays.toLocaleString()} days)…
+          Loading field archive index…
         </span>
       </div>
     );
   }
 
-  if (error || !index || !timeline) {
+  if (error || !index) {
     return (
       <div className={cn('text-center text-sm text-muted-foreground', shellClass || 'py-6')}>
         Archive unavailable: {error ?? 'missing data'}
@@ -117,23 +156,23 @@ export function PetrobanglaArchivePanel({
     );
   }
 
-  if (dayLoading || !selectedDay) {
-    return (
-      <div className={cn('flex items-center justify-center gap-3 min-h-[100px]', shellClass)}>
-        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">Loading {archiveResolution.resolved}…</span>
-      </div>
-    );
-  }
-
-  const kpis = computeArchiveKpis(selectedDay, timeline, index);
   const archiveDate = archiveResolution.resolved;
+  const indexDay = lookupIndexDay(archiveDate);
+  const kpis = selectedDay
+    ? computeArchiveKpis(selectedDay)
+    : indexDay
+      ? computeArchiveKpisPreview(indexDay)
+      : null;
+  const kpisPreview = !selectedDay && !!indexDay;
+  const peakAnchor = timeline?.peak ?? ARCHIVE_PEAK;
 
   const anchorLine = (
     <>
-      <strong>Verified anchors:</strong> Peak {timeline.peak ? `${timeline.peak.gas.toFixed(1)} MMCFD (${timeline.peak.date})` : '—'} ·
-      Low {timeline.low ? `${timeline.low.gas.toFixed(1)} MMCFD (${timeline.low.date})` : '—'} ·
-      Jan 2020 {ARCHIVE_INSIGHTS.jan2020Baseline.gas} MMCFD → Jun 2026 {ARCHIVE_INSIGHTS.jun2026Latest.gas} MMCFD ({ARCHIVE_INSIGHTS.nationalDecline.pct}%).
+      <strong>Verified anchors:</strong> Peak {`${peakAnchor.gas.toFixed(1)} MMCFD (${peakAnchor.date})`}
+      {timeline?.low ? (
+        <> · Low {timeline.low.gas.toFixed(1)} MMCFD ({timeline.low.date})</>
+      ) : null}
+      {' '}· Jan 2020 {ARCHIVE_INSIGHTS.jan2020Baseline.gas} MMCFD → Jun 2026 {ARCHIVE_INSIGHTS.jun2026Latest.gas} MMCFD ({ARCHIVE_INSIGHTS.nationalDecline.pct}%).
     </>
   );
 
@@ -144,11 +183,11 @@ export function PetrobanglaArchivePanel({
           gridDate={selectedDate}
           archiveDate={archiveDate}
           exact={archiveResolution.exact}
-          summary={selectedDay.meta.agent_summary}
-          peakGas={timeline.peak?.gas}
-          peakDate={timeline.peak?.date}
-          lowGas={timeline.low?.gas}
-          lowDate={timeline.low?.date}
+          summary={selectedDay?.meta.agent_summary}
+          peakGas={peakAnchor.gas}
+          peakDate={peakAnchor.date}
+          lowGas={timeline?.low?.gas}
+          lowDate={timeline?.low?.date}
           declinePct={ARCHIVE_INSIGHTS.nationalDecline.pct}
         />
       ) : null}
@@ -161,7 +200,7 @@ export function PetrobanglaArchivePanel({
             exact={archiveResolution.exact}
             latestArchiveDate={latestArchiveDate}
           />
-          {selectedDay.meta.agent_summary && (
+          {selectedDay?.meta.agent_summary && (
             <p className="text-[11px] text-muted-foreground italic leading-relaxed">
               {selectedDay.meta.agent_summary}
             </p>
@@ -171,17 +210,33 @@ export function PetrobanglaArchivePanel({
       ) : null}
 
         <div className="gas-reserve-archive-kpi-row">
-          <div className="grid-explorer-kpi-strip relative z-30 !grid-cols-2 md:!grid-cols-3 xl:!grid-cols-6">
-            <PetrobanglaArchiveKpiStrip
-              kpis={kpis}
-              mode={mode}
-              archiveDate={archiveDate}
-              gridDate={selectedDate}
-              exactMatch={archiveResolution.exact}
-              peakGas={timeline.peak?.gas}
-              peakDate={timeline.peak?.date}
-            />
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] md:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Petrobangla Gas Analytics
+            </span>
+            <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-[9px] font-semibold text-muted-foreground border border-border/40 select-none">
+              since 2020
+            </span>
           </div>
+          {kpis ? (
+            <div className="grid-explorer-kpi-strip relative z-30 !grid-cols-2 md:!grid-cols-3 xl:!grid-cols-6">
+              <PetrobanglaArchiveKpiStrip
+                kpis={kpis}
+                mode={mode}
+                archiveDate={archiveDate}
+                gridDate={selectedDate}
+                exactMatch={archiveResolution.exact}
+                peakGas={peakAnchor.gas}
+                peakDate={peakAnchor.date}
+                preview={kpisPreview}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 min-h-[4.5rem] px-2 text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin text-primary shrink-0" />
+              Loading archive index…
+            </div>
+          )}
         </div>
 
         {!unified && (
@@ -196,19 +251,88 @@ export function PetrobanglaArchivePanel({
         <div className="gas-reserve-archive-explorer">
           <GasReserveArchiveViewTabs active={activeView} onChange={setActiveView} />
 
+          {TIMELINE_VIEWS.has(activeView) && (
+            <ArchiveRangeToolbar
+              preset={rangePreset}
+              onPresetChange={setRangePreset}
+              mode={mode}
+              showMaToggle={activeView === 'timeline'}
+              showMa={showMa}
+              onToggleMa={() => setShowMa((v) => !v)}
+              className="mb-3"
+            />
+          )}
+
           <div className="gas-reserve-archive-view-shell">
             <div className="gas-reserve-archive-view-shell__inner">
           {activeView === 'timeline' && (
-            <PetrobanglaArchiveNationalTimeline timeline={timeline} mode={mode} chartsReady={chartsReady} embedded compact={unified} />
+            timeline && !timelineLoading ? (
+              <PetrobanglaArchiveNationalTimeline
+                timeline={timeline}
+                rangeDays={chartRangeDays}
+                preset={rangePreset}
+                chartsReady={chartsReady}
+                showMa={showMa}
+                embedded
+                compact={unified}
+              />
+            ) : (
+              <div className="flex items-center justify-center gap-3 min-h-[16rem] rounded-xl border border-border/40 bg-muted/10">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                <span className="text-sm text-muted-foreground">Loading national timeline…</span>
+              </div>
+            )
           )}
           {activeView === 'fields' && (
-            <PetrobanglaArchiveFieldCards timeline={timeline} latestDay={selectedDay} mode={mode} embedded compact={unified} />
+            timeline && !timelineLoading ? (
+              <PetrobanglaArchiveFieldCards
+                rangeDays={fieldRangeDays}
+                preset={rangePreset}
+                latestDay={selectedDay}
+                mode={mode}
+                embedded
+                compact={unified}
+              />
+            ) : (
+              <div className="flex items-center justify-center gap-3 min-h-[12rem] text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Loading field lifelines…
+              </div>
+            )
           )}
           {activeView === 'power-gap' && (
-            <PetrobanglaArchivePowerGap timeline={timeline} selectedDay={selectedDay} mode={mode} chartsReady={chartsReady} embedded compact={unified} />
+            timeline && !timelineLoading ? (
+              <PetrobanglaArchivePowerGap
+                rangeDays={chartRangeDays}
+                preset={rangePreset}
+                selectedDay={selectedDay}
+                mode={mode}
+                chartsReady={chartsReady}
+                embedded
+                compact={unified}
+              />
+            ) : (
+              <div className="flex items-center justify-center gap-3 min-h-[12rem] text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Loading power gap view…
+              </div>
+            )
           )}
           {activeView === 'sectors' && (
-            <PetrobanglaArchiveSectorDistribution timeline={timeline} chartsReady={chartsReady} embedded compact={unified} />
+            timeline && !timelineLoading ? (
+              <PetrobanglaArchiveSectorDistribution
+                rangeDays={chartRangeDays}
+                preset={rangePreset}
+                chartsReady={chartsReady}
+                embedded
+                compact={unified}
+              />
+            ) : (
+              <div className="flex items-center justify-center gap-3 min-h-[12rem] text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                Loading sector distribution…
+              </div>
+            )
           )}
           {activeView === 'compare' && (
             <PetrobanglaArchiveCompare
