@@ -67,7 +67,7 @@ export function PetrobanglaArchivePanel({
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
   const [activeView, setActiveView] = useState<ArchiveStoryView>('timeline');
-  const [rangePreset, setRangePreset] = useState<ArchiveRangePreset>('1Y');
+  const [rangePreset, setRangePreset] = useState<ArchiveRangePreset>('1W');
   const [showMa, setShowMa] = useState(false);
   const chartsReady = true;
   const error = bootstrapError;
