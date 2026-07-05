@@ -22,8 +22,9 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { filterTimelineDays } from '@/lib/data/petrobangla/compute';
-import type { PetrobanglaTimelineSummary } from '@/lib/data/petrobangla/types';
-import { ArchiveBadge, ArchiveChartFooter } from './PetrobanglaArchiveShared';
+import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
+import type { PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
+import { ArchiveBadge, ArchiveChartFooter, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 
 const SECTOR_COLORS = {
   powerSupply: PB_ARCHIVE_COLORS.domestic,
@@ -118,12 +119,14 @@ function SectorTooltip({
 }
 
 export function PetrobanglaArchiveSectorDistribution({
-  timeline,
+  rangeDays,
+  preset,
   chartsReady,
   embedded = false,
   compact = false,
 }: {
-  timeline: PetrobanglaTimelineSummary;
+  rangeDays: PetrobanglaTimelineDay[];
+  preset: ArchiveRangePreset;
   chartsReady: boolean;
   embedded?: boolean;
   compact?: boolean;
@@ -131,7 +134,7 @@ export function PetrobanglaArchiveSectorDistribution({
   const chartTheme = useChartTheme();
 
   const chartData = useMemo(() => {
-    return filterTimelineDays(timeline.days).map((d) => ({
+    return filterTimelineDays(rangeDays).map((d) => ({
       date: d.date,
       powerSupply: d.power_supply ?? 0,
       powerDemand: d.power_demand ?? 0,
@@ -139,7 +142,7 @@ export function PetrobanglaArchiveSectorDistribution({
       fertDemand: d.fertilizer_demand ?? 0,
       others: d.others_mmcfd ?? 0,
     }));
-  }, [timeline]);
+  }, [rangeDays]);
 
   const wrapperClass = embedded ? 'space-y-4 grid-explorer-gas-subview' : 'grid-explorer-chart-card card';
 
@@ -154,25 +157,27 @@ export function PetrobanglaArchiveSectorDistribution({
         </div>
       )}
 
-      <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
-        {chartsReady ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-              <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-              <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
-              <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
-              <GridRechartsTooltip content={<SectorTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
-              <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
-              <Area type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} />
-              <Area type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} />
-              <Area type="monotone" dataKey="powerSupply" name="Power supply" stackId="s" fill={SECTOR_COLORS.powerSupply} stroke={SECTOR_COLORS.powerSupply} fillOpacity={0.2} />
-              <Line type="monotone" dataKey="powerDemand" name="Power demand" stroke={SECTOR_COLORS.powerDemand} strokeWidth={2} dot={false} strokeDasharray="4 4" />
-            </ComposedChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="grid-explorer-skeleton" />
-        )}
-      </div>
+      <ArchiveRangeLockedOverlay preset={preset} className="mt-4">
+        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg">
+          {chartsReady ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
+                <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
+                <GridRechartsTooltip content={<SectorTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+                <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
+                <Area type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} />
+                <Area type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} />
+                <Area type="monotone" dataKey="powerSupply" name="Power supply" stackId="s" fill={SECTOR_COLORS.powerSupply} stroke={SECTOR_COLORS.powerSupply} fillOpacity={0.2} />
+                <Line type="monotone" dataKey="powerDemand" name="Power demand" stroke={SECTOR_COLORS.powerDemand} strokeWidth={2} dot={false} strokeDasharray="4 4" />
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid-explorer-skeleton" />
+          )}
+        </div>
+      </ArchiveRangeLockedOverlay>
 
       {!compact && (
         <ArchiveChartFooter
