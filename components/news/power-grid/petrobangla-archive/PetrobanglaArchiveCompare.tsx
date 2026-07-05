@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowDown, ArrowRight, ArrowUp, Copy, GitCompare, Info, Search } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { ArrowDown, ArrowRight, ArrowUp, Copy, GitCompare, Info, Search, Calendar } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { ARCHIVE_BASELINE_DATE, ARCHIVE_START_DATE } from '@/lib/data/petrobangla/constants';
 import {
@@ -17,6 +17,7 @@ import type { AudienceMode, PetrobanglaDaily, PetrobanglaIndex } from '@/lib/dat
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
 import { isDateAllowedForTier, type GridAccessTier } from '@/lib/data/grid/grid-tier-access';
 import { GridDataLockedGate } from '@/components/news/power-grid/GridDataLockedGate';
+import { CustomDropdown } from '@/components/news/power-grid/shared';
 import { ArchiveBadge, ArchiveDateGridPicker, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
 
 const COMPARE_MODE_HINT: Record<AudienceMode, string> = {
@@ -50,6 +51,85 @@ function getRequiredTierForDate(date: string, latestDate: string): GridAccessTie
   return 'plan_999';
 }
 
+function resolveMatchingDateForYear(year: string, rightDate: string, okDates: string[]): string {
+  const parts = rightDate.split('-');
+  if (parts.length !== 3) return okDates[0] || '2024-07-02';
+  const [, m, d] = parts;
+
+  const exact = `${year}-${m}-${d}`;
+  if (okDates.includes(exact)) return exact;
+
+  const datesInYear = okDates.filter((date) => date.startsWith(`${year}-`));
+  if (!datesInYear.length) return okDates[0] || '2024-07-02';
+
+  const targetDays = parseInt(m, 10) * 31 + parseInt(d, 10);
+  let closestDate = datesInYear[0];
+  let minDiff = Infinity;
+
+  for (const date of datesInYear) {
+    const [, curM, curD] = date.split('-');
+    const curDays = parseInt(curM, 10) * 31 + parseInt(curD, 10);
+    const diff = Math.abs(curDays - targetDays);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestDate = date;
+    }
+  }
+  return closestDate;
+}
+
+export function ArchiveEarlierYearPicker({
+  label,
+  value,
+  onChange,
+  years,
+  accent = 'default',
+}: {
+  label: string;
+  value: string;
+  onChange: (year: string) => void;
+  years: string[];
+  accent?: 'sky' | 'emerald' | 'default';
+}) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const yearOptions = useMemo(() => years.map((y) => ({ label: y, value: y })), [years]);
+
+  const accentClass =
+    accent === 'sky'
+      ? 'gas-reserve-compare-date-group--sky'
+      : accent === 'emerald'
+        ? 'gas-reserve-compare-date-group--emerald'
+        : '';
+
+  return (
+    <div className={cn('gas-reserve-compare-date-group', accentClass)} ref={dropdownRef}>
+      <span className="gas-reserve-compare-date-group__label">{label}</span>
+      <div className="gas-reserve-compare-date-grid grid-cols-1">
+        <div className="gas-reserve-compare-date-grid__cell relative z-50">
+          <CustomDropdown
+            value={value}
+            onChange={onChange}
+            options={yearOptions}
+            placeholder="Select Year"
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            dropdownRef={dropdownRef}
+            icon={<Calendar className="h-3.5 w-3.5 text-primary shrink-0" />}
+            prefixLabel="Year:"
+            layout="grid"
+            gridColumns={3}
+            menuWidth="14rem"
+            noBackground
+            hideDecorationsOnSelect
+          />
+        </div>
+      </div>
+      <span className="gas-reserve-compare-date-group__hint">Matches month and day of Later Date</span>
+    </div>
+  );
+}
+
 export function PetrobanglaArchiveCompare({
   index,
   latestDate,
@@ -70,7 +150,8 @@ export function PetrobanglaArchiveCompare({
     [gridSelectedDate, index, latestDate],
   );
 
-  const [leftDate, setLeftDate] = useState(COMPARE_FREE_BASELINE_DATE);
+  const [leftYear, setLeftYear] = useState('2024');
+  const [leftDateOverride, setLeftDateOverride] = useState<string | null>(null);
   const [rightDate, setRightDate] = useState(gridResolved);
   const [left, setLeft] = useState<PetrobanglaDaily | null>(null);
   const [right, setRight] = useState<PetrobanglaDaily | null>(null);
@@ -80,17 +161,34 @@ export function PetrobanglaArchiveCompare({
 
   const { tier } = useGridTierAccess();
 
+  const okDates = useMemo(() => {
+    return [...new Set(index.days.filter((d) => d.parse_status === 'ok').map((d) => d.date))].sort();
+  }, [index]);
+
+  const leftDate = useMemo(() => {
+    if (leftDateOverride) return leftDateOverride;
+    return resolveMatchingDateForYear(leftYear, rightDate, okDates);
+  }, [leftDateOverride, leftYear, rightDate, okDates]);
+
   const leftReq = useMemo(() => getRequiredTierForDate(leftDate, latestDate), [leftDate, latestDate]);
   const rightReq = useMemo(() => getRequiredTierForDate(rightDate, latestDate), [rightDate, latestDate]);
   const requiredTier = TIER_RANK[leftReq] > TIER_RANK[rightReq] ? leftReq : rightReq;
   const isLocked = TIER_RANK[tier] < TIER_RANK[requiredTier];
 
-  const okDates = useMemo(() => {
-    return [...new Set(index.days.filter((d) => d.parse_status === 'ok').map((d) => d.date))].sort();
-  }, [index]);
+  const availableYears = useMemo(() => {
+    return Array.from(new Set(okDates.map((d) => d.split('-')[0]))).sort((a, b) => b.localeCompare(a));
+  }, [okDates]);
+
+  const currentLeftYear = useMemo(() => leftDate.split('-')[0], [leftDate]);
+
+  const handleYearChange = useCallback((year: string) => {
+    setLeftYear(year);
+    setLeftDateOverride(null);
+  }, []);
 
   useEffect(() => {
     setRightDate(gridResolved);
+    setLeftDateOverride(null);
   }, [gridResolved]);
 
   useEffect(() => {
@@ -200,12 +298,11 @@ export function PetrobanglaArchiveCompare({
 
       <div className="gas-reserve-compare-toolbar">
         <div className="gas-reserve-compare-toolbar__dates">
-          <ArchiveDateGridPicker
-            label="Earlier date"
-            value={leftDate}
-            onChange={setLeftDate}
-            dates={okDates}
-            hint="Manual archive baseline day"
+          <ArchiveEarlierYearPicker
+            label="Earlier Year"
+            value={currentLeftYear}
+            onChange={handleYearChange}
+            years={availableYears}
             accent="sky"
           />
           <div className="gas-reserve-compare-toolbar__arrow" aria-hidden title="Compare direction">
@@ -228,7 +325,8 @@ export function PetrobanglaArchiveCompare({
               leftDate === COMPARE_FREE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
-              setLeftDate(COMPARE_FREE_BASELINE_DATE);
+              setLeftYear('2024');
+              setLeftDateOverride(null);
               setRightDate(gridResolved);
             }}
           >
@@ -241,7 +339,8 @@ export function PetrobanglaArchiveCompare({
               leftDate === ARCHIVE_START_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
-              setLeftDate(ARCHIVE_START_DATE);
+              setLeftYear('2020');
+              setLeftDateOverride(null);
               setRightDate(gridResolved);
             }}
           >
@@ -254,7 +353,7 @@ export function PetrobanglaArchiveCompare({
               leftDate === ARCHIVE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
-              setLeftDate(ARCHIVE_BASELINE_DATE);
+              setLeftDateOverride(ARCHIVE_BASELINE_DATE);
               setRightDate(gridResolved);
             }}
           >
