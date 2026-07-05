@@ -114,6 +114,10 @@ function SectorTooltip({
           —
         </span>
       </div>
+      <div className="grid-chart-tooltip__foot mt-2 pt-1.5 border-t border-border/20 text-[9px] text-muted-foreground leading-normal space-y-0.5">
+        <div><strong>Calculation:</strong> Share = Sector Supply / Total Supply ({formatNumber(total, 1)} MMCFD).</div>
+        <div>Fulfillment = Supply / Demand (Others is assumed 100% allocation).</div>
+      </div>
     </GridChartTooltipShell>
   );
 }
