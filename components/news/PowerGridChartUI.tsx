@@ -357,25 +357,27 @@ export const GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE: React.CSSProperties = {
 
 export const GRID_RECHARTS_TOOLTIP_PROPS = {
   wrapperStyle: GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE,
-  allowEscapeViewBox: { x: true, y: true },
+  allowEscapeViewBox: { x: false, y: false },
 } as const;
 
 export function GridRechartsTooltip({
   content,
   cursor,
   wrapperStyle,
+  allowEscapeViewBox = { x: false, y: false },
 }: {
   // eslint-disable-next-line
   content: React.ComponentType<any> | React.ReactElement | ((props: any) => React.ReactNode);
   cursor?: object;
   wrapperStyle?: React.CSSProperties;
+  allowEscapeViewBox?: { x: boolean; y: boolean } | boolean;
 }) {
   return (
     <Tooltip
       // Recharts ContentType is narrower than our shared tooltip union
       content={content as React.ComponentProps<typeof Tooltip>['content']}
       wrapperStyle={{ ...GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE, ...wrapperStyle }}
-      allowEscapeViewBox={{ x: true, y: true }}
+      allowEscapeViewBox={allowEscapeViewBox}
       cursor={cursor}
     />
   );
