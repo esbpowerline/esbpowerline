@@ -1,9 +1,19 @@
 'use client';
 
 import { useMemo, useRef, useState, type ReactNode } from 'react';
-import { Activity, Calendar, ChevronDown, FileText, Info } from 'lucide-react';
+import { Activity, Calendar, ChevronDown, FileText, Info, Lock } from 'lucide-react';
 import { CustomDropdown } from '@/components/news/power-grid/shared';
 import { cn } from '@/lib/utils';
+import { GridCardFooter } from '../GridExplorerUI';
+import { GridDataLockedGate } from '@/components/news/power-grid/GridDataLockedGate';
+import { useGridTierAccess } from '@/hooks/useGridTierAccess';
+import {
+  ARCHIVE_RANGE_PRESETS,
+  archivePresetGateLabel,
+  getRequiredTierForArchivePreset,
+  isArchivePresetLockedForTier,
+  type ArchiveRangePreset,
+} from '@/lib/data/petrobangla/archiveRange';
 import type { AudienceMode, PetrobanglaDaily } from '@/lib/data/petrobangla/types';
 import { PETROBANGLA_OFFICIAL_LABEL, PETROBANGLA_OFFICIAL_SITE } from '@/lib/data/petrobangla/constants';
 
@@ -25,9 +35,100 @@ export function PetrobanglaOfficialSourceLink({ className }: { className?: strin
   );
 }
 
-/** Matches live gas tab badge family (sky) — distinct label from emerald Daily */
-export function ArchiveBadge() {
-  return <sup className="text-sky-500 font-extrabold text-[10px] ml-2 select-none">Archive</sup>;
+export { ArchiveBadge } from '../GridExplorerUI';
+
+export function ArchiveRangeToolbar({
+  preset,
+  onPresetChange,
+  mode,
+  showMaToggle = false,
+  showMa = false,
+  onToggleMa,
+  className,
+}: {
+  preset: ArchiveRangePreset;
+  onPresetChange: (p: ArchiveRangePreset) => void;
+  mode: AudienceMode;
+  showMaToggle?: boolean;
+  showMa?: boolean;
+  onToggleMa?: () => void;
+  className?: string;
+}) {
+  const { tier } = useGridTierAccess();
+
+  return (
+    <div className={cn('gas-reserve-archive-view-toolbar', className)}>
+      <div className="min-w-0">
+        <p className="gas-reserve-archive-view-toolbar__title">Timeline range</p>
+        <p className="gas-reserve-archive-view-toolbar__sub">Shared across archive charts · ends on selected gas-day</p>
+      </div>
+      <div className="gas-reserve-archive-view-toolbar__controls">
+        <div className="gas-reserve-archive-range" role="group" aria-label="Timeline range">
+          {ARCHIVE_RANGE_PRESETS.map((p) => {
+            const isLocked = isArchivePresetLockedForTier(p, tier);
+            return (
+              <button
+                key={p}
+                type="button"
+                onClick={() => onPresetChange(p)}
+                className={cn(
+                  'gas-reserve-archive-range__btn inline-flex items-center gap-1',
+                  preset === p && 'gas-reserve-archive-range__btn--active',
+                )}
+              >
+                {p === 'ALL' ? 'All' : p}
+                {isLocked && <Lock className="h-2.5 w-2.5 shrink-0 opacity-70" />}
+              </button>
+            );
+          })}
+        </div>
+        {showMaToggle && mode === 'analyst' && onToggleMa && (
+          <button
+            type="button"
+            onClick={onToggleMa}
+            className={cn(
+              'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle',
+              showMa && 'gas-reserve-archive-range__btn--active',
+            )}
+          >
+            7-day MA
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function ArchiveRangeLockedOverlay({
+  preset,
+  children,
+  className,
+}: {
+  preset: ArchiveRangePreset;
+  children: ReactNode;
+  className?: string;
+}) {
+  const { tier } = useGridTierAccess();
+  const locked = isArchivePresetLockedForTier(preset, tier);
+
+  return (
+    <div className={cn('relative', className)}>
+      <div className={cn('w-full h-full', locked && 'pointer-events-none select-none blur-md brightness-[0.55] saturate-50')}>
+        {children}
+      </div>
+      {locked && (
+        <>
+          <div className="pointer-events-none absolute inset-0 z-[55] bg-background/40 backdrop-blur-[2px]" aria-hidden />
+          <GridDataLockedGate
+            requiredTier={getRequiredTierForArchivePreset(preset)}
+            selectedDate={archivePresetGateLabel(preset)}
+            variant="overlay"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] w-[95%] max-w-md shadow-2xl"
+          />
+        </>
+      )}
+    </div>
+  );
 }
 
 export function AudienceModeToggle({
@@ -89,7 +190,7 @@ export function ArchiveChartFooter({
         </>
       )}
       {!embedded && (
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>
             Source:{' '}
             <PetrobanglaOfficialSourceLink />
@@ -106,7 +207,7 @@ export function ArchiveChartFooter({
               Raw JSON
             </a>
           )}
-        </div>
+        </GridCardFooter>
       )}
       {embedded && day && (
         <div className="flex justify-end pt-1">
@@ -352,8 +453,8 @@ export function ArchiveDateGridPicker({
 
 export function ArchiveInsightCallout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-2 p-3 rounded-xl bg-muted/10 border border-border/40 text-[11px] text-muted-foreground leading-relaxed">
-      <Info className="h-4 w-4 text-sky-500 shrink-0 mt-0.5" />
+    <div className="flex gap-2 text-[11px] text-muted-foreground leading-relaxed px-1">
+      <Info className="h-3.5 w-3.5 text-sky-500 shrink-0 mt-0.5" />
       <div>{children}</div>
     </div>
   );
@@ -387,8 +488,8 @@ export function ArchiveSyncNotice({
         )}
       </span>
       {gridAhead && (
-        <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-          Archive ends {latestArchiveDate}
+        <span className="text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 select-none">
+          · Archive ends {latestArchiveDate}
         </span>
       )}
     </div>

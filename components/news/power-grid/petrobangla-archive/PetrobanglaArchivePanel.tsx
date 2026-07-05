@@ -210,13 +210,13 @@ export function PetrobanglaArchivePanel({
       ) : null}
 
         <div className="gas-reserve-archive-kpi-row">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] md:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-wider">
               Petrobangla Gas Analytics
             </span>
-            <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-[9px] font-semibold text-muted-foreground border border-border/40 select-none">
+            <sup className="text-sky-500 font-extrabold text-[9px] select-none">
               since 2020
-            </span>
+            </sup>
           </div>
           {kpis ? (
             <div className="grid-explorer-kpi-strip relative z-30 !grid-cols-2 md:!grid-cols-3 xl:!grid-cols-6">
@@ -351,7 +351,6 @@ export function PetrobanglaArchivePanel({
         {!unified && (
           <>
             <GasExplanationBlock
-              className="rounded-xl border border-border/30 -mx-0"
               what="Full Petrobangla archive with field-level production, plant intake/offtake, sector allocation, and national timeline since January 2020. Five story views — timeline, field lifelines, power gas gap, sector distribution, and day compare — all keyed to the grid date selector."
               insight={`National gas fell from ${ARCHIVE_INSIGHTS.jan2020Baseline.gas} MMCFD (Jan 2020) to ~${ARCHIVE_INSIGHTS.jun2026Latest.gas} MMCFD (${ARCHIVE_INSIGHTS.jun2026Latest.date}), a ${Math.abs(ARCHIVE_INSIGHTS.nationalDecline.pct)}% decline while LNG share expanded. Power-sector fulfillment collapsed from ${ARCHIVE_INSIGHTS.powerFulfillmentCollapse.from}% to ${ARCHIVE_INSIGHTS.powerFulfillmentCollapse.to}%, signalling structural rationing.`}
             />
