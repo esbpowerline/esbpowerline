@@ -1,7 +1,7 @@
 export const PB_ARCHIVE_COLORS = {
   domestic: '#0ea5e9',
   lng: '#a855f7',
-  shortage: '#ef4444',
+  shortage: '#ffffff',
   fertilizer: '#f59e0b',
   others: '#64748b',
   /** Near-white — stack fills only; use totalLine for chart strokes and legends */

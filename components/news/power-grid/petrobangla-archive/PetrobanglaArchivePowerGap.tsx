@@ -28,7 +28,7 @@ import { ArchiveBadge, ArchiveChartFooter } from './PetrobanglaArchiveShared';
 const POWER_GAP_COLORS = {
   demand: PB_ARCHIVE_COLORS.powerDemand,
   supply: PB_ARCHIVE_COLORS.powerSupply,
-  gap: '#06b6d4',
+  gap: PB_ARCHIVE_COLORS.shortage,
   fulfillment: PB_ARCHIVE_COLORS.lng,
 } as const;
 
