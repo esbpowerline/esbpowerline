@@ -33,6 +33,8 @@ function shiftIsoYear(iso: string, delta: number): string {
   return `${y + delta}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
+const COMPARE_FREE_BASELINE_DATE = '2024-07-02';
+
 const TIER_RANK: Record<GridAccessTier, number> = {
   visitor: 0,
   member: 1,
@@ -41,6 +43,7 @@ const TIER_RANK: Record<GridAccessTier, number> = {
 };
 
 function getRequiredTierForDate(date: string, latestDate: string): GridAccessTier {
+  if (date === COMPARE_FREE_BASELINE_DATE) return 'visitor';
   if (isDateAllowedForTier(date, 'visitor', latestDate)) return 'visitor';
   if (isDateAllowedForTier(date, 'member', latestDate)) return 'member';
   if (isDateAllowedForTier(date, 'plan_499', latestDate)) return 'plan_499';
@@ -67,7 +70,7 @@ export function PetrobanglaArchiveCompare({
     [gridSelectedDate, index, latestDate],
   );
 
-  const [leftDate, setLeftDate] = useState(ARCHIVE_BASELINE_DATE);
+  const [leftDate, setLeftDate] = useState(COMPARE_FREE_BASELINE_DATE);
   const [rightDate, setRightDate] = useState(gridResolved);
   const [left, setLeft] = useState<PetrobanglaDaily | null>(null);
   const [right, setRight] = useState<PetrobanglaDaily | null>(null);
@@ -218,6 +221,19 @@ export function PetrobanglaArchiveCompare({
           />
         </div>
         <div className="gas-reserve-compare-toolbar__presets flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={cn(
+              'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
+              leftDate === COMPARE_FREE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+            )}
+            onClick={() => {
+              setLeftDate(COMPARE_FREE_BASELINE_DATE);
+              setRightDate(gridResolved);
+            }}
+          >
+            Sample (2024 vs grid)
+          </button>
           <button
             type="button"
             className={cn(
