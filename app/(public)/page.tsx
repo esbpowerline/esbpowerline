@@ -134,18 +134,18 @@ export default async function Home() {
               />
             </div>
 
-            <aside className="home-editorial__rail" aria-label="Sidebar">
+             <aside className="home-editorial__rail" aria-label="Sidebar">
               <HomeTrendingSection trending={trending} layout="hero-rail" />
               
               {/* Sidebar Ad Block */}
-              <Link href="/advertising" className="mt-12 sticky top-[11rem] rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+              <Link href="/advertising" className="home-ad-space--sidebar sticky top-[11rem] rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
                 <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover" suppressHydrationWarning />
               </Link>
             </aside>
           </div>
 
           {/* 2-Column Pre-Footer Ad Space */}
-          <div className="mt-12 mb-12 grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
+          <div className="home-ad-space--pre-footer grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
             <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
               <Image src="/images/promotions/006.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
             </Link>
