@@ -7,6 +7,7 @@ import { BrandLogo } from '@/components/shared/BrandLogo';
 import { LoginBrandFooter } from '@/components/auth/LoginBrandFooter';
 import { SiteThemeToggle } from '@/components/shared/SiteThemeToggle';
 import { cn } from '@/lib/utils';
+import { applySiteTheme } from '@/lib/site-theme';
 
 export type LoginAudience = 'staff' | 'member';
 
@@ -24,6 +25,7 @@ export function LoginFrame({
   const isMember = audience === 'member';
 
   useEffect(() => {
+    applySiteTheme('white');
     const { hostname, host, protocol } = window.location;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       const port = host.split(':')[1];

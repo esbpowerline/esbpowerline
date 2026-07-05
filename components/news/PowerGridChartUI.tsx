@@ -377,7 +377,7 @@ export function GridRechartsTooltip({
       // Recharts ContentType is narrower than our shared tooltip union
       content={content as React.ComponentProps<typeof Tooltip>['content']}
       wrapperStyle={{ ...GRID_RECHARTS_TOOLTIP_WRAPPER_STYLE, ...wrapperStyle }}
-      allowEscapeViewBox={allowEscapeViewBox}
+      allowEscapeViewBox={allowEscapeViewBox as any}
       cursor={cursor}
     />
   );

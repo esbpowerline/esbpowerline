@@ -61,9 +61,9 @@ export const SITE_THEME_PAINT: Record<SiteTheme, { background: string; foregroun
 
 /** Blocking head CSS — prevents a flash of wrong background/text before Tailwind hydrates. */
 export const SITE_THEME_CRITICAL_CSS = `
-html,body{background-color:#04070f;color:#f1f5f9;color-scheme:dark}
-html.theme-dark,html.theme-dark body{background-color:#09090b;color:#f4f4f5}
-html.theme-white,html.theme-white body{background-color:#f8fafc;color:#0f172a;color-scheme:light}
+html,body{background-color:#f8fafc;color:#0f172a;color-scheme:light}
+html.theme-midnight,html.theme-midnight body{background-color:#04070f;color:#f1f5f9;color-scheme:dark}
+html.theme-dark,html.theme-dark body{background-color:#09090b;color:#f4f4f5;color-scheme:dark}
 body{min-height:100vh;margin:0}
 `.trim();
 
@@ -85,7 +85,7 @@ function paintDocumentTheme(theme: SiteTheme) {
 }
 
 /** Apply theme classes before React hydrates to avoid a flash of the wrong palette. */
-export const SITE_THEME_INIT_SCRIPT = `(function(){try{var k='${SITE_THEME_STORAGE_KEY}';var t=localStorage.getItem(k);if(!t)t=localStorage.getItem('theme');if(!t)t=localStorage.getItem('admin-theme');var v=['midnight','dark','white'];if(v.indexOf(t)<0)t='midnight';var r=document.documentElement;r.classList.remove('theme-midnight','theme-dark','theme-white','light','dark');r.classList.add('theme-'+t,t==='white'?'light':'dark');r.dataset.siteTheme=t;localStorage.setItem(k,t);document.cookie=k+'='+t+';path=/;max-age=31536000;SameSite=Lax';var p={midnight:['#04070f','#f1f5f9'],dark:['#09090b','#f4f4f5'],white:['#f8fafc','#0f172a']};var c=p[t]||p.midnight;r.style.backgroundColor=c[0];r.style.color=c[1];if(document.body){document.body.style.backgroundColor=c[0];document.body.style.color=c[1];}}catch(e){var r=document.documentElement;r.classList.add('theme-midnight','dark');r.dataset.siteTheme='midnight';r.style.backgroundColor='#04070f';r.style.color='#f1f5f9';}})();`;
+export const SITE_THEME_INIT_SCRIPT = `(function(){try{var k='${SITE_THEME_STORAGE_KEY}';var t=sessionStorage.getItem(k);var v=['midnight','dark','white'];if(v.indexOf(t)<0)t='white';var r=document.documentElement;r.classList.remove('theme-midnight','theme-dark','theme-white','light','dark');r.classList.add('theme-'+t,t==='white'?'light':'dark');r.dataset.siteTheme=t;sessionStorage.setItem(k,t);document.cookie=k+'='+t+';path=/;max-age=31536000;SameSite=Lax';var p={midnight:['#04070f','#f1f5f9'],dark:['#09090b','#f4f4f5'],white:['#f8fafc','#0f172a']};var c=p[t]||p.white;r.style.backgroundColor=c[0];r.style.color=c[1];if(document.body){document.body.style.backgroundColor=c[0];document.body.style.color=c[1];}}catch(e){var r=document.documentElement;r.classList.add('theme-white','light');r.dataset.siteTheme='white';r.style.backgroundColor='#f8fafc';r.style.color='#0f172a';}})();`;
 
 export function applySiteTheme(theme: SiteTheme) {
   if (typeof document === 'undefined') return;
@@ -94,31 +94,16 @@ export function applySiteTheme(theme: SiteTheme) {
   root.classList.add(`theme-${theme}`);
   root.classList.add(theme === 'white' ? 'light' : 'dark');
   root.dataset.siteTheme = theme;
-  localStorage.setItem(SITE_THEME_STORAGE_KEY, theme);
+  sessionStorage.setItem(SITE_THEME_STORAGE_KEY, theme);
   persistThemeCookie(theme);
   paintDocumentTheme(theme);
 }
 
 export function getSavedSiteTheme(): SiteTheme {
-  if (typeof window === 'undefined') return 'midnight';
+  if (typeof window === 'undefined') return 'white';
 
-  const saved = localStorage.getItem(SITE_THEME_STORAGE_KEY);
+  const saved = sessionStorage.getItem(SITE_THEME_STORAGE_KEY);
   if (isSiteTheme(saved)) return saved;
 
-  // Migrate legacy keys (shared "theme" collided with next-themes)
-  const legacyTheme = localStorage.getItem('theme');
-  if (isSiteTheme(legacyTheme)) {
-    localStorage.setItem(SITE_THEME_STORAGE_KEY, legacyTheme);
-    localStorage.removeItem('theme');
-    return legacyTheme;
-  }
-
-  const legacyAdmin = localStorage.getItem('admin-theme');
-  if (isSiteTheme(legacyAdmin)) {
-    localStorage.setItem(SITE_THEME_STORAGE_KEY, legacyAdmin);
-    localStorage.removeItem('admin-theme');
-    return legacyAdmin;
-  }
-
-  return 'midnight';
+  return 'white';
 }

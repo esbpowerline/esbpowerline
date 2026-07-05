@@ -123,15 +123,7 @@ export function MemberLoginScreen() {
     if (success) setSuccess('');
   }
 
-  function selectDemoMember() {
-    setMode('sign-in');
-    setIdentifier(DEMO_MEMBER.identifier);
-    setPassword('');
-    setError('');
-  }
 
-  const DemoIcon = DEMO_MEMBER.icon;
-  const demoActive = mode === 'sign-in' && identifier === DEMO_MEMBER.identifier;
 
   return (
     <>
@@ -410,35 +402,7 @@ export function MemberLoginScreen() {
                 )}
               </p>
 
-              {mode === 'sign-in' && process.env.NODE_ENV !== 'production' && (
-                <div className="login-contributors">
-                  <div className="login-contributors__header">
-                    <p className="login-contributors__title">Demo account</p>
-                    <p className="login-contributors__hint">Tap to fill email (use seed password from .env)</p>
-                  </div>
-                  <ul className="login-contributors__rows">
-                    <li>
-                      <button
-                        type="button"
-                        className={cn(
-                          'login-contributors__row',
-                          demoActive && 'login-contributors__row--active',
-                        )}
-                        onClick={selectDemoMember}
-                      >
-                        <span className="login-contributors__icon" aria-hidden>
-                          <DemoIcon />
-                        </span>
-                        <span className="login-contributors__meta">
-                          <span className="login-contributors__badge">{DEMO_MEMBER.role}</span>
-                          <span className="login-contributors__email">{DEMO_MEMBER.identifier}</span>
-                        </span>
-                        <ArrowRight className="login-contributors__arrow" aria-hidden />
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              )}
+
 
           <p className="login-access__alt text-center text-xs text-muted-foreground">
             Editorial or admin staff?{' '}

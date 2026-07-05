@@ -45,8 +45,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className="theme-midnight dark"
-      data-site-theme="midnight"
+      className="theme-white light"
+      data-site-theme="white"
       data-site-locale="en"
       suppressHydrationWarning
     >

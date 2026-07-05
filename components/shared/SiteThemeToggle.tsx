@@ -30,7 +30,7 @@ const TIP_VISIBLE_MS = 500;
 const TIP_FADE_MS = 500;
 
 export function SiteThemeToggle({ className = '' }: SiteThemeToggleProps) {
-  const [theme, setTheme] = useState<SiteTheme>('midnight');
+  const [theme, setTheme] = useState<SiteTheme>('white');
   const [openTip, setOpenTip] = useState<SiteTheme | null>(null);
   const [closingTip, setClosingTip] = useState<SiteTheme | null>(null);
   const lockedTipRef = useRef<SiteTheme | null>(null);
