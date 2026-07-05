@@ -126,6 +126,14 @@ export default async function Home() {
                 className="home-block home-editorial__interviews"
                 initialInterviews={normalizeInterviews(interviews)}
               />
+
+              {/* Mobile/Tablet Inline Ad block for 004.png */}
+              <div className="block lg:hidden home-ad-space--sidebar mb-8" suppressHydrationWarning>
+                <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+                  <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover" suppressHydrationWarning />
+                </Link>
+              </div>
+
               <HomePowerSector
                 categoriesWithArticles={categoriesWithArticles}
                 coverageSlots={coverageSlots}

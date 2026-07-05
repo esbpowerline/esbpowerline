@@ -94,6 +94,13 @@ export function HomePowerSector({
         />
       </div>
 
+      {/* Mobile Inline Ad block for 007.png */}
+      <div className="block md:hidden mb-12" suppressHydrationWarning>
+        <Link href="/advertising" className="rounded-2xl overflow-hidden relative group w-full block" suppressHydrationWarning>
+          <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+        </Link>
+      </div>
+
       {/* 10 Vertical Categories Section */}
       <div className="space-y-12 border-t border-border/40 pt-12">
         {categoriesWithArticles
