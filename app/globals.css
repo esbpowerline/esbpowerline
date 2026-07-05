@@ -953,7 +953,7 @@ body {
 }
 
 /* Hero band — shared proportions (hero carousel + trending rail) */
-.home-hero-band {
+.home-page {
   --hero-split-inset: clamp(1rem, 1.75vw, 1.5rem);
   --home-hero-band-pad-y: var(--home-gap);
   --hero-meta-h: 1.625rem;
@@ -962,12 +962,15 @@ body {
     var(--hero-meta-h) + var(--hero-title-h) + var(--hero-excerpt-h) + var(--hero-footer-h) +
       (var(--hero-slot-gap) * 3)
   );
+}
+
+.home-hero-band {
   padding-top: 0;
   padding-bottom: 0;
 }
 
 @media (min-width: 768px) {
-  .home-hero-band {
+  .home-page {
     --hero-meta-h: 1.875rem;
     --hero-content-h: calc(
       var(--hero-meta-h) + var(--hero-title-h) + var(--hero-excerpt-h) + var(--hero-footer-h) +
@@ -983,7 +986,7 @@ body {
 }
 
 @media (min-width: 1024px) {
-  .home-hero-band {
+  .home-page {
     --home-hero-band-card-h: calc(var(--hero-content-h) + 2 * var(--home-hero-band-pad-y));
     --snapshot-head-h: 3.375rem;
     --snapshot-foot-h: 2rem;
@@ -1060,7 +1063,7 @@ body {
     min-height: 0;
   }
 
-  .home-hero-band .home-trending-hero-rail {
+  .home-page .home-trending-hero-rail {
     min-height: var(--home-hero-band-card-h);
     height: var(--home-hero-band-card-h);
     max-height: var(--home-hero-band-card-h);
@@ -1089,7 +1092,7 @@ body {
 }
 
 /* Hero band — trending mirrors hero inset + slot rhythm */
-.home-hero-band .home-trending-hero-rail__body {
+.home-page .home-trending-hero-rail__body {
   --trending-stage-queue-gap: 0.25rem;
   flex: 1;
   min-height: 0;
