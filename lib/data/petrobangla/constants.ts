@@ -9,8 +9,8 @@ export const PB_ARCHIVE_COLORS = {
   totalLine: '#94a3b8',
   ma: '#64748b',
   powerDemand: '#ef4444',
-  /** Power supply area — matches grid explorer orange accent */
-  powerSupply: '#f97316',
+  /** Power supply area — emerald green for delivered actual supply */
+  powerSupply: '#10b981',
   national: '#0ea5e9',
 } as const;
 
