@@ -155,7 +155,12 @@ export async function middleware(request: NextRequest) {
         role,
         gridPlan,
       });
-      if (!isDateAllowedForTier(isoDate, tier, latestDate)) {
+
+      const latestYear = parseInt(latestDate.split('-')[0], 10);
+      const targetYear = parseInt(isoDate.split('-')[0], 10);
+      const isTwoYearsPrior = latestYear - targetYear === 2;
+
+      if (!isTwoYearsPrior && !isDateAllowedForTier(isoDate, tier, latestDate)) {
         return denyDailyJson('Subscription required for historical grid data access.');
       }
     }
