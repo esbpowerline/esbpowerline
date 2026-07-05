@@ -170,6 +170,7 @@ export function PetrobanglaArchiveCompare({
             value={leftDate}
             onChange={setLeftDate}
             dates={okDates}
+            hint="Manual archive baseline day"
             accent="sky"
           />
           <div className="gas-reserve-compare-toolbar__arrow" aria-hidden title="Compare direction">
@@ -180,7 +181,7 @@ export function PetrobanglaArchiveCompare({
             value={rightDate}
             onChange={setRightDate}
             dates={okDates}
-            hint="Synced to grid when available"
+            hint="Synced to grid date selector"
             accent="emerald"
           />
         </div>
