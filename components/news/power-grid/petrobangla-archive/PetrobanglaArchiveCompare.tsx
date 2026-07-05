@@ -14,6 +14,9 @@ import {
 } from '@/lib/data/petrobangla/compute';
 import { loadArchiveDay } from '@/lib/data/petrobangla/loadArchive';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaIndex } from '@/lib/data/petrobangla/types';
+import { useGridTierAccess } from '@/hooks/useGridTierAccess';
+import { isDateAllowedForTier, type GridAccessTier } from '@/lib/data/grid/grid-tier-access';
+import { GridDataLockedGate } from '@/components/news/power-grid/GridDataLockedGate';
 import { ArchiveBadge, ArchiveDateGridPicker, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
 
 const COMPARE_MODE_HINT: Record<AudienceMode, string> = {
@@ -28,6 +31,20 @@ function shiftIsoYear(iso: string, delta: number): string {
   if (parts.length !== 3) return iso;
   const [y, m, d] = parts.map(Number);
   return `${y + delta}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
+const TIER_RANK: Record<GridAccessTier, number> = {
+  visitor: 0,
+  member: 1,
+  plan_499: 2,
+  plan_999: 3,
+};
+
+function getRequiredTierForDate(date: string, latestDate: string): GridAccessTier {
+  if (isDateAllowedForTier(date, 'visitor', latestDate)) return 'visitor';
+  if (isDateAllowedForTier(date, 'member', latestDate)) return 'member';
+  if (isDateAllowedForTier(date, 'plan_499', latestDate)) return 'plan_499';
+  return 'plan_999';
 }
 
 export function PetrobanglaArchiveCompare({
@@ -58,6 +75,13 @@ export function PetrobanglaArchiveCompare({
   const [hoveredField, setHoveredField] = useState<string | null>(null);
   const [fieldQuery, setFieldQuery] = useState('');
 
+  const { tier } = useGridTierAccess();
+
+  const leftReq = useMemo(() => getRequiredTierForDate(leftDate, latestDate), [leftDate, latestDate]);
+  const rightReq = useMemo(() => getRequiredTierForDate(rightDate, latestDate), [rightDate, latestDate]);
+  const requiredTier = TIER_RANK[leftReq] > TIER_RANK[rightReq] ? leftReq : rightReq;
+  const isLocked = TIER_RANK[tier] < TIER_RANK[requiredTier];
+
   const okDates = useMemo(() => {
     return [...new Set(index.days.filter((d) => d.parse_status === 'ok').map((d) => d.date))].sort();
   }, [index]);
@@ -68,6 +92,14 @@ export function PetrobanglaArchiveCompare({
 
   useEffect(() => {
     let cancelled = false;
+
+    if (isLocked) {
+      setLeft(null);
+      setRight(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     Promise.all([
       loadArchiveDay(leftDate, { allowPartial: mode === 'analyst' }),
@@ -91,7 +123,7 @@ export function PetrobanglaArchiveCompare({
     return () => {
       cancelled = true;
     };
-  }, [leftDate, rightDate, mode]);
+  }, [leftDate, rightDate, mode, isLocked]);
 
   const copySummary = useCallback(async () => {
     if (!left || !right) return;
@@ -245,75 +277,96 @@ export function PetrobanglaArchiveCompare({
         </div>
       </div>
 
-      {loading && (
-        <div className="flex items-center gap-2 py-6 justify-center">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-xs text-muted-foreground">Reconciling comparative day metrics…</p>
-        </div>
-      )}
+      <div className="relative min-h-[16rem]">
+        {loading && (
+          <div className="flex flex-col items-center justify-center gap-3 py-12">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <p className="text-xs text-muted-foreground">Reconciling comparative day metrics…</p>
+          </div>
+        )}
 
-      {left && right && !loading && (
-        <>
-          <CompareDeltaStrip left={left} right={right} leftDate={leftDate} rightDate={rightDate} mode={mode} />
+        {!loading && isLocked && (
+          <div className="relative w-full py-8 flex items-center justify-center">
+            <div className="absolute inset-0 bg-background/30 backdrop-blur-[2px] z-10 rounded-xl" />
+            <GridDataLockedGate
+              requiredTier={requiredTier}
+              selectedDate={`comparison for ${leftDate} vs ${rightDate}`}
+              variant="overlay"
+              className="z-20 w-[95%] max-w-md shadow-2xl relative"
+            />
+          </div>
+        )}
 
-          {/* Search/Filter Bar */}
-          {mode !== 'simple' && (
-            <div className="relative max-w-sm mb-1 px-1">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search production fields (e.g. Bibiyana, Titas)..."
-                value={fieldQuery}
-                onChange={(e) => setFieldQuery(e.target.value)}
-                className="w-full bg-muted/40 border border-border/40 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-sky-500/50"
+        {!loading && !isLocked && (!left || !right) && (
+          <div className="flex flex-col items-center justify-center py-12 text-sm text-muted-foreground">
+            <Info className="h-5 w-5 mb-2 text-muted-foreground/60" />
+            No comparative data loaded for the selected dates.
+          </div>
+        )}
+
+        {!loading && !isLocked && left && right && (
+          <div className="space-y-4">
+            <CompareDeltaStrip left={left} right={right} leftDate={leftDate} rightDate={rightDate} mode={mode} />
+
+            {/* Search/Filter Bar */}
+            {mode !== 'simple' && (
+              <div className="relative max-w-sm mb-1 px-1 mt-4">
+                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search production fields (e.g. Bibiyana, Titas)..."
+                  value={fieldQuery}
+                  onChange={(e) => setFieldQuery(e.target.value)}
+                  className="w-full bg-muted/40 border border-border/40 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-sky-500/50"
+                />
+              </div>
+            )}
+
+            <div className="gas-reserve-compare-panels mt-4">
+              <ComparePanel
+                day={left}
+                label={leftDate}
+                mode={mode}
+                side="left"
+                hoveredField={hoveredField}
+                setHoveredField={setHoveredField}
+                filter={fieldQuery}
+              />
+              <ComparePanel
+                day={right}
+                label={rightDate}
+                mode={mode}
+                side="right"
+                other={left}
+                hoveredField={hoveredField}
+                setHoveredField={setHoveredField}
+                filter={fieldQuery}
               />
             </div>
-          )}
 
-          <div className="gas-reserve-compare-panels">
-            <ComparePanel
-              day={left}
-              label={leftDate}
-              mode={mode}
-              side="left"
-              hoveredField={hoveredField}
-              setHoveredField={setHoveredField}
-              filter={fieldQuery}
-            />
-            <ComparePanel
-              day={right}
-              label={rightDate}
-              mode={mode}
-              side="right"
-              other={left}
-              hoveredField={hoveredField}
-              setHoveredField={setHoveredField}
-              filter={fieldQuery}
-            />
-          </div>
-
-          <div className="gas-reserve-compare-movers">
-            <h4 className="gas-reserve-compare-movers__title">Top field movers</h4>
-            <div className="gas-reserve-compare-movers__chips">
-              {topMovers.map((m) => (
-                <span
-                  key={m.field}
-                  className={cn(
-                    'gas-reserve-compare-movers__chip cursor-pointer select-none hover:brightness-95',
-                    m.delta >= 0 ? 'gas-reserve-compare-movers__chip--up' : 'gas-reserve-compare-movers__chip--down',
-                    hoveredField === m.field && 'ring-2 ring-sky-500/50 scale-[1.02]',
-                  )}
-                  onMouseEnter={() => setHoveredField(m.field)}
-                  onMouseLeave={() => setHoveredField(null)}
-                >
-                  {m.field}: {m.delta >= 0 ? '+' : ''}
-                  {formatNumber(m.delta, 1)} MMCFD
-                </span>
-              ))}
+            <div className="gas-reserve-compare-movers mt-4">
+              <h4 className="gas-reserve-compare-movers__title">Top field movers</h4>
+              <div className="gas-reserve-compare-movers__chips">
+                {topMovers.map((m) => (
+                  <span
+                    key={m.field}
+                    className={cn(
+                      'gas-reserve-compare-movers__chip cursor-pointer select-none hover:brightness-95',
+                      m.delta >= 0 ? 'gas-reserve-compare-movers__chip--up' : 'gas-reserve-compare-movers__chip--down',
+                      hoveredField === m.field && 'ring-2 ring-sky-500/50 scale-[1.02]',
+                    )}
+                    onMouseEnter={() => setHoveredField(m.field)}
+                    onMouseLeave={() => setHoveredField(null)}
+                  >
+                    {m.field}: {m.delta >= 0 ? '+' : ''}
+                    {formatNumber(m.delta, 1)} MMCFD
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

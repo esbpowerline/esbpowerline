@@ -5432,13 +5432,21 @@ html.theme-dark .locale-toggle__btn--active:hover {
 
 /* Power / data explorer polish */
 .explorer-tab {
-  @apply flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-2xl transition-all border border-transparent shrink-0;
+  @apply flex items-center gap-2 px-4 py-2.5 min-h-11 text-sm font-medium rounded-2xl border border-transparent shrink-0;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 .explorer-tab.active {
   @apply bg-primary/10 text-primary border-primary/20 shadow-sm;
 }
 .explorer-tab:not(.active):hover {
   @apply bg-muted text-foreground;
+}
+.explorer-tab:focus-visible {
+  @apply outline-none ring-2 ring-primary/45 ring-offset-2 ring-offset-background;
+}
+.explorer-tab svg {
+  @apply shrink-0;
+  transform: translateY(0.5px);
 }
 
 /* ── Power Grid Explorer ── */
@@ -5666,6 +5674,28 @@ html.theme-dark .locale-toggle__btn--active:hover {
   .grid-glow-blob-2,
   .grid-glow-blob-3 {
     animation: none !important;
+  }
+
+  .grid-explorer-kpi:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .grid-explorer-skeleton,
+  .grid-explorer-chart-skeleton__bar,
+  .grid-explorer-chart-skeleton__tick,
+  .grid-explorer-table-skeleton {
+    animation: none !important;
+    opacity: 0.65;
+  }
+
+  .grid-explorer-loading-overlay *,
+  .grid-chart-tooltip {
+    animation: none !important;
+  }
+
+  .grid-explorer-filter-panel__toggle svg {
+    transition: none;
   }
 }
 
@@ -6396,11 +6426,11 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 .gas-reserve-compare-toolbar__dates {
-  @apply grid gap-3 sm:gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-center;
+  @apply grid gap-3 sm:gap-4 sm:grid-cols-[1fr_auto_1fr] sm:items-start;
 }
 
 .gas-reserve-compare-toolbar__arrow {
-  @apply hidden sm:flex items-center justify-center self-center;
+  @apply hidden sm:flex items-center justify-center mt-[1.35rem];
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 999px;
@@ -6824,7 +6854,139 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 .grid-explorer-skeleton {
-  @apply h-full rounded-xl bg-muted/25 animate-pulse;
+  @apply h-full min-h-[12rem] rounded-xl bg-muted/25 animate-pulse;
+}
+
+.grid-explorer-chart-skeleton {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  min-height: 21.5rem;
+  padding: 0.75rem 0.5rem 0.25rem;
+}
+
+.grid-explorer-chart-skeleton__plot {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 0 0.5rem 0 2.5rem;
+  border-left: 1px solid hsl(var(--border) / 0.45);
+  border-bottom: 1px solid hsl(var(--border) / 0.45);
+  min-height: 16rem;
+}
+
+.grid-explorer-chart-skeleton__bar {
+  flex: 1;
+  border-radius: 0.25rem 0.25rem 0 0;
+  background: hsl(var(--muted) / 0.35);
+  animation: grid-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.grid-explorer-chart-skeleton__bar:nth-child(odd) {
+  height: 42%;
+}
+
+.grid-explorer-chart-skeleton__bar:nth-child(even) {
+  height: 68%;
+  animation-delay: 120ms;
+}
+
+.grid-explorer-chart-skeleton__bar:nth-child(3n) {
+  height: 55%;
+  animation-delay: 240ms;
+}
+
+.grid-explorer-chart-skeleton__x-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.5rem 0 2.5rem;
+}
+
+.grid-explorer-chart-skeleton__tick {
+  height: 0.5rem;
+  width: 2rem;
+  border-radius: 0.25rem;
+  background: hsl(var(--muted) / 0.3);
+  animation: grid-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes grid-skeleton-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+}
+
+.grid-explorer-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 21.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.grid-explorer-chart-empty__title {
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.85);
+}
+
+.grid-explorer-control {
+  @apply min-h-11 rounded-xl border border-border/40 text-sm font-semibold;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.grid-explorer-control:focus-visible {
+  @apply outline-none ring-2 ring-primary/45 ring-offset-2 ring-offset-background border-primary/40;
+}
+
+.grid-explorer-loading-overlay {
+  transition: opacity 200ms ease;
+}
+
+.grid-explorer-filter-panel__toggle {
+  @apply sm:hidden w-full min-h-11 flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl border border-border/50 bg-muted/15 text-sm font-semibold text-foreground;
+}
+
+.grid-explorer-filter-panel__body {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+@media (min-width: 640px) {
+  .grid-explorer-filter-panel__body {
+    display: grid !important;
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .grid-explorer-filter-panel:not(.is-open) .grid-explorer-filter-panel__body {
+    display: none;
+  }
+
+  .grid-explorer-table-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.75rem;
+    background: hsl(var(--muted) / 0.2);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .grid-explorer-datatable .grid-explorer-table-wrap {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
 }
 
 .grid-explorer-chart-area {
@@ -7223,6 +7385,46 @@ button.grid-explorer-link {
   @apply overflow-auto -mx-1 px-1;
 }
 
+.grid-explorer-datatable {
+  @apply w-full;
+}
+
+.grid-explorer-table-wrap--sticky-head thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: hsl(var(--card));
+  box-shadow: 0 1px 0 hsl(var(--border) / 0.7);
+}
+
+.grid-explorer-table-wrap--sticky-col tbody td:first-child,
+.grid-explorer-table-wrap--sticky-col thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: hsl(var(--card));
+}
+
+.grid-explorer-table-wrap--sticky-col thead th:first-child {
+  z-index: 3;
+}
+
+.grid-explorer-table-wrap--compact .grid-explorer-table th {
+  @apply py-1.5 pr-3;
+}
+
+.grid-explorer-table-wrap--compact .grid-explorer-table td {
+  @apply py-2 pr-3;
+}
+
+.grid-explorer-table-skeleton {
+  @apply bg-muted/40 animate-pulse;
+}
+
+.grid-explorer-table-empty {
+  @apply flex min-h-[12rem] items-center justify-center px-6 py-12 text-center text-sm text-muted-foreground;
+}
+
 .grid-explorer-table {
   @apply w-full text-sm;
 }
@@ -7249,6 +7451,20 @@ button.grid-explorer-link {
 
 .grid-explorer-table td {
   @apply py-3.5 pr-4 align-middle;
+}
+
+.grid-explorer-table .grid-explorer-table__truncate {
+  display: block;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .grid-explorer-table .grid-explorer-table__truncate {
+    max-width: 10rem;
+  }
 }
 
 .grid-explorer-table__line {
