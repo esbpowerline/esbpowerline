@@ -337,8 +337,8 @@ export function HomeSnapshotPanel({
       </div>
 
       {sourcesText && (
-        <div className="flex-shrink-0 relative z-10">
-          <div className="flex flex-col items-end w-full gap-0.5 text-[8px] md:text-[10px] text-muted-foreground font-mono font-medium italic opacity-75 text-right">
+        <div className="flex-shrink-0 pt-3 border-t border-border/10 dark:border-border/20 mt-2 relative z-10">
+          <div className="flex flex-col items-end w-full gap-0.5 text-[9px] xs:text-[10px] md:text-[11px] text-muted-foreground font-mono font-medium italic opacity-75 text-right">
             <div className="flex items-center justify-end gap-1 w-full whitespace-nowrap">
               <span className="font-semibold text-foreground/50 tracking-wider not-italic">{locale === 'bn' ? 'তথ্য সূত্র:' : 'DATA:'}</span>
               <span>{sourcesText}</span>
