@@ -213,8 +213,8 @@ export function stressedPlants(day: PetrobanglaDaily) {
     demand: number;
     supply: number;
   }> = [];
-  for (const co of day.distribution.companies) {
-    for (const p of co.power_plants) {
+  for (const co of day.distribution?.companies ?? []) {
+    for (const p of co.power_plants ?? []) {
       const demand = p.demand_mmcfd ?? 0;
       const supply = p.supply_mmcfd ?? 0;
       if (supply === 0 || (demand > 0 && supply < demand * 0.5)) {
