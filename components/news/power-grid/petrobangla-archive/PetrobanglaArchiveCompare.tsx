@@ -1,25 +1,34 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowRight, Copy, GitCompare } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUp, Copy, GitCompare, Info, Search } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { ARCHIVE_BASELINE_DATE, ARCHIVE_START_DATE } from '@/lib/data/petrobangla/constants';
 import {
   computeArchiveKpis,
+  getDomesticGas,
+  getFieldGas,
   getRpgclGas,
   powerFulfillmentPct,
   resolveArchiveGasDay,
 } from '@/lib/data/petrobangla/compute';
-import { loadArchiveDay, loadArchiveTimeline } from '@/lib/data/petrobangla/loadArchive';
+import { loadArchiveDay } from '@/lib/data/petrobangla/loadArchive';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaIndex } from '@/lib/data/petrobangla/types';
 import { ArchiveBadge, ArchiveDateGridPicker, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
 
 const COMPARE_MODE_HINT: Record<AudienceMode, string> = {
-  simple: 'Side-by-side gas-day snapshot — national total, power fulfillment, and top fields.',
-  analyst: 'Full field tables unlocked. Use presets to benchmark against Jan 2020 or the verified baseline.',
-  investor: 'Watch power fulfillment and LNG share deltas — these drive fuel-cost and dispatch risk.',
-  researcher: 'Validation flags and raw JSON links available. Copy summary exports a markdown table.',
+  simple: 'Interactive side-by-side gas comparison — national total, power fulfillment, and top fields. Hover a row to sync highlight.',
+  analyst: 'Full analyst mode: hover fields to compare inline deltas, filter by field name, and use YoY or DoD presets.',
+  investor: 'Risk dashboard: watch power fulfillment, LNG import share, andBibiyana concentration shift over time.',
+  researcher: 'Validation reconciliation status, copy-to-markdown exports, and raw telemetry field delta tracking.',
 };
+
+function shiftIsoYear(iso: string, delta: number): string {
+  const parts = iso.split('-');
+  if (parts.length !== 3) return iso;
+  const [y, m, d] = parts.map(Number);
+  return `${y + delta}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
 
 export function PetrobanglaArchiveCompare({
   index,
@@ -46,8 +55,12 @@ export function PetrobanglaArchiveCompare({
   const [left, setLeft] = useState<PetrobanglaDaily | null>(null);
   const [right, setRight] = useState<PetrobanglaDaily | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hoveredField, setHoveredField] = useState<string | null>(null);
+  const [fieldQuery, setFieldQuery] = useState('');
 
-  const okDates = [...new Set(index.days.filter((d) => d.parse_status === 'ok').map((d) => d.date))].sort();
+  const okDates = useMemo(() => {
+    return [...new Set(index.days.filter((d) => d.parse_status === 'ok').map((d) => d.date))].sort();
+  }, [index]);
 
   useEffect(() => {
     setRightDate(gridResolved);
@@ -82,9 +95,8 @@ export function PetrobanglaArchiveCompare({
 
   const copySummary = useCallback(async () => {
     if (!left || !right) return;
-    const timeline = await loadArchiveTimeline();
-    const lk = computeArchiveKpis(left, timeline, index);
-    const rk = computeArchiveKpis(right, timeline, index);
+    const lk = computeArchiveKpis(left);
+    const rk = computeArchiveKpis(right);
     const md = [
       `# Petrobangla Archive Comparison`,
       ``,
@@ -94,14 +106,25 @@ export function PetrobanglaArchiveCompare({
       `| Power fulfillment | ${lk.powerFulfillmentPct.toFixed(1)}% | ${rk.powerFulfillmentPct.toFixed(1)}% | ${(rk.powerFulfillmentPct - lk.powerFulfillmentPct).toFixed(1)}pp |`,
       `| LNG share | ${lk.lngSharePct.toFixed(1)}% | ${rk.lngSharePct.toFixed(1)}% | ${(rk.lngSharePct - lk.lngSharePct).toFixed(1)}pp |`,
       `| Bibiyana (MMCFD) | ${lk.bibiyanaGas.toFixed(1)} | ${rk.bibiyanaGas.toFixed(1)} | ${(rk.bibiyanaGas - lk.bibiyanaGas).toFixed(1)} |`,
+      `| Active wells | ${lk.activeWells} | ${rk.activeWells} | ${rk.activeWells - lk.activeWells} |`,
       ``,
       `Sources: /data/petrobangla/daily/${leftDate}.json · /data/petrobangla/daily/${rightDate}.json`,
     ].join('\n');
     await navigator.clipboard.writeText(md);
-  }, [left, right, leftDate, rightDate, index]);
+  }, [left, right, leftDate, rightDate]);
 
   const topMovers = left && right ? fieldMovers(left, right) : [];
   const wrapperClass = embedded ? 'grid-explorer-gas-subview' : 'grid-explorer-chart-card card';
+
+  // YoY calculation
+  const yoyDate = useMemo(() => shiftIsoYear(rightDate, -1), [rightDate]);
+  const hasYoy = useMemo(() => okDates.includes(yoyDate), [okDates, yoyDate]);
+
+  // DoD calculation
+  const prevDate = useMemo(() => {
+    const rightIndex = okDates.indexOf(rightDate);
+    return rightIndex > 0 ? okDates[rightIndex - 1] : null;
+  }, [okDates, rightDate]);
 
   return (
     <div className={cn(wrapperClass, 'space-y-4')}>
@@ -161,11 +184,11 @@ export function PetrobanglaArchiveCompare({
             accent="emerald"
           />
         </div>
-        <div className="gas-reserve-compare-toolbar__presets">
+        <div className="gas-reserve-compare-toolbar__presets flex flex-wrap gap-2">
           <button
             type="button"
             className={cn(
-              'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto',
+              'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
               leftDate === ARCHIVE_START_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
@@ -178,7 +201,7 @@ export function PetrobanglaArchiveCompare({
           <button
             type="button"
             className={cn(
-              'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto',
+              'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
               leftDate === ARCHIVE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
@@ -188,20 +211,84 @@ export function PetrobanglaArchiveCompare({
           >
             Baseline vs grid
           </button>
+          {hasYoy && (
+            <button
+              type="button"
+              className={cn(
+                'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
+                leftDate === yoyDate && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+              )}
+              onClick={() => {
+                setLeftDate(yoyDate);
+                setRightDate(gridResolved);
+              }}
+            >
+              YoY (1 Year Ago)
+            </button>
+          )}
+          {prevDate && (
+            <button
+              type="button"
+              className={cn(
+                'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
+                leftDate === prevDate && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+              )}
+              onClick={() => {
+                setLeftDate(prevDate);
+                setRightDate(gridResolved);
+              }}
+            >
+              DoD (Prev Day)
+            </button>
+          )}
         </div>
       </div>
 
       {loading && (
-        <p className="text-[11px] text-muted-foreground px-1">Loading archive days…</p>
+        <div className="flex items-center gap-2 py-6 justify-center">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-xs text-muted-foreground">Reconciling comparative day metrics…</p>
+        </div>
       )}
 
       {left && right && !loading && (
         <>
           <CompareDeltaStrip left={left} right={right} leftDate={leftDate} rightDate={rightDate} mode={mode} />
 
+          {/* Search/Filter Bar */}
+          {mode !== 'simple' && (
+            <div className="relative max-w-sm mb-1 px-1">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search production fields (e.g. Bibiyana, Titas)..."
+                value={fieldQuery}
+                onChange={(e) => setFieldQuery(e.target.value)}
+                className="w-full bg-muted/40 border border-border/40 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-sky-500/50"
+              />
+            </div>
+          )}
+
           <div className="gas-reserve-compare-panels">
-            <ComparePanel day={left} label={leftDate} mode={mode} side="left" />
-            <ComparePanel day={right} label={rightDate} mode={mode} side="right" other={left} />
+            <ComparePanel
+              day={left}
+              label={leftDate}
+              mode={mode}
+              side="left"
+              hoveredField={hoveredField}
+              setHoveredField={setHoveredField}
+              filter={fieldQuery}
+            />
+            <ComparePanel
+              day={right}
+              label={rightDate}
+              mode={mode}
+              side="right"
+              other={left}
+              hoveredField={hoveredField}
+              setHoveredField={setHoveredField}
+              filter={fieldQuery}
+            />
           </div>
 
           <div className="gas-reserve-compare-movers">
@@ -211,9 +298,12 @@ export function PetrobanglaArchiveCompare({
                 <span
                   key={m.field}
                   className={cn(
-                    'gas-reserve-compare-movers__chip',
+                    'gas-reserve-compare-movers__chip cursor-pointer select-none hover:brightness-95',
                     m.delta >= 0 ? 'gas-reserve-compare-movers__chip--up' : 'gas-reserve-compare-movers__chip--down',
+                    hoveredField === m.field && 'ring-2 ring-sky-500/50 scale-[1.02]',
                   )}
+                  onMouseEnter={() => setHoveredField(m.field)}
+                  onMouseLeave={() => setHoveredField(null)}
                 >
                   {m.field}: {m.delta >= 0 ? '+' : ''}
                   {formatNumber(m.delta, 1)} MMCFD
@@ -249,6 +339,11 @@ function CompareDeltaStrip({
   const lngShareL = gasL > 0 ? (lngL / gasL) * 100 : 0;
   const lngShareR = gasR > 0 ? (lngR / gasR) * 100 : 0;
 
+  const bibL = getFieldGas(left.production.fields, 'Bibiyana');
+  const bibR = getFieldGas(right.production.fields, 'Bibiyana');
+  const wellsL = left.production.grand_total.producing_wells || 0;
+  const wellsR = right.production.grand_total.producing_wells || 0;
+
   const items = [
     {
       label: 'National gas',
@@ -263,12 +358,26 @@ function CompareDeltaStrip({
       fmt: (v: number) => v.toFixed(1),
     },
     ...(mode !== 'simple'
-      ? [{
-          label: 'LNG share',
-          delta: lngShareR - lngShareL,
-          unit: 'pp',
-          fmt: (v: number) => v.toFixed(1),
-        }]
+      ? [
+          {
+            label: 'LNG share',
+            delta: lngShareR - lngShareL,
+            unit: 'pp',
+            fmt: (v: number) => v.toFixed(1),
+          },
+          {
+            label: 'Bibiyana output',
+            delta: bibR - bibL,
+            unit: 'MMCFD',
+            fmt: (v: number) => formatNumber(v, 1),
+          },
+          {
+            label: 'Active wells',
+            delta: wellsR - wellsL,
+            unit: 'wells',
+            fmt: (v: number) => (v >= 0 ? `+${v}` : v.toString()),
+          },
+        ]
       : []),
   ];
 
@@ -277,16 +386,17 @@ function CompareDeltaStrip({
       <p className="gas-reserve-compare-delta-strip__title">
         {leftDate} → {rightDate}
       </p>
-      <div className="gas-reserve-compare-delta-strip__grid">
+      <div className="gas-reserve-compare-delta-strip__grid grid-cols-2 md:grid-cols-5 gap-3">
         {items.map((item) => (
-          <div key={item.label} className="gas-reserve-compare-delta-strip__item">
-            <span className="gas-reserve-compare-delta-strip__label">{item.label}</span>
+          <div key={item.label} className="gas-reserve-compare-delta-strip__item flex flex-col p-2 bg-muted/20 border border-border/30 rounded-xl">
+            <span className="gas-reserve-compare-delta-strip__label text-[10px] text-muted-foreground uppercase font-semibold">{item.label}</span>
             <span
               className={cn(
-                'gas-reserve-compare-delta-strip__value',
+                'gas-reserve-compare-delta-strip__value text-sm font-bold flex items-center gap-1 mt-0.5',
                 item.delta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500',
               )}
             >
+              {item.delta >= 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
               {item.delta >= 0 ? '+' : ''}{item.fmt(item.delta)} {item.unit}
             </span>
           </div>
@@ -302,12 +412,18 @@ function ComparePanel({
   mode,
   side,
   other,
+  hoveredField,
+  setHoveredField,
+  filter,
 }: {
   day: PetrobanglaDaily;
   label: string;
   mode: AudienceMode;
   side: 'left' | 'right';
   other?: PetrobanglaDaily;
+  hoveredField: string | null;
+  setHoveredField: (f: string | null) => void;
+  filter: string;
 }) {
   const fulfillment = powerFulfillmentPct(day);
   const lng = getRpgclGas(day.production.fields);
@@ -317,66 +433,122 @@ function ComparePanel({
   const deltaGas =
     other != null ? total - other.production.grand_total.gas_mmcfd : null;
 
+  // Filter fields
+  const filteredFields = useMemo(() => {
+    const fields = day.production.fields;
+    if (!filter) return fields.slice(0, mode === 'simple' ? 8 : 99);
+    const q = filter.toLowerCase();
+    return fields.filter(
+      (f) => f.field.toLowerCase().includes(q) || f.company_code.toLowerCase().includes(q),
+    );
+  }, [day, filter, mode]);
+
+  // Map to other fields for inline delta calculation
+  const otherMap = useMemo(() => {
+    if (!other) return null;
+    return new Map(other.production.fields.map((f) => [f.field, f.gas_mmcfd]));
+  }, [other]);
+
   return (
     <div
       className={cn(
-        'gas-reserve-compare-panel',
+        'gas-reserve-compare-panel border border-border/30 rounded-2xl p-4 bg-muted/5',
         side === 'left' ? 'gas-reserve-compare-panel--left' : 'gas-reserve-compare-panel--right',
       )}
     >
-      <div className="gas-reserve-compare-panel__head">
-        <span className="gas-reserve-compare-panel__date">{label}</span>
+      <div className="gas-reserve-compare-panel__head flex items-center justify-between pb-3 border-b border-border/30">
+        <span className="gas-reserve-compare-panel__date font-bold text-foreground text-sm">{label}</span>
         {deltaGas != null && (
           <span
             className={cn(
-              'gas-reserve-compare-panel__delta',
-              deltaGas >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500',
+              'gas-reserve-compare-panel__delta text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 select-none',
+              deltaGas >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 text-red-500',
             )}
           >
+            {deltaGas >= 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
             {deltaGas >= 0 ? '+' : ''}
             {formatNumber(deltaGas, 1)} MMCFD
           </span>
         )}
       </div>
 
-      <div className="gas-reserve-compare-panel__stats">
-        <div className="gas-reserve-compare-panel__stat">
-          <span className="gas-reserve-compare-panel__stat-label">National gas</span>
-          <span className="gas-reserve-compare-panel__stat-value">{formatNumber(total, 1)}</span>
+      <div className="gas-reserve-compare-panel__stats grid grid-cols-3 gap-2 my-4">
+        <div className="gas-reserve-compare-panel__stat flex flex-col p-2 bg-background border border-border/40 rounded-xl">
+          <span className="gas-reserve-compare-panel__stat-label text-[9px] text-muted-foreground uppercase font-semibold">National gas</span>
+          <span className="gas-reserve-compare-panel__stat-value font-bold text-sm text-foreground mt-0.5">{formatNumber(total, 1)}</span>
         </div>
-        <div className="gas-reserve-compare-panel__stat">
-          <span className="gas-reserve-compare-panel__stat-label">Power fulfillment</span>
-          <span className="gas-reserve-compare-panel__stat-value">{fulfillment.toFixed(0)}%</span>
+        <div className="gas-reserve-compare-panel__stat flex flex-col p-2 bg-background border border-border/40 rounded-xl">
+          <span className="gas-reserve-compare-panel__stat-label text-[9px] text-muted-foreground uppercase font-semibold">Fulfillment</span>
+          <span className="gas-reserve-compare-panel__stat-value font-bold text-sm text-foreground mt-0.5">{fulfillment.toFixed(0)}%</span>
         </div>
-        <div className="gas-reserve-compare-panel__stat">
-          <span className="gas-reserve-compare-panel__stat-label">LNG share</span>
-          <span className="gas-reserve-compare-panel__stat-value">{lngShare.toFixed(0)}%</span>
+        <div className="gas-reserve-compare-panel__stat flex flex-col p-2 bg-background border border-border/40 rounded-xl">
+          <span className="gas-reserve-compare-panel__stat-label text-[9px] text-muted-foreground uppercase font-semibold">LNG share</span>
+          <span className="gas-reserve-compare-panel__stat-value font-bold text-sm text-foreground mt-0.5">{lngShare.toFixed(0)}%</span>
         </div>
       </div>
 
-      <div className="grid-explorer-table-wrap gas-reserve-compare-panel__table">
+      <div className="grid-explorer-table-wrap gas-reserve-compare-panel__table max-h-72 overflow-y-auto">
         <table className="grid-explorer-table text-[10px]">
           <thead>
             <tr>
-              <th>Field</th>
-              <th className="text-right">Gas MMCFD</th>
+              <th className="text-left font-bold text-muted-foreground pb-2">Field</th>
+              <th className="text-right font-bold text-muted-foreground pb-2">Gas MMCFD</th>
             </tr>
           </thead>
           <tbody>
-            {day.production.fields.slice(0, mode === 'simple' ? 8 : 99).map((f) => (
-              <tr key={f.id}>
-                <td>{f.field}</td>
-                <td className="tabular-nums text-right">{formatNumber(f.gas_mmcfd, 1)}</td>
-              </tr>
-            ))}
+            {filteredFields.map((f) => {
+              const otherVal = otherMap?.get(f.field);
+              const fieldDelta = otherVal !== undefined ? f.gas_mmcfd - otherVal : null;
+              const gasPct = total > 0 ? (f.gas_mmcfd / total) * 100 : 0;
+              const isHovered = hoveredField === f.field;
+
+              return (
+                <tr
+                  key={f.id}
+                  className={cn(
+                    'group transition-colors relative cursor-pointer',
+                    isHovered ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 font-medium' : 'hover:bg-muted/30',
+                  )}
+                  onMouseEnter={() => setHoveredField(f.field)}
+                  onMouseLeave={() => setHoveredField(null)}
+                >
+                  <td className="py-2 pr-2 relative z-10">
+                    <div className="flex items-center justify-between">
+                      <span className="truncate max-w-[120px]">{f.field}</span>
+                      {fieldDelta !== null && fieldDelta !== 0 && (
+                        <span
+                          className={cn(
+                            'text-[9px] font-bold ml-1 transition-opacity opacity-70 group-hover:opacity-100',
+                            fieldDelta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500',
+                          )}
+                        >
+                          {fieldDelta > 0 ? '▲' : '▼'} {Math.abs(fieldDelta).toFixed(1)}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="tabular-nums text-right py-2 relative z-10 font-mono">
+                    <div className="relative inline-block pr-1">
+                      {/* Share background progress bar */}
+                      <span
+                        className="absolute right-0 bottom-0 top-0 bg-sky-500/5 dark:bg-sky-400/10 rounded"
+                        style={{ width: `${Math.min(100, gasPct * 1.5)}%`, zIndex: -1 }}
+                      />
+                      {formatNumber(f.gas_mmcfd, 1)}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       {mode === 'researcher' && day.validation && (
-        <p className="gas-reserve-compare-panel__foot">
-          Reconciled: {day.validation.reconciled ? 'Yes' : 'No'}
-        </p>
+        <div className="mt-3 pt-2 border-t border-border/30 text-[9px] text-muted-foreground flex justify-between">
+          <span>Reconciled: <strong className="text-foreground">{day.validation.reconciled ? 'Yes' : 'No'}</strong></span>
+          <span>Wells: <strong className="text-foreground">{day.production.grand_total.producing_wells}</strong></span>
+        </div>
       )}
     </div>
   );
