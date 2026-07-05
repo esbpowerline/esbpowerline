@@ -22,8 +22,9 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { filterTimelineDays, stressedPlants, worstPowerGapDays } from '@/lib/data/petrobangla/compute';
-import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineSummary } from '@/lib/data/petrobangla/types';
-import { ArchiveBadge, ArchiveChartFooter } from './PetrobanglaArchiveShared';
+import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
+import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
+import { ArchiveBadge, ArchiveChartFooter, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 
 const POWER_GAP_COLORS = {
   demand: PB_ARCHIVE_COLORS.powerDemand,
@@ -90,15 +91,17 @@ function PowerGapTooltip({
 }
 
 export function PetrobanglaArchivePowerGap({
-  timeline,
+  rangeDays,
+  preset,
   selectedDay,
   mode,
   chartsReady,
   embedded = false,
   compact = false,
 }: {
-  timeline: PetrobanglaTimelineSummary;
-  selectedDay: PetrobanglaDaily;
+  rangeDays: PetrobanglaTimelineDay[];
+  preset: ArchiveRangePreset;
+  selectedDay: PetrobanglaDaily | null;
   mode: AudienceMode;
   chartsReady: boolean;
   embedded?: boolean;
@@ -107,17 +110,17 @@ export function PetrobanglaArchivePowerGap({
   const chartTheme = useChartTheme();
 
   const chartData = useMemo(() => {
-    return filterTimelineDays(timeline.days).map((d) => ({
+    return filterTimelineDays(rangeDays).map((d) => ({
       date: d.date,
       demand: d.power_demand ?? 0,
       supply: d.power_supply ?? 0,
       gap: (d.power_demand ?? 0) - (d.power_supply ?? 0),
       fulfillment: d.power_fulfillment_pct ?? 0,
     }));
-  }, [timeline]);
+  }, [rangeDays]);
 
-  const worst = worstPowerGapDays(filterTimelineDays(timeline.days), 10);
-  const plants = stressedPlants(selectedDay);
+  const worst = worstPowerGapDays(filterTimelineDays(rangeDays), 10);
+  const plants = selectedDay ? stressedPlants(selectedDay) : [];
 
   const wrapperClass = embedded ? 'space-y-0 grid-explorer-gas-subview' : 'grid-explorer-chart-card card space-y-0';
 
@@ -132,59 +135,61 @@ export function PetrobanglaArchivePowerGap({
         </div>
       )}
 
-      <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 px-4">
-        {chartsReady ? (
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.dualAxis}>
-              <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-              <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
-              <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
-              <YAxis yAxisId="right" orientation="right" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v}%`, domain: [0, 100] })} />
-              <GridRechartsTooltip content={<PowerGapTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
-              <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
-              <Area
-                yAxisId="left"
-                type="monotone"
-                dataKey="gap"
-                name="Shortage (MMCFD)"
-                fill={POWER_GAP_COLORS.gap}
-                stroke={POWER_GAP_COLORS.gap}
-                fillOpacity={0.15}
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="demand"
-                name="Power demand"
-                stroke={POWER_GAP_COLORS.demand}
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="supply"
-                name="Power supply"
-                stroke={POWER_GAP_COLORS.supply}
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="fulfillment"
-                name="Fulfillment %"
-                stroke={POWER_GAP_COLORS.fulfillment}
-                strokeWidth={1.5}
-                dot={false}
-                strokeDasharray="3 3"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="grid-explorer-skeleton" />
-        )}
-      </div>
+      <ArchiveRangeLockedOverlay preset={preset} className="mt-4 px-4">
+        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg">
+          {chartsReady ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.dualAxis}>
+                <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
+                <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
+                <YAxis yAxisId="right" orientation="right" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v}%`, domain: [0, 100] })} />
+                <GridRechartsTooltip content={<PowerGapTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+                <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
+                <Area
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="gap"
+                  name="Shortage (MMCFD)"
+                  fill={POWER_GAP_COLORS.gap}
+                  stroke={POWER_GAP_COLORS.gap}
+                  fillOpacity={0.15}
+                />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="demand"
+                  name="Power demand"
+                  stroke={POWER_GAP_COLORS.demand}
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  yAxisId="left"
+                  type="monotone"
+                  dataKey="supply"
+                  name="Power supply"
+                  stroke={POWER_GAP_COLORS.supply}
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="fulfillment"
+                  name="Fulfillment %"
+                  stroke={POWER_GAP_COLORS.fulfillment}
+                  strokeWidth={1.5}
+                  dot={false}
+                  strokeDasharray="3 3"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid-explorer-skeleton" />
+          )}
+        </div>
+      </ArchiveRangeLockedOverlay>
 
       <div className="p-4 grid md:grid-cols-2 gap-4">
         <div>
@@ -206,7 +211,7 @@ export function PetrobanglaArchivePowerGap({
         </div>
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-            Stressed plants · {selectedDay.report.report_date_start}
+            Stressed plants · {selectedDay ? selectedDay.report.report_date_start : '—'}
           </h4>
           <div className="grid-explorer-table-wrap max-h-48 overflow-auto">
             <table className="grid-explorer-table text-xs">
@@ -220,6 +225,13 @@ export function PetrobanglaArchivePowerGap({
                     <td className={cnSupply(p.supply)}>{formatNumber(p.supply, 1)}</td>
                   </tr>
                 ))}
+                {plants.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="text-center py-4 text-muted-foreground">
+                      {selectedDay ? 'No plant outages reported.' : 'Loading daily detail...'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -229,7 +241,7 @@ export function PetrobanglaArchivePowerGap({
       {!compact && (
         <ArchiveChartFooter
           embedded={embedded}
-          day={selectedDay}
+          day={selectedDay ?? undefined}
           caption="Power plants request gas and receive far less than demanded — below 50% fulfillment, load-shedding risk rises sharply."
         />
       )}
