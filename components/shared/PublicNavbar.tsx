@@ -36,22 +36,34 @@ type NavCategory = {
   iconImageUrl?: string | null;
 };
 
+function isHubSectionActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function PublicNavLink({
   href,
   className,
   style,
   children,
   onClick,
+  'aria-current': ariaCurrent,
 }: {
   href: string;
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
   onClick?: () => void;
+  'aria-current'?: 'page' | undefined;
 }) {
   const resolvedHref = usePublicHref(href);
   return (
-    <Link href={resolvedHref} className={className} style={style} onClick={onClick}>
+    <Link
+      href={resolvedHref}
+      className={className}
+      style={style}
+      onClick={onClick}
+      aria-current={ariaCurrent}
+    >
       {children}
     </Link>
   );
@@ -287,7 +299,7 @@ export function PublicNavbar({
                   <PublicNavLink
                     href="/articles"
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--latest${
-                      pathname === '/articles' ? ' public-nav-bar__hub-link--active' : ''
+                      isHubSectionActive(pathname, '/articles') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
                   >
                     <Newspaper className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
@@ -297,8 +309,9 @@ export function PublicNavbar({
                   <PublicNavLink
                     href="/grid-explorer"
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--grid${
-                      pathname.includes('/power-grid') ? ' public-nav-bar__hub-link--active' : ''
+                      isHubSectionActive(pathname, '/grid-explorer') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
+                    aria-current={isHubSectionActive(pathname, '/grid-explorer') ? 'page' : undefined}
                   >
                     <BarChart3 className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                     <span className="hidden lg:inline">{t('nav.gridExplorer')}</span>
@@ -307,7 +320,7 @@ export function PublicNavbar({
                   <PublicNavLink
                     href="/magazine"
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--magazine${
-                      pathname === '/magazine' ? ' public-nav-bar__hub-link--active' : ''
+                      isHubSectionActive(pathname, '/magazine') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
                   >
                     <BookOpen className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />

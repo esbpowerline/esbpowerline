@@ -53,7 +53,14 @@ export function PetrobanglaLiveWeekPanel({
   fillColumn = false,
 }: Props) {
   const { tier } = useGridTierAccess();
-  const { liveWeek: bundle, liveWeekLoading, ensureLiveWeekDays } = usePetrobanglaBootstrap();
+  const {
+    liveWeek: bundle,
+    liveWeekLoading,
+    ensureLiveWeekDays,
+    timeline,
+    timelineLoading,
+    ensureTimeline,
+  } = usePetrobanglaBootstrap();
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
   const chartsReady = true;
@@ -63,21 +70,36 @@ export function PetrobanglaLiveWeekPanel({
   const rangeOption = LIVE_WEEK_RANGE_OPTIONS.find((o) => o.days === rangeDays);
 
   useEffect(() => {
-    if (!bundle || rangeLocked || bundle.days.length >= rangeDays) return;
-    void ensureLiveWeekDays(rangeDays);
-  }, [bundle, rangeDays, ensureLiveWeekDays, rangeLocked]);
+    if (rangeDays <= 30) {
+      if (!bundle || rangeLocked || bundle.days.length >= rangeDays) return;
+      void ensureLiveWeekDays(rangeDays);
+    } else {
+      if (timeline || rangeLocked) return;
+      void ensureTimeline();
+    }
+  }, [bundle, rangeDays, ensureLiveWeekDays, timeline, ensureTimeline, rangeLocked]);
 
   const activeBundle = useMemo(() => {
     if (!bundle?.days.length) return null;
-    const want = rangeLocked ? maxLiveWeekDaysForTier(tier) : rangeDays;
+    const want = rangeLocked ? maxLiveWeekDaysForTier(tier) : Math.min(30, rangeDays);
     return sliceLiveWeekBundle(bundle, Math.min(want, bundle.days.length));
   }, [bundle, rangeDays, rangeLocked, tier]);
 
-  if (liveWeekLoading && !bundle) {
+  const activeTimelineDays = useMemo(() => {
+    if (!timeline?.days.length) return [];
+    const want = rangeLocked ? maxLiveWeekDaysForTier(tier) : rangeDays;
+    return timeline.days.slice(-Math.min(want, timeline.days.length));
+  }, [timeline, rangeDays, rangeLocked, tier]);
+
+  const isLoading = !bundle || (rangeDays > 30 && !timeline && timelineLoading);
+
+  if (isLoading) {
     return (
       <div className={cn('flex items-center justify-center gap-3 min-h-[120px]', !unified && 'grid-explorer-chart-card card p-8')}>
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">Loading recent gas-days…</span>
+        <span className="text-sm text-muted-foreground">
+          {rangeDays <= 30 ? 'Loading recent gas-days…' : 'Loading national timeline…'}
+        </span>
       </div>
     );
   }
@@ -86,6 +108,14 @@ export function PetrobanglaLiveWeekPanel({
     return (
       <div className={cn('text-center text-sm text-muted-foreground', unified ? 'py-6' : 'grid-explorer-chart-card card p-6')}>
         Live week data unavailable. Run sync_petrobangla_live.py to refresh.
+      </div>
+    );
+  }
+
+  if (rangeDays > 30 && !timeline) {
+    return (
+      <div className={cn('text-center text-sm text-muted-foreground', unified ? 'py-6' : 'grid-explorer-chart-card card p-6')}>
+        Timeline data unavailable.
       </div>
     );
   }
@@ -141,36 +171,45 @@ export function PetrobanglaLiveWeekPanel({
         </div>
       )}
 
-      <div className="gas-reserve-live-week-range" role="group" aria-label="Live window">
-        {LIVE_WEEK_RANGE_OPTIONS.map((opt) => {
-          const locked = isLiveWeekRangeLocked(opt.days, tier);
-          return (
-            <button
-              key={opt.days}
-              type="button"
-              onClick={() => setRangeDays(opt.days)}
-              className={cn(
-                'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle inline-flex items-center gap-1',
-                rangeDays === opt.days && 'gas-reserve-archive-range__btn--active',
-              )}
-            >
-              {opt.label}
-              {locked && <Lock className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />}
-            </button>
-          );
-        })}
+      <div className="flex justify-center w-full">
+        <div className="gas-reserve-archive-range" role="group" aria-label="Live window">
+          {LIVE_WEEK_RANGE_OPTIONS.map((opt) => {
+            const locked = isLiveWeekRangeLocked(opt.days, tier);
+            return (
+              <button
+                key={opt.days}
+                type="button"
+                onClick={() => setRangeDays(opt.days)}
+                className={cn(
+                  'gas-reserve-archive-range__btn inline-flex items-center gap-1',
+                  rangeDays === opt.days && 'gas-reserve-archive-range__btn--active',
+                )}
+              >
+                {opt.label}
+                {locked && <Lock className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {liveWeekLoading && bundle && !rangeLocked && bundle.days.length < rangeDays && (
+      {rangeDays <= 30 && liveWeekLoading && bundle && !rangeLocked && bundle.days.length < rangeDays && (
         <p className="flex items-center gap-2 text-[11px] text-muted-foreground px-1">
           <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
-          Loading {rangeDays === 4000 ? 'full archive' : `${rangeDays}-day`} window…
+          Loading {rangeDays}-day window…
+        </p>
+      )}
+      {rangeDays > 30 && timelineLoading && !timeline && (
+        <p className="flex items-center gap-2 text-[11px] text-muted-foreground px-1">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+          Loading national timeline…
         </p>
       )}
 
       <div className={cn('relative', fillColumn && 'gas-reserve-live-week__chart-wrap')}>
         <PbLiveTimeline
-          bundle={activeBundle}
+          bundle={rangeDays <= 30 ? activeBundle ?? undefined : undefined}
+          timelineDays={rangeDays > 30 ? activeTimelineDays : undefined}
           chartsReady={chartsReady}
           highlightDate={inWeek ? selectedDate : undefined}
           compact={unified}

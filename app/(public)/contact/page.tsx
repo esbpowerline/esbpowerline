@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Mail, MapPin, Phone, Send, CheckCircle2 } from 'lucide-react';
 import { ContactGeometryBackdrop } from '@/components/shared/ContactGeometryBackdrop';
 
@@ -13,6 +13,22 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [csrfToken, setCsrfToken] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch('/api/contact/csrf')
+      .then((res) => res.json())
+      .then((data: { token?: string }) => {
+        if (!cancelled && data.token) setCsrfToken(data.token);
+      })
+      .catch(() => {
+        /* same-origin fallback in checkCsrf */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,9 +37,12 @@ export default function ContactPage() {
     setLoading(true);
     setError('');
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (csrfToken) headers['x-csrf-token'] = csrfToken;
+
       const res = await fetch('/api/contact', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ name, email, phone, subject, message }),
       });
       const data = await res.json();
@@ -71,7 +90,7 @@ export default function ContactPage() {
           <div className="grid lg:grid-cols-12 gap-8 items-start pt-6">
             {/* Contact Details */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="card p-6 border border-border/40 bg-card/20 rounded-3xl space-y-6">
+              <div id="advertising" className="card p-6 border border-border/40 bg-card/20 rounded-3xl space-y-6 scroll-mt-24">
                 <h3 className="text-xl font-display font-bold">Office Information</h3>
                 
                 <div className="space-y-4">

@@ -13,11 +13,12 @@ export function safeAuthRedirectPath(raw: string | null | undefined, fallback: s
     const url = new URL(value);
     const hostname = url.hostname;
     const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+    const vercelHost = process.env.VERCEL_URL?.trim().replace(/^https?:\/\//, '').split('/')[0];
     const isProdDomain =
       hostname === 'esbpowerline.com' ||
       hostname.endsWith('.esbpowerline.com') ||
       hostname === 'esbpowerline' ||
-      hostname.endsWith('.vercel.app');
+      (vercelHost ? hostname === vercelHost : false);
 
     if (isLocal || isProdDomain) {
       return value;

@@ -84,17 +84,8 @@ def parse_pdf(filepath):
         sys.stderr.write(f"PDF file not found: {filepath}\n")
         return None
     
-    # Official fallback values from the June 22-23 2026 Petrobangla release
-    gas_data = {
-        "totalGasProduction": 2647.5,
-        "lngImport": 1008.0,
-        "chevronGas": 928.7,
-        "bgfclGas": 478.6,
-        "sgflGas": 139.8,
-        "bapexGas": 92.4,
-        "tullowGas": 31.2,
-    }
-    
+    gas_data = {}
+
     try:
         import pypdf
         reader = pypdf.PdfReader(filepath)
@@ -103,31 +94,33 @@ def parse_pdf(filepath):
             t = page.extract_text()
             if t:
                 text += t + "\n"
-                
-        # If there is readable text inside the PDF, perform dynamic regex parsing
-        if text.strip():
-            # Example parsing logic:
-            # "Total Production : 2647.5" or similar
-            import re
-            total_match = re.search(r'Total\s+Production\s*:\s*([\d\.,]+)', text, re.IGNORECASE)
-            if total_match:
-                gas_data["totalGasProduction"] = float(total_match.group(1).replace(',', ''))
-                
-            lng_match = re.search(r'LNG\s*:\s*([\d\.,]+)', text, re.IGNORECASE)
-            if lng_match:
-                gas_data["lngImport"] = float(lng_match.group(1).replace(',', ''))
-                
-            chevron_match = re.search(r'Chevron\s*:\s*([\d\.,]+)', text, re.IGNORECASE)
-            if chevron_match:
-                gas_data["chevronGas"] = float(chevron_match.group(1).replace(',', ''))
-                
-            sys.stderr.write("Successfully extracted values from PDF text stream.\n")
-        else:
-            sys.stderr.write("PDF contains no extractable text stream (vector path drawings), using verified official defaults.\n")
+
+        if not text.strip():
+            sys.stderr.write("PDF contains no extractable text stream.\n")
+            return None
+
+        import re
+        total_match = re.search(r'Total\s+Production\s*:\s*([\d\.,]+)', text, re.IGNORECASE)
+        if total_match:
+            gas_data["totalGasProduction"] = float(total_match.group(1).replace(',', ''))
+
+        lng_match = re.search(r'LNG\s*:\s*([\d\.,]+)', text, re.IGNORECASE)
+        if lng_match:
+            gas_data["lngImport"] = float(lng_match.group(1).replace(',', ''))
+
+        chevron_match = re.search(r'Chevron\s*:\s*([\d\.,]+)', text, re.IGNORECASE)
+        if chevron_match:
+            gas_data["chevronGas"] = float(chevron_match.group(1).replace(',', ''))
+
+        if gas_data.get("totalGasProduction") is None:
+            sys.stderr.write("PDF text found but no parseable gas production values.\n")
+            return None
+
+        sys.stderr.write("Successfully extracted values from PDF text stream.\n")
+        return gas_data
     except Exception as e:
-        sys.stderr.write(f"PDF reading error, falling back to verified defaults: {e}\n")
-        
-    return gas_data
+        sys.stderr.write(f"PDF reading error: {e}\n")
+        return None
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

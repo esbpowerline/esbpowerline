@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import {
   Area,
   CartesianGrid,
@@ -20,8 +21,9 @@ import {
 } from '@/components/news/PowerGridChartUI';
 import { cn, formatNumber } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
-import { liveWeekTimelinePoints } from '@/lib/data/petrobangla/computeLiveWeek';
-import type { PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
+import { liveWeekTimelinePoints, formatLiveWeekAxisLabel } from '@/lib/data/petrobangla/computeLiveWeek';
+import { decimateTimelineDays } from '@/lib/data/petrobangla/compute';
+import type { PetrobanglaLiveWeekBundle, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { LiveBadge } from './pbLiveShared';
 
 function LiveWeekTooltip({
@@ -81,34 +83,58 @@ function LiveWeekTooltip({
 
 export function PbLiveTimeline({
   bundle,
+  timelineDays,
   chartsReady,
   highlightDate,
   compact = false,
   fillHeight = false,
 }: {
-  bundle: PetrobanglaLiveWeekBundle;
+  bundle?: PetrobanglaLiveWeekBundle;
+  timelineDays?: PetrobanglaTimelineDay[];
   chartsReady: boolean;
   highlightDate?: string;
   compact?: boolean;
   fillHeight?: boolean;
 }) {
   const chartTheme = useChartTheme();
-  const dayCount = bundle.days.length;
-  const points = liveWeekTimelinePoints(bundle);
-  const data = points.map((p, i) => ({
-    ...p,
-    shortLabel:
-      dayCount > 30
-        ? i === 0 || i === dayCount - 1 || i % Math.ceil(dayCount / 6) === 0
-          ? p.axisLabel
-          : ''
-        : dayCount > 14
-          ? i % 2 === 0
+  const dayCount = timelineDays ? timelineDays.length : bundle ? bundle.days.length : 0;
+
+  const points = useMemo(() => {
+    if (timelineDays) {
+      return timelineDays.map((d) => ({
+        date: d.date,
+        label: d.date,
+        axisLabel: formatLiveWeekAxisLabel(d.date, undefined, false),
+        totalGas: d.total_gas,
+        powerDemand: d.power_demand ?? 0,
+        powerSupply: d.power_supply ?? 0,
+        fulfillment: d.power_fulfillment_pct ?? 0,
+      }));
+    }
+    if (bundle) {
+      return liveWeekTimelinePoints(bundle);
+    }
+    return [];
+  }, [bundle, timelineDays]);
+
+  const decimatedPoints = useMemo(() => decimateTimelineDays(points, 180), [points]);
+
+  const data = useMemo(() => {
+    return decimatedPoints.map((p, i) => ({
+      ...p,
+      shortLabel:
+        dayCount > 30
+          ? i === 0 || i === decimatedPoints.length - 1 || i % Math.ceil(decimatedPoints.length / 6) === 0
             ? p.axisLabel
             : ''
-          : p.axisLabel,
-    highlight: p.date === highlightDate,
-  }));
+          : dayCount > 14
+            ? i % 2 === 0
+              ? p.axisLabel
+              : ''
+            : p.axisLabel,
+      highlight: p.date === highlightDate,
+    }));
+  }, [decimatedPoints, dayCount, highlightDate]);
 
   const nationalColor = PB_ARCHIVE_COLORS.national;
   const demandColor = PB_ARCHIVE_COLORS.powerDemand;

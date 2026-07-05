@@ -9,6 +9,7 @@ BPDB daily sources are intentionally out of scope until a site loader exists.
 """
 from __future__ import annotations
 
+import os
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -22,12 +23,13 @@ PARSE_GRID = ROOT / "scripts" / "parse_daily_reports.py"
 # Pipeline B — PetrobanglaDaily (lib/data/petrobangla/types.ts)
 PETROBANGLA_PUBLIC = ROOT / "public" / "data" / "petrobangla" / "daily"
 PETROBANGLA_PUBLIC_ROOT = ROOT / "public" / "data" / "petrobangla"
-PARSE_PETROBANGLA = Path(r"C:\Users\user\Desktop\grid_backlog\parse_petrobangla.py")
-PETROBANGLA_JSON_STAGING = Path(r"C:\Users\user\Desktop\grid_backlog\petrobangla_json")
+_GRID_BACKLOG = Path(os.environ.get("ESB_GRID_BACKLOG", str(Path.home() / "Desktop" / "grid_backlog")))
+PARSE_PETROBANGLA = Path(os.environ.get("ESB_PARSE_PETROBANGLA", str(_GRID_BACKLOG / "parse_petrobangla.py")))
+PETROBANGLA_JSON_STAGING = Path(os.environ.get("ESB_PETROBANGLA_JSON_STAGING", str(_GRID_BACKLOG / "petrobangla_json")))
 PETROBANGLA_INDEX_STAGING = PETROBANGLA_JSON_STAGING / "_index.json"
 SYNC_PETROBANGLA = ROOT / "scripts" / "sync_petrobangla_live.py"
 BUILD_PETROBANGLA_TIMELINE = ROOT / "scripts" / "build_petrobangla_timeline.py"
-PETROBANGLA_HOT_FOLDER = Path(r"C:\Users\user\Desktop\New weeks")
+PETROBANGLA_HOT_FOLDER = Path(os.environ.get("ESB_PETROBANGLA_HOT_FOLDER", str(Path.home() / "Desktop" / "New weeks")))
 
 # Canonical fuel / company labels (lib/data/grid/types.ts)
 REQUIRED_GENERATION_FUELS = (
@@ -59,7 +61,7 @@ PETROBANGLA_GAS_DISTRIBUTION_COMPANIES = (
 )
 
 # Organized daily report archive on Desktop
-DAILY_REPORTS_ROOT = Path(r"C:\Users\user\Desktop\Daily Reports")
+DAILY_REPORTS_ROOT = Path(os.environ.get("ESB_DAILY_REPORTS_ROOT", str(Path.home() / "Desktop" / "Daily Reports")))
 
 # Scratch cache while downloading
 SCRATCH_DOWNLOADS = ROOT / "scratch" / "downloads"

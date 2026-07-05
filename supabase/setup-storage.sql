@@ -21,12 +21,18 @@ create policy "Public read media bucket"
   to public
   using (bucket_id = 'media');
 
--- Authenticated staff may upload (service role bypasses RLS for server uploads)
+-- Staff only may upload (service role bypasses RLS for server uploads)
 drop policy if exists "Authenticated upload media bucket" on storage.objects;
-create policy "Authenticated upload media bucket"
+drop policy if exists "Staff upload media bucket" on storage.objects;
+create policy "Staff upload media bucket"
   on storage.objects for insert
   to authenticated
-  with check (bucket_id = 'media');
+  with check (
+    bucket_id = 'media'
+    and coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') in (
+      'SUPER_ADMIN', 'ADMIN', 'EDITOR', 'COPY_EDITOR', 'PHOTO_EDITOR', 'REPORTER'
+    )
+  );
 
 drop policy if exists "Authenticated update own media" on storage.objects;
 create policy "Authenticated update own media"

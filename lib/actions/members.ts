@@ -8,6 +8,7 @@ import prisma from '@/lib/prisma';
 import type { PublicArticleCard } from '@/lib/category-types';
 import type { PublicMagazineIssue } from '@/lib/category-content';
 import { requireMemberPanelUser } from '@/lib/server-auth';
+import { resolvePrismaUserId } from '@/lib/resolve-prisma-user-id';
 
 async function requireUserId() {
   const memberSession = await getMemberSession();
@@ -21,19 +22,6 @@ async function requireUserId() {
     userId,
     session: { user: { ...memberSession.user, id: userId } },
   };
-}
-
-async function resolvePrismaUserId(userId: string, email: string) {
-  const user = await prisma.user.findFirst({
-    where: {
-      OR: [{ id: userId }, { email: email.toLowerCase() }, { supabaseUserId: userId }],
-    },
-    select: { id: true, status: true },
-  });
-  if (!user || user.status === 'SUSPENDED' || user.status === 'PENDING') {
-    throw new Error('Sign in required');
-  }
-  return user.id;
 }
 
 async function requireCommentAuthor() {
@@ -338,8 +326,14 @@ export async function getArticleComments(articleId: string) {
 export async function getRecentDownloadsAction(): Promise<MemberDownloadRow[]> {
   const memberSession = await getMemberSession();
   if (!memberSession) return [];
+  let userId: string;
+  try {
+    userId = await resolvePrismaUserId(memberSession.user.id, memberSession.user.email);
+  } catch {
+    return [];
+  }
   return prisma.memberDownload.findMany({
-    where: { userId: memberSession.user.id },
+    where: { userId },
     orderBy: { createdAt: 'desc' },
     take: 5,
     select: { id: true, label: true, fileUrl: true, createdAt: true },
@@ -347,21 +341,21 @@ export async function getRecentDownloadsAction(): Promise<MemberDownloadRow[]> {
 }
 
 export async function triggerGridRefresh() {
-  const memberSession = await getMemberSession();
   const session = await auth();
-  const signedIn = !!memberSession || !!session;
-  
-  if (!signedIn) {
-    throw new Error('You must be signed in to refresh grid data.');
+  if (!session?.user?.role || !can(session.user.role as Role, 'admin.access')) {
+    throw new Error('Admin access required to refresh grid data.');
   }
 
   try {
-    const { runIngestionPipeline } = await import('@/scripts/ingest-energy-reports');
-    await runIngestionPipeline();
+    const { runIngestionPipeline } = await import('@/lib/cron/energy-ingest');
+    const result = await runIngestionPipeline();
     revalidatePath('/grid-explorer');
+    if (!result.ok) {
+      return { success: false, error: 'Ingestion pipeline completed with errors.' };
+    }
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to refresh grid data:', error);
-    return { success: false, error: error.message || String(error) };
+    return { success: false, error: 'Grid refresh failed. Please try again later.' };
   }
-}
+}

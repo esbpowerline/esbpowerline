@@ -16,10 +16,20 @@ alter table public.profiles add column if not exists status text not null defaul
 alter table public.profiles enable row level security;
 
 drop policy if exists "Profiles readable by authenticated users" on public.profiles;
-create policy "Profiles readable by authenticated users"
+drop policy if exists "Profiles readable by owner" on public.profiles;
+drop policy if exists "Profiles readable by staff" on public.profiles;
+create policy "Profiles readable by owner"
   on public.profiles for select
   to authenticated
-  using (true);
+  using (auth.uid() = id);
+create policy "Profiles readable by staff"
+  on public.profiles for select
+  to authenticated
+  using (
+    coalesce(auth.jwt() -> 'app_metadata' ->> 'role', '') in (
+      'SUPER_ADMIN', 'ADMIN', 'EDITOR', 'COPY_EDITOR', 'PHOTO_EDITOR', 'REPORTER'
+    )
+  );
 
 -- Users may update own display fields only — NOT role or status (prevents self-escalation).
 drop policy if exists "Users update own profile" on public.profiles;

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getSupabaseEnv } from '@/utils/supabase/env';
 import { resolveRoleFromSupabaseUser } from '@/lib/supabase/resolve-role';
@@ -173,11 +173,16 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     };
   }, [fetchUser]);
 
-  const value: AuthContextValue = {
-    data: user ? { user } : null,
-    status,
-    update: () => fetchUser(),
-  };
+  const refreshSession = useCallback(() => fetchUser(), [fetchUser]);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      data: user ? { user } : null,
+      status,
+      update: refreshSession,
+    }),
+    [user, status, refreshSession],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -13,8 +13,17 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await request.json();
-  const { read } = body;
+
+  let read: boolean;
+  try {
+    const body = await request.json();
+    if (typeof body?.read !== 'boolean') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+    read = body.read;
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
 
   try {
     const updated = await prisma.contactMessage.update({

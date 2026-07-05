@@ -25,6 +25,16 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'localhost:3000',
+        'localhost:3001',
+        'localhost:3002',
+        '127.0.0.1:3000',
+        '127.0.0.1:3001',
+        '127.0.0.1:3002',
+      ],
+    },
     // Disabled: parallel split-surface dev (3 instances) can corrupt Turbopack's dev cache
     turbopackFileSystemCacheForDev: false,
     turbopackFileSystemCacheForBuild: true,
@@ -90,6 +100,26 @@ const nextConfig: NextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
+      },
+    ];
+  },
+
+  async redirects() {
+    return [
+      {
+        source: '/advertising',
+        destination: '/contact#advertising',
+        permanent: true,
+      },
+      {
+        source: '/power-grid',
+        destination: '/grid-explorer',
+        permanent: true,
+      },
+      {
+        source: '/power-grid/:path*',
+        destination: '/grid-explorer/:path*',
+        permanent: true,
       },
     ];
   },

@@ -93,6 +93,20 @@ function unauthorizedApi(response: NextResponse): NextResponse {
   return denied;
 }
 
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  return request.cookies.getAll().some((cookie) => cookie.name.includes('-auth-token'));
+}
+
+function pathNeedsRoleCheck(pathname: string): boolean {
+  if (pathname.startsWith('/admin') || pathname.startsWith('/cms') || pathname.startsWith('/members')) {
+    return true;
+  }
+  if (pathname.startsWith('/login') || pathname.startsWith('/auth')) {
+    return true;
+  }
+  return isProxyProtectedApi(pathname);
+}
+
 function redirectWithCookies(
   request: NextRequest,
   response: NextResponse,
@@ -156,11 +170,7 @@ export async function middleware(request: NextRequest) {
         gridPlan,
       });
 
-      const latestYear = parseInt(latestDate.split('-')[0], 10);
-      const targetYear = parseInt(isoDate.split('-')[0], 10);
-      const isTwoYearsPrior = latestYear - targetYear === 2;
-
-      if (!isTwoYearsPrior && !isDateAllowedForTier(isoDate, tier, latestDate)) {
+      if (!isDateAllowedForTier(isoDate, tier, latestDate)) {
         return denyDailyJson('Subscription required for historical grid data access.');
       }
     }
@@ -176,6 +186,10 @@ export async function middleware(request: NextRequest) {
       status: 403,
       headers: { 'Content-Type': 'text/plain' },
     });
+  }
+
+  if (!pathNeedsRoleCheck(pathname) && !hasSupabaseAuthCookie(request)) {
+    return NextResponse.next({ request });
   }
 
   const { response, supabase, user } = await updateSession(request);

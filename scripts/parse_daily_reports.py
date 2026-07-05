@@ -4,10 +4,19 @@ import json
 import datetime
 from concurrent.futures import ThreadPoolExecutor
 
-PGCB_DIR = r"C:\Users\user\Desktop\PGCB\Daily Reports - D\Daily Reports Parsed"
-PB_DIR = r"C:\Users\user\Desktop\Petrobangla\Daily Gas Reports - D\Daily Gas Reports Parsed"
-OUTPUT_DIR = r"C:\Users\user\esbpowerline\public\data\daily"
-DATES_OUTPUT_PATH = r"C:\Users\user\esbpowerline\lib\available-dates.json"
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_USER_HOME = os.environ.get("USERPROFILE") or os.environ.get("HOME") or ""
+
+PGCB_DIR = os.environ.get(
+    "ESB_PGCB_PARSED_DIR",
+    os.path.join(_USER_HOME, "Desktop", "PGCB", "Daily Reports - D", "Daily Reports Parsed") if _USER_HOME else "",
+)
+PB_DIR = os.environ.get(
+    "ESB_PB_PARSED_DIR",
+    os.path.join(_USER_HOME, "Desktop", "Petrobangla", "Daily Gas Reports - D", "Daily Gas Reports Parsed") if _USER_HOME else "",
+)
+OUTPUT_DIR = os.environ.get("ESB_DAILY_OUTPUT_DIR", os.path.join(_REPO_ROOT, "public", "data", "daily"))
+DATES_OUTPUT_PATH = os.environ.get("ESB_AVAILABLE_DATES_PATH", os.path.join(_REPO_ROOT, "lib", "available-dates.json"))
 
 def clean_float(val_str):
     if not val_str:

@@ -129,22 +129,4 @@ export async function auth(): Promise<AuthSession> {
   return { user: appUser };
 }
 
-export async function signOut(_options?: { redirect?: boolean }) {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-}
-
-export async function signIn(
-  _provider: string,
-  credentials: { email?: string; identifier?: string; password: string; redirect?: boolean },
-) {
-  const email = credentials.email ?? credentials.identifier ?? '';
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password: credentials.password,
-  });
-  if (error) throw error;
-}
-
 export { roleHomePath as getRedirectForRole } from '@/lib/auth-routing';

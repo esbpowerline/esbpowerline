@@ -59,20 +59,34 @@ export function authContinuePath(destination: string): string {
   return `/auth/continue?to=${encodeURIComponent(destination)}`;
 }
 
-export function buildHandoffUrl(destination: string, token: string): string {
+export const HANDOFF_COOKIE = 'esb_handoff';
+
+export function buildHandoffUrl(destination: string): string {
   const current = /^https?:\/\//i.test(destination)
     ? new URL(destination)
     : new URL(destination, 'http://localhost:3000');
 
   const handoff = new URL('/api/auth/handoff', current.origin);
-  handoff.searchParams.set('token', token);
   handoff.searchParams.set('callbackUrl', `${current.pathname}${current.search}`);
+  return handoff.toString();
+}
+
+/** @deprecated Query-string tokens leak via logs/history — use HANDOFF_COOKIE instead. */
+export function buildHandoffUrlWithToken(destination: string, token: string): string {
+  const url = buildHandoffUrl(destination);
+  const handoff = new URL(url);
+  handoff.searchParams.set('token', token);
   return handoff.toString();
 }
 
 /** Short-lived signed token carrying Supabase session tokens for cross-port dev handoff. */
 export async function createHandoffToken(): Promise<string | null> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
   const {
     data: { session },
   } = await supabase.auth.getSession();

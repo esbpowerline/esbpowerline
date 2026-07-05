@@ -31,13 +31,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedMessage = message.trim();
+
+    if (trimmedName.length > 200) {
+      return NextResponse.json({ error: 'Name is too long.' }, { status: 400 });
+    }
+    if (trimmedEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      return NextResponse.json({ error: 'Invalid email address.' }, { status: 400 });
+    }
+    if (trimmedMessage.length > 10_000) {
+      return NextResponse.json({ error: 'Message is too long.' }, { status: 400 });
+    }
+    if (subject && String(subject).trim().length > 300) {
+      return NextResponse.json({ error: 'Subject is too long.' }, { status: 400 });
+    }
+    if (phone && String(phone).trim().length > 40) {
+      return NextResponse.json({ error: 'Phone number is too long.' }, { status: 400 });
+    }
+
     const contactMessage = await prisma.contactMessage.create({
       data: {
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
+        name: trimmedName,
+        email: trimmedEmail,
         phone: phone?.trim() || null,
         subject: subject?.trim() || null,
-        message: message.trim(),
+        message: trimmedMessage,
       },
     });
 

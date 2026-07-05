@@ -25,10 +25,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, message: stdout.trim() });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({
-      ok: true,
-      message: `Sync skipped — serving static live-week cache (${message})`,
-      skipped: true,
-    });
+    console.error('[Petrobangla refresh] Sync failed:', message);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: 'Petrobangla sync failed',
+        detail: message,
+      },
+      { status: 502 },
+    );
   }
 }

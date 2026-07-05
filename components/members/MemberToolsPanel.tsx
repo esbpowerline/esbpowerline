@@ -2,7 +2,7 @@
 
 import { useSession } from '@/utils/supabase/auth-context';
 import { useEffect, useState, useTransition } from 'react';
-import { getRecentDownloadsAction } from '@/lib/actions/members';
+
 import { FileDown, ArrowRight, Loader2, RefreshCw, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
@@ -19,8 +19,10 @@ export function MemberToolsPanel() {
     if (!signedIn) return;
     startTransition(async () => {
       try {
-        const data = await getRecentDownloadsAction();
-        setDownloads(data);
+        const res = await fetch('/api/members/recent-downloads', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        setDownloads(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error('Failed to load recent downloads:', err);
       }

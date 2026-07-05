@@ -118,7 +118,10 @@ export async function getCategoryBySlug(slug: string): Promise<PublicCategory | 
   };
 }
 
-export async function getPublishedArticlesByCategory(categoryName: string, locale?: string): Promise<PublicArticleCard[]> {
+export const getPublishedArticlesByCategory = cache(async function getPublishedArticlesByCategory(
+  categoryName: string,
+  locale?: string,
+): Promise<PublicArticleCard[]> {
   const articles = await prisma.article.findMany({
     where: {
       status: 'PUBLISHED',
@@ -139,7 +142,7 @@ export async function getPublishedArticlesByCategory(categoryName: string, local
       }
     })
     .map((a) => mapArticle(a, locale));
-}
+});
 
 export const getPublishedArticlesForPublic = cache(async (limit = 60, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({

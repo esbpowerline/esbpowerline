@@ -13,7 +13,7 @@ export const LIVE_WEEK_COUNT = 7;
 export const LIVE_WEEK_BOOTSTRAP = 30;
 export const LIVE_WEEK_MAX = 4000;
 
-export type LiveWeekRangeLabel = '1W' | '14D' | '1M' | '6M' | '1Y' | '2Y' | '3Y' | 'All';
+export type LiveWeekRangeLabel = '1W' | '1M' | '6M' | '1Y' | '3Y' | 'All';
 
 export type LiveWeekRangeOption = {
   days: number;
@@ -24,11 +24,9 @@ export type LiveWeekRangeOption = {
 /** Rolling window presets — always show every chip; tier locks longer windows. */
 export const LIVE_WEEK_RANGE_OPTIONS: LiveWeekRangeOption[] = [
   { days: 7, label: '1W', requiredTier: 'visitor' },
-  { days: 14, label: '14D', requiredTier: 'member' },
   { days: 30, label: '1M', requiredTier: 'member' },
   { days: 180, label: '6M', requiredTier: 'plan_499' },
   { days: 365, label: '1Y', requiredTier: 'plan_499' },
-  { days: 730, label: '2Y', requiredTier: 'plan_499' },
   { days: 1095, label: '3Y', requiredTier: 'plan_499' },
   { days: 4000, label: 'All', requiredTier: 'plan_499' },
 ];

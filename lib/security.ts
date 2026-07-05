@@ -2,22 +2,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, clientIpFromForwarded, PRIVATE_NO_STORE } from '@/lib/rate-limit';
 
 /**
- * Verify the x-csrf-token header against the CSRF_SECRET env var.
- * In production, CSRF_SECRET must be set (enforced by env-guard) — fail closed if missing.
+ * Double-submit CSRF: x-csrf-token header must match the csrf_token cookie.
+ * Falls back to same-origin check when no cookie is present (legacy clients).
  */
 export function checkCsrf(request: NextRequest): NextResponse | null {
-  const secret = process.env.CSRF_SECRET?.trim();
-  if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+  const cookieToken = request.cookies.get('csrf_token')?.value;
+  const headerToken = request.headers.get('x-csrf-token');
+
+  if (cookieToken && headerToken && cookieToken === headerToken) {
     return null;
   }
-  const token = request.headers.get('x-csrf-token');
-  if (token !== secret) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const origin = request.headers.get('origin');
+  const host = request.headers.get('host');
+  if (origin && host) {
+    try {
+      if (new URL(origin).host === host) {
+        return null;
+      }
+    } catch {
+      /* invalid origin */
+    }
   }
-  return null;
+
+  return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 }
 
 /**

@@ -172,7 +172,66 @@ function tryDesktopFallbacks(): { powerGridData: Record<string, unknown> | null;
 }
 
 /** Cron route only — downloads PGCB/Petrobangla reports, syncs homepage metrics, and runs SREDA ingest. */
-export async function runIngestionPipeline() {
+export type IngestPipelineResult = {
+  ok: boolean;
+  pgcb: boolean;
+  gas: boolean;
+  dbSync: boolean;
+  sreda: boolean;
+};
+
+const INGEST_LOCK_KEY = 'ingest_lock';
+const INGEST_LOCK_TTL_MS = 15 * 60_000;
+
+async function acquireIngestLock(): Promise<boolean> {
+  const now = Date.now();
+  const existing = await prisma.siteSetting.findUnique({ where: { key: INGEST_LOCK_KEY } });
+  if (existing?.value && typeof existing.value === 'object' && existing.value !== null) {
+    const lockedAt = Number((existing.value as { lockedAt?: number }).lockedAt ?? 0);
+    if (lockedAt && now - lockedAt < INGEST_LOCK_TTL_MS) {
+      console.warn('[Ingest] Pipeline already running — skipping.');
+      return false;
+    }
+  }
+  await prisma.siteSetting.upsert({
+    where: { key: INGEST_LOCK_KEY },
+    create: { key: INGEST_LOCK_KEY, value: { lockedAt: now } },
+    update: { value: { lockedAt: now } },
+  });
+  return true;
+}
+
+async function releaseIngestLock() {
+  await prisma.siteSetting.delete({ where: { key: INGEST_LOCK_KEY } }).catch(() => undefined);
+}
+
+function computeLoadShedMw(powerGridData: Record<string, unknown>): number | null {
+  const hourly = powerGridData.hourlyLoadData as Array<{ loadShed?: number }> | undefined;
+  if (hourly?.length) {
+    return Math.round(Math.max(0, ...hourly.map((h) => h.loadShed ?? 0)));
+  }
+  const regional = powerGridData.regionalDemandData as Array<{ loadShed?: number }> | undefined;
+  if (regional?.length) {
+    return Math.round(Math.max(0, ...regional.map((r) => r.loadShed ?? 0)));
+  }
+  return null;
+}
+
+export async function runIngestionPipeline(): Promise<IngestPipelineResult> {
+  const locked = await acquireIngestLock();
+  if (!locked) {
+    return { ok: false, pgcb: false, gas: false, dbSync: false, sreda: false };
+  }
+
+  const result: IngestPipelineResult = {
+    ok: false,
+    pgcb: false,
+    gas: false,
+    dbSync: false,
+    sreda: false,
+  };
+
+  try {
   const downloadDir = getDownloadDir();
   ensureDir(downloadDir);
   console.log('[Ingest] Ingestion pipeline started...');
@@ -241,13 +300,17 @@ export async function runIngestionPipeline() {
       const dbPayload: Record<string, string> = {};
 
       if (powerGridData) {
+        result.pgcb = true;
         dbPayload.generation_capacity = '28420';
-        dbPayload.current_demand = String(Math.round(Number(powerGridData.eveningPeakGen)));
+        dbPayload.current_demand = String(
+          Math.round(Number(powerGridData.eveningPeakDemand ?? powerGridData.eveningPeakGen)),
+        );
         dbPayload.generation_cost = String(Number(powerGridData.avgProductionCost).toFixed(3));
         dbPayload.est_fuel_cost = String(Math.round(Number(powerGridData.totalDailyCost) / 10000000));
       }
 
       if (gasData) {
+        result.gas = true;
         dbPayload.gas_supply = String(gasData.totalGasProduction);
       }
 
@@ -260,13 +323,15 @@ export async function runIngestionPipeline() {
       const dd = String(telemetryDate.getDate()).padStart(2, '0');
       dbPayload.snapshotDate = `${yyyy}-${mm}-${dd}`;
 
-      for (const [key, value] of Object.entries(dbPayload)) {
-        await prisma.siteSetting.upsert({
-          where: { key },
-          update: { value: JSON.stringify(value) },
-          create: { key, value: JSON.stringify(value) },
-        });
-      }
+      await prisma.$transaction(
+        Object.entries(dbPayload).map(([key, value]) =>
+          prisma.siteSetting.upsert({
+            where: { key },
+            update: { value },
+            create: { key, value },
+          }),
+        ),
+      );
 
       const snapshotSetting = await prisma.siteSetting.findUnique({ where: { key: 'snapshot' } });
       if (snapshotSetting) {
@@ -307,7 +372,10 @@ export async function runIngestionPipeline() {
             } else if (item.label === 'Grid Import' && powerGridData.importPeakMw != null) {
               item.value = Math.round(Number(powerGridData.importPeakMw));
             } else if (item.label === 'Load Shedding') {
-              item.value = 0;
+              const loadShed = computeLoadShedMw(powerGridData);
+              if (loadShed !== null) {
+                item.value = loadShed;
+              }
             }
           }
           await prisma.siteSetting.update({
@@ -361,6 +429,7 @@ export async function runIngestionPipeline() {
         }
       }
 
+      result.dbSync = true;
       console.log('[Ingest] Database settings sync complete.');
     } catch (dbError) {
       console.error('[Ingest] DB update failed:', dbError);
@@ -369,6 +438,7 @@ export async function runIngestionPipeline() {
 
   try {
     const sredaResult = await runSredaIngestion();
+    result.sreda = sredaResult.ok;
     if (!sredaResult.ok) {
       console.warn(`[Ingest] SREDA ingest skipped: ${sredaResult.error ?? 'unknown error'}`);
     }
@@ -376,5 +446,10 @@ export async function runIngestionPipeline() {
     console.error('[Ingest] SREDA ingest failed:', sredaError);
   }
 
-  console.log('[Ingest] Pipeline iteration complete.');
+  result.ok = result.pgcb || result.gas || result.dbSync || result.sreda;
+  console.log('[Ingest] Pipeline iteration complete.', result);
+  return result;
+  } finally {
+    await releaseIngestLock();
+  }
 }

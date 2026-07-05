@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
-import { verifyHandoffToken } from '@/lib/auth-handoff';
+import { HANDOFF_COOKIE, verifyHandoffToken } from '@/lib/auth-handoff';
 import { getSupabaseEnv } from '@/utils/supabase/env';
 
 export const runtime = 'nodejs';
@@ -15,7 +15,8 @@ function safeCallbackUrl(raw: string | null): string {
 }
 
 export async function GET(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get('token');
+  const token =
+    request.cookies.get(HANDOFF_COOKIE)?.value ?? request.nextUrl.searchParams.get('token');
   const callbackUrl = safeCallbackUrl(request.nextUrl.searchParams.get('callbackUrl'));
 
   const isMemberCallback = callbackUrl === '/members' || callbackUrl.startsWith('/members/');
@@ -59,5 +60,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(loginPath, request.url));
   }
 
+  response.cookies.delete(HANDOFF_COOKIE);
   return response;
 }

@@ -69,7 +69,7 @@ export default async function Home() {
       const articles = await getPublishedArticlesByCategory(cat.name, locale);
       return {
         ...cat,
-        articles: articles.slice(0, 3),
+        articles,
       };
     })
   );
@@ -130,7 +130,7 @@ export default async function Home() {
               {/* Mobile/Tablet Inline Ad block for 004.png */}
               <div className="block lg:hidden home-ad-space--sidebar mb-8" suppressHydrationWarning>
                 <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
-                  <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover" suppressHydrationWarning />
+                  <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
                 </Link>
               </div>
 
@@ -147,7 +147,7 @@ export default async function Home() {
               
               {/* Sidebar Ad Block */}
               <Link href="/advertising" className="home-ad-space--sidebar sticky top-[11rem] rounded-2xl w-full overflow-hidden relative group hidden lg:block" suppressHydrationWarning>
-                <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover" suppressHydrationWarning />
+                <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
               </Link>
             </aside>
           </div>
@@ -155,10 +155,10 @@ export default async function Home() {
           {/* 2-Column Pre-Footer Ad Space */}
           <div className="home-ad-space--pre-footer grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
             <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
-              <Image src="/images/promotions/006.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+              <Image src="/images/promotions/006.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
             </Link>
             <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group hidden md:block" suppressHydrationWarning>
-              <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+              <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
             </Link>
           </div>
 

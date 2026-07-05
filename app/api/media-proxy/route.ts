@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
+import { can } from '@/lib/constants';
+import { getSupabaseEnv } from '@/utils/supabase/env';
 
 export async function GET(request: NextRequest) {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.role || !can(session.user.role, 'media.upload')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -19,8 +21,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid protocol' }, { status: 400 });
     }
 
+    const { url: supabaseUrl } = getSupabaseEnv();
+    const supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : '';
     const allowedHosts = [
-      'sxgokpmrbgdndstygapc.supabase.co',
+      ...(supabaseHost ? [supabaseHost] : []),
       'localhost',
       '127.0.0.1',
     ];

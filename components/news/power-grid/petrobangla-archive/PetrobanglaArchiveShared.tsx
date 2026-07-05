@@ -57,12 +57,12 @@ export function ArchiveRangeToolbar({
   const { tier } = useGridTierAccess();
 
   return (
-    <div className={cn('gas-reserve-archive-view-toolbar', className)}>
+    <div className={cn('gas-reserve-archive-view-toolbar flex flex-col items-center justify-center gap-2.5 text-center', className)}>
       <div className="min-w-0">
         <p className="gas-reserve-archive-view-toolbar__title">Timeline range</p>
         <p className="gas-reserve-archive-view-toolbar__sub">Shared across archive charts · ends on selected gas-day</p>
       </div>
-      <div className="gas-reserve-archive-view-toolbar__controls">
+      <div className="gas-reserve-archive-view-toolbar__controls flex flex-wrap items-center justify-center gap-3 w-full">
         <div className="gas-reserve-archive-range" role="group" aria-label="Timeline range">
           {ARCHIVE_RANGE_PRESETS.map((p) => {
             const isLocked = isArchivePresetLockedForTier(p, tier);
