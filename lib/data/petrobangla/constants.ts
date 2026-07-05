@@ -31,6 +31,7 @@ export const QUARANTINE_DATES = new Set([
 
 export const ARCHIVE_BASELINE_DATE = '2020-01-11';
 export const ARCHIVE_BASELINE_GAS = 3167.9;
+export const ARCHIVE_BASELINE_DOMESTIC_GAS = 2575.7;
 export const ARCHIVE_START_DATE = '2020-01-11';
 export const ARCHIVE_PEAK = { date: '2024-04-12', gas: 3218.4 } as const;
 
