@@ -191,6 +191,13 @@ export function buildFieldHistory(
   return points;
 }
 
+/** Downsample dense timeline series so Recharts stays responsive on mobile. */
+export function decimateTimelineDays<T>(rows: T[], maxPoints = 420): T[] {
+  if (rows.length <= maxPoints) return rows;
+  const step = Math.ceil(rows.length / maxPoints);
+  return rows.filter((_, i) => i % step === 0 || i === rows.length - 1);
+}
+
 export function worstPowerGapDays(
   days: PetrobanglaTimelineDay[],
   limit = 10,
