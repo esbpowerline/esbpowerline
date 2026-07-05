@@ -52,36 +52,65 @@ function SectorTooltip({
   const d = payload[0]?.payload;
   if (!d) return null;
 
+  const total = d.powerSupply + d.fertSupply + d.others;
+  const powerShare = total > 0 ? (d.powerSupply / total) * 100 : 0;
+  const fertShare = total > 0 ? (d.fertSupply / total) * 100 : 0;
+  const othersShare = total > 0 ? (d.others / total) * 100 : 0;
+
+  const powerFulfillment = d.powerDemand > 0 ? (d.powerSupply / d.powerDemand) * 100 : 0;
+  const fertFulfillment = d.fertDemand > 0 ? (d.fertSupply / d.fertDemand) * 100 : 0;
+
   return (
     <GridChartTooltipShell title={d.date} accent={SECTOR_COLORS.powerSupply}>
-      <div className="grid-chart-tooltip__grid">
-        <span className="grid-chart-tooltip__label flex items-center gap-1.5">
+      <div className="grid-chart-tooltip__grid" style={{ gridTemplateColumns: 'auto auto auto auto', gap: '0.4rem 0.8rem', alignItems: 'center' }}>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase">Sector</span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">Volume</span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">Share of Day</span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">Fulfillment</span>
+
+        {/* Power Sector Row */}
+        <span className="grid-chart-tooltip__label flex items-center gap-1.5 font-medium whitespace-nowrap">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: SECTOR_COLORS.powerSupply }} />
           Power supply
         </span>
-        <span className="grid-chart-tooltip__value" style={{ color: SECTOR_COLORS.powerSupply }}>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-semibold" style={{ color: SECTOR_COLORS.powerSupply }}>
           {formatNumber(d.powerSupply, 1)} MMCFD
         </span>
-        <span className="grid-chart-tooltip__label flex items-center gap-1.5">
-          <span className="grid-chart-tooltip__dot shrink-0" style={{ background: SECTOR_COLORS.powerDemand }} />
-          Power demand
+        <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
+          {powerShare.toFixed(1)}%
         </span>
-        <span className="grid-chart-tooltip__value" style={{ color: SECTOR_COLORS.powerDemand }}>
-          {formatNumber(d.powerDemand, 1)} MMCFD
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: powerFulfillment >= 80 ? '#10b981' : powerFulfillment >= 50 ? '#f59e0b' : '#ef4444' }}>
+          {powerFulfillment.toFixed(1)}%
         </span>
-        <span className="grid-chart-tooltip__label flex items-center gap-1.5">
+
+        {/* Fertilizer Sector Row */}
+        <span className="grid-chart-tooltip__label flex items-center gap-1.5 font-medium whitespace-nowrap">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: SECTOR_COLORS.fertSupply }} />
-          Fertilizer supply
+          Fertilizer
         </span>
-        <span className="grid-chart-tooltip__value" style={{ color: SECTOR_COLORS.fertSupply }}>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-semibold" style={{ color: SECTOR_COLORS.fertSupply }}>
           {formatNumber(d.fertSupply, 1)} MMCFD
         </span>
-        <span className="grid-chart-tooltip__label flex items-center gap-1.5">
-          <span className="grid-chart-tooltip__dot shrink-0" style={{ background: SECTOR_COLORS.others }} />
-          Others / industry
+        <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
+          {fertShare.toFixed(1)}%
         </span>
-        <span className="grid-chart-tooltip__value" style={{ color: SECTOR_COLORS.others }}>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: fertFulfillment >= 80 ? '#10b981' : fertFulfillment >= 50 ? '#f59e0b' : '#ef4444' }}>
+          {fertFulfillment.toFixed(1)}%
+        </span>
+
+        {/* Others/Industry Row */}
+        <span className="grid-chart-tooltip__label flex items-center gap-1.5 font-medium whitespace-nowrap">
+          <span className="grid-chart-tooltip__dot shrink-0" style={{ background: SECTOR_COLORS.others }} />
+          Others / Industry
+        </span>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-semibold" style={{ color: SECTOR_COLORS.others }}>
           {formatNumber(d.others, 1)} MMCFD
+        </span>
+        <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
+          {othersShare.toFixed(1)}%
+        </span>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-medium text-muted-foreground/40">
+          —
         </span>
       </div>
     </GridChartTooltipShell>
