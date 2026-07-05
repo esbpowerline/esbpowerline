@@ -86,6 +86,10 @@ function PowerGapTooltip({
           {d.fulfillment.toFixed(1)}%
         </span>
       </div>
+      <div className="grid-chart-tooltip__foot mt-2 pt-1.5 border-t border-border/20 text-[9px] text-muted-foreground leading-normal space-y-0.5">
+        <div><strong>Calculation:</strong> Shortage = Power Demand - Power Supply.</div>
+        <div>Fulfillment = Power Supply / Power Demand (below 50% raises grid instability risk).</div>
+      </div>
     </GridChartTooltipShell>
   );
 }
