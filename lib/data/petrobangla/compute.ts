@@ -2,16 +2,20 @@ import {
   ARCHIVE_BASELINE_DATE,
   ARCHIVE_BASELINE_GAS,
   ARCHIVE_INSIGHTS,
+  ARCHIVE_PEAK,
+  ARCHIVE_BASELINE_DOMESTIC_GAS,
   isQuarantined,
 } from './constants';
 import type {
   ArchiveKpis,
   PetrobanglaDaily,
   PetrobanglaIndex,
+  PetrobanglaIndexDay,
   PetrobanglaTimelineDay,
   PetrobanglaTimelineSummary,
   ProductionField,
 } from './types';
+import { lookupIndexDay, lookupTimelineDay } from './loadArchive';
 
 export function getRpgclGas(fields: ProductionField[]): number {
   return fields
@@ -92,23 +96,22 @@ export function computeStressScore(
   return { score, color };
 }
 
-export function computeArchiveKpis(
-  day: PetrobanglaDaily,
-  timeline: PetrobanglaTimelineSummary,
-  index: PetrobanglaIndex,
-): ArchiveKpis {
+export function computeArchiveKpis(day: PetrobanglaDaily): ArchiveKpis {
   const fields = day.production.fields;
   const grandTotal = day.production.grand_total.gas_mmcfd;
   const domestic = getDomesticGas(fields);
   const lng = getRpgclGas(fields);
   const bibiyana = getFieldGas(fields, 'Bibiyana');
   const gt = getDistributionGrandTotal(day);
-  const peakGas = timeline.peak?.gas ?? grandTotal;
+  const peakGas = lookupTimelineDay(ARCHIVE_PEAK.date)?.total_gas ?? ARCHIVE_PEAK.gas;
   const date = day.report.report_date_start;
 
   const yearAgo = shiftIsoYear(date, -1);
-  const yearAgoRow = timeline.days.find((d) => d.date === yearAgo && d.parse_status === 'ok');
-  const baselineRow = timeline.days.find((d) => d.date === ARCHIVE_BASELINE_DATE);
+  const yearAgoGas =
+    lookupTimelineDay(yearAgo)?.total_gas ??
+    lookupIndexDay(yearAgo)?.grand_total_gas_mmcfd ??
+    null;
+  const baselineRow = lookupTimelineDay(ARCHIVE_BASELINE_DATE);
 
   const { score, color } = computeStressScore(day, peakGas);
 
@@ -116,7 +119,7 @@ export function computeArchiveKpis(
     stressScore: score,
     stressColor: color,
     totalGas: grandTotal,
-    totalGasDeltaYear: yearAgoRow ? grandTotal - yearAgoRow.total_gas : null,
+    totalGasDeltaYear: yearAgoGas != null ? grandTotal - yearAgoGas : null,
     totalGasDeltaPeak: grandTotal - peakGas,
     totalGasDeltaBaseline: grandTotal - (baselineRow?.total_gas ?? ARCHIVE_BASELINE_GAS),
     powerFulfillmentPct:
@@ -129,10 +132,40 @@ export function computeArchiveKpis(
     lngGasMmcfd: lng,
     domesticGas: domestic,
     domesticDeltaBaseline:
-      domestic - (baselineRow ? baselineRow.domestic_gas : ARCHIVE_INSIGHTS.jan2020Baseline.gas - 592),
+      domestic - (baselineRow?.domestic_gas ?? ARCHIVE_BASELINE_DOMESTIC_GAS),
     activeWells: day.production.grand_total.producing_wells,
     bibiyanaGas: bibiyana,
     bibiyanaDomesticSharePct: domestic > 0 ? (bibiyana / domestic) * 100 : 0,
+  };
+}
+
+export function computeArchiveKpisPreview(
+  indexDay: PetrobanglaIndexDay,
+): ArchiveKpis {
+  const grandTotal = indexDay.grand_total_gas_mmcfd;
+  const date = indexDay.date;
+  const yearAgo = shiftIsoYear(date, -1);
+  const yearAgoGas = lookupIndexDay(yearAgo)?.grand_total_gas_mmcfd ?? null;
+  const peakGas = ARCHIVE_PEAK.gas;
+  const baselineRow = lookupTimelineDay(ARCHIVE_BASELINE_DATE);
+
+  return {
+    stressScore: 0,
+    stressColor: 'green',
+    totalGas: grandTotal,
+    totalGasDeltaYear: yearAgoGas != null ? grandTotal - yearAgoGas : null,
+    totalGasDeltaPeak: grandTotal - peakGas,
+    totalGasDeltaBaseline: grandTotal - (baselineRow?.total_gas ?? ARCHIVE_BASELINE_GAS),
+    powerFulfillmentPct: 0,
+    powerDemand: 0,
+    powerSupply: 0,
+    lngSharePct: 0,
+    lngGasMmcfd: 0,
+    domesticGas: 0,
+    domesticDeltaBaseline: 0,
+    activeWells: indexDay.plant_count, // dummy fallback
+    bibiyanaGas: 0,
+    bibiyanaDomesticSharePct: 0,
   };
 }
 
