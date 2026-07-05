@@ -332,7 +332,7 @@ export function HomeSnapshotPanel({
         </div>
       </div>
 
-      <div className="relative z-10 flex-grow">
+      <div className="relative z-10 flex-grow my-3">
         <EnergyDashboard initialStats={snapshotStats as never} compact fillHeight={false} />
       </div>
 
