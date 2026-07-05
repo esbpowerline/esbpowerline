@@ -1072,6 +1072,13 @@ export function PowerGridExplorer({
 
       <div className="min-h-[280px]">
       {/* KPI Strip */}
+      <GridLockedContent
+        locked={tierLockRequired !== null}
+        requiredTier={tierLockRequired as any}
+        selectedDate={selectedDate}
+        onTryDemo={() => setSelectedDate(DEMO_DATE)}
+        variant="micro"
+      >
       <div className="grid-explorer-kpi-strip relative z-30" ref={kpiStripRef}>
         <div 
           className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
@@ -1341,6 +1348,7 @@ export function PowerGridExplorer({
           </div>
         </div>
       </div>
+      </GridLockedContent>
 
       {/* Flat Tab Navigation */}
       <div className="grid-explorer-tabs mt-6 mb-4" role="tablist" aria-label="Grid reports views">
