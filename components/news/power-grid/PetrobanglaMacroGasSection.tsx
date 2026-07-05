@@ -78,7 +78,7 @@ export function PetrobanglaMacroGasSection({
                 : audienceMode === 'investor'
                   ? 'Short-window volatility — power fulfillment and LNG share drive fuel-cost risk'
                   : audienceMode === 'researcher'
-                    ? 'Rolling window with raw JSON links — 7 / 15 / 30 day presets'
+                    ? 'Rolling window with raw JSON links — 1W through full archive presets'
                     : 'Rolling gas-days — sparklines, plant stress, and day-over-day compare'
             }
           >

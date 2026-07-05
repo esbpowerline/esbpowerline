@@ -9,9 +9,9 @@ import {
   MAJOR_FIELDS,
   PB_ARCHIVE_COLORS,
 } from '@/lib/data/petrobangla/constants';
-import { filterTimelineDays } from '@/lib/data/petrobangla/compute';
-import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineSummary } from '@/lib/data/petrobangla/types';
-import { ArchiveBadge, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
+import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
+import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
+import { ArchiveBadge, ArchiveInsightCallout, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 
 type SortKey = 'largest' | 'decline' | 'depleted';
 
@@ -32,14 +32,16 @@ const MODE_INTRO: Record<AudienceMode, string> = {
 };
 
 export function PetrobanglaArchiveFieldCards({
-  timeline,
+  rangeDays,
+  preset,
   latestDay,
   mode,
   embedded = false,
   compact = false,
 }: {
-  timeline: PetrobanglaTimelineSummary;
-  latestDay: PetrobanglaDaily;
+  rangeDays: PetrobanglaTimelineDay[];
+  preset: ArchiveRangePreset;
+  latestDay: PetrobanglaDaily | null;
   mode: AudienceMode;
   embedded?: boolean;
   compact?: boolean;
@@ -49,22 +51,23 @@ export function PetrobanglaArchiveFieldCards({
   const [hoverField, setHoverField] = useState<string | null>(null);
 
   const cards = useMemo(() => {
-    const okDays = filterTimelineDays(timeline.days);
     return MAJOR_FIELDS.map((fieldName) => {
-      const series = okDays
+      const series = rangeDays
         .map((d) => ({ date: d.date, gas: d.major_fields?.[fieldName] ?? 0 }))
         .filter((p) => p.gas > 0);
       const current = series[series.length - 1]?.gas ?? 0;
       const peak = series.reduce((best, p) => (p.gas > best.gas ? p : best), { date: '', gas: 0 });
       const pctFromPeak = peak.gas > 0 ? ((current - peak.gas) / peak.gas) * 100 : 0;
-      const latestField = latestDay.production.fields.find((f) => f.field === fieldName);
+      const latestField = latestDay?.production.fields.find((f) => f.field === fieldName);
       const wells = latestField?.producing_wells ?? 0;
       const capacity = latestField?.capacity_mmcfd ?? 0;
       const util = capacity > 0 ? (current / capacity) * 100 : 0;
       const isRpgcl = fieldName === 'R-LNG Terminal';
-      const domesticTotal = latestDay.production.fields
-        .filter((f) => f.company_code !== 'RPGCL')
-        .reduce((s, f) => s + f.gas_mmcfd, 0);
+      const domesticTotal = latestDay
+        ? latestDay.production.fields
+            .filter((f) => f.company_code !== 'RPGCL')
+            .reduce((s, f) => s + f.gas_mmcfd, 0)
+        : 0;
       const concentrationRisk = !isRpgcl && domesticTotal > 0 && fieldName === 'Bibiyana' && current / domesticTotal > 0.25;
       const meta = FIELD_LIFELINE_META[fieldName];
 
@@ -96,7 +99,7 @@ export function PetrobanglaArchiveFieldCards({
         declineRate30,
       };
     });
-  }, [timeline, latestDay]);
+  }, [rangeDays, latestDay]);
 
   const sorted = [...cards].sort((a, b) => {
     if (sort === 'largest') return b.current - a.current;
@@ -158,6 +161,7 @@ export function PetrobanglaArchiveFieldCards({
         </ArchiveInsightCallout>
       )}
 
+      <ArchiveRangeLockedOverlay preset={preset}>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-4">
         {sorted.map((c) => {
           const isHovered = hoverField === c.fieldName;
@@ -238,6 +242,7 @@ export function PetrobanglaArchiveFieldCards({
           );
         })}
       </div>
+      </ArchiveRangeLockedOverlay>
 
       {modalField && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/50" onClick={() => setModalField(null)}>

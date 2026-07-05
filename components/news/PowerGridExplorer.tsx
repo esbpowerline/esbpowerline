@@ -40,7 +40,7 @@ import {
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { shouldUseArchiveFallback } from '@/lib/data/grid/daily-access';
 import { getCachedDailyReport, peekLatestCachedReport, setCachedDailyReport } from '@/lib/data/grid/daily-cache';
-import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/available-dates';
+import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { pgcbMonthlyData, getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
@@ -57,6 +57,12 @@ import { globalVsDomesticData, historicalExchangeRates } from '@/lib/data/macro/
 import { macroInfrastructureData } from '@/lib/data/macro/infrastructure';
 import { nationalBudgetData } from '@/lib/data/macro/budget';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
+import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
+import { DailyBadge, GridCardFooter, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
+import { GridDataTable, type GridTableDensity } from '@/components/news/power-grid/GridDataTable';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
+import type { GridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { MethodologyReconciliationBanner } from '@/components/news/power-grid/MethodologyReconciliationBanner';
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
@@ -89,11 +95,13 @@ interface GridLineItem {
 
 interface PowerGridExplorerProps {
   initialLines?: GridLineItem[];
+  urlBoot?: GridExplorerUrlBoot;
 }
 const DEMO_DATE = '2026-06-22';
 
 export function PowerGridExplorer({
   initialLines,
+  urlBoot,
 }: PowerGridExplorerProps = {}) {
   const chartTheme = useChartTheme();
   const gridAccess = useGridTierAccess();
@@ -104,7 +112,7 @@ export function PowerGridExplorer({
   }, []);
 
   const latestDate = gridAccess.latestDate;
-  const [selectedDate, setSelectedDate] = useState<string>(latestDate);
+  const [selectedDate, setSelectedDate] = useState<string>(urlBoot?.date ?? latestDate);
   const [tierLockRequired, setTierLockRequired] = useState<ReturnType<typeof gridAccess.requiredTierForDate> | null>(null);
   const [activeData, setActiveData] = useState<GridDailyData | null>(() => getCachedDailyReport(latestDate) ?? null);
   const [isLoadingDaily, setIsLoadingDaily] = useState<boolean>(() => !getCachedDailyReport(latestDate));
@@ -314,9 +322,12 @@ export function PowerGridExplorer({
     selectAccessibleDate(`${selectedYear}-${selectedMonth}-${newDay}`);
   };
 
+  const fetchSeqRef = useRef(0);
+
   // Dynamic Fetch Effect — stale-while-revalidate when date is already cached
   useEffect(() => {
     let isMounted = true;
+    const requestSeq = ++fetchSeqRef.current;
     if (!selectedDate || gridAccess.loading) return;
 
     if (!gridAccess.canAccessDate(selectedDate)) {
@@ -330,6 +341,7 @@ export function PowerGridExplorer({
     const cached = getCachedDailyReport(selectedDate);
     if (cached) {
       setActiveData(cached);
+      setIsDataMissing(false);
       setIsLoadingDaily(false);
     } else {
       setIsLoadingDaily(true);
@@ -337,7 +349,7 @@ export function PowerGridExplorer({
 
     fetchDailyReport(selectedDate, { refresh: Boolean(cached) })
       .then(async (result) => {
-        if (!isMounted) return;
+        if (!isMounted || requestSeq !== fetchSeqRef.current) return;
         if (result.ok) {
           setActiveData(result.data);
           setIsDataMissing(false);
@@ -347,18 +359,32 @@ export function PowerGridExplorer({
         } else if (!result.ok && shouldUseArchiveFallback(result.status ?? null)) {
           const { getArchiveFallback } = await import('@/lib/data/grid/archive-fallback');
           const fallback = getArchiveFallback(selectedDate);
+          const stale = getCachedDailyReport(selectedDate);
           if (fallback) {
             setCachedDailyReport(selectedDate, fallback);
             setActiveData(fallback);
+            setIsDataMissing(false);
+          } else if (stale) {
+            setActiveData(stale);
+            setIsDataMissing(false);
+          } else {
+            setActiveData(null);
+            setIsDataMissing(true);
           }
-          setIsDataMissing(true);
           if (result.status !== 404 && result.status !== 429) {
             console.error(result.error);
           } else if (result.status === 429) {
             console.warn('Rate limit reached (HTTP 429). Please slow down your requests.');
           }
         } else {
-          setIsDataMissing(true);
+          const stale = getCachedDailyReport(selectedDate);
+          if (stale) {
+            setActiveData(stale);
+            setIsDataMissing(false);
+          } else {
+            setActiveData(null);
+            setIsDataMissing(true);
+          }
           if (result.status !== 404 && result.status !== 429) {
             console.error(result.error);
           } else if (result.status === 429) {
@@ -367,7 +393,7 @@ export function PowerGridExplorer({
         }
       })
       .finally(() => {
-        if (isMounted) setIsLoadingDaily(false);
+        if (isMounted && requestSeq === fetchSeqRef.current) setIsLoadingDaily(false);
       });
 
     return () => {
@@ -380,42 +406,6 @@ export function PowerGridExplorer({
     gridAccess.requiredTierForDate,
   ]);
 
-  const [activeKpiTooltip, setActiveKpiTooltip] = useState<string | null>(null);
-  const kpiStripRef = useRef<HTMLDivElement>(null);
-  const kpiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const toggleKpiTooltip = (tooltip: string) => {
-    if (kpiTimeoutRef.current) {
-      clearTimeout(kpiTimeoutRef.current);
-      kpiTimeoutRef.current = null;
-    }
-
-    setActiveKpiTooltip((prev) => {
-      const next = prev === tooltip ? null : tooltip;
-      if (next) {
-        kpiTimeoutRef.current = setTimeout(() => {
-          setActiveKpiTooltip(null);
-          kpiTimeoutRef.current = null;
-        }, 2000); // Auto-close after 2 seconds
-      }
-      return next;
-    });
-  };
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (kpiStripRef.current && !kpiStripRef.current.contains(event.target as Node)) {
-        setActiveKpiTooltip(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      if (kpiTimeoutRef.current) {
-        clearTimeout(kpiTimeoutRef.current);
-      }
-    };
-  }, []);
   const {
     systemStats,
     generationData,
@@ -543,9 +533,12 @@ export function PowerGridExplorer({
 
   const totalCompletedProjectPages = Math.ceil(filteredCompletedProjects.length / completedPerPage);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro'>(
+    urlBoot?.tab ?? 'overview',
+  );
   
   const activeScrollIdRef = useRef<number | null>(null);
+  const tabScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerScrollToElement = (elementId: string) => {
     const element = document.getElementById(elementId);
@@ -594,10 +587,21 @@ export function PowerGridExplorer({
 
   const handleTabClick = (tabId: typeof activeTab) => {
     setActiveTab(tabId);
-    const timer = setTimeout(() => {
+    if (tabScrollTimerRef.current) clearTimeout(tabScrollTimerRef.current);
+    tabScrollTimerRef.current = setTimeout(() => {
+      tabScrollTimerRef.current = null;
       triggerScrollToElement('grid-status-overview-header');
     }, 50);
   };
+
+  useEffect(() => {
+    return () => {
+      if (tabScrollTimerRef.current) clearTimeout(tabScrollTimerRef.current);
+      if (activeScrollIdRef.current !== null) {
+        cancelAnimationFrame(activeScrollIdRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -605,13 +609,20 @@ export function PowerGridExplorer({
     }
   }, [activeTab]);
 
-  const [macroSubTab, setMacroSubTab] = useState<'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'insights'>('overview');
+  const [macroSubTab, setMacroSubTab] = useState<'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'insights'>(
+    urlBoot?.macro ?? 'overview',
+  );
   
   const handleSubTabClick = (subTabId: typeof macroSubTab) => {
     setMacroSubTab(subTabId);
   };
   const [reportsCompany, setReportsCompany] = useState<'bpdb' | 'petrobangla'>('bpdb');
-  const chartsReady = true;
+  const chartsReady = Boolean(activeData);
+  const pieGenerationData = useMemo(
+    () => generationData.filter((d) => Number(d.gen) > 0 && Number.isFinite(Number(d.gen))),
+    [generationData],
+  );
+  const hasGenerationChartData = pieGenerationData.length > 0;
 
   const nationalBudgetMergedData = useMemo(() => {
     const infraByYear = Object.fromEntries(
@@ -706,11 +717,14 @@ export function PowerGridExplorer({
   const ownerDropdownRef = useRef<HTMLDivElement>(null);
 
   const [subSearch, setSubSearch] = useState('');
+  const debouncedSubSearch = useDebouncedValue(subSearch);
   const [subVoltageFilter, setSubVoltageFilter] = useState<string>('all');
   const [subZoneFilter, setSubZoneFilter] = useState<string>('all');
   const [subOwnerFilter, setSubOwnerFilter] = useState<string>('all');
   const [subPage, setSubPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(50);
+  const [subTableDensity, setSubTableDensity] = useState<GridTableDensity>('comfortable');
+  const [subFiltersOpen, setSubFiltersOpen] = useState(false);
   const zones = ['Dhaka', 'Khulna', 'Barishal', 'Cumilla', 'Sylhet', 'Rajshahi', 'Chattogram', 'Rangpur', 'Mymensingh'];
   const owners = ['POWER GRID', 'APSCL', 'BIFPCL', 'RNPP', 'Bulk', 'BPDB', 'DESCO', 'DPDC', 'MoST', 'DMTCL'];
 
@@ -850,10 +864,14 @@ export function PowerGridExplorer({
     }
   }, [showMethodologyForActiveTab]);
 
+  const substationRowKey = (sub: (typeof substationsData)[number]) =>
+    `${sub.voltage}:${sub.name}`;
+
   // Substation Filtering Logic
   const filteredSubstations = substationsData.filter((sub) => {
-    const matchesSearch = sub.name.toLowerCase().includes(subSearch.toLowerCase()) || 
-                          sub.circle.toLowerCase().includes(subSearch.toLowerCase());
+    const q = debouncedSubSearch.toLowerCase();
+    const matchesSearch = sub.name.toLowerCase().includes(q) ||
+                          sub.circle.toLowerCase().includes(q);
     const matchesVoltage = subVoltageFilter === 'all' || sub.voltage === subVoltageFilter;
     const matchesZone = subZoneFilter === 'all' || sub.zone === subZoneFilter;
     const matchesOwner = subOwnerFilter === 'all' || sub.owner === subOwnerFilter;
@@ -876,7 +894,7 @@ export function PowerGridExplorer({
   // Reset page to 1 when filters change
   useEffect(() => {
     setSubPage(1);
-  }, [subSearch, subVoltageFilter, subZoneFilter, subOwnerFilter]);
+  }, [debouncedSubSearch, subVoltageFilter, subZoneFilter, subOwnerFilter]);
 
   // Overview calculations
   const totalGenMkwhr = generationData.reduce((sum, item) => sum + item.gen, 0);
@@ -903,6 +921,12 @@ export function PowerGridExplorer({
 
   return (
     <>
+      <GridExplorerUrlSyncer
+        activeTab={activeTab}
+        selectedDate={selectedDate}
+        macroSubTab={macroSubTab}
+        latestDate={latestDate}
+      />
       <div className="grid-explorer relative print:hidden">
       {/* Dynamic Animated Ambient Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-3xl" aria-hidden="true">
@@ -1079,276 +1103,23 @@ export function PowerGridExplorer({
         onTryDemo={() => setSelectedDate(DEMO_DATE)}
         variant="micro"
       >
-      <div className="grid-explorer-kpi-strip relative z-30" ref={kpiStripRef}>
-        <div 
-          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
-          onClick={() => toggleKpiTooltip('gen')}
-        >
-          <Zap className="grid-explorer-kpi__icon" />
-          <div className="min-w-0">
-            <div className="grid-explorer-kpi__label">Daily Generation<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></div>
-            <div className="grid-explorer-kpi__value">{systemStats.totalEnergyGen.toFixed(1)} MKWh</div>
-          </div>
-          {/* Custom Tooltip */}
-          <div 
-            className={cn(
-              "absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[17.5rem] md:w-80 left-0 md:left-1/2 md:-translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
-              activeKpiTooltip === 'gen' && "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-            )}
-            style={{ backgroundColor: 'hsl(var(--card))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
-            <div className="font-bold text-xs uppercase tracking-wider text-primary border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5">
-              <Zap className="h-3.5 w-3.5" /> Generation Briefing
-            </div>
-            <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Energy Gen:</span>
-                <span className="font-bold text-foreground">{systemStats.totalEnergyGen.toFixed(2)} MKWh</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Max Peak Gen:</span>
-                <span className="font-bold text-foreground">{formatNumber(Math.round(systemStats.maxGen))} MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Min Base Gen:</span>
-                <span className="font-bold text-foreground">{formatNumber(Math.round(systemStats.minGen))} MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Unserved (Load Shed):</span>
-                <span className="font-bold text-destructive">{systemStats.totalEnergyUnserved.toFixed(2)} MKWh</span>
-              </div>
-              <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold">
-                Calculation: Demand = Gen + Load Shed
-              </div>
-              <div className="pt-1 flex justify-between text-[9px] text-muted-foreground border-t border-border/20">
-                <span>Ref: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB Daily Log</a></span>
-                <span>Date: {systemStats.date}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div 
-          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
-          onClick={() => toggleKpiTooltip('demand')}
-        >
-          <Activity className="grid-explorer-kpi__icon text-amber-500" />
-          <div className="min-w-0">
-            <div className="grid-explorer-kpi__label">Peak Demand<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></div>
-            <div className="grid-explorer-kpi__value">{formatNumber(Math.round(systemStats.eveningPeakDemand))} MW</div>
-          </div>
-          {/* Custom Tooltip */}
-          <div 
-            className={cn(
-              "absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-72 md:w-[19rem] right-0 md:left-1/2 md:-translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
-              activeKpiTooltip === 'demand' && "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-            )}
-            style={{ backgroundColor: 'hsl(var(--card))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
-            <div className="font-bold text-xs uppercase tracking-wider text-amber-500 border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5">
-              <Activity className="h-3.5 w-3.5" /> Demand Briefing
-            </div>
-            <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Evening Peak Demand:</span>
-                <span className="font-bold text-foreground">{formatNumber(Math.round(systemStats.eveningPeakDemand))} MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Day Peak Demand:</span>
-                <span className="font-bold text-foreground">{formatNumber(Math.round(systemStats.dayPeakDemand))} MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Peak Deficit Shedding:</span>
-                <span className="font-bold text-destructive">496 MW at 21:00</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Max System Temp:</span>
-                <span className="font-bold text-foreground">{systemStats.maxTemp.toFixed(1)} °C</span>
-              </div>
-              <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold">
-                Audited by: NLDC System Operations
-              </div>
-              <div className="pt-1 flex justify-between text-[9px] text-muted-foreground border-t border-border/20">
-                <span>Ref: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB/NLDC SCADA</a></span>
-                <span>Date: {systemStats.date}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div 
-          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
-          onClick={() => toggleKpiTooltip('gas')}
-        >
-          <Droplet className="grid-explorer-kpi__icon text-sky-500" />
-          <div className="min-w-0">
-            <div className="grid-explorer-kpi__label">Gas Production<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></div>
-            <div className="grid-explorer-kpi__value">{formatNumber(totalGasSupply, 1)} MMCFD</div>
-          </div>
-          {/* Custom Tooltip */}
-          <div 
-            className={cn(
-              "absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[19.5rem] md:w-[22rem] left-0 md:left-1/2 md:-translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
-              activeKpiTooltip === 'gas' && "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-            )}
-            style={{ backgroundColor: 'hsl(var(--card))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
-            <div className="font-bold text-xs uppercase tracking-wider text-sky-500 border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5">
-              <Droplet className="h-3.5 w-3.5" /> Gas Supply Briefing
-            </div>
-            <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Gas Supply:</span>
-                <span className="font-bold text-foreground">{formatNumber(totalGasSupply, 1)} MMCFD</span>
-              </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">Imported LNG:</span>
-                <span className="font-bold text-foreground">{formatNumber(importedLngGas, 1)} MMCFD ({importedLngPct.toFixed(1)}%)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Chevron IOC Supply:</span>
-                <span className="font-bold text-foreground">{formatNumber(chevronGas, 1)} MMCFD ({chevronPct.toFixed(1)}%)</span>
-              </div>
-              {tullowGas > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tullow IOC Supply:</span>
-                  <span className="font-bold text-foreground">{formatNumber(tullowGas, 1)} MMCFD ({tullowPct.toFixed(1)}%)</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">State Field Output:</span>
-                <span className="font-bold text-foreground">{formatNumber(stateFieldsGas, 1)} MMCFD ({stateFieldsPct.toFixed(1)}%)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Condensate:</span>
-                <span className="font-bold text-foreground">{formatNumber(totalCondensate, 1)} BBL</span>
-              </div>
-              <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold">
-                Audited by: MABS &amp; J Partners / CAG
-              </div>
-              <div className="pt-1 flex justify-between text-[9px] text-muted-foreground border-t border-border/20">
-                <span>Ref: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Petrobangla Report</a></span>
-                <span>Date: {tooltipDate}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div 
-          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
-          onClick={() => toggleKpiTooltip('renew')}
-        >
-          <Sun className="grid-explorer-kpi__icon text-yellow-500" />
-          <div className="min-w-0">
-            <div className="grid-explorer-kpi__label">Renewables Online<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></div>
-            <div className="grid-explorer-kpi__value">{totalCapacityRenewables.toFixed(1)} MW</div>
-          </div>
-          {/* Custom Tooltip */}
-          <div 
-            className={cn(
-              "absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[18rem] md:w-[20rem] right-0 md:left-1/2 md:-translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
-              activeKpiTooltip === 'renew' && "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-            )}
-            style={{ backgroundColor: 'hsl(var(--card))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
-            <div className="font-bold text-xs uppercase tracking-wider text-yellow-500 border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5">
-              <Sun className="h-3.5 w-3.5" /> Clean Energy Briefing
-            </div>
-            <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Solar Capacity:</span>
-                <span className="font-bold text-foreground">1,511.70 MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Hydro Capacity:</span>
-                <span className="font-bold text-foreground">230.00 MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Wind Capacity:</span>
-                <span className="font-bold text-foreground">62.00 MW</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Biogas &amp; Biomass:</span>
-                <span className="font-bold text-foreground">1.09 MW</span>
-              </div>
-              <div className="flex justify-between border-t border-border/20 pt-1">
-                <span className="text-muted-foreground">Renewable Share:</span>
-                <span className="font-bold text-primary">~7.24% of Mix</span>
-              </div>
-              <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold">
-                Audited by: SREDA Policy Division
-              </div>
-              <div className="pt-1 flex justify-between text-[9px] text-muted-foreground border-t border-border/20">
-                <span>Ref: <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">SREDA Database</a></span>
-                <span>Date: Jun 2026</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div 
-          className="grid-explorer-kpi stat group hover:z-[100] cursor-pointer select-none"
-          onClick={() => toggleKpiTooltip('cost')}
-        >
-          <TakaIcon className="grid-explorer-kpi__icon text-emerald-500" />
-          <div className="min-w-0">
-            <div className="grid-explorer-kpi__label">Est. Fuel Cost<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></div>
-            <div className="grid-explorer-kpi__value">{(systemStats.totalDailyCost / 10000000).toFixed(1)} Cr Tk.</div>
-          </div>
-          {/* Custom Tooltip */}
-          <div 
-            className={cn(
-              "absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[18.5rem] md:w-[21rem] left-0 md:left-1/2 md:-translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto",
-              activeKpiTooltip === 'cost' && "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-            )}
-            style={{ backgroundColor: 'hsl(var(--card))' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
-            <div className="font-bold text-xs uppercase tracking-wider text-emerald-500 border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5">
-              <TakaIcon className="h-3.5 w-3.5 shrink-0" /> Fuel &amp; Import Bills
-            </div>
-            <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Total Daily Cost:</span>
-                <span className="font-bold text-foreground">{(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Average Bulk Cost:</span>
-                <span className="font-bold text-primary">{avgCostPerKwh.toFixed(3)} Tk/KWh</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">HFO Generation Cost:</span>
-                <span className="font-bold text-destructive">18.06 Tk/KWh</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Hydro Generation Cost:</span>
-                <span className="font-bold text-emerald-500">0.10 Tk/KWh</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Cross-Border Imports:</span>
-                <span className="font-bold text-foreground">6.34 Tk/KWh</span>
-              </div>
-              <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold">
-                Audited by: BPDB Audit Team &amp; CAG
-              </div>
-              <div className="pt-1 flex justify-between text-[9px] text-muted-foreground border-t border-border/20">
-                <span>Ref: <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPC Gazettes</a></span>
-                <span>Date: {systemStats.date}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </GridLockedContent>
+      <OverviewKpiStrip
+        systemStats={systemStats}
+        totalGasSupply={totalGasSupply}
+        importedLngGas={importedLngGas}
+        importedLngPct={importedLngPct}
+        chevronGas={chevronGas}
+        chevronPct={chevronPct}
+        tullowGas={tullowGas}
+        tullowPct={tullowPct}
+        stateFieldsGas={stateFieldsGas}
+        stateFieldsPct={stateFieldsPct}
+        totalCondensate={totalCondensate}
+        tooltipDate={tooltipDate}
+        avgCostPerKwh={avgCostPerKwh}
+        totalCapacityRenewables={totalCapacityRenewables}
+      />
+</GridLockedContent>
 
       {/* Flat Tab Navigation */}
       <div className="grid-explorer-tabs mt-6 mb-4" role="tablist" aria-label="Grid reports views">
@@ -1366,7 +1137,7 @@ export function PowerGridExplorer({
             >
               <TabIcon className="h-4 w-4 shrink-0" />
               <span>{t.label}</span>
-              {t.id === 'renewables' && <sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup>}
+              {t.id === 'renewables' && <MonthlyBadge />}
             </button>
           );
         })}
@@ -1375,7 +1146,7 @@ export function PowerGridExplorer({
       {/* Tab Panels */}
       <div className="relative min-h-[400px]">
         {isLoadingDaily && !activeData && (
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-2xl transition-all duration-300">
+          <div className="grid-explorer-loading-overlay absolute inset-0 bg-background/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-2xl">
             <div className="flex flex-col items-center gap-3 bg-card/60 px-6 py-4 rounded-2xl border border-border/50 shadow-2xl backdrop-blur-md animate-in zoom-in-95 duration-150">
               <div className="relative">
                 <div className="h-10 w-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
@@ -1386,16 +1157,31 @@ export function PowerGridExplorer({
           </div>
         )}
 
-        {isDataMissing && (
+        {isDataMissing && !activeData && (
           <div className="grid-explorer-panel space-y-6">
             <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
               <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4 animate-pulse">
                 <Info className="h-8 w-8 text-amber-500" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">Report has not been released for this day yet.</h4>
+              <h4 className="text-base font-bold text-foreground mb-2">
+                {isDateAvailable(selectedDate)
+                  ? 'Report file not loaded yet'
+                  : 'Report has not been released for this day yet'}
+              </h4>
               <p className="text-xs text-muted-foreground max-w-sm mb-4">
-                The daily grid status report and Petrobangla production telemetry for {selectedDate} have not been finalized or published by PGCB/NLDC.
+                {isDateAvailable(selectedDate)
+                  ? `The ${selectedDate} PGCB daily report is in our catalog but could not be fetched — it may still be syncing to the site mirror. Petrobangla field data may load separately below.`
+                  : `The daily grid status report and Petrobangla production telemetry for ${selectedDate} have not been finalized or published by PGCB/NLDC.`}
               </p>
+              {selectedDate !== latestDate && (
+                <button
+                  type="button"
+                  onClick={() => selectAccessibleDate(latestDate)}
+                  className="grid-explorer-control mb-4 px-4 py-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                >
+                  View latest report ({isoDateToLegacy(latestDate) ?? latestDate})
+                </button>
+              )}
               {latestCachedReport?.systemStats && (
                 <div className="bg-muted/10 p-4 rounded-xl border border-border/20 font-sans text-xs text-foreground max-w-md w-full text-left">
                   <div className="font-bold text-amber-500 uppercase tracking-wider text-[10px] mb-2">Latest Available Report:</div>
@@ -1436,7 +1222,7 @@ export function PowerGridExplorer({
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
               <div>
-                <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<DailyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
               <GridLiveBadge label={`Report: ${systemStats.date}`} />
@@ -1456,10 +1242,18 @@ export function PowerGridExplorer({
               })}
             </div>
 
-            <div className="grid-explorer-donut-wrap">              {chartsReady ? (
+            <div className="grid-explorer-donut-wrap">
+              {!chartsReady ? (
+                <div className="grid-explorer-skeleton min-h-[12.5rem] w-[12.5rem] rounded-full mx-auto" aria-hidden />
+              ) : !hasGenerationChartData ? (
+                <div className="grid-explorer-chart-empty min-h-[12.5rem]" role="status">
+                  <div className="grid-explorer-chart-empty__title">No generation data</div>
+                  <p>No fuel mix recorded for this reporting date.</p>
+                </div>
+              ) : (
                 <PieChart width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                   <Pie
-                    data={generationData.filter(d => d.gen > 0)}
+                    data={pieGenerationData}
                     dataKey="gen"
                     nameKey="name"
                     cx={100}
@@ -1473,7 +1267,7 @@ export function PowerGridExplorer({
                     onMouseEnter={(_, i) => setHoveredIndex(i)}
                     onMouseLeave={() => setHoveredIndex(null)}
                   >
-                    {generationData.filter(d => d.gen > 0).map((entry, idx) => {
+                    {pieGenerationData.map((entry, idx) => {
                       const dimmed = hoveredIndex !== null && hoveredIndex !== idx;
                       return (
                         <Cell
@@ -1541,14 +1335,12 @@ export function PowerGridExplorer({
                     </text>
                   </g>
                 </PieChart>
-              ) : (
-                <div className="grid-explorer-skeleton" />
               )}
             </div>
 
             {/* Custom Legend */}
             <div className="grid-chart-legend">
-              {generationData.filter(d => d.gen > 0).map((item, i) => {
+              {pieGenerationData.map((item, i) => {
                 const dimmed = hoveredIndex !== null && hoveredIndex !== i;
                 return (
                   <button
@@ -1568,18 +1360,18 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80">
+            <GridCardFooter>
               <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Progress Report</a></span>
               <span>Audited by: PGCB Network Operations Division</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
-            </div>
+            </GridCardFooter>
           </div>
 
           {/* Cost Bar Chart */}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
               <div>
-                <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type (Total: {(totalCostBdt / 10000000).toFixed(1)} Cr Tk.) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
               <span className="grid-explorer-chip">Cost Analysis</span>
@@ -1686,11 +1478,11 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80">
+            <GridCardFooter>
               <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Reports</a> &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Fuel Gazettes</a></span>
               <span>Audited by: BPDB Audits / CAG Audit Team</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
-            </div>
+            </GridCardFooter>
           </div>
         </div>
 
@@ -1698,7 +1490,7 @@ export function PowerGridExplorer({
         <div className="grid-explorer-chart-card card">
           <div className="grid-explorer-chart-card__head">
             <div>
-              <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+              <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<DailyBadge /></h3>
               <p className="grid-explorer-chart-card__sub">SCADA demand, actual generation, and load shedding profile (Date: {systemStats.date}) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
             </div>
             <span className="grid-explorer-chip bg-destructive/10 text-destructive border-destructive/20">NLDC SCADA Curve</span>
@@ -1800,11 +1592,11 @@ export function PowerGridExplorer({
           })()}
 
           {/* Card Metadata Footer */}
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80">
+          <GridCardFooter>
             <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB NLDC Operations Sheet</a></span>
             <span>Audited by: National Load Despatch Centre (NLDC) System Operators</span>
             <span className="font-medium">Reporting Period: 24-Hour SCADA Log (Date: {systemStats.date})</span>
-          </div>
+          </GridCardFooter>
         </div>
       </div>
       </GridLockedContent> )
@@ -1832,7 +1624,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
               <Zap className="h-5 w-5 text-primary shrink-0" />
               <div>
-                <h3 className="grid-explorer-chart-card__title">Generation &amp; Production Cost Breakdown<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                <h3 className="grid-explorer-chart-card__title">Generation &amp; Production Cost Breakdown<DailyBadge /></h3>
                   <p className="grid-explorer-chart-card__sub">System performance data logged on {systemStats.date} • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
             </div>
@@ -1880,18 +1672,18 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+            <GridCardFooter>
               <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Reports</a> &amp; <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Logs</a></span>
               <span>Audited by: BPDB Finance &amp; Commercial Operations / CAG Audit Team</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
-            </div>
+            </GridCardFooter>
           </div>
 
           {/* Daily Milestones */}
           <div className="grid-explorer-chart-card card p-4 space-y-4">
             <div className="grid-explorer-chart-card__head">
               <div>
-                <h3 className="grid-explorer-chart-card__title">Daily Operational Milestones<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                <h3 className="grid-explorer-chart-card__title">Daily Operational Milestones<DailyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">Key metrics on system margin, load shedding demand, and gas-to-power allocations • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
             </div>
@@ -1935,11 +1727,11 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+            <GridCardFooter>
               <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Operations</a> &amp; <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Production Division</a></span>
               <span>Audited by: NLDC Operators &amp; Petrobangla Billing</span>
               <span className="font-medium">Reporting Period: System Summary (Date: {systemStats.date})</span>
-            </div>
+            </GridCardFooter>
           </div>
         </div>
         </GridLockedContent> )
@@ -1984,7 +1776,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
               <Globe className="h-5 w-5 text-purple-500 shrink-0" />
               <div>
-                <h3 className="grid-explorer-chart-card__title">Cross-Border Power Imports Tracker<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                <h3 className="grid-explorer-chart-card__title">Cross-Border Power Imports Tracker<DailyBadge /></h3>
                   <p className="grid-explorer-chart-card__sub">Real-time import allocations and daily power trade (Report: {systemStats.date}) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
             </div>
@@ -2034,11 +1826,11 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+            <GridCardFooter>
               <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations Division</a></span>
               <span>Audited by: HVDC Bheramara &amp; Cumilla Substations</span>
               <span className="font-medium">Reporting Period: Daily Interconnector Flow (Date: {systemStats.date})</span>
-            </div>
+            </GridCardFooter>
           </div>
         </div>
         </GridLockedContent> )
@@ -2052,7 +1844,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
               <Sun className="h-5 w-5 text-yellow-500 shrink-0" />
               <div>
-                <h3 className="grid-explorer-chart-card__title">Renewable Installed Capacity<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
+                <h3 className="grid-explorer-chart-card__title">Renewable Installed Capacity<MonthlyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">Source: SREDA National Database of Renewable Energy</p>
               </div>
             </div>
@@ -2087,11 +1879,11 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+            <GridCardFooter>
               <span>Source: <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">SREDA Renewable Database</a></span>
               <span>Audited by: SREDA Monitoring &amp; Policy Division</span>
               <span className="font-medium">Reporting Period: Clean Energy Inventory (Date: Jun 2026)</span>
-            </div>
+            </GridCardFooter>
           </div>
 
           {/* SREDA Strategy Progress */}
@@ -2099,7 +1891,7 @@ export function PowerGridExplorer({
             <div className="space-y-4">
               <div className="grid-explorer-chart-card__head">
                 <div>
-                  <h3 className="grid-explorer-chart-card__title">SREDA Renewable Target Progress<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
+                  <h3 className="grid-explorer-chart-card__title">SREDA Renewable Target Progress<MonthlyBadge /></h3>
                   <p className="grid-explorer-chart-card__sub">Tracking towards Sustainable Development Goals (SDG 7)</p>
                 </div>
               </div>
@@ -2147,11 +1939,11 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+            <GridCardFooter>
               <span>Source: <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">SREDA Target Sheets</a></span>
               <span>Audited by: Ministry of Power, Energy &amp; Mineral Resources (MPEMR)</span>
               <span className="font-medium">Reporting Period: Vision 2030/2040 Targets</span>
-            </div>
+            </GridCardFooter>
           </div>
         </div>
         </GridLockedContent>
@@ -2978,52 +2770,143 @@ export function PowerGridExplorer({
               </div>
 
               {/* Substation Filters */}
-              <div className="p-4 bg-card border border-border/60 rounded-2xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 z-40 relative">
-                <div className="relative">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Search substation name..."
-                    value={subSearch}
-                    onChange={(e) => setSubSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 text-xs md:text-sm bg-muted/20 border border-border/40 rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary/50 transition-colors"
+              <div className={cn('grid-explorer-filter-panel p-4 bg-card border border-border/60 rounded-2xl z-40 relative', subFiltersOpen && 'is-open')}>
+                <button
+                  type="button"
+                  className="grid-explorer-filter-panel__toggle"
+                  aria-expanded={subFiltersOpen}
+                  onClick={() => setSubFiltersOpen((o) => !o)}
+                >
+                  <span>Filter substations</span>
+                  <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', subFiltersOpen && 'rotate-180')} />
+                </button>
+                <div className="grid-explorer-filter-panel__body mt-4 sm:mt-0">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                    <input
+                      type="search"
+                      placeholder="Search substation name..."
+                      value={subSearch}
+                      onChange={(e) => setSubSearch(e.target.value)}
+                      className="grid-explorer-control w-full pl-9 pr-4 py-2 text-xs md:text-sm bg-muted/20 text-foreground placeholder-muted-foreground"
+                    />
+                  </div>
+
+                  <CustomDropdown
+                    value={subVoltageFilter}
+                    onChange={setSubVoltageFilter}
+                    options={voltageOptions}
+                    placeholder="All Voltage Classes"
+                    isOpen={isVoltageDropdownOpen}
+                    setIsOpen={setIsVoltageDropdownOpen}
+                    dropdownRef={voltageDropdownRef}
+                  />
+
+                  <CustomDropdown
+                    value={subZoneFilter}
+                    onChange={setSubZoneFilter}
+                    options={zoneOptions}
+                    placeholder="All Operation Zones"
+                    isOpen={isZoneDropdownOpen}
+                    setIsOpen={setIsZoneDropdownOpen}
+                    dropdownRef={zoneDropdownRef}
+                  />
+
+                  <CustomDropdown
+                    value={subOwnerFilter}
+                    onChange={setSubOwnerFilter}
+                    options={ownerOptions}
+                    placeholder="All Owners"
+                    isOpen={isOwnerDropdownOpen}
+                    setIsOpen={setIsOwnerDropdownOpen}
+                    dropdownRef={ownerDropdownRef}
                   />
                 </div>
-
-                <CustomDropdown
-                  value={subVoltageFilter}
-                  onChange={setSubVoltageFilter}
-                  options={voltageOptions}
-                  placeholder="All Voltage Classes"
-                  isOpen={isVoltageDropdownOpen}
-                  setIsOpen={setIsVoltageDropdownOpen}
-                  dropdownRef={voltageDropdownRef}
-                />
-
-                <CustomDropdown
-                  value={subZoneFilter}
-                  onChange={setSubZoneFilter}
-                  options={zoneOptions}
-                  placeholder="All Operation Zones"
-                  isOpen={isZoneDropdownOpen}
-                  setIsOpen={setIsZoneDropdownOpen}
-                  dropdownRef={zoneDropdownRef}
-                />
-
-                <CustomDropdown
-                  value={subOwnerFilter}
-                  onChange={setSubOwnerFilter}
-                  options={ownerOptions}
-                  placeholder="All Owners"
-                  isOpen={isOwnerDropdownOpen}
-                  setIsOpen={setIsOwnerDropdownOpen}
-                  dropdownRef={ownerDropdownRef}
-                />
               </div>
 
               {/* Substations Table */}
               <div className="grid-explorer-chart-card card">
-                <div className="grid-explorer-table-wrap">
+                <div className="flex items-center justify-end gap-2 px-4 pt-4">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Density</span>
+                  {(['comfortable', 'compact'] as const).map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setSubTableDensity(d)}
+                      className={cn(
+                        'px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all duration-150 capitalize',
+                        subTableDensity === d
+                          ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                          : 'bg-muted/10 border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted/30',
+                      )}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+
+                <p className="grid-explorer-table-scroll-hint sm:hidden px-4" role="note">
+                  Swipe horizontally to see all columns
+                </p>
+                <GridDataTable
+                  stickyHeader
+                  stickyFirstCol
+                  density={subTableDensity}
+                  empty={paginatedSubstations.length === 0}
+                  emptyMessage="No substations match your filter criteria."
+                  aria-label="National grid substation registry"
+                  footer={
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-border/40">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">Show:</span>
+                        <div className="flex gap-1.5">
+                          {[25, 50, 100].map((size) => (
+                            <button
+                              key={size}
+                              type="button"
+                              onClick={() => {
+                                setItemsPerPage(size);
+                                setSubPage(1);
+                              }}
+                              className={cn(
+                                'px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all duration-150',
+                                itemsPerPage === size
+                                  ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                                  : 'bg-muted/10 border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted/30',
+                              )}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground">per page</span>
+                      </div>
+
+                      <span className="text-xs text-muted-foreground text-center">
+                        Page <strong className="text-foreground">{totalSubPages === 0 ? 0 : subPage}</strong> of <strong className="text-foreground">{totalSubPages}</strong> ({filteredSubstations.length} total stations)
+                      </span>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          disabled={subPage === 1}
+                          onClick={() => setSubPage((p) => Math.max(p - 1, 1))}
+                          className="p-1.5 rounded-lg border border-border/40 hover:bg-muted/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-muted-foreground focus:outline-none"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={subPage === totalSubPages || totalSubPages === 0}
+                          onClick={() => setSubPage((p) => Math.min(p + 1, totalSubPages))}
+                          className="p-1.5 rounded-lg border border-border/40 hover:bg-muted/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-muted-foreground focus:outline-none"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  }
+                >
                   <table className="grid-explorer-table">
                     <thead>
                       <tr>
@@ -3032,108 +2915,48 @@ export function PowerGridExplorer({
                         <th>Voltage Class</th>
                         <th>Operation Zone</th>
                         <th>Transformer Detail</th>
-                        <th className="text-left">Total Capacity</th>
+                        <th className="text-right">Total Capacity</th>
                         <th>Ownership</th>
                         <th>Grid Circle</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedSubstations.length > 0 ? (
-                        paginatedSubstations.map((sub, idx) => (
-                          <tr key={idx} className="hover:bg-muted/5 transition-colors">
-                            <td className="font-semibold text-muted-foreground">{sub.sn}</td>
-                            <td className="font-semibold text-foreground">{sub.name}</td>
-                            <td>
-                              <span className={cn(
-                                "px-2 py-0.5 rounded-full text-[10px] font-bold",
-                                sub.voltage === '400kV' ? "bg-red-500/10 text-red-500 border border-red-500/20" :
-                                sub.voltage === '230kV' ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" :
-                                sub.voltage === '132kV' ? "bg-blue-500/10 text-blue-500 border border-blue-500/20" :
-                                "bg-indigo-500/10 text-indigo-500 border border-indigo-500/20"
-                              )}>
-                                {sub.voltage}
-                              </span>
-                            </td>
-                            <td>{sub.zone}</td>
-                            <td className="font-mono text-xs">{sub.transformer}</td>
-                            <td className="text-left font-medium tabular-nums text-foreground">{sub.capacity}</td>
-                            <td>
-                              <span className={cn(
-                                "px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                                sub.owner === 'POWER GRID' ? "bg-primary/10 text-primary" :
-                                sub.owner === 'Bulk' ? "bg-amber-500/10 text-amber-500" :
-                                "bg-muted text-muted-foreground"
-                              )}>
-                                {sub.owner}
-                              </span>
-                            </td>
-                            <td>{sub.circle}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={8} className="text-center py-8 text-muted-foreground">
-                            No substations match your filter criteria.
+                      {paginatedSubstations.map((sub) => (
+                        <tr key={substationRowKey(sub)} className="hover:bg-muted/5 transition-colors">
+                          <td className="font-semibold text-muted-foreground tabular-nums">{sub.sn}</td>
+                          <td className="font-semibold text-foreground" title={sub.name}>
+                            <span className="grid-explorer-table__truncate">{sub.name}</span>
                           </td>
+                          <td>
+                            <span className={cn(
+                              'px-2 py-0.5 rounded-full text-[10px] font-bold',
+                              sub.voltage === '400kV' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                              sub.voltage === '230kV' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                              sub.voltage === '132kV' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                              'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20',
+                            )}>
+                              {sub.voltage}
+                            </span>
+                          </td>
+                          <td>{sub.zone}</td>
+                          <td className="font-mono text-xs">{sub.transformer}</td>
+                          <td className="text-right font-medium tabular-nums text-foreground">{sub.capacity}</td>
+                          <td>
+                            <span className={cn(
+                              'px-2 py-0.5 rounded-full text-[10px] font-semibold',
+                              sub.owner === 'POWER GRID' ? 'bg-primary/10 text-primary' :
+                              sub.owner === 'Bulk' ? 'bg-amber-500/10 text-amber-500' :
+                              'bg-muted text-muted-foreground',
+                            )}>
+                              {sub.owner}
+                            </span>
+                          </td>
+                          <td>{sub.circle}</td>
                         </tr>
-                      )}
+                      ))}
                     </tbody>
                   </table>
-                </div>
-
-                {/* Pagination Controls */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-border/40 mt-4">
-                  {/* Left: Items per page selector */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">Show:</span>
-                    <div className="flex gap-1.5">
-                      {[25, 50, 100].map((size) => (
-                        <button
-                          key={size}
-                          type="button"
-                          onClick={() => {
-                            setItemsPerPage(size);
-                            setSubPage(1);
-                          }}
-                          className={cn(
-                            "px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all duration-150",
-                            itemsPerPage === size
-                              ? "bg-primary/10 text-primary border-primary/20 shadow-sm"
-                              : "bg-muted/10 border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                          )}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                    <span className="text-xs text-muted-foreground">per page</span>
-                  </div>
-
-                  {/* Middle: Page status text */}
-                  <span className="text-xs text-muted-foreground text-center">
-                    Page <strong className="text-foreground">{totalSubPages === 0 ? 0 : subPage}</strong> of <strong className="text-foreground">{totalSubPages}</strong> ({filteredSubstations.length} total stations)
-                  </span>
-
-                  {/* Right: Prev / Next Buttons */}
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={subPage === 1}
-                      onClick={() => setSubPage((p) => Math.max(p - 1, 1))}
-                      className="p-1.5 rounded-lg border border-border/40 hover:bg-muted/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-muted-foreground focus:outline-none"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={subPage === totalSubPages || totalSubPages === 0}
-                      onClick={() => setSubPage((p) => Math.min(p + 1, totalSubPages))}
-                      className="p-1.5 rounded-lg border border-border/40 hover:bg-muted/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-muted-foreground focus:outline-none"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
+                </GridDataTable>
               </div>
 
               {/* Technical Glossary Footnote */}
@@ -4148,7 +3971,7 @@ export function PowerGridExplorer({
               <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                 <Cable className="h-5 w-5 text-primary shrink-0" />
                 <div>
-                  <h3 className="grid-explorer-chart-card__title">Zone-wise Demand &amp; Load-Shedding<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                  <h3 className="grid-explorer-chart-card__title">Zone-wise Demand &amp; Load-Shedding<DailyBadge /></h3>
                   <p className="grid-explorer-chart-card__sub">SCADA readings recorded at evening peak hour (21:00 Hr.) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
                 </div>
               </div>
@@ -4199,11 +4022,11 @@ export function PowerGridExplorer({
               </div>
 
               {/* Card Metadata Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+              <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations Log</a></span>
                 <span>Audited by: National Load Despatch Centre (NLDC) Operators</span>
                 <span className="font-medium">Reporting Period: Evening Peak Load (Date: {systemStats.date})</span>
-              </div>
+              </GridCardFooter>
             </div>
 
             {/* Daily Outage Log */}
@@ -4211,7 +4034,7 @@ export function PowerGridExplorer({
               <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                 <FileText className="h-5 w-5 text-amber-500 shrink-0" />
                 <div>
-                  <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup></h3>
+                  <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<DailyBadge /></h3>
                   <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
                 </div>
               </div>
@@ -4232,11 +4055,11 @@ export function PowerGridExplorer({
               </div>
 
               {/* Card Metadata Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+              <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Outage Log</a></span>
                 <span>Audited by: PGCB Network Protection &amp; NLDC Control Room</span>
                 <span className="font-medium">Reporting Period: 24-Hour Logs (Date: {systemStats.date})</span>
-              </div>
+              </GridCardFooter>
             </div>
           </div>
 
@@ -4290,11 +4113,11 @@ export function PowerGridExplorer({
               </div>
 
               {/* Card Metadata Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+              <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations &amp; NLDC Grid Map</a></span>
                 <span>Audited by: National Load Despatch Centre (NLDC)</span>
                 <span className="font-medium">Status: Indicative Operating Capacity &amp; Load</span>
-              </div>
+              </GridCardFooter>
             </div>
           </div>
         </div>
@@ -4496,11 +4319,11 @@ export function PowerGridExplorer({
                 </div>
 
                 {/* Card Metadata Footer */}
-                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                <GridCardFooter>
                   <span>Source: <a href="https://www.mof.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Ministry of Finance</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Reports</a></span>
                   <span>Audited by: Ministry of Finance Budget Audits &amp; CAG</span>
                   <span className="font-medium">Data compiled from FY 2010-11 to FY 2026-27</span>
-                </div>
+                </GridCardFooter>
               </div>
 
               {/* Historical Pricing Analysis Section (Moved from Gen tab) */}
@@ -4657,11 +4480,11 @@ export function PowerGridExplorer({
                 </div>
 
                 {/* Card Metadata Footer */}
-                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                <GridCardFooter>
                   <span>Source: <a href="https://www.berc.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BERC Tariff Orders</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Reports</a></span>
                   <span>Audited by: Office of the Comptroller &amp; Auditor General (CAG)</span>
                   <span className="font-medium">Reporting Period: FY 2010 - FY 2024</span>
-                </div>
+                </GridCardFooter>
               </div>
 
               {/* Comprehensive Macro-Economic Study */}
@@ -4751,11 +4574,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Accounts &amp; Audit Reports</a></span>
                     <span>Audited by: Hoda Vasi Chowdhury &amp; Co. / Office of the Comptroller &amp; Auditor General (CAG)</span>
                     <span className="font-medium">Reporting Period: FY 2020 - FY 2026 Financial Audits</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
 
                 {/* LNG Dependency Area Chart */}
@@ -4842,11 +4665,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Balance Sheets &amp; Daily MIS Reports</a></span>
                     <span>Audited by: MABS &amp; J Partners Chartered Accountants / CAG Bangladesh</span>
                     <span className="font-medium">Reporting Period: Historical Reserves Log (2018 - 2026)</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
               </div>
 
@@ -4884,11 +4707,11 @@ export function PowerGridExplorer({
               </div>
 
               {/* Section Metadata Footer */}
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 text-[10px] text-muted-foreground/75 px-1">
+              <GridCardFooter>
                 <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Petrobangla Hydrocarbon Unit</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">BPDB Annual Financials</a></span>
                 <span>Audited by: CAG Audit Reports &amp; Ministry of Finance (MoF) Gazettes</span>
                 <span>Reporting Period: Macro Analysis (2026 Audit Reports)</span>
-              </div>
+              </GridCardFooter>
             </div>
           )}
 
@@ -5022,7 +4845,7 @@ export function PowerGridExplorer({
                       {/* Fuel Mix Card */}
                       <div className="grid-explorer-chart-card card">
                         <div className="mb-4">
-                          <h3 className="grid-explorer-chart-card__title">Energy Fuel Mix<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
+                          <h3 className="grid-explorer-chart-card__title">Energy Fuel Mix<MonthlyBadge /></h3>
                     <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                           <p className="grid-explorer-chart-card__sub text-xs text-muted-foreground mt-0.5 leading-relaxed">
                             Net generation by fuel source in {currentMonthlyData?.month} {currentMonthlyData?.year} (MKWh)
@@ -5161,7 +4984,7 @@ export function PowerGridExplorer({
                       {/* Regional Peak Supply Card */}
                       <div className="grid-explorer-chart-card card">
                         <div className="mb-4">
-                          <h3 className="grid-explorer-chart-card__title">Regional Maximum Peak Supply<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
+                          <h3 className="grid-explorer-chart-card__title">Regional Maximum Peak Supply<MonthlyBadge /></h3>
                     <p className="grid-explorer-chart-card__sub">
                             Substation peak loads served by grid zone in {currentMonthlyData?.month} {currentMonthlyData?.year} (MW)
                            — <span className="text-primary font-semibold text-xs">Tracked since 2014</span></p>
@@ -5267,7 +5090,7 @@ export function PowerGridExplorer({
               <div className="grid-explorer-chart-card card">
                 <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:pr-4">
                   <div>
-                    <h3 className="grid-explorer-chart-card__title">PGCB 13-Year Historical Growth Trends<sup className="text-orange-500 font-extrabold text-[10px] ml-2 select-none">Monthly</sup></h3>
+                    <h3 className="grid-explorer-chart-card__title">PGCB 13-Year Historical Growth Trends<MonthlyBadge /></h3>
                     <p className="grid-explorer-chart-card__sub">Grid operational metrics charted monthly from 2013 to 2026 • <span className="text-primary font-semibold text-xs">Tracked since January 2013</span></p>
                   </div>
                   
@@ -5627,10 +5450,10 @@ export function PowerGridExplorer({
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                <GridCardFooter>
                   <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Monthly System Operation Reports</a></span>
                   <span>Data Period: January 2013 - April 2026 (157 Consecutive Reports)</span>
-                </div>
+                </GridCardFooter>
               </div>
             </div>
           )}
@@ -5715,11 +5538,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: <a href="https://www.bb.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Bangladesh Bank Interbank Weighted Average Statistics</a> &amp; <a href="http://bbs.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BBS Inflation Database</a></span>
                     <span>Audited by: Bangladesh Bank Monetary Policy Division / BBS Census Bureau</span>
                     <span className="font-medium">Reporting Period: Macro-Economic Tracker (2010 - 2026)</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
 
                 {/* Spot LNG vs Coal Import Price Trends */}
@@ -5789,11 +5612,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-2 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: <a href="https://www.opec.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">OPEC Bulletin Daily Spot Prices</a> &amp; <a href="https://www.spglobal.com/commodityinsights/en" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Platts JKM LNG Assessments</a> / BPC Accounts</span>
                     <span>Audited by: World Bank Commodity Division / BPC Price Auditing Committee</span>
                     <span className="font-medium">Reporting Period: Global Indexes (2010 - 2026)</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
               </div>
 
@@ -5837,11 +5660,11 @@ export function PowerGridExplorer({
                 </div>
 
                 {/* Card Metadata Footer */}
-                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                <GridCardFooter>
                   <span>Source: <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Retail Gazettes</a> &amp; <a href="https://www.bb.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Bangladesh Bank Databases</a></span>
                   <span>Audited by: BPC Accounts Division &amp; World Bank commodity research division</span>
                   <span className="font-medium">Reporting Period: Historical Macro Pricing Benchmarks (2010 - 2026)</span>
-                </div>
+                </GridCardFooter>
               </div>
             </div>
           )}
@@ -5949,11 +5772,11 @@ export function PowerGridExplorer({
                     </div>
 
                     {/* Card Metadata Footer */}
-                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                    <GridCardFooter>
                       <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financial Reports</a></span>
                       <span>Audited by: SF Ahmed &amp; Co. Chartered Accountants / Office of the CAG Bangladesh</span>
                       <span className="font-medium">Reporting Period: Audited Accounts (FY 2010 - FY 2026)</span>
-                    </div>
+                    </GridCardFooter>
                   </div>
 
                   {/* BPDB table */}
@@ -5984,11 +5807,11 @@ export function PowerGridExplorer({
                     </div>
 
                     {/* Card Metadata Footer */}
-                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                    <GridCardFooter>
                       <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financial Reports</a></span>
                       <span>Audited by: SF Ahmed &amp; Co. Chartered Accountants / Office of the CAG Bangladesh</span>
                       <span className="font-medium">Reporting Period: Audited Financial Statements (FY 2010 - FY 2026)</span>
-                    </div>
+                    </GridCardFooter>
                   </div>
                 </div>
               ) : (
@@ -6058,11 +5881,11 @@ export function PowerGridExplorer({
                     </div>
 
                     {/* Card Metadata Footer */}
-                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                    <GridCardFooter>
                       <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Financial Accounts</a></span>
                       <span>Audited by: MABS &amp; J Partners Chartered Accountants / Office of the CAG Bangladesh</span>
                       <span className="font-medium">Reporting Period: Audited Balance Sheets (FY 2010 - FY 2026)</span>
-                    </div>
+                    </GridCardFooter>
                   </div>
 
                   {/* Petrobangla table */}
@@ -6093,11 +5916,11 @@ export function PowerGridExplorer({
                     </div>
 
                     {/* Card Metadata Footer */}
-                    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                    <GridCardFooter>
                       <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Financial Accounts</a></span>
                       <span>Audited by: MABS &amp; J Partners Chartered Accountants / Office of the CAG Bangladesh</span>
                       <span className="font-medium">Reporting Period: Audited Accounts Summary (FY 2010 - FY 2026)</span>
-                    </div>
+                    </GridCardFooter>
                   </div>
                 </div>
               )}
@@ -6195,11 +6018,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: OPEC Bulletin Historical Spot Prices &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Official Pricing Gazettes</a></span>
                     <span>Audited by: BPC Pricing Committee &amp; OPEC Secretariat</span>
                     <span className="font-medium">Reporting Period: Global Comparison (1975 - 2026)</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
 
                 {/* Chart 2: Gas vs Tariff */}
@@ -6280,11 +6103,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: World Bank Pink Sheets &amp; <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Annual Reports</a></span>
                     <span>Audited by: BERC Tariff Division &amp; World Bank Commodity Markets Group</span>
                     <span className="font-medium">Reporting Period: Global Comparison (2010 - 2026)</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
               </div>
 
@@ -6365,11 +6188,11 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Card Metadata Footer */}
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 mt-4 pt-3 border-t border-border/40 text-[10px] text-muted-foreground/80 px-4 pb-4">
+                  <GridCardFooter>
                     <span>Source: IRENA Renewable Cost Databases &amp; BPDB Power Purchase Agreements (PPAs)</span>
                     <span>Audited by: SREDA Solar Registry &amp; BPDB Planning &amp; Design Division</span>
                     <span className="font-medium">Reporting Period: Global Cost Comparison (2015 - 2026)</span>
-                  </div>
+                  </GridCardFooter>
                 </div>
               </div>
             )}

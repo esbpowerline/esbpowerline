@@ -18,6 +18,7 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { Activity, Layers, TrendingUp, BarChart3 } from 'lucide-react';
+import { GridCardFooter } from '@/components/news/power-grid/GridExplorerUI';
 
 export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allowedYears = null }: { chartTheme: any; isTruncated?: boolean; allowedYears?: number | null }) {
   const data = longitudinalStudyData;
@@ -198,11 +199,11 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Annual Progress Reports</a></span>
           <span>Verified by: PGCB System Planning &amp; Project Management Departments</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025</span>
-        </div>
+        </GridCardFooter>
       </div>
 
       {/* Cumulative Grid Buildout */}
@@ -258,11 +259,11 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Transmission System Studies</a></span>
           <span>Verified by: NLDC (National Load Despatch Centre) System Map</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025</span>
-        </div>
+        </GridCardFooter>
       </div>
 
       {/* Transmission Expansion Pace */}
@@ -315,11 +316,11 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Project Audit Summaries</a></span>
           <span>Verified by: Ministry of Power, Energy and Mineral Resources (MPEMR)</span>
           <span className="font-medium">Reporting Period: FY 2012 - FY 2025</span>
-        </div>
+        </GridCardFooter>
       </div>
 
       {/* Indexed Trajectories */}
@@ -381,11 +382,11 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         </div>
 
         {/* Card Metadata Footer */}
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>Source: <a href="https://www.mof.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">MOF Budget Briefs</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB/PGCB Statistics</a></span>
           <span>Audited by: Comptroller &amp; Auditor General (CAG) &amp; IMED, Bangladesh</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025 Baseline Study</span>
-        </div>
+        </GridCardFooter>
       </div>
 
     </div>

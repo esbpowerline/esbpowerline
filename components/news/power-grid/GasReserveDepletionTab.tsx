@@ -38,6 +38,7 @@ import {
   reservesChartYMax,
   type ReserveScenarioId,
 } from '@/lib/data/macro/reserves';
+import { GridCardFooter } from './GridExplorerUI';
 import { PetrobanglaMacroGasSection } from './PetrobanglaMacroGasSection';
 import { GasReserveScenarioOutlook } from './GasReserveScenarioOutlook';
 
@@ -338,7 +339,7 @@ export function GasReserveDepletionTab({
             Steeper lines mean faster depletion.
           </p>
         </div>
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>
             Source:{' '}
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
@@ -348,7 +349,7 @@ export function GasReserveDepletionTab({
           </span>
           <span>Audited by: MPEMR · CAG Bangladesh</span>
           <span className="font-medium">2020–2026 audited · 2026–2038 forecast</span>
-        </div>
+        </GridCardFooter>
       </div>
 
       <PetrobanglaMacroGasSection

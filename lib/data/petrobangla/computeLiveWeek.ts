@@ -34,12 +34,33 @@ export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeek
   };
 }
 
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
+
+/** X-axis label — disambiguate when Petrobangla reuses the same gas-day label on adjacent files. */
+export function formatLiveWeekAxisLabel(date: string, label?: string, duplicateGasLabel = false): string {
+  if (!duplicateGasLabel && label) {
+    return label.split(',')[0]?.trim() ?? date.slice(5);
+  }
+  const [, m, d] = date.split('-').map(Number);
+  if (!m || !d) return date.slice(5);
+  return `${d} ${MONTH_SHORT[m - 1] ?? ''}`.trim();
+}
+
 export function liveWeekTimelinePoints(bundle: PetrobanglaLiveWeekBundle) {
+  const rawLabels = bundle.days.map((d) => d.report.report_date_label?.split(',')[0]?.trim() ?? '');
+  const labelCounts = rawLabels.reduce<Record<string, number>>((acc, l) => {
+    if (l) acc[l] = (acc[l] ?? 0) + 1;
+    return acc;
+  }, {});
+
   return bundle.days.map((d) => {
     const gt = getDistributionGrandTotal(d);
+    const gasLabel = d.report.report_date_label?.split(',')[0]?.trim() ?? '';
+    const duplicateGasLabel = Boolean(gasLabel && (labelCounts[gasLabel] ?? 0) > 1);
     return {
       date: d.report.report_date_end,
       label: d.report.report_date_label,
+      axisLabel: formatLiveWeekAxisLabel(d.report.report_date_end, d.report.report_date_label, duplicateGasLabel),
       totalGas: d.production.grand_total.gas_mmcfd,
       powerDemand: gt.power_demand_mmcfd,
       powerSupply: gt.power_supply_mmcfd,

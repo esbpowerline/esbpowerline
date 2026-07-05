@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Leaf, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { GridChartExternalLegend } from '@/components/news/PowerGridChartUI';
+import { GridCardFooter } from './GridExplorerUI';
 import {
   RESERVE_FORECAST_MILESTONES,
   RESERVE_SCENARIO_COLORS,
@@ -252,11 +253,11 @@ export function GasReserveScenarioRail({ activeScenario, onScenarioHover, embedd
               <strong>What changes:</strong> Industrial load, power-sector gas burn, and efficiency assumptions — not the starting reserve audit.
             </p>
           </div>
-          <div className="grid-explorer-card-footer">
+          <GridCardFooter>
             <span>Source: MPEMR multi-scenario audit</span>
             <span>Audited by: MPEMR · CAG Bangladesh</span>
             <span className="font-medium">Forked {FORECAST_START}–2038</span>
-          </div>
+          </GridCardFooter>
         </div>
       )}
     </aside>

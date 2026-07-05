@@ -74,7 +74,7 @@ export function CustomDropdown({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'w-full relative flex items-center justify-center gap-2 px-3.5 py-2 text-xs border border-border/40 rounded-xl text-foreground focus:outline-none focus:border-primary/50 transition-all duration-150 font-semibold shadow-sm pr-8',
+          'grid-explorer-control w-full relative flex items-center justify-center gap-2 px-3.5 py-2 min-h-11 text-xs text-foreground font-semibold shadow-sm pr-8',
           noBackground
             ? 'bg-transparent hover:bg-muted/10 hover:border-primary/30'
             : 'bg-muted/20 hover:bg-muted/30 hover:border-primary/30',
@@ -127,7 +127,7 @@ export function CustomDropdown({
                   setIsOpen(false);
                 }}
                 className={cn(
-                  'flex items-center rounded-xl text-xs md:text-sm font-semibold transition-all select-none text-left',
+                  'flex items-center rounded-xl text-xs md:text-sm font-semibold transition-colors duration-150 select-none text-left min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
                   layout === 'grid' ? 'justify-center p-2' : 'w-full justify-between px-3.5 py-2.5',
                   locked
                     ? cn(

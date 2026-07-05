@@ -94,14 +94,19 @@ export function PbLiveTimeline({
 }) {
   const chartTheme = useChartTheme();
   const dayCount = bundle.days.length;
-  const data = liveWeekTimelinePoints(bundle).map((p, i) => ({
+  const points = liveWeekTimelinePoints(bundle);
+  const data = points.map((p, i) => ({
     ...p,
     shortLabel:
-      dayCount > 15
-        ? (i === 0 || i === dayCount - 1 || i % 5 === 0 ? p.date.slice(5) : '')
-        : dayCount > 7
-          ? (i % 2 === 0 ? p.date.slice(5) : '')
-          : (p.label?.split(',')[0] ?? p.date.slice(5)),
+      dayCount > 30
+        ? i === 0 || i === dayCount - 1 || i % Math.ceil(dayCount / 6) === 0
+          ? p.axisLabel
+          : ''
+        : dayCount > 14
+          ? i % 2 === 0
+            ? p.axisLabel
+            : ''
+          : p.axisLabel,
     highlight: p.date === highlightDate,
   }));
 

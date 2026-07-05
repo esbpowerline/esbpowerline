@@ -8,71 +8,40 @@ import {
   AudienceModeToggle,
   PetrobanglaOfficialSourceLink,
 } from './petrobangla-archive/PetrobanglaArchiveShared';
+import {
+  ArchiveBadge,
+  DailyBadge,
+  GridExplanationBlock,
+  GridSourceFooter,
+  LiveBadge,
+} from './GridExplorerUI';
 
-export function DailyBadge() {
-  return <sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup>;
-}
+export { ArchiveBadge, DailyBadge, LiveBadge };
 
-export function LiveBadge() {
-  return <sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Live</sup>;
-}
-
-export function ArchiveBadge() {
-  return <sup className="text-sky-500 font-extrabold text-[10px] ml-2 select-none">Archive</sup>;
-}
-
-export function GasExplanationBlock({
-  what,
-  insight,
-  className,
-}: {
-  what: ReactNode;
-  insight?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        'bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2',
-        className,
-      )}
-    >
-      <p>
-        <strong>What is being shown?</strong>
-      </p>
-      <div className="leading-relaxed">{what}</div>
-      {insight && (
-        <p className="leading-relaxed">
-          <strong>Analytical Insight:</strong> {insight}
-        </p>
-      )}
-    </div>
-  );
-}
-
+/** Gas tab panels — thin alias preserving `reportingPeriod` prop name */
 export function GasSourceFooter({
   source,
   auditedBy,
   reportingPeriod,
   className,
 }: {
-  source: ReactNode;
+  source: React.ReactNode;
   auditedBy: string;
   reportingPeriod: string;
   className?: string;
 }) {
   return (
-    <div
-      className={cn('grid-explorer-card-footer', className)}
-    >
-      <span>
-        Source: {source}
-      </span>
-      <span>Audited by: {auditedBy}</span>
-      <span className="font-medium">{reportingPeriod}</span>
-    </div>
+    <GridSourceFooter
+      source={source}
+      auditedBy={auditedBy}
+      reporting={reportingPeriod}
+      className={className}
+    />
   );
 }
+
+/** @deprecated Use GridExplanationBlock */
+export const GasExplanationBlock = GridExplanationBlock;
 
 export function GasSectorFootnote() {
   return (
@@ -127,7 +96,6 @@ export function GasTabHero({
   audienceMode: AudienceMode;
   onAudienceModeChange: (mode: AudienceMode) => void;
   showAudienceToggle?: boolean;
-  /** gas = daily tab context; macro = reserve depletion sub-tab */
   variant?: 'gas' | 'macro';
 }) {
   const isMacro = variant === 'macro';

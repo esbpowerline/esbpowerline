@@ -1,21 +1,60 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { Activity, Droplet, Flame, Layers, TrendingUp } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import type { LiveWeekKpis } from '@/lib/data/petrobangla/types';
-import { LiveBadge } from './pbLiveShared';
+import {
+  GridKpiLabel,
+  GridSinceBadge,
+  LiveBadge,
+} from '@/components/news/power-grid/GridExplorerUI';
+
+function PbLiveKpiCard({
+  icon: Icon,
+  iconClassName,
+  label,
+  value,
+  valueClassName,
+  hint,
+}: {
+  icon: typeof Droplet;
+  iconClassName?: string;
+  label: ReactNode;
+  value: ReactNode;
+  valueClassName?: string;
+  hint: ReactNode;
+}) {
+  return (
+    <div className="grid-explorer-kpi stat group">
+      <Icon className={cn('grid-explorer-kpi__icon', iconClassName)} />
+      <div>
+        <GridKpiLabel>{label}</GridKpiLabel>
+        <div className={cn('grid-explorer-kpi__value', valueClassName)}>{value}</div>
+        <p className="text-[9px] text-muted-foreground mt-1">{hint}</p>
+      </div>
+    </div>
+  );
+}
 
 export function PbLiveKpiStrip({ kpis, showAll }: { kpis: LiveWeekKpis; showAll: boolean }) {
   const fulfillmentClass = kpis.powerFulfillmentPct < 45 ? 'text-red-500' : 'text-amber-500';
 
   return (
     <>
-      <div className="grid-explorer-kpi stat group">
-        <Droplet className="grid-explorer-kpi__icon text-sky-500" />
-        <div>
-          <div className="grid-explorer-kpi__label">Latest National Gas<LiveBadge /><sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
-          <div className="grid-explorer-kpi__value">{formatNumber(kpis.latestGas, 1)}</div>
-          <p className="text-[9px] text-muted-foreground mt-1">
+      <PbLiveKpiCard
+        icon={Droplet}
+        iconClassName="text-sky-500"
+        label={
+          <>
+            Latest National Gas
+            <LiveBadge />
+            <GridSinceBadge />
+          </>
+        }
+        value={formatNumber(kpis.latestGas, 1)}
+        hint={
+          <>
             {kpis.latestLabel}
             {kpis.latestGasDelta != null && (
               <span className={kpis.latestGasDelta >= 0 ? ' text-emerald-500' : ' text-red-500'}>
@@ -23,53 +62,68 @@ export function PbLiveKpiStrip({ kpis, showAll }: { kpis: LiveWeekKpis; showAll:
                 {kpis.latestGasDelta >= 0 ? '▲' : '▼'} {formatNumber(Math.abs(kpis.latestGasDelta), 1)} vs prior day
               </span>
             )}
-          </p>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {showAll && (
         <>
-          <div className="grid-explorer-kpi stat group">
-            <Activity className="grid-explorer-kpi__icon text-primary" />
-            <div>
-              <div className="grid-explorer-kpi__label">7-Day Average Gas<LiveBadge /><sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
-              <div className="grid-explorer-kpi__value">{formatNumber(kpis.weekAvgGas, 0)}</div>
-              <p className="text-[9px] text-muted-foreground mt-1">Weekly official average MMCFD</p>
-            </div>
-          </div>
+          <PbLiveKpiCard
+            icon={Activity}
+            iconClassName="text-primary"
+            label={
+              <>
+                7-Day Average Gas
+                <LiveBadge />
+                <GridSinceBadge />
+              </>
+            }
+            value={formatNumber(kpis.weekAvgGas, 0)}
+            hint="Weekly official average MMCFD"
+          />
 
-          <div className="grid-explorer-kpi stat group">
-            <Flame className={cn('grid-explorer-kpi__icon', fulfillmentClass)} />
-            <div>
-              <div className="grid-explorer-kpi__label">Power Fulfillment<LiveBadge /><sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
-              <div className={cn('grid-explorer-kpi__value', fulfillmentClass)}>
-                {kpis.powerFulfillmentPct.toFixed(1)}%
-              </div>
-              <p className="text-[9px] text-muted-foreground mt-1">
-                {formatNumber(kpis.powerSupply, 1)} of {formatNumber(kpis.powerDemand, 1)} MMCFD to plants
-              </p>
-            </div>
-          </div>
+          <PbLiveKpiCard
+            icon={Flame}
+            iconClassName={fulfillmentClass}
+            label={
+              <>
+                Power Fulfillment
+                <LiveBadge />
+                <GridSinceBadge />
+              </>
+            }
+            value={`${kpis.powerFulfillmentPct.toFixed(1)}%`}
+            valueClassName={fulfillmentClass}
+            hint={`${formatNumber(kpis.powerSupply, 1)} of ${formatNumber(kpis.powerDemand, 1)} MMCFD to plants`}
+          />
 
-          <div className="grid-explorer-kpi stat group">
-            <Layers className="grid-explorer-kpi__icon text-purple-500" />
-            <div>
-              <div className="grid-explorer-kpi__label">LNG Dependency<LiveBadge /><sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
-              <div className="grid-explorer-kpi__value">{kpis.lngSharePct.toFixed(1)}%</div>
-              <p className="text-[9px] text-muted-foreground mt-1">{formatNumber(kpis.lngGasMmcfd, 1)} MMCFD imported</p>
-            </div>
-          </div>
+          <PbLiveKpiCard
+            icon={Layers}
+            iconClassName="text-purple-500"
+            label={
+              <>
+                LNG Dependency
+                <LiveBadge />
+                <GridSinceBadge />
+              </>
+            }
+            value={`${kpis.lngSharePct.toFixed(1)}%`}
+            hint={`${formatNumber(kpis.lngGasMmcfd, 1)} MMCFD imported`}
+          />
 
-          <div className="grid-explorer-kpi stat group">
-            <TrendingUp className="grid-explorer-kpi__icon text-amber-500" />
-            <div>
-              <div className="grid-explorer-kpi__label">Week Volatility<LiveBadge /><sup className="text-muted-foreground/60 font-medium text-[9px] ml-1.5 select-none lowercase">since 2020</sup></div>
-              <div className="grid-explorer-kpi__value">{formatNumber(kpis.weekVolatility, 1)}</div>
-              <p className="text-[9px] text-muted-foreground mt-1">
-                Range {formatNumber(kpis.weekMinGas, 0)}–{formatNumber(kpis.weekMaxGas, 0)} MMCFD
-              </p>
-            </div>
-          </div>
+          <PbLiveKpiCard
+            icon={TrendingUp}
+            iconClassName="text-amber-500"
+            label={
+              <>
+                Week Volatility
+                <LiveBadge />
+                <GridSinceBadge />
+              </>
+            }
+            value={formatNumber(kpis.weekVolatility, 1)}
+            hint={`Range ${formatNumber(kpis.weekMinGas, 0)}–${formatNumber(kpis.weekMaxGas, 0)} MMCFD`}
+          />
         </>
       )}
     </>

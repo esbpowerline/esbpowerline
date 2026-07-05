@@ -2,28 +2,50 @@ import { isQuarantined } from './constants';
 import type {
   PetrobanglaDaily,
   PetrobanglaIndex,
+  PetrobanglaIndexDay,
+  PetrobanglaTimelineDay,
   PetrobanglaTimelineSummary,
 } from './types';
 import { QuarantinedDayError } from './types';
 
 let indexCache: PetrobanglaIndex | null = null;
+let indexDayMap: Map<string, PetrobanglaIndexDay> | null = null;
 let timelineCache: PetrobanglaTimelineSummary | null = null;
+let timelineDayMap: Map<string, PetrobanglaTimelineDay> | null = null;
 const dayCache = new Map<string, PetrobanglaDaily>();
+
+function ingestIndex(data: PetrobanglaIndex) {
+  indexCache = data;
+  indexDayMap = new Map(data.days.map((d) => [d.date, d]));
+}
+
+function ingestTimeline(data: PetrobanglaTimelineSummary) {
+  timelineCache = data;
+  timelineDayMap = new Map(data.days.map((d) => [d.date, d]));
+}
+
+export function lookupIndexDay(date: string): PetrobanglaIndexDay | undefined {
+  return indexDayMap?.get(date);
+}
+
+export function lookupTimelineDay(date: string): PetrobanglaTimelineDay | undefined {
+  return timelineDayMap?.get(date);
+}
 
 export async function loadArchiveIndex(): Promise<PetrobanglaIndex> {
   if (indexCache) return indexCache;
   const res = await fetch('/data/petrobangla/_index.json');
   if (!res.ok) throw new Error('Failed to load Petrobangla archive index');
-  indexCache = (await res.json()) as PetrobanglaIndex;
-  return indexCache;
+  ingestIndex((await res.json()) as PetrobanglaIndex);
+  return indexCache!;
 }
 
 export async function loadArchiveTimeline(): Promise<PetrobanglaTimelineSummary> {
   if (timelineCache) return timelineCache;
   const res = await fetch('/data/petrobangla/timeline-summary.json');
   if (!res.ok) throw new Error('Failed to load Petrobangla timeline summary');
-  timelineCache = (await res.json()) as PetrobanglaTimelineSummary;
-  return timelineCache;
+  ingestTimeline((await res.json()) as PetrobanglaTimelineSummary);
+  return timelineCache!;
 }
 
 export async function loadArchiveDay(

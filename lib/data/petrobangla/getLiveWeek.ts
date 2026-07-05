@@ -1,5 +1,6 @@
 import { isQuarantined } from './constants';
 import { loadArchiveDay, loadArchiveIndex } from './loadArchive';
+import type { GridAccessTier } from '@/lib/data/grid/grid-tier-access';
 import type {
   PetrobanglaDaily,
   PetrobanglaIndex,
@@ -7,18 +8,66 @@ import type {
   PetrobanglaLiveWeekBundle,
 } from './types';
 
-
-
 export const LIVE_WEEK_COUNT = 7;
+/** Matches prebuilt `/data/petrobangla/_live_week.json` — never blast-fetch the full archive on boot. */
+export const LIVE_WEEK_BOOTSTRAP = 30;
 export const LIVE_WEEK_MAX = 4000;
-export const LIVE_WEEK_PRESETS = [7, 15, 30, 180, 365, 4000] as const;
-export type LiveWeekPreset = (typeof LIVE_WEEK_PRESETS)[number];
+
+export type LiveWeekRangeLabel = '1W' | '14D' | '1M' | '6M' | '1Y' | '2Y' | '3Y' | 'All';
+
+export type LiveWeekRangeOption = {
+  days: number;
+  label: LiveWeekRangeLabel;
+  requiredTier: GridAccessTier;
+};
+
+/** Rolling window presets — always show every chip; tier locks longer windows. */
+export const LIVE_WEEK_RANGE_OPTIONS: LiveWeekRangeOption[] = [
+  { days: 7, label: '1W', requiredTier: 'visitor' },
+  { days: 14, label: '14D', requiredTier: 'member' },
+  { days: 30, label: '1M', requiredTier: 'member' },
+  { days: 180, label: '6M', requiredTier: 'plan_499' },
+  { days: 365, label: '1Y', requiredTier: 'plan_499' },
+  { days: 730, label: '2Y', requiredTier: 'plan_499' },
+  { days: 1095, label: '3Y', requiredTier: 'plan_499' },
+  { days: 4000, label: 'All', requiredTier: 'plan_499' },
+];
+
+export const LIVE_WEEK_PRESETS = LIVE_WEEK_RANGE_OPTIONS.map((o) => o.days);
+export type LiveWeekPreset = number;
+
+const TIER_RANK: Record<GridAccessTier, number> = {
+  visitor: 0,
+  member: 1,
+  plan_499: 2,
+  plan_999: 3,
+};
+
+export function getLiveWeekRangeOption(days: number): LiveWeekRangeOption | undefined {
+  return LIVE_WEEK_RANGE_OPTIONS.find((o) => o.days === days);
+}
+
+export function isLiveWeekRangeLocked(days: number, tier: GridAccessTier): boolean {
+  const opt = getLiveWeekRangeOption(days);
+  if (!opt) return false;
+  return TIER_RANK[tier] < TIER_RANK[opt.requiredTier];
+}
+
+export function maxLiveWeekDaysForTier(tier: GridAccessTier): number {
+  let max = LIVE_WEEK_RANGE_OPTIONS[0].days;
+  for (const opt of LIVE_WEEK_RANGE_OPTIONS) {
+    if (TIER_RANK[tier] >= TIER_RANK[opt.requiredTier]) max = opt.days;
+  }
+  return max;
+}
+
+const LIVE_WEEK_FETCH_BATCH = 20;
 
 let liveWeekCache: PetrobanglaLiveWeekBundle | null = null;
 
 export function pickLiveWeekEntries(
   index: PetrobanglaIndex,
-  count = LIVE_WEEK_MAX,
+  count = LIVE_WEEK_BOOTSTRAP,
 ): PetrobanglaIndexDay[] {
   const ok = index.days
     .filter((d) => d.parse_status === 'ok' && !isQuarantined(d.date))
@@ -28,7 +77,7 @@ export function pickLiveWeekEntries(
 
 export function sliceLiveWeekBundle(
   bundle: PetrobanglaLiveWeekBundle,
-  count: LiveWeekPreset,
+  count: number,
 ): PetrobanglaLiveWeekBundle {
   const days = bundle.days.slice(-count);
   const index_entries = bundle.index_entries.slice(-count);
@@ -65,27 +114,42 @@ function lookupLiveWeekDay(
   return map.get(entry.date) ?? map.get(fileDate) ?? null;
 }
 
+async function fetchOneLiveWeekDay(
+  entry: PetrobanglaIndexDay,
+  existing: Map<string, PetrobanglaDaily>,
+): Promise<PetrobanglaDaily | null> {
+  const hit = lookupLiveWeekDay(existing, entry);
+  if (hit) return hit;
+  const fileDate = entry.json_file?.replace('.json', '') ?? entry.date;
+  try {
+    const day = await loadArchiveDay(fileDate);
+    registerLiveWeekDay(existing, day);
+    return day;
+  } catch {
+    try {
+      const day = await loadArchiveDay(entry.date);
+      registerLiveWeekDay(existing, day);
+      return day;
+    } catch {
+      return null;
+    }
+  }
+}
+
+/** Fetch missing gas-days in small batches — avoids thousands of parallel HTTP requests. */
 async function loadLiveWeekDays(
   entries: PetrobanglaIndexDay[],
   existing = new Map<string, PetrobanglaDaily>(),
 ): Promise<PetrobanglaDaily[]> {
-  const loaded = await Promise.all(
-    entries.map(async (entry) => {
-      const hit = lookupLiveWeekDay(existing, entry);
-      if (hit) return hit;
-      const fileDate = entry.json_file?.replace('.json', '') ?? entry.date;
-      try {
-        return await loadArchiveDay(fileDate);
-      } catch {
-        try {
-          return await loadArchiveDay(entry.date);
-        } catch {
-          return null;
-        }
-      }
-    }),
-  );
-  return loaded.filter(isCompleteLiveDay);
+  const ordered: PetrobanglaDaily[] = [];
+  for (let i = 0; i < entries.length; i += LIVE_WEEK_FETCH_BATCH) {
+    const batch = entries.slice(i, i + LIVE_WEEK_FETCH_BATCH);
+    const loaded = await Promise.all(batch.map((entry) => fetchOneLiveWeekDay(entry, existing)));
+    for (const day of loaded) {
+      if (isCompleteLiveDay(day)) ordered.push(day);
+    }
+  }
+  return ordered;
 }
 
 async function fetchStaticLiveWeekBundle(): Promise<PetrobanglaLiveWeekBundle | null> {
@@ -98,8 +162,45 @@ async function fetchStaticLiveWeekBundle(): Promise<PetrobanglaLiveWeekBundle | 
   }
 }
 
+function seedExistingFromStatic(
+  staticBundle: PetrobanglaLiveWeekBundle | null,
+): Map<string, PetrobanglaDaily> {
+  const existingByDate = new Map<string, PetrobanglaDaily>();
+  if (!staticBundle) return existingByDate;
+  const staticDays = staticBundle.days ?? [];
+  const staticEntries = staticBundle.index_entries ?? [];
+  staticDays.forEach((day, i) => {
+    if (!isCompleteLiveDay(day)) return;
+    registerLiveWeekDay(existingByDate, day);
+    const entry = staticEntries[i];
+    if (entry) {
+      existingByDate.set(entry.date, day);
+      const fileDate = entry.json_file?.replace('.json', '');
+      if (fileDate) existingByDate.set(fileDate, day);
+    }
+  });
+  return existingByDate;
+}
+
+function buildLiveWeekBundle(
+  entries: PetrobanglaIndexDay[],
+  days: PetrobanglaDaily[],
+  staticBundle: PetrobanglaLiveWeekBundle | null,
+): PetrobanglaLiveWeekBundle {
+  const latest = entries[entries.length - 1];
+  return {
+    generated_at: staticBundle?.generated_at ?? new Date().toISOString(),
+    live_week_count: days.length,
+    latest_date: latest?.date ?? null,
+    latest_label: latest?.date_label ?? null,
+    index_entries:
+      staticBundle?.index_entries?.length === days.length ? staticBundle.index_entries : entries,
+    days,
+  };
+}
+
 export async function loadLiveWeekBundle(
-  count: LiveWeekPreset | number = LIVE_WEEK_MAX,
+  count: number = LIVE_WEEK_BOOTSTRAP,
 ): Promise<PetrobanglaLiveWeekBundle> {
   const want = Math.min(Math.max(1, count), LIVE_WEEK_MAX);
   if (liveWeekCache && liveWeekCache.days.length >= want) return liveWeekCache;
@@ -115,35 +216,11 @@ export async function loadLiveWeekBundle(
     return staticBundle;
   }
 
+  const existingByDate = seedExistingFromStatic(staticBundle);
   const index = await loadArchiveIndex();
-  const entries = pickLiveWeekEntries(index, LIVE_WEEK_MAX);
-
-  const existingByDate = new Map<string, PetrobanglaDaily>();
-  const staticDays = staticBundle?.days ?? [];
-  const staticEntries = staticBundle?.index_entries ?? [];
-  staticDays.forEach((day, i) => {
-    if (!isCompleteLiveDay(day)) return;
-    registerLiveWeekDay(existingByDate, day);
-    const entry = staticEntries[i];
-    if (entry) {
-      existingByDate.set(entry.date, day);
-      const fileDate = entry.json_file?.replace('.json', '');
-      if (fileDate) existingByDate.set(fileDate, day);
-    }
-  });
-
+  const entries = pickLiveWeekEntries(index, want);
   const days = await loadLiveWeekDays(entries, existingByDate);
-  const latest = entries[entries.length - 1];
-  const bundle: PetrobanglaLiveWeekBundle = {
-    generated_at: staticBundle?.generated_at ?? new Date().toISOString(),
-    live_week_count: days.length,
-    latest_date: latest?.date ?? null,
-    latest_label: latest?.date_label ?? null,
-    index_entries: staticBundle?.index_entries?.length === days.length
-      ? staticBundle.index_entries
-      : entries,
-    days,
-  };
+  const bundle = buildLiveWeekBundle(entries, days, staticBundle);
   liveWeekCache = bundle;
   return bundle;
 }

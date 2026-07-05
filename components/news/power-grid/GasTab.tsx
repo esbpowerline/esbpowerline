@@ -4,6 +4,7 @@ import { Database, Droplet, Info } from 'lucide-react';
 import type { GasDistributionItem, GasProductionItem } from '@/lib/data/grid/types';
 import { formatNumber } from '@/lib/utils';
 import { GridLockedContent } from './GridLockedContent';
+import { GridCardFooter } from './GridExplorerUI';
 
 interface GasTabProps {
   selectedDate: string;
@@ -130,7 +131,7 @@ export function GasTab({
           <p className="leading-relaxed"><strong>Analytical Insight:</strong> Chevron (operating the Bibiyana field) remains the dominant producer of natural gas in Bangladesh, supplying over 50% of domestic gas. The high dependency on a single field and company exposes the entire gas-to-power supply chain to operational vulnerability and highlights the urgency of expanding national exploration or gas import capacity.</p>
         </div>
 
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>
             Source:{' '}
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
@@ -139,7 +140,7 @@ export function GasTab({
           </span>
           <span>Audited by: Petrobangla Production &amp; Marketing Division</span>
           <span className="font-medium">Reporting Period: Daily Field Snapshot (Date: {systemStatsDate})</span>
-        </div>
+        </GridCardFooter>
       </div>
 
       <div className="grid-explorer-chart-card card">
@@ -235,7 +236,7 @@ export function GasTab({
           </div>
         </div>
 
-        <div className="grid-explorer-card-footer">
+        <GridCardFooter>
           <span>
             Source:{' '}
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
@@ -244,7 +245,7 @@ export function GasTab({
           </span>
           <span>Audited by: Distributor Billing Audits (TGTDCL, KGDCL, JGTDSL)</span>
           <span className="font-medium">Reporting Period: Daily Distribution Allocation (Date: {systemStatsDate})</span>
-        </div>
+        </GridCardFooter>
       </div>
     </div>
   );
