@@ -38,9 +38,7 @@ def main():
         meta = data.get("meta", {})
         status = meta.get("parse_status", "failed")
         report = data.get("report", {})
-        date = report.get("report_date_start")
-        if not date:
-            continue
+        date = path.stem
         gt = data.get("production", {}).get("grand_total", {})
         fields = data.get("production", {}).get("fields", [])
         dom, lng = domestic_lng(fields)
