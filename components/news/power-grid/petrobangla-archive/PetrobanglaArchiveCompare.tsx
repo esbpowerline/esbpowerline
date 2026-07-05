@@ -150,7 +150,11 @@ export function PetrobanglaArchiveCompare({
     [gridSelectedDate, index, latestDate],
   );
 
-  const [leftYear, setLeftYear] = useState('2024');
+  const [isDefaultComparison, setIsDefaultComparison] = useState(true);
+  const [leftYear, setLeftYear] = useState(() => {
+    const parts = gridResolved.split('-');
+    return parts.length === 3 ? String(parseInt(parts[0], 10) - 2) : '2024';
+  });
   const [leftDateOverride, setLeftDateOverride] = useState<string | null>(null);
   const [rightDate, setRightDate] = useState(gridResolved);
   const [left, setLeft] = useState<PetrobanglaDaily | null>(null);
@@ -173,7 +177,7 @@ export function PetrobanglaArchiveCompare({
   const leftReq = useMemo(() => getRequiredTierForDate(leftDate, latestDate), [leftDate, latestDate]);
   const rightReq = useMemo(() => getRequiredTierForDate(rightDate, latestDate), [rightDate, latestDate]);
   const requiredTier = TIER_RANK[leftReq] > TIER_RANK[rightReq] ? leftReq : rightReq;
-  const isLocked = TIER_RANK[tier] < TIER_RANK[requiredTier];
+  const isLocked = !isDefaultComparison && TIER_RANK[tier] < TIER_RANK[requiredTier];
 
   const availableYears = useMemo(() => {
     return Array.from(new Set(okDates.map((d) => d.split('-')[0]))).sort((a, b) => b.localeCompare(a));
@@ -184,6 +188,12 @@ export function PetrobanglaArchiveCompare({
   const handleYearChange = useCallback((year: string) => {
     setLeftYear(year);
     setLeftDateOverride(null);
+    setIsDefaultComparison(false);
+  }, []);
+
+  const handleRightDateChange = useCallback((date: string) => {
+    setRightDate(date);
+    setIsDefaultComparison(false);
   }, []);
 
   useEffect(() => {
@@ -311,7 +321,7 @@ export function PetrobanglaArchiveCompare({
           <ArchiveDateGridPicker
             label="Later date"
             value={rightDate}
-            onChange={setRightDate}
+            onChange={handleRightDateChange}
             dates={okDates}
             hint="Synced to grid date selector"
             accent="emerald"
@@ -322,26 +332,29 @@ export function PetrobanglaArchiveCompare({
             type="button"
             className={cn(
               'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
-              leftDate === COMPARE_FREE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+              isDefaultComparison && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
-              setLeftYear('2024');
+              const defaultYear = String(parseInt(gridResolved.split('-')[0], 10) - 2);
+              setLeftYear(defaultYear);
               setLeftDateOverride(null);
               setRightDate(gridResolved);
+              setIsDefaultComparison(true);
             }}
           >
-            Sample (2024 vs grid)
+            Sample (2 Years Ago vs grid)
           </button>
           <button
             type="button"
             className={cn(
               'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
-              leftDate === ARCHIVE_START_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+              !isDefaultComparison && leftDate === ARCHIVE_START_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
               setLeftYear('2020');
               setLeftDateOverride(null);
               setRightDate(gridResolved);
+              setIsDefaultComparison(false);
             }}
           >
             Jan 2020 vs grid
@@ -350,11 +363,12 @@ export function PetrobanglaArchiveCompare({
             type="button"
             className={cn(
               'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
-              leftDate === ARCHIVE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+              !isDefaultComparison && leftDate === ARCHIVE_BASELINE_DATE && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
             )}
             onClick={() => {
               setLeftDateOverride(ARCHIVE_BASELINE_DATE);
               setRightDate(gridResolved);
+              setIsDefaultComparison(false);
             }}
           >
             Baseline vs grid
@@ -364,11 +378,12 @@ export function PetrobanglaArchiveCompare({
               type="button"
               className={cn(
                 'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
-                leftDate === yoyDate && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+                !isDefaultComparison && leftDate === yoyDate && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
               )}
               onClick={() => {
-                setLeftDate(yoyDate);
+                setLeftDateOverride(yoyDate);
                 setRightDate(gridResolved);
+                setIsDefaultComparison(false);
               }}
             >
               YoY (1 Year Ago)
@@ -379,11 +394,12 @@ export function PetrobanglaArchiveCompare({
               type="button"
               className={cn(
                 'gas-reserve-archive-range__btn gas-reserve-archive-range__btn--toggle w-full sm:w-auto text-xs py-1.5',
-                leftDate === prevDate && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
+                !isDefaultComparison && leftDate === prevDate && rightDate === gridResolved && 'gas-reserve-archive-range__btn--active',
               )}
               onClick={() => {
-                setLeftDate(prevDate);
+                setLeftDateOverride(prevDate);
                 setRightDate(gridResolved);
+                setIsDefaultComparison(false);
               }}
             >
               DoD (Prev Day)
