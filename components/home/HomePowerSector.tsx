@@ -155,13 +155,13 @@ export function HomePowerSector({
                 {(index === 1 || index === 7) && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6" suppressHydrationWarning>
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-                      <Image src="/images/Ad Banners/009.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                      <Image src="/images/promotions/009.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
                     </Link>
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
-                      <Image src="/images/Ad Banners/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
                     </Link>
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
-                      <Image src="/images/Ad Banners/003.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                      <Image src="/images/promotions/003.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
                     </Link>
                   </div>
                 )}
@@ -169,7 +169,7 @@ export function HomePowerSector({
                 {/* 1 Large Full-Width Ad Space */}
                 {(index === 4 || index === 10) && (
                   <Link href="/advertising" className="rounded-2xl overflow-hidden relative group w-full block" suppressHydrationWarning>
-                    <Image src="/images/Ad Banners/005.png" alt="Advertisement" width={3126} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
+                    <Image src="/images/promotions/005.png" alt="Advertisement" width={3126} height={480} className="w-full h-auto object-cover" suppressHydrationWarning />
                   </Link>
                 )}
               </React.Fragment>

@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     siteName: 'ESB PowerLine',
     images: [{ url: '/og-image.png' }],
   },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
 
 const bodyClass = [
