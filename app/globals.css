@@ -3768,13 +3768,22 @@ html[data-site-theme='dark'] #mobile-categories-panel {
 
 /* === Login screen — editorial portal access === */
 .brand-logo__frame {
-  @apply inline-flex items-center rounded-md border border-border/40 bg-card px-2.5 py-1.5 shadow-sm;
+  @apply inline-flex items-center justify-center rounded-md border border-border/40 bg-card px-2.5 py-1.5 shadow-sm;
 }
 
 .brand-logo__img {
   @apply h-auto w-auto object-contain;
   max-height: 2.75rem;
   max-width: 220px;
+}
+
+/* Ensure the brand logo frame has a solid white background in dark & midnight themes for visibility */
+html.dark .brand-logo__frame,
+html.theme-midnight .brand-logo__frame,
+html.theme-dark .brand-logo__frame {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 .login-shell {
@@ -4007,6 +4016,10 @@ html[data-site-theme='dark'] #mobile-categories-panel {
   @apply text-[0.875rem] font-normal leading-[1.72] tracking-[0.005em];
   color: hsl(var(--foreground) / 0.68);
   text-wrap: pretty;
+}
+
+html.dark .brand-deck__lede {
+  color: hsl(var(--foreground) / 0.82);
 }
 
 .brand-deck__em {
@@ -19528,6 +19541,11 @@ html.theme-white .cms-datetime-grid-cell {
   margin-bottom: clamp(1.25rem, 4cqw, 2.25rem) !important;
 }
 
+.public-footer-logo {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
 /* Footer logo background removal */
 .public-footer-logo .brand-logo__frame {
   background: transparent !important;
@@ -19535,6 +19553,16 @@ html.theme-white .cms-datetime-grid-cell {
   border: none !important;
   border-width: 0 !important;
   box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* On dark and midnight themes, apply a white background directly to the image itself to avoid any frame layout/position shifts */
+html.dark .public-footer-logo .brand-logo__img,
+html.theme-midnight .public-footer-logo .brand-logo__img,
+html.theme-dark .public-footer-logo .brand-logo__img {
+  background-color: #ffffff !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
   padding: 0 !important;
 }
 

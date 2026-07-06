@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -56,6 +56,26 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
   const currentTranslateRef = useRef(0);
   const dragOffsetRef = useRef(0);
 
+  const visibleCount = windowWidth >= 1024 ? 3 : windowWidth >= 768 ? 2 : 1;
+  const maxIndex = Math.max(0, articles.length - visibleCount);
+  const gap = 24; // px
+
+  // Calculate base translation for a given index (without dragging offset)
+  const getBaseTranslate = useCallback((index: number) => {
+    if (index === 0) return 0;
+    const container = containerRef.current;
+    if (!container) return 0;
+    const containerWidth = container.clientWidth;
+    
+    if (windowWidth >= 1024) {
+      return -index * ((containerWidth - gap * 2) / 3 + gap);
+    } else if (windowWidth >= 768) {
+      return -index * ((containerWidth - gap) / 2 + gap);
+    } else {
+      return -index * (containerWidth + gap);
+    }
+  }, [windowWidth, gap]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -88,27 +108,9 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
     };
-  }, [currentIndex]);
+  }, [currentIndex, getBaseTranslate]);
 
-  const visibleCount = windowWidth >= 1024 ? 3 : windowWidth >= 768 ? 2 : 1;
-  const maxIndex = Math.max(0, articles.length - visibleCount);
-  const gap = 24; // px
 
-  // Calculate base translation for a given index (without dragging offset)
-  const getBaseTranslate = (index: number) => {
-    if (index === 0) return 0;
-    const container = containerRef.current;
-    if (!container) return 0;
-    const containerWidth = container.clientWidth;
-    
-    if (windowWidth >= 1024) {
-      return -index * ((containerWidth - gap * 2) / 3 + gap);
-    } else if (windowWidth >= 768) {
-      return -index * ((containerWidth - gap) / 2 + gap);
-    } else {
-      return -index * (containerWidth + gap);
-    }
-  };
 
   const nextCard = () => {
     if (currentIndex >= maxIndex) return;
@@ -153,7 +155,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     }, 5500);
 
     return () => clearInterval(timer);
-  }, [maxIndex, visibleCount, articles.length]);
+  }, [maxIndex, visibleCount, articles.length, getBaseTranslate]);
 
   // Drag handlers
   const handleDragStart = (clientX: number) => {

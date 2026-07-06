@@ -210,7 +210,7 @@ export function PowerGridExplorer({
     }
     setTierLockRequired(gridAccess.requiredTierForDate(isoDate));
     setSelectedDate(isoDate);
-  }, [gridAccess.canAccessDate, gridAccess.requiredTierForDate]);
+  }, [gridAccess]);
 
   useEffect(() => {
     if (gridAccess.loading) return;
@@ -219,7 +219,7 @@ export function PowerGridExplorer({
     } else {
       setTierLockRequired(null);
     }
-  }, [gridAccess.loading, gridAccess.canAccessDate, gridAccess.requiredTierForDate, selectedDate]);
+  }, [gridAccess, selectedDate]);
 
   const years = useMemo(() => {
     return Array.from(new Set(availableDatesList.map(d => d.split('-')[0]))).sort((a, b) => b.localeCompare(a));
@@ -231,9 +231,9 @@ export function PowerGridExplorer({
       const hasAccessible = datesInYear.some((d) => gridAccess.canAccessDate(d));
       return { label: y, value: y, locked: !hasAccessible };
     });
-  }, [years, availableDatesList, gridAccess.canAccessDate]);
+  }, [years, availableDatesList, gridAccess]);
 
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const monthNames = useMemo(() => ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"], []);
 
   const monthsForYear = useMemo(() => {
     return Array.from(new Set(
@@ -254,7 +254,7 @@ export function PowerGridExplorer({
         locked: !hasAccessible,
       };
     });
-  }, [monthsForYear, availableDatesList, selectedYear, gridAccess.canAccessDate]);
+  }, [monthsForYear, availableDatesList, selectedYear, gridAccess, monthNames]);
 
   const daysForMonth = useMemo(() => {
     return Array.from(new Set(
@@ -273,7 +273,7 @@ export function PowerGridExplorer({
         locked: !gridAccess.canAccessDate(iso),
       };
     });
-  }, [daysForMonth, selectedYear, selectedMonth, gridAccess.canAccessDate]);
+  }, [daysForMonth, selectedYear, selectedMonth, gridAccess]);
 
   const handleYearChange = (newYear: string) => {
     const datesInYear = availableDatesList.filter((d) => d.startsWith(`${newYear}-`)).sort();
@@ -401,9 +401,7 @@ export function PowerGridExplorer({
     };
   }, [
     selectedDate,
-    gridAccess.loading,
-    gridAccess.canAccessDate,
-    gridAccess.requiredTierForDate,
+    gridAccess,
   ]);
 
   const {

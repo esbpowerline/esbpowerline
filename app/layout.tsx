@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 
 import { Inter, Noto_Sans_Bengali, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
@@ -54,8 +55,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Critical theme CSS injected before paint to avoid flash */}
         <style dangerouslySetInnerHTML={{ __html: SITE_THEME_CRITICAL_CSS }} suppressHydrationWarning />
         {/* Theme + locale hydration — must run before React tree */}
-        <script dangerouslySetInnerHTML={{ __html: SITE_THEME_INIT_SCRIPT }} suppressHydrationWarning />
-        <script dangerouslySetInnerHTML={{ __html: SITE_LOCALE_INIT_SCRIPT }} suppressHydrationWarning />
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: SITE_THEME_INIT_SCRIPT }} />
+        <Script id="locale-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: SITE_LOCALE_INIT_SCRIPT }} />
       </head>
       <body suppressHydrationWarning className={bodyClass}>
 

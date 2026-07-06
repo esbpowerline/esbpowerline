@@ -18,9 +18,9 @@ export function resolveArchiveRangeStart(preset: ArchiveRangePreset, endDate: st
   } else if (preset === '6M') {
     date.setMonth(date.getMonth() - 6);
   } else if (preset === '1Y') {
-    return `${y - 1}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    date.setFullYear(date.getFullYear() - 1);
   } else if (preset === '3Y') {
-    return `${y - 3}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    date.setFullYear(date.getFullYear() - 3);
   }
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }

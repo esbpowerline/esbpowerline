@@ -128,12 +128,14 @@ export function PetrobanglaArchiveSectorDistribution({
   chartsReady,
   embedded = false,
   compact = false,
+  onClose,
 }: {
   rangeDays: PetrobanglaTimelineDay[];
   preset: ArchiveRangePreset;
   chartsReady: boolean;
   embedded?: boolean;
   compact?: boolean;
+  onClose?: () => void;
 }) {
   const chartTheme = useChartTheme();
 
@@ -161,7 +163,7 @@ export function PetrobanglaArchiveSectorDistribution({
         </div>
       )}
 
-      <ArchiveRangeLockedOverlay preset={preset} className="mt-4">
+      <ArchiveRangeLockedOverlay preset={preset} className="mt-4" onClose={onClose}>
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">

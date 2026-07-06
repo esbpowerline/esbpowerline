@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Lock, ArrowRight, Clock } from 'lucide-react';
+import { Lock, ArrowRight, Clock, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { GridAccessTier } from '@/lib/data/grid/grid-tier-access';
 import { getLockedDateMessage } from '@/lib/membership/grid-access-messaging';
@@ -12,6 +12,7 @@ type GridDataLockedGateProps = {
   className?: string;
   variant?: 'overlay' | 'inline';
   onTryDemo?: () => void;
+  onClose?: () => void;
 };
 
 export function GridDataLockedGate({
@@ -20,6 +21,7 @@ export function GridDataLockedGate({
   className,
   variant = 'overlay',
   onTryDemo,
+  onClose,
 }: GridDataLockedGateProps) {
   const msg = getLockedDateMessage(requiredTier, selectedDate);
 
@@ -34,6 +36,17 @@ export function GridDataLockedGate({
       aria-labelledby="grid-lock-title"
       aria-describedby="grid-lock-desc"
     >
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 z-20 rounded-md p-1.5 text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all focus:outline-none"
+          aria-label="Close locked panel"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+
       <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-amber-500/5" aria-hidden />
       <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary/10 blur-3xl" aria-hidden />
       <div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-amber-500/10 blur-2xl" aria-hidden />

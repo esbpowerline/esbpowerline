@@ -100,7 +100,7 @@ export function EditorialPlatformControl() {
       refreshDismissed();
       loadSnapshot(true);
     }
-  }, [open, session?.user, loadSnapshot, refreshDismissed]);
+  }, [open, session?.user, loadSnapshot, refreshDismissed, loadState]);
 
   const stats = snapshot ?? EMPTY;
 

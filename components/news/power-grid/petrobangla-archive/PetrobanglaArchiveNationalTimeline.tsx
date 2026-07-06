@@ -35,6 +35,7 @@ export function PetrobanglaArchiveNationalTimeline({
   showMa = false,
   embedded = false,
   compact = false,
+  onClose,
 }: {
   timeline: PetrobanglaTimelineSummary;
   rangeDays: PetrobanglaTimelineDay[];
@@ -43,6 +44,7 @@ export function PetrobanglaArchiveNationalTimeline({
   showMa?: boolean;
   embedded?: boolean;
   compact?: boolean;
+  onClose?: () => void;
 }) {
   const chartTheme = useChartTheme();
 
@@ -103,7 +105,7 @@ export function PetrobanglaArchiveNationalTimeline({
       )}
 
       <div className="gas-reserve-archive-chart-block">
-        <ArchiveRangeLockedOverlay preset={preset}>
+        <ArchiveRangeLockedOverlay preset={preset} onClose={onClose}>
           <div
             className={cn(
               'grid-explorer-chart-area w-full gas-reserve-archive-chart-block__plot',

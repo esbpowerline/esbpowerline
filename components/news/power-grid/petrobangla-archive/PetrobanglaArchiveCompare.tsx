@@ -170,9 +170,12 @@ export function PetrobanglaArchiveCompare({
   }, [index]);
 
   const leftDate = useMemo(() => {
+    if (tier === 'visitor' && isDefaultComparison) {
+      return COMPARE_FREE_BASELINE_DATE;
+    }
     if (leftDateOverride) return leftDateOverride;
     return resolveMatchingDateForYear(leftYear, rightDate, okDates);
-  }, [leftDateOverride, leftYear, rightDate, okDates]);
+  }, [leftDateOverride, leftYear, rightDate, okDates, tier, isDefaultComparison]);
 
   const leftReq = useMemo(() => getRequiredTierForDate(leftDate, latestDate), [leftDate, latestDate]);
   const rightReq = useMemo(() => getRequiredTierForDate(rightDate, latestDate), [rightDate, latestDate]);
@@ -424,6 +427,13 @@ export function PetrobanglaArchiveCompare({
               selectedDate={`comparison for ${leftDate} vs ${rightDate}`}
               variant="overlay"
               className="z-20 w-[95%] max-w-md shadow-2xl relative"
+              onClose={() => {
+                const defaultYear = String(parseInt(gridResolved.split('-')[0], 10) - 2);
+                setLeftYear(defaultYear);
+                setLeftDateOverride(null);
+                setRightDate(gridResolved);
+                setIsDefaultComparison(true);
+              }}
             />
           </div>
         )}

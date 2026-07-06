@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession } from '@/utils/supabase/auth-context';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useCallback } from 'react';
 
 import { FileDown, ArrowRight, Loader2, RefreshCw, Printer } from 'lucide-react';
 import Link from 'next/link';
@@ -15,7 +15,7 @@ export function MemberToolsPanel() {
   const [downloads, setDownloads] = useState<any[]>([]);
   const [isPending, startTransition] = useTransition();
 
-  function fetchRecentDownloads() {
+  const fetchRecentDownloads = useCallback(() => {
     if (!signedIn) return;
     startTransition(async () => {
       try {
@@ -27,7 +27,7 @@ export function MemberToolsPanel() {
         console.error('Failed to load recent downloads:', err);
       }
     });
-  }
+  }, [signedIn]);
 
   function handlePdfPrint(theme: SiteTheme) {
     if (typeof window === 'undefined') return;
@@ -48,7 +48,7 @@ export function MemberToolsPanel() {
     if (signedIn) {
       fetchRecentDownloads();
     }
-  }, [signedIn]);
+  }, [signedIn, fetchRecentDownloads]);
 
   // Listen to window custom event if we want to sync downloads from DownloadGridButton
   useEffect(() => {
@@ -57,7 +57,7 @@ export function MemberToolsPanel() {
       window.addEventListener('esb-download-sync', handleSync);
       return () => window.removeEventListener('esb-download-sync', handleSync);
     }
-  }, [signedIn]);
+  }, [signedIn, fetchRecentDownloads]);
 
   if (!signedIn) return null;
 

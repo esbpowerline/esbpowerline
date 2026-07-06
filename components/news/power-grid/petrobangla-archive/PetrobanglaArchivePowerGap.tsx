@@ -102,6 +102,7 @@ export function PetrobanglaArchivePowerGap({
   chartsReady,
   embedded = false,
   compact = false,
+  onClose,
 }: {
   rangeDays: PetrobanglaTimelineDay[];
   preset: ArchiveRangePreset;
@@ -110,6 +111,7 @@ export function PetrobanglaArchivePowerGap({
   chartsReady: boolean;
   embedded?: boolean;
   compact?: boolean;
+  onClose?: () => void;
 }) {
   const chartTheme = useChartTheme();
 
@@ -139,7 +141,7 @@ export function PetrobanglaArchivePowerGap({
         </div>
       )}
 
-      <ArchiveRangeLockedOverlay preset={preset} className="mt-4 px-4">
+      <ArchiveRangeLockedOverlay preset={preset} className="mt-4 px-4" onClose={onClose}>
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">

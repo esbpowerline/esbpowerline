@@ -103,10 +103,12 @@ export function ArchiveRangeLockedOverlay({
   preset,
   children,
   className,
+  onClose,
 }: {
   preset: ArchiveRangePreset;
   children: ReactNode;
   className?: string;
+  onClose?: () => void;
 }) {
   const { tier } = useGridTierAccess();
   const locked = isArchivePresetLockedForTier(preset, tier);
@@ -124,6 +126,7 @@ export function ArchiveRangeLockedOverlay({
             selectedDate={archivePresetGateLabel(preset)}
             variant="overlay"
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[60] w-[95%] max-w-md shadow-2xl"
+            onClose={onClose}
           />
         </>
       )}

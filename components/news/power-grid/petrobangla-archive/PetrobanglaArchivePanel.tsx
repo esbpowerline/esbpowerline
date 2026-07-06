@@ -275,6 +275,7 @@ export function PetrobanglaArchivePanel({
                 showMa={showMa}
                 embedded
                 compact={unified}
+                onClose={() => setRangePreset('1W')}
               />
             ) : (
               <div className="flex items-center justify-center gap-3 min-h-[16rem] rounded-xl border border-border/40 bg-muted/10">
@@ -292,6 +293,7 @@ export function PetrobanglaArchivePanel({
                 mode={mode}
                 embedded
                 compact={unified}
+                onClose={() => setRangePreset('1W')}
               />
             ) : (
               <div className="flex items-center justify-center gap-3 min-h-[12rem] text-sm text-muted-foreground">
@@ -310,6 +312,7 @@ export function PetrobanglaArchivePanel({
                 chartsReady={chartsReady}
                 embedded
                 compact={unified}
+                onClose={() => setRangePreset('1W')}
               />
             ) : (
               <div className="flex items-center justify-center gap-3 min-h-[12rem] text-sm text-muted-foreground">
@@ -326,6 +329,7 @@ export function PetrobanglaArchivePanel({
                 chartsReady={chartsReady}
                 embedded
                 compact={unified}
+                onClose={() => setRangePreset('1W')}
               />
             ) : (
               <div className="flex items-center justify-center gap-3 min-h-[12rem] text-sm text-muted-foreground">

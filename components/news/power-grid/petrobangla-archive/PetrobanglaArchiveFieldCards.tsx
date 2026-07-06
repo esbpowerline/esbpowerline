@@ -38,6 +38,7 @@ export function PetrobanglaArchiveFieldCards({
   mode,
   embedded = false,
   compact = false,
+  onClose,
 }: {
   rangeDays: PetrobanglaTimelineDay[];
   preset: ArchiveRangePreset;
@@ -45,6 +46,7 @@ export function PetrobanglaArchiveFieldCards({
   mode: AudienceMode;
   embedded?: boolean;
   compact?: boolean;
+  onClose?: () => void;
 }) {
   const [sort, setSort] = useState<SortKey>('largest');
   const [modalField, setModalField] = useState<string | null>(null);
@@ -161,7 +163,7 @@ export function PetrobanglaArchiveFieldCards({
         </ArchiveInsightCallout>
       )}
 
-      <ArchiveRangeLockedOverlay preset={preset}>
+      <ArchiveRangeLockedOverlay preset={preset} onClose={onClose}>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 p-4">
         {sorted.map((c) => {
           const isHovered = hoverField === c.fieldName;
