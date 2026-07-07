@@ -12,6 +12,7 @@ type GridLockedContentProps = {
   children: ReactNode;
   className?: string;
   onTryDemo?: () => void;
+  onClose?: () => void;
   variant?: 'full' | 'micro';
 };
 
@@ -25,6 +26,7 @@ export function GridLockedContent({
   children,
   className,
   onTryDemo,
+  onClose,
   variant = 'full',
 }: GridLockedContentProps) {
   return (
@@ -50,6 +52,7 @@ export function GridLockedContent({
             selectedDate={selectedDate}
             variant="overlay"
             onTryDemo={onTryDemo}
+            onClose={onClose ?? onTryDemo}
           />
         </>
       )}

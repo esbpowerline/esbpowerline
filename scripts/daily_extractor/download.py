@@ -114,7 +114,7 @@ def try_pgcb_legacy(report_date: date, dest_dir: Path | None = None) -> Path | N
 
 
 def _petrobangla_pdf_urls() -> list[str]:
-    base = "https://www.petrobangla.org.bd"
+    base = "https://petrobangla.org.bd"
     urls: list[str] = []
     try:
         html = fetch(base).decode("utf-8", errors="ignore")

@@ -16,7 +16,8 @@ export type GridMacroSubTab =
   | 'global'
   | 'reports'
   | 'reserves'
-  | 'insights';
+  | 'insights'
+  | 'system_loss';
 
 export type GridExplorerUrlBoot = {
   tab?: GridExplorerTab;
@@ -44,6 +45,7 @@ const MACRO_IDS: GridMacroSubTab[] = [
   'reports',
   'reserves',
   'insights',
+  'system_loss',
 ];
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;

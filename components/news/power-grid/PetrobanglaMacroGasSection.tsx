@@ -10,6 +10,7 @@ import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
 import { AudienceModeToggle, PetrobanglaOfficialSourceLink } from './petrobangla-archive/PetrobanglaArchiveShared';
 import { GasExplanationBlock, GasSourceFooter, LiveBadge } from './GasTabShared';
 import { MacroGasInnerSection } from './MacroGasSectionChrome';
+import { LIVE_WEEK_RANGE_OPTIONS, type LiveWeekPreset } from '@/lib/data/petrobangla/getLiveWeek';
 
 interface Props {
   selectedDate: string;
@@ -33,6 +34,31 @@ export function PetrobanglaMacroGasSection({
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const audienceMode = audienceModeProp ?? internalMode;
   const setAudienceMode = onAudienceModeChange ?? setInternalMode;
+
+  const [rangeDays, setRangeDays] = useState<LiveWeekPreset>(7);
+
+  const rangeOption = LIVE_WEEK_RANGE_OPTIONS.find((o) => o.days === rangeDays);
+  const rangeLabel = rangeOption ? rangeOption.label : '1W';
+
+  const rangeTitleMap: Record<string, string> = {
+    '1W': 'Rolling week',
+    '1M': 'Rolling month',
+    '6M': 'Rolling six months',
+    '1Y': 'Rolling year',
+    '3Y': 'Rolling three years',
+    'All': 'Full timeline',
+  };
+  const blockTitle = rangeTitleMap[rangeLabel] ?? 'Rolling week';
+
+  const rangeDescriptionMap: Record<string, string> = {
+    '1W': 'Last 7 gas-days',
+    '1M': 'Last 30 gas-days',
+    '6M': 'Last 180 gas-days',
+    '1Y': 'Last 365 gas-days',
+    '3Y': 'Last 1,095 gas-days',
+    'All': 'Full archive timeline',
+  };
+  const rangeDesc = rangeDescriptionMap[rangeLabel] ?? 'Last 7 gas-days';
 
   const shellClass = embedded
     ? 'card gas-reserve-evidence'
@@ -70,22 +96,24 @@ export function PetrobanglaMacroGasSection({
         {!hideLiveWeek && (
           <MacroGasInnerSection
             icon={Database}
-            title="This week"
+            title={blockTitle}
             badge={<LiveBadge />}
             subtitle={
               audienceMode === 'simple'
-                ? 'Last 7–30 gas-days — national supply vs power plant allocation'
+                ? `${rangeDesc} — national supply vs power plant allocation`
                 : audienceMode === 'investor'
-                  ? 'Short-window volatility — power fulfillment and LNG share drive fuel-cost risk'
+                  ? `${rangeLabel} volatility — power fulfillment and LNG share drive fuel-cost risk`
                   : audienceMode === 'researcher'
-                    ? 'Rolling window with raw JSON links — 1W through full archive presets'
-                    : 'Rolling gas-days — sparklines, plant stress, and day-over-day compare'
+                    ? `Rolling window with raw JSON links — ${rangeLabel} preset view`
+                    : `Rolling gas-days (${rangeLabel}) — sparklines, plant stress, and day-over-day compare`
             }
           >
             <PetrobanglaLiveWeekPanel
               selectedDate={selectedDate}
               pgcbGasTotal={pgcbGasTotal}
               mode={audienceMode}
+              rangeDays={rangeDays}
+              onRangeDaysChange={setRangeDays}
               unified
             />
           </MacroGasInnerSection>

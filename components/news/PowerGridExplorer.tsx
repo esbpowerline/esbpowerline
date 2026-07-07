@@ -56,6 +56,7 @@ import { globalVsDomesticData, historicalExchangeRates } from '@/lib/data/macro/
 
 import { macroInfrastructureData } from '@/lib/data/macro/infrastructure';
 import { nationalBudgetData } from '@/lib/data/macro/budget';
+import { systemLossData } from '@/lib/data/macro/system-loss';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
 import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
 import { DailyBadge, GridCardFooter, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
@@ -607,7 +608,7 @@ export function PowerGridExplorer({
     }
   }, [activeTab]);
 
-  const [macroSubTab, setMacroSubTab] = useState<'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'insights'>(
+  const [macroSubTab, setMacroSubTab] = useState<'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'system_loss' | 'insights'>(
     urlBoot?.macro ?? 'overview',
   );
   
@@ -1223,7 +1224,7 @@ export function PowerGridExplorer({
                 <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<DailyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
-              <GridLiveBadge label={`Report: ${systemStats.date}`} />
+              <span className="grid-explorer-chip">Fuel Type</span>
             </div>
 
             <div className="grid-explorer-mix-stack" aria-hidden>
@@ -1454,7 +1455,7 @@ export function PowerGridExplorer({
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mt-6 pt-4 border-t border-border/50">
+            <div className="grid grid-cols-2 gap-3 mt-6 pt-4 pb-4 border-t border-border/50">
               <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[5.5rem] text-center">
                 <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug">
                   Avg Production Cost
@@ -1476,7 +1477,7 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
-            <GridCardFooter>
+            <GridCardFooter className="mt-0 pt-4">
               <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Reports</a> &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Fuel Gazettes</a></span>
               <span>Audited by: BPDB Audits / CAG Audit Team</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
@@ -4142,9 +4143,151 @@ export function PowerGridExplorer({
         const localMacroInfrastructureData = truncate(macroInfrastructureData, 1);
         const budgetLimit = allowedYears === 5 ? 6 : 5;
         const localNationalBudgetMergedData = isTruncated ? nationalBudgetMergedData.slice(-budgetLimit) : nationalBudgetMergedData;
+        const allowedYearsSystemLoss = gridAccess.isStaff || gridAccess.tier === 'plan_999' ? null : 5;
+        const localSystemLossData = allowedYearsSystemLoss === null ? systemLossData : systemLossData.slice(0, allowedYearsSystemLoss);
+        const glanceIndicators = [
+          {
+            label: "Installed Capacity",
+            value: "33,092 MW",
+            desc: "Includes captive & renewable energy",
+            Icon: Zap,
+            iconColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+            tooltipTitle: "Official Installed Grid Capacity",
+            tooltipDesc: "Total utility-scale grid-connected capacity monitored by BPDB is 26,300 MW, supplemented by 3,500 MW captive industrial plants and 3,292 MW of renewable capacity (including off-grid solar home systems and grid-tied solar).",
+            highlightLabel: "Grid-Tied vs. Off-Grid:",
+            highlightValue: "85% Utility-Scale"
+          },
+          {
+            label: "Peak Generation",
+            value: "17,201 MW",
+            valueColor: "text-primary",
+            desc: "Recorded on May 20, 2026",
+            Icon: Activity,
+            iconColor: "text-rose-500 bg-rose-500/10 border-rose-500/20",
+            tooltipTitle: "National Grid Peak Load Record",
+            tooltipDesc: "Verified maximum instantaneous active power generation delivered by public & private generators to the national grid during the summer peak load window. Monitored by PGCB's National Load Despatch Centre (NLDC).",
+            highlightLabel: "SCADA Verified Peak:",
+            highlightValue: "17,201 MW"
+          },
+          {
+            label: "Active Power Plants",
+            value: "137 Plants",
+            desc: "0 retired/expired plants",
+            Icon: Landmark,
+            iconColor: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+            tooltipTitle: "BPDB Contracted Power Plants",
+            tooltipDesc: "Official count of grid-tied power stations under active Power Purchase Agreements (PPA) with the BPDB. Comprises 62 public units, 66 Independent Power Producers (IPPs), and 9 Rental/Quick Rental units.",
+            highlightLabel: "PPA Active Units:",
+            highlightValue: "137 Operational"
+          },
+          {
+            label: "Import Capacity",
+            value: "2,696 MW",
+            desc: "Cross-border grid connection",
+            Icon: Globe,
+            iconColor: "text-sky-500 bg-sky-500/10 border-sky-500/20",
+            tooltipTitle: "Cross-Border Interconnection",
+            tooltipDesc: "Consolidated importing capability via cross-border transmission networks. Includes Bheramara HVDC (1,000 MW), Adani Power Godda link (1,496 MW), and Tripura radial link (200 MW).",
+            highlightLabel: "HVDC Interconnectors:",
+            highlightValue: "2 Active Links"
+          },
+          {
+            label: "Transmission Lines",
+            value: "18,152 ckt km",
+            desc: "High-voltage grid network",
+            Icon: Cable,
+            iconColor: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20",
+            tooltipTitle: "PGCB Transmission Network Asset",
+            tooltipDesc: "Consolidated circuit kilometers of high-voltage transmission lines operated exclusively by PGCB: 400kV lines (approx. 2,100 ckt km), 230kV lines (approx. 4,300 ckt km), and 132kV lines (approx. 11,752 ckt km).",
+            highlightLabel: "National Grid Backbone:",
+            highlightValue: "100% PGCB Managed"
+          },
+          {
+            label: "Substation Capacity",
+            value: "91,242 MVA",
+            desc: "Grid substation network",
+            Icon: BarChart3,
+            iconColor: "text-purple-500 bg-purple-500/10 border-purple-500/20",
+            tooltipTitle: "Grid Transformation Capacity",
+            tooltipDesc: "Total installed transformer capacity across PGCB transmission grid substations. Includes 400kV, 230kV, and 132kV primary transformer ratings measured in Megavolt-Amperes (MVA).",
+            highlightLabel: "PGCB Transformer Assets:",
+            highlightValue: "91,242 MVA"
+          },
+          {
+            label: "Distribution Lines",
+            value: "658,563 km",
+            desc: "Electrified lines (May 2026)",
+            Icon: Network,
+            iconColor: "text-violet-500 bg-violet-500/10 border-violet-500/20",
+            tooltipTitle: "Distribution Network Grid Length",
+            tooltipDesc: "Aggregated distribution line lengths (33kV, 11kV, and 0.4kV networks) operated by utilities. The Bangladesh Rural Electrification Board (BREB) holds the largest share with over 530,000 km of lines.",
+            highlightLabel: "BREB Share:",
+            highlightValue: "80.5% of Lines"
+          },
+          {
+            label: "Consumer Base",
+            value: "49.94 Million",
+            desc: "49,941,000 links (May 2026)",
+            Icon: Database,
+            iconColor: "text-teal-500 bg-teal-500/10 border-teal-500/20",
+            tooltipTitle: "Official Registered Accounts",
+            tooltipDesc: "Aggregated live electricity meters across all six distribution utilities. The consumer base grew by 8.4% annually, driven by rural grid expansion under the 'Electricity for All' initiative.",
+            highlightLabel: "Active Connections:",
+            highlightValue: "49,941,000 Accounts"
+          },
+          {
+            label: "Electricity Access",
+            value: "100.0%",
+            desc: "Share of population connected",
+            Icon: Sun,
+            iconColor: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
+            tooltipTitle: "National Electrification Ratio",
+            tooltipDesc: "Official government declaration certifying universal electricity access. Accomplished through grid extensions by BREB and off-grid Solar Home Systems (SHS) deployed by IDCOL in remote island regions.",
+            highlightLabel: "Off-Grid Solar Coverage:",
+            highlightValue: "8% of Population"
+          },
+          {
+            label: "Per Capita Gen.",
+            value: "661 kWh",
+            desc: "FY 2024-25, inc. captive & RE",
+            Icon: TrendingUp,
+            iconColor: "text-orange-500 bg-orange-500/10 border-orange-500/20",
+            tooltipTitle: "Annual Per Capita Energy Metric",
+            tooltipDesc: "Calculated by dividing total annual gross generation (including captive industrial and renewable generation) by the national population estimate, serving as a primary indicator of economic productivity.",
+            highlightLabel: "FY 2024-25 Actual:",
+            highlightValue: "661 kWh / person"
+          },
+          {
+            label: "Irrigation Pumps",
+            value: "498,000",
+            desc: "Agriculture connections",
+            Icon: Droplet,
+            iconColor: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+            tooltipTitle: "Agricultural Grid Connections",
+            tooltipDesc: "Dedicated power connections for seasonal crop watering (Boro season). Monitored under agricultural tariff subsidies to ensure food security. Peak demand occurs from February to April.",
+            highlightLabel: "Peak Agricultural Load:",
+            highlightValue: "Demands up to 2,500 MW"
+          },
+          {
+            label: "ADP Allocation",
+            value: "18,409.52 Cr",
+            desc: "FY 2025-26 budget",
+            Icon: DollarSign,
+            iconColor: "text-lime-600 dark:text-lime-400 bg-lime-500/10 border-lime-500/20",
+            tooltipTitle: "National Development Budget",
+            tooltipDesc: "Capital expenditure allocation under the Annual Development Programme (ADP) specifically earmarked for the Power Division. Funded by government resources and foreign development partners (JICA, ADB, WB).",
+            highlightLabel: "ADP Earmark:",
+            highlightValue: "18,409.52 Crore BDT"
+          }
+        ];
         
         const visibleMonths = isTruncated ? allowedYears * 12 : pgcbMonthlyData.length;
         const hiddenPercentage = Math.max(0, Math.round((1 - (visibleMonths / Math.max(pgcbMonthlyData.length, visibleMonths))) * 100));
+        
+        const activeAllowedYears = macroSubTab === 'system_loss' ? 5 : allowedYears;
+        const totalItemsCount = macroSubTab === 'system_loss' ? systemLossData.length : pgcbMonthlyData.length;
+        const visibleItemsCount = macroSubTab === 'system_loss' ? 5 : (isTruncated ? allowedYears * 12 : pgcbMonthlyData.length);
+        const activeHiddenPercentage = Math.max(0, Math.round((1 - (visibleItemsCount / Math.max(totalItemsCount, visibleItemsCount))) * 100));
 
         return (
         <div className="grid-explorer-panel space-y-6">
@@ -4155,7 +4298,7 @@ export function PowerGridExplorer({
                 <div>
                   <h4 className="text-sm font-semibold text-amber-500">Historical Preview Mode</h4>
                   <p className="text-[11.5px] text-muted-foreground mt-1">
-                    You are viewing a {allowedYears}-year preview of the macro trends. {gridAccess.isMember ? 'Upgrade your plan' : 'Subscribe'} to unlock the full historical backlog (you are missing {hiddenPercentage}% of the data spanning 15+ years).
+                    You are viewing a {activeAllowedYears}-year preview of the macro trends. {gridAccess.isMember ? 'Upgrade your plan' : 'Subscribe'} to unlock the full historical backlog (you are missing {activeHiddenPercentage}% of the data spanning 15+ years).
                   </p>
                 </div>
               </div>
@@ -4171,6 +4314,7 @@ export function PowerGridExplorer({
               { id: 'global', label: 'Global vs. Domestic', icon: Globe },
               { id: 'reports', label: 'Annual Reports', icon: FileText },
               { id: 'reserves', label: 'Gas Reserve Depletion', icon: Database },
+              { id: 'system_loss', label: 'Sector Glance & Losses', icon: Activity },
               { id: 'insights', label: 'Analyst & Investor Insights', icon: DollarSign }
             ].map((t) => {
               const SubIcon = t.icon;
@@ -4388,7 +4532,7 @@ export function PowerGridExplorer({
                       
                       {/* Custom Tooltip */}
                       <div 
-                        className="absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[17.5rem] md:w-80 left-1/2 -translate-x-1/2 top-[calc(100%+4px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                        className="absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[17.5rem] md:w-80 left-1/2 -translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
                         style={{ backgroundColor: 'hsl(var(--card))' }}
                       >
                         <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
@@ -4796,7 +4940,7 @@ export function PowerGridExplorer({
 
                     {/* KPI Grid */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Max Peak Generation</div>
                         <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-primary tabular-nums">
@@ -4805,7 +4949,7 @@ export function PowerGridExplorer({
                         <p className="text-[9px] text-muted-foreground mt-1">Evening peak generation recorded</p>
                       </div>
 
-                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Estimated Peak Demand</div>
                         <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-foreground tabular-nums">
@@ -4814,7 +4958,7 @@ export function PowerGridExplorer({
                         <p className="text-[9px] text-muted-foreground mt-1">System operational peak demand</p>
                       </div>
 
-                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Peak Deficit / Load Shed</div>
                         <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-destructive tabular-nums">
@@ -4826,7 +4970,7 @@ export function PowerGridExplorer({
                         <p className="text-[9px] text-muted-foreground mt-1">Peak capacity deficit gap</p>
                       </div>
 
-                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+                      <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Total Net Energy</div>
                         <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
                         <div className="text-2xl font-bold mt-1 text-amber-500 tabular-nums">
@@ -6202,6 +6346,278 @@ export function PowerGridExplorer({
               pgcbGasTotal={totalGasSupply}
               chartsReady={chartsReady}
             />
+          )}
+
+          {macroSubTab === 'system_loss' && (
+            <div className="space-y-6 grid-explorer-subpanel">
+              {/* Power Sector at a Glance */}
+              <div className="grid-explorer-chart-card card p-6">
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4 flex flex-col items-center text-center">
+                  <Landmark className="h-6 w-6 text-primary mb-2" />
+                  <div>
+                    <h3 className="grid-explorer-chart-card__title text-lg font-bold">Power Sector at a Glance</h3>
+                    <p className="grid-explorer-chart-card__sub text-xs text-muted-foreground">Official key indicators of grid capacity, consumer base, transmission, and performance</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                  {glanceIndicators.map((stat, idx) => {
+                    const Icon = stat.Icon;
+                    return (
+                      <div key={idx} className="p-4 bg-muted/10 border border-border/30 rounded-2xl flex items-center justify-center gap-3.5 hover:bg-muted/15 transition-all duration-200 shadow-sm group relative cursor-help">
+                        <div className={`h-9 w-9 flex items-center justify-center rounded-xl ${stat.iconColor} group-hover:scale-110 transition-transform duration-200 shrink-0`}>
+                          <Icon className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="space-y-0.5 text-left font-medium">
+                          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{stat.label}</div>
+                          <div className={`text-base font-bold ${stat.valueColor || 'text-foreground'}`}>{stat.value}</div>
+                          <div className="text-[9px] text-muted-foreground leading-normal">{stat.desc}</div>
+                        </div>
+
+                        {/* Custom Tooltip */}
+                        <div 
+                          className="absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[17.5rem] md:w-80 left-1/2 -translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                          style={{ backgroundColor: 'hsl(var(--card))' }}
+                        >
+                          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
+                          <div className={`font-bold text-xs uppercase tracking-wider ${stat.iconColor.split(' ')[0]} border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5 text-left`}>
+                            <Icon className="h-3.5 w-3.5" /> {stat.tooltipTitle}
+                          </div>
+                          <div className="text-[11px] leading-relaxed text-muted-foreground font-medium whitespace-normal text-left">
+                            {stat.tooltipDesc}
+                            <div className="mt-3 p-2.5 rounded-lg font-semibold border border-border/40 flex justify-between items-center bg-muted/5">
+                              <span className="text-[10px] text-muted-foreground uppercase">{stat.highlightLabel}</span>
+                              <span className="text-xs font-bold text-foreground">{stat.highlightValue}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Distribution System Loss */}
+                  <div className="col-span-2 md:col-span-4 p-6 bg-gradient-to-br from-amber-500/10 via-amber-500/[0.03] to-transparent border border-amber-500/30 rounded-2xl flex flex-col items-center justify-center text-center space-y-1.5 hover:border-amber-500/50 transition-all duration-300 shadow-md relative overflow-hidden group cursor-help">
+                    {/* Glowing background blur bubble */}
+                    <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-all duration-300 pointer-events-none" />
+                    
+                    <div className="text-[10.5px] font-extrabold text-amber-500 uppercase tracking-widest">Distribution System Loss Target</div>
+                    <div className="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight tabular-nums drop-shadow-sm">
+                      7.35%
+                    </div>
+                    <div className="text-[9.5px] text-muted-foreground font-medium leading-normal max-w-[480px]">
+                      Official FY 2025-26 performance target (evaluated up to April 2026)
+                    </div>
+
+                    {/* Custom Tooltip */}
+                    <div 
+                      className="absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] w-[17.5rem] md:w-80 left-1/2 -translate-x-1/2 top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto"
+                      style={{ backgroundColor: 'hsl(var(--card))' }}
+                    >
+                      <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
+                      <div className="font-bold text-xs uppercase tracking-wider text-amber-500 border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5 text-left">
+                        <Activity className="h-3.5 w-3.5" /> Target Distribution Loss
+                      </div>
+                      <div className="text-[11px] leading-relaxed text-muted-foreground font-medium whitespace-normal text-left">
+                        The official government performance contract target for utility-level power line distribution system losses (BPDB, BREB, DPDC, DESCO, WZPDCO, NESCO).
+                        <div className="mt-3 p-2.5 rounded-lg font-semibold border border-border/40 flex justify-between items-center bg-muted/5">
+                          <span className="text-[10px] text-muted-foreground uppercase">Target Deadline:</span>
+                          <span className="text-xs font-bold text-foreground">June 2026</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Metadata Footer */}
+                <GridCardFooter className="mt-6">
+                  <span>Source: <a href="https://powerdivision.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Ministry of Power, Energy and Mineral Resources (Power Division)</a></span>
+                  <span className="font-medium">Last Updated: Sunday, June 14, 2026 at 03:39 PM</span>
+                </GridCardFooter>
+              </div>
+
+              {/* Year-wise System Loss Chart */}
+              <div className="grid-explorer-chart-card card p-6">
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4">
+                  <Activity className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <h3 className="grid-explorer-chart-card__title">Historical System Loss Trends (T&amp;D)</h3>
+                    <p className="grid-explorer-chart-card__sub">Long-term reduction curves in transmission, distribution, and overall system loss — <span className="text-primary font-semibold text-xs">Tracked since 2001</span></p>
+                  </div>
+                  <span className="grid-explorer-chip bg-primary/10 text-primary border-primary/20 ml-auto text-[10px] font-bold">Last Updated: Wednesday, Sep 17, 2025 at 06:01 PM</span>
+                </div>
+
+                <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
+                  {chartsReady ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart
+                        data={[...localSystemLossData].reverse()}
+                        margin={{ top: 10, right: 5, left: -5, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <XAxis
+                          dataKey="fiscal_year"
+                          tick={{ fontSize: 9, fill: chartTheme.axisTick }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          width={GRID_Y_AXIS_WIDTH.single}
+                          tick={{ fontSize: 10, fill: chartTheme.axisTick }}
+                          axisLine={false}
+                          tickLine={false}
+                          tickMargin={4}
+                          domain={[0, 30]}
+                          tickFormatter={(v) => `${v}%`}
+                        />
+                        <Tooltip
+                          content={({ active, payload }) => {
+                            if (!active || !payload?.length) return null;
+                            const d = payload[0].payload;
+                            return (
+                              <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-80 max-w-[calc(100vw-2rem)] select-none bg-card space-y-3">
+                                <div className="font-bold text-foreground border-b border-border/40 pb-1.5 flex items-center justify-between gap-2">
+                                  <span>FY ${d.fiscal_year} Loss Analysis</span>
+                                  <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Power Cell</span>
+                                </div>
+                                
+                                {/* Overall Metrics */}
+                                <div className="space-y-1.5 text-[11px] md:text-xs">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                      Transmission Loss:
+                                    </span>
+                                    <span className="font-bold text-emerald-500 tabular-nums">${d.transmission.toFixed(2)}%</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                                      Distribution Loss:
+                                    </span>
+                                    <span className="font-bold text-purple-500 tabular-nums">${d.distribution.toFixed(2)}%</span>
+                                  </div>
+                                  <div className="flex justify-between items-center border-t border-border/30 pt-1.5">
+                                    <span className="text-destructive font-bold flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
+                                      Total T&amp;D Loss:
+                                    </span>
+                                    <span className="font-bold text-destructive tabular-nums bg-destructive/5 px-1.5 py-0.5 rounded">${d.total_td.toFixed(2)}%</span>
+                                  </div>
+                                </div>
+
+                                {/* Utility-wise Breakdown */}
+                                <div className="border-t border-border/40 pt-2 space-y-1.5">
+                                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Utility Distribution Loss</div>
+                                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10.5px] tabular-nums">
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground font-semibold">BPDB:</span>
+                                      <span className="text-foreground font-bold">${d.bpdb.toFixed(2)}%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground font-semibold">REB:</span>
+                                      <span className="text-foreground font-bold">${d.reb.toFixed(2)}%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground font-semibold">DPDC:</span>
+                                      <span className="text-foreground font-bold">${d.dpdc.toFixed(2)}%</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground font-semibold">DESCO:</span>
+                                      <span className="text-foreground font-bold">${d.desco.toFixed(2)}%</span>
+                                    </div>
+                                    <div className="flex justify-between col-span-2 sm:col-span-1">
+                                      <span className="text-muted-foreground font-semibold">WZPDCO:</span>
+                                      <span className="text-foreground font-bold">${d.wzpdco !== null ? `${d.wzpdco.toFixed(2)}%` : '—'}</span>
+                                    </div>
+                                    <div className="flex justify-between col-span-2 sm:col-span-1">
+                                      <span className="text-muted-foreground font-semibold">NESCO:</span>
+                                      <span className="text-foreground font-bold">${d.nesco !== null ? `${d.nesco.toFixed(2)}%` : '—'}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }}
+                        />
+                        <GridRechartsLegend
+                          verticalAlign="top"
+                          height={36}
+                          iconSize={8}
+                          wrapperStyle={{ fontSize: '11px' }}
+                        />
+                        <Area type="monotone" dataKey="total_td" name="Total T&amp;D Loss" stroke={chartTheme.destructive} fill={chartTheme.destructive} fillOpacity={0.06} strokeWidth={2.5} />
+                        <Line type="monotone" dataKey="distribution" name="Distribution Loss" stroke="#a855f7" strokeWidth={2} dot={{ r: 2 }} />
+                        <Line type="monotone" dataKey="transmission" name="Transmission Loss" stroke="#10b981" strokeWidth={2} dot={{ r: 2 }} />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="grid-explorer-skeleton" />
+                  )}
+                </div>
+
+                {/* Card Explanation Block */}
+                <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2 mt-4 rounded-xl">
+                  <p><strong>Overview and Trends:</strong></p>
+                  <p className="leading-relaxed">
+                    Bangladesh has made significant strides in upgrading its grid performance over the last two decades. The total <strong className="text-foreground">Transmission &amp; Distribution (T&amp;D) system loss</strong> dropped from a peak of <strong className="text-foreground">27.97% in FY 2001-02</strong> to <strong className="text-foreground">10.13% in FY 2024-25</strong>.
+                  </p>
+                  <p className="leading-relaxed">
+                    This rationalization was driven primarily by massive investments in prepaid metering, distribution substation reinforcement, and the conversion of low-voltage overhead lines to underground circuits in urban pockets. Technical transmission loss (high-voltage line resistance) has remained stable between <strong className="text-foreground">2.6% and 4.0%</strong> during this period.
+                  </p>
+                </div>
+              </div>
+
+              {/* Data Table */}
+              <div className="grid-explorer-chart-card card p-6">
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4">
+                  <FileText className="h-5 w-5 text-indigo-500 shrink-0" />
+                  <div>
+                    <h3 className="grid-explorer-chart-card__title">Year-wise System Loss Statistics</h3>
+                    <p className="grid-explorer-chart-card__sub">Audit-verified utility-wise and overall grid system loss records — <span className="text-primary font-semibold text-xs">Tracked since 2001</span></p>
+                  </div>
+                </div>
+
+                <div className="grid-explorer-table-wrap">
+                  <table className="grid-explorer-table text-xs text-center">
+                    <thead>
+                      <tr className="border-b border-border/40 text-muted-foreground uppercase font-bold text-[10px] tracking-wider">
+                        <th className="py-2.5 text-center">FY</th>
+                        <th className="py-2.5 text-center">BPDB</th>
+                        <th className="py-2.5 text-center">REB</th>
+                        <th className="py-2.5 text-center">DPDC</th>
+                        <th className="py-2.5 text-center">DESCO</th>
+                        <th className="py-2.5 text-center">WZPDCO</th>
+                        <th className="py-2.5 text-center">NESCO</th>
+                        <th className="py-2.5 text-center font-bold text-purple-600 dark:text-purple-400">Distribution</th>
+                        <th className="py-2.5 text-center font-semibold text-emerald-500">Transmission</th>
+                        <th className="py-2.5 text-center font-bold text-destructive">Total T&amp;D</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/10 font-medium tabular-nums text-foreground">
+                      {localSystemLossData.map((d) => (
+                        <tr key={d.fiscal_year} className="hover:bg-muted/5 transition-colors">
+                          <td className="py-2.5 font-bold text-foreground">{d.fiscal_year}</td>
+                          <td className="py-2.5">{d.bpdb.toFixed(2)}%</td>
+                          <td className="py-2.5">{d.reb.toFixed(2)}%</td>
+                          <td className="py-2.5">{d.dpdc.toFixed(2)}%</td>
+                          <td className="py-2.5">{d.desco.toFixed(2)}%</td>
+                          <td className="py-2.5">{d.wzpdco !== null ? `${d.wzpdco.toFixed(2)}%` : '—'}</td>
+                          <td className="py-2.5">{d.nesco !== null ? `${d.nesco.toFixed(2)}%` : '—'}</td>
+                          <td className="py-2.5 text-purple-600 dark:text-purple-400 font-semibold">{d.distribution.toFixed(2)}%</td>
+                          <td className="py-2.5 text-emerald-600 dark:text-emerald-400 font-semibold">{d.transmission.toFixed(2)}%</td>
+                          <td className="py-2.5 text-destructive font-bold bg-destructive/5">{d.total_td.toFixed(2)}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <GridCardFooter className="mt-4">
+                  <span>Source: <a href="http://www.powercell.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Power Cell, Ministry of Power, Energy and Mineral Resources</a></span>
+                  <span>Report Period: Year-wise Consolidated Audit (FY 2002 - FY 2025)</span>
+                </GridCardFooter>
+              </div>
+            </div>
           )}
 
           {macroSubTab === 'insights' && (

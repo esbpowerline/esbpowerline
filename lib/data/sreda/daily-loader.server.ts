@@ -1,6 +1,6 @@
 import { cache } from 'react';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
-import { getLatestSredaDate } from '@/lib/data/sreda/available-dates';
+import { getLatestSredaDate, sredaAvailableDates } from '@/lib/data/sreda/available-dates';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
 
 export async function loadSredaDailyFromDisk(isoDate: string): Promise<SredaDailyData | null> {
@@ -19,7 +19,10 @@ export async function loadSredaDailyFromDisk(isoDate: string): Promise<SredaDail
 }
 
 export const getLatestSredaDaily = cache(async (): Promise<SredaDailyData | null> => {
-  const isoDate = getLatestSredaDate();
-  if (!isoDate) return null;
-  return loadSredaDailyFromDisk(isoDate);
+  const dates = [...sredaAvailableDates].reverse();
+  for (const date of dates) {
+    const data = await loadSredaDailyFromDisk(date);
+    if (data) return data;
+  }
+  return null;
 });

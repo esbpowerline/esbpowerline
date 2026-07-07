@@ -73,7 +73,7 @@ export function useGridTierAccess(): GridTierAccessState {
     [tier, latestDate],
   );
 
-  return {
+  return useMemo(() => ({
     loading,
     tier,
     gridPlan,
@@ -87,5 +87,17 @@ export function useGridTierAccess(): GridTierAccessState {
     signedIn,
     isMember,
     isStaff,
-  };
+  }), [
+    loading,
+    tier,
+    gridPlan,
+    latestDate,
+    earliestAllowedDate,
+    limits,
+    isDateAllowed,
+    requiredTierForDate,
+    signedIn,
+    isMember,
+    isStaff,
+  ]);
 }

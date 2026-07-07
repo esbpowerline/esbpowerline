@@ -159,7 +159,7 @@ export function PbLiveTimeline({
             <ComposedChart data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'shortLabel' })} />
-              <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [2400, 'auto'] })} />
+              <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [0, 'auto'] })} />
               <GridRechartsTooltip content={<LiveWeekTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
 
               <Area

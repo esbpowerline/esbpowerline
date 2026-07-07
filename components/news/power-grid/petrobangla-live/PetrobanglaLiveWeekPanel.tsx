@@ -41,6 +41,8 @@ interface Props {
   underChart?: boolean;
   /** Stretch content to fill balanced triad column */
   fillColumn?: boolean;
+  rangeDays?: LiveWeekPreset;
+  onRangeDaysChange?: (days: LiveWeekPreset) => void;
 }
 
 export function PetrobanglaLiveWeekPanel({
@@ -51,6 +53,8 @@ export function PetrobanglaLiveWeekPanel({
   unified = false,
   underChart = false,
   fillColumn = false,
+  rangeDays: rangeDaysProp,
+  onRangeDaysChange,
 }: Props) {
   const { tier } = useGridTierAccess();
   const {
@@ -64,7 +68,9 @@ export function PetrobanglaLiveWeekPanel({
   const [internalMode, setInternalMode] = useState<AudienceMode>('simple');
   const mode = modeProp ?? internalMode;
   const chartsReady = true;
-  const [rangeDays, setRangeDays] = useState<LiveWeekPreset>(7);
+  const [internalRangeDays, setInternalRangeDays] = useState<LiveWeekPreset>(7);
+  const rangeDays = rangeDaysProp ?? internalRangeDays;
+  const setRangeDays = onRangeDaysChange ?? setInternalRangeDays;
 
   const rangeLocked = isLiveWeekRangeLocked(rangeDays, tier);
   const rangeOption = LIVE_WEEK_RANGE_OPTIONS.find((o) => o.days === rangeDays);
@@ -128,9 +134,22 @@ export function PetrobanglaLiveWeekPanel({
   const showAnalyst = mode === 'analyst' || mode === 'researcher';
   const showInvestor = mode === 'investor' || mode === 'analyst';
 
+  const rangePeriodLabel =
+    rangeDays === 7
+      ? 'Week ending'
+      : rangeDays === 30
+        ? 'Month ending'
+        : rangeDays === 180
+          ? '6-month period ending'
+          : rangeDays === 365
+            ? 'Year ending'
+            : rangeDays === 1095
+              ? '3-year period ending'
+              : 'Archive period ending';
+
   const weekInsight = unified
-    ? `Week ending ${formatLiveWeekDate(kpis.latestDate)}: ${formatNumber(kpis.weekAvgGas, 0)} MMCFD average · ${kpis.powerFulfillmentPct.toFixed(0)}% power fulfillment · ${kpis.lngSharePct.toFixed(0)}% LNG · Bibiyana ${formatNumber(kpis.bibiyanaGas, 0)} MMCFD.`
-    : `Week ending ${formatLiveWeekDate(kpis.latestDate)}: National gas averaged ~${formatNumber(kpis.weekAvgGas, 0)} MMCFD with ${formatNumber(kpis.weekVolatility, 1)} MMCFD daily swing. Power plants demanded ~${formatNumber(kpis.powerDemand, 0)} MMCFD but received ~${formatNumber(kpis.powerSupply, 0)} — ${kpis.powerFulfillmentPct.toFixed(0)}% fulfillment. LNG supplied ~${kpis.lngSharePct.toFixed(0)}% of all gas. Bibiyana held at ~${formatNumber(kpis.bibiyanaGas, 0)} MMCFD on ${kpis.bibiyanaWells} wells.`;
+    ? `${rangePeriodLabel} ${formatLiveWeekDate(kpis.latestDate)}: ${formatNumber(kpis.weekAvgGas, 0)} MMCFD average · ${kpis.powerFulfillmentPct.toFixed(0)}% power fulfillment · ${kpis.lngSharePct.toFixed(0)}% LNG · Bibiyana ${formatNumber(kpis.bibiyanaGas, 0)} MMCFD.`
+    : `${rangePeriodLabel} ${formatLiveWeekDate(kpis.latestDate)}: National gas averaged ~${formatNumber(kpis.weekAvgGas, 0)} MMCFD with ${formatNumber(kpis.weekVolatility, 1)} MMCFD daily swing. Power plants demanded ~${formatNumber(kpis.powerDemand, 0)} MMCFD but received ~${formatNumber(kpis.powerSupply, 0)} — ${kpis.powerFulfillmentPct.toFixed(0)}% fulfillment. LNG supplied ~${kpis.lngSharePct.toFixed(0)}% of all gas. Bibiyana held at ~${formatNumber(kpis.bibiyanaGas, 0)} MMCFD on ${kpis.bibiyanaWells} wells.`;
 
   const body = (
     <div
@@ -156,7 +175,7 @@ export function PetrobanglaLiveWeekPanel({
 
       {!inWeek && selectedDate >= '2020-01-11' && (
         <p className="text-[10px] text-amber-600 dark:text-amber-400 px-2 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          Grid date {selectedDate} is outside this week — see Daily archive below.
+          Grid date {selectedDate} is outside this range — see Daily archive below.
         </p>
       )}
 
@@ -222,6 +241,7 @@ export function PetrobanglaLiveWeekPanel({
               requiredTier={rangeOption.requiredTier}
               selectedDate={selectedDate}
               className="max-w-md"
+              onClose={() => setRangeDays(7)}
             />
           </div>
         )}
@@ -273,7 +293,10 @@ export function PetrobanglaLiveWeekPanel({
         <>
           <GasExplanationBlock
             className="rounded-xl border border-border/30"
-            what="Rolling seven official Petrobangla gas-days: national supply, power-sector demand vs allocation, LNG share, Bibiyana output, and plant stress. Analyst and Researcher modes unlock field sparklines, plant tables, and day-over-day compare."
+            what={rangeDays > 3000 
+              ? "Full archive of official Petrobangla gas-days: national supply, power-sector demand vs allocation, LNG share, Bibiyana output, and plant stress. Analyst and Researcher modes unlock field sparklines, plant tables, and day-over-day compare."
+              : `Rolling ${rangeDays}-day official Petrobangla gas-days window: national supply, power-sector demand vs allocation, LNG share, Bibiyana output, and plant stress. Analyst and Researcher modes unlock field sparklines, plant tables, and day-over-day compare.`
+            }
             insight="Short-term volatility in this window often precedes rationing decisions. When power fulfillment drops while LNG share rises, the system is leaning on expensive imports without fully covering electricity-sector demand — a pattern visible across the 2024–2026 archive."
           />
           <GasSourceFooter
@@ -283,7 +306,7 @@ export function PetrobanglaLiveWeekPanel({
               </>
             }
             auditedBy="Petrobangla Production &amp; Marketing Division"
-            reportingPeriod={`Live week ending ${kpis.latestDate} · gas-day 8:00 AM → 8:00 AM`}
+            reportingPeriod={`${rangePeriodLabel} ${kpis.latestDate} · gas-day 8:00 AM → 8:00 AM`}
           />
         </>
       )}
