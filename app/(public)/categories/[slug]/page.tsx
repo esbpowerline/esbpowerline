@@ -9,7 +9,7 @@ import { categoryIconWrapStyle, categoryTextStyle } from '@/lib/category-icons';
 import { CategoryIconDisplay } from '@/components/category/CategoryIconDisplay';
 import prisma from '@/lib/prisma';
 
-export const revalidate = 60;
+export const revalidate = 600;
 
 export async function generateStaticParams() {
   const categories = await prisma.category.findMany({

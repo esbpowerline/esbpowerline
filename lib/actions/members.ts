@@ -341,21 +341,8 @@ export async function getRecentDownloadsAction(): Promise<MemberDownloadRow[]> {
 }
 
 export async function triggerGridRefresh() {
-  const session = await auth();
-  if (!session?.user?.role || !can(session.user.role as Role, 'admin.access')) {
-    throw new Error('Admin access required to refresh grid data.');
-  }
-
-  try {
-    const { runIngestionPipeline } = await import('@/lib/cron/energy-ingest');
-    const result = await runIngestionPipeline();
-    revalidatePath('/grid-explorer');
-    if (!result.ok) {
-      return { success: false, error: 'Ingestion pipeline completed with errors.' };
-    }
-    return { success: true };
-  } catch (error: unknown) {
-    console.error('Failed to refresh grid data:', error);
-    return { success: false, error: 'Grid refresh failed. Please try again later.' };
-  }
+  throw new Error(
+    "Grid ingestion disabled on serverless due to compute limits. " +
+    "Run the ingestion daemon locally (e.g. on the Pi) instead."
+  );
 }

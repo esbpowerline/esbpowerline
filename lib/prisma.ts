@@ -8,6 +8,8 @@ import {
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
 
+// REMINDER: Ensure DATABASE_URL uses the Supabase Transaction Pooler (port 6543)
+// instead of the direct connection string to prevent pool exhaustion.
 function createPrismaClient() {
   const databaseUrl = resolveDatabaseUrl();
   const log: Prisma.LogLevel[] =

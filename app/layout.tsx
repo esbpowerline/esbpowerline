@@ -3,8 +3,6 @@ import Script from 'next/script';
 
 import { Inter, Noto_Sans_Bengali, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
-import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 import { ProvidersShell } from './ProvidersShell';
 import { SITE_THEME_CRITICAL_CSS, SITE_THEME_INIT_SCRIPT } from '@/lib/site-theme';
@@ -63,8 +61,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ProvidersShell>
           {children}
-          <Analytics />
-          <SpeedInsights />
           <Toaster
             position="bottom-right"
             closeButton

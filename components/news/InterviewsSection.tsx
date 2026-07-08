@@ -141,7 +141,7 @@ export function InterviewsSection({
             key={iv.id}
             type="button"
             onClick={() => setSelected(iv)}
-            className="interview-card group flex h-full flex-col text-left rounded-2xl overflow-hidden border border-border bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="interview-card w-full group flex h-full flex-col text-left rounded-2xl overflow-hidden border border-border bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <div className="relative aspect-video shrink-0 overflow-hidden">
               <img

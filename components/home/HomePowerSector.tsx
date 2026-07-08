@@ -70,7 +70,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     if (windowWidth >= 1024) {
       return -index * ((containerWidth - gap * 2) / 3 + gap);
     } else if (windowWidth >= 768) {
-      return -index * ((containerWidth - gap) / 2 + gap);
+      if (windowWidth >= 768) { return -index * ((containerWidth - gap) / 2 + gap); } else { return -index * (containerWidth + gap); }
     } else {
       return -index * (containerWidth + gap);
     }
@@ -243,7 +243,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       {articles.length > visibleCount && currentIndex > 0 && (
         <button
           onClick={prevCard}
-          className="absolute -left-5 top-[40%] -translate-y-1/2 z-40 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-0 group-hover/carousel:opacity-100 pointer-events-none group-hover/carousel:pointer-events-auto hidden lg:flex"
+          className="absolute -left-3 md:-left-5 top-[40%] -translate-y-1/2 z-40 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:pointer-events-none lg:group-hover/carousel:pointer-events-auto shadow-sm"
           aria-label="Previous slide"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -271,7 +271,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
           {articles.map((article) => (
             <div 
               key={article.id} 
-              className="article-card-wrapper flex-shrink-0 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] pointer-events-none flex flex-col h-full"
+              className="article-card-wrapper flex-shrink-0 w-full md:w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] pointer-events-none flex flex-col h-full"
               style={{ userSelect: 'none' }}
               onDragStart={(e) => e.preventDefault()}
             >
@@ -339,7 +339,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       {articles.length > visibleCount && currentIndex < maxIndex && (
         <button
           onClick={nextCard}
-          className="absolute -right-5 top-[40%] -translate-y-1/2 z-40 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-0 group-hover/carousel:opacity-100 pointer-events-none group-hover/carousel:pointer-events-auto hidden lg:flex"
+          className="absolute -right-3 md:-right-5 top-[40%] -translate-y-1/2 z-40 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:pointer-events-none lg:group-hover/carousel:pointer-events-auto shadow-sm"
           aria-label="Next slide"
         >
           <ChevronRight className="h-5 w-5" />

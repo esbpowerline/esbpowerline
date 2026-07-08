@@ -3,10 +3,7 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "crons": [
-    {
-      "path": "/api/cron/ingest",
-      "schedule": "0 6 * * *"
-    },
+
     {
       "path": "/api/cron/publish-scheduled",
       "schedule": "0 7 * * *"
@@ -28,9 +25,27 @@
       ]
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/admin/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "private, no-store" }
+      ]
+    },
+    {
+      "source": "/api/auth/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" }
+      ]
+    },
+    {
+      "source": "/api/members/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=60, stale-while-revalidate=300" }
       ]
     }
   ]

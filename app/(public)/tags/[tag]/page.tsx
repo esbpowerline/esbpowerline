@@ -1,9 +1,14 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArticleCard } from '@/components/news/ArticleCard';
-import { getPublishedArticlesByTag } from '@/lib/category-content';
+import { getPublishedArticlesByTag, getPublicTagCounts } from '@/lib/category-content';
 
-export const revalidate = 60;
+export const revalidate = 600;
+
+export async function generateStaticParams() {
+  const tags = await getPublicTagCounts();
+  return tags.map(t => ({ tag: t.tag }));
+}
 
 interface Props {
   params: Promise<{ tag: string }>;

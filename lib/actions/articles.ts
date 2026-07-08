@@ -69,6 +69,12 @@ function enforceArticlePermissions(
   return result;
 }
 
+/**
+ * Revalidates all public-facing ISR paths.
+ * ONLY call this when an article's PUBLIC VISIBILITY has changed
+ * (published, unpublished, trashed from published, or placement flags changed).
+ * Do NOT call for pure draft saves — they have no public impact.
+ */
 function revalidatePublicContent(slugs: string[] = []) {
   for (const path of PUBLIC_REVALIDATE_PATHS) revalidatePath(path);
   for (const slug of slugs) revalidatePath(`/articles/${slug}`);
@@ -486,7 +492,19 @@ export async function bulkArticleAction(
   revalidatePath('/cms/articles');
   revalidatePath('/cms');
   revalidatePath('/admin/articles');
-  revalidatePublicContent(articles.map((a) => a.slug));
+
+  // Only sweep public ISR paths when publicly visible content actually changes.
+  // Placement flags (feature/pin/break) change homepage ordering — always revalidate.
+  // Status changes: only revalidate if articles were or will be publicly visible.
+  const publiclyAffected = action === 'feature' || action === 'unfeature' ||
+    action === 'pin_on' || action === 'pin_off' ||
+    action === 'breaking_on' || action === 'breaking_off' ||
+    action === 'publish' || action === 'trash' || action === 'archive' ||
+    articles.some((a) => a.status === 'PUBLISHED');
+
+  if (publiclyAffected) {
+    revalidatePublicContent(articles.map((a) => a.slug));
+  }
 
   return { affected, action };
 }
@@ -817,7 +835,13 @@ export async function bulkOwnArticleAction(ids: string[], action: OwnBulkAction)
   revalidatePath('/cms');
   revalidatePath('/cms/articles');
   if (action === 'trash') revalidatePath('/cms/trash');
-  revalidatePublicContent(articles.map((a) => a.slug));
+
+  // Only sweep public ISR paths if articles were published or are being published.
+  const hadPublished = articles.some((a) => a.status === 'PUBLISHED');
+  if (action === 'publish' || hadPublished) {
+    revalidatePublicContent(articles.map((a) => a.slug));
+  }
+
   return { affected, action };
 }
 

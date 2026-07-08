@@ -277,6 +277,7 @@ export function FeaturedCarousel({
                         src={item.imageUrl}
                         alt={item.title}
                         fill
+                        unoptimized={true}
                         priority={idx === 0}
                         className={`absolute inset-0 h-full w-full transition-opacity duration-700 ease-in-out ${
                           idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'

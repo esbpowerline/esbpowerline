@@ -31,7 +31,7 @@ import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { createTranslator } from '@/lib/i18n/messages';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
 
-export const revalidate = 60;
+export const revalidate = 180;
 
 export const metadata = {
   title: 'ESB PowerLine — Bangladesh Energy & Power News',

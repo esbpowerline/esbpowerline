@@ -8,7 +8,7 @@ import { ArticleCard } from '@/components/news/ArticleCard';
 import { getPublishedArticlesForPublic } from '@/lib/category-content';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
 
-export const revalidate = 60;
+export const revalidate = 600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

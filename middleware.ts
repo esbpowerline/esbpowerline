@@ -189,11 +189,21 @@ export async function middleware(request: NextRequest) {
     });
   }
 
+  // Fast path #1: No auth cookie + public route → skip everything (no Supabase calls)
   if (!pathNeedsRoleCheck(pathname) && !hasSupabaseAuthCookie(request)) {
     return NextResponse.next({ request });
   }
 
+  // Fast path #2: Has auth cookie but route doesn't need a role check (e.g. a logged-in
+  // reader browsing public articles). Refresh the Supabase session token only — skip the
+  // Postgres profiles lookup in resolveEdgeSession entirely.
+  if (!pathNeedsRoleCheck(pathname) && hasSupabaseAuthCookie(request)) {
+    const { response } = await updateSession(request);
+    return response;
+  }
+
   const { response, supabase, user } = await updateSession(request);
+
 
   if (isProxyProtectedApi(pathname)) {
     if (isCronAuthorized(request)) return response;

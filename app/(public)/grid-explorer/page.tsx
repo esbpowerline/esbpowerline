@@ -6,31 +6,20 @@ import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButto
 import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
 import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
-import { readGridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { Activity } from 'lucide-react';
+import { Suspense } from 'react';
 
-export const revalidate = 60;
+export const revalidate = 120;
 
 export const metadata = {
   title: 'Power Grid Explorer — ESB PowerLine',
   description: 'Real-time and planning data for Bangladesh’s electricity system — generation, transmission, demand & projects.',
 };
 
-type PageProps = {
-  searchParams: Promise<{ date?: string; tab?: string; macro?: string }>;
-};
-
-export default async function PowerGridExplorerPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const query = new URLSearchParams();
-  if (params.tab) query.set('tab', params.tab);
-  if (params.date) query.set('date', params.date);
-  if (params.macro) query.set('macro', params.macro);
-  const urlBoot = readGridExplorerUrlBoot(query.toString() ? `?${query.toString()}` : '');
-
+export default async function PowerGridExplorerPage() {
   const [settings, prefetchedDailyReports] = await Promise.all([
     getGridSettingsMap(),
-    prefetchGridExplorerDailyReports(params.date ?? null),
+    prefetchGridExplorerDailyReports(null),
   ]);
   const grid = normalizeGridSettings(settings);
   const latestDate = getLatestAvailableDate();
@@ -62,12 +51,13 @@ export default async function PowerGridExplorerPage({ searchParams }: PageProps)
         </div>
       </div>
 
-      <PowerGridExplorerClient
-        initialLines={grid.gridLines}
-        prefetchedDailyReports={prefetchedDailyReports}
-        urlBoot={urlBoot}
-        latestDate={latestDate ?? undefined}
-      />
+      <Suspense fallback={<div className="h-[28rem] rounded-2xl border border-border/50 bg-muted/15 animate-pulse" />}>
+        <PowerGridExplorerClient
+          initialLines={grid.gridLines}
+          prefetchedDailyReports={prefetchedDailyReports}
+          latestDate={latestDate ?? undefined}
+        />
+      </Suspense>
 
       <MemberToolsPanel />
 

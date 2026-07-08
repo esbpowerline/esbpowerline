@@ -22,7 +22,7 @@ import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import prisma from '@/lib/prisma';
 
-export const revalidate = 60;
+export const revalidate = 600;
 
 export async function generateStaticParams() {
   const articles = await prisma.article.findMany({
@@ -182,6 +182,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 alt={article.heroImage?.alt ?? article.title}
                 fill
                 priority
+                unoptimized={true}
                 style={heroImageStyle(article.heroImage)}
                 sizes="(max-width: 768px) 100vw, 800px"
               />

@@ -27,6 +27,7 @@ export function CategoryIconDisplay({
         alt=""
         width={size}
         height={size}
+        unoptimized={true}
         className={cn('category-custom-icon object-contain', imageClassName)}
         style={style}
         draggable={false}

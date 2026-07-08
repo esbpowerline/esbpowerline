@@ -1,11 +1,9 @@
 import Link from 'next/link';
-import { ArrowRight, Download, Calendar, Users } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { getLatestMagazineIssue } from '@/lib/category-content';
-import { auth } from '@/lib/auth';
-import { getMagazineSavedState } from '@/lib/actions/members';
-import { MagazinePageClient } from '@/components/news/MagazinePageClient';
+import { MagazinePageClient, MagazineLibraryButton } from '@/components/news/MagazinePageClient';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 export const metadata = {
   title: 'Monthly Magazine | ESB PowerLine',
@@ -14,9 +12,6 @@ export const metadata = {
 
 export default async function MagazinePage() {
   const issue = await getLatestMagazineIssue();
-  const session = await auth();
-  const signedIn = !!session?.user?.id;
-  const saved = issue && signedIn ? await getMagazineSavedState(issue.id) : false;
 
   const magazine = issue ?? {
     id: '',
@@ -59,23 +54,21 @@ export default async function MagazinePage() {
         title={magazine.title}
         summary={magazine.summary}
         issueLabel={issueLabel}
-        signedIn={signedIn}
         pdfUrl={magazine.pdfUrl}
-        saved={saved}
         issueId={magazine.id}
         features={features}
       />
 
       <div className="container container--shell pb-12 relative z-10">
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-5">
+        <div className="mt-8 lg:mt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-5">
             <h2 className="font-semibold text-xl">In this issue</h2>
-            <Link href="/articles" className="text-xs text-primary hover:underline flex items-center gap-1">All power sector features <ArrowRight className="h-3.5 w-3.5" /></Link>
+            <Link href="/articles" className="text-xs text-primary hover:underline flex items-center gap-1 self-start sm:self-auto">All power sector features <ArrowRight className="h-3.5 w-3.5" /></Link>
           </div>
 
           <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
             {features.map((f, idx) => (
-              <div key={idx} className="card p-6 group hover:border-primary/50 transition-all duration-200 relative overflow-hidden">
+              <div key={idx} className="card p-5 sm:p-6 group hover:border-primary/50 transition-all duration-200 relative overflow-hidden">
                 {/* Subtle card glow */}
                 <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true">
                   <div className="absolute -top-[30%] -right-[30%] w-[10rem] h-[10rem] rounded-full bg-emerald-500/6 blur-[30px]" />
@@ -90,15 +83,11 @@ export default async function MagazinePage() {
           </div>
         </div>
 
-        <div className="mt-12 rounded-2xl border border-border/70 p-8 bg-muted/30 text-center">
+        <div className="mt-12 rounded-2xl border border-border/70 p-6 md:p-8 bg-muted/30 text-center mx-4 md:mx-0">
           <div className="max-w-md mx-auto">
             <div className="font-semibold text-lg mb-2">Access the full archive + exclusive briefings</div>
             <p className="text-sm text-muted-foreground mb-5">Monthly magazine + data packages for energy professionals.</p>
-            {signedIn ? (
-              <Link href="/members" className="btn btn-primary px-8">Open my library</Link>
-            ) : (
-              <Link href="/members/login" className="btn btn-primary px-8">Sign in for full access</Link>
-            )}
+            <MagazineLibraryButton />
           </div>
         </div>
       </div>

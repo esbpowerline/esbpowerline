@@ -7,8 +7,9 @@ import { localizeCategoryFields } from '@/lib/i18n/categories';
 import { createTranslator } from '@/lib/i18n/messages';
 import { getServerSiteLocale } from '@/lib/locale-server';
 import { SortSelect } from '@/components/news/SortSelect';
-
-export const revalidate = 60;
+import { Suspense } from 'react';
+import { ArticlesClient } from '@/components/news/ArticlesClient';
+export const revalidate = 300;
 
 export const metadata = {
   title: 'Latest News | ESB PowerLine',
@@ -19,42 +20,15 @@ export const metadata = {
   },
 };
 
-interface ArticlesPageProps {
-  searchParams: Promise<{ category?: string; sort?: string; page?: string }>;
-}
-
-export default async function ArticlesPage({ searchParams }: ArticlesPageProps) {
+export default async function ArticlesPage() {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);
-  const resolvedParams = await searchParams;
-  const categoryParam = resolvedParams.category;
-  const sort = resolvedParams.sort || 'latest';
-  const currentPage = parseInt(resolvedParams.page || '1', 10);
 
   const [categories, allArticles, trending] = await Promise.all([
     getPublicCategories(),
     getPublishedArticlesForPublic(120, locale),
     getTrendingPublishedArticles(5, locale),
   ]);
-
-  let articles = allArticles;
-
-  if (categoryParam) {
-    const match = categories.find((c) => c.slug === categoryParam);
-    if (match) {
-      articles = articles.filter((a) => a.category === match.name);
-    }
-  }
-
-  if (sort === 'views') {
-    articles = [...articles].sort((a, b) => b.views - a.views);
-  } else {
-    articles = [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }
-
-  const perPage = 9;
-  const totalPages = Math.ceil(articles.length / perPage);
-  const paginatedArticles = articles.slice(0, currentPage * perPage);
 
   return (
     <div className="container container--shell articles-page py-8 md:py-10">
@@ -71,74 +45,21 @@ export default async function ArticlesPage({ searchParams }: ArticlesPageProps) 
             <Search className="articles-page__toolbar-icon" strokeWidth={2} aria-hidden />
             <span>{t('articles.advancedSearch')}</span>
           </Link>
-          <SortSelect currentSort={sort} />
+          <Suspense fallback={<div className="h-6 w-24 bg-muted/20 animate-pulse rounded" />}>
+            <SortSelect />
+          </Suspense>
         </div>
       </header>
 
-      <div className="articles-page__filters mb-6 md:mb-8">
-        <Link
-          href={sort === 'views' ? '/articles?sort=views' : '/articles'}
-          className={`category-pill ${!categoryParam ? 'active' : ''}`}
-        >
-          {t('common.all')}
-        </Link>
-        {categories.map((cat) => {
-          const isActive = categoryParam === cat.slug;
-          const href = sort === 'views'
-            ? `/articles?category=${cat.slug}&sort=views`
-            : `/articles?category=${cat.slug}`;
-          const localized = localizeCategoryFields(locale, cat);
-          return (
-            <Link
-              key={cat.id}
-              href={href}
-              className={`category-pill ${isActive ? 'active' : ''}`}
-            >
-              {localized.name}
-            </Link>
-          );
-        })}
-      </div>
-
       <div className="articles-editorial__grid">
         <div className="articles-editorial__main min-w-0">
-          {paginatedArticles.length === 0 ? (
-            <p className="text-muted-foreground py-12 text-center">{t('coverage.noArticles')}</p>
-          ) : (
-            <div className="articles-grid" id="articles-grid">
-              {paginatedArticles.map((article) => (
-                <ArticleCard
-                  key={article.id}
-                  id={article.slug}
-                  title={article.title}
-                  shortTitle={article.shortTitle}
-                  excerpt={article.excerpt}
-                  category={article.category}
-                  imageUrl={article.imageUrl}
-                  author={article.author}
-                  date={article.date}
-                  readTime={article.readTime}
-                  views={article.views}
-                />
-              ))}
-            </div>
-          )}
-
-          {currentPage < totalPages && (
-            <div className="mt-8 text-center">
-              <Link
-                href={`/articles?${new URLSearchParams({
-                  ...(categoryParam && { category: categoryParam }),
-                  ...(sort !== 'latest' && { sort }),
-                  page: String(currentPage + 1),
-                })}`}
-                className="btn btn-primary px-8"
-                scroll={false}
-              >
-                {t('articles.loadMore')}
-              </Link>
-            </div>
-          )}
+          <Suspense fallback={<div className="h-96 rounded-2xl border border-border/50 bg-muted/15 animate-pulse my-8" />}>
+            <ArticlesClient
+              categories={categories}
+              allArticles={allArticles}
+              locale={locale}
+            />
+          </Suspense>
         </div>
 
         <aside className="articles-editorial__rail" aria-label={t('articles.trending')}>

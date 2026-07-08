@@ -54,6 +54,7 @@ export function HomeBottomRow({
                 src={magazine.coverUrl}
                 alt={magazine.title}
                 fill
+                unoptimized={true}
                 className="object-cover"
                 sizes="72px"
               />

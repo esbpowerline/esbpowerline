@@ -16,6 +16,14 @@ export async function GET(request: Request) {
 
   try {
     console.log('[API Cron] Triggering energy report ingestion pipeline...');
+    
+    // Guard against running Python ingestion on Vercel
+    return NextResponse.json({
+      ok: false,
+      error: 'Grid ingestion disabled on serverless due to compute limits. Run the ingestion daemon locally (e.g. on the Pi) instead.'
+    }, { status: 503 });
+
+    // The below is unreachable but kept to avoid typescript complaints or if we run it in a container
     const result = await runIngestionPipeline();
     if (!result.ok) {
       return NextResponse.json(

@@ -35,7 +35,7 @@ export default async function MemberMagazinePage() {
           {issues.map((issue, index) => (
             <li key={issue.id} className="member-magazine-card">
               <div className="member-magazine-card__cover">
-                <Image src={issue.coverUrl} alt="" width={112} height={144} className="h-full w-full object-cover" />
+                <Image src={issue.coverUrl} alt="" width={112} height={144} unoptimized={true} className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">

@@ -5,11 +5,12 @@ import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, SlidersHorizontal, Check } from 'lucide-react';
 import { useLocale } from '@/components/shared/LocaleProvider';
 
-export function SortSelect({ currentSort }: { currentSort: string }) {
+export function SortSelect() {
   const { t } = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const currentSort = searchParams.get('sort') || 'latest';
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 

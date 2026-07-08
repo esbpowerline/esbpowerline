@@ -4,7 +4,7 @@ import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { checkRateLimitResponse, withPrivateNoStore } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 60;
 
 export async function GET(request: NextRequest) {
   const limited = checkRateLimitResponse(request, 'api-market-dse', 60, 60_000);

@@ -92,11 +92,24 @@ export function PlatformControl() {
       loadSnapshot(false);
     }
 
+    // Poll every 60s (was 15s) — skip entirely when tab is hidden
     const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.hidden) return;
       loadSnapshot(true);
-    }, 15000);
+    }, 60_000);
 
-    return () => clearInterval(interval);
+    // Refresh immediately when user returns to this tab
+    const handleVisibility = () => {
+      if (typeof document !== 'undefined' && !document.hidden && loadState === 'ready') {
+        loadSnapshot(true);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, [session?.user, loadState, loadSnapshot]);
 
   useEffect(() => {

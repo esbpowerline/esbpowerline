@@ -405,17 +405,20 @@ export function ArticleForm({
 
   useEffect(() => {
     if (mode === 'edit' && status === 'DRAFT' && article) {
+      // Autosave every 30s (was 5s) — skip entirely when tab is in the background
       const interval = setInterval(() => {
+        if (typeof document !== 'undefined' && document.hidden) return;
         updateArticle(article.id, buildSavePayload('DRAFT'))
           .then(() => setAutosaveError(null))
           .catch((err: unknown) => {
             const message = err instanceof Error ? err.message : 'Autosave failed';
             setAutosaveError(message);
           });
-      }, 5000);
+      }, 30_000);
       return () => clearInterval(interval);
     }
   }, [mode, status, article, buildSavePayload]);
+
 
   // 1. Auto-calculate category & tags when title/content changes
   useEffect(() => {

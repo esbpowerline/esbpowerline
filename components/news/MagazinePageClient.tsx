@@ -6,15 +6,16 @@ import { ArrowRight, Download, Calendar, Users, Sparkles, BookOpen, Star, HelpCi
 import { MagazineCoverMockup } from './MagazineCoverMockup';
 import { MagazineFlipBook } from './MagazineFlipBook';
 import { SaveMagazineButton } from '@/components/members/SaveMagazineButton';
+import { useSession } from '@/utils/supabase/auth-context';
+import { getMagazineSavedState } from '@/lib/actions/members';
+import { useEffect } from 'react';
 
 interface MagazinePageClientProps {
   coverUrl: string;
   title: string;
   summary: string;
   issueLabel: string;
-  signedIn: boolean;
   pdfUrl: string | null;
-  saved: boolean;
   issueId: string;
   features: { title: string; excerpt: string }[];
 }
@@ -24,12 +25,20 @@ export function MagazinePageClient({
   title,
   summary,
   issueLabel,
-  signedIn,
   pdfUrl,
-  saved,
   issueId,
   features,
 }: MagazinePageClientProps) {
+  const { status } = useSession();
+  const signedIn = status === 'authenticated';
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (signedIn && issueId) {
+      getMagazineSavedState(issueId).then(setSaved).catch(console.error);
+    }
+  }, [signedIn, issueId]);
+
   const [activeCover, setActiveCover] = useState(coverUrl);
   const [isFlipBookOpen, setIsFlipBookOpen] = useState(false);
 
@@ -62,7 +71,7 @@ export function MagazinePageClient({
       <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
         
         {/* Left Info Column */}
-        <div className="lg:w-2/5">
+        <div className="lg:w-2/5 order-2 lg:order-1">
           <div className="sticky top-8">
             <div className="uppercase text-xs tracking-[2px] text-accent font-semibold mb-2.5 flex items-center gap-2">
               <Calendar className="h-3.5 w-3.5 text-primary" /> {issueLabel} ISSUE
@@ -93,24 +102,24 @@ export function MagazinePageClient({
               </ul>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
               {signedIn && pdfUrl ? (
-                <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary gap-2 px-5">
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary gap-2 px-5 w-full sm:w-auto justify-center">
                   <Download className="h-4 w-4" /> Download PDF
                 </a>
               ) : pdfUrl ? (
-                <Link href="/members/login?callbackUrl=/magazine" className="btn btn-primary gap-2 px-5">
+                <Link href="/members/login?callbackUrl=/magazine" className="btn btn-primary gap-2 px-5 w-full sm:w-auto justify-center">
                   <Download className="h-4 w-4" /> Member login to download
                 </Link>
               ) : (
-                <button type="button" className="btn btn-primary gap-2 px-5" disabled>
+                <button type="button" className="btn btn-primary gap-2 px-5 w-full sm:w-auto justify-center" disabled>
                   <Download className="h-4 w-4" /> PDF coming soon
                 </button>
               )}
               
               <button 
                 onClick={() => openFlipBook(coverUrl)}
-                className="btn btn-emerald gap-2 px-5 shadow-[0_2px_10px_-2px_rgba(16,185,129,0.2)]"
+                className="btn btn-emerald gap-2 px-5 shadow-[0_2px_10px_-2px_rgba(16,185,129,0.2)] w-full sm:w-auto justify-center"
               >
                 <BookOpen className="h-4 w-4" /> Flipbook Preview
               </button>
@@ -132,7 +141,7 @@ export function MagazinePageClient({
         </div>
 
         {/* Right Cover Preview & Previous Releases Column */}
-        <div className="lg:w-3/5 flex flex-col items-center">
+        <div className="lg:w-3/5 flex flex-col items-center order-1 lg:order-2">
           
           {/* Main Cover Holder Container */}
           <div className="w-full max-w-[420px] p-6 rounded-3xl border border-border/40 bg-gradient-to-b from-card/80 to-card/25 shadow-xl dark:shadow-none relative group mb-10">
@@ -181,7 +190,7 @@ export function MagazinePageClient({
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
               {previousIssues.map((issue, idx) => (
                 <div 
                   key={idx} 
@@ -218,4 +227,14 @@ export function MagazinePageClient({
       />
     </div>
   );
+}
+
+export function MagazineLibraryButton() {
+  const { status } = useSession();
+  const signedIn = status === 'authenticated';
+  
+  if (signedIn) {
+    return <Link href="/members" className="btn btn-primary px-8">Open my library</Link>;
+  }
+  return <Link href="/members/login" className="btn btn-primary px-8">Sign in for full access</Link>;
 }

@@ -5,7 +5,7 @@ import { PublicFooter } from '@/components/shared/PublicFooter';
 import { getPublicCategories } from '@/lib/category-content';
 import { getPublicSettingsMap } from '@/lib/homepage-content';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettingsMap();

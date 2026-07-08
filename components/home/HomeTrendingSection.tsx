@@ -201,6 +201,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
                       src={article.imageUrl}
                       alt=""
                       fill
+                      unoptimized={true}
                       style={heroImageStyle(article.heroMeta || undefined)}
                       sizes="(max-width: 768px) 100vw, 280px"
                       className="absolute inset-0 h-full w-full object-cover"
@@ -497,6 +498,7 @@ export function HomeTrendingSection({
                 src={lead.imageUrl}
                 alt=""
                 fill
+                unoptimized={true}
                 style={heroImageStyle(lead.heroMeta || undefined)}
                 sizes="(max-width: 768px) 96px, 128px"
               />
