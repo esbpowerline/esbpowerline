@@ -120,21 +120,11 @@ export function PbLiveTimeline({
   const decimatedPoints = useMemo(() => decimateTimelineDays(points, 180), [points]);
 
   const data = useMemo(() => {
-    return decimatedPoints.map((p, i) => ({
+    return decimatedPoints.map((p) => ({
       ...p,
-      shortLabel:
-        dayCount > 30
-          ? i === 0 || i === decimatedPoints.length - 1 || i % Math.ceil(decimatedPoints.length / 6) === 0
-            ? p.axisLabel
-            : ''
-          : dayCount > 14
-            ? i % 2 === 0
-              ? p.axisLabel
-              : ''
-            : p.axisLabel,
       highlight: p.date === highlightDate,
     }));
-  }, [decimatedPoints, dayCount, highlightDate]);
+  }, [decimatedPoints, highlightDate]);
 
   const nationalColor = PB_ARCHIVE_COLORS.national;
   const demandColor = PB_ARCHIVE_COLORS.powerDemand;
@@ -158,7 +148,7 @@ export function PbLiveTimeline({
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
               <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-              <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'shortLabel' })} />
+              <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'axisLabel', minTickGap: 30 })} />
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [0, 'auto'] })} />
               <GridRechartsTooltip content={<LiveWeekTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
 

@@ -957,20 +957,20 @@ export function ArticlePreviewPanel({
           <div className="cms-preview-modal__toolbar-group">
             <span className="cms-preview-modal__toolbar-label">Placement</span>
             {([
-              ['carousel', 'Carousel', Pin],
-              ['coverage-hero', 'Coverage', LayoutGrid],
-              ['card', 'Home cards', Star],
+              ['carousel', 'Featured', Star],
+              ['coverage-hero', 'Hero card', LayoutGrid],
+              ['card', 'Home cards', Pin],
               ['trending', 'Trending', Flame],
               ['article', 'Article', Newspaper],
               ['facebook', 'Facebook', Facebook],
             ] as const).map(([id, label, Icon]) => {
               const disabled =
-                (id === 'carousel' && !isFeatured && !isBreaking) ||
-                (id === 'coverage-hero' && !isFeatured && !isBreaking && !isPinned) ||
+                (id === 'carousel' && !isFeatured) ||
+                (id === 'coverage-hero' && !isBreaking) ||
                 (id === 'trending' && !isTrending);
               const placementHints = {
-                'carousel': 'Show as featured or breaking hero carousel item',
-                'coverage-hero': 'Show as pinned homepage coverage layout slot',
+                'carousel': 'Show in the dedicated featured panel',
+                'coverage-hero': 'Show as breaking news hero card',
                 'card': 'Show as secondary category card on home feed',
                 'trending': 'Show in the trending ticker hero rail section',
                 'article': 'Show full reader view article details layout',

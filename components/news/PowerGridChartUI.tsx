@@ -366,7 +366,6 @@ export function GridRechartsTooltip({
   wrapperStyle,
   allowEscapeViewBox = { x: false, y: false },
 }: {
-  // eslint-disable-next-line
   content: React.ComponentType<any> | React.ReactElement | ((props: any) => React.ReactNode);
   cursor?: object;
   wrapperStyle?: React.CSSProperties;

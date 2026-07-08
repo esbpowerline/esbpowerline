@@ -14,6 +14,13 @@ import {
   shouldUseArchiveFallback,
 } from '@/lib/data/grid/daily-access';
 import { getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
+import {
+  getCachedDailyReport,
+  resolveInitialDailyReport,
+  seedDailyReportCache,
+  setCachedDailyReport,
+} from '@/lib/data/grid/daily-cache';
+import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
 import { buildHomeSnapshotFromDaily, gwhToAvgMw, POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
 
 const sampleReport = {
@@ -243,6 +250,41 @@ describe('home-snapshot', () => {
     expect(stats[10].value).toBe(1806);
     expect(stats[10].unit).toBe(POWER_UNIT);
     expect(stats[11].value).toBe(5.56);
+  });
+});
+
+describe('grid explorer prefetch', () => {
+  it('prefetches latest daily report from disk', async () => {
+    const latest = getLatestAvailableDate();
+    expect(latest).toBeTruthy();
+    const reports = await prefetchGridExplorerDailyReports(null);
+    expect(reports[latest!]).toBeDefined();
+    expect(reports[latest!].systemStats.date).toBeTruthy();
+  });
+
+  it('also prefetches a deep-linked date when provided', async () => {
+    const latest = getLatestAvailableDate();
+    expect(latest).toBeTruthy();
+    const deepLink = latest!.slice(0, 8) + '01';
+    if (!isDateAvailable(deepLink)) return;
+
+    const reports = await prefetchGridExplorerDailyReports(deepLink);
+    expect(reports[latest!]).toBeDefined();
+    expect(reports[deepLink]).toBeDefined();
+  });
+});
+
+describe('daily-cache seeding', () => {
+  it('resolves initial report from prefetched map before network', () => {
+    const latest = getLatestAvailableDate() ?? '2026-07-03';
+    const seeded = { ...sampleReport, systemStats: { ...sampleReport.systemStats, date: '1 Jul 2026' } };
+    seedDailyReportCache({ [latest]: seeded as typeof sampleReport });
+
+    const resolved = resolveInitialDailyReport(latest, latest, { [latest]: seeded as typeof sampleReport });
+    expect(resolved?.systemStats.date).toBe('1 Jul 2026');
+    expect(getCachedDailyReport(latest)?.systemStats.date).toBe('1 Jul 2026');
+
+    setCachedDailyReport(latest, sampleReport as typeof sampleReport);
   });
 });
 

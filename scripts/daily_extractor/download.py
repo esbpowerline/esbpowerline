@@ -29,7 +29,7 @@ class DownloadResult:
     errors: list[str]
 
 
-def fetch(url: str, timeout: int = 45) -> bytes:
+def fetch(url: str, timeout: int = 3) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": "ESBPowerLine-DailyExtractor/1.0"})
     with urllib.request.urlopen(req, context=CTX, timeout=timeout) as resp:
         return resp.read()
@@ -191,7 +191,18 @@ def download_for_energy_day(energy: date) -> DownloadResult:
     errors: list[str] = []
     report_date = energy_to_report_date(energy)
 
-    pgcb_path, erp_id = probe_erp_for_energy(energy)
+    pgcb_path = None
+    erp_id = None
+    dd, mm, yy = f"{report_date.day:02d}", f"{report_date.month:02d}", str(report_date.year)
+    local_path1 = Path(rf"C:\Users\user\Downloads\Daily Report {dd}-{mm}-{yy}.xlsx")
+    local_path2 = Path(rf"C:\Users\user\Downloads\Daily Report  {dd}-{mm}-{yy}.xlsx")
+    if local_path1.exists():
+        pgcb_path = local_path1
+    elif local_path2.exists():
+        pgcb_path = local_path2
+
+    if not pgcb_path:
+        pgcb_path, erp_id = probe_erp_for_energy(energy)
     if not pgcb_path:
         pgcb_path = try_pgcb_legacy(report_date)
         if pgcb_path:

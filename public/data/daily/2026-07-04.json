@@ -1,60 +1,60 @@
 {
   "systemStats": {
     "date": "04 Jul 2026",
-    "dayPeakGen": 14150.19,
-    "eveningPeakGen": 15821.76,
-    "dayPeakDemand": 14298.19,
-    "eveningPeakDemand": 16130.76,
-    "minGen": 13556.81,
-    "maxGen": 16521.0,
-    "totalEnergyGen": 354.65240387,
-    "totalEnergyUnserved": 1.18,
-    "totalEnergyDemand": 355.84,
+    "dayPeakGen": 15213.62,
+    "eveningPeakGen": 16076.62,
+    "dayPeakDemand": 15572.62,
+    "eveningPeakDemand": 16826.62,
+    "minGen": 14031.99,
+    "maxGen": 17430.0,
+    "totalEnergyGen": 367.11853964,
+    "totalEnergyUnserved": 2.87,
+    "totalEnergyDemand": 369.99,
     "maxTemp": 32.8,
-    "totalGasSuppliedPower": 930.91,
-    "avgProductionCost": 6.165,
-    "totalDailyCost": 2186448821
+    "totalGasSuppliedPower": 951.9,
+    "avgProductionCost": 6.599,
+    "totalDailyCost": 2422480557
   },
   "generationData": [
     {
       "name": "Gas",
-      "gen": 132.34,
-      "cost": 456569513,
+      "gen": 134.14,
+      "cost": 462772315,
       "unitCost": 3.45,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
-      "gen": 133.0,
-      "cost": 880432927,
+      "gen": 130.95,
+      "cost": 866911811,
       "unitCost": 6.62,
       "color": "#64748b"
     },
     {
       "name": "HFO",
-      "gen": 24.92,
-      "cost": 450022121,
+      "gen": 36.94,
+      "cost": 667206776,
       "unitCost": 18.06,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
-      "gen": 1.74,
-      "cost": 174210,
+      "gen": 1.56,
+      "cost": 156270,
       "unitCost": 0.1,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 3.44,
-      "cost": 54325637,
+      "gen": 5.35,
+      "cost": 84297508,
       "unitCost": 15.77,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 58.11,
-      "cost": 368394848,
+      "gen": 56.89,
+      "cost": 360702374,
       "unitCost": 6.34,
       "color": "#a855f7"
     },
@@ -69,117 +69,82 @@
   "borderImportsData": [
     {
       "source": "HVDC Bheramara (India)",
-      "energy": 21.81,
-      "peakFlow": 902.0,
+      "energy": 21.76,
+      "peakFlow": 900.0,
       "type": "C/B Interconnector (West)"
     },
     {
       "source": "Adani Godda (India)",
-      "energy": 31.85,
-      "peakFlow": 1489.76,
+      "energy": 30.32,
+      "peakFlow": 1475.56,
       "type": "C/B Interconnector (North)"
     },
     {
       "source": "Tripura Cumilla (India)",
-      "energy": 3.53,
-      "peakFlow": 134.0,
+      "energy": 3.91,
+      "peakFlow": 182.0,
       "type": "C/B Interconnector (East)"
     }
   ],
   "regionalDemandData": [
     {
       "zone": "Dhaka",
-      "loadShed": 65.0,
-      "demand": 5660.12,
-      "pct": 1.1
+      "loadShed": 208.0,
+      "demand": 5824.0,
+      "pct": 3.6
     },
     {
       "zone": "Chattogram",
       "loadShed": 0.0,
-      "demand": 1419.7,
+      "demand": 1525.9,
       "pct": 0.0
     },
     {
       "zone": "Cumilla",
-      "loadShed": 0.0,
-      "demand": 1462.0,
-      "pct": 0.0
+      "loadShed": 23.0,
+      "demand": 1291.0,
+      "pct": 1.8
     },
     {
       "zone": "Mymensingh",
-      "loadShed": 206.0,
-      "demand": 1396.0,
-      "pct": 14.8
+      "loadShed": 342.0,
+      "demand": 1501.0,
+      "pct": 22.8
     },
     {
       "zone": "Sylhet",
-      "loadShed": 0.0,
-      "demand": 679.0,
-      "pct": 0.0
+      "loadShed": 19.0,
+      "demand": 611.0,
+      "pct": 3.1
     },
     {
       "zone": "Khulna",
-      "loadShed": 25.0,
-      "demand": 1833.0,
-      "pct": 1.4
+      "loadShed": 48.0,
+      "demand": 1994.0,
+      "pct": 2.4
     },
     {
       "zone": "Barishal",
-      "loadShed": 0.0,
-      "demand": 447.1,
-      "pct": 0.0
+      "loadShed": 3.0,
+      "demand": 501.0,
+      "pct": 0.6
     },
     {
       "zone": "Rajshahi",
-      "loadShed": 0.0,
-      "demand": 1597.6,
-      "pct": 0.0
+      "loadShed": 2.0,
+      "demand": 1703.6,
+      "pct": 0.1
     },
     {
       "zone": "Rangpur",
-      "loadShed": 0.0,
-      "demand": 1109.0,
-      "pct": 0.0
+      "loadShed": 73.0,
+      "demand": 1218.0,
+      "pct": 6.0
     }
   ],
   "dailyOutages": [
     {
-      "time": "16:41 - Khulna(C )-Khulna (S)  132kV Ckt-2 Scheduled S/D from Khulna(S) 230/132kV end Due to ALDC",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
-      "time": "17:35 - Shahjadpur 132/33kV S/S T-3(425T) LT Forced S/D Due to Maintenance work for nesco",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
-      "time": "17:34 - Shahjadpur 132/33kV S/S T-3(425T) HT Forced S/D Due to Maintenance work for nesco",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
-      "time": "20:09 - Sitakunda 132/33kV S/S TRAFO-2 HT Tripped showing Trafo differential Prot. Relay F87T2",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
-      "time": "20:00 - Shahjadpur 132/33kV S/S T-3(425T) HT Forced S/D Due to Red hot maintenance work.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
-      "time": "20:30 - Shahjadpur 132/33kV S/S T-3(425T) LT Forced S/D Due to Red hot maintenance work.",
+      "time": "16:50 - Sreepur 230/132/33kV S/S 132/33 kV T-2 HT Forced S/D Due to 33 kv jumper repair work by",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
@@ -189,234 +154,234 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 15985.78,
+      "generation": 16254.65,
       "loadShed": 0.0,
-      "demand": 15985.78
+      "demand": 16254.65
     },
     {
       "time": "01:00",
-      "generation": 16057.69,
+      "generation": 15986.72,
       "loadShed": 0.0,
-      "demand": 16057.69
+      "demand": 15986.72
     },
     {
       "time": "02:00",
-      "generation": 15667.84,
+      "generation": 15662.36,
       "loadShed": 0.0,
-      "demand": 15667.84
+      "demand": 15662.36
     },
     {
       "time": "03:00",
-      "generation": 15353.06,
+      "generation": 15297.99,
       "loadShed": 0.0,
-      "demand": 15353.06
+      "demand": 15297.99
     },
     {
       "time": "04:00",
-      "generation": 15019.35,
+      "generation": 15266.44,
       "loadShed": 0.0,
-      "demand": 15019.35
+      "demand": 15266.44
     },
     {
       "time": "05:00",
-      "generation": 14674.58,
+      "generation": 15080.2,
       "loadShed": 0.0,
-      "demand": 14674.58
+      "demand": 15080.2
     },
     {
       "time": "06:00",
-      "generation": 14242.19,
+      "generation": 14369.82,
       "loadShed": 0.0,
-      "demand": 14242.19
+      "demand": 14369.82
     },
     {
       "time": "07:00",
-      "generation": 14047.69,
+      "generation": 14370.5,
       "loadShed": 0.0,
-      "demand": 14047.69
+      "demand": 14370.5
     },
     {
       "time": "08:00",
-      "generation": 13861.5,
+      "generation": 14031.99,
       "loadShed": 0.0,
-      "demand": 13861.5
+      "demand": 14031.99
     },
     {
       "time": "09:00",
-      "generation": 13638.73,
+      "generation": 14221.7,
       "loadShed": 0.0,
-      "demand": 13638.73
+      "demand": 14221.7
     },
     {
       "time": "10:00",
-      "generation": 13556.81,
+      "generation": 14488.91,
       "loadShed": 0.0,
-      "demand": 13556.81
+      "demand": 14488.91
     },
     {
       "time": "11:00",
-      "generation": 13875.5,
+      "generation": 14959.67,
       "loadShed": 0.0,
-      "demand": 13875.5
+      "demand": 14959.67
     },
     {
       "time": "12:00",
-      "generation": 14150.19,
+      "generation": 15213.62,
       "loadShed": 0.0,
-      "demand": 14150.19
+      "demand": 15213.62
     },
     {
       "time": "13:00",
-      "generation": 14191.73,
+      "generation": 15434.78,
       "loadShed": 0.0,
-      "demand": 14191.73
+      "demand": 15434.78
     },
     {
       "time": "14:00",
-      "generation": 14205.69,
+      "generation": 15555.09,
       "loadShed": 0.0,
-      "demand": 14205.69
+      "demand": 15555.09
     },
     {
       "time": "15:00",
-      "generation": 14299.97,
+      "generation": 15464.16,
       "loadShed": 0.0,
-      "demand": 14299.97
+      "demand": 15464.16
     },
     {
       "time": "16:00",
-      "generation": 14102.24,
+      "generation": 14913.06,
       "loadShed": 0.0,
-      "demand": 14102.24
+      "demand": 14913.06
     },
     {
       "time": "17:00",
-      "generation": 13663.0,
+      "generation": 14919.54,
       "loadShed": 0.0,
-      "demand": 13663.0
+      "demand": 14919.54
     },
     {
       "time": "18:00",
-      "generation": 13408.91,
-      "loadShed": 236.8,
-      "demand": 13645.71
+      "generation": 14529.21,
+      "loadShed": 574.4,
+      "demand": 15103.61
     },
     {
       "time": "19:00",
-      "generation": 14804.23,
-      "loadShed": 236.8,
-      "demand": 15041.03
+      "generation": 15382.48,
+      "loadShed": 574.4,
+      "demand": 15956.88
     },
     {
       "time": "20:00",
-      "generation": 15779.02,
-      "loadShed": 236.8,
-      "demand": 16015.82
+      "generation": 15322.57,
+      "loadShed": 574.4,
+      "demand": 15896.97
     },
     {
       "time": "21:00",
-      "generation": 15821.76,
-      "loadShed": 236.8,
-      "demand": 16058.56
+      "generation": 15224.13,
+      "loadShed": 574.4,
+      "demand": 15798.53
     },
     {
       "time": "22:00",
-      "generation": 15753.18,
-      "loadShed": 236.8,
-      "demand": 15989.98
+      "generation": 15753.82,
+      "loadShed": 574.4,
+      "demand": 16328.22
     },
     {
       "time": "23:00",
-      "generation": 15698.83,
-      "loadShed": 236.8,
-      "demand": 15935.63
+      "generation": 15950.1,
+      "loadShed": 574.4,
+      "demand": 16524.5
     }
   ],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
       "fields": 5,
-      "gas": 478.6,
-      "condensate": 374.3,
-      "share": 18.0
+      "gas": 479.3,
+      "condensate": 374.9,
+      "share": 18.1
     },
     {
       "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
       "fields": 5,
-      "gas": 93.7,
-      "condensate": 329.1,
-      "share": 3.5
+      "gas": 94.3,
+      "condensate": 360.8,
+      "share": 3.6
     },
     {
       "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
       "fields": 9,
-      "gas": 91.9,
-      "condensate": 48.2,
-      "share": 3.5
+      "gas": 88.7,
+      "condensate": 26.3,
+      "share": 3.3
     },
     {
       "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
       "fields": 3,
-      "gas": 896.9,
-      "condensate": 4781.6,
-      "share": 33.7
+      "gas": 887.6,
+      "condensate": 4781.2,
+      "share": 33.5
     },
     {
       "company": "Tullow (Bangora)",
       "fields": 1,
-      "gas": 31.0,
-      "condensate": 88.0,
+      "gas": 30.9,
+      "condensate": 90.0,
       "share": 1.2
     },
     {
       "company": "RPGCL (R-LNG Import / LNG Terminal)",
       "fields": 0,
-      "gas": 1070.7,
+      "gas": 1069.8,
       "condensate": 0.0,
-      "share": 40.2
+      "share": 40.4
     }
   ],
   "gasDistributionData": [
     {
       "company": "TGTDCL (Dhaka & Mymensingh)",
-      "power": 268.2,
-      "fertilizer": 73.3,
-      "others": 1093.7,
-      "total": 1435.2
+      "power": 262.2,
+      "fertilizer": 72.8,
+      "others": 1077.5,
+      "total": 1412.6
     },
     {
       "company": "BGDCL (Cumilla & Sylhet)",
-      "power": 221.4,
+      "power": 236.1,
       "fertilizer": 0.0,
-      "others": 88.8,
-      "total": 310.2
+      "others": 84.1,
+      "total": 320.2
     },
     {
       "company": "KGDCL (Chattogram)",
       "power": 38.1,
-      "fertilizer": 38.5,
-      "others": 163.7,
-      "total": 240.3
+      "fertilizer": 42.5,
+      "others": 169.5,
+      "total": 250.1
     },
     {
       "company": "JGTDSL (Sylhet region)",
-      "power": 222.0,
-      "fertilizer": 40.1,
-      "others": 111.0,
-      "total": 373.0
+      "power": 218.6,
+      "fertilizer": 39.9,
+      "others": 110.3,
+      "total": 368.8
     },
     {
       "company": "PGCL (Rajshahi & Rangpur)",
-      "power": 124.6,
+      "power": 140.2,
       "fertilizer": 0.0,
-      "others": 29.8,
-      "total": 154.4
+      "others": 29.1,
+      "total": 169.3
     },
     {
       "company": "SGCL (Barishal & Khulna)",
-      "power": 55.1,
+      "power": 55.2,
       "fertilizer": 0.0,
-      "others": 4.5,
+      "others": 4.4,
       "total": 59.6
     }
   ]

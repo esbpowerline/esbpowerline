@@ -27,7 +27,7 @@ export default async function MagazinePage() {
     issueDate: new Date(),
   };
 
-  const issueLabel = magazine.issueDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+  const issueLabel = new Date(magazine.issueDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
 
   const features = [
     { title: 'Solar + Wind Pipeline 2026–2030', excerpt: 'Full project map and tender calendar for utility-scale renewables.' },

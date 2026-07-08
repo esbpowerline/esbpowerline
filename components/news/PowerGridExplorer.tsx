@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable react/no-unescaped-entities */
 
 import dynamic from 'next/dynamic';
 import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } from 'react';
@@ -39,7 +38,13 @@ import {
 } from '@/components/news/PowerGridChartUI';
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { shouldUseArchiveFallback } from '@/lib/data/grid/daily-access';
-import { getCachedDailyReport, peekLatestCachedReport, setCachedDailyReport } from '@/lib/data/grid/daily-cache';
+import {
+  getCachedDailyReport,
+  peekLatestCachedReport,
+  resolveInitialDailyReport,
+  seedDailyReportCache,
+  setCachedDailyReport,
+} from '@/lib/data/grid/daily-cache';
 import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
@@ -68,7 +73,8 @@ import { MethodologyReconciliationBanner } from '@/components/news/power-grid/Me
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
-import { subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
+import { GridTopologyMap } from '@/components/news/GridTopologyMap';
+import { isDateAllowedForTier, subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
 import { sredaItemsWithIcons } from '@/components/news/power-grid/sreda-icons';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
 const GasTab = dynamic(
@@ -97,12 +103,16 @@ interface GridLineItem {
 interface PowerGridExplorerProps {
   initialLines?: GridLineItem[];
   urlBoot?: GridExplorerUrlBoot;
+  prefetchedDailyReports?: Record<string, GridDailyData>;
+  serverLatestDate?: string;
 }
 const DEMO_DATE = '2026-06-22';
 
 export function PowerGridExplorer({
   initialLines,
   urlBoot,
+  prefetchedDailyReports,
+  serverLatestDate,
 }: PowerGridExplorerProps = {}) {
   const chartTheme = useChartTheme();
   const gridAccess = useGridTierAccess();
@@ -112,11 +122,22 @@ export function PowerGridExplorer({
     return availableDates.filter((d) => /^(201[1-9]|202[0-6])-\d{2}-\d{2}$/.test(String(d)));
   }, []);
 
-  const latestDate = gridAccess.latestDate;
-  const [selectedDate, setSelectedDate] = useState<string>(urlBoot?.date ?? latestDate);
+  const latestDate = gridAccess.latestDate || serverLatestDate || getLatestAvailableDate() || '2026-07-03';
+  const bootDate = urlBoot?.date ?? latestDate;
+
+  useMemo(() => {
+    if (prefetchedDailyReports) seedDailyReportCache(prefetchedDailyReports);
+    return null;
+  }, [prefetchedDailyReports]);
+
+  const [selectedDate, setSelectedDate] = useState<string>(bootDate);
   const [tierLockRequired, setTierLockRequired] = useState<ReturnType<typeof gridAccess.requiredTierForDate> | null>(null);
-  const [activeData, setActiveData] = useState<GridDailyData | null>(() => getCachedDailyReport(latestDate) ?? null);
-  const [isLoadingDaily, setIsLoadingDaily] = useState<boolean>(() => !getCachedDailyReport(latestDate));
+  const [activeData, setActiveData] = useState<GridDailyData | null>(() =>
+    resolveInitialDailyReport(bootDate, latestDate, prefetchedDailyReports),
+  );
+  const [isLoadingDaily, setIsLoadingDaily] = useState<boolean>(
+    () => !resolveInitialDailyReport(bootDate, latestDate, prefetchedDailyReports),
+  );
   const latestCachedReport = useMemo(
     () => peekLatestCachedReport(latestDate) ?? (selectedDate === latestDate ? activeData : null),
     [latestDate, selectedDate, activeData],
@@ -214,13 +235,18 @@ export function PowerGridExplorer({
   }, [gridAccess]);
 
   useEffect(() => {
-    if (gridAccess.loading) return;
+    if (gridAccess.loading) {
+      if (isDateAllowedForTier(selectedDate, 'visitor', latestDate)) {
+        setTierLockRequired(null);
+      }
+      return;
+    }
     if (!gridAccess.canAccessDate(selectedDate)) {
       setTierLockRequired(gridAccess.requiredTierForDate(selectedDate));
     } else {
       setTierLockRequired(null);
     }
-  }, [gridAccess, selectedDate]);
+  }, [gridAccess, selectedDate, latestDate]);
 
   const years = useMemo(() => {
     return Array.from(new Set(availableDatesList.map(d => d.split('-')[0]))).sort((a, b) => b.localeCompare(a));
@@ -325,13 +351,16 @@ export function PowerGridExplorer({
 
   const fetchSeqRef = useRef(0);
 
+  const visitorCanAccessSelected = isDateAllowedForTier(selectedDate, 'visitor', latestDate);
+
   // Dynamic Fetch Effect — stale-while-revalidate when date is already cached
   useEffect(() => {
     let isMounted = true;
     const requestSeq = ++fetchSeqRef.current;
-    if (!selectedDate || gridAccess.loading) return;
+    if (!selectedDate) return;
+    if (gridAccess.loading && !visitorCanAccessSelected) return;
 
-    if (!gridAccess.canAccessDate(selectedDate)) {
+    if (!gridAccess.loading && !gridAccess.canAccessDate(selectedDate)) {
       setTierLockRequired(gridAccess.requiredTierForDate(selectedDate));
       setIsLoadingDaily(false);
       setIsDataMissing(false);
@@ -373,7 +402,7 @@ export function PowerGridExplorer({
             setIsDataMissing(true);
           }
           if (result.status !== 404 && result.status !== 429) {
-            console.error(result.error);
+            console.warn(`Grid Data: ${result.error}`);
           } else if (result.status === 429) {
             console.warn('Rate limit reached (HTTP 429). Please slow down your requests.');
           }
@@ -387,7 +416,7 @@ export function PowerGridExplorer({
             setIsDataMissing(true);
           }
           if (result.status !== 404 && result.status !== 429) {
-            console.error(result.error);
+            console.warn(`Grid Data: ${result.error}`);
           } else if (result.status === 429) {
             console.warn('Rate limit reached (HTTP 429). Please slow down your requests.');
           }
@@ -403,6 +432,7 @@ export function PowerGridExplorer({
   }, [
     selectedDate,
     gridAccess,
+    visitorCanAccessSelected,
   ]);
 
   const {
@@ -617,6 +647,7 @@ export function PowerGridExplorer({
   };
   const [reportsCompany, setReportsCompany] = useState<'bpdb' | 'petrobangla'>('bpdb');
   const chartsReady = Boolean(activeData);
+  const macroChartsReady = true;
   const pieGenerationData = useMemo(
     () => generationData.filter((d) => Number(d.gen) > 0 && Number.isFinite(Number(d.gen))),
     [generationData],
@@ -4443,9 +4474,9 @@ export function PowerGridExplorer({
                             );
                           }}
                         />
-                        <Bar yAxisId="left" dataKey="power_energy_allocation_crore_tk" name="Power Budget (Cr Tk)" fill="url(#budget-grad)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
-                        <Line yAxisId="right" type="monotone" dataKey="installed_capacity_mw" name="Installed Cap. (MW)" stroke="#06b6d4" strokeWidth={2.5} dot={{ stroke: '#06b6d4', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
-                        <Line yAxisId="right" type="monotone" dataKey="peak_generation_mw" name="Peak Gen. (MW)" stroke="#f97316" strokeWidth={2.5} dot={{ stroke: '#f97316', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+                        <Bar yAxisId="left" dataKey="power_energy_allocation_crore_tk" name="Power Budget (Cr Tk)" fill="url(#budget-grad)" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                        <Line yAxisId="right" type="monotone" dataKey="installed_capacity_mw" name="Installed Cap. (MW)" stroke="#06b6d4" strokeWidth={2.5} dot={{ stroke: '#06b6d4', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Line yAxisId="right" type="monotone" dataKey="peak_generation_mw" name="Peak Gen. (MW)" stroke="#f97316" strokeWidth={2.5} dot={{ stroke: '#f97316', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
                 
@@ -4606,8 +4637,8 @@ export function PowerGridExplorer({
                             );
                           }}
                         />
-                        <Bar dataKey="tariff" name="Bulk Tariff (Tk/kWh)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false} />
-                        <Line type="monotone" dataKey="cost" name="BPDB Gen. Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+                        <Bar dataKey="tariff" name="Bulk Tariff (Tk/kWh)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={32} />
+                        <Line type="monotone" dataKey="cost" name="BPDB Gen. Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
                 <div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
@@ -4651,7 +4682,7 @@ export function PowerGridExplorer({
                   </div>
 
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
-                    {chartsReady ? (
+                    {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -4733,7 +4764,7 @@ export function PowerGridExplorer({
                     <span className="grid-explorer-chip">LNG Reliance</span>
                   </div>
 
-                  {chartsReady ? (
+                  {macroChartsReady ? (
                   <GridChartFrame
                     className="mt-4"
                     legend={[
@@ -4789,8 +4820,8 @@ export function PowerGridExplorer({
                               );
                             }}
                           />
-                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.22} strokeWidth={2} legendType="none" isAnimationActive={false} />
-                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke="#a855f7" fill="#a855f7" fillOpacity={0.28} strokeWidth={2} legendType="none" isAnimationActive={false} />
+                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.22} strokeWidth={2} legendType="none" />
+                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke="#a855f7" fill="#a855f7" fillOpacity={0.28} strokeWidth={2} legendType="none" />
                         </ComposedChart>
                   </GridChartFrame>
                   ) : (
@@ -4938,7 +4969,6 @@ export function PowerGridExplorer({
                       </div>
                     </div>
 
-                    {/* KPI Grid */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Max Peak Generation</div>
@@ -4995,9 +5025,9 @@ export function PowerGridExplorer({
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                           {/* Left Column: Chart */}
-                          <div className="lg:col-span-6 flex items-center justify-center">
-                            <div className="grid-explorer-donut-wrap grid-explorer-donut-wrap--centered !mb-0">
-                              {chartsReady ? (
+                          <div className="lg:col-span-6 flex items-center justify-center w-full min-w-0">
+                            <div className="grid-explorer-donut-wrap grid-explorer-donut-wrap--centered !mb-0 w-full">
+                              {macroChartsReady ? (
                                 <PieChart width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                                   <Pie
                                     data={
@@ -5131,11 +5161,11 @@ export function PowerGridExplorer({
                             Substation peak loads served by grid zone in {currentMonthlyData?.month} {currentMonthlyData?.year} (MW)
                            — <span className="text-primary font-semibold text-xs">Tracked since 2014</span></p>
                         </div>
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                           {/* Left Column: Chart */}
-                          <div className="lg:col-span-6 w-full">
+                          <div className="lg:col-span-6 w-full min-w-0">
                             <div className="grid-explorer-chart-area grid-explorer-chart-area--lg grid-explorer-chart-area--split !min-h-[16rem] !h-[16rem]">
-                              {chartsReady ? (
+                              {macroChartsReady ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                   <BarChart
                                     accessibilityLayer={false}
@@ -5303,7 +5333,7 @@ export function PowerGridExplorer({
                 </div>
 
                 <div className="grid-explorer-chart-area mt-4 !h-[26rem]">
-                  {chartsReady ? (
+                  {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       {monthlyTrendMetric === 'peaks' ? (
                         <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -5624,7 +5654,7 @@ export function PowerGridExplorer({
                   </div>
 
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
-                    {chartsReady ? (
+                    {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -5698,7 +5728,7 @@ export function PowerGridExplorer({
                   </div>
 
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
-                    {chartsReady ? (
+                    {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -5856,7 +5886,7 @@ export function PowerGridExplorer({
                     </div>
 
                     <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
-                      {chartsReady ? (
+                      {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart accessibilityLayer={false} data={localBpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                             <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -5904,8 +5934,8 @@ export function PowerGridExplorer({
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
                             <Bar dataKey="revenue" name="Operating Revenue" fill="#0ea5e9" stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
                             <Bar dataKey="subsidy" name="Govt Subsidy" fill="#10b981" stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="cost" name="Gen &amp; Purchase Cost" fill="#f43f5e" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Line type="monotone" dataKey="loss" name="Net Loss (after subsidy)" stroke="#ef4444" strokeWidth={3} dot={{ fill: '#ef4444', r: 4 }} />
+                            <Bar dataKey="cost" name="Gen &amp; Purchase Cost" fill="#f97316" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Line type="monotone" dataKey="loss" name="Net Loss (after subsidy)" stroke="#a855f7" strokeWidth={3} dot={{ fill: '#a855f7', r: 4 }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       ) : (
@@ -5968,7 +5998,7 @@ export function PowerGridExplorer({
                     </div>
 
                     <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
-                      {chartsReady ? (
+                      {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart accessibilityLayer={false} data={localPetrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                             <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -6040,6 +6070,7 @@ export function PowerGridExplorer({
                             <th className="text-left">Gas Sales Revenue (Crore BDT)</th>
                             <th className="text-left">LNG Import Costs (Crore BDT)</th>
                             <th className="text-left">Net Profit / Loss (Crore BDT)</th>
+                            <th className="text-right">Action</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -6050,6 +6081,16 @@ export function PowerGridExplorer({
                               <td className="text-left tabular-nums text-purple-500">{formatNumber(d.lngCost)}</td>
                               <td className={cn("text-left tabular-nums font-bold", d.netProfit > 0 ? "text-emerald-500" : "text-destructive")}>
                                 {formatNumber(d.netProfit)}
+                              </td>
+                              <td className="text-right">
+                                {d.year === 'FY 18' ? (
+                                  <a href="/annual-reports/financials" target="_blank" className="text-xs text-primary hover:underline font-semibold flex items-center justify-end gap-1">
+                                    <FileText className="w-3 h-3" />
+                                    View Full Report
+                                  </a>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs italic">N/A</span>
+                                )}
                               </td>
                             </tr>
                           ))}
@@ -6093,7 +6134,7 @@ export function PowerGridExplorer({
                   </div>
 
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
-                    {chartsReady ? (
+                    {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -6178,7 +6219,7 @@ export function PowerGridExplorer({
                   </div>
 
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
-                    {chartsReady ? (
+                    {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2010)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -6264,7 +6305,7 @@ export function PowerGridExplorer({
                 </div>
 
                 <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
-                  {chartsReady ? (
+                  {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                         <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -6344,7 +6385,7 @@ export function PowerGridExplorer({
               selectedDate={selectedDate}
               systemStatsDate={systemStats?.date || 'Jun 2026'}
               pgcbGasTotal={totalGasSupply}
-              chartsReady={chartsReady}
+              chartsReady={macroChartsReady}
             />
           )}
 

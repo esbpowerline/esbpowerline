@@ -66,7 +66,7 @@ export function MacroGasInnerSection({
   );
 }
 
-export function MacroGasWeekSummary({ kpis }: { kpis: LiveWeekKpis }) {
+export function MacroGasWeekSummary({ kpis, labelPrefix }: { kpis: LiveWeekKpis, labelPrefix?: string }) {
   const fulfillmentTone = kpis.powerFulfillmentPct < 45 ? 'text-red-500' : 'text-amber-500';
   const deltaTone = (kpis.latestGasDelta ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500';
 
@@ -86,12 +86,12 @@ export function MacroGasWeekSummary({ kpis }: { kpis: LiveWeekKpis }) {
         </span>
       </div>
       <div className="grid-explorer-macro-gas-stat">
-        <span className="grid-explorer-macro-gas-stat__label">Week average</span>
+        <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} average` : 'Week average'}</span>
         <span className="grid-explorer-macro-gas-stat__value">{formatNumber(kpis.weekAvgGas, 0)}</span>
         <span className="grid-explorer-macro-gas-stat__hint">MMCFD · to {formatLiveWeekDate(kpis.latestDate)}</span>
       </div>
       <div className="grid-explorer-macro-gas-stat">
-        <span className="grid-explorer-macro-gas-stat__label">Power fulfillment</span>
+        <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} Power fulfillment` : 'Power fulfillment'}</span>
         <span className={cn('grid-explorer-macro-gas-stat__value', fulfillmentTone)}>
           {kpis.powerFulfillmentPct.toFixed(0)}%
         </span>
@@ -100,7 +100,7 @@ export function MacroGasWeekSummary({ kpis }: { kpis: LiveWeekKpis }) {
         </span>
       </div>
       <div className="grid-explorer-macro-gas-stat">
-        <span className="grid-explorer-macro-gas-stat__label">LNG share</span>
+        <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} LNG share` : 'LNG share'}</span>
         <span className="grid-explorer-macro-gas-stat__value">{kpis.lngSharePct.toFixed(0)}%</span>
         <span className="grid-explorer-macro-gas-stat__hint">imported gas in mix</span>
       </div>

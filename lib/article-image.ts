@@ -16,7 +16,7 @@ export function normalizeArticleImageUrl(url?: string | null): string | null {
       const isCategory = filename.startsWith('categories/');
       const folder = isCategory ? '' : 'library/';
       const cleanFilename = isCategory ? filename.substring('categories/'.length) : filename;
-      return `${supabaseUrl}/storage/v1/object/public/media/${folder}${cleanFilename}`;
+      return `${supabaseUrl}/storage/v1/render/image/public/media/${folder}${cleanFilename}?width=1200&format=webp&quality=80`;
     }
   }
 

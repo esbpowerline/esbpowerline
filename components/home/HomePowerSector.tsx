@@ -271,11 +271,11 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
           {articles.map((article) => (
             <div 
               key={article.id} 
-              className="article-card-wrapper flex-shrink-0 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] pointer-events-none"
+              className="article-card-wrapper flex-shrink-0 w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] pointer-events-none flex flex-col h-full"
               style={{ userSelect: 'none' }}
               onDragStart={(e) => e.preventDefault()}
             >
-              <div className="pointer-events-auto">
+              <div className="pointer-events-auto flex-1 flex flex-col">
                 <ArticleCard
                   id={article.slug}
                   title={article.title}
@@ -452,15 +452,15 @@ export function HomePowerSector({
 
                 {/* 3 Proportional Ad Spaces */}
                 {(index === 1 || index === 7) && (
-                  <div className="category-ad-block-3 grid grid-cols-1 md:grid-cols-3 gap-6" suppressHydrationWarning>
+                  <div className="category-ad-block-3 grid grid-cols-3 gap-2 md:gap-6" suppressHydrationWarning>
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-                      <Image src="/images/promotions/009.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
-                    </Link>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
                       <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
                     </Link>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group hidden md:block" suppressHydrationWarning>
-                      <Image src="/images/promotions/003.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
+                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                    </Link>
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
+                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
                     </Link>
                   </div>
                 )}

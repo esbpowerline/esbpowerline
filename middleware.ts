@@ -21,11 +21,22 @@ import {
   resolveGridAccessTier,
 } from '@/lib/data/grid/grid-tier-access';
 
-const dailyFetchTimestamps = new Map<string, number[]>();
-const DAILY_BURST_WINDOW_MS = 60_000;
-const DAILY_BURST_LIMIT = 30;
-const DAILY_SEQ_WINDOW_MS = 10_000;
-const DAILY_SEQ_LIMIT = 8;
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const redis = process.env.UPSTASH_REDIS_REST_URL ? Redis.fromEnv() : null;
+
+const authRateLimit = redis ? new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, '1 m'),
+  analytics: true,
+}) : null;
+
+const standardRateLimit = redis ? new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(100, '10 s'),
+  analytics: true,
+}) : null;
 
 function isDailyJsonPath(pathname: string): boolean {
   return /^\/data\/daily\/\d{4}-\d{2}-\d{2}\.json$/.test(pathname);
@@ -39,27 +50,6 @@ function isPetrobanglaJsonPath(pathname: string): boolean {
 
 function isProtectedDataJsonPath(pathname: string): boolean {
   return isDailyJsonPath(pathname) || isPetrobanglaJsonPath(pathname);
-}
-
-function dailyScrapeBlocked(request: NextRequest, ip: string): boolean {
-  const burstKey = edgeRateLimitKey('daily-json-burst', ip);
-  const burst = checkRateLimit(burstKey, DAILY_BURST_LIMIT, DAILY_BURST_WINDOW_MS);
-  if (!burst.allowed) return true;
-
-  const match = request.nextUrl.pathname.match(
-    /\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/,
-  );
-  if (!match) return false;
-
-  const now = Date.now();
-  const seqKey = ip;
-  const history = (dailyFetchTimestamps.get(seqKey) ?? []).filter((t) => now - t < DAILY_SEQ_WINDOW_MS);
-  history.push(now);
-  dailyFetchTimestamps.set(seqKey, history);
-  if (dailyFetchTimestamps.size > 5_000) {
-    dailyFetchTimestamps.clear();
-  }
-  return history.length > DAILY_SEQ_LIMIT;
 }
 
 function denyDailyJson(message: string, status = 403): NextResponse {
@@ -130,16 +120,27 @@ function redirectWithCookies(
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const ip = clientIpFromForwarded(
+    request.headers.get('x-forwarded-for'),
+    request.headers.get('x-real-ip'),
+  );
+
+  // Global Upstash Rate Limiting
+  if (redis) {
+    if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
+      const { success } = await authRateLimit!.limit(ip);
+      if (!success) {
+        return new NextResponse('Too many login attempts. Please try again later.', { status: 429 });
+      }
+    } else {
+      const { success } = await standardRateLimit!.limit(ip);
+      if (!success) {
+        return new NextResponse('Too many requests. Please slow down.', { status: 429 });
+      }
+    }
+  }
 
   if (isProtectedDataJsonPath(pathname)) {
-    const ip = clientIpFromForwarded(
-      request.headers.get('x-forwarded-for'),
-      request.headers.get('x-real-ip'),
-    );
-
-    if (dailyScrapeBlocked(request, ip)) {
-      return denyDailyJson('Too many requests. Please slow down.', 429);
-    }
 
     const userAgent = request.headers.get('user-agent');
     if (isBlockedBotUserAgent(userAgent)) {

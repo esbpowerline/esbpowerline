@@ -1,4 +1,4 @@
-import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import prisma from '@/lib/prisma';
 import type { PublicArticleCard, PublicCategory } from '@/lib/category-types';
 import type { HeroImageMeta } from '@/lib/hero-image';
@@ -72,7 +72,7 @@ function mapArticle(
   };
 }
 
-export const getPublicCategories = cache(async (): Promise<PublicCategory[]> => {
+export const getPublicCategories = unstable_cache(async (): Promise<PublicCategory[]> => {
   const [categories, counts] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: 'asc' } }),
     prisma.article.groupBy({
@@ -95,7 +95,7 @@ export const getPublicCategories = cache(async (): Promise<PublicCategory[]> => 
     order: c.order,
     articleCount: countMap[c.name] ?? 0,
   }));
-});
+}, ['getPublicCategories'], { revalidate: 60 });
 
 export async function getCategoryBySlug(slug: string): Promise<PublicCategory | null> {
   const cat = await prisma.category.findUnique({ where: { slug } });
@@ -118,7 +118,7 @@ export async function getCategoryBySlug(slug: string): Promise<PublicCategory | 
   };
 }
 
-export const getPublishedArticlesByCategory = cache(async function getPublishedArticlesByCategory(
+export const getPublishedArticlesByCategory = unstable_cache(async function getPublishedArticlesByCategory(
   categoryName: string,
   locale?: string,
 ): Promise<PublicArticleCard[]> {
@@ -132,6 +132,7 @@ export const getPublishedArticlesByCategory = cache(async function getPublishedA
     },
     include: { author: { select: { name: true } } },
     orderBy: { publishedAt: 'desc' },
+    take: 60,
   });
   return articles
     .filter((a) => {
@@ -142,9 +143,9 @@ export const getPublishedArticlesByCategory = cache(async function getPublishedA
       }
     })
     .map((a) => mapArticle(a, locale));
-});
+}, ['getPublishedArticlesByCategory'], { revalidate: 60 });
 
-export const getPublishedArticlesForPublic = cache(async (limit = 60, locale?: string): Promise<PublicArticleCard[]> => {
+export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
     include: { author: { select: { name: true } } },
@@ -161,9 +162,9 @@ export const getPublishedArticlesForPublic = cache(async (limit = 60, locale?: s
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-});
+}, ['getPublishedArticlesForPublic'], { revalidate: 60 });
 
-export async function getPublishedArticleBySlug(slug: string, locale?: string): Promise<PublicArticleDetail | null> {
+export const getPublishedArticleBySlug = unstable_cache(async function getPublishedArticleBySlug(slug: string, locale?: string): Promise<PublicArticleDetail | null> {
   const article = await prisma.article.findFirst({
     where: { slug, status: 'PUBLISHED' },
     include: { author: { select: { name: true } } },
@@ -199,7 +200,7 @@ export async function getPublishedArticleBySlug(slug: string, locale?: string): 
     imageCredit: article.imageCredit,
     collaborators,
   };
-}
+}, ['getPublishedArticleBySlug'], { revalidate: 60 });
 
 export async function getRelatedPublishedArticles(
   slug: string,
@@ -238,7 +239,7 @@ export async function getRelatedPublishedArticles(
   return picked.map((a) => mapArticle(a, locale));
 }
 
-export const getTrendingPublishedArticles = cache(async (limit = 5, locale?: string): Promise<PublicArticleCard[]> => {
+export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
     where: {
       status: 'PUBLISHED',
@@ -259,9 +260,9 @@ export const getTrendingPublishedArticles = cache(async (limit = 5, locale?: str
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-});
+}, ['getTrendingPublishedArticles'], { revalidate: 60 });
 
-export const getFeaturedArticles = cache(async (limit = 8, locale?: string): Promise<PublicArticleCard[]> => {
+export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
     where: {
       status: 'PUBLISHED',
@@ -283,29 +284,35 @@ export const getFeaturedArticles = cache(async (limit = 8, locale?: string): Pro
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-});
+}, ['getFeaturedArticles'], { revalidate: 60 });
 
 export async function getPublicTagCounts(): Promise<{ tag: string; count: number }[]> {
-  const articles = await prisma.article.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { tags: true },
-  });
-  const counts = new Map<string, number>();
-  for (const a of articles) {
-    for (const t of (a.tags as string[]) ?? []) {
-      counts.set(t, (counts.get(t) ?? 0) + 1);
-    }
+  try {
+    const counts = await prisma.$queryRaw<{ tag: string; count: bigint }[]>`
+      SELECT jsonb_array_elements_text(tags) AS tag, COUNT(*) as count 
+      FROM "Article" 
+      WHERE status = 'PUBLISHED' 
+      AND tags IS NOT NULL 
+      AND jsonb_typeof(tags) = 'array'
+      GROUP BY tag 
+      ORDER BY count DESC
+    `;
+    return counts.map(r => ({ tag: r.tag, count: Number(r.count) }));
+  } catch (e) {
+    console.error('Error fetching tag counts natively:', e);
+    return [];
   }
-  return Array.from(counts.entries())
-    .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 }
 
 export async function getPublishedArticlesByTag(tag: string, locale?: string): Promise<PublicArticleCard[]> {
   const articles = await prisma.article.findMany({
-    where: { status: 'PUBLISHED' },
+    where: { 
+      status: 'PUBLISHED',
+      tags: { array_contains: tag } 
+    },
     include: { author: { select: { name: true } } },
     orderBy: { publishedAt: 'desc' },
+    take: 60,
   });
   return articles
     .filter((a) => {
@@ -315,11 +322,10 @@ export async function getPublishedArticlesByTag(tag: string, locale?: string): P
         return !/[\u0980-\u09FF]/.test(a.title);
       }
     })
-    .filter((a) => ((a.tags as string[]) ?? []).includes(tag))
     .map((a) => mapArticle(a, locale));
 }
 
-export const getLatestMagazineIssue = cache(async (): Promise<PublicMagazineIssue | null> => {
+export const getLatestMagazineIssue = unstable_cache(async (): Promise<PublicMagazineIssue | null> => {
   const issue = await prisma.magazineIssue.findFirst({
     where: { status: 'published' },
     orderBy: { issueDate: 'desc' },
@@ -333,4 +339,4 @@ export const getLatestMagazineIssue = cache(async (): Promise<PublicMagazineIssu
     pdfUrl: issue.pdfUrl,
     summary: issue.summary ?? '',
   };
-});
+}, ['getLatestMagazineIssue'], { revalidate: 60 });

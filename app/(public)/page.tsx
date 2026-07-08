@@ -47,7 +47,7 @@ export const metadata = {
 export default async function Home() {
   const locale = await getServerSiteLocale();
   const settingsPromise = getPublicSettingsMap();
-  const [settings, trending, magazineRow, categories, featuredArticles, carouselItems, coverageSlots, pinnedArticles, interviews] =
+  const [settings, trending, magazineRow, categories, featuredArticles, carouselItems, coverageSlots, pinnedArticles, interviews, dailySnapshot] =
     await Promise.all([
       settingsPromise,
       getTrendingPublishedArticles(5, locale),
@@ -62,6 +62,7 @@ export default async function Home() {
       }),
       getPinnedCoverageArticles(locale),
       getLatestYoutubeInterviews(4),
+      getLatestHomeSnapshot(),
     ]);
 
   const categoriesWithArticles = await Promise.all(
@@ -81,11 +82,10 @@ export default async function Home() {
     issueDate: new Date(),
   };
   const magazineLabel = magazineRow
-    ? magazineRow.issueDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    ? new Date(magazineRow.issueDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     : 'Latest';
   const snapshotLabel = getSnapshotLabel(settings);
   const professionalsCta = getProfessionalsCta(settings);
-  const dailySnapshot = await getLatestHomeSnapshot();
   const snapshotStats = dailySnapshot?.stats ?? settings.snapshot;
   const snapshotDate = (dailySnapshot?.date ?? settings.snapshotDate) as string | undefined;
   const snapshotHeaderDate = formatSnapshotHeaderDate(snapshotDate, locale);
@@ -146,7 +146,7 @@ export default async function Home() {
               <HomeTrendingSection trending={trending} layout="hero-rail" />
               
               {/* Sidebar Ad Block */}
-              <Link href="/advertising" className="home-ad-space--sidebar sticky top-[11rem] rounded-2xl w-full overflow-hidden relative group hidden lg:block" suppressHydrationWarning>
+              <Link href="/advertising" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block" suppressHydrationWarning>
                 <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
               </Link>
             </aside>

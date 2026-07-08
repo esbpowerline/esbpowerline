@@ -4,6 +4,9 @@ import { PowerGridExportControls } from '@/components/members/PowerGridExportCon
 import { PowerGridExplorerClient } from '@/components/news/PowerGridExplorerClient';
 import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButton';
 import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
+import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
+import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
+import { readGridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { Activity } from 'lucide-react';
 
 export const revalidate = 60;
@@ -13,9 +16,24 @@ export const metadata = {
   description: 'Real-time and planning data for Bangladesh’s electricity system — generation, transmission, demand & projects.',
 };
 
-export default async function PowerGridExplorerPage() {
-  const settings = await getGridSettingsMap();
+type PageProps = {
+  searchParams: Promise<{ date?: string; tab?: string; macro?: string }>;
+};
+
+export default async function PowerGridExplorerPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
+  if (params.tab) query.set('tab', params.tab);
+  if (params.date) query.set('date', params.date);
+  if (params.macro) query.set('macro', params.macro);
+  const urlBoot = readGridExplorerUrlBoot(query.toString() ? `?${query.toString()}` : '');
+
+  const [settings, prefetchedDailyReports] = await Promise.all([
+    getGridSettingsMap(),
+    prefetchGridExplorerDailyReports(params.date ?? null),
+  ]);
   const grid = normalizeGridSettings(settings);
+  const latestDate = getLatestAvailableDate();
 
   return (
     <div id="power-grid-page-container" className="container container--shell py-8 md:py-10">
@@ -44,7 +62,12 @@ export default async function PowerGridExplorerPage() {
         </div>
       </div>
 
-      <PowerGridExplorerClient initialLines={grid.gridLines} />
+      <PowerGridExplorerClient
+        initialLines={grid.gridLines}
+        prefetchedDailyReports={prefetchedDailyReports}
+        urlBoot={urlBoot}
+        latestDate={latestDate ?? undefined}
+      />
 
       <MemberToolsPanel />
 

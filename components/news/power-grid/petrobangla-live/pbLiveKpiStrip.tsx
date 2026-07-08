@@ -37,64 +37,56 @@ function PbLiveKpiCard({
   );
 }
 
-export function PbLiveKpiStrip({ kpis, showAll }: { kpis: LiveWeekKpis; showAll: boolean }) {
-  const fulfillmentClass = kpis.powerFulfillmentPct < 45 ? 'text-red-500' : 'text-amber-500';
+export interface PeriodKpis {
+  avgGas: number;
+  avgFulfillment: number;
+  avgLngShare: number;
+  volatility: number;
+  daysCount: number;
+}
+
+export function PbLiveKpiStrip({
+  periodKpis,
+  labelPrefix,
+  showAll,
+}: {
+  periodKpis: PeriodKpis;
+  labelPrefix: string;
+  showAll: boolean;
+}) {
+  const fulfillmentClass = periodKpis.avgFulfillment < 45 ? 'text-red-500' : 'text-amber-500';
 
   return (
     <>
       <PbLiveKpiCard
-        icon={Droplet}
+        icon={Activity}
         iconClassName="text-sky-500"
         label={
           <>
-            Latest National Gas
+            {labelPrefix} Avg Gas
             <LiveBadge />
             <GridSinceBadge />
           </>
         }
-        value={formatNumber(kpis.latestGas, 1)}
-        hint={
-          <>
-            {kpis.latestLabel}
-            {kpis.latestGasDelta != null && (
-              <span className={kpis.latestGasDelta >= 0 ? ' text-emerald-500' : ' text-red-500'}>
-                {' '}
-                {kpis.latestGasDelta >= 0 ? '▲' : '▼'} {formatNumber(Math.abs(kpis.latestGasDelta), 1)} vs prior day
-              </span>
-            )}
-          </>
-        }
+        value={formatNumber(periodKpis.avgGas, 0)}
+        hint={`${periodKpis.daysCount}-day official average MMCFD`}
       />
 
       {showAll && (
         <>
           <PbLiveKpiCard
-            icon={Activity}
-            iconClassName="text-primary"
-            label={
-              <>
-                7-Day Average Gas
-                <LiveBadge />
-                <GridSinceBadge />
-              </>
-            }
-            value={formatNumber(kpis.weekAvgGas, 0)}
-            hint="Weekly official average MMCFD"
-          />
-
-          <PbLiveKpiCard
             icon={Flame}
             iconClassName={fulfillmentClass}
             label={
               <>
-                Power Fulfillment
+                {labelPrefix} Power Fulfillment
                 <LiveBadge />
                 <GridSinceBadge />
               </>
             }
-            value={`${kpis.powerFulfillmentPct.toFixed(1)}%`}
+            value={`${periodKpis.avgFulfillment.toFixed(1)}%`}
             valueClassName={fulfillmentClass}
-            hint={`${formatNumber(kpis.powerSupply, 1)} of ${formatNumber(kpis.powerDemand, 1)} MMCFD to plants`}
+            hint="Average supply vs demand over period"
           />
 
           <PbLiveKpiCard
@@ -102,13 +94,13 @@ export function PbLiveKpiStrip({ kpis, showAll }: { kpis: LiveWeekKpis; showAll:
             iconClassName="text-purple-500"
             label={
               <>
-                LNG Dependency
+                {labelPrefix} LNG Share
                 <LiveBadge />
                 <GridSinceBadge />
               </>
             }
-            value={`${kpis.lngSharePct.toFixed(1)}%`}
-            hint={`${formatNumber(kpis.lngGasMmcfd, 1)} MMCFD imported`}
+            value={`${periodKpis.avgLngShare.toFixed(1)}%`}
+            hint="Average imported LNG share over period"
           />
 
           <PbLiveKpiCard
@@ -116,13 +108,13 @@ export function PbLiveKpiStrip({ kpis, showAll }: { kpis: LiveWeekKpis; showAll:
             iconClassName="text-amber-500"
             label={
               <>
-                Week Volatility
+                {labelPrefix} Volatility
                 <LiveBadge />
                 <GridSinceBadge />
               </>
             }
-            value={formatNumber(kpis.weekVolatility, 1)}
-            hint={`Range ${formatNumber(kpis.weekMinGas, 0)}–${formatNumber(kpis.weekMaxGas, 0)} MMCFD`}
+            value={formatNumber(periodKpis.volatility, 1)}
+            hint="Max/Min spread across period"
           />
         </>
       )}

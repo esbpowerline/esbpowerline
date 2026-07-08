@@ -20,7 +20,10 @@ import {
 } from '@/components/cms/CmsUI';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 
-export default async function CMSDashboardPage() {
+import { Suspense } from 'react';
+import { CmsLoading } from '@/components/cms/CmsUI';
+
+async function CmsDashboardData() {
   const session = await auth();
   const authorId = session?.user?.id;
   const role = session?.user?.role;
@@ -182,5 +185,13 @@ export default async function CMSDashboardPage() {
         </CmsCard>
       </CmsCardGrid>
     </CmsSectionStack>
+  );
+}
+
+export default function CMSDashboardPage() {
+  return (
+    <Suspense fallback={<CmsLoading label="Loading CMS data..." />}>
+      <CmsDashboardData />
+    </Suspense>
   );
 }

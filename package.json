@@ -61,6 +61,8 @@
     "@tiptap/react": "^3.26.1",
     "@tiptap/starter-kit": "^3.26.1",
     "@types/bcryptjs": "^2.4.6",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "basic-ftp": "^6.0.1",
@@ -90,6 +92,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/dagre": "^0.7.54",
     "@types/node": "^22.15.21",
     "@types/pg": "^8.20.0",
     "@types/react": "^19.1.5",
@@ -111,5 +114,8 @@
   "allowScripts": {
     "@prisma/engines@7.8.0": true,
     "prisma@7.8.0": true
+  },
+  "overrides": {
+    "react-is": "^19.2.7"
   }
 }

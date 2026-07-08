@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Droplet, Loader2, Lock } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import { computeLiveWeekKpis } from '@/lib/data/petrobangla/computeLiveWeek';
+import { getDistributionGrandTotal, getRpgclGas } from '@/lib/data/petrobangla/compute';
 import {
   formatLiveWeekDate,
   isDateInLiveWeek,
@@ -24,7 +25,7 @@ import {
 } from '../petrobangla-archive/PetrobanglaArchiveShared';
 import { GasExplanationBlock, GasSourceFooter, LiveBadge } from '../GasTabShared';
 import { MacroGasWeekSummary } from '../MacroGasSectionChrome';
-import { PbLiveKpiStrip } from './pbLiveKpiStrip';
+import { PbLiveKpiStrip, type PeriodKpis } from './pbLiveKpiStrip';
 import { PbLiveTimeline } from './pbLiveTimeline';
 import { PbLiveFieldSnapshot } from './pbLiveFieldSnapshot';
 import { PbLivePlantStress } from './pbLivePlantStress';
@@ -97,6 +98,50 @@ export function PetrobanglaLiveWeekPanel({
     return timeline.days.slice(-Math.min(want, timeline.days.length));
   }, [timeline, rangeDays, rangeLocked, tier]);
 
+  const periodKpis: PeriodKpis | null = useMemo(() => {
+    const days = activeTimelineDays.length ? activeTimelineDays : (activeBundle?.days.map(d => {
+      const gt = getDistributionGrandTotal(d);
+      return {
+        date: d.report.report_date_end,
+        total_gas: d.production.grand_total.gas_mmcfd,
+        power_demand: gt.power_demand_mmcfd,
+        power_supply: gt.power_supply_mmcfd,
+        lng_gas: getRpgclGas(d.production.fields),
+      }
+    }) ?? []);
+
+    if (!days.length) return null;
+
+    let totalGas = 0;
+    let powerDemand = 0;
+    let powerSupply = 0;
+    let lngGas = 0;
+    let minGas = Infinity;
+    let maxGas = -Infinity;
+
+    for (const d of days) {
+      totalGas += d.total_gas ?? 0;
+      powerDemand += d.power_demand ?? 0;
+      powerSupply += d.power_supply ?? 0;
+      lngGas += d.lng_gas ?? 0;
+      if (d.total_gas != null && d.total_gas < minGas) minGas = d.total_gas;
+      if (d.total_gas != null && d.total_gas > maxGas) maxGas = d.total_gas;
+    }
+
+    const avgGas = totalGas / days.length;
+    const avgFulfillment = powerDemand > 0 ? (powerSupply / powerDemand) * 100 : 0;
+    const avgLngShare = totalGas > 0 ? (lngGas / totalGas) * 100 : 0;
+    const volatility = maxGas === -Infinity ? 0 : maxGas - minGas;
+
+    return {
+      avgGas,
+      avgFulfillment,
+      avgLngShare,
+      volatility,
+      daysCount: days.length
+    };
+  }, [activeTimelineDays, activeBundle]);
+
   const isLoading = !bundle || (rangeDays > 30 && !timeline && timelineLoading);
 
   if (isLoading) {
@@ -147,6 +192,21 @@ export function PetrobanglaLiveWeekPanel({
               ? '3-year period ending'
               : 'Archive period ending';
 
+  const labelPrefix =
+    rangeDays === 7
+      ? '7-Day'
+      : rangeDays === 30
+        ? '30-Day'
+        : rangeDays === 180
+          ? '6-Month'
+          : rangeDays === 365
+            ? '1-Year'
+            : rangeDays === 1095
+              ? '3-Year'
+              : 'All-Time';
+
+
+
   const weekInsight = unified
     ? `${rangePeriodLabel} ${formatLiveWeekDate(kpis.latestDate)}: ${formatNumber(kpis.weekAvgGas, 0)} MMCFD average · ${kpis.powerFulfillmentPct.toFixed(0)}% power fulfillment · ${kpis.lngSharePct.toFixed(0)}% LNG · Bibiyana ${formatNumber(kpis.bibiyanaGas, 0)} MMCFD.`
     : `${rangePeriodLabel} ${formatLiveWeekDate(kpis.latestDate)}: National gas averaged ~${formatNumber(kpis.weekAvgGas, 0)} MMCFD with ${formatNumber(kpis.weekVolatility, 1)} MMCFD daily swing. Power plants demanded ~${formatNumber(kpis.powerDemand, 0)} MMCFD but received ~${formatNumber(kpis.powerSupply, 0)} — ${kpis.powerFulfillmentPct.toFixed(0)}% fulfillment. LNG supplied ~${kpis.lngSharePct.toFixed(0)}% of all gas. Bibiyana held at ~${formatNumber(kpis.bibiyanaGas, 0)} MMCFD on ${kpis.bibiyanaWells} wells.`;
@@ -161,7 +221,7 @@ export function PetrobanglaLiveWeekPanel({
       )}
     >
       {unified ? (
-        <MacroGasWeekSummary kpis={kpis} />
+        <MacroGasWeekSummary kpis={kpis} labelPrefix={labelPrefix} />
       ) : (
         <ArchiveInsightCallout>{weekInsight}</ArchiveInsightCallout>
       )}
@@ -179,14 +239,14 @@ export function PetrobanglaLiveWeekPanel({
         </p>
       )}
 
-      {showKpiStrip && (
+      {showKpiStrip && periodKpis && (
         <div
           className={cn(
             'grid-explorer-kpi-strip',
-            showAllKpis ? '!grid-cols-2 md:!grid-cols-3 xl:!grid-cols-5' : '!grid-cols-1 max-w-xs',
+            showAllKpis ? '!grid-cols-2 md:!grid-cols-4 xl:!grid-cols-4' : '!grid-cols-1 max-w-xs',
           )}
         >
-          <PbLiveKpiStrip kpis={kpis} showAll={showAllKpis} />
+          <PbLiveKpiStrip periodKpis={periodKpis} labelPrefix={labelPrefix} showAll={showAllKpis} />
         </div>
       )}
 

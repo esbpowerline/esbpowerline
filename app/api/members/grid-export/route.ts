@@ -5,7 +5,20 @@ import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const limitParam = searchParams.get('limit');
+  const sinceParam = searchParams.get('since');
+  
+  const take = limitParam ? Math.min(parseInt(limitParam, 10), 1000) : 500;
+  
+  let dateFilter = {};
+  if (sinceParam) {
+    const sinceDate = new Date(sinceParam);
+    if (!isNaN(sinceDate.getTime())) {
+      dateFilter = { updatedAt: { gte: sinceDate } };
+    }
+  }
   const memberSession = await getMemberSession();
   if (!memberSession) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,7 +40,9 @@ export async function GET() {
   });
 
   const stats = await prisma.dashboardStat.findMany({
+    where: dateFilter,
     orderBy: { statName: 'asc' },
+    take,
   });
 
   const csvRows = ['metric,value,unit,source,as_of'];

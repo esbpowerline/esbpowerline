@@ -17,7 +17,10 @@ import { publicArticleUrl, publicPathUrl } from '@/lib/public-site-url';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 
-export default async function AdminDashboardPage() {
+import { Suspense } from 'react';
+import { AdminLoading } from '@/components/admin/AdminUI';
+
+async function AdminDashboardData() {
   const [stats, authorStats, session] = await Promise.all([
     getAdminOverview(),
     getAuthorPublishingStats(),
@@ -120,5 +123,13 @@ export default async function AdminDashboardPage() {
         </div>
       </AdminCardGrid>
     </AdminSectionStack>
+  );
+}
+
+export default function AdminDashboardPage() {
+  return (
+    <Suspense fallback={<AdminLoading label="Loading metrics..." />}>
+      <AdminDashboardData />
+    </Suspense>
   );
 }
