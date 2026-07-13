@@ -21,7 +21,9 @@ async function backfillMissingMediaSizes(items: any[]) {
 
       let size: number | null = null;
       if (m.url.startsWith('/')) {
-        const localPath = path.join(process.cwd(), 'public', m.url);
+        const cwd = process.cwd();
+        const publicDir = cwd + '/public';
+        const localPath = path.join(publicDir, m.url);
         if (existsSync(localPath)) {
           try {
             size = statSync(localPath).size;

@@ -8,11 +8,9 @@ export function resolveSafeLocalUploadPath(url: string): string | null {
   if (relative.includes('..') || relative.includes('\\')) return null;
 
   const cwd = process.cwd();
-  // Hide from Webpack static analysis to prevent "Overly broad patterns" build warning
-  const pDir = ['p', 'u', 'b', 'l', 'i', 'c'].join('');
-  
-  const uploadsRoot = path.resolve(cwd, pDir, 'uploads');
-  const filePath = path.resolve(cwd, pDir, relative);
+  const publicDir = cwd + '/public';
+  const uploadsRoot = path.join(publicDir, 'uploads');
+  const filePath = path.join(publicDir, relative);
   if (filePath !== uploadsRoot && !filePath.startsWith(`${uploadsRoot}${path.sep}`)) {
     return null;
   }
