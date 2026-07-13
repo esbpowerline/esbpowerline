@@ -13,3 +13,4 @@ export default function ResetPasswordPage() {
     </Suspense>
   );
 }
+export const dynamic = 'force-dynamic';

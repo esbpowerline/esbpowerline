@@ -6,8 +6,7 @@ import { getPublishedArticlesByTag, getPublicTagCounts } from '@/lib/category-co
 export const revalidate = 600;
 
 export async function generateStaticParams() {
-  const tags = await getPublicTagCounts();
-  return tags.map(t => ({ tag: t.tag }));
+  return [];
 }
 
 interface Props {

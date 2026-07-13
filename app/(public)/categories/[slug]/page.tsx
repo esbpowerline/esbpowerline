@@ -12,10 +12,7 @@ import prisma from '@/lib/prisma';
 export const revalidate = 600;
 
 export async function generateStaticParams() {
-  const categories = await prisma.category.findMany({
-    select: { slug: true },
-  });
-  return categories.map((cat) => ({ slug: cat.slug }));
+  return [];
 }
 
 interface Props {

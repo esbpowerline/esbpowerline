@@ -25,13 +25,7 @@ import prisma from '@/lib/prisma';
 export const revalidate = 600;
 
 export async function generateStaticParams() {
-  const articles = await prisma.article.findMany({
-    where: { status: 'PUBLISHED' },
-    orderBy: { publishedAt: 'desc' },
-    take: 20,
-    select: { slug: true },
-  });
-  return articles.map((article) => ({ slug: article.slug }));
+  return [];
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {

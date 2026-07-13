@@ -8,3 +8,4 @@ export const metadata = {
 export default function MemberLoginPage() {
   return <MemberLoginScreen />;
 }
+export const dynamic = 'force-dynamic';

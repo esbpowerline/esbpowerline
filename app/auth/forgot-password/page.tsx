@@ -13,3 +13,4 @@ export default function ForgotPasswordPage() {
     </Suspense>
   );
 }
+export const dynamic = 'force-dynamic';
