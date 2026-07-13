@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState , type ReactNode} from 'react';
 import { Info, LineChart as LineChartIcon } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { cn, formatNumber } from '@/lib/utils';
@@ -38,6 +38,7 @@ export function PetrobanglaArchiveFieldCards({
   mode,
   embedded = false,
   compact = false,
+  rangeToolbar,
   onClose,
 }: {
   rangeDays: PetrobanglaTimelineDay[];
@@ -46,6 +47,7 @@ export function PetrobanglaArchiveFieldCards({
   mode: AudienceMode;
   embedded?: boolean;
   compact?: boolean;
+  rangeToolbar?: ReactNode;
   onClose?: () => void;
 }) {
   const [sort, setSort] = useState<SortKey>('largest');
@@ -120,6 +122,17 @@ export function PetrobanglaArchiveFieldCards({
           !embedded && 'grid-explorer-chart-card__head--border',
         )}
       >
+        {compact && (
+          <div className="gas-reserve-archive-view-toolbar flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+            <div className="min-w-0 flex-1 text-center md:text-left">
+              <p className="gas-reserve-archive-view-toolbar__title">Field Lifeline Cards</p>
+              <p className="gas-reserve-archive-view-toolbar__sub">
+                Major producers · archive sparklines
+              </p>
+            </div>
+            {rangeToolbar && <div className="shrink-0">{rangeToolbar}</div>}
+          </div>
+        )}
         {!compact && (
           <div className="gas-reserve-field-sort__title">
             <h3 className="grid-explorer-chart-card__title">Field Lifeline Cards<ArchiveBadge /></h3>

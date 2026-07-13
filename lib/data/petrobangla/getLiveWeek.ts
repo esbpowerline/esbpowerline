@@ -10,7 +10,7 @@ import type {
 
 export const LIVE_WEEK_COUNT = 7;
 /** Matches prebuilt `/data/petrobangla/_live_week.json` — never blast-fetch the full archive on boot. */
-export const LIVE_WEEK_BOOTSTRAP = 30;
+export const LIVE_WEEK_BOOTSTRAP = 7;
 export const LIVE_WEEK_MAX = 4000;
 
 export type LiveWeekRangeLabel = '1W' | '1M' | '6M' | '1Y' | '3Y' | 'All';

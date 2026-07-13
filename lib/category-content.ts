@@ -145,6 +145,8 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
     .map((a) => mapArticle(a, locale));
 }, ['getPublishedArticlesByCategory'], { revalidate: 60 });
 
+
+
 export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
@@ -209,7 +211,8 @@ export async function getRelatedPublishedArticles(
   limit = 3,
   locale?: string,
 ): Promise<PublicArticleCard[]> {
-  const candidates = await prisma.article.findMany({
+  return unstable_cache(async () => {
+    const candidates = await prisma.article.findMany({
     where: { status: 'PUBLISHED', slug: { not: slug } },
     include: { author: { select: { name: true } } },
     orderBy: { views: 'desc' },
@@ -235,8 +238,9 @@ export async function getRelatedPublishedArticles(
     .filter((x) => x.score > 0)
     .sort((x, y) => y.score - x.score || y.a.views - x.a.views);
 
-  const picked = (scored.length > 0 ? scored.map((x) => x.a) : filtered).slice(0, limit);
-  return picked.map((a) => mapArticle(a, locale));
+    const picked = (scored.length > 0 ? scored.map((x) => x.a) : filtered).slice(0, limit);
+    return picked.map((a) => mapArticle(a, locale));
+  }, ['related', slug, category, tags?.join(',') ?? '', String(limit), String(locale)], { revalidate: 3600 })();
 }
 
 export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, locale?: string): Promise<PublicArticleCard[]> => {

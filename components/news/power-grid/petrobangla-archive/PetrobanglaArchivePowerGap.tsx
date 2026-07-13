@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo , type ReactNode} from 'react';
 import {
   Area,
   CartesianGrid,
@@ -19,7 +19,7 @@ import {
   gridChartYAxisProps,
   GridRechartsLegend,
 } from '@/components/news/PowerGridChartUI';
-import { formatNumber } from '@/lib/utils';
+import { cn, formatNumber, formatTooltipDate } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { filterTimelineDays, stressedPlants, worstPowerGapDays } from '@/lib/data/petrobangla/compute';
 import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
@@ -55,7 +55,7 @@ function PowerGapTooltip({
   const fulfillmentColor = POWER_GAP_COLORS.fulfillment;
 
   return (
-    <GridChartTooltipShell title={d.date} accent={POWER_GAP_COLORS.demand}>
+    <GridChartTooltipShell title={formatTooltipDate(d.date)} accent={POWER_GAP_COLORS.demand}>
       <div className="grid-chart-tooltip__grid">
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: POWER_GAP_COLORS.demand }} />
@@ -102,6 +102,7 @@ export function PetrobanglaArchivePowerGap({
   chartsReady,
   embedded = false,
   compact = false,
+  rangeToolbar,
   onClose,
 }: {
   rangeDays: PetrobanglaTimelineDay[];
@@ -111,6 +112,7 @@ export function PetrobanglaArchivePowerGap({
   chartsReady: boolean;
   embedded?: boolean;
   compact?: boolean;
+  rangeToolbar?: ReactNode;
   onClose?: () => void;
 }) {
   const chartTheme = useChartTheme();
@@ -128,10 +130,21 @@ export function PetrobanglaArchivePowerGap({
   const worst = worstPowerGapDays(filterTimelineDays(rangeDays), 10);
   const plants = selectedDay ? stressedPlants(selectedDay) : [];
 
-  const wrapperClass = embedded ? 'space-y-0 grid-explorer-gas-subview' : 'grid-explorer-chart-card card space-y-0';
+  const wrapperClass = embedded ? 'grid-explorer-gas-subview' : 'grid-explorer-chart-card card';
 
   return (
-    <div className={wrapperClass}>
+    <div className={cn(wrapperClass, compact ? 'space-y-3' : 'space-y-4')}>
+      {compact && (
+        <div className="gas-reserve-archive-view-toolbar flex flex-col md:flex-row items-center justify-between gap-4 w-full">
+          <div className="min-w-0 flex-1 text-center md:text-left">
+            <p className="gas-reserve-archive-view-toolbar__title">Power Sector Gas Gap</p>
+            <p className="gas-reserve-archive-view-toolbar__sub">
+              Grid-scale rationing
+            </p>
+          </div>
+          {rangeToolbar && <div className="shrink-0">{rangeToolbar}</div>}
+        </div>
+      )}
       {!compact && (
         <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
           <div>

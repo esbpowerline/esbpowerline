@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DEFAULT_DSE_TICKER, jitterDseSnapshot, type DseTickerItem } from '@/lib/bd-stock-market';
 import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
-import { checkRateLimitResponse, withPrivateNoStore } from '@/lib/security';
+import { checkRateLimitResponse } from '@/lib/security';
 
-export const dynamic = 'force-dynamic';
 export const revalidate = 60;
 
 export async function GET(request: NextRequest) {
@@ -16,11 +15,9 @@ export async function GET(request: NextRequest) {
     items = jitterDseSnapshot(DEFAULT_DSE_TICKER);
   }
 
-  return withPrivateNoStore(
-    NextResponse.json({
-      market: 'DSE',
-      updatedAt: new Date().toISOString(),
-      items,
-    }),
-  );
+  return NextResponse.json({
+    market: 'DSE',
+    updatedAt: new Date().toISOString(),
+    items,
+  });
 }

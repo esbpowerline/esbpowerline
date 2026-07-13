@@ -128,7 +128,7 @@ export default async function Home() {
               />
 
               {/* Mobile/Tablet Inline Ad block for 004.png */}
-              <div className="block lg:hidden home-ad-space--sidebar mb-8" suppressHydrationWarning>
+              <div className="block lg:hidden home-ad-space--sidebar mb-8 max-w-sm mx-auto" suppressHydrationWarning>
                 <Link href="/advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
                   <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
                 </Link>

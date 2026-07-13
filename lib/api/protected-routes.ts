@@ -7,7 +7,6 @@ export const PROXY_PROTECTED_API_PREFIXES = [
   '/api/analytics',
   '/api/upload',
   '/api/members/grid-export',
-  '/api/petrobangla/refresh',
 ] as const;
 
 export function isProxyProtectedApi(pathname: string): boolean {

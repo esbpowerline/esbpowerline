@@ -12,8 +12,10 @@ import {
   getPublishedArticlesForPublic,
   getTrendingPublishedArticles,
 } from '@/lib/category-content';
+import { requireEditorialReader } from '@/lib/server-auth';
 
 export async function getArticlePreviewContext() {
+  await requireEditorialReader();
   const settings = await getPublicSettingsMap();
 
   const [carouselItems, categories, sectorArticles, coverageSlots, pinnedArticles, trendingArticles] = await Promise.all([

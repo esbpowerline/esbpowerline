@@ -1,5 +1,6 @@
 'use server';
 
+import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
@@ -316,10 +317,11 @@ export type BulkArticleAction =
 const PASSWORD_REQUIRED_ACTIONS = new Set<BulkArticleAction>(['trash', 'delete_permanent', 'archive']);
 
 export async function bulkArticleAction(
-  ids: string[],
+  rawIds: string[],
   action: BulkArticleAction,
   options?: { password?: string; authorNote?: string }
 ) {
+  const ids = z.array(z.string().uuid()).min(1).max(100).parse(rawIds);
   const user = await requireAuth();
   if (!ids.length) throw new Error('No articles selected');
 
@@ -488,6 +490,12 @@ export async function bulkArticleAction(
       }),
     },
   });
+
+  if (['trash', 'restore', 'publish', 'draft', 'archive', 'delete_permanent'].includes(action)) {
+    const { syncAuthorArticleCounts } = await import('@/lib/author-stats');
+    const authorIds = Array.from(new Set(articles.map((a) => a.authorId)));
+    await Promise.all(authorIds.map((id) => syncAuthorArticleCounts(id)));
+  }
 
   revalidatePath('/cms/articles');
   revalidatePath('/cms');

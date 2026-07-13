@@ -363,7 +363,11 @@ export function GridKpiTooltipGridRow({
   return (
     <>
       <span className="grid-chart-tooltip__label flex items-center gap-1.5">
-        {dotColor && <span className="grid-chart-tooltip__dot shrink-0" style={{ background: dotColor }} />}
+        {dotColor ? (
+          <span className="grid-chart-tooltip__dot shrink-0" style={{ background: dotColor }} />
+        ) : (
+          <span className="grid-chart-tooltip__dot shrink-0 bg-transparent" />
+        )}
         {label}
       </span>
       <span

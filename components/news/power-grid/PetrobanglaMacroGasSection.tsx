@@ -5,7 +5,7 @@ import { Database } from 'lucide-react';
 import type { AudienceMode } from '@/lib/data/petrobangla/types';
 import { ARCHIVE_INSIGHTS } from '@/lib/data/petrobangla/constants';
 import { PetrobanglaArchivePanel } from './petrobangla-archive/PetrobanglaArchivePanel';
-import { PetrobanglaLiveWeekPanel } from './petrobangla-live/PetrobanglaLiveWeekPanel';
+import { PetrobanglaLiveWeekPanel, LiveWeekRangeToolbar } from './petrobangla-live/PetrobanglaLiveWeekPanel';
 import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
 import { AudienceModeToggle, PetrobanglaOfficialSourceLink } from './petrobangla-archive/PetrobanglaArchiveShared';
 import { GasExplanationBlock, GasSourceFooter, LiveBadge } from './GasTabShared';
@@ -106,6 +106,12 @@ export function PetrobanglaMacroGasSection({
                   : audienceMode === 'researcher'
                     ? `Rolling window with raw JSON links — ${rangeLabel} preset view`
                     : `Rolling gas-days (${rangeLabel}) — sparklines, plant stress, and day-over-day compare`
+            }
+            toolbar={
+              <LiveWeekRangeToolbar
+                rangeDays={rangeDays}
+                setRangeDays={setRangeDays}
+              />
             }
           >
             <PetrobanglaLiveWeekPanel

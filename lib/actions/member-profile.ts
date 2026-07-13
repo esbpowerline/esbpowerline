@@ -77,10 +77,8 @@ export async function updateMemberProfile(input: { name?: string; email?: string
         const { error } = await admin.auth.admin.updateUserById(supabaseUser.id, {
           email: updateData.email,
           user_metadata: {
-            role: 'SUBSCRIBER',
             name: nextName,
             full_name: nextName,
-            status: user.status,
           },
         });
         if (error) throw error;

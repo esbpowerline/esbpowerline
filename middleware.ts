@@ -132,7 +132,8 @@ export async function middleware(request: NextRequest) {
       if (!success) {
         return new NextResponse('Too many login attempts. Please try again later.', { status: 429 });
       }
-    } else {
+    } else if (pathname.startsWith('/api/')) {
+      // Protect API routes from abuse, but avoid draining the 10,000 Upstash Free Tier limit on regular page views
       const { success } = await standardRateLimit!.limit(ip);
       if (!success) {
         return new NextResponse('Too many requests. Please slow down.', { status: 429 });
@@ -234,8 +235,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/data/daily/:path*.json',
-    '/data/petrobangla/:path*.json',
-    '/((?!_next/static|_next/image|images|favicon.ico|robots.txt|sitemap.xml|api/cron).*)',
+    '/((?!_next/static|_next/image|images|data|favicon.ico|robots.txt|sitemap.xml|api/cron).*)',
   ],
 };

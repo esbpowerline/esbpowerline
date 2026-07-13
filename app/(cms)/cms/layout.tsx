@@ -2,6 +2,7 @@ import { CmsShell } from '@/components/cms/CmsShell';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { redirect } from 'next/navigation';
+import '../../cms.css';
 
 export const metadata = { title: 'CMS' };
 

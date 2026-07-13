@@ -36,6 +36,7 @@ export async function publishDueScheduledArticles(now = new Date()): Promise<Pub
       imageUrl: true,
       tags: true,
       publishedAt: true,
+      authorId: true,
     },
   });
 
@@ -89,6 +90,11 @@ export async function publishDueScheduledArticles(now = new Date()): Promise<Pub
   }
 
   if (published.length > 0) {
+    const { syncAuthorArticleCounts } = await import('@/lib/author-stats');
+    const publishedArticles = due.filter((a) => published.includes(a.slug));
+    const authorIds = Array.from(new Set(publishedArticles.map((a) => a.authorId)));
+    await Promise.all(authorIds.map((id) => syncAuthorArticleCounts(id)));
+
     revalidatePublicContent(published);
     revalidatePath('/cms/articles/scheduled');
     revalidatePath('/admin/articles');

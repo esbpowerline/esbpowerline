@@ -56,13 +56,18 @@ function publishingPeriodStarts(now = new Date()) {
   return { day, week, month, year };
 }
 
+import { unstable_cache } from 'next/cache';
+
 /** Published story counts per author/editor for admin dashboard */
 export async function getAuthorPublishingStats(): Promise<AuthorPublishingStat[]> {
   const session = await auth();
   if (!session?.user || !can(session.user.role, 'admin.access')) {
     throw new Error('Forbidden');
   }
+  return getCachedAuthorPublishingStats();
+}
 
+const getCachedAuthorPublishingStats = unstable_cache(async (): Promise<AuthorPublishingStat[]> => {
   const { day, week, month, year } = publishingPeriodStarts();
   const publishedBase = { status: 'PUBLISHED' as const, editorTrash: false };
 
@@ -123,15 +128,18 @@ export async function getAuthorPublishingStats(): Promise<AuthorPublishingStat[]
       year: yearMap.get(author.id) ?? 0,
     }))
     .sort((a, b) => b.total - a.total || b.month - a.month || b.year - a.year || a.name.localeCompare(b.name));
-}
+}, ['analytics-author-stats'], { revalidate: 1800 });
 
-/** Lightweight stats for admin dashboard — avoids full analytics query storm */
+/** Lightweight stats for admin dashboard â€” avoids full analytics query storm */
 export async function getAdminOverview() {
   const session = await auth();
   if (!session?.user || !can(session.user.role, 'admin.access')) {
     throw new Error('Forbidden');
   }
+  return getCachedAdminOverview();
+}
 
+const getCachedAdminOverview = unstable_cache(async () => {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -184,12 +192,16 @@ export async function getAdminOverview() {
     addedThisMonth,
     pendingComments,
     memberCount,
+    computedAt: now.toISOString(),
   };
-}
+}, ['analytics-admin-overview'], { revalidate: 1800 });
 
 export async function getAnalytics(options?: AnalyticsOptions) {
   await requireAnalyticsAccess();
+  return getCachedAnalytics(options);
+}
 
+const getCachedAnalytics = unstable_cache(async (options?: AnalyticsOptions) => {
   const now = new Date();
   const overviewMode = options === undefined;
   const { period, month } = overviewMode
@@ -469,7 +481,7 @@ export async function getAnalytics(options?: AnalyticsOptions) {
     if (overviewMode) {
       return base.map((o) => ({
         ...o,
-        description: 'Daily chart · MoM comparison',
+        description: 'Daily chart Â· MoM comparison',
         dot: 'hsl(var(--muted-foreground) / 0.4)',
       }));
     }
@@ -495,7 +507,7 @@ export async function getAnalytics(options?: AnalyticsOptions) {
       return {
         ...o,
         count: published,
-        description: published > 0 ? `${published} post${published === 1 ? '' : 's'} · ${viewsLabel}` : 'No publishes · daily trend only',
+        description: published > 0 ? `${published} post${published === 1 ? '' : 's'} Â· ${viewsLabel}` : 'No publishes Â· daily trend only',
         dot: published > 0 ? `hsl(${148 + (i * 7) % 40} 65% 44%)` : 'hsl(var(--muted-foreground) / 0.35)',
       };
     });
@@ -573,8 +585,9 @@ export async function getAnalytics(options?: AnalyticsOptions) {
       carouselMode,
       homepageManaged: true,
     },
+    computedAt: now.toISOString(),
   };
-}
+}, ['analytics-main'], { revalidate: 1800 });
 
 /** Author-scoped analytics for the CMS workspace */
 export async function getAuthorAnalytics(authorId?: string) {
@@ -584,6 +597,10 @@ export async function getAuthorAnalytics(authorId?: string) {
   }
 
   const targetId = authorId && can(session.user.role, 'analytics.view_all') ? authorId : session.user.id;
+  return getCachedAuthorAnalytics(targetId);
+}
+
+const getCachedAuthorAnalytics = unstable_cache(async (targetId: string) => {
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -706,4 +723,4 @@ export async function getAuthorAnalytics(authorId?: string) {
     },
     peers: peers.slice(0, 8),
   };
-}
+}, ['analytics-author'], { revalidate: 1800 });

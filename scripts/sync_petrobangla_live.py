@@ -15,7 +15,7 @@ HOT_FOLDER = Path(r"C:\Users\user\Desktop\New weeks")
 PARSE_CLI = Path(r"C:\Users\user\Desktop\grid_backlog\parse_petrobangla.py")
 PUBLIC = ROOT / "public" / "data" / "petrobangla"
 PUBLIC_DAILY = PUBLIC / "daily"
-LIVE_WEEK_COUNT = 30
+LIVE_WEEK_COUNT = 7
 QUARANTINE = {
     "2020-02-04", "2020-02-05", "2020-03-06", "2020-09-17", "2020-10-16",
     "2020-10-17", "2020-10-18", "2020-10-19", "2025-05-20", "2025-05-21",
@@ -65,9 +65,9 @@ def build_live_week(index: dict) -> dict:
     days = []
     for entry in window:
         jf = entry.get("json_file") or f"{entry['date']}.json"
-        path = DESKTOP_JSON / jf
+        path = PUBLIC_DAILY / jf
         if not path.exists():
-            path = DESKTOP_JSON / f"{entry['date']}.json"
+            path = PUBLIC_DAILY / f"{entry['date']}.json"
         if not path.exists():
             continue
         data = json.loads(path.read_text(encoding="utf-8"))

@@ -250,28 +250,6 @@ export function PetrobanglaLiveWeekPanel({
         </div>
       )}
 
-      <div className="flex justify-center w-full">
-        <div className="gas-reserve-archive-range" role="group" aria-label="Live window">
-          {LIVE_WEEK_RANGE_OPTIONS.map((opt) => {
-            const locked = isLiveWeekRangeLocked(opt.days, tier);
-            return (
-              <button
-                key={opt.days}
-                type="button"
-                onClick={() => setRangeDays(opt.days)}
-                className={cn(
-                  'gas-reserve-archive-range__btn inline-flex items-center gap-1',
-                  rangeDays === opt.days && 'gas-reserve-archive-range__btn--active',
-                )}
-              >
-                {opt.label}
-                {locked && <Lock className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {rangeDays <= 30 && liveWeekLoading && bundle && !rangeLocked && bundle.days.length < rangeDays && (
         <p className="flex items-center gap-2 text-[11px] text-muted-foreground px-1">
           <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
@@ -373,7 +351,7 @@ export function PetrobanglaLiveWeekPanel({
     </div>
   );
 
-  if (unified) return body;
+if (unified) return body;
 
   return (
     <div className="grid-explorer-chart-card card">
@@ -396,3 +374,37 @@ export function PetrobanglaLiveWeekPanel({
     </div>
   );
 }
+export function LiveWeekRangeToolbar({
+  rangeDays,
+  setRangeDays,
+}: {
+  rangeDays: LiveWeekPreset;
+  setRangeDays: (days: LiveWeekPreset) => void;
+}) {
+  const { tier } = useGridTierAccess();
+  return (
+    <div className="gas-reserve-archive-view-toolbar__controls flex flex-wrap items-center justify-center gap-3 w-full">
+      <div className="gas-reserve-archive-range" role="group" aria-label="Live window">
+        {LIVE_WEEK_RANGE_OPTIONS.map((opt) => {
+          const locked = isLiveWeekRangeLocked(opt.days, tier);
+          return (
+            <button
+              key={opt.days}
+              type="button"
+              onClick={() => setRangeDays(opt.days)}
+              className={cn(
+                'gas-reserve-archive-range__btn inline-flex items-center gap-1',
+                rangeDays === opt.days && 'gas-reserve-archive-range__btn--active',
+              )}
+            >
+              {opt.label}
+              {locked && <Lock className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+  

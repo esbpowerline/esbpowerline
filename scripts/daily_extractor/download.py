@@ -131,25 +131,43 @@ def _petrobangla_pdf_urls() -> list[str]:
     return urls
 
 
-def _local_petrobangla_pdf() -> Path | None:
-    """Fallback: newest PDF from operator hot folders when live site is down."""
+def _local_petrobangla_pdf(energy: date = None) -> Path | None:
+    """Fallback: match PDF from operator hot folders for the given energy date."""
     candidates: list[Path] = []
     for folder in (
         Path(r"C:\Users\user\Desktop\New weeks"),
         Path(r"C:\Users\user\Desktop\Daily Gas Reports ALL - Petrobangla"),
+        Path(r"C:\Users\hamim\Desktop\PB"),
     ):
         if folder.is_dir():
             candidates.extend(folder.rglob("*.pdf"))
     if not candidates:
         return None
+    
+    if energy:
+        # PGCB's energy day is the report day - 1, but Petrobangla's PDF is usually dated the same as report date
+        # Let's try report_date (energy + 1 day) or energy date itself
+        report_date = energy + timedelta(days=1)
+        
+        target_names = [
+            f"{report_date.day}-{report_date.month}-{str(report_date.year)[-2:]}.pdf",
+            f"{report_date.day}-{report_date.month:02d}-{str(report_date.year)[-2:]}.pdf",
+            f"{report_date.day:02d}-{report_date.month:02d}-{str(report_date.year)[-2:]}.pdf",
+            f"{energy.day}-{energy.month}-{str(energy.year)[-2:]}.pdf",
+        ]
+        
+        for p in candidates:
+            if any(name in p.name for name in target_names):
+                return p
+
     return max(candidates, key=lambda p: p.stat().st_mtime)
 
 
-def download_petrobangla(dest_dir: Path | None = None) -> tuple[Path | None, str | None]:
+def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Path | None, str | None]:
     dest_dir = dest_dir or SCRATCH_DOWNLOADS
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    local = _local_petrobangla_pdf()
+    local = _local_petrobangla_pdf(energy)
     if local:
         dest = dest_dir / f"Petrobangla_{local.name}"
         if not dest.exists() or dest.stat().st_size != local.stat().st_size:
@@ -196,10 +214,17 @@ def download_for_energy_day(energy: date) -> DownloadResult:
     dd, mm, yy = f"{report_date.day:02d}", f"{report_date.month:02d}", str(report_date.year)
     local_path1 = Path(rf"C:\Users\user\Downloads\Daily Report {dd}-{mm}-{yy}.xlsx")
     local_path2 = Path(rf"C:\Users\user\Downloads\Daily Report  {dd}-{mm}-{yy}.xlsx")
+    local_path3 = Path(rf"C:\Users\hamim\Desktop\PGCB\Daily Report {dd}-{mm}-{yy}.xlsx")
+    local_path4 = Path(rf"C:\Users\hamim\Desktop\PGCB\Daily Report  {dd}-{mm}-{yy}.xlsx")
+    
     if local_path1.exists():
         pgcb_path = local_path1
     elif local_path2.exists():
         pgcb_path = local_path2
+    elif local_path3.exists():
+        pgcb_path = local_path3
+    elif local_path4.exists():
+        pgcb_path = local_path4
 
     if not pgcb_path:
         pgcb_path, erp_id = probe_erp_for_energy(energy)
@@ -214,7 +239,7 @@ def download_for_energy_day(energy: date) -> DownloadResult:
     if not pgcb_path:
         errors.append(f"No PGCB report found for energy day {energy} (report date {report_date})")
 
-    pb_pdf, pb_url = download_petrobangla()
+    pb_pdf, pb_url = download_petrobangla(energy)
     if not pb_pdf:
         errors.append("Petrobangla daily PDF not available (gas sections will be zero-filled or carried forward)")
 

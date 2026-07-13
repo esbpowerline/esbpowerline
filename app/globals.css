@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
- * Site theme tokens — MUST stay outside @layer so they override :root.
+ * Site theme tokens â€” MUST stay outside @layer so they override :root.
  * Tailwind layers reorder base rules and break html.theme-* variable cascade.
  */
 html.theme-midnight,
@@ -150,7 +150,7 @@ html[data-site-theme='white'],
     --hero-surface: 222 47% 9%;
     --hero-dot: 217 30% 22%;
 
-    /* Compact UI type — one step up from legacy 9–12px labels */
+    /* Compact UI type â€” one step up from legacy 9â€“12px labels */
     --text-ui-2xs: 0.625rem;
     --text-ui-xs: 0.6875rem;
     --text-ui-sm: 0.75rem;
@@ -162,8 +162,8 @@ html[data-site-theme='white'],
     --text-ui-leading-clamp: 1.4;
     --text-ui-pad-block: 0;
     --text-ui-clamp-buffer: 0;
-    /* Home + Account nav pills — matched footprint (icon-only below sm) */
-    /* Home ↔ Account — single footprint (icon + longest label + padding) */
+    /* Home + Account nav pills â€” matched footprint (icon-only below sm) */
+    /* Home â†” Account â€” single footprint (icon + longest label + padding) */
     --nav-paired-pill-h: 2.375rem;
     --nav-paired-pill-w: 7rem;
     --nav-paired-pill-px: 0.625rem;
@@ -175,7 +175,7 @@ html[data-site-theme='white'],
     --nav-paired-avatar: var(--nav-swatch-btn);
     --nav-account-pill-pad-block: var(--nav-swatch-inset);
     --nav-account-pill-pad-inline-start: var(--nav-swatch-inset);
-    /* Outer nav clusters — right (Account/Themes) is the reference footprint */
+    /* Outer nav clusters â€” right (Account/Themes) is the reference footprint */
     --nav-cluster-pad: 0.25rem;
     --nav-cluster-gap: 0.25rem;
     --nav-cluster-h: calc(var(--nav-paired-pill-h) + var(--nav-cluster-pad) * 2);
@@ -322,7 +322,7 @@ html[data-site-theme='white'],
   background-color: hsl(var(--primary) / 0.03);
 }
 
-/* Compact UI utilities — inherit locale-aware scale */
+/* Compact UI utilities â€” inherit locale-aware scale */
 .text-ui-2xs {
   font-size: var(--text-ui-2xs);
 }
@@ -335,7 +335,7 @@ html[data-site-theme='white'],
   font-size: var(--text-ui-sm);
 }
 
-/* Unified icon scale — navbar, toggles, inline UI */
+/* Unified icon scale â€” navbar, toggles, inline UI */
 .icon-xs {
   width: var(--icon-size-xs);
   height: var(--icon-size-xs);
@@ -410,14 +410,14 @@ svg.icon-xs {
 .prose { @apply max-w-none; }
 .prose p, .prose li { @apply text-foreground leading-relaxed; }
 
-/* Public canvas — never horizontal scroll (clip preserves position:sticky) */
+/* Public canvas â€” never horizontal scroll (clip preserves position:sticky) */
 html,
 body {
   overflow-x: clip;
   max-width: 100%;
 }
 
-/* Content container — proportional reading width (100% avoids vw scrollbar jitter) */
+/* Content container â€” proportional reading width (100% avoids vw scrollbar jitter) */
 .container {
   width: 100%;
   max-width: min(1280px, calc(100% - clamp(1.5rem, 5vw, 4rem)));
@@ -425,7 +425,7 @@ body {
   padding-inline: clamp(1rem, 2vw, 1.75rem);
 }
 
-/* Wide shell — masthead, nav, homepage editorial canvas */
+/* Wide shell â€” masthead, nav, homepage editorial canvas */
 .container--shell {
   max-width: min(1536px, calc(100% - clamp(1.5rem, 6vw, 5rem)));
 }
@@ -448,14 +448,14 @@ body {
   @apply glass-card p-9 shadow-xl rounded-3xl border-border/60;
 }
 
-/* Hero / site dot grid — driven by per-theme --hero-surface / --hero-dot tokens */
+/* Hero / site dot grid â€” driven by per-theme --hero-surface / --hero-dot tokens */
 .hero-dot-pattern {
   background-color: hsl(var(--hero-surface));
   background-image: radial-gradient(hsl(var(--hero-dot) / 0.42) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
-/* Featured hero — rigid slot grid; carousel never shifts height between stories */
+/* Featured hero â€” rigid slot grid; carousel never shifts height between stories */
 :root {
   --hero-slot-gap: 0.625rem;
   --hero-split-inset: clamp(1rem, 1.75vw, 1.5rem);
@@ -512,7 +512,7 @@ body {
   overflow: hidden;
 }
 
-/* Mobile: headline → full photo → deck → controls (content uses display:contents) */
+/* Mobile: headline â†’ full photo â†’ deck â†’ controls (content uses display:contents) */
 .featured-hero__split .featured-hero__content {
   display: contents;
 }
@@ -853,7 +853,7 @@ body {
   }
 }
 
-/* Homepage — proportional section rhythm (--home-gap) */
+/* Homepage â€” proportional section rhythm (--home-gap) */
 .home-page .featured-hero-section {
   padding-top: calc(var(--home-gap) * 0.35);
   padding-bottom: calc(var(--home-gap) * 0.55);
@@ -910,7 +910,7 @@ body {
   padding-bottom: calc(var(--home-gap) * 1.5) !important;
 }
 
-/* Shared homepage rhythm — one proportional scale for blocks, columns, chrome */
+/* Shared homepage rhythm â€” one proportional scale for blocks, columns, chrome */
 :root {
   --home-gap: clamp(0.75rem, 1.25vw, 1.125rem);
   --home-rail-width: 20rem;
@@ -929,7 +929,7 @@ body {
   }
 }
 
-/* Homepage — editorial main column + sticky sidebar rail */
+/* Homepage â€” editorial main column + sticky sidebar rail */
 .home-editorial {
   padding-top: 0;
   padding-bottom: 0;
@@ -939,6 +939,12 @@ body {
   display: grid;
   gap: 0;
   align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.home-editorial__main,
+.home-editorial__rail {
+  min-width: 0;
 }
 
 .home-editorial__rail > .home-block + .home-block,
@@ -967,7 +973,7 @@ body {
   }
 }
 
-/* Hero band — shared proportions (hero carousel + trending rail) */
+/* Hero band â€” shared proportions (hero carousel + trending rail) */
 .home-page {
   --hero-split-inset: clamp(1rem, 1.75vw, 1.5rem);
   --home-hero-band-pad-y: var(--home-gap);
@@ -1106,7 +1112,7 @@ body {
   padding: 0.5rem 0.75rem;
 }
 
-/* Hero band — trending mirrors hero inset + slot rhythm */
+/* Hero band â€” trending mirrors hero inset + slot rhythm */
 .home-page .home-trending-hero-rail__body {
   --trending-stage-queue-gap: 0.75rem;
   flex: 1;
@@ -1187,7 +1193,7 @@ body {
   margin-top: 0;
 }
 
-/* Trending wave — image on top, copy below; fixed slots prevent height jump */
+/* Trending wave â€” image on top, copy below; fixed slots prevent height jump */
 .home-trending-wave__stage {
   position: relative;
   overflow: hidden;
@@ -1493,7 +1499,7 @@ body {
   color: hsl(0 72% 50% / 0.85);
 }
 
-/* Latest news — editorial grid aligned with homepage */
+/* Latest news â€” editorial grid aligned with homepage */
 .articles-editorial__grid {
   display: grid;
   gap: clamp(1.25rem, 2vw, 2.5rem);
@@ -1511,7 +1517,7 @@ body {
   }
 }
 
-/* Latest page — trending rail (Most read / Trending this week / All stories) */
+/* Latest page â€” trending rail (Most read / Trending this week / All stories) */
 .articles-trending-rail {
   border: 1px solid hsl(var(--border) / 0.45);
   border-radius: 0.75rem;
@@ -1720,7 +1726,7 @@ html.locale-bn .articles-trending-rail__view-all {
   }
 }
 
-/* Search — wide shell + full-width query field */
+/* Search â€” wide shell + full-width query field */
 .search-page__input {
   max-width: none;
 }
@@ -1729,7 +1735,7 @@ html.locale-bn .search-page__header h1 {
   font-family: var(--font-bengali), var(--font-sans), sans-serif;
 }
 
-/* Latest news page — locale-stable header + single-line filter rail */
+/* Latest news page â€” locale-stable header + single-line filter rail */
 .articles-page__toolbar {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 11.5rem));
@@ -1847,7 +1853,7 @@ html.locale-bn .search-page__header h1 {
   max-width: 100%;
 }
 
-/* Section kickers / links — EN uppercase; BN swaps typeface + slightly larger scale */
+/* Section kickers / links â€” EN uppercase; BN swaps typeface + slightly larger scale */
 .section-kicker {
   font-size: var(--text-ui-2xs);
   font-weight: 700;
@@ -1937,7 +1943,7 @@ html.locale-bn .search-page__header h1 {
   }
 }
 
-/* Bottom band — magazine + membership (no duplicate nav promos) */
+/* Bottom band â€” magazine + membership (no duplicate nav promos) */
 .home-bottom-row__grid {
   display: grid;
   gap: var(--home-gap);
@@ -1967,7 +1973,7 @@ html.locale-bn .search-page__header h1 {
   border-color: hsl(var(--primary) / 0.35);
 }
 
-/* Editorial row — matched two-line heads (kicker + title) so grids align */
+/* Editorial row â€” matched two-line heads (kicker + title) so grids align */
 .home-editorial__section-head {
   min-height: 3.625rem;
 }
@@ -1983,13 +1989,14 @@ html.locale-bn .search-page__header h1 {
 }
 
 .home-editorial__interview-grid {
+  display: grid;
   gap: calc(var(--home-gap) * 0.65);
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .home-editorial__interview-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2003,12 +2010,12 @@ html.locale-bn .search-page__header h1 {
 .home-article-grid {
   display: grid;
   gap: calc(var(--home-gap) * 0.65);
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-@media (min-width: 640px) {
+@media (min-width: 768px) {
   .home-article-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -2069,7 +2076,7 @@ html.locale-bn .search-page__header h1 {
 
 
 
-/* Trending — matches home section cards (lead + numbered list) */
+/* Trending â€” matches home section cards (lead + numbered list) */
 .home-trending-item__rank {
   font-family: var(--font-mono);
   font-size: var(--text-ui-xs);
@@ -2087,7 +2094,7 @@ html.locale-bn .search-page__header h1 {
   margin-top: 0;
 }
 
-/* Bengali locale — typeface + scale tokens in trending + latest news */
+/* Bengali locale â€” typeface + scale tokens in trending + latest news */
 html.locale-bn .section-kicker,
 html.locale-bn .section-category-label,
 html.locale-bn .section-inline-link,
@@ -2138,7 +2145,7 @@ html.locale-bn .article-card h3 {
   }
 }
 
-/* Public masthead — same page surface as body (--bg tracks midnight/dark/white) */
+/* Public masthead â€” same page surface as body (--bg tracks midnight/dark/white) */
 .site-banner-shell,
 .site-banner-frame {
   background-color: var(--bg);
@@ -2189,7 +2196,7 @@ html.locale-bn .article-card h3 {
 }
 
 
-/* Hub band — balanced gaps: ticker ↔ hub ↔ categories */
+/* Hub band â€” balanced gaps: ticker â†” hub â†” categories */
 .public-nav-bar__hub-band {
   position: relative;
   z-index: 3;
@@ -2233,7 +2240,7 @@ html.locale-bn .article-card h3 {
   min-width: 0;
 }
 
-/* Shared nav pill shell — hub center; start/end clusters sized via --nav-cluster-w */
+/* Shared nav pill shell â€” hub center; start/end clusters sized via --nav-cluster-w */
 .public-nav-bar__pill-cluster,
 .public-nav-bar__hub {
   display: inline-flex;
@@ -2327,7 +2334,7 @@ html.locale-bn .article-card h3 {
   gap: var(--nav-cluster-gap);
 }
 
-/* Mirrored utility rows — same inner width on left and right */
+/* Mirrored utility rows â€” same inner width on left and right */
 .public-nav-bar__utilities {
   display: inline-flex;
   align-items: center;
@@ -2369,7 +2376,7 @@ html.locale-bn .article-card h3 {
   }
 }
 
-/* Center hub — Latest / Grid / Magazine */
+/* Center hub â€” Latest / Grid / Magazine */
 .public-nav-bar__hub {
   gap: 0.25rem;
 }
@@ -2398,7 +2405,7 @@ html.locale-bn .article-card h3 {
   background: hsl(var(--muted) / 0.3);
 }
 
-/* Latest — news-style rose (faded text, vivid active pill) */
+/* Latest â€” news-style rose (faded text, vivid active pill) */
 .public-nav-bar__hub-link--latest {
   color: hsl(0 62% 46%);
 }
@@ -2418,7 +2425,7 @@ html.locale-bn .article-card h3 {
   color: hsl(0 0% 100%);
 }
 
-/* Grid Explorer — bright subtle blue (data / analytics) */
+/* Grid Explorer â€” bright subtle blue (data / analytics) */
 .public-nav-bar__hub-link--grid {
   color: hsl(210 88% 46%);
 }
@@ -2438,7 +2445,7 @@ html.locale-bn .article-card h3 {
   color: hsl(0 0% 100%);
 }
 
-/* Magazine — faded emerald text; active = emerald pill */
+/* Magazine â€” faded emerald text; active = emerald pill */
 .public-nav-bar__hub-link--magazine {
   color: hsl(160 84% 30%);
 }
@@ -2496,7 +2503,7 @@ html.locale-bn .article-card h3 {
   background: linear-gradient(180deg, hsl(210 88% 52%) 0%, hsl(210 92% 46%) 100%);
 }
 
-/* Live market strip — clipped to banner; square top, rounded bottom via masthead frame */
+/* Live market strip â€” clipped to banner; square top, rounded bottom via masthead frame */
 .public-market-strip {
   padding: 0;
   background: transparent;
@@ -2525,7 +2532,7 @@ html.locale-bn .article-card h3 {
   padding: 0.3rem 0.75rem !important;
 }
 
-/* Ticker marquee — vertically centered while scrolling */
+/* Ticker marquee â€” vertically centered while scrolling */
 .market-ticker__row {
   align-self: stretch;
 }
@@ -2675,7 +2682,7 @@ html.locale-bn .market-ticker-label {
   text-transform: none;
 }
 
-/* Homepage — standalone system snapshot segment (hero-band right column) */
+/* Homepage â€” standalone system snapshot segment (hero-band right column) */
 .home-snapshot-segment {
   display: flex;
   flex-direction: column;
@@ -2937,7 +2944,7 @@ html.locale-bn .home-snapshot-segment__kicker {
   text-transform: none;
 }
 
-/* Compact energy dashboard — default scale outside hero shell */
+/* Compact energy dashboard â€” default scale outside hero shell */
 .energy-dashboard--compact .energy-dashboard__stat-label {
   font-size: clamp(0.55rem, 1vw + 0.3rem, 0.75rem);
   line-height: var(--text-ui-leading-compact);
@@ -2966,7 +2973,7 @@ html.locale-bn .home-snapshot-segment__kicker {
   min-height: 3.25rem;
 }
 
-/* System snapshot — live feed + agency rail (terminal-style, matches market strip) */
+/* System snapshot â€” live feed + agency rail (terminal-style, matches market strip) */
 .home-snapshot__sources {
   display: flex;
   flex-wrap: wrap;
@@ -3120,7 +3127,7 @@ html.locale-bn .home-snapshot__agency {
   background: hsl(160 62% 34%);
 }
 
-/* Right utilities row — account + themes (left row uses same .public-nav-bar__utilities) */
+/* Right utilities row â€” account + themes (left row uses same .public-nav-bar__utilities) */
 
 .public-nav-bar__pill-label {
   display: none;
@@ -3137,7 +3144,7 @@ html.locale-bn .home-snapshot__agency {
   }
 }
 
-/* Home ↔ Account bookends — one shared box model (link + button) */
+/* Home â†” Account bookends â€” one shared box model (link + button) */
 a.public-nav-bar__pill-btn--paired,
 button.public-nav-bar__pill-btn--paired,
 .public-nav-bar .account-menu__trigger.public-nav-bar__pill-btn--paired {
@@ -3198,7 +3205,7 @@ button.public-nav-bar__pill-btn--paired,
     justify-content: flex-start;
   }
 
-  /* BN — compact paired pills for Home + Search (fits Bengali copy) */
+  /* BN â€” compact paired pills for Home + Search (fits Bengali copy) */
   html.locale-bn .public-nav-bar__start-cluster .public-nav-bar__pill-btn--paired {
     width: var(--nav-cluster-compact-pill-w);
     min-width: var(--nav-cluster-compact-pill-w);
@@ -3216,7 +3223,7 @@ button.public-nav-bar__pill-btn--paired,
     white-space: normal;
   }
 
-  /* EN — full Home label; Search icon-only; locale EN/BN never clipped */
+  /* EN â€” full Home label; Search icon-only; locale EN/BN never clipped */
   html:not(.locale-bn) .public-nav-bar__start-cluster .public-nav-bar__home.public-nav-bar__pill-btn--paired {
     width: auto;
     min-width: 4.75rem;
@@ -3324,7 +3331,7 @@ button.public-nav-bar__pill-btn--paired,
   align-items: center;
 }
 
-/* Locale + theme swatch tracks — identical inset capsule in navbar */
+/* Locale + theme swatch tracks â€” identical inset capsule in navbar */
 .public-nav-bar .locale-toggle__swatches,
 .public-nav-bar .site-theme-toggle__swatches {
   display: inline-flex;
@@ -3453,7 +3460,7 @@ html.theme-dark .public-nav-bar .locale-toggle__btn--active:hover {
   color: hsl(var(--muted-foreground) / 0.92);
 }
 
-/* Account icon — same round footprint as an active theme/locale swatch */
+/* Account icon â€” same round footprint as an active theme/locale swatch */
 .public-nav-bar__account-icon-slot {
   display: inline-flex;
   align-items: center;
@@ -3505,7 +3512,7 @@ html.locale-bn .public-nav-bar__account-pill .account-avatar--compact .account-a
   font-family: var(--font-bengali), var(--font-sans), sans-serif;
 }
 
-/* Fallback — any navbar lucide without explicit icon-* class */
+/* Fallback â€” any navbar lucide without explicit icon-* class */
 .public-nav-bar svg.lucide:not(.icon-xs):not(.icon-sm):not(.icon-md) {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
@@ -3514,7 +3521,7 @@ html.locale-bn .public-nav-bar__account-pill .account-avatar--compact .account-a
 
 .public-nav-bar__hub-link .icon-sm {
   opacity: 1;
-  /* Scale icon to 1rem (16px) for 1.33× ratio against 12px text — matches Vercel / Linear / Stripe nav standards */
+  /* Scale icon to 1rem (16px) for 1.33Ã— ratio against 12px text â€” matches Vercel / Linear / Stripe nav standards */
   width: 1rem;
   height: 1rem;
 }
@@ -3558,7 +3565,7 @@ html.locale-bn .public-nav-bar__hub-link span {
   background-image: linear-gradient(to left, var(--bg), transparent);
 }
 
-/* Nav shell — wide canvas per row (hub + categories as siblings) */
+/* Nav shell â€” wide canvas per row (hub + categories as siblings) */
 .public-nav-bar__hub-shell,
 .public-nav-bar__categories-shell {
   width: 100%;
@@ -3576,7 +3583,7 @@ html.locale-bn .public-nav-bar__hub-link span {
   padding-bottom: calc(var(--home-gap) * 0.45);
 }
 
-/* Category row — full shell width; matches homepage editorial canvas */
+/* Category row â€” full shell width; matches homepage editorial canvas */
 .public-nav-bar__categories {
   padding-top: calc(var(--home-gap) * 0.2);
   padding-bottom: 0;
@@ -3591,7 +3598,7 @@ html.locale-bn .public-nav-bar__hub-link span {
   padding: 0.4375rem 0.25rem;
 }
 
-/* Category ribbon — single bordered surface; opaque mix matches bg-card/55 without scroll ghost */
+/* Category ribbon â€” single bordered surface; opaque mix matches bg-card/55 without scroll ghost */
 .category-nav-ribbon {
   --category-nav-radius: 0.75rem;
   --category-nav-border-color: hsl(var(--border) / 0.45);
@@ -3773,7 +3780,7 @@ html[data-site-theme='dark'] #mobile-categories-panel {
   );
 }
 
-/* === Login screen — editorial portal access === */
+/* === Login screen â€” editorial portal access === */
 .brand-logo__frame {
   @apply inline-flex items-center justify-center rounded-md border border-border/40 bg-card px-2.5 py-1.5 shadow-sm;
 }
@@ -3860,7 +3867,7 @@ html.theme-dark .brand-logo__frame {
   @apply max-w-md;
 }
 
-/* Single frame — one elevation, one border (Vercel/Linear pattern) */
+/* Single frame â€” one elevation, one border (Vercel/Linear pattern) */
 .login-frame {
   @apply relative z-[1] w-full max-w-[1040px] rounded-2xl border bg-card shadow-lg overflow-hidden;
   border-color: hsl(var(--login-accent) / 0.3);
@@ -3951,7 +3958,7 @@ html.theme-dark .brand-logo__frame {
   @apply grid overflow-hidden rounded-b-2xl lg:grid-cols-[1fr_1fr];
 }
 
-/* Brand column — editorial masthead, static texture */
+/* Brand column â€” editorial masthead, static texture */
 .login-brand {
   @apply relative flex h-full min-h-full flex-col overflow-hidden border-b border-border lg:border-b-0 lg:border-r;
   background-color: hsl(var(--login-accent-soft) / 0.42);
@@ -4006,7 +4013,7 @@ html.theme-dark .brand-logo__frame {
   );
 }
 
-/* Brand deck — shared login & footer editorial copy */
+/* Brand deck â€” shared login & footer editorial copy */
 .brand-deck {
   @apply flex flex-col gap-1;
 }
@@ -4039,7 +4046,7 @@ html.dark .brand-deck__lede {
   max-width: var(--login-brand-copy-width);
 }
 
-/* Login masthead footer — publisher + social (staff & member) */
+/* Login masthead footer â€” publisher + social (staff & member) */
 .login-portal-footer {
   @apply w-full rounded-xl border px-3.5 py-3 sm:px-4 sm:py-3.5;
   border-color: hsl(var(--login-accent) / 0.14);
@@ -4131,7 +4138,7 @@ html.dark .brand-deck__lede {
   background-color: hsl(var(--background));
 }
 
-/* Access column — task-first typography (sans, not display) */
+/* Access column â€” task-first typography (sans, not display) */
 .login-access {
   @apply flex min-h-full flex-col bg-card;
 }
@@ -4381,7 +4388,7 @@ html.dark .brand-deck__lede {
   color: hsl(224 85% 42%);
 }
 
-/* Member perks — left column under BrandDeck */
+/* Member perks â€” left column under BrandDeck */
 .login-member-perks {
   @apply w-full rounded-xl border px-4 py-4 sm:px-5 sm:py-4;
   border-color: hsl(var(--login-accent) / 0.16);
@@ -4446,7 +4453,7 @@ html.dark .brand-deck__lede {
   @apply text-sm font-medium text-foreground;
 }
 
-/* Member panel — reader library (teal accent) */
+/* Member panel â€” reader library (teal accent) */
 .member-panel {
   --member-accent: 162 72% 46%;
   --member-accent-soft: 165 38% 10%;
@@ -4900,7 +4907,7 @@ html.dark .brand-deck__lede {
   color: hsl(var(--muted-foreground));
 }
 
-/* Workspace open — role-colored hover */
+/* Workspace open â€” role-colored hover */
 .workspace-open-control--member:hover,
 .account-menu__action--member:hover {
   color: hsl(162 68% 32%) !important;
@@ -5164,7 +5171,7 @@ html.dark .brand-deck__lede {
   @apply w-full rounded-xl border border-input bg-background px-3 py-2 text-sm leading-relaxed;
 }
 
-/* Official social — Facebook & YouTube */
+/* Official social â€” Facebook & YouTube */
 .official-social {
   @apply flex flex-wrap items-center gap-2;
   list-style: none;
@@ -5197,7 +5204,7 @@ html.dark .brand-deck__lede {
   @apply gap-2.5;
 }
 
-/* Bengali locale — typeface swap; scale via --text-ui-* tokens above */
+/* Bengali locale â€” typeface swap; scale via --text-ui-* tokens above */
 html.locale-bn,
 html.locale-bn body {
   --font-sans: var(--font-bengali);
@@ -5211,7 +5218,7 @@ html.locale-bn .category-pill {
   letter-spacing: 0.01em;
 }
 
-/* Clamped BN headlines — taller line boxes inside fixed clamp heights */
+/* Clamped BN headlines â€” taller line boxes inside fixed clamp heights */
 html.locale-bn .home-trending-wave__excerpt,
 html.locale-bn .home-trending-wave__queue-title,
 html.locale-bn .home-trending-item__title,
@@ -5232,7 +5239,7 @@ html.locale-bn .article-card h3 {
   font-family: var(--font-bengali), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Language toggle — compact paired swatches */
+/* Language toggle â€” compact paired swatches */
 .locale-toggle {
   @apply flex items-center;
 }
@@ -5343,7 +5350,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
   display: contents;
 }
 
-/* Theme swatches — shared by public navbar & login */
+/* Theme swatches â€” shared by public navbar & login */
 .site-theme-toggle {
   @apply flex items-center gap-1.5;
 }
@@ -5489,7 +5496,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
   transform: translateY(0.5px);
 }
 
-/* ── Power Grid Explorer ── */
+/* â”€â”€ Power Grid Explorer â”€â”€ */
 .grid-explorer {
   @apply space-y-6;
 }
@@ -5543,7 +5550,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 .grid-explorer-subpanel {
-  /* Instant macro sub-tab swap — avoids stacked entrance animations */
+  /* Instant macro sub-tab swap â€” avoids stacked entrance animations */
 }
 
 .grid-explorer-chart-area--fixed {
@@ -5739,7 +5746,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
   }
 }
 
-/* Gas & LNG tab — unified section chrome */
+/* Gas & LNG tab â€” unified section chrome */
 .grid-explorer-gas-hero {
   @apply p-5 space-y-4;
   background: linear-gradient(
@@ -5952,7 +5959,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply text-[9px] text-muted-foreground leading-snug text-center max-w-[14rem];
 }
 
-/* Depletion trajectory + scenarios — single full-width chart card */
+/* Depletion trajectory + scenarios â€” single full-width chart card */
 .gas-reserve-depletion__body {
   @apply px-5 py-4 space-y-4;
 }
@@ -7544,13 +7551,13 @@ button.grid-explorer-link {
   @apply mt-2 text-sm text-muted-foreground leading-relaxed;
 }
 
-/* Recharts hover cursor — theme-friendly */
+/* Recharts hover cursor â€” theme-friendly */
 .grid-explorer .recharts-tooltip-wrapper {
   outline: none !important;
   z-index: 50 !important;
 }
 
-/* Recharts v3 accessibility layer focuses the SVG on click — suppress the focus ring */
+/* Recharts v3 accessibility layer focuses the SVG on click â€” suppress the focus ring */
 .grid-explorer :is(
   .recharts-wrapper,
   .recharts-surface,
@@ -7598,224 +7605,8 @@ button.grid-explorer-link {
   filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.45));
 }
 
-/* TipTap editor – keep functional but cleaner */
-.tiptap-editor {
-  border-radius: 0.625rem;
-  border: 1px solid hsl(var(--border) / 0.45);
-  background: hsl(var(--background) / 0.85);
-  overflow: hidden;
-}
-
-.tiptap-editor--sticky-toolbar {
-  overflow: visible !important;
-}
-
-.tiptap-toolbar {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.25rem, 1fr));
-  gap: 0.35rem;
-  padding: 0.45rem 0.5rem;
-  border-bottom: 1px solid hsl(var(--border) / 0.4);
-  background: hsl(var(--muted) / 0.28);
-}
-
-.tiptap-toolbar--ribbon {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  padding: 0.4375rem 0.5625rem;
-  background: linear-gradient(180deg, hsl(var(--muted) / 0.32) 0%, hsl(var(--muted) / 0.18) 100%);
-  border-bottom: 1px solid hsl(var(--border) / 0.42);
-}
-
-.tiptap-toolbar__group {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.0625rem;
-  padding: 0.125rem;
-  border-radius: 0.5rem;
-  border: 1px solid hsl(var(--border) / 0.32);
-  background: hsl(var(--background) / 0.55);
-  flex-shrink: 0;
-}
-
-.tiptap-toolbar__group--end {
-  /* removed margin-left: auto for even wrapping */
-}
-
-.tiptap-toolbar__divider {
-  width: 1px;
-  height: 1.5rem;
-  background: hsl(var(--border) / 0.45);
-  margin: 0 0.0625rem;
-  flex-shrink: 0;
-}
-
-.tiptap-toolbar--loading {
-  min-height: 2.75rem;
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.tiptap-toolbar__zone {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.125rem;
-  min-height: 2rem;
-  min-width: 0;
-  padding: 0.15rem 0.2rem;
-  border-radius: 0.55rem;
-  border: 1px solid hsl(var(--border) / 0.28);
-  background: hsl(var(--background) / 0.38);
-}
-
-.tiptap-toolbar__item {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.tiptap-toolbar__btn {
-  height: 2rem;
-  width: 2rem;
-  border-radius: 0.375rem;
-  flex-shrink: 0;
-}
-
-.tiptap-toolbar__btn svg {
-  width: 1rem !important;
-  height: 1rem !important;
-}
-
-.tiptap-toolbar--ribbon .tiptap-toolbar__btn {
-  height: 2rem;
-  width: 2rem;
-  border-radius: 0.375rem;
-  color: hsl(var(--muted-foreground));
-}
-
-
-.tiptap-toolbar--ribbon .tiptap-toolbar__btn:hover:not(:disabled) {
-  background: hsl(var(--muted) / 0.55);
-  color: hsl(var(--foreground));
-}
-
-.tiptap-toolbar__btn--active {
-  background: hsl(var(--muted) / 0.65);
-  color: hsl(var(--foreground));
-}
-
-@media (max-width: 767px) {
-  .tiptap-toolbar--ribbon {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    justify-content: flex-start !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-  }
-  .tiptap-toolbar--ribbon::-webkit-scrollbar {
-    display: none !important;
-  }
-  .tiptap-toolbar__divider {
-    margin: 0 0.25rem !important;
-  }
-}
-
-.tiptap-editor__body {
-  min-height: 280px;
-  overflow: auto;
-}
-
-.tiptap-editor__body--loading {
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-}
-
-.tiptap-editor__body .tiptap {
-  min-height: 280px;
-}
-
-.tiptap { @apply min-h-[280px] p-4 sm:p-5 outline-none text-[15px] leading-relaxed; }
-.tiptap p { @apply mb-4 text-foreground; }
-.tiptap h1 { @apply text-2xl font-semibold tracking-tight mb-4; }
-.tiptap h2 { @apply text-xl font-semibold tracking-tight mb-3 mt-5; }
-.tiptap h3 { @apply text-lg font-semibold tracking-tight mb-2 mt-4; }
-.tiptap ul, .tiptap ol { @apply pl-6 mb-4 space-y-1; }
-.tiptap blockquote { @apply border-l-4 border-primary/60 pl-5 italic text-muted-foreground my-4; }
-.tiptap img { @apply max-w-full rounded-xl my-4 shadow-sm; }
-.tiptap img.ProseMirror-selectednode {
-  outline: 2px solid hsl(var(--primary));
-  box-shadow: 0 0 0 4px hsla(var(--primary) / 0.2);
-}
-.tiptap a { @apply text-primary underline underline-offset-2 cursor-pointer; }
-.tiptap table { @apply w-full border-collapse my-4 text-sm relative; }
-.tiptap th, .tiptap td { @apply border border-border px-3 py-2 align-top relative; }
-.tiptap th { @apply bg-muted/40 font-semibold text-left; }
-.tiptap td.selectedCell, .tiptap th.selectedCell {
-  background-color: hsla(var(--primary) / 0.12) !important;
-}
-.tiptap .column-resize-handle {
-  position: absolute;
-  right: -2px;
-  top: 0;
-  bottom: -2px;
-  width: 4px;
-  background-color: hsl(var(--primary));
-  pointer-events: none;
-}
-.tiptap hr { @apply my-6 border-border; }
-
-/* Real-time alignment previews */
-.tiptap .align-left, .article-body .align-left { text-align: left; }
-.tiptap .align-center, .article-body .align-center { text-align: center; }
-.tiptap .align-right, .article-body .align-right { text-align: right; }
-.tiptap .align-justify, .article-body .align-justify { text-align: justify; }
-
-/* Placeholder formatting */
-.tiptap p.is-editor-empty:first-child::before,
-.tiptap p.is-empty:first-child::before {
-  content: attr(data-placeholder);
-  float: left;
-  color: hsl(var(--muted-foreground) / 0.45);
-  pointer-events: none;
-  height: 0;
-}
-
-/* Pre & code blocks styles */
-.tiptap pre, .article-body pre {
-  background: hsl(var(--muted) / 0.6);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  font-family: var(--font-mono, monospace);
-  font-size: 13px;
-  overflow-x: auto;
-  margin: 1rem 0;
-  border: 1px solid hsl(var(--border) / 0.35);
-}
-.tiptap code, .article-body code {
-  background: hsl(var(--muted) / 0.6);
-  border-radius: 0.25rem;
-  padding: 0.15rem 0.3rem;
-  font-family: var(--font-mono, monospace);
-  font-size: 0.9em;
-  border: 1px solid hsl(var(--border) / 0.2);
-}
-.tiptap pre code, .article-body pre code {
-  background: none;
-  padding: 0;
-  border-radius: 0;
-  font-size: inherit;
-  border: none;
-}
-
-/* Published article body — mirrors editor (.tiptap) typography */
-/* Sticky author byline — stays lower-left while scrolling long stories */
+/* Published article body â€” mirrors editor (.tiptap) typography */
+/* Sticky author byline â€” stays lower-left while scrolling long stories */
 .article-author-sticky {
   display: inline-flex;
   align-items: center;
@@ -7892,7 +7683,7 @@ button.grid-explorer-link {
 .article-body strong { @apply font-semibold text-foreground; }
 .article-body em { @apply italic; }
 
-/* All Coverage mosaic — 9 proportional layout variants */
+/* All Coverage mosaic â€” 9 proportional layout variants */
 .coverage-mosaic {
   display: grid;
   grid-template-columns: 1fr;
@@ -8059,7 +7850,7 @@ html {
   background: var(--scroll-thumb-hover);
 }
 
-/* Default midnight — :root already matches; explicit class keeps admin/cms overrides scoped */
+/* Default midnight â€” :root already matches; explicit class keeps admin/cms overrides scoped */
 html.theme-midnight,
 html:not(.theme-dark):not(.theme-white) {
   color-scheme: dark;
@@ -8078,9 +7869,9 @@ html.theme-white {
   scrollbar-width: none;
 }
 
-/* ═══════════════════════════════════════════
-   ADMIN CONSOLE — capsule, sleek, functional
-   ═══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   ADMIN CONSOLE â€” capsule, sleek, functional
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .admin-shell {
   --admin-rose: 346 77% 58%;
   --admin-violet: 262 72% 62%;
@@ -8630,7 +8421,7 @@ html.theme-white {
   }
 }
 
-/* ── Large screens: tighter rhythm, more content in view (admin + editorial) ── */
+/* â”€â”€ Large screens: tighter rhythm, more content in view (admin + editorial) â”€â”€ */
 @media (min-width: 1280px) {
   .admin-shell,
   .cms-shell {
@@ -9727,7 +9518,7 @@ html.theme-white {
   letter-spacing: 0.02em;
 }
 
-/* Analytics — dense operational dashboard */
+/* Analytics â€” dense operational dashboard */
 .admin-analytics-page {
   display: flex;
   flex-direction: column;
@@ -10788,7 +10579,7 @@ html.theme-white {
   font-weight: 700;
 }
 
-/* Content pipeline — analytics overview */
+/* Content pipeline â€” analytics overview */
 .admin-card-body--pipeline-v2 {
   display: flex;
   flex-direction: column;
@@ -11048,7 +10839,7 @@ html.theme-white {
   white-space: normal;
 }
 
-/* Article manager — filters, bulk bar, row actions */
+/* Article manager â€” filters, bulk bar, row actions */
 .admin-article-manager {
   display: flex;
   flex-direction: column;
@@ -11711,7 +11502,7 @@ html.theme-white {
   color: hsl(var(--admin-rose));
 }
 
-/* Public site — DB-driven category accent colors */
+/* Public site â€” DB-driven category accent colors */
 .category-card--custom:hover {
   border-color: color-mix(in srgb, var(--cat-color) 42%, transparent);
 }
@@ -11816,7 +11607,7 @@ html.theme-white {
   text-align: center;
 }
 
-/* Member library nav tooltips — teal accent, glass surface */
+/* Member library nav tooltips â€” teal accent, glass surface */
 .modern-tooltip--member {
   --member-accent: 162 72% 46%;
   max-width: 13.5rem;
@@ -11966,7 +11757,7 @@ html.theme-white .modern-tooltip--member .modern-tooltip-arrow {
   color: hsl(var(--admin-rose));
 }
 
-/* CMS editor tooltips — portaled to body; explicit theme-safe surfaces */
+/* CMS editor tooltips â€” portaled to body; explicit theme-safe surfaces */
 .modern-tooltip--editor {
   max-width: 15rem;
   padding: 0.5rem 0.75rem;
@@ -12026,7 +11817,7 @@ html.theme-white .modern-tooltip--editor .modern-tooltip-arrow {
   border-color: hsl(214 32% 84%) !important;
 }
 
-/* Pro guidance — hide subtitles, hints, and non-essential tooltips */
+/* Pro guidance â€” hide subtitles, hints, and non-essential tooltips */
 html[data-editor-guidance='pro'] .cms-editor-panel__desc,
 html[data-editor-guidance='pro'] .cms-write-hero__desc,
 html[data-editor-guidance='pro'] .cms-placement-strip__desc,
@@ -12625,7 +12416,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   }
 }
 
-/* ── Admin change pipeline (BIOS-style dock) ── */
+/* â”€â”€ Admin change pipeline (BIOS-style dock) â”€â”€ */
 .admin-changes-dock-tab {
   position: fixed;
   right: 0;
@@ -13017,7 +12808,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   }
 }
 
-/* Sign out — consistent red hover */
+/* Sign out â€” consistent red hover */
 .sign-out-control:hover,
 .account-menu__action--signout:hover,
 .member-panel__signout:hover,
@@ -13040,7 +12831,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   border-color: hsl(0 72% 51% / 0.4) !important;
 }
 
-/* ── Shared dropdown system ── */
+/* â”€â”€ Shared dropdown system â”€â”€ */
 .admin-header-toolbar {
   min-width: 0;
 }
@@ -14620,7 +14411,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   border-color: hsl(262 72% 62% / 0.25);
 }
 
-/* Admin shell — theme-aware surfaces */
+/* Admin shell â€” theme-aware surfaces */
 .theme-white .admin-shell {
   --admin-surface: 210 40% 98%;
   --admin-elevated: 210 40% 96%;
@@ -14719,9 +14510,9 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   background: hsl(var(--card) / 0.55);
 }
 
-/* ═══════════════════════════════════════════
-   CMS EDITORIAL SUITE — responsive polish
-   ═══════════════════════════════════════════ */
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+   CMS EDITORIAL SUITE â€” responsive polish
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 .cms-shell .cms-main,
 .cms-shell .cms-sidebar,
@@ -14813,7 +14604,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   }
 }
 
-/* Write page — full-width within shell gutters */
+/* Write page â€” full-width within shell gutters */
 .cms-write-page {
   width: 100%;
   max-width: 100%;
@@ -15577,7 +15368,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   color: hsl(var(--foreground)) !important;
 }
 
-/* Go-live date panel — compact editorial card */
+/* Go-live date panel â€” compact editorial card */
 .cms-datetime-panel {
   border-radius: 0.75rem;
   border: 1px solid hsl(var(--border) / 0.45);
@@ -15703,7 +15494,7 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   display: none;
 }
 
-/* Datetime pickers — match Organize category dropdown panel (portaled admin-select-menu) */
+/* Datetime pickers â€” match Organize category dropdown panel (portaled admin-select-menu) */
 .admin-dropdown-panel.cms-datetime-select-menu {
   max-width: none;
 }
@@ -15918,7 +15709,7 @@ html.theme-white .cms-datetime-grid-cell {
   background: hsl(var(--muted) / 0.55);
 }
 
-/* Date picker — polished month & calendar day grids */
+/* Date picker â€” polished month & calendar day grids */
 .cms-date-grid-menu {
   min-width: 0;
   max-width: none;
@@ -16489,7 +16280,7 @@ html.theme-white .cms-datetime-grid-cell {
   box-shadow: 0 1px 4px hsl(0 0% 0% / 0.1);
 }
 
-/* 12h — warm editorial rose */
+/* 12h â€” warm editorial rose */
 .cms-clock-segment__btn:first-child.cms-clock-segment__btn--active {
   color: hsl(var(--admin-rose));
   background: linear-gradient(
@@ -16500,7 +16291,7 @@ html.theme-white .cms-datetime-grid-cell {
   box-shadow: 0 1px 5px hsl(var(--admin-rose) / 0.12);
 }
 
-/* 24h — cool violet accent */
+/* 24h â€” cool violet accent */
 .cms-clock-segment__btn:last-child.cms-clock-segment__btn--active {
   color: hsl(var(--admin-violet));
   background: linear-gradient(
@@ -16566,12 +16357,12 @@ html.theme-white .cms-datetime-grid-cell {
   margin-bottom: 0.375rem;
 }
 
-/* Category select — menu hover matches public navbar sectors */
+/* Category select â€” menu hover matches public navbar sectors */
 .cms-category-select .admin-dropdown-trigger {
   border-radius: 0.75rem;
 }
 
-/* Portaled menu — must target panel class, not parent wrapper */
+/* Portaled menu â€” must target panel class, not parent wrapper */
 .admin-select-menu--category .admin-select-option--category {
   transition: background 180ms ease, color 180ms ease;
 }
@@ -16653,7 +16444,7 @@ html.theme-white .cms-datetime-grid-cell {
   overflow: visible;
 }
 
-/* Placement toggle — pixel-aligned track + thumb */
+/* Placement toggle â€” pixel-aligned track + thumb */
 .cms-placement-switch {
   position: relative;
   flex-shrink: 0;
@@ -17454,7 +17245,7 @@ html.theme-white .cms-datetime-grid-cell {
   font-size: 0.875rem;
 }
 
-/* Preview device frames — override viewport breakpoints inside fixed-width frames */
+/* Preview device frames â€” override viewport breakpoints inside fixed-width frames */
 .cms-preview-device-frame--mobile .cms-preview-public-surface,
 .cms-preview-device-frame--tablet .cms-preview-public-surface {
   overflow-x: hidden;
@@ -17490,7 +17281,7 @@ html.theme-white .cms-datetime-grid-cell {
   padding-right: 0 !important;
 }
 
-/* Mobile preview frame hero overrides — match native mobile layout exactly */
+/* Mobile preview frame hero overrides â€” match native mobile layout exactly */
 .cms-preview-device-frame--mobile .featured-hero-card {
   height: auto !important;
   min-height: 0 !important;
@@ -18432,7 +18223,7 @@ html.theme-white .cms-datetime-grid-cell {
     color: hsl(var(--primary)) !important;
   }
 
-  /* Hide all text labels and dividers — icons only */
+  /* Hide all text labels and dividers â€” icons only */
   .public-nav-bar__pill-label,
   .public-nav-bar__pill-divider {
     display: none !important;
@@ -18717,7 +18508,7 @@ html.theme-white .cms-datetime-grid-cell {
   }
   .public-nav-bar .locale-toggle__label { pointer-events: none !important; }
 
-  /* Hide hub link labels on mobile — tablet (768px+) block overrides this to inline */
+  /* Hide hub link labels on mobile â€” tablet (768px+) block overrides this to inline */
   .public-nav-bar .public-nav-bar__hub-link span {
     display: none !important;
   }
@@ -18811,7 +18602,7 @@ html.theme-white .cms-datetime-grid-cell {
   }
 }
 
-/* ─── Responsive Navigation Bar Overrides for Screen Viewport Sizes ─── */
+/* â”€â”€â”€ Responsive Navigation Bar Overrides for Screen Viewport Sizes â”€â”€â”€ */
 
 /* 1. Mobile & tablet container padding to prevent squeeze and reduce side gaps */
 @media (max-width: 1023px) {
@@ -19032,7 +18823,7 @@ html.theme-white .cms-datetime-grid-cell {
     box-sizing: border-box !important;
   }
 
-  /* Hub links (Latest, GE, Mag) — pill shape with label on tablet, not icon-only circles */
+  /* Hub links (Latest, GE, Mag) â€” pill shape with label on tablet, not icon-only circles */
   .public-nav-bar .public-nav-bar__hub-link {
     width: auto !important;
     min-width: unset !important;
@@ -19049,7 +18840,7 @@ html.theme-white .cms-datetime-grid-cell {
     box-sizing: border-box !important;
   }
 
-  /* Keep hub icons at 1rem on tablet — prevents the 22px token overwhelming the 0.68rem label */
+  /* Keep hub icons at 1rem on tablet â€” prevents the 22px token overwhelming the 0.68rem label */
   .public-nav-bar .public-nav-bar__hub-link .icon-sm {
     width: 1rem !important;
     height: 1rem !important;
@@ -19057,7 +18848,7 @@ html.theme-white .cms-datetime-grid-cell {
   }
 }
 
-/* ─── Proportional Typography Auto-Sizing for Mobile & Tablet (iPad) ─── */
+/* â”€â”€â”€ Proportional Typography Auto-Sizing for Mobile & Tablet (iPad) â”€â”€â”€ */
 
 @media (max-width: 1023px) {
   .text-5xl, .md\:text-5xl {
@@ -19654,9 +19445,9 @@ html.theme-dark .public-footer-logo .brand-logo__img {
 
 /* Keep premium rounded corners, borders, and shadows in active preview focus mode */
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ADMIN & CMS MOBILE + TABLET RESPONSIVE GRID REDESIGN
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* 1. Tablet & Mobile Viewport Auto-Collapse (<= 1023px) */
 @media (max-width: 1023px) {
@@ -19952,9 +19743,9 @@ html.theme-dark .public-footer-logo .brand-logo__img {
   }
 }
 
-/* ═══════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    ADMIN & CMS MOBILE + TABLET RESPONSIVE FIXES
-   ═══════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 @media (min-width: 1024px) {
   /* Lock HTML and body to screen size when admin/cms shell is active to enable internal content-only scrolling */
@@ -20429,14 +20220,14 @@ iframe::-webkit-scrollbar-track {
   transform: translateX(-50%) translateY(0) scale(1);
 }
 
-/* ═══════════════════════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    GLOBAL RESPONSIVE AUTO-SIZING SYSTEM
    Fluid typography, touch-friendly sizing, and reactive layouts
-   for all mobile (<768px) and tablet (768–1023px) screens.
+   for all mobile (<768px) and tablet (768â€“1023px) screens.
    Uses clamp() so every element scales smoothly without jumps.
-═══════════════════════════════════════════════════════════════ */
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-/* ── Fluid base font size ───────────────────────────────────── */
+/* â”€â”€ Fluid base font size â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (max-width: 767px) {
   :root {
     --fluid-base: clamp(0.875rem, 2.5vw + 0.5rem, 1rem);
@@ -20527,7 +20318,7 @@ iframe::-webkit-scrollbar-track {
   }
 }
 
-/* ── Tablet (768–1023px) ──────────────────────────────────────── */
+/* â”€â”€ Tablet (768â€“1023px) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @media (min-width: 768px) and (max-width: 1023px) {
   /* Containers: generous breathing room on tablet */
   .container,

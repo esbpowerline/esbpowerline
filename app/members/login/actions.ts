@@ -115,6 +115,11 @@ async function establishMemberSession(
     return memberLoginFailure('This account is not a member account. Use staff sign in instead.');
   }
 
+  await prisma.user.update({
+    where: { email },
+    data: { lastLoginAt: new Date() },
+  });
+
   return null;
 }
 

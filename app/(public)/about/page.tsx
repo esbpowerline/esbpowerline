@@ -4,6 +4,8 @@ import { getServerSiteLocale } from '@/lib/locale-server';
 import { createTranslator } from '@/lib/i18n/messages';
 import { ScrollGeometryBackdrop } from '@/components/shared/ScrollGeometryBackdrop';
 
+export const revalidate = 86400;
+
 export default async function AboutPage() {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);

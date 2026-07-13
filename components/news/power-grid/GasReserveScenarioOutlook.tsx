@@ -97,7 +97,7 @@ export function GasReserveScenarioOutlook({
                   <span className={vs > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}>
                     {' '}
                     · {vs > 0 ? '+' : ''}
-                    {vs} yrs vs BAU
+                    {vs} yrs vs Current rate
                   </span>
                 )}
               </span>
@@ -167,7 +167,7 @@ export function GasReserveScenarioOutlook({
             <span className="gas-reserve-scenario-detail__stat-value">{annualDraw.toFixed(2)} Tcf</span>
           </div>
           <div className="gas-reserve-scenario-detail__stat">
-            <span className="gas-reserve-scenario-detail__stat-label">Vs BAU</span>
+            <span className="gas-reserve-scenario-detail__stat-label">vs Current rate</span>
             <span
               className="gas-reserve-scenario-detail__stat-value"
               style={{

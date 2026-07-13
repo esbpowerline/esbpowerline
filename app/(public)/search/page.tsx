@@ -3,6 +3,8 @@ import { getPublishedArticlesForPublic } from '@/lib/category-content';
 import { createTranslator } from '@/lib/i18n/messages';
 import { getServerSiteLocale } from '@/lib/locale-server';
 
+export const revalidate = 600;
+
 export const metadata = {
   title: 'Search | ESB PowerLine',
   description: 'Search published power sector news and analysis.',

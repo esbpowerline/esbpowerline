@@ -8,8 +8,8 @@ export function resolveSafeLocalUploadPath(url: string): string | null {
   if (relative.includes('..') || relative.includes('\\')) return null;
 
   const cwd = process.cwd();
-  // Using variables to prevent Next.js from statically tracing the entire public directory
-  const pDir = 'pub' + 'lic';
+  // Hide from Webpack static analysis to prevent "Overly broad patterns" build warning
+  const pDir = ['p', 'u', 'b', 'l', 'i', 'c'].join('');
   
   const uploadsRoot = path.resolve(cwd, pDir, 'uploads');
   const filePath = path.resolve(cwd, pDir, relative);

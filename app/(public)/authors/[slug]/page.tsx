@@ -1,11 +1,11 @@
 import { getServerSiteLocale } from '@/lib/locale-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { User, Twitter, Linkedin, Mail } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/utils';
 import { ArticleCard } from '@/components/news/ArticleCard';
-import { getPublishedArticlesForPublic } from '@/lib/category-content';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
 
 export const revalidate = 600;
@@ -30,50 +30,34 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function AuthorPage({ params }: { params: Promise<{ slug: string }> }) {
-  const locale = await getServerSiteLocale();
-  const { slug } = await params;
-  
-  let author;
-  let articles;
+async function AuthorArticles({ 
+  author, 
+  locale, 
+  page 
+}: { 
+  author: { id: string; name: string }; 
+  locale: string; 
+  page: number;
+}) {
+  const take = 20;
+  const skip = (page - 1) * take;
 
-  if (slug === 'esb-news-desk') {
-    author = {
-      id: 'esb-news-desk',
-      name: 'ESB News Desk',
-      bio: 'The official editorial desk of ESB PowerLine, delivering authoritative, breaking, and in-depth energy sector news in Bangladesh.',
-      avatar: null,
-      email: 'desk@esbpowerline.com',
-    };
+  const whereClause = author.id === 'esb-news-desk' 
+    ? { status: 'PUBLISHED' as const, postAsNewsDesk: true }
+    : { status: 'PUBLISHED' as const, authorId: author.id, postAsNewsDesk: false };
 
-    articles = await prisma.article.findMany({
-      where: { 
-        status: 'PUBLISHED',
-        postAsNewsDesk: true,
-      },
+  const [articles, totalCount] = await Promise.all([
+    prisma.article.findMany({
+      where: whereClause,
       include: { author: { select: { name: true } } },
-      orderBy: { publishedAt: 'desc' }
-    });
-  } else {
-    // Find author by matching slugified name
-    const users = await prisma.user.findMany({ 
-      select: { id: true, name: true, bio: true, avatar: true, email: true } 
-    });
-    author = users.find(u => slugify(u.name) === slug);
-    
-    if (!author) notFound();
+      orderBy: { publishedAt: 'desc' },
+      take,
+      skip,
+    }),
+    prisma.article.count({ where: whereClause })
+  ]);
 
-    // Get articles published by this author (only where not posted as news desk)
-    articles = await prisma.article.findMany({
-      where: { 
-        status: 'PUBLISHED',
-        authorId: author.id,
-        postAsNewsDesk: false,
-      },
-      include: { author: { select: { name: true } } },
-      orderBy: { publishedAt: 'desc' }
-    });
-  }
+  const totalPages = Math.ceil(totalCount / take);
 
   // Map to PublicArticleCard format
   const mappedArticles = articles
@@ -107,41 +91,14 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
     });
 
   return (
-    <div className="container py-12 max-w-5xl">
-      <div className="flex flex-col md:flex-row gap-8 items-start mb-16 bg-muted/30 p-8 rounded-3xl border border-border/50">
-        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-3xl md:text-5xl shrink-0 overflow-hidden border border-primary/20">
-          {author.avatar ? (
-            <img src={author.avatar} alt={author.name} className="w-full h-full object-cover" />
-          ) : (
-            author.name.substring(0, 2).toUpperCase()
-          )}
-        </div>
-        <div className="flex-1">
-          <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight mb-4">{author.name}</h1>
-          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 max-w-3xl">
-            {author.bio || `Staff writer at ESB PowerLine.`}
-          </p>
-          <div className="flex items-center gap-3">
-            <a href={`mailto:${author.email}`} className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-              <Mail className="w-4 h-4" />
-            </a>
-            <button className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-              <Twitter className="w-4 h-4" />
-            </button>
-            <button className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-              <Linkedin className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+    <div>
+      <div className="flex items-center justify-between mb-8 pb-4 border-b">
+        <h2 className="text-2xl font-bold tracking-tight">Latest from {author.name.split(' ')[0]}</h2>
+        <span className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">{totalCount} articles</span>
       </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-8 pb-4 border-b">
-          <h2 className="text-2xl font-bold tracking-tight">Latest from {author.name.split(' ')[0]}</h2>
-          <span className="text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full">{mappedArticles.length} articles</span>
-        </div>
-        
-        {mappedArticles.length > 0 ? (
+      
+      {mappedArticles.length > 0 ? (
+        <>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {mappedArticles.map((a) => (
               <ArticleCard
@@ -161,14 +118,101 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
               />
             ))}
           </div>
-        ) : (
-          <div className="text-center py-20 bg-muted/20 rounded-2xl border border-dashed">
-            <User className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No articles yet</h3>
-            <p className="text-muted-foreground">This author hasn't published any articles yet.</p>
+          {totalPages > 1 && totalCount > 0 && (
+            <div className="flex justify-center items-center gap-4 mt-12">
+              {page > 1 && (
+                <Link href={`?page=${page - 1}`} className="btn border border-border px-4 py-2 rounded-full hover:bg-muted transition-colors">
+                  Previous
+                </Link>
+              )}
+              <span className="py-2 text-sm text-muted-foreground font-medium">
+                Page {page} of {totalPages}
+              </span>
+              {page < totalPages && (
+                <Link href={`?page=${page + 1}`} className="btn border border-border px-4 py-2 rounded-full hover:bg-muted transition-colors">
+                  Next
+                </Link>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-20 bg-muted/20 rounded-2xl border border-dashed">
+          <User className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold mb-2">No articles yet</h3>
+          <p className="text-muted-foreground">This author hasn't published any articles yet.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default async function AuthorPage({ 
+  params,
+  searchParams 
+}: { 
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const locale = await getServerSiteLocale();
+  const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedSearchParams.page || '1'));
+  
+  let author;
+
+  if (slug === 'esb-news-desk') {
+    author = {
+      id: 'esb-news-desk',
+      name: 'ESB News Desk',
+      bio: 'The official editorial desk of ESB PowerLine, delivering authoritative, breaking, and in-depth energy sector news in Bangladesh.',
+      avatar: null,
+      email: 'desk@esbpowerline.com',
+    };
+  } else {
+    // Find author by matching slugified name
+    const users = await prisma.user.findMany({ 
+      select: { id: true, name: true, bio: true, avatar: true, email: true } 
+    });
+    author = users.find(u => slugify(u.name) === slug);
+    
+    if (!author) notFound();
+  }
+
+  return (
+    <div className="container py-12 max-w-5xl">
+      <div className="flex flex-col md:flex-row gap-8 items-start mb-16 bg-muted/30 p-8 rounded-3xl border border-border/50">
+        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-3xl md:text-5xl shrink-0 overflow-hidden border border-primary/20">
+          {author.avatar ? (
+            <img src={author.avatar} alt={author.name} className="w-full h-full object-cover" />
+          ) : (
+            author.name.substring(0, 2).toUpperCase()
+          )}
+        </div>
+        <div className="flex-1">
+          <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight mb-4">{author.name}</h1>
+          <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6 max-w-3xl">
+            {author.bio || `Staff writer at ESB PowerLine.`}
+          </p>
+          <div className="flex items-center gap-3">
+            {author.email && (
+              <a href={`mailto:${author.email}`} className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                <Mail className="w-4 h-4" />
+              </a>
+            )}
+            <button className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+              <Twitter className="w-4 h-4" />
+            </button>
+            <button className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+              <Linkedin className="w-4 h-4" />
+            </button>
           </div>
-        )}
+        </div>
       </div>
+
+      <Suspense fallback={<div className="py-20 text-center text-muted-foreground animate-pulse">Loading articles...</div>}>
+        <AuthorArticles author={author as { id: string, name: string }} locale={locale} page={page} />
+      </Suspense>
     </div>
   );
 }

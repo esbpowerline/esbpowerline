@@ -28,12 +28,15 @@ async function AdminDashboardData() {
   ]);
   const role = session?.user?.role;
 
+  const stalenessMinutes = Math.max(0, Math.round((Date.now() - new Date(stats.computedAt).getTime()) / 60000));
+  const stalenessText = stalenessMinutes === 0 ? 'just now' : `${stalenessMinutes} min ago`;
+
   return (
     <AdminSectionStack>
       <AdminPageHeader
         icon={BarChart3}
         title="Admin Overview"
-        description="Platform health, content pipeline, and user activity at a glance."
+        description={`Platform health, content pipeline, and user activity at a glance. (Updated ${stalenessText})`}
       />
 
       <AdminStatGrid>

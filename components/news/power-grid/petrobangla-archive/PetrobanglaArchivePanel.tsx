@@ -251,18 +251,6 @@ export function PetrobanglaArchivePanel({
         <div className="gas-reserve-archive-explorer">
           <GasReserveArchiveViewTabs active={activeView} onChange={setActiveView} />
 
-          {TIMELINE_VIEWS.has(activeView) && (
-            <ArchiveRangeToolbar
-              preset={rangePreset}
-              onPresetChange={setRangePreset}
-              mode={mode}
-              showMaToggle={activeView === 'timeline'}
-              showMa={showMa}
-              onToggleMa={() => setShowMa((v) => !v)}
-              className="mb-3"
-            />
-          )}
-
           <div className="gas-reserve-archive-view-shell">
             <div className="gas-reserve-archive-view-shell__inner">
           {activeView === 'timeline' && (
@@ -275,6 +263,16 @@ export function PetrobanglaArchivePanel({
                 showMa={showMa}
                 embedded
                 compact={unified}
+                rangeToolbar={
+                  <ArchiveRangeToolbar
+                    preset={rangePreset}
+                    onPresetChange={setRangePreset}
+                    mode={mode}
+                    showMaToggle={true}
+                    showMa={showMa}
+                    onToggleMa={() => setShowMa((v) => !v)}
+                  />
+                }
                 onClose={() => setRangePreset('1W')}
               />
             ) : (
@@ -293,6 +291,13 @@ export function PetrobanglaArchivePanel({
                 mode={mode}
                 embedded
                 compact={unified}
+                rangeToolbar={
+                  <ArchiveRangeToolbar
+                    preset={rangePreset}
+                    onPresetChange={setRangePreset}
+                    mode={mode}
+                  />
+                }
                 onClose={() => setRangePreset('1W')}
               />
             ) : (
@@ -312,6 +317,13 @@ export function PetrobanglaArchivePanel({
                 chartsReady={chartsReady}
                 embedded
                 compact={unified}
+                rangeToolbar={
+                  <ArchiveRangeToolbar
+                    preset={rangePreset}
+                    onPresetChange={setRangePreset}
+                    mode={mode}
+                  />
+                }
                 onClose={() => setRangePreset('1W')}
               />
             ) : (
@@ -329,6 +341,13 @@ export function PetrobanglaArchivePanel({
                 chartsReady={chartsReady}
                 embedded
                 compact={unified}
+                rangeToolbar={
+                  <ArchiveRangeToolbar
+                    preset={rangePreset}
+                    onPresetChange={setRangePreset}
+                    mode={mode}
+                  />
+                }
                 onClose={() => setRangePreset('1W')}
               />
             ) : (

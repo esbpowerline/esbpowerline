@@ -165,7 +165,7 @@ export function GasReserveScenarioRail({ activeScenario, onScenarioHover, embedd
                   <span className="gas-reserve-scenario-card__stat-value">{annualDraw.toFixed(2)} Tcf</span>
                 </div>
                 <div className="gas-reserve-scenario-card__stat">
-                  <span className="gas-reserve-scenario-card__stat-label">Vs BAU</span>
+                  <span className="gas-reserve-scenario-card__stat-label">vs Current rate</span>
                   <span
                     className="gas-reserve-scenario-card__stat-value"
                     style={{
@@ -247,7 +247,7 @@ export function GasReserveScenarioRail({ activeScenario, onScenarioHover, embedd
           <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
             <p>
               <strong>How to compare:</strong> All three forks start from the same {RESERVES_AUDITED_META.remaining2026Tcf} Tcf audited balance in {FORECAST_START}.
-              Steeper demand pulls reserves down faster — low growth adds ~2 years, high growth cuts ~2 years vs BAU.
+              Steeper demand pulls reserves down faster — low growth adds ~2 years, high growth cuts ~2 years vs Current rate.
             </p>
             <p>
               <strong>What changes:</strong> Industrial load, power-sector gas burn, and efficiency assumptions — not the starting reserve audit.

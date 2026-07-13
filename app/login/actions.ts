@@ -106,6 +106,11 @@ export async function loginAction(
       return { error: 'This account is not authorized for staff access. Use member sign in instead.' };
     }
 
+    await prisma.user.update({
+      where: { email },
+      data: { lastLoginAt: new Date() },
+    });
+
     revalidatePath('/', 'layout');
 
     const headerStore = await headers();

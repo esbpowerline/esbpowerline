@@ -39,27 +39,32 @@ export function MacroGasInnerSection({
   title,
   badge,
   subtitle,
+  toolbar,
   children,
 }: {
   icon: typeof Layers;
   title: string;
   badge?: ReactNode;
   subtitle?: string;
+  toolbar?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section className="grid-explorer-macro-gas-block">
-      <div className="grid-explorer-macro-gas-block__head">
-        <div className="grid-explorer-macro-gas-block__icon">
-          <Icon className="h-4 w-4 text-sky-500" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <h4 className="text-sm font-bold text-foreground">{title}</h4>
-            {badge}
+      <div className="grid-explorer-macro-gas-block__head flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex gap-2.5 items-start">
+          <div className="grid-explorer-macro-gas-block__icon">
+            <Icon className="h-4 w-4 text-sky-500" />
           </div>
-          {subtitle && <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{subtitle}</p>}
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+              <h4 className="text-sm font-bold text-foreground">{title}</h4>
+              {badge}
+            </div>
+            {subtitle && <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{subtitle}</p>}
+          </div>
         </div>
+        {toolbar && <div className="shrink-0">{toolbar}</div>}
       </div>
       <div className="grid-explorer-macro-gas-block__body">{children}</div>
     </section>

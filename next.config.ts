@@ -64,6 +64,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    unoptimized: true, // Bypass Vercel 1000 image/mo limit
     remotePatterns: [
       { protocol: 'https', hostname: '**.supabase.co' },
       { protocol: 'https', hostname: 'esbpowerline.com' },

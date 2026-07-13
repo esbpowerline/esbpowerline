@@ -73,7 +73,10 @@ import { MethodologyReconciliationBanner } from '@/components/news/power-grid/Me
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
-import { GridTopologyMap } from '@/components/news/GridTopologyMap';
+const GridTopologyMap = dynamic(
+  () => import('@/components/news/GridTopologyMap').then((m) => m.GridTopologyMap),
+  { ssr: false, loading: () => <div className="grid-explorer-skeleton h-[500px] rounded-2xl flex items-center justify-center border border-dashed"><span className="text-muted-foreground text-sm font-medium">Loading Network Map...</span></div> }
+);
 import { isDateAllowedForTier, subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
 import { sredaItemsWithIcons } from '@/components/news/power-grid/sreda-icons';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
@@ -5164,7 +5167,7 @@ export function PowerGridExplorer({
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                           {/* Left Column: Chart */}
                           <div className="lg:col-span-6 w-full min-w-0">
-                            <div className="grid-explorer-chart-area grid-explorer-chart-area--lg grid-explorer-chart-area--split !min-h-[16rem] !h-[16rem]">
+                            <div className="grid-explorer-chart-area grid-explorer-chart-area--lg grid-explorer-chart-area--split !min-h-[16rem] !h-[16rem] mt-16">
                               {macroChartsReady ? (
                                 <ResponsiveContainer width="100%" height="100%">
                                   <BarChart
@@ -5182,14 +5185,10 @@ export function PowerGridExplorer({
                                       padding={GRID_X_AXIS_PADDING}
                                     />
                                     <YAxis
+                                      {...gridChartYAxisProps(chartTheme, { splitUnit: 'MW' })}
                                       width={GRID_Y_AXIS_WIDTH.single}
-                                      tick={{ fontSize: 11, fill: chartTheme.axisTick }}
-                                      axisLine={false}
-                                      tickLine={false}
-                                      tickMargin={4}
                                       domain={[0, 'auto']}
                                       allowDecimals={false}
-                                      tickFormatter={(v) => `${v} MW`}
                                     />
                                     <Bar
                                       dataKey="value"

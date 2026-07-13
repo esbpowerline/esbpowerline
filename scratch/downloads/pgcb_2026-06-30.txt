@@ -1,0 +1,981 @@
+## Sheet: Forecast
+ |  | Power Grid Bangladesh PLC
+ |  | National Load Dispatch Center (NLDC)
+ |  | Forecasted Generation & Demand of National Grid
+ | Date : | 02-07-2026
+Sl. | Name of the
+ Power Station | Fuel | Producer | Installed Capacity |  | Present Capacity | Actual Generation on |  | Forecasted Available Gen. on |  | Effective Available Gen. on |  | Remarks
+ |  |  |  |  |  |  | 01-07-2026 | during | 02-07-2026 | during | 02-07-2026 | during
+ |  |  |  |  |  |  | Day Peak | Ev. Peak | Day Peak | Ev. Peak | Day Peak | Ev. Peak
+ |  |  |  | Unit No. X Capacity | MW | MW | MW | MW | MW | MW | MW | MW
+1 | Ghorasal Repowered CCPP Unit-3 | Gas | PDB | 1*260 | 260 | 260 | 0 | 0 | 0 | 0 | 0 | 0 | GT is under maintenance
+2 | Ghorasal Repowered CCPP Unit-4 | Gas | PDB | 1*210 | 210 | 240 | 0 | 0 | 230 | 230 | 0 | 0 | Gas shortage
+ | Ghorasal TPP Unit-5 | Gas | PDB | 1*210 | 210 | 190 | 0 | 0 | 190 | 190 | 0 | 0 | Gas shortage
+3 | Ghorasal 365 MW CCPP Unit-7 | Gas | PDB | 1*243+1*122 | 365 | 365 | 0 | 0 | 260 | 260 | 0 | 0 | Gas shortage
+4 | Ghorashal 108 MW PP (Regent) | Gas | IPP | 34*3.35 | 108 | 97.7 | 0 | 0 | 97.7 | 97.7 | 0 | 0 | Gas (RMS) problem
+5 | Haripur GTPP | Gas | SBU,PDB | 32*2 | 32 | 20 | 0 | 0 | 0 | 0 | 0 | 0 | -
+6 | Haripur 412 MW CCPP | Gas | EGCB | 1*273+1*139 | 412 | 412 | 370 | 410 | 412 | 412 | 412 | 412 | AGC
+ | Haripur 360 MW CCPP (HPL) | Gas | IPP | 1*235+1*125 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | Contract Expired
+7 | Meghnaghat 450 MW CCPP (MPL) | Gas | IPP | 2*150+1*150 | 450 | 450 | 0 | 0 | 225 | 225 | 0 | 0 | Gas shortage
+8 | Meghnaghat CCPP(Summit) | Gas | IPP | 2*110+1*110 | 335 | 335 | 269 | 300 | 335 | 335 | 301.5 | 301.5 | Gas shortage
+9 | Madanganj-55 MW PP(Summit) | HFO | IPP | 3*17+1*11.3 | 55 | 55 | 15 | 15 | 55 | 55 | 15 | 15 | Liquid fuel shortage
+12 | Siddhirgonj 210 MW TPP | Gas | PDB | 1*210 | 210 | 115 | 0 | 0 | 0 | 0 | 0 | 0 | Under Major Overhauling
+13 | Siddhirgonj 2*120 MW GTPP | Gas | EGCB | 2*105 | 210 | 210 | 0 | 0 | 210 | 210 | 0 | 0 | Gas shortage
+14 | Siddhirganj 335 MW CCPP | Gas | EGCB | 1*217+118 | 335 | 335 | 297 | 328 | 335 | 335 | 315 | 315 | Gas shortage
+15 | Gagnagar 102 MW PP (Digital Power) | HFO | IPP | 12*8.924 | 102 | 102 | 0 | 0 | 102 | 102 | 0 | 0 | Liquid fuel shortage
+17 | Kamalaghat 54 MW PP(Banco Energy) | HFO | IPP | 3*18 | 54 | 53.97 | 0 | 35 | 53.97 | 53.97 | 18 | 35 | Liquid fuel shortage
+18 | Kodda 150 MW PP BRPL | HFO | PDB-RPCL | 9*17.06 | 149 | 149.36 | 144 | 130 | 149.36 | 149.36 | 149.36 | 149.36
+18 | Manikganj 55 MW PP (Northern) | HFO | IPP | 19.3*3 | 55 | 55 | 0 | 35 | 55 | 55 | 35 | 35 | Liquid fuel shortage
+20 | Nababganj 55 MW PP (Southern power ) | HFO | IPP | 19.3*3 | 55 | 55 | 0 | 35 | 55 | 55 | 0 | 35 | Liquid fuel shortage
+22 | Summit Power Ashulia | Gas | IPP |  | 80 | 33.75 | 16.5 | 15.5 | 33 | 33 | 21 | 21 | Low gas pressure
+22 | Summit Power Madhabdi | Gas | IPP | 3*3.67+4*8.73 | 80 | 23 | 21 | 21 | 22 | 22 | 22 | 22 | -
+25 | Gazipur 52 MW PP | HFO | RPCL | 6*8.9 | 52 | 52.194 | 16 | 8 | 52.19 | 52.19 | 33 | 33 | Liquid fuel shortage
+26 | Tongi 80 MW GTPP | Gas | PDB | 1* 105 | 105 | 105 | 0 | 0 | 0 | 0 | 0 | 0 | Under Maintenance of Exciter
+27 | Kodda 300 MW PP Unit-2 (Summit) | HFO | IPP | 18*17.06 | 300 | 300 | 146 | 45 | 300 | 300 | 146 | 195 | Liquid fuel shortage
+28 | Kodda 149 MW PP Unit-1 (Summit) | HFO | IPP | 8*18.45+8.97 | 149 | 149 | 52 | 115 | 149 | 149 | 70 | 132 | Liquid fuel shortage
+29 | Gazipur 100 MW PP | HFO | RPCL | 6*17.5 | 105 | 105 | 34 | 70 | 105 | 105 | 35 | 70 | Liquid fuel shortage
+30 | Meghnaghat 104 MW PP (OPCL) | HFO | IPP | 6*18.5 | 104 | 104 | 0 | 0 | 104 | 104 | 0 | 0 | Liquid fuel shortage
+31 | Manikgonj 162MW PP(MPGL) | HFO | IPP | 9*18 | 162 | 162 | 17 | 72 | 162 | 162 | 18 | 108 | Liquid fuel shortage
+32 | Spectra Solar Plant Ltd. | Solar | IPP |  | 35 | 35 | 9 | 0 | 20 | 0 | 20 | 0 | -
+33 | Kanchan Purbachal Power Generation Ltd. | HFO | IPP | 18.4*3 | 55 | 55 | 0 | 17 | 55 | 55 | 0 | 17 | Liquid fuel shortage
+34 | Unique Meghnaghat Power Limited (UMPL) | Gas | IPP |  | 584 | 584 | 520 | 440 | 584 | 584 | 526 | 526 | AGC+Gas shortage
+35 | Meghnaghat CCPP(Summit)-2 | Gas/HSD | IPP | 1*409+1*202 | 583 | 583 | 535 | 440 | 583 | 583 | 525 | 525 | AGC+Gas shortage
+ | JERA Meghnaghat Power Limited | Gas | IPP | 250*2+268 | 0 | 718 | 0 | 0 | 718 | 718 | 0 | 0 | Gas shortage
+ | Sreepur 150 MW PP BRPL | HFO | PDB-RPCL | 9*18 | 0 | 160 | 34 | 108 | 143 | 143 | 142 | 142 | Liquid fuel shortage
+Dhaka Area Total |  |  |  |  | 6001 | 6668.974 | 2495.5 | 2639.5 | 5795.22 | 5775.22 | 2803.86 | 3088.86
+36 | Chattogram TPP | Gas | PDB | 1*210+1*210 | 420 | 360 | 0 | 0 | 0 | 0 | 0 | 0 | Unit #1 Under Maintenance, Unit#2 Gas Shortage
+37 | Raozan 25 MW PP | HFO | IPP | 3*8.9 | 25 | 25.5 | 1 | 8 | 25.5 | 25.5 | 8 | 25 | Liquid fuel shortage
+38 | Teknaf  20MW PP (Solartech) | Solar | IPP |  | 20 | 20 | 5 | 0 | 16 | 0 | 16 | 0 | -
+39 | Patenga 50MW PP (Baraka) | HFO | IPP | 8*6.98 | 50 | 50 | 6 | 50 | 50 | 50 | 50 | 50 | -
+40 | Karnaphuli Hydro PP Unit-1,2,3,4, 5 | Hydro | PDB | 2*40+3*50 | 230 | 230 | 99 | 98 | 99 | 99 | 99 | 99 | -
+41 | Sikalbaha 225MW CCPP | Gas/HSD | PDB | 1*150+1*75 | 225 | 225 | 214 | 217 | 215 | 220 | 215 | 220 | -
+42 | Sikalbaha Peaking GT | Gas/HSD | PDB | 1*150 | 150 | 150 | 0 | 0 | 0 | 0 | 0 | 0 | -
+43 | Sikalbaha 105 MW PP (Baraka Sikalbaha) | HFO | IPP | 6*17.5 | 105 | 105 | 9 | 90 | 105 | 105 | 17 | 17 | Liquid fuel shortage
+44 | Hathazari 100 MW peaking PP | HFO | PDB | 11*8.9 | 98 | 98 | 0 | 0 | 8 | 8 | 8 | 8 | Liquid fuel shortage
+45 | Dohazari -Kalaish 100 MW Peaking | HFO | PDB | 6*17 | 102 | 102 | 0 | 50 | 0 | 51 | 0 | 51 | Liquid fuel shortage
+46 | Juldah 100 MW PP Unit-3 (Acorn) | HFO | IPP | 8*13.5 | 100 | 100 | 12 | 12 | 100 | 100 | 12 | 12 | Liquid fuel shortage
+ | Malancha, Ctg. EPZ (United) | Gas | IPP | 5*8.73+3*9.34 | 42 | 42 | 2 | 28 | 5 | 24 | 5 | 24 | -
+47 | Chattogram 108 MW PP (ECPV) | HFO | IPP | 16*7 | 108 | 108 | 5 | 64 | 108 | 108 | 25 | 50 | Liquid fuel shortage
+48 | Kaptai 7 MW  Solar PP | Solar | PDB |  | 7 | 6 | 3.33 | 0 | 3.54 | 0 | 3.54 | 0 | -
+49 | Anwara 300 MW PP (United) | HFO | IPP | 17*17+24 | 300 | 300 | 5 | 16 | 300 | 300 | 16 | 16 | Liquid fuel shortage
+50 | Jodiac Power | HFO | IPP | 3*18.55+1*3.6 | 54 | 54.363 | 0 | 54.36 | 54.36 | 54.36 | 0 | 54 | -
+51 | Karnaphuli Power Ltd. | HFO | IPP | 18.415*6+6.5 | 110 | 110 | 31 | 105 | 110 | 110 | 99 | 99 | FGMO
+52 | Juldah unit-2 (Acorn) | HFO | IPP | 8*13.6 | 100 | 100 | 12 | 12 | 100 | 100 | 12 | 12 | Liquid fuel shortage
+53 | Anlima Energy Ltd. | HFO | IPP | 6*21.2 | 116 | 116 | 1 | 13 | 116 | 116 | 92 | 92 | FGMO
+54 | Mirsharai 150 MW BRPL | HFO/Gas | IPP | 18.5*9 | 163 | 163 | 0 | 0 | 0 | 0 | 0 | 0 | Under Maintenance
+55 | SS Power | Coal | IPP | 2*660 | 1224 | 1224 | 1160 | 1160 | 1224 | 1224 | 1204 | 1204 | FGMO
+56 | Cox's Bazar Wind | Wind | PDB | 22*3 | 60 | 60 | 53 | 37 | 8 | 0 | 8 | 0 | -
+57 | Matarbari 2*600 MW (CPGCBL) | Coal | CPGCL | 2*600 | 1150 | 1150 | 1135 | 1135 | 1150 | 1150 | 1135 | 1135 | machine problem
+Chattogram Area Total |  |  |  |  | 4959 | 4898.863 | 2753.33 | 3149.36 | 3797.4 | 3844.86 | 3024.54 | 3168
+58 | Ashuganj CCPP 225 MW | Gas | APSCL | 1X142+1X75 | 221 | 221.25 | 215 | 198 | 221.25 | 221.25 | 200 | 200 | Gas shortage
+59 | Ashuganj 450 MW CCPP(North) | Gas | APSCL | 1*360 | 360 | 350.01 | 290 | 290 | 350.01 | 350.01 | 290 | 290 | Gas shortage
+60 | Ashuganj 450 MW CCPP(South) | Gas | APSCL | 1*360 | 360 | 342.01 | 240 | 240 | 342.01 | 342.01 | 240 | 240 | Gas shortage
+61 | Ashuganj 420 MW CCPP(East) | Gas | APSCL | 284*1+116*1 | 400 | 393 | 230 | 230 | 393 | 393 | 230 | 230 | Gas shortage
+62 | Ashuganj TSK 50 MW PP | Gas | APSCL | 14*3.96 | 53 | 46.701 | 37 | 37 | 41.65 | 41.65 | 0 | 0 | Gas shortage
+63 | Ashuganj 55 MW PP (Precision) | Gas | QRPP | 15*4 | 55 | 52.824 | 25 | 25 | 52.82 | 52.82 | 0 | 0 | Gas shortage
+64 | Ashuganj 195 MW PP (APSCL-United) | Gas | IPP | 20X9.73+1X16 | 195 | 195 | 0 | 0 | 195 | 195 | 0 | 0 | Gas shortage
+65 | Ashuganj 51 MW PP (Midland) | Gas | IPP | 6X9.34 | 51 | 51 | 51 | 51 | 51 | 51 | 51 | 51 | -
+66 | Ashuganj 150MW PP (Midland) | HFO | IPP | 23X7.015 | 150 | 150 | 26 | 70 | 150 | 150 | 53 | 150 | -
+67 | Titas 50 MW Peaking PP | HFO | PDB | 6*8.92 | 52 | 52 | 24 | 23 | 32 | 32 | 32 | 32 | Engine Problem
+68 | Chandpur 150 MW CCPP | Gas | PDB | 1*106+1*57 | 163 | 163 | 138 | 136 | 163 | 163 | 140 | 140 | Low gas pressure
+69 | Chandpur 200MW (Desh energy) | HFO | IPP | 12*18.4 | 200 | 200 | 22 | 17 | 200 | 200 | 200 | 200 | -
+ | Import (Tripura) | Import | Import |  | 160 | 160 | 156 | 162 | 84 | 78 | 160 | 160 | -
+71 | Jangalia 52 MW PP (Lakdanavi) | HFO | IPP | 6*8.92 | 52.2 | 52.2 | 0 | 8 | 52.2 | 52.2 | 52 | 52 | -
+72 | Cumilla 25 MW PP (Summit) | Gas | SIPP,REB | 3*3.67+2*6.97 | 25 | 25 | 17 | 17 | 24.5 | 24.5 | 19 | 19 | -
+73 | Feni Lanka Power | HFO | IPP | 7*18.415+1*9.78 | 114 | 114 | 66 | 16 | 114 | 114 | 114 | 114 | -
+74 | Chowmuhani 113 MW | HFO | IPP | 12*9.78+2*3.1 | 113 | 113 | 0 | 8 | 113 | 113 | 9 | 18 | Liquid fuel shortage
+75 | Chandpur 115(Doreen) | HFO | IPP | 4*18.5+2*22.5 | 115 | 115 | 0 | 50 | 115 | 115 | 34 | 68 | Liquid fuel shortage
+76 | Sonagazi 75 MW (AC) Solar Power Plant | Solar | EGCB |  | 75 | 75 | 44 | 0 | 55 | 0 | 55 | 0 | -
+Cumilla Area Total |  |  |  |  | 2914.2 | 2870.995 | 1581 | 1578 | 2749.44 | 2688.44 | 1879 | 1964
+Sl. | Name of the
+ Power Station | Fuel | Producer | Installed Capacity |  | Present Capacity | Actual Generation on |  | Forecasted Available Gen. on |  | Effective Available Gen. on |  | Remarks
+ |  |  |  |  |  |  | 01-07-2026 | during | 02-07-2026 | during | 02-07-2026 | during
+ |  |  |  |  |  |  | Day Peak | Ev. Peak | Day Peak | Ev. Peak | Day Peak | Ev. Peak
+ |  |  |  | Unit No. X Capacity | MW | MW | MW | MW | MW | MW | MW | MW
+ | Muktagacha Solartech Energy Ltd | Solar | IPP | 1*20 | 20 | 20 | 13.75 | 0 | 10 | 0 | 10 | 0 | -
+77 | RPCL 210MW CCPP | Gas | RPCL | 4*35+1*70 | 210 | 210 | 0 | 0 | 210 | 210 | 0 | 0 | Low gas pressure
+79 | Sarishabari 3 MW Solar Plant | Solar | IPP |  | 3 | 2.71 | 2.3 | 0 | 2.1 | 0 | 2.1 | 0 | -
+80 | Mymensingh 200 MW PP (United) | HFO | IPP | 9.78*21 | 200 | 200 | 66 | 117 | 70 | 110 | 70 | 110 | Liquid fuel shortage
+81 | Jamalpur 115 MW PP (United) | HFO | IPP | 9.78*12 | 115 | 115 | 58 | 88 | 60 | 80 | 60 | 80 | Liquid fuel shortage
+82 | Sutiakhali 50 MW Solar PP | Solar | IPP |  | 50 | 50 | 43.49 | 0 | 48 | 0 | 48 | 0 | -
+83 | Tangail Palli Power Gen 22 MW | HFO | IPP | 4*6.7 | 22 | 22 | 0 | 0 | 22 | 22 | 0 | 0 | Liquid fuel shortage
+84 | Bhairob 54.5 MW | HFO | IPP | 3*18.2 | 54 | 54.5 | 0 | 17 | 54.5 | 54.5 | 0 | 17 | Liquid fuel shortage
+Mymensingh Area Total |  |  |  |  | 674 | 674.21 | 183.54 | 222 | 476.6 | 476.5 | 190.1 | 207
+ | Moulvibazar 10 MW Solar Power Plant | Solar | IPP | 1*10 | 0 | 0 | 6 | 0 | 0 | 0 | 0 | 0 | -
+85 | Fenchugonj CCPP Phase-1 | Gas | PDB | 2*32+1*33 | 97 | 90 | 29 | 29 | 28 | 28 | 29 | 29 | machine problem
+86 | Fenchugonj CCPP Phase-2 | Gas | PDB | 2*35+1*35 | 104 | 90 | 0 | 0 | 30 | 30 | 0 | 0
+87 | Kushiara 163 MW CCPP (KP) | Gas | IPP | 1*109+1*54 | 163 | 163 | 149 | 133 | 163 | 163 | 147 | 147 | AGC
+88 | Shajibazar 330 MW CCPP | Gas | PDB | 3*110 | 330 | 330 | 141 | 142 | 145 | 145 | 145 | 145 | -
+91 | Shahjibazar GTPP Unit- 8 & 9 | Gas | PDB | 2*35 | 70 | 66 | 30 | 25 | 30 | 30 | 30 | 30 | GT-9 Under Maintenance
+92 | Shahjibazar 86MW PP (Shahjibazar) | Gas | RPP | 32*2.90 | 86 | 86 | 52 | 83 | 86 | 86 | 52 | 84 | Gas shortage
+93 | Shahjibazar 100 MW GTPP | Gas | PDB | 1*100 | 100 | 100 | 0 | 0 | 0 | 0 | 0 | 0 | machine problem
+94 | Sylhet 225 MW CCPP | Gas | PDB | 1*142+1*89 | 231 | 231 | 101 | 101 | 102 | 102 | 102 | 102 | ST Under Maintenance
+95 | Sylhet  20 MW GTPP | Gas | PDB | 1*20 | 20 | 20 | 0 | 0 | 20 | 20 | 0 | 0 | -
+96 | Shahjahanulla 25 MW PP | Gas | SIPP,REB | 3*9.34 | 25 | 25 | 16 | 16 | 25 | 25 | 17 | 17 | -
+97 | Bibiana-II 341 MW CCPP (Summit) | Gas | IPP | 1*222+1*119 | 341 | 341 | 310 | 315 | 341 | 341 | 310 | 310 | Machine Problem
+98 | Bibiyana-III 400 MW CCPP | Gas | PDB | 285*1+134*1 | 400 | 400 | 307 | 245 | 300 | 300 | 310 | 310 | Machine Problem
+99 | Bibiyana South 400 MW | Gas | PDB | 1*400 | 383 | 383 | 0 | 0 | 0 | 0 | 0 | 0 | Under Maintenance
+Sylhet Area Total |  |  |  |  | 2350 | 2325 | 1141 | 1089 | 1270 | 1270 | 1142 | 1174
+100 | Bheramara GTPP Unit-3 | HSD | PDB | 1X20 | 20 | 16 | 0 | 0 | 0 | 0 | 0 | 0 | Contract Expired
+** | Bheramara (HVDC ) | Import | Import | 2X500 | 1000 | 1000 | 519 | 904 | 1000 | 1000 | 1000 | 1000 | -
+101 | Faridpur 50 MW Peaking PP | HFO | PDB | 8*6.89 | 54 | 54 | 0 | 0 | 0 | 0 | 0 | 0 | Engine Problem
+102 | Khulna 225 MW CCPP | HSD/Gas | NWPGCL | 1X150+1X75 | 230 | 230 | 0 | 0 | 230 | 230 | 230 | 230 | -
+103 | Gopalganj 100 MW Peaking PP | HFO | PDB | 16*6.98 | 109 | 109 | 0 | 0 | 0 | 0 | 0 | 0 | Liquid fuel shortage
+104 | Bheramara 410 MW CCPP | Gas | NWPGCL | 1X278+1X132 | 410 | 410 | 0 | 0 | 410 | 410 | 0 | 0 | Gas shortage
+105 | Rupsha 105 MW PP (Orion rupsha) | HFO | IPP | 6*18.445 | 105 | 105 | 0 | 0 | 105 | 105 | 0 | 0 | Liquid fuel shortage
+106 | Madhumati 100 MW PP | HFO | NWPGCL | 6*18 | 105 | 105 | 0 | 15 | 105 | 105 | 15 | 15 | Liquid fuel shortage
+107 | Mongla Orion 100 MW Solar PP | Solar | IPP | 100 | 100 | 100 | 30 | 0 | 55 | 0 | 55 | 0 | -
+108 | Khulna 330 MW CCPP | HSD/Gas | PDB | 1*220+1*110 | 336 | 336 | 0 | 0 | 330 | 330 | 150 | 150 | Liquid fuel shortage
+109 | Rampal 1320 MW (BIFPCL) | Coal | PDB | 660*2 | 1234 | 1234.2 | 768 | 1033 | 1200 | 1200 | 1200 | 1200 | -
+** | HVDC(Nepal) | Import | Import | 1*40 | 0 | 40 | 38 | 38 | 40 | 40 | 38 | 38 | -
+Khulna Area Total |  |  |  |  | 3703 | 3739.2 | 1355 | 1990 | 3475 | 3420 | 2688 | 2633
+ | Patuakhali 1320 MW (RNPL) | Coal | RNPL | 660*2 | 1320 | 1244 | 976 | 892 | 1050 | 1050 | 1050 | 1050 | AGC
+110 | Barisal 110 MW PP (Summit ) | HFO | IPP | 7X17.076 | 110 | 110 | 0 | 32 | 110 | 110 | 16 | 16 | Liquid fuel shortage
+111 | Bhola  33 MW PP (Venture) | Gas | NENP | 1X34.50 | 40 | 11.04 | 0 | 0 | 0 | 0 | 0 | 0 | Contract Expired
+112 | Bhola 225 MW  CCPP | Gas | PDB | 2X63+1X68 | 194 | 194 | 64 | 65 | 65 | 65 | 65 | 65 | GT-1 & ST under maint
+113 | Payra 1320 MW | Coal | BCPCL | 2*622 | 1244 | 1244 | 970 | 1195 | 1244 | 1244 | 1244 | 1244 | AGC
+114 | Bhola Nutan Biddut BD LTD | Gas/HSD | IPP | 2*75+1*75 | 220 | 220 | 220 | 220 | 220 | 220 | 220 | 220
+115 | United Payra Power Ltd. | HFO | IPP | 8*18.5+1*9.5 | 150 | 150 | 0 | 35 | 150 | 150 | 17 | 17 | Liquid fuel shortage
+116 | Barisal 307 MW | Coal | BCPCL | 307X1 | 307 | 307 | 263 | 276 | 307 | 307 | 307 | 307 | AGC
+117 | Barisal 1 MW Solar Plant | Solar | IPP |  | 1 | 1 | 0.32 | 0 | 1 | 0 | 1 | 0 | -
+Barishal Area Total |  |  |  |  | 3586 | 3481.04 | 2493.32 | 2715 | 3147 | 3146 | 2920 | 2919
+ | Pabna 64 MW Solar Plant | Solar | PDB | 11*6.6 | 64 | 64.55 | 6.22 | 0 | 40 | 0 | 40 | 0 | Contract Expired
+118 | Baghabari 71 MW GTPP | Gas | PDB | 1X71 | 71 | 70 | 0 | 0 | 0 | 0 | 0 | 0 | Gas shortage
+ | Baghabari  100 MW GTPP | Gas | PDB | 1*100 | 100 | 100 | 0 | 0 | 0 | 0 | 0 | 0 | Machine Under Maintenance
+119 | Baghabari  50 MW Peaking PP | HFO | PDB | 6*8.9 | 52 | 52 | 0 | 40 | 40 | 40 | 40 | 40 | Engine Problem
+120 | Bera 70 MW Peaking PP | HFO | PDB | 9*8.29 | 71 | 71 | 0 | 0 | 32 | 32 | 0 | 15 | Engine Problem
+122 | Katakhali 50 MW Peaking PP | HFO | PDB | 6*8.7 | 50 | 50 | 0 | 20 | 32 | 32 | 32 | 32 | Partial Shutdown due to maintenance
+123 | Sirajgonj 225MW CCPP Unit-1 | Gas/HSD | NWPGCL | 1*150+1*75 | 210 | 214 | 154 | 150 | 214 | 214 | 170 | 170 | Gas shortage
+124 | Sirajgonj 225MW CCPP Unit-2 | Gas/HSD | NWPGCL | 1*150+1*75 | 220 | 220 | 159 | 146 | 220 | 220 | 170 | 170 | Gas shortage
+125 | Sirajgonj 225MW CCPP Unit-3 | Gas/HSD | NWPGCL | 1*141 | 220 | 220 | 153 | 145 | 220 | 220 | 170 | 170 | Gas shortage
+126 | Sirajgonj 400 MW CCPP Unit-4 | Gas/HSD | NWPGCL | 1*282+1*132 | 414 | 413.792 | 414 | 414 | 413.79 | 413.79 | 372.41 | 372.41 | AGC
+127 | Santahar  50 MW Peaking PP | HFO | PDB | 6*8.7 | 50 | 50 | 0 | 21 | 24 | 24 | 24 | 24 | Engine Problem
+129 | Natore 52 MW PP (Rajlanka) | HFO | IPP | 6*8.92 | 52 | 52.2 | 0 | 0 | 52.2 | 52.2 | 0 | 0 | Liquid fuel shortage
+130 | Chapainawabganj 100 MW Peaking PP | HFO | PDB | 12*8.924 | 104 | 104 | 0 | 42 | 92 | 92 | 0 | 92 | Liquid fuel shortage
+131 | Bagura 113 MW PP (Confidence)-2 | HFO | IPP | 6*18.55+7.2 | 113 | 113 | 0 | 35 | 113 | 113 | 75 | 75 | Liquid fuel shortage
+132 | Bagura 113 MW PP (Confidence)-1 | HFO | IPP | 6*18.55 | 113 | 113 | 0 | 35 | 113 | 113 | 0 | 35 | Liquid fuel shortage
+133 | Sirajgonj 6.55 MW Solar | Solar | NWPGCL |  | 6 | 6.12 | 0 | 0 | 5.6 | 0 | 5.6 | 0 | -
+** | Adani Power Jharkhanda Ltd | Import | Import | 2*673 | 1496 | 1469.13 | 1295.65 | 1474.84 | 1469.13 | 1469.13 | 1469.13 | 1469.13 | AGC
+134 | Sirajganj 68 MW Solar Park | Solar | IPP |  | 68 | 68 | 37.09 | 0 | 61 | 0 | 61 | 0 | -
+ | Pabna Solar 100 MW | Solar | IPP |  | 0 | 100 | 16 | 0 | 100 | 0 | 100 | 0 | -
+ | Sirajganj 2 MW Wind Power Plant | Wind | PDB | 0.25*8 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 | Contract Expired
+Rajshahi Area Total |  |  |  |  | 3476 | 3552.792 | 2234.96 | 2522.84 | 3241.72 | 3035.12 | 2729.14 | 2664.54
+ | Saidpur 150 MW Simple Cycle Power Plant | HSD | PDB | 1*150 | 150 | 162.443 | 0 | 0 | 0 | 0 | 0 | 0 | -
+135 | Barapukuria TPP Unit-1 & 2 | Coal | PDB | 1*125+1*125 | 250 | 170 | 38 | 37 | 38 | 38 | 38 | 38 | U-2 Under maint.
+136 | Barapukuria 275 MW TPP Unit-3 | Coal | PDB | 1*275 | 274 | 274 | 200 | 180 | 200 | 200 | 200 | 200 | Machine Problem
+137 | Rangpur 20 MW  GTPP | HSD | PDB | 1*20 | 20 | 20 | 0 | 0 | 20 | 20 | 20 | 20 | -
+138 | Saidpur 20 MW GTPP | HSD | PDB | 1*20 | 20 | 20 | 0 | 0 | 14 | 14 | 14 | 14 | -
+139 | Rangpur 113 MW PP (Confidence) | HFO | IPP | 9*6.984+7*7.015+3.15*2 | 113 | 113 | 0 | 106 | 113 | 113 | 113 | 113 | -
+140 | Sympa Solar Power 8 MW | Solar | IPP |  | 8 | 8 | 2.6 | 0 | 6 | 0 | 6 | 0 | -
+141 | Energypac Power Venture Thakurgaon Ltd. | HFO | IPP |  | 115 | 115 | 0 | 95 | 115 | 115 | 95 | 95 | Liquid fuel shortage
+142 | Intraco Solar 30 MW | Solar | IPP | 1*30 | 30 | 30 | 9 | 0 | 30 | 0 | 30 | 0 | -
+143 | Teesta Solar Limited | Solar | BCPCL |  | 200 | 200 | 171 | 0 | 181.39 | 0 | 181.39 | 0 | -
+Rangpur Area Total |  |  |  |  | 1180 | 1112.443 | 420.6 | 418 | 717.39 | 500 | 697.39 | 480
+System Total |  |  |  |  | 28843.2 | 29323.517 | 14658.25 | 16323.7 | 24669.77 | 24156.14 | 18074.03 | 18298.4
+ |  |  |  | Forecast Scenario (02-07-2026)
+ |  |  |  | Hour | Generation |  | Load-Shed |  | Demand
+ |  |  |  | 1900-01-01 | 16048 |  | 412.56 |  | 16480
+ |  |  |  | 1900-01-01 | 15869 |  | 440.255 |  | 16330
+ |  |  |  | 1900-01-01 | 15344 |  | 473.68 |  | 15840
+ |  |  |  | 1900-01-01 | 15076 |  | 452.67 |  | 15550
+ |  |  |  | 1900-01-01 | 14487 |  | 432.615 |  | 14940
+ |  |  |  | 1900-01-01 | 14216 |  | 376.27 |  | 14610
+ |  |  |  | 1900-01-01 | 13871 |  | 218.695 |  | 14100
+ |  |  |  | 1900-01-01 | 13837 |  | 184.315 |  | 14030
+ |  |  |  | 1900-01-01 | 13917 |  | 12.415 |  | 13930
+ |  |  |  | 1900-01-01 | 14015 |  | 157.575 |  | 14180
+ |  |  |  | 1900-01-01 | 14195 |  | 291.275 |  | 14500
+ |  |  |  | 1900-01-01 | 14337 |  | 270.265 |  | 14620
+ |  |  |  | 1900-01-01 | 14658 |  | 345.71 |  | 15020
+ |  |  |  | 1900-01-01 | 14747 |  | 318.015 |  | 15080
+ |  |  |  | 1900-01-01 | 14810 |  | 362.9 |  | 15190
+ |  |  |  | 1900-01-01 | 14860 |  | 496.6 |  | 15380
+ |  |  |  | 1900-01-01 | 14791 |  | 505.195 |  | 15320
+ |  |  |  | 1900-01-01 | 14415 |  | 444.075 |  | 14880
+ |  |  |  | 1900-01-01 | 14000 |  | 429.75 |  | 14450
+ |  |  |  | 1900-01-01 | 14500 |  | 477.5 |  | 15000
+ |  |  |  | 1900-01-01 | 15143 |  | 398.235 |  | 15560
+ |  |  |  | 1900-01-01 | 16280 |  | 496.6 |  | 16800
+ |  |  |  | 1900-01-01 | 16160 |  | 391.55 |  | 16570
+ |  |  |  | 1900-01-01 | 16323 |  | 484.185 |  | 16830
+ |  |  |  | 1900-01-01 | 16281 |  | 323.745 |  | 16620
+ |  |  |  | 1900-01-01 | 16100 |  | 382 |  | 16500
+Probable Maximum Temperature: |  |  | 33.00°C
+Probable Maximum Demand at Day Peak: |  |  | 15020.00 MW |  | Total Load Shed forecast (in MW) at evening peak hr. (Sub-station End):
+Probable Maximum Demand at Evening Peak: |  |  | 16830.00 MW |  | Area Wise Load Shed forecast (in MW) at evening peak hr. (Sub-station End):
+Probable Maximum Generation at Evening Peak: |  |  | 16323.00 MW |  | Dhaka | Chittagong | Cumilla | Mymensingh | Sylhet | Khulna | Barishal | Rajshahi | Rangpur | Total
+Probable Total Energy Generation: |  |  | 357.50 MKWHr. |  | 80 | 60 | 60 | 120 | 50 | 50 | 0 | 34 | 30 | 484
+ | *** This report is generated digitally from Operation Information System (OIS) at 09:27 hrs on 02-07-2026
+ |  | Sub-Divisional Engineer |  |  |  |  |  |  | Executive Engineer
+ |  | Network Operation Division |  |  |  |  |  |  | Network Operation Division
+## Sheet: GenLog
+ |  |  |  |  |  |  | Power Grid Bangladesh PLC |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-01 |  |  |  |  |  |  |  |  | Power Grid Bangladesh PLC |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-01 |  |  |  |  |  |  |  |  | Power Grid Bangladesh PLC |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-01 |  |  |  |  |  |  |  |  | Power Grid Bangladesh PLC |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-01 |  |  |  |  |  |  |  |  | Power Grid Bangladesh PLC |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-01 |  |  |  |  |  |  |  |  | Power Grid Bangladesh PLC |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-01
+ |  |  |  |  |  |  | National Load Dispatch Center (NLDC) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Page 1 of 6 |  |  |  |  |  |  |  |  | National Load Dispatch Center (NLDC) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Page 2 of 6 |  |  |  |  |  |  |  |  | National Load Dispatch Center (NLDC) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Page 3 of 6 |  |  |  |  |  |  |  |  | National Load Dispatch Center (NLDC) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Page 4 of 6 |  |  |  |  |  |  |  |  | National Load Dispatch Center (NLDC) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Page 5 of 6 |  |  |  |  |  |  |  |  | National Load Dispatch Center (NLDC) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Page 6 of 6
+ |  |  |  |  |  |  | Daily Generation Log (Mega Watt) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Daily Generation Log (Mega Watt) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Daily Generation Log (Mega Watt) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Daily Generation Log (Mega Watt) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Daily Generation Log (Mega Watt) |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Daily Generation Log (Mega Watt)
+ |  | Shift |  | Signature
+ |  | 06:00-14:00 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Date: | 01-07-2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Date: | 01-07-2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Date: | 01-07-2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Date: | 01-07-2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Date: | 01-07-2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Date: | 01-07-2026
+ |  | 14:00-22:00 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Day: | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Day: | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Day: | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Day: | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Day: | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Day: | Wednesday
+ |  | 22:00-06:00
+Hour | Gagnagar 102 MW PP (Digital Power) | Gazipur 100 MW PP | Gazipur 52 MW PP | Ghorasal 365 MW CCPP Unit-7 | Ghorasal Repowered CCPP Unit-3 | Ghorasal Repowered CCPP Unit-4 | Ghorasal TPP Unit-5 | Ghorashal 108 MW PP (Regent) | Haripur 412 MW CCPP | Haripur GTPP | JERA Meghnaghat Power Limited | Kamalaghat 54 MW PP(Banco Energy) | Kanchan Purbachal Power Generation Ltd. | Kodda 149 MW PP Unit-1 (Summit) | Kodda 150 MW PP BRPL | Kodda 300 MW PP Unit-2 (Summit) | Madanganj-55 MW PP(Summit) | Manikganj 55 MW PP (Northern) | Manikgonj 162MW PP(MPGL) | Meghnaghat 104 MW PP (OPCL) | Meghnaghat 450 MW CCPP (MPL) | Meghnaghat CCPP(Summit) | Meghnaghat CCPP(Summit)-2 (Gas) | Meghnaghat CCPP(Summit)-2 (HSD) | Nababganj 55 MW PP (Southern power ) | Siddhirganj 335 MW CCPP | Siddhirgonj 2*120 MW GTPP | Siddhirgonj 210 MW TPP | Spectra Solar Plant Ltd. | Sreepur 150 MW PP BRPL | Summit Power Ashulia | Summit Power Madhabdi | Tongi 80 MW GTPP | Unique Meghnaghat Power Limited (UMPL) | Anlima Energy Ltd. | Anwara 300 MW PP (United) | Chattogram 108 MW PP (ECPV) | Chattogram TPP | Cox's Bazar Wind | Dohazari -Kalaish 100 MW Peaking | Hathazari 100 MW peaking PP | Jodiac Power | Juldah 100 MW PP Unit-3 (Acorn) | Juldah unit-2 (Acorn) | Kaptai 7 MW  Solar PP | Karnaphuli Hydro PP Unit-1,2,3,4, 5 | Karnaphuli Power Ltd. | Malancha, Ctg. EPZ (United) | Matarbari 2*600 MW (CPGCBL) | Mirsharai 150 MW BRPL (HFO) | Mirsharai 150 MW BRPL (Gas) | Patenga 50MW PP (Baraka) | Raozan 25 MW PP | Sikalbaha 105 MW PP (Baraka Sikalbaha) | Sikalbaha 225MW CCPP (Gas) | Sikalbaha 225MW CCPP (HSD) | Sikalbaha Peaking GT (Gas) | Sikalbaha Peaking GT (HSD) | SS Power | Teknaf  20MW PP (Solartech) | Ashuganj 150MW PP (Midland) | Ashuganj 195 MW PP (APSCL-United) | Ashuganj 420 MW CCPP(East) | Ashuganj 450 MW CCPP(North) | Ashuganj 450 MW CCPP(South) | Ashuganj 51 MW PP (Midland) | Ashuganj 55 MW PP (Precision) | Ashuganj CCPP 225 MW | Ashuganj TSK 50 MW PP | Chandpur 115(Doreen) | Chandpur 150 MW CCPP | Chandpur 200MW (Desh energy) | Chowmuhani 113 MW | Cumilla 25 MW PP (Summit) | Feni Lanka Power | Import (Tripura) | Jangalia 52 MW PP (Lakdanavi) | Sonagazi 75 MW (AC) Solar Power Plant | Titas 50 MW Peaking PP | Bibiana-II 341 MW CCPP (Summit) | Bibiyana South 400 MW | Bibiyana-III 400 MW CCPP | Fenchugonj CCPP Phase-1 | Fenchugonj CCPP Phase-2 | Kushiara 163 MW CCPP (KP) | Moulvibazar 10 MW Solar Power Plant | Shahjahanulla 25 MW PP | Shahjibazar 100 MW GTPP | Shahjibazar 86MW PP (Shahjibazar) | Shahjibazar GTPP Unit- 8 & 9 | Shajibazar 330 MW CCPP | Sylhet  20 MW GTPP | Sylhet 225 MW CCPP | Bhairob 54.5 MW | Jamalpur 115 MW PP (United) | Muktagacha Solartech Energy Ltd | Mymensingh 200 MW PP (United) | RPCL 210MW CCPP | Sarishabari 3 MW Solar Plant | Sutiakhali 50 MW Solar PP | Tangail Palli Power Gen 22 MW | Eastern Total | Bheramara (HVDC ) | Bheramara 410 MW CCPP | Bheramara GTPP Unit-3 | Faridpur 50 MW Peaking PP | Gopalganj 100 MW Peaking PP | HVDC(Nepal) | Khulna 225 MW CCPP (HSD) | Khulna 225 MW CCPP (Gas) | Khulna 330 MW CCPP (HSD) | Khulna 330 MW CCPP (Gas) | Madhumati 100 MW PP | Mongla Orion 100 MW Solar PP | Rampal 1320 MW (BIFPCL) | Rupsha 105 MW PP (Orion rupsha) | Rupsha 800 MW CCPP (Gas) | Rupsha 800 MW CCPP (HSD) | Adani Power Jharkhanda Ltd | Baghabari  100 MW GTPP | Baghabari  50 MW Peaking PP | Baghabari 71 MW GTPP | Bagura 113 MW PP (Confidence)-1 | Bagura 113 MW PP (Confidence)-2 | Bera 70 MW Peaking PP | Chapainawabganj 100 MW Peaking PP | Katakhali 50 MW Peaking PP | Natore 52 MW PP (Rajlanka) | Pabna 64 MW Solar Plant | Pabna Solar 100 MW | Santahar  50 MW Peaking PP | Sirajganj 2 MW Wind Power Plant | Sirajganj 68 MW Solar Park | Sirajgonj 225MW CCPP Unit-1 (Gas) | Sirajgonj 225MW CCPP Unit-1 (HSD) | Sirajgonj 225MW CCPP Unit-2 (Gas) | Sirajgonj 225MW CCPP Unit-2 (HSD) | Sirajgonj 225MW CCPP Unit-3 (Gas) | Sirajgonj 225MW CCPP Unit-3 (HSD) | Sirajgonj 400 MW CCPP Unit-4 (Gas) | Sirajgonj 400 MW CCPP Unit-4 (HSD) | Sirajgonj 6.55 MW Solar | Barapukuria 275 MW TPP Unit-3 | Barapukuria TPP Unit-1 & 2 | Energypac Power Venture Thakurgaon Ltd. | Intraco Solar 30 MW | Rangpur 113 MW PP (Confidence) | Rangpur 20 MW  GTPP | Saidpur 150 MW Simple Cycle Power Plant | Saidpur 20 MW GTPP | Sympa Solar Power 8 MW | Teesta Solar Limited | Barisal 1 MW Solar Plant | Barisal 110 MW PP (Summit ) | Barisal 307 MW | Bhola 225 MW  CCPP | Bhola Nutan Biddut BD LTD (Gas) | Bhola Nutan Biddut BD LTD (HSD) | Patuakhali 1320 MW (RNPL) | Payra 1320 MW | United Payra Power Ltd. | Western Total | National Grid Total | Water Level
+ | 102.000 MW | 105.000 MW | 52.194 MW | 365.000 MW | 260.000 MW | 240.000 MW | 190.000 MW | 97.700 MW | 412.000 MW | 20.000 MW | 718.000 MW | 53.970 MW | 55.000 MW | 149.000 MW | 149.360 MW | 300.000 MW | 55.000 MW | 55.000 MW | 162.000 MW | 104.000 MW | 450.000 MW | 335.000 MW | 583.000 MW | 583.000 MW | 55.000 MW | 335.000 MW | 210.000 MW | 115.000 MW | 35.000 MW | 160.000 MW | 33.750 MW | 23.000 MW | 105.000 MW | 584.000 MW | 116.000 MW | 300.000 MW | 108.000 MW | 360.000 MW | 60.000 MW | 102.000 MW | 98.000 MW | 54.363 MW | 100.000 MW | 100.000 MW | 6.000 MW | 230.000 MW | 110.000 MW | 42.000 MW | 1150.000 MW | 163.000 MW | 163.000 MW | 50.000 MW | 25.500 MW | 105.000 MW | 225.000 MW | 225.000 MW | 150.000 MW | 150.000 MW | 1224.000 MW | 20.000 MW | 150.000 MW | 195.000 MW | 393.000 MW | 350.010 MW | 342.010 MW | 51.000 MW | 52.824 MW | 221.250 MW | 46.701 MW | 115.000 MW | 163.000 MW | 200.000 MW | 113.000 MW | 25.000 MW | 114.000 MW | 160.000 MW | 52.200 MW | 75.000 MW | 52.000 MW | 341.000 MW | 383.000 MW | 400.000 MW | 90.000 MW | 90.000 MW | 163.000 MW | 0.000 MW | 25.000 MW | 100.000 MW | 86.000 MW | 66.000 MW | 330.000 MW | 20.000 MW | 231.000 MW | 54.500 MW | 115.000 MW | 20.000 MW | 200.000 MW | 210.000 MW | 2.710 MW | 50.000 MW | 22.000 MW | - | 1000.000 MW | 410.000 MW | 16.000 MW | 54.000 MW | 109.000 MW | 40.000 MW | 230.000 MW | 230.000 MW | 336.000 MW | 336.000 MW | 105.000 MW | 100.000 MW | 1234.200 MW | 105.000 MW | 0.000 MW | 0.000 MW | 1469.130 MW | 100.000 MW | 52.000 MW | 70.000 MW | 113.000 MW | 113.000 MW | 71.000 MW | 104.000 MW | 50.000 MW | 52.200 MW | 64.550 MW | 100.000 MW | 50.000 MW | 2.000 MW | 68.000 MW | 214.000 MW | 214.000 MW | 220.000 MW | 220.000 MW | 220.000 MW | 220.000 MW | 413.792 MW | 413.792 MW | 6.120 MW | 274.000 MW | 170.000 MW | 115.000 MW | 30.000 MW | 113.000 MW | 20.000 MW | 162.443 MW | 20.000 MW | 8.000 MW | 200.000 MW | 1.000 MW | 110.000 MW | 307.000 MW | 194.000 MW | 220.000 MW | 220.000 MW | 1244.000 MW | 1244.000 MW | 150.000 MW | - | - | -
+00:00 | 0 | 35 | 33 | 0 | 0 | 0 | 0 | 0 | 371 | 0 | 0 | 17 | 0 | 134 | 120 | 145 | 15 | 35 | 35 | 0 | 0 | 20 | 555 | 0 | 0 | 300 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 520 | 15 | 16 | 50 | 0 | 3 | 50 | 0 | 18 | 12 | 12 | 0 | 100 | 55 | 21 | 1135 | 0 | 0 | 6 | 0 | 0 | 220 | 0 | 0 | 0 | 1165 | 0 | 12 | 0 | 250 | 320 | 300 | 51 | 15 | 215 | 37 | 58 | 140 | 24 | 0 | 19 | 15 | 160 | 0 | 0 | 16 | 310 | 0 | 269 | 29 | 0 | 150 | 0 | 16 | 0 | 85 | 25 | 143 | 0 | 101 | 0 | 79 | 0 | 107 | 0 | 0 | 0 | 0 | 8338.5 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 100 | 0 | 0 | 0 | 900 | 0 | 0 | 0 | 1437.18 | 0 | 40 | 0 | 80 | 45 | 0 | 92 | 18 | 0 | 0 | 0 | 0 | 0 | 0 | 160 | 0 | 160 | 0 | 162 | 0 | 395 | 0 | 0 | 183 | 39 | 88 | 0 | 76 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 270 | 65 | 220 | 0 | 1050 | 1200 | 17 | 7710.18 | 16048.68 | 76.23
+01:00 | 0 | 60 | 33 | 0 | 0 | 0 | 0 | 0 | 355 | 0 | 0 | 0 | 0 | 73 | 146 | 145 | 15 | 35 | 35 | 0 | 0 | 20 | 550 | 0 | 0 | 300 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 440 | 63 | 16 | 33 | 0 | 2 | 50 | 0 | 18 | 12 | 12 | 0 | 99 | 106 | 26 | 1135 | 0 | 0 | 6 | 0 | 0 | 219 | 0 | 0 | 0 | 1164 | 0 | 12 | 0 | 250 | 320 | 300 | 51 | 41 | 216 | 37 | 51 | 140 | 51 | 0 | 19 | 48 | 156 | 16 | 0 | 16 | 310 | 0 | 274 | 29 | 0 | 143 | 0 | 16 | 0 | 85 | 25 | 143 | 0 | 101 | 0 | 9 | 0 | 48 | 0 | 0 | 0 | 0 | 8254.5 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 101 | 0 | 0 | 0 | 900 | 0 | 0 | 0 | 1367.3 | 0 | 40 | 0 | 113 | 90 | 0 | 0 | 19 | 0 | 0 | 0 | 0 | 0 | 0 | 160 | 0 | 159 | 0 | 165 | 0 | 384 | 0 | 0 | 183 | 39 | 91 | 0 | 103 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 237 | 65 | 220 | 0 | 1050 | 1215 | 17 | 7615.3 | 15869.8 | 76.2
+02:00 | 0 | 88 | 33 | 0 | 0 | 0 | 0 | 0 | 334 | 0 | 0 | 0 | 0 | 55 | 147 | 145 | 15 | 35 | 0 | 0 | 0 | 106 | 550 | 0 | 0 | 295 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 410 | 58 | 16 | 27 | 0 | 2 | 0 | 0 | 18 | 12 | 12 | 0 | 97 | 105 | 26 | 1135 | 0 | 0 | 6 | 0 | 0 | 220 | 0 | 0 | 0 | 1160 | 0 | 12 | 0 | 230 | 290 | 280 | 51 | 43 | 204 | 37 | 0 | 140 | 32 | 0 | 19 | 45 | 152 | 52 | 0 | 16 | 305 | 0 | 274 | 29 | 0 | 133 | 0 | 16 | 0 | 85 | 25 | 141 | 0 | 101 | 0 | 9 | 0 | 48 | 0 | 0 | 0 | 0 | 8055.5 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 100 | 0 | 0 | 0 | 900 | 0 | 0 | 0 | 1280.95 | 0 | 40 | 0 | 0 | 0 | 0 | 0 | 19 | 0 | 0 | 0 | 0 | 0 | 0 | 160 | 0 | 160 | 0 | 166 | 0 | 349 | 0 | 0 | 183 | 39 | 91 | 0 | 104 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 233 | 65 | 220 | 0 | 1050 | 1215 | 17 | 7288.95 | 15344.45 | 76.2
+03:00 | 0 | 88 | 33 | 0 | 0 | 0 | 0 | 0 | 312 | 0 | 0 | 0 | 0 | 52 | 147 | 145 | 15 | 0 | 0 | 0 | 0 | 141 | 515 | 0 | 0 | 290 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 400 | 55 | 16 | 24 | 0 | 2 | 0 | 0 | 18 | 12 | 12 | 0 | 95 | 107 | 19 | 1135 | 0 | 0 | 6 | 0 | 0 | 220 | 0 | 0 | 0 | 1162 | 0 | 12 | 0 | 230 | 290 | 280 | 51 | 45 | 185 | 37 | 0 | 140 | 17 | 0 | 14 | 43 | 144 | 52 | 0 | 16 | 310 | 0 | 284 | 29 | 0 | 122 | 0 | 16 | 0 | 84 | 25 | 141 | 0 | 101 | 0 | 9 | 0 | 48 | 0 | 0 | 0 | 0 | 7925.5 | 844 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 0 | 890 | 0 | 0 | 0 | 1257.91 | 0 | 40 | 0 | 0 | 0 | 0 | 0 | 19 | 0 | 0 | 0 | 0 | 0 | 0 | 160 | 0 | 163 | 0 | 167 | 0 | 345 | 0 | 0 | 183 | 39 | 91 | 0 | 106 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 230 | 65 | 220 | 0 | 1050 | 1210 | 17 | 7150.91 | 15076.41 | 76.2
+04:00 | 0 | 88 | 33 | 0 | 0 | 0 | 0 | 0 | 308 | 0 | 0 | 0 | 0 | 52 | 147 | 30 | 15 | 0 | 0 | 0 | 0 | 141 | 440 | 0 | 0 | 286 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 400 | 0 | 0 | 24 | 0 | 9 | 0 | 0 | 18 | 12 | 12 | 0 | 95 | 51 | 19 | 1135 | 0 | 0 | 6 | 0 | 15 | 220 | 0 | 0 | 0 | 1160 | 0 | 0 | 0 | 230 | 290 | 280 | 51 | 45 | 182 | 37 | 0 | 140 | 17 | 0 | 14 | 46 | 148 | 0 | 0 | 16 | 310 | 0 | 295 | 29 | 0 | 123 | 0 | 16 | 0 | 84 | 25 | 140 | 0 | 101 | 0 | 9 | 0 | 48 | 0 | 0 | 0 | 0 | 7571.5 | 844 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 0 | 891 | 0 | 0 | 0 | 1251 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 160 | 0 | 166 | 0 | 171 | 0 | 347 | 0 | 0 | 183 | 40 | 0 | 0 | 49 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 231 | 65 | 220 | 0 | 1050 | 1210 | 0 | 6916 | 14487.5 | 76.2
+05:00 | 0 | 88 | 33 | 0 | 0 | 0 | 0 | 0 | 290 | 0 | 0 | 0 | 0 | 52 | 147 | 30 | 15 | 0 | 0 | 0 | 0 | 145 | 480 | 0 | 0 | 288 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 480 | 0 | 0 | 25 | 0 | 10 | 0 | 0 | 0 | 12 | 12 | 0 | 95 | 51 | 20 | 940 | 0 | 0 | 6 | 0 | 0 | 219 | 0 | 0 | 0 | 1160 | 0 | 0 | 0 | 230 | 290 | 280 | 51 | 46 | 172 | 37 | 0 | 140 | 17 | 0 | 6 | 47 | 144 | 0 | 0 | 16 | 310 | 0 | 307 | 29 | 0 | 136 | 0 | 16 | 0 | 85 | 25 | 142 | 0 | 101 | 0 | 9 | 0 | 48 | 0 | 0 | 0 | 0 | 7461.5 | 844 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 0 | 900 | 0 | 0 | 0 | 1263.14 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 160 | 0 | 168 | 0 | 173 | 0 | 367 | 0 | 0 | 183 | 41 | 0 | 0 | 34 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 237 | 65 | 220 | 0 | 877 | 1185 | 0 | 6755.14 | 14216.64 | 76.2
+06:00 | 0 | 88 | 33 | 0 | 0 | 0 | 0 | 0 | 305 | 0 | 0 | 0 | 0 | 52 | 147 | 0 | 15 | 0 | 0 | 0 | 0 | 142 | 495 | 0 | 0 | 297 | 0 | 0 | 0 | 142 | 16.5 | 21 | 0 | 440 | 0 | 0 | 24 | 0 | 3 | 0 | 0 | 0 | 12 | 12 | 0.07 | 96 | 17 | 21 | 850 | 0 | 0 | 6 | 0 | 0 | 218 | 0 | 0 | 0 | 1050 | 1 | 0 | 0 | 230 | 290 | 280 | 51 | 47 | 166 | 37 | 0 | 140 | 17 | 0 | 11 | 17 | 140 | 0 | 5 | 16 | 305 | 0 | 307 | 29 | 0 | 140 | 0 | 16 | 0 | 85 | 25 | 142 | 0 | 101 | 0 | 37 | 0.4 | 48 | 0 | 0 | 0.71 | 0 | 7186.68 | 844 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 3.51 | 900 | 0 | 0 | 0 | 1280.39 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0.3 | 0 | 0 | 0 | 1.67 | 161 | 0 | 173 | 0 | 173 | 0 | 358 | 0 | 0.27 | 182 | 41 | 0 | 0.5 | 0 | 0 | 0 | 0 | 0 | 15 | 0.05 | 0 | 236 | 65 | 220 | 0 | 857 | 1135 | 0 | 6684.69 | 13871.37 | 76.2
+07:00 | 0 | 70 | 33 | 0 | 0 | 0 | 0 | 0 | 305 | 0 | 0 | 0 | 0 | 52 | 147 | 0 | 15 | 0 | 0 | 0 | 0 | 140 | 495 | 0 | 0 | 299 | 0 | 0 | 1 | 142 | 16.5 | 21 | 0 | 440 | 0 | 0 | 24 | 0 | 4 | 0 | 0 | 0 | 12 | 12 | 0.55 | 96 | 17 | 20 | 858 | 0 | 0 | 6 | 0 | 0 | 218 | 0 | 0 | 0 | 1052 | 4 | 0 | 0 | 230 | 290 | 240 | 51 | 20 | 197 | 37 | 0 | 140 | 17 | 0 | 11 | 16 | 136 | 0 | 4 | 16 | 305 | 0 | 308 | 29 | 0 | 139 | 1 | 4 | 0 | 52 | 28 | 143 | 0 | 101 | 0 | 47 | 2.4 | 48 | 0 | 0.2 | 2.16 | 0 | 7114.81 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 8.84 | 900 | 0 | 0 | 0 | 1281.91 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 7.35 | 9 | 0 | 0 | 3.89 | 168 | 0 | 173 | 0 | 173 | 0 | 352 | 0 | 0.34 | 183 | 41 | 0 | 6 | 0 | 0 | 0 | 0 | 0.1 | 52 | 0.06 | 0 | 236 | 65 | 220 | 0 | 871 | 1090 | 0 | 6722.49 | 13837.3 | 76.2
+08:00 | 0 | 50 | 33 | 0 | 0 | 0 | 0 | 0 | 300 | 0 | 0 | 0 | 0 | 52 | 129 | 0 | 15 | 0 | 0 | 0 | 0 | 144 | 495 | 0 | 0 | 299 | 0 | 0 | 1 | 142 | 16.5 | 21 | 0 | 440 | 0 | 0 | 24 | 0 | 3 | 0 | 0 | 0 | 12 | 12 | 1.3 | 98 | 17 | 3 | 855 | 0 | 0 | 6 | 0 | 0 | 218 | 0 | 0 | 0 | 1050 | 6 | 0 | 0 | 230 | 290 | 240 | 51 | 20 | 216 | 37 | 0 | 140 | 17 | 0 | 11 | 14 | 132 | 0 | 15 | 16 | 305 | 0 | 308 | 29 | 0 | 136 | 2 | 16 | 0 | 52 | 28 | 143 | 0 | 101 | 0 | 47 | 6.23 | 48 | 0 | 0.3 | 4.1 | 0 | 7097.43 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 40.8 | 900 | 0 | 0 | 0 | 1284.89 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 16.44 | 29 | 0 | 0 | 9.75 | 168 | 0 | 175 | 0 | 171 | 0 | 364 | 0 | 1.45 | 200 | 40 | 0 | 14 | 0 | 0 | 0 | 0 | 2.6 | 80 | 0.1 | 0 | 237 | 65 | 220 | 0 | 870 | 1050 | 0 | 6820.03 | 13917.46 | 76.2
+09:00 | 0 | 50 | 33 | 0 | 0 | 0 | 0 | 0 | 347 | 0 | 0 | 0 | 0 | 52 | 146 | 0 | 15 | 0 | 17 | 0 | 0 | 146 | 480 | 0 | 0 | 305 | 0 | 0 | 5 | 142 | 16.5 | 21 | 0 | 460 | 0 | 0 | 23 | 0 | 2 | 0 | 0 | 0 | 12 | 12 | 2.21 | 98 | 17 | 2 | 850 | 0 | 0 | 6 | 0 | 0 | 217 | 0 | 0 | 0 | 1060 | 7 | 0 | 0 | 230 | 290 | 240 | 51 | 20 | 217 | 40 | 0 | 140 | 0 | 0 | 11 | 0 | 138 | 0 | 25 | 16 | 310 | 0 | 308 | 29 | 0 | 141 | 4 | 16 | 0 | 52 | 28 | 142 | 0 | 101 | 0 | 47 | 2.63 | 48 | 0 | 0.4 | 5.62 | 0 | 7196.36 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 20 | 888 | 0 | 0 | 0 | 1285.31 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0.9 | 28 | 0 | 0 | 34.06 | 165 | 0 | 171 | 0 | 167 | 0 | 369 | 0 | 3.24 | 200 | 39 | 0 | 21 | 0 | 0 | 0 | 0 | 4.7 | 103 | 0.15 | 0 | 240 | 65 | 220 | 0 | 879 | 1035 | 0 | 6819.36 | 14015.72 | 76.15
+10:00 | 0 | 34 | 33 | 0 | 0 | 0 | 0 | 0 | 369 | 0 | 0 | 0 | 0 | 52 | 145 | 0 | 15 | 17 | 17 | 0 | 0 | 152 | 495 | 0 | 0 | 305 | 0 | 0 | 5 | 51 | 16.5 | 0 | 0 | 490 | 0 | 0 | 0 | 0 | 9 | 0 | 0 | 0 | 12 | 12 | 3.17 | 99 | 17 | 0 | 870 | 0 | 0 | 6 | 0 | 0 | 216 | 0 | 0 | 0 | 1145 | 7 | 0 | 0 | 230 | 290 | 240 | 51 | 20 | 217 | 40 | 0 | 140 | 0 | 0 | 17 | 0 | 136 | 0 | 21 | 16 | 310 | 0 | 308 | 29 | 0 | 141 | 8 | 16 | 0 | 52 | 28 | 142 | 0 | 101 | 0 | 48 | 8.6 | 48 | 0 | 0.6 | 20.41 | 0 | 7271.28 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 53 | 860 | 0 | 0 | 0 | 1292.66 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 11.6 | 17 | 0 | 0 | 49.4 | 163 | 0 | 167 | 0 | 164 | 0 | 386 | 0 | 5.05 | 200 | 37 | 0 | 14 | 0 | 0 | 0 | 0 | 6.8 | 179 | 0.32 | 0 | 247 | 65 | 220 | 0 | 905 | 1000 | 0 | 6923.83 | 14195.11 | 76.15
+11:00 | 0 | 34 | 16 | 0 | 0 | 0 | 0 | 0 | 334 | 0 | 0 | 0 | 0 | 52 | 145 | 0 | 15 | 0 | 17 | 0 | 0 | 168 | 515 | 0 | 0 | 295 | 0 | 0 | 1 | 34 | 16.5 | 21 | 0 | 530 | 0 | 0 | 0 | 0 | 13 | 0 | 0 | 0 | 12 | 12 | 3.14 | 99 | 17 | 2 | 1025 | 0 | 0 | 0 | 0 | 0 | 214 | 0 | 0 | 0 | 1160 | 3 | 0 | 0 | 230 | 290 | 240 | 51 | 25 | 216 | 40 | 0 | 139 | 0 | 0 | 17 | 0 | 148 | 0 | 40 | 16 | 305 | 0 | 308 | 29 | 0 | 148 | 10 | 16 | 0 | 52 | 28 | 143 | 0 | 101 | 0 | 48 | 16.21 | 48 | 0 | 2 | 23.95 | 0 | 7483.8 | 843 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 75 | 815 | 0 | 0 | 0 | 1273.62 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 8.35 | 5 | 0 | 0 | 38.54 | 160 | 0 | 164 | 0 | 158 | 0 | 400 | 0 | 0 | 200 | 37 | 0 | 21 | 0 | 0 | 0 | 0 | 7.6 | 205 | 0.34 | 0 | 246 | 65 | 220 | 0 | 893 | 980 | 0 | 6853.45 | 14337.25 | 76.14
+12:00 | 0 | 34 | 16 | 0 | 0 | 0 | 0 | 0 | 370 | 0 | 0 | 0 | 0 | 52 | 144 | 146 | 15 | 0 | 17 | 0 | 0 | 269 | 535 | 0 | 0 | 297 | 0 | 0 | 9 | 34 | 16.5 | 21 | 0 | 520 | 1 | 5 | 5 | 0 | 53 | 0 | 0 | 0 | 12 | 12 | 3.33 | 99 | 31 | 2 | 1135 | 0 | 0 | 6 | 1 | 9 | 214 | 0 | 0 | 0 | 1160 | 5 | 26 | 0 | 230 | 290 | 240 | 51 | 25 | 215 | 37 | 0 | 138 | 22 | 0 | 17 | 66 | 156 | 0 | 44 | 24 | 310 | 0 | 307 | 29 | 0 | 149 | 6 | 16 | 0 | 52 | 30 | 141 | 0 | 101 | 0 | 58 | 13.75 | 66 | 0 | 2.3 | 43.49 | 0 | 8154.37 | 519 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 30 | 768 | 0 | 0 | 0 | 1295.65 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 6.22 | 16 | 0 | 0 | 37.09 | 154 | 0 | 159 | 0 | 153 | 0 | 414 | 0 | 0 | 200 | 38 | 0 | 9 | 0 | 0 | 0 | 0 | 2.6 | 171 | 0.32 | 0 | 263 | 64 | 220 | 0 | 976 | 970 | 0 | 6503.88 | 14658.25 | 76.14
+13:00 | 0 | 17 | 8 | 0 | 0 | 0 | 0 | 0 | 400 | 0 | 0 | 0 | 0 | 52 | 144 | 146 | 15 | 0 | 17 | 0 | 0 | 302 | 485 | 0 | 0 | 324 | 0 | 0 | 23 | 17 | 16.5 | 21 | 0 | 440 | 15 | 16 | 21 | 0 | 27 | 0 | 0 | 0 | 12 | 12 | 1.59 | 98 | 83 | 2 | 1135 | 0 | 0 | 18 | 8 | 62 | 214 | 0 | 0 | 0 | 1160 | 2 | 53 | 0 | 230 | 290 | 240 | 51 | 25 | 213 | 40 | 24 | 136 | 96 | 0 | 17 | 97 | 162 | 20 | 68 | 23 | 305 | 0 | 307 | 29 | 0 | 139 | 7 | 16 | 0 | 52 | 30 | 140 | 0 | 101 | 0 | 58 | 9.2 | 67 | 0 | 1.5 | 2 | 0 | 8362.79 | 520 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 63 | 830 | 0 | 0 | 0 | 1236.01 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 17.11 | 29 | 0 | 0 | 38.63 | 153 | 0 | 153 | 0 | 145 | 0 | 350 | 0 | 0 | 200 | 38 | 0 | 9 | 0 | 0 | 0 | 0 | 1.5 | 107 | 0.54 | 0 | 211 | 64 | 220 | 0 | 876 | 1085 | 0 | 6384.79 | 14747.58 | 76.12
+14:00 | 0 | 17 | 8 | 0 | 0 | 0 | 0 | 0 | 406 | 0 | 0 | 0 | 0 | 52 | 45 | 146 | 15 | 0 | 17 | 0 | 0 | 300 | 465 | 0 | 0 | 320 | 0 | 0 | 14 | 17 | 16.5 | 21 | 0 | 480 | 15 | 16 | 24 | 0 | 28 | 0 | 0 | 0 | 12 | 12 | 1.31 | 96 | 101 | 2 | 1135 | 0 | 0 | 18 | 8 | 90 | 214 | 0 | 0 | 0 | 1160 | 5 | 53 | 0 | 230 | 290 | 240 | 51 | 25 | 213 | 39 | 34 | 136 | 96 | 0 | 17 | 97 | 160 | 43 | 62 | 24 | 305 | 0 | 307 | 29 | 0 | 141 | 11 | 16 | 0 | 52 | 28 | 142 | 0 | 100 | 0 | 58 | 2.62 | 68 | 0 | 0.6 | 14.94 | 0 | 8361.97 | 508 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 34 | 854 | 0 | 0 | 0 | 1293.82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 23.81 | 19 | 0 | 0 | 38.46 | 152 | 0 | 130 | 0 | 130 | 0 | 350 | 0 | 0 | 200 | 38 | 0 | 1 | 0 | 0 | 0 | 0 | 4.5 | 66 | 0.08 | 0 | 219 | 63 | 220 | 0 | 896 | 1170 | 0 | 6448.67 | 14810.64 | 76.11
+15:00 | 0 | 17 | 8 | 0 | 0 | 0 | 0 | 0 | 405 | 0 | 0 | 0 | 0 | 52 | 47 | 146 | 15 | 27 | 17 | 0 | 0 | 267 | 480 | 0 | 0 | 322 | 0 | 0 | 15 | 17 | 16 | 21 | 0 | 470 | 35 | 16 | 26 | 0 | 35 | 0 | 0 | 0 | 12 | 12 | 2.17 | 93 | 107 | 2 | 1125 | 0 | 0 | 19 | 8 | 90 | 216 | 0 | 0 | 0 | 1185 | 6 | 51 | 0 | 230 | 290 | 240 | 51 | 25 | 204 | 36 | 34 | 136 | 97 | 0 | 17 | 93 | 158 | 52.2 | 57 | 24 | 310 | 0 | 270 | 29 | 0 | 145 | 10 | 16 | 0 | 52 | 25 | 143 | 0 | 100 | 0 | 58 | 2.3 | 68 | 0 | 0.6 | 10.71 | 0 | 8365.98 | 507 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 39 | 897 | 0 | 0 | 0 | 1201.2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 35.09 | 20 | 0 | 0 | 39.9 | 152 | 0 | 130 | 0 | 130 | 0 | 414 | 0 | 0 | 201 | 38 | 0 | 4 | 0 | 0 | 0 | 0 | 5.4 | 51 | 0.54 | 0 | 226 | 63 | 220 | 0 | 912 | 1170 | 0 | 6494.13 | 14860.11 | 76.1
+16:00 | 0 | 17 | 8 | 0 | 0 | 0 | 0 | 0 | 405 | 0 | 0 | 17 | 0 | 52 | 48 | 146 | 15 | 35 | 17 | 0 | 0 | 250 | 520 | 0 | 17 | 320 | 0 | 0 | 16 | 17 | 16 | 21 | 0 | 415 | 47 | 16 | 30 | 0 | 26 | 0 | 0 | 3 | 12 | 12 | 1.49 | 91 | 109 | 2 | 1125 | 0 | 0 | 37 | 8 | 90 | 218 | 0 | 0 | 0 | 1160 | 5 | 48 | 0 | 230 | 290 | 240 | 51 | 25 | 200 | 39 | 33 | 135 | 96 | 0 | 17 | 96 | 162 | 52.2 | 44 | 24 | 315 | 0 | 258 | 29 | 0 | 141 | 3 | 16 | 0 | 52 | 25 | 141 | 0 | 100 | 0 | 58 | 1.4 | 68 | 0 | 0.1 | 7.65 | 8 | 8349.84 | 507 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 22 | 900 | 0 | 0 | 0 | 1228.82 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 19.5 | 27 | 0 | 0 | 6.56 | 151 | 0 | 143 | 0 | 138 | 0 | 414 | 0 | 0 | 201 | 37 | 0 | 7 | 0 | 0 | 0 | 0 | 3.9 | 53 | 0.17 | 0 | 234 | 63 | 220 | 0 | 858 | 1170 | 0 | 6441.95 | 14791.79 | 76.09
+17:00 | 0 | 17 | 8 | 0 | 0 | 0 | 0 | 0 | 380 | 0 | 0 | 17 | 5 | 74 | 48 | 45 | 15 | 35 | 54 | 0 | 0 | 250 | 530 | 0 | 35 | 325 | 0 | 0 | 7 | 17 | 16 | 21 | 0 | 390 | 15 | 16 | 28 | 0 | 50 | 0 | 0 | 18 | 12 | 12 | 0.36 | 92 | 85 | 5 | 1125 | 2 | 0 | 19 | 8 | 51 | 217 | 0 | 0 | 0 | 1110 | 2 | 30 | 0 | 230 | 290 | 240 | 51 | 25 | 195 | 39 | 17 | 136 | 17 | 2 | 17 | 34 | 160 | 8 | 14 | 23 | 315 | 0 | 258 | 29 | 0 | 133 | 2 | 16 | 0 | 52 | 28 | 141 | 0 | 100 | 0 | 58 | 2.3 | 68 | 0 | 0.1 | 5.43 | 10 | 7902.19 | 717 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 15 | 900 | 0 | 0 | 0 | 1329.17 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 13.5 | 15 | 0 | 0 | 6.82 | 150 | 0 | 143 | 0 | 145 | 0 | 350 | 0 | 0 | 200 | 37 | 0 | 7 | 0 | 0 | 0 | 0 | 1.2 | 27 | 0.11 | 0 | 233 | 63 | 180 | 0 | 853 | 1090 | 0 | 6513.8 | 14415.99 | 76.08
+18:00 | 0 | 17 | 8 | 0 | 0 | 0 | 0 | 0 | 380 | 0 | 0 | 15.8 | 17 | 95 | 48 | 45 | 15 | 35 | 54 | 0 | 0 | 250 | 410 | 0 | 17 | 325 | 0 | 0 | 2 | 27 | 16 | 21 | 0 | 410 | 15 | 16 | 31 | 0 | 11 | 0 | 0 | 18 | 12 | 12 | 0.27 | 95 | 34 | 8 | 1125 | 0 | 0 | 21 | 8 | 34 | 217 | 0 | 0 | 0 | 1100 | 0 | 20 | 0 | 230 | 290 | 240 | 51 | 25 | 202 | 39 | 17 | 136 | 17 | 8 | 17 | 17 | 154 | 8 | 7 | 23 | 315 | 0 | 258 | 29 | 0 | 122 | 1 | 16 | 0 | 52 | 30 | 142 | 0 | 100 | 0 | 58 | 1.3 | 68 | 0 | 0.1 | 2.5 | 10 | 7670.97 | 902 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 13 | 821 | 0 | 0 | 0 | 1200.37 | 0 | 40 | 0 | 0 | 0 | 8 | 52 | 6 | 0 | 3.4 | 6 | 13 | 0 | 2.4 | 130 | 0 | 130 | 0 | 130 | 0 | 350 | 0 | 0.21 | 180 | 36 | 0 | 3 | 0 | 0 | 0 | 0 | 0.6 | 13 | 0.03 | 0 | 164 | 63 | 180 | 0 | 745 | 1100 | 0 | 6330.01 | 14000.98 | 76.07
+19:00 | 0 | 105 | 8 | 0 | 0 | 0 | 0 | 0 | 406 | 0 | 0 | 15.8 | 17 | 110 | 149 | 45 | 15 | 35 | 108 | 0 | 0 | 250 | 415 | 0 | 25 | 280 | 0 | 0 | 0 | 36 | 15.5 | 21 | 0 | 435 | 13 | 16 | 44 | 0 | 1 | 47 | 0 | 20 | 12 | 12 | 0 | 96 | 42 | 8 | 1125 | 0 | 0 | 20 | 8 | 38 | 216 | 0 | 0 | 0 | 1120 | 0 | 26 | 0 | 230 | 290 | 240 | 51 | 25 | 202 | 39 | 22 | 136 | 18 | 8 | 17 | 40 | 168 | 8 | 0 | 23 | 320 | 0 | 270 | 29 | 0 | 128 | 0 | 16 | 0 | 52 | 25 | 141 | 0 | 101 | 1 | 67 | 0 | 86 | 0 | 0 | 0 | 12 | 8120.3 | 903 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 15 | 0 | 814 | 0 | 0 | 0 | 1298.66 | 0 | 40 | 0 | 35 | 1 | 15 | 93 | 19 | 0 | 0 | 0 | 21 | 0 | 0 | 130 | 0 | 130 | 0 | 130 | 0 | 300 | 0 | 0 | 180 | 37 | 75 | 0 | 60 | 0 | 0 | 0 | 0 | 0 | 0 | 10 | 253 | 63 | 180 | 0 | 1023 | 1160 | 0 | 7023.66 | 15143.96 | 76.06
+19:30 | 0 | 105 | 8 | 0 | 0 | 0 | 0 | 0 | 411 | 0 | 0 | 35 | 17 | 115 | 149 | 195 | 15 | 35 | 108 | 0 | 0 | 250 | 417 | 0 | 35 | 329 | 0 | 0 | 0 | 55 | 15.5 | 21 | 0 | 400 | 15 | 16 | 78 | 0 | 9 | 50 | 0 | 54.36 | 12 | 12 | 0 | 97 | 68 | 13 | 1125 | 0 | 0 | 50 | 8 | 88 | 218 | 0 | 0 | 0 | 1115 | 0 | 70 | 0 | 230 | 290 | 240 | 51 | 25 | 189 | 40 | 90 | 137 | 68 | 8 | 17 | 64 | 168 | 25 | 0 | 23 | 320 | 0 | 270 | 29 | 0 | 131 | 0 | 16 | 0 | 83 | 28 | 142 | 0 | 100 | 17 | 78 | 0 | 107 | 0 | 0 | 0 | 0 | 8799.86 | 903 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 15 | 0 | 868 | 0 | 0 | 0 | 1432.34 | 0 | 40 | 0 | 35 | 35 | 15 | 93 | 19 | 0 | 0 | 0 | 21 | 0 | 0 | 144 | 0 | 146 | 0 | 141 | 0 | 414 | 0 | 0 | 180 | 37 | 90 | 0 | 100 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 255 | 65 | 220 | 0 | 945 | 1180 | 17 | 7480.34 | 16280.2 | 76.05
+20:00 | 0 | 88 | 8 | 0 | 0 | 0 | 0 | 0 | 410 | 0 | 0 | 35 | 17 | 115 | 130 | 195 | 15 | 35 | 108 | 0 | 0 | 250 | 420 | 0 | 35 | 328 | 0 | 0 | 0 | 63 | 15.5 | 21 | 0 | 400 | 13 | 16 | 79 | 0 | 16 | 50 | 0 | 54.36 | 12 | 12 | 0 | 97 | 100 | 20 | 1135 | 0 | 0 | 50 | 8 | 88 | 217 | 0 | 0 | 0 | 1145 | 0 | 70 | 0 | 230 | 290 | 240 | 51 | 25 | 192 | 40 | 81 | 136 | 34 | 9 | 17 | 45 | 162 | 8 | 0 | 23 | 320 | 0 | 270 | 29 | 0 | 124 | 0 | 16 | 0 | 83 | 28 | 142 | 0 | 101 | 17 | 78 | 0 | 107 | 0 | 0 | 0 | 0 | 8768.86 | 903 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 15 | 0 | 939 | 0 | 0 | 0 | 1464.7 | 0 | 40 | 0 | 35 | 35 | 12 | 93 | 20 | 0 | 0 | 0 | 21 | 0 | 0 | 148 | 0 | 143 | 0 | 144 | 0 | 414 | 0 | 0 | 180 | 35 | 90 | 0 | 84 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 180 | 65 | 220 | 0 | 823 | 1180 | 38 | 7391.7 | 16160.56 | 76.04
+21:00 | 0 | 70 | 8 | 0 | 0 | 0 | 0 | 0 | 410 | 0 | 0 | 35 | 17 | 115 | 130 | 45 | 15 | 35 | 72 | 0 | 0 | 300 | 440 | 0 | 35 | 328 | 0 | 0 | 0 | 108 | 15.5 | 21 | 0 | 440 | 13 | 16 | 64 | 0 | 37 | 50 | 0 | 54.36 | 12 | 12 | 0 | 98 | 105 | 28 | 1135 | 0 | 0 | 50 | 8 | 90 | 217 | 0 | 0 | 0 | 1160 | 0 | 70 | 0 | 230 | 290 | 240 | 51 | 25 | 198 | 37 | 50 | 136 | 17 | 8 | 17 | 16 | 162 | 8 | 0 | 23 | 315 | 0 | 245 | 29 | 0 | 133 | 0 | 16 | 0 | 83 | 25 | 142 | 0 | 101 | 17 | 88 | 0 | 117 | 0 | 0 | 0 | 0 | 8677.86 | 904 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 15 | 0 | 1033 | 0 | 0 | 0 | 1474.84 | 0 | 40 | 0 | 35 | 35 | 0 | 42 | 20 | 0 | 0 | 0 | 21 | 0 | 0 | 150 | 0 | 146 | 0 | 145 | 0 | 414 | 0 | 0 | 180 | 37 | 95 | 0 | 106 | 0 | 0 | 0 | 0 | 0 | 0 | 32 | 276 | 65 | 220 | 0 | 892 | 1195 | 35 | 7645.84 | 16323.7 | 76.03
+22:00 | 0 | 70 | 25 | 0 | 0 | 0 | 0 | 0 | 411 | 0 | 0 | 35 | 17 | 115 | 130 | 15 | 15 | 35 | 35 | 0 | 0 | 302 | 440 | 0 | 17 | 328 | 0 | 0 | 0 | 143 | 15.5 | 21 | 0 | 440 | 15 | 16 | 63 | 0 | 23 | 50 | 0 | 54.36 | 12 | 12 | 0 | 98 | 106 | 32 | 1135 | 0 | 0 | 50 | 8 | 90 | 218 | 0 | 0 | 0 | 1160 | 0 | 50 | 0 | 230 | 290 | 240 | 51 | 25 | 200 | 40 | 47 | 138 | 17 | 9 | 17 | 15 | 164 | 8 | 0 | 23 | 320 | 0 | 244 | 29 | 0 | 132 | 0 | 16 | 0 | 82 | 25 | 143 | 0 | 100 | 17 | 88 | 0 | 117 | 0 | 0 | 0 | 0 | 8628.86 | 903 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 0 | 1098 | 0 | 0 | 0 | 1475.46 | 0 | 40 | 0 | 35 | 35 | 0 | 42 | 20 | 0 | 0 | 0 | 21 | 0 | 0 | 149 | 0 | 145 | 0 | 143 | 0 | 414 | 0 | 0 | 180 | 37 | 95 | 0 | 106 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 279 | 65 | 220 | 0 | 889 | 1190 | 17 | 7652.46 | 16281.32
+23:00 | 0 | 70 | 33 | 0 | 0 | 0 | 0 | 0 | 410 | 0 | 0 | 16.5 | 17 | 115 | 145 | 15 | 15 | 35 | 47 | 0 | 0 | 308 | 455 | 0 | 17 | 328 | 0 | 0 | 0 | 143 | 15.5 | 21 | 0 | 460 | 15 | 16 | 63 | 0 | 19 | 50 | 0 | 37 | 12 | 12 | 0 | 98 | 109 | 34 | 1135 | 0 | 0 | 50 | 8 | 90 | 218 | 0 | 0 | 0 | 1162 | 0 | 30 | 0 | 230 | 290 | 240 | 51 | 25 | 201 | 40 | 48 | 140 | 16 | 9 | 17 | 15 | 166 | 8 | 0 | 16 | 320 | 0 | 244 | 29 | 0 | 135 | 0 | 16 | 0 | 83 | 25 | 142 | 0 | 98 | 17 | 88 | 0 | 117 | 0 | 0 | 0 | 0 | 8650 | 905 | 0 | 0 | 0 | 0 | 38 | 0 | 0 | 0 | 0 | 0 | 0 | 1100 | 0 | 0 | 0 | 1475.4 | 0 | 40 | 0 | 35 | 35 | 0 | 42 | 20 | 0 | 0 | 0 | 21 | 0 | 0 | 148 | 0 | 145 | 0 | 142 | 0 | 414 | 0 | 0 | 180 | 36 | 95 | 0 | 106 | 0 | 0 | 0 | 0 | 0 | 0 | 16 | 277 | 65 | 220 | 0 | 878 | 1200 | 17 | 7650.4 | 16300.4
+Total KWH | 0 | 1331098 | 531274 | 0 | 0 | 0 | 0 | 0 | 8823600 | 0 | 0 | 200448 | 133920 | 1739520 | 2940960 | 1814575 | 380969 | 418474 | 660960 | 0 | 0 | 4897745 | 11658399 | 0 | 184185 | 7444058 | 0 | 0 | 90171 | 2298000 | 394800 | 492120 | 0 | 10751818.18 | 446731 | 244385 | 779064 | 0 | 403200 | 345280 | 0 | 395805 | 297600 | 288960 | 22441 | 2313940 | 1732944 | 329280 | 25447272.73 | 3345 | 0 | 500160 | 101988 | 993599 | 5143206 | 0 | 0 | 0 | 27234543 | 51570 | 677454 | 0 | 5718500 | 7361600 | 6158000 | 1164864 | 713280 | 4934000 | 922464 | 581760 | 3422747 | 867360 | 55440 | 385080 | 949620 | 3628800 | 400282 | 415673 | 460336 | 7510000 | 0 | 6858000 | 692000 | 0 | 3264954.55 | 60260 | 364320 | 0 | 1604160 | 639456 | 3255300 | 0 | 2414770 | 90720 | 1212000 | 67194 | 1639200 | 0 | 7050 | 142470 | 42240 | 192943762.46 | 19010909 | 0 | 0 | 0 | 0 | 912000 | 0 | 0 | 226320 | 0 | 42912 | 410969 | 21810910 | 0 | 0 | 0 | 33521369 | 0 | 393654 | 0 | 313344 | 318048 | 27939 | 426848 | 152284 | 0 | 150688 | 281790 | 117211 | 0 | 293824 | 3767818 | 0 | 3919609 | 0 | 3948582 | 0 | 9149818 | 0 | 8280 | 4633000 | 883200 | 819546 | 147261 | 978316 | 0 | 0 | 0 | 39833.16 | 1159920 | 2817 | 184320 | 5760000 | 1548000 | 5363810 | 0 | 21949090 | 27454545.45 | 205200 | 170333984.61 | 363277747.07
+## Sheet: P1
+ |  |  |  | Power Grid Bangladesh PLC
+ |  |  |  | National Load Dispatch Center (NLDC)
+ |  |  |  | System Summary Report
+ |  | Date : | 01-07-2026
+ |  |  | Power Supply Scenario
+ | Day Peak Generation |  |  | 14658.25 | MW | 12:00 Hr. | Energy Generated |  |  | 363.27774707 |  | MKWHr.
+ | Day Peak Demand |  |  | 15025.25 | MW | 12:00 Hr. | Energy Unserverd |  |  | 8.7 |  | MKWHr.
+ | Evening Peak Generation |  |  | 16323.7 | MW | 21:00 Hr. | Energy Demand |  |  | 371.97774707 |  | MKWHr.
+ | Evening Peak Demand |  |  | 16835.7 | MW | 21:00 Hr. | Maximum Temperature |  |  | 33 |  | °C
+ | Minimum Generation of the Day |  |  | 13837.3 | MW | 07:00 Hr. | Total Gas Supplied |  |  | 970.83 |  | MMCFD
+ | Maximum Generation of the Day |  |  | 16323.7 | MW | 21:00 Hr. | Production Cost per KWHr |  |  | 6.331365618555227 |  | Tk.
+ |  |  | Zone-wise Generation Summary (MKWHr.)
+ |  |  |  | Gas | Coal | HFO | HSD | Hydro | Solar | Import | Wind | Total
+ | Dhaka Zone |  |  | 44.46254018 | 0 | 12.634383 | 0 | 0 | 0.090171 | 0 | 0 | 57.18709418 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Gas | 135.01615873 | Gas | 454534487.7666
+ | Chattogram Zone |  |  | 5.472486 | 52.68181573 | 6.129861 | 0 | 2.31394 | 0.074011 | 0 | 0.4032 | 67.07531373 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Coal | 135.17256118 | Coal | 898482170.2154
+ | Cumilla Zone |  |  | 30.780535 | 0 | 3.992252 | 0 | 0 | 0.415673 | 3.6288 | 0 | 38.81726 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | HFO | 29.720278 | HFO | 524866621.97
+ | Mymensingh Zone |  |  | 0 | 0 | 2.98416 | 0 | 0 | 0.216714 | 0 | 0 | 3.200874 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | HSD | 0.22632 | HSD | 4571664.0
+ | Sylhet Zone |  |  | 26.60296055 | 0 | 0 | 0 | 0 | 0.06026 | 0 | 0 | 26.66322055 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Hydro | 2.31394 | Hydro | 8816111.4
+ | Khulna Zone |  |  | 0 | 21.81091 | 0.042912 | 0.22632 | 0 | 0.410969 | 19.922909 | 0 | 42.41402 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Solar | 3.35221116 | Solar | 53967615.0032
+ | Barishal Zone |  |  | 6.91181 | 55.16363545 | 0.38952 | 0 | 0 | 0.002817 | 0 | 0 | 62.46778245 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Import | 57.073078 | Import | 348874495.43
+ | Rajshahi Zone |  |  | 20.785827 | 0 | 1.749328 | 0 | 0 | 0.734582 | 33.521369 | 0 | 56.791106 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Wind | 0.4032 | Wind | 5931072.0
+ | Rangpur Zone |  |  | 0 | 5.5162 | 1.797862 | 0 | 0 | 1.34701416 | 0 | 0 | 8.66107616
+ | Total |  |  | 135.01615873 | 135.17256118 | 29.720278 | 0.22632 | 2.31394 | 3.35221116 | 57.073078 | 0.4032 | 363.27774707
+ |  |  |  | Production Cost (Tk.)
+ |  |  |  | Fuel | Tk. |  | Fuel | Tk.
+ |  |  |  | Gas | 454534487.7666 |  | Hydro | 8816111.4
+ |  |  |  | Coal | 898482170.2154 |  | Solar | 53967615.0032
+ |  |  |  | HFO | 524866621.97 |  | Import | 348874495.43
+ |  |  |  | HSD | 4571664 |  | Wind | 5931072
+ |  |  |  |  | Total: | 230,00,44,237 |  | Tk.
+E-W Interconnector & Import Scenario
+Energy Flow from East to West: |  |  | KWHr: | 0 |  | Import through HVDC C/B Interconnector: |  |  | MKWHr: | 19.010909 | Peak Hr Flow | 904.00 MW at 21:00 hrs.
+Energy Flow from West to East: |  |  | KWHr: | 49159672.73 |  | Import through Adani C/B Interconnector: |  |  | MKWHr: | 33.521369 | Peak Hr Flow | 1474.84 MW at 21:00 hrs.
+Power Flow during Peak Demand (W-E): |  |  | MW: | 2302 |  | Import through Cumilla C/B Interconnector: |  |  | MKWHr: | 3.6288 | Peak Hr Flow | 162.00 MW at 21:00 hrs.
+Maximum Power Flow (W-E): |  |  | MW: | 2812 |  | Total Import through C/B Interconnector: |  |  | MKWHr: | 56.161078 | Peak Hr Flow | 2540.84 MW at 21:00 hrs.
+ |  |  | Zone-wise Load-shed and Demand Summary (MW) at evening peak Hour (21:00 Hr.)
+ |  |  |  | Zone |  | Load-Shed |  | Demand
+ |  |  |  | Dhaka |  | 54 |  | 5853
+ |  |  |  | Chattogram |  | 0 |  | 1624
+ |  |  |  | Cumilla |  | 20 |  | 1562
+ |  |  |  | Mymensingh |  | 416 |  | 1495
+ |  |  |  | Sylhet |  | 0 |  | 716
+ |  |  |  | Khulna |  | 0 |  | 1878
+ |  |  |  | Barishal |  | 0 |  | 512
+ |  |  |  | Rajshahi |  | 0 |  | 1574
+ |  |  |  | Rangpur |  | 0 |  | 1111
+ |  |  |  | Total |  | 490 |  | 16325
+ |  | Status of unavailable Power Plant
+ |  | Planned S/D |  |  |  |  | Forced S/D
+ |  | Sl | Plant Name |  |  | Capacity | Sl | Plant Name |  |  | Capacity
+ |  | 1 | Baghabari  100 MW GTPP |  |  | 100 | 1 | Karnaphuli Hydro PP Unit-3 |  |  | 50
+ |  | 2 | Barapukuria TPP  Unit-2 |  |  | 85
+ |  | 3 | Karnaphuli Hydro PP Unit-5 |  |  | 50
+ |  | 4 | Siddhirgonj 210 MW  TPP |  |  | 115
+ |  |  |  |  | Total | 350 |  |  |  | Total | 50
+ |  |  |  | Total Unavailable Capacity |  |  |  | 400
+ |  |  |  |  | Event Summary
+ | Outage Time | Restoration Time | Description of Event |  |  |  |  |  |  |  | Description of Event
+ | 08:22 | 14:57 | Haripur 230/132kV S/S Bus-2 Scheduled S/D Due to Temperature Correction work.
+ | 08:29 | 08:53 | Jhenaidah 132/33kV S/S Jhenaidah-Magura, 132kV Circuit-1(L7) Tripped showing Distance |  |  |  |  |  |  |  | 35.0MW load
+ |  |  | Relay ABC, ZONE2,3-29.81KM relays. |  |  |  |  |  |  |  | interrup.
+ | 08:29 | 08:54 | Jhenaidah-Magura 132 kV Ckt-2 Tripped from Jhenaidah 132/33kV end showing Distance relay |  |  |  |  |  |  |  | 35.0MW load
+ |  |  | ABC,ZONE1-9.75KM relays. |  |  |  |  |  |  |  | interrup. Jhenaidah
+ |  |  |  |  |  |  |  |  |  |  | 132/33kV end
+ | 08:52 | 08:54 | Jhenaidah-Magura 132 kV Ckt-1 Tripped from Magura 132/33kV end showing Distance Relay. |  |  |  |  |  |  |  | 67.0MW load
+ |  |  | relays Due to Thundering. |  |  |  |  |  |  |  | interrup. Magura
+ |  |  |  |  |  |  |  |  |  |  | 132/33kV end
+ | 08:52 | 08:58 | Jhenaidah-Magura 132 kV Ckt-2 Tripped from Magura 132/33kV end showing Distance Relay. |  |  |  |  |  |  |  | 67.0MW load
+ |  |  | relays Due to Thundering. |  |  |  |  |  |  |  | interrup. Magura
+ |  |  |  |  |  |  |  |  |  |  | 132/33kV end
+ | 10:04 | 14:21 | Dhamrai 132/33kV S/S Transformer-2 LT Scheduled S/D Due to Red hot maintenances by PBS |  |  |  |  |  |  |  | 40.0MW load
+ |  |  |  |  |  |  |  |  |  |  | interrup.
+ | 10:05 | 14:20 | Dhamrai 132/33kV S/S Transformer-2 HT Scheduled S/D Due to Red hot maintenance by PBS |  |  |  |  |  |  |  | 40.0MW load
+ |  |  |  |  |  |  |  |  |  |  | interrup.
+ | 10:16 | 16:12 | Siddhirganj-Ullon (T at Maniknagar)  132kV Ckt-1 Tripped from Siddhirganj 132/33kV end
+ |  |  | showing Distance Relay. relays Due to Due to line Fault.
+ |  | 11:13 | Goalpara 132/33kV S/S T-6 HT is restored.
+ |  | 11:14 | Goalpara 132/33kV S/S T-6 LT is restored.
+ | 11:41 | 18:07 | Korerhat 400/230/132kV S/S ATR-3(7103T) LT Project Work S/D Due to Project work
+ | 11:42 | 18:05 | Korerhat 400/230/132kV S/S ATR-3(7103T) HT Project Work S/D Due to Project work
+ | 12:10 | 16:12 | Siddhirganj-Ullon (T at Maniknagar)  132kV Ckt-1 Forced S/D from Siddhirganj 132/33kV end
+ |  |  | Due to Due to line fault (Distance Relay, B-phase, Zone-1) & Repair of T-connector &
+ |  |  | short loop conductor connection of B-phase of T-Point (between 667M and 666M No. DS of
+ |  |  | Diameter).
+ | 12:49 | 15:46 | Feni 132/33kV S/S T-2(415T) LT Scheduled S/D Due to 132kV Bus coupler GCB Y & B Phase Red
+ |  |  | hot Maintenance
+ | 12:49 | 15:45 | Feni 132/33kV S/S T-2(415T) HT Scheduled S/D Due to 132kV Bus coupler GCB Y & B Phase Red
+ |  |  | hot Maintenance
+ | 13:26 | 16:34 | Gallamari- Khulna (S)  132kV Ckt-1 Project Work S/D from Gollamari 132/33kV end Due to
+ |  |  | Shutdown taken by DWZTGEP.
+ | 13:26 | 16:05 | Gallamari- Khulna (S)  132kV Ckt-2 Project Work S/D from Gollamari 132/33kV end Due to
+ |  |  | Shutdown taken by DWZTGEP.
+ | 13:50 |  | BIPTC S/S 20D09C 20MVA HT Tripped showing Buccholz Relay relays Due to Tripped by
+ |  |  | Buccholz Relay.
+ | 13:50 |  | BIPTC S/S Block-01, Trafo-01 HT Tripped showing Primary Source Fail relays Due to Tripped
+ |  |  | for it's Source (20 MVA Trafo) Trip
+ | 13:50 |  | BIPTC S/S Block-02, Trafo-01 LT Tripped showing Primary Source Fail relays Due to Tripped
+ |  |  | for it's Source (20 MVA Trafo) Trip
+ | 13:50 |  | BIPTC S/S Block-02, Trafo-01 HT Tripped showing Primary Source Fail relays Due to Tripped
+ |  |  | for it's Source (20 MVA Trafo) Trip
+ | 13:50 |  | BIPTC S/S 20D09C 20MVA LT Tripped showing Buccholz Relay relays Due to Tripped by
+ |  |  | Buccholz Relay
+ | 13:50 |  | BIPTC S/S Block-01, Trafo-01 LT Tripped showing Primary Source Fail relays Due to Tripped
+ |  |  | for it's Source (20 MVA Trafo) Trip
+ |  | 16:04 | Gopalganj 132/33kV S/S Gallamari-2 is restored.
+ |  | 16:33 | Gopalganj 132/33kV S/S Gallamari-1 is restored.
+ | 18:41 | 20:27 | Hasnabad 230/132kV S/S AUTO TR-1 HT Tripped showing 86T1,86T2,86L1,86L2 relays Due to
+ |  |  | false signal.
+ |  | 19:08 | Patuakhali-Payra  132kV Ckt-2 is restored.
+ | 20:31 | 21:09 | Niamatpur 132/33kV S/S Transformer-1(407T) LT Tripped showing Master Trip Relay OPTD. |  |  |  |  |  |  |  | 21.0MW load
+ |  |  | relays Due to 33 kV PBS Side Auxiliary transformer flushing. |  |  |  |  |  |  |  | interrup.
+ | 21:00 |  | Evening Peak Generation: 16323 MW.
+ |  | 03:16 | Kishoreganj-Mymensingh  132kV Ckt-2 is restored.
+ | 03:18 | 03:42 | Barguna 132/33kV S/S Transformer-1 LT Tripped showing REF615 relays Due to Barguna BREB-1 |  |  |  |  |  |  |  | 10.0MW load
+ |  |  | (barguna pbs) feeder fault ( there is a fire at the substation). |  |  |  |  |  |  |  | interrup.
+ | 03:18 | 03:42 | Barguna 132/33kV S/S Transformer-2 LT Tripped showing REF615 relays Due to Barguna BREB-1 |  |  |  |  |  |  |  | 10.0MW load
+ |  |  | (barguna pbs) feeder fault ( there is a fire at the substation). |  |  |  |  |  |  |  | interrup.
+ | 05:42 |  | Jashore 132/33kV S/S T-1 LT Forced S/D Due to Redhot Maintanance
+ | 05:42 |  | Jashore 132/33kV S/S T-1 HT Forced S/D Due to Redhot Maintanance
+ | 06:00 |  | Minimum generation 13852 MW
+ | 06:08 |  | Hasnabad 230/132kV S/S AUTO TR-1 HT Tripped showing LOR 86T activeted relays Due to
+ |  |  | unknown
+ | 06:08 |  | Hasnabad 230/132kV S/S AUTO TR-1 LT Tripped showing LOR relays.
+ | 06:20 |  | BIPTC S/S Block-01, Trafo-02 LT Tripped showing PRV Trip relays Due to Tripped by Source
+ |  |  | Trip
+ | 06:20 |  | BIPTC S/S Block-01, Trafo-02 HT Tripped showing PRV Trip relays Due to Tripped by Source
+ |  |  | Trip
+ | 06:20 |  | BIPTC S/S Block-02, Trafo-02 HT Tripped showing PRV Trip relays Due to Tripped by Source
+ |  |  | Trip
+ | 06:20 |  | BIPTC S/S Block-02, Trafo-02 LT Tripped showing PRV Trip relays Due to Tripped by Source
+ |  |  | Trip
+ | 06:20 |  | BIPTC S/S 20D10A 20MVA HT Tripped showing PRV Trip relays Due to Tripped by PRV
+ | 06:20 |  | BIPTC S/S 20D10A 20MVA LT Tripped showing PRV Trip relays Due to Tripped By PRV
+ | 07:10 |  | Hasnabad 230/132kV S/S AUTO TR-1 HT Scheduled S/D Due to maintenace ATR-01 Y@
+ | 07:10 |  | Hasnabad 230/132kV S/S AUTO TR-1 LT Scheduled S/D Due to Maintence
+ | 07:54 |  | BIPTC S/S 20D10A 20MVA HT Scheduled S/D Due to Shutdown is taken for PRV(Pressure Relief
+ |  |  | Valve) maintenance
+ |  | Sub-Divisional Engineer |  |  |  | Executive Engineer |  |  |  | Superintendent Engineer
+ |  | Network Operation Division |  |  |  | Network Operation Division |  |  |  | Network Operation Division
+## Sheet: P2
+ |  |  | Power Grid Bangladesh PLC
+ |  |  | National Load Dispatch Center (NLDC)
+ |  |  | EVENING PEAK GENERATION AND DAY LONG ENERGY DATA OF POWER STATIONS
+ |  | Date : | 01-07-2026
+ | Sl. | Name of the
+ Power Stations |  | Producer | Installed Capacity | Present Capacity | Peak Hour Generation | Energy Generated | Remarks
+ |  |  |  |  | Unit No. X Capacity | MW | MW | KWH
+ | 1 | Ghorasal Repowered CCPP Unit-3 |  | PDB | 1*260 | 260 | 0 | 0 | GT is under maintenance
+ | 2 | Ghorasal Repowered CCPP Unit-4 |  | PDB | 1*210 | 240 | 0 | 0 | Gas shortage
+ |  | Ghorasal TPP Unit-5 |  | PDB | 1*210 | 190 | 0 | 0 | Gas shortage
+ | 3 | Ghorasal 365 MW CCPP Unit-7 |  | PDB | 1*243+1*122 | 365 | 0 | 0 | Gas shortage
+ | 4 | Ghorashal 108 MW PP (Regent) |  | IPP | 34*3.35 | 97.7 | 0 | 0 | Gas (RMS) problem
+ | 5 | Haripur GTPP |  | SBU,PDB | 32*2 | 20 | 0 | 0 | -
+ | 6 | Haripur 412 MW CCPP |  | EGCB | 1*273+1*139 | 412 | 410 | 8823600 | AGC
+ |  | Haripur 360 MW CCPP (HPL) |  | IPP | 1*235+1*125 | 0 | 0 | 0 | Contract Expired
+ | 7 | Meghnaghat 450 MW CCPP (MPL) |  | IPP | 2*150+1*150 | 450 | 0 | 0 | Gas shortage
+ | 8 | Meghnaghat CCPP(Summit) |  | IPP | 2*110+1*110 | 335 | 300 | 4897745 | Gas shortage
+ | 9 | Madanganj-55 MW PP(Summit) |  | IPP | 3*17+1*11.3 | 55 | 15 | 380969 | Liquid fuel shortage
+ | 12 | Siddhirgonj 210 MW TPP |  | PDB | 1*210 | 115 | 0 | 0 | Under Major Overhauling
+ | 13 | Siddhirgonj 2*120 MW GTPP |  | EGCB | 2*105 | 210 | 0 | 0 | Gas shortage
+ | 14 | Siddhirganj 335 MW CCPP |  | EGCB | 1*217+118 | 335 | 328 | 7444058 | Gas shortage
+ | 15 | Gagnagar 102 MW PP (Digital Power) |  | IPP | 12*8.924 | 102 | 0 | 0 | Liquid fuel shortage
+ | 17 | Kamalaghat 54 MW PP(Banco Energy) |  | IPP | 3*18 | 53.97 | 35 | 200448 | Liquid fuel shortage
+ | 18 | Kodda 150 MW PP BRPL |  | PDB-RPCL | 9*17.06 | 149.36 | 130 | 2940960 | Liquid fuel shortage
+ | 18 | Manikganj 55 MW PP (Northern) |  | IPP | 19.3*3 | 55 | 35 | 418474 | Liquid fuel shortage
+ | 20 | Nababganj 55 MW PP (Southern power ) |  | IPP | 19.3*3 | 55 | 35 | 184185 | Liquid fuel shortage
+ | 22 | Summit Power Ashulia |  | IPP | 0 | 33.75 | 15.5 | 394800 | Low gas pressure
+ | 22 | Summit Power Madhabdi |  | IPP | 3*3.67+4*8.73 | 23 | 21 | 492120 | -
+ | 25 | Gazipur 52 MW PP |  | RPCL | 6*8.9 | 52.194 | 8 | 531274 | Liquid fuel shortage
+ | 26 | Tongi 80 MW GTPP |  | PDB | 1* 105 | 105 | 0 | 0 | Under Maintenance of Exciter
+ | 27 | Kodda 300 MW PP Unit-2 (Summit) |  | IPP | 18*17.06 | 300 | 45 | 1814575 | Liquid fuel shortage
+ | 28 | Kodda 149 MW PP Unit-1 (Summit) |  | IPP | 8*18.45+8.97 | 149 | 115 | 1739520 | Liquid fuel shortage
+ | 29 | Gazipur 100 MW PP |  | RPCL | 6*17.5 | 105 | 70 | 1331098 | Liquid fuel shortage
+ | 30 | Meghnaghat 104 MW PP (OPCL) |  | IPP | 6*18.5 | 104 | 0 | 0 | Liquid fuel shortage
+ | 31 | Manikgonj 162MW PP(MPGL) |  | IPP | 9*18 | 162 | 72 | 660960 | Liquid fuel shortage
+ | 32 | Spectra Solar Plant Ltd. |  | IPP | 0 | 35 | 0 | 90171 | -
+ | 33 | Kanchan Purbachal Power Generation Ltd. |  | IPP | 18.4*3 | 55 | 17 | 133920 | Liquid fuel shortage
+ | 34 | Unique Meghnaghat Power Limited (UMPL) |  | IPP | 0 | 584 | 440 | 10751818.18 | AGC+Gas shortage
+ | 35 | Meghnaghat CCPP(Summit)-2 |  | IPP | 1*409+1*202 | 583 | 440 | 11658399 | FGMO
+ |  | JERA Meghnaghat Power Limited |  | IPP | 250*2+268 | 718 | 0 | 0 | Gas shortage
+ |  | Sreepur 150 MW PP BRPL |  | PDB-RPCL | 9*18 | 160 | 108 | 2298000 | Liquid fuel shortage
+ | Dhaka Area Total |  |  |  |  | 6668.974 | 2639.5 | 57187094.18
+ | 36 | Chattogram TPP |  | PDB | 1*210+1*210 | 360 | 0 | 0 | Unit #1 Under Maintenance, Unit#2 Gas Shortage
+ | 37 | Raozan 25 MW PP |  | IPP | 3*8.9 | 25.5 | 8 | 101988 | Liquid fuel shortage
+ | 38 | Teknaf  20MW PP (Solartech) |  | IPP | 0 | 20 | 0 | 51570 | -
+ | 39 | Patenga 50MW PP (Baraka) |  | IPP | 8*6.98 | 50 | 50 | 500160 | Liquid fuel shortage
+ | 40 | Karnaphuli Hydro PP Unit-1,2,3,4, 5 |  | PDB | 2*40+3*50 | 230 | 98 | 2313940 | -
+ | 41 | Sikalbaha 225MW CCPP |  | PDB | 1*150+1*75 | 225 | 217 | 5143206 | -
+ | 42 | Sikalbaha Peaking GT |  | PDB | 1*150 | 150 | 0 | 0 | -
+ | 43 | Sikalbaha 105 MW PP (Baraka Sikalbaha) |  | IPP | 6*17.5 | 105 | 90 | 993599 | Liquid fuel shortage
+ | 44 | Hathazari 100 MW peaking PP |  | PDB | 11*8.9 | 98 | 0 | 0 | Liquid fuel shortage
+ | 45 | Dohazari -Kalaish 100 MW Peaking |  | PDB | 6*17 | 102 | 50 | 345280 | Liquid fuel shortage
+ | 46 | Juldah 100 MW PP Unit-3 (Acorn) |  | IPP | 8*13.5 | 100 | 12 | 297600 | Liquid fuel shortage
+ |  | Malancha, Ctg. EPZ (United) |  | IPP | 5*8.73+3*9.34 | 42 | 28 | 329280 | -
+ | 47 | Chattogram 108 MW PP (ECPV) |  | IPP | 16*7 | 108 | 64 | 779064 | Liquid fuel shortage
+ | 48 | Kaptai 7 MW  Solar PP |  | PDB | 0 | 6 | 0 | 22441 | -
+ | 49 | Anwara 300 MW PP (United) |  | IPP | 17*17+24 | 300 | 16 | 244385 | Liquid fuel shortage
+ | 50 | Jodiac Power |  | IPP | 3*18.55+1*3.6 | 54.363 | 54.36 | 395805 | -
+ | 51 | Karnaphuli Power Ltd. |  | IPP | 18.415*6+6.5 | 110 | 105 | 1732944 | -
+ | 52 | Juldah unit-2 (Acorn) |  | IPP | 8*13.6 | 100 | 12 | 288960 | Liquid fuel shortage
+ | 53 | Anlima Energy Ltd. |  | IPP | 6*21.2 | 116 | 13 | 446731 | FGMO
+ | 54 | Mirsharai 150 MW BRPL |  | IPP | 18.5*9 | 163 | 0 | 3345 | Under Maintenance
+ | 55 | SS Power |  | IPP | 2*660 | 1224 | 1160 | 27234543 | Coal Shortage Due to BPDB Payment Default
+ | 56 | Cox's Bazar Wind |  | PDB | 22*3 | 60 | 37 | 403200 | -
+ | 57 | Matarbari 2*600 MW (CPGCBL) |  | CPGCL | 2*600 | 1150 | 1135 | 25447272.73 | Machine Problem
+ | Chattogram Area Total |  |  |  |  | 4898.863 | 3149.36 | 67075313.73
+ | 58 | Ashuganj CCPP 225 MW |  | APSCL | 1X142+1X75 | 221.25 | 198 | 4934000 | FGMO
+ | 59 | Ashuganj 450 MW CCPP(North) |  | APSCL | 1*360 | 350.01 | 290 | 7361600 | Machine Problem
+ | 60 | Ashuganj 450 MW CCPP(South) |  | APSCL | 1*360 | 342.01 | 240 | 6158000 | Machine Problem
+ | 61 | Ashuganj 420 MW CCPP(East) |  | APSCL | 284*1+116*1 | 393 | 230 | 5718500 | Gas shortage
+ | 62 | Ashuganj TSK 50 MW PP |  | APSCL | 14*3.96 | 46.701 | 37 | 922464 | Machine Problem
+ | 63 | Ashuganj 55 MW PP (Precision) |  | QRPP | 15*4 | 52.824 | 25 | 713280 | Gas shortage
+ | 64 | Ashuganj 195 MW PP (APSCL-United) |  | IPP | 20X9.73+1X16 | 195 | 0 | 0 | Gas shortage
+ | 65 | Ashuganj 51 MW PP (Midland) |  | IPP | 6X9.34 | 51 | 51 | 1164864 | -
+ | 66 | Ashuganj 150MW PP (Midland) |  | IPP | 23X7.015 | 150 | 70 | 677454 | -
+ | 67 | Titas 50 MW Peaking PP |  | PDB | 6*8.92 | 52 | 23 | 460336 | Engine Problem
+ | 68 | Chandpur 150 MW CCPP |  | PDB | 1*106+1*57 | 163 | 136 | 3422747 | Low gas pressure
+ | 69 | Chandpur 200MW (Desh energy) |  | IPP | 12*18.4 | 200 | 17 | 867360 | Liquid fuel shortage
+ |  | Import (Tripura) |  | Import | 0 | 160 | 162 | 3628800 | -
+ | 71 | Jangalia 52 MW PP (Lakdanavi) |  | IPP | 6*8.92 | 52.2 | 8 | 400282 | Liquid fuel shortage
+ | 72 | Cumilla 25 MW PP (Summit) |  | SIPP,REB | 3*3.67+2*6.97 | 25 | 17 | 385080 | -
+ | 73 | Feni Lanka Power |  | IPP | 7*18.415+1*9.78 | 114 | 16 | 949620 | Liquid fuel shortage
+ | 74 | Chowmuhani 113 MW |  | IPP | 12*9.78+2*3.1 | 113 | 8 | 55440 | Liquid fuel shortage
+ | 75 | Chandpur 115(Doreen) |  | IPP | 4*18.5+2*22.5 | 115 | 50 | 581760 | Liquid fuel shortage
+ | 76 | Sonagazi 75 MW (AC) Solar Power Plant |  | EGCB | 0 | 75 | 0 | 415673 | -
+ | Cumilla Area Total |  |  |  |  | 2870.995 | 1578 | 38817260
+ |  | Muktagacha Solartech Energy Ltd |  | IPP | 1*20 | 20 | 0 | 67194 | -
+ | 77 | RPCL 210MW CCPP |  | RPCL | 4*35+1*70 | 210 | 0 | 0 | Low gas pressure
+ | 79 | Sarishabari 3 MW Solar Plant |  | IPP | 0 | 2.71 | 0 | 7050 | -
+ | 80 | Mymensingh 200 MW PP (United) |  | IPP | 9.78*21 | 200 | 117 | 1639200 | Liquid fuel shortage
+ | 81 | Jamalpur 115 MW PP (United) |  | IPP | 9.78*12 | 115 | 88 | 1212000 | Liquid fuel shortage
+ | 82 | Sutiakhali 50 MW Solar PP |  | IPP | 0 | 50 | 0 | 142470 | -
+ | 83 | Tangail Palli Power Gen 22 MW |  | IPP | 4*6.7 | 22 | 0 | 42240 | Liquid fuel shortage
+ | 84 | Bhairob 54.5 MW |  | IPP | 3*18.2 | 54.5 | 17 | 90720 | Liquid fuel shortage
+ | Mymensingh Area Total |  |  |  |  | 674.21 | 222 | 3200874
+ |  | Moulvibazar 10 MW Solar Power Plant |  | IPP | 1*10 | 0 | 0 | 60260 | -
+ | 85 | Fenchugonj CCPP Phase-1 |  | PDB | 2*32+1*33 | 90 | 29 | 692000 | Plant availability less
+ | 86 | Fenchugonj CCPP Phase-2 |  | PDB | 2*35+1*35 | 90 | 0 | 0 | Gas shortage
+ | 87 | Kushiara 163 MW CCPP (KP) |  | IPP | 1*109+1*54 | 163 | 133 | 3264954.55 | AGC+FGMO
+ | 88 | Shajibazar 330 MW CCPP |  | PDB | 3*110 | 330 | 142 | 3255300 | -
+ | 91 | Shahjibazar GTPP Unit- 8 & 9 |  | PDB | 2*35 | 66 | 25 | 639456 | GT-9 Under Maintenance
+ | 92 | Shahjibazar 86MW PP (Shahjibazar) |  | RPP | 32*2.90 | 86 | 83 | 1604160 | Gas shortage
+ | 93 | Shahjibazar 100 MW GTPP |  | PDB | 1*100 | 100 | 0 | 0 | machine problem
+ | 94 | Sylhet 225 MW CCPP |  | PDB | 1*142+1*89 | 231 | 101 | 2414770 | ST Under Maintenance
+ | 95 | Sylhet  20 MW GTPP |  | PDB | 1*20 | 20 | 0 | 0 | -
+ | 96 | Shahjahanulla 25 MW PP |  | SIPP,REB | 3*9.34 | 25 | 16 | 364320 | -
+ | 97 | Bibiana-II 341 MW CCPP (Summit) |  | IPP | 1*222+1*119 | 341 | 315 | 7510000 | FGMO
+ | 98 | Bibiyana-III 400 MW CCPP |  | PDB | 285*1+134*1 | 400 | 245 | 6858000 | Machine Problem
+ | 99 | Bibiyana South 400 MW |  | PDB | 1*400 | 383 | 0 | 0 | Under Maintenance
+ | Sylhet Area Total |  |  |  |  | 2325 | 1089 | 26663220.55
+ | 100 | Bheramara GTPP Unit-3 |  | PDB | 1X20 | 16 | 0 | 0 | Contract Expired
+ | ** | Bheramara (HVDC ) |  | Import | 2X500 | 1000 | 904 | 19010909 | -
+ | 101 | Faridpur 50 MW Peaking PP |  | PDB | 8*6.89 | 54 | 0 | 0 | Liquid fuel shortage
+ | 102 | Khulna 225 MW CCPP |  | NWPGCL | 1X150+1X75 | 230 | 0 | 0 | -
+ | 103 | Gopalganj 100 MW Peaking PP |  | PDB | 16*6.98 | 109 | 0 | 0 | Liquid fuel shortage
+ | 104 | Bheramara 410 MW CCPP |  | NWPGCL | 1X278+1X132 | 410 | 0 | 0 | Gas shortage
+ | 105 | Rupsha 105 MW PP (Orion rupsha) |  | IPP | 6*18.445 | 105 | 0 | 0 | Liquid fuel shortage
+ | 106 | Madhumati 100 MW PP |  | NWPGCL | 6*18 | 105 | 15 | 42912 | Liquid fuel shortage
+ | 107 | Mongla Orion 100 MW Solar PP |  | IPP | 100 | 100 | 0 | 410969 | -
+ | 108 | Khulna 330 MW CCPP |  | PDB | 1*220+1*110 | 336 | 0 | 226320 | -
+ | 109 | Rampal 1320 MW (BIFPCL) |  | PDB | 660*2 | 1234.2 | 1033 | 21810910 | Machine Problem
+ | ** | HVDC(Nepal) |  | Import | 1*40 | 40 | 38 | 912000 | -
+ | Khulna Area Total |  |  |  |  | 3739.2 | 1990 | 42414020
+ |  | Patuakhali 1320 MW (RNPL) |  | RNPL | 660*2 | 1244 | 892 | 21949090 | -
+ | 110 | Barisal 110 MW PP (Summit ) |  | IPP | 7X17.076 | 110 | 32 | 184320 | Liquid fuel shortage
+ | 111 | Bhola  33 MW PP (Venture) |  | NENP | 1X34.50 | 11.04 | 0 | 0 | Contract Expired
+ | 112 | Bhola 225 MW  CCPP |  | PDB | 2X63+1X68 | 194 | 65 | 1548000 | GT-1 & ST under maint
+ | 113 | Payra 1320 MW |  | BCPCL | 2*622 | 1244 | 1195 | 27454545.45 | FGMO
+ | 114 | Bhola Nutan Biddut BD LTD |  | IPP | 2*75+1*75 | 220 | 220 | 5363810 | MVAR Subjected to Grid Voltage
+ | 115 | United Payra Power Ltd. |  | IPP | 8*18.5+1*9.5 | 150 | 35 | 205200 | Liquid fuel shortage
+ | 116 | Barisal 307 MW |  | BCPCL | 307X1 | 307 | 276 | 5760000 | FGMO
+ | 117 | Barisal 1 MW Solar Plant |  | IPP | 0 | 1 | 0 | 2817 | -
+ | Barishal Area Total |  |  |  |  | 3481.04 | 2715 | 62467782.45
+ |  | Pabna 64 MW Solar Plant |  | PDB | 11*6.6 | 64.55 | 0 | 150688 | Contract Expired
+ | 118 | Baghabari 71 MW GTPP |  | PDB | 1X71 | 70 | 0 | 0 | Gas shortage
+ |  | Baghabari  100 MW GTPP |  | PDB | 1*100 | 100 | 0 | 0 | Machine Under Maintenance
+ | 119 | Baghabari  50 MW Peaking PP |  | PDB | 6*8.9 | 52 | 40 | 393654 | Engine Problem
+ | 120 | Bera 70 MW Peaking PP |  | PDB | 9*8.29 | 71 | 0 | 27939 | Engine Problem
+ | 122 | Katakhali 50 MW Peaking PP |  | PDB | 6*8.7 | 50 | 20 | 152284 | Partial Shutdown due to maintenance
+ | 123 | Sirajgonj 225MW CCPP Unit-1 |  | NWPGCL | 1*150+1*75 | 214 | 150 | 3767818 | Gas shortage
+ | 124 | Sirajgonj 225MW CCPP Unit-2 |  | NWPGCL | 1*150+1*75 | 220 | 146 | 3919609 | Gas shortage
+ | 125 | Sirajgonj 225MW CCPP Unit-3 |  | NWPGCL | 1*141 | 220 | 145 | 3948582 | Standby as per instruction of NLDC
+ | 126 | Sirajgonj 400 MW CCPP Unit-4 |  | NWPGCL | 1*282+1*132 | 413.792 | 414 | 9149818 | AGC+FGMO
+ | 127 | Santahar  50 MW Peaking PP |  | PDB | 6*8.7 | 50 | 21 | 117211 | Engine Problem
+ | 129 | Natore 52 MW PP (Rajlanka) |  | IPP | 6*8.92 | 52.2 | 0 | 0 | Liquid fuel shortage
+ | 130 | Chapainawabganj 100 MW Peaking PP |  | PDB | 12*8.924 | 104 | 42 | 426848 | Liquid fuel shortage
+ | 131 | Bagura 113 MW PP (Confidence)-2 |  | IPP | 6*18.55+7.2 | 113 | 35 | 318048 | Liquid fuel shortage
+ | 132 | Bagura 113 MW PP (Confidence)-1 |  | IPP | 6*18.55 | 113 | 35 | 313344 | Liquid fuel shortage
+ | 133 | Sirajgonj 6.55 MW Solar |  | NWPGCL | 0 | 6.12 | 0 | 8280 | -
+ | ** | Adani Power Jharkhanda Ltd |  | Import | 2*673 | 1469.13 | 1474.84 | 33521369 | -
+ | 134 | Sirajganj 68 MW Solar Park |  | IPP | 0 | 68 | 0 | 293824 | -
+ |  | Pabna Solar 100 MW |  | IPP | 0 | 100 | 0 | 281790 | -
+ |  | Sirajganj 2 MW Wind Power Plant |  | PDB | 0.25*8 | 2 | 0 | 0 | Contract Expired
+ | Rajshahi Area Total |  |  |  |  | 3552.792 | 2522.84 | 56791106
+ |  | Saidpur 150 MW Simple Cycle Power Plant |  | PDB | 1*150 | 162.443 | 0 | 0 | -
+ | 135 | Barapukuria TPP Unit-1 & 2 |  | PDB | 1*125+1*125 | 170 | 37 | 883200 | U-2 Under maint.
+ | 136 | Barapukuria 275 MW TPP Unit-3 |  | PDB | 1*275 | 274 | 180 | 4633000 | Machine Problem
+ | 137 | Rangpur 20 MW  GTPP |  | PDB | 1*20 | 20 | 0 | 0 | -
+ | 138 | Saidpur 20 MW GTPP |  | PDB | 1*20 | 20 | 0 | 0 | -
+ | 139 | Rangpur 113 MW PP (Confidence) |  | IPP | 9*6.984+7*7.015+3.15*2 | 113 | 106 | 978316 | Liquid fuel shortage
+ | 140 | Sympa Solar Power 8 MW |  | IPP | 0 | 8 | 0 | 39833.16 | -
+ | 141 | Energypac Power Venture Thakurgaon Ltd. |  | IPP | 0 | 115 | 95 | 819546 | Liquid fuel shortage
+ | 142 | Intraco Solar 30 MW |  | IPP | 1*30 | 30 | 0 | 147261 | -
+ | 143 | Teesta Solar Limited |  | BCPCL | 0 | 200 | 0 | 1159920 | -
+ | Rangpur Area Total |  |  |  |  | 1112.443 | 418 | 8661076.16
+ | Eastern Grid Total |  |  |  |  | 17438.042 | 8677.86 | 192943762.46
+ | Western Grid Total |  |  |  |  | 11885.475 | 7645.84 | 170333984.61
+ | National Grid Total |  |  |  |  | 29323.517 | 16323.7 | 363277747.07
+ | *Data collected from respective power station via Operation Information System(OIS) software.
+ |  |  |  |  |  |  | Executive Engineer
+ |  |  |  |  |  |  | Network Operation Division
+## Sheet: P3
+ |  |  |  | Power Grid Bangladesh PLC
+ |  |  |  | National Load Dispatch Center (NLDC)
+ |  |  |  | MAXIMUM LOAD SERVED BY DIFFERENT GRID SUB-STATIONS
+ |  | Date : | 01-07-2026
+ |  |  | Zone Total Scenario at Evening Peak Hour (21:00 Hr.)
+ | (a) ENTIRE EASTERN  GRID: |  |  | 10814.12 |  | MW | (b) ENTIRE WESTERN  GRID: |  |  |  | 5075.4 | MW
+ | i) Dhaka area |  |  | 5799.32 |  | MW | i)  Khulna area |  |  |  | 1878 | MW
+ | ii) Chattogram area |  |  | 1677.8 |  | MW | ii) Barishal area |  |  |  | 512 | MW
+ | iii) Cumilla area |  |  | 1542 |  | MW | iii) Rajshahi area |  |  |  | 1574.4 | MW
+ | iv) Mymensingh area |  |  | 1079 |  | MW | iv) Rangpur area |  |  |  | 1111 | MW
+ | v) Sylhet area |  |  | 716 |  | MW
+ | System Total Demand at Evening Peak Hour (a + b) = |  |  |  |  |  | 15889.52 | MW
+ | Sl No. | Sub-station | Load (MW) | Time | Sl No. | Sub-station | Load (MW) | Time | Sl No. | Sub-station | Load (MW) | Time
+ | 1 | AKS | 0 | 00:00 | 67 | HaripurSBU | 143 | 23:00 | 133 | Narshingdi | 203 | 20:00 | 199.0 | UttaraNew | 58.0 | 00:00
+ | 2 | AKSML | 132.5 | 02:00 | 68 | Hasnabad | 93 | 21:00 | 134 | Natore | 167 | 00:00 | 200.0 | Zigatola | 92.0 | 13:00
+ | 3 | Aftabnagar | 46 | 00:00 | 69 | Hathazari | 98 | 00:00 | 135 | Nawabganj | 63 | 01:00
+ | 4 | Agargaon | 119 | 14:00 | 70 | Hatirjheel | 47 | 14:00 | 136 | Netrakona | 126 | 00:00
+ | 5 | Agrabad | 78 | 11:00 | 71 | Ishurdi | 84 | 01:00 | 137 | New | 85 | 11:00
+ | 6 | Amnura | 33 | 00:00 | 72 | Jaldhaka | 90 | 22:00 | 138 | Niamatpur | 87 | 00:00
+ | 7 | Ashuganj | 89 | 23:00 | 73 | Jamalpur | 114 | 00:00 | 139 | Noapara | 45 | 19:30
+ | 8 | BSRM | 200 | 01:00 | 74 | Jashore | 161 | 19:30 | 140 | PHP | 13 | 14:00
+ | 9 | Bagerhat | 94 | 19:30 | 75 | Jhenaidah | 98 | 19:30 | 141 | Pabna | 103 | 00:00
+ | 10 | Bajitpur | 98 | 20:00 | 76 | Joydebpur | 159 | 08:00 | 142 | Palashbari | 136 | 00:00
+ | 11 | Bakerganj | 16.4 | 20:00 | 77 | Joypurhat | 70 | 00:00 | 143 | Panchagarh | 69 | 19:30
+ | 12 | Bakulia | 98 | 19:30 | 78 | Juldah | 22 | 13:00 | 144 | Patiya | 11.4 | 22:00
+ | 13 | Banani | 66 | 13:00 | 79 | KSRM | 45 | 21:00 | 145 | Patuakhali | 73 | 22:00
+ | 14 | Bangabhaban | 17 | 10:00 | 80 | Kabirpur | 273 | 09:00 | 146 | Payra | 36 | 22:00
+ | 15 | Barapukuria | 69 | 22:00 | 81 | Kachua | 102 | 22:00 | 147 | Postogola | 63 | 00:00
+ | 16 | Barguna | 24 | 21:00 | 82 | Kaliganj | 38 | 19:30 | 148 | Pubail | 42 | 11:00
+ | 17 | Barishal | 106 | 13:00 | 83 | Kallyanpur | 129 | 23:00 | 149 | Purbachal | 29 | 13:00
+ | 18 | Barishal-230 | 114 | 22:00 | 84 | Kalurghat | 38 | 12:00 | 150 | Purbasadipur | 150 | 20:00
+ | 19 | Baroaulia | 55 | 12:00 | 85 | Kamrangirchar | 80 | 13:00 | 151 | Rahanpur | 46 | 01:00
+ | 20 | Baroirhat | 66 | 14:00 | 86 | Kaptai |  |  | 152 | Rahim | 36 | 12:00
+ | 21 | Bashundhara | 200 | 14:00 | 87 | Kasba | 43 | 22:00 | 153 | Rajbari | 86 | 20:00
+ | 22 | BashundharaCement | 12 | 11:00 | 88 | Kazla | 117 | 13:00 | 154 | Rajendrapur | 114 | 11:00
+ | 23 | Beanibazar | 90 | 19:00 | 89 | Keranigonj | 88 | 19:30 | 155 | Rajshahi | 151 | 00:00
+ | 24 | Benapole | 67 | 00:00 | 90 | Khagrachori | 38 | 19:00 | 156 | Rajshahi-230 | 82 | 23:00
+ | 25 | Bhaluka | 144 | 00:00 | 91 | Khulna | 63 | 20:00 | 157 | Ramganj | 120 | 21:00
+ | 26 | Bhandaria | 60 | 20:00 | 92 | Khulshi | 160 | 00:00 | 158 | Rampur | 42 | 00:00
+ | 27 | Bhangura | 39 | 00:00 | 93 | Kishoreganj | 124 | 02:00 | 159 | Rangamati | 18 | 19:00
+ | 28 | Bheramara(GK) | 68 | 19:30 | 94 | Kodda | 300 | 23:00 | 160 | Rangpur | 152 | 19:00
+ | 29 | Bhulta | 227 | 18:00 | 95 | Kulaura | 59 | 00:00 | 161 | Ruppur | 4.8 | 10:00
+ | 30 | Bog-Sherpur | 86 | 00:00 | 96 | Kurigram | 72 | 07:00 | 162 | SSM | 0 | 00:00
+ | 31 | Bogura | 180 | 20:00 | 97 | Kushtia | 159 | 19:30 | 163 | Saidpur | 113 | 21:00
+ | 32 | Borhanuddin | 81 | 21:00 | 98 | Laksam | 30 | 00:00 | 164 | Santhia | 36 | 00:00
+ | 33 | Brahmanbaria | 147 | 19:00 | 99 | Lakshmipur | 39 | 02:00 | 165 | Satkhira | 136 | 19:30
+ | 34 | Cantonment | 134 | 13:00 | 100 | Lalbag | 81 | 13:00 | 166 | Satmasjid | 104 | 14:00
+ | 35 | Chandina | 36 | 19:30 | 101 | Lalmonirhat | 64 | 00:00 | 167 | Savar | 210 | 19:00
+ | 36 | Chandpur | 88 | 19:00 | 102 | MI_Cement | 14.2 | 23:00 | 168 | SevenRings | 16.5 | 03:00
+ | 37 | Chandraghona | 34 | 20:00 | 103 | Madanganj | 42 | 00:00 | 169 | ShahCement | 34 | 03:00
+ | 38 | Chapai | 82 | 00:00 | 104 | Madaripur | 124 | 22:00 | 170 | Shahjadpur | 80 | 19:30
+ | 39 | Charfasson | 35 | 23:00 | 105 | Madartek | 89 | 00:00 | 171 | Shahjibazar | 138 | 21:00
+ | 40 | Charsaidpur | 38 | 01:00 | 106 | Madunaghat | 55 | 21:00 | 172 | Shahmirpur | 52 | 20:00
+ | 41 | Chauddagram | 79 | 19:00 | 107 | Magura | 68 | 19:30 | 173 | Shariatpur | 97 | 22:00
+ | 42 | Chhatak | 46 | 00:00 | 108 | Mahasthangarh | 84 | 00:00 | 174 | Sherpur | 140 | 22:00
+ | 43 | Chowmuhani | 168 | 19:00 | 109 | Maijdee | 49 | 19:30 | 175 | Shikalbaha | 33 | 01:00
+ | 44 | Chuadanga | 122 | 20:00 | 110 | Manikganj | 146 | 19:30 | 176 | Shitalakhya | 75.3 | 13:00
+ | 45 | Coxsbazar | 144 | 19:30 | 111 | Maniknagar | 79 | 13:00 | 177 | Sholosohor | 47 | 19:00
+ | 46 | Cumilla(N) | 133 | 19:00 | 112 | Matarbari | 55 | 20:00 | 178 | Shomvuganj | 40 | 00:00
+ | 47 | Cumilla(S) | 167 | 19:00 | 113 | Matuail | 82 | 12:00 | 179 | Shyampur | 182 | 13:00
+ | 48 | Daganbhuiyan | 37 | 00:00 | 114 | Metrorail_Motijheel | 28 | 18:00 | 180 | Siddhirganj | 135 | 12:00
+ | 49 | Daudkandi | 147 | 19:00 | 115 | Metrorail_Uttara | 0 | 00:00 | 181 | Sirajganj | 122 | 21:00
+ | 50 | DhakaUniversity | 94 | 13:00 | 116 | Millgate | 105 | 12:00 | 182 | Sitakunda | 21 | 20:00
+ | 51 | Dhamrai | 108 | 19:30 | 117 | Mirpur | 156 | 12:00 | 183 | Sonargaon | 147 | 07:00
+ | 52 | Dhanmondi | 119.6 | 13:00 | 118 | Mirsorai | 35 | 03:00 | 184 | Sreemongol | 95 | 21:00
+ | 53 | Dohazari | 112 | 21:00 | 119 | Mirzapur | 56 | 19:30 | 185 | Sreepur | 133 | 18:30
+ | 54 | Faridpur | 176 | 22:00 | 120 | Mithapukur | 79 | 01:00 | 186 | Srinagar | 52.29 | 00:00
+ | 55 | Fatullah | 104 | 15:00 | 121 | Modern |  |  | 187 | Sunamganj | 62 | 01:00
+ | 56 | Fenchuganj | 53 | 00:00 | 122 | Mogbazar | 93.4 | 16:00 | 188 | Sylhet | 143 | 21:00
+ | 57 | Feni | 117 | 19:00 | 123 | Mongla | 36 | 06:00 | 189 | Sylhet_(South) | 65 | 00:00
+ | 58 | GPH | 78 | 18:30 | 124 | Motijheel | 48 | 12:00 | 190 | TK | 23 | 21:00
+ | 59 | Ghatail | 79 | 00:00 | 125 | Muktagacha | 44 | 08:00 | 191 | Tangail | 178 | 22:00
+ | 60 | Ghorashal | 0 | 00:00 | 126 | Munshiganj | 117 | 22:00 | 192 | Taraganj | 31 | 19:30
+ | 61 | Ghorashal-230 | 101 | 00:00 | 127 | Muradnagar | 55 | 22:00 | 193 | Tasnim | 46 | 03:00
+ | 62 | Goalpara | 36 | 00:00 | 128 | Mymensingh | 172 | 20:00 | 194 | Thakurgaon | 123 | 20:00
+ | 63 | Gollamari | 110 | 23:00 | 129 | Nabinagar | 112 | 11:00 | 195 | Tongi | 161 | 11:00
+ | 64 | Gopalganj | 118 | 19:30 | 130 | Naogaon | 148 | 01:00 | 196 | Ullahpara | 41 | 20:00
+ | 65 | Gulshan | 122 | 15:00 | 131 | Narail | 54.5 | 02:00 | 197 | Ullon | 59 | 00:00
+ | 66 | Halishahar | 111 | 15:00 | 132 | Narinda | 72 | 13:00 | 198 | Uttara | 95 | 13:00
+ |  | Sub-Divisional Engineer |  |  |  | Executive Engineer |  |  |  | Superintendent Engineer
+ |  | Network Operation Division |  |  |  | Network Operation Division |  |  |  | Network Operation Division
+ | (1) Honbl. Advisor |  | (4) Chairman,BERC |  |  | (9) Member,Generation,PDB. | (14) G.M. Commercial Operation |  |  | (20) Director,Public Relation,PDB. | (26) Executive Eng. EMD.
+ | Ministry of Power,Energy & Mineral |  | (5) Chairman, BPDB. |  |  | (10) Member,Distribution,PDB. | (15) C.E. Generation,PDB. |  |  | (21) Director Program, PDB. | (27) NLDC
+ | Resources, GOB. |  | (6) Managing  Director, PGCB. |  |  | (11) Member,Transmission & | (16) C.E, (P & D),PDB. |  |  | (22) S.E. Consumer Affairs,PDB.
+ | (2) Secy (Power Divn.)Ministry of |  | (7) Member(Power & Industry) |  |  | System Operation,PDB. | (17) C.E. System Operation,PGCB |  |  | (23) Director,Project Planning,PDB.
+ | Power,Energy & Mineral Resources. |  | Planning Commission. |  |  | (12) Member,P&D,PDB. | (18) C.E. Transmission (1&2) PGCB. |  |  | (24) Director,System Planning,PDB.
+ | (3) Director General,Power cell |  | (8) Executive Director (O & M) PGCB. |  |  | (13) C.E (P & D), PGCB. | (19) S.E. System Protection,PGCB. |  |  | (25)  Executive Eng.IMD.
+## Sheet: P4
+ | Power Grid Bangladesh PLC
+ | National Load Dispatch Center (NLDC)
+ | Hourly Demand, Generation & Load-Shed Report
+ | Date : | 01-07-2026
+ | Hour | Generation |  | Load-Shed |  | Demand
+ | 1900-01-01 | 16048.68 |  | 420 |  | 16487.58
+ | 1900-01-01 | 15869.8 |  | 443 |  | 16332.74
+ | 1900-01-01 | 15344.45 |  | 476 |  | 15841.87
+ | 1900-01-01 | 15076.41 |  | 455 |  | 15551.89
+ | 1900-01-01 | 14487.5 |  | 438 |  | 14945.5
+ | 1900-01-01 | 14216.64 |  | 380 |  | 14613.64
+ | 1900-01-01 | 13871.37 |  | 219 |  | 14100.37
+ | 1900-01-01 | 13837.3 |  | 189 |  | 14035.3
+ | 1900-01-01 | 13917.46 |  | 20 |  | 13938.46
+ | 1900-01-01 | 14015.72 |  | 164 |  | 14186.72
+ | 1900-01-01 | 14195.11 |  | 299 |  | 14507.11
+ | 1900-01-01 | 14337.25 |  | 279 |  | 14629.25
+ | 1900-01-01 | 14658.25 |  | 351 |  | 15025.25
+ | 1900-01-01 | 14747.58 |  | 322 |  | 15083.58
+ | 1900-01-01 | 14810.64 |  | 364 |  | 15191.02
+ | 1900-01-01 | 14860.11 |  | 504 |  | 15386.79
+ | 1900-01-01 | 14791.79 |  | 509 |  | 15323.7
+ | 1900-01-01 | 14415.99 |  | 453 |  | 14889.38
+ | 1900-01-01 | 14000.98 |  | 432 |  | 14452.42
+ | 1900-01-01 | 15143.96 |  | 399 |  | 15560.96
+ | 1900-01-01 | 16280.2 |  | 498 |  | 16800.2
+ | 1900-01-01 | 16160.56 |  | 393 |  | 16571.56
+ | 1900-01-01 | 16323.7 |  | 490 |  | 16835.7
+ | 1900-01-01 | 16281.32 |  | 323 |  | 16619.32
+ | 1900-01-01 | 16300.4 |  | 378 |  | 16695.4
+ | Sub-Divisional Engineer |  |  |  | Executive Engineer
+ | Network Operation Division |  |  |  | Network Operation Division
+## Sheet: L-Curve
+ |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-11
+Date | 01-07-2026 |  |  |  | Power Grid Bangladesh PLC
+TIME | EAST GRID | WEST GRID | TOTAL |  | National Load Dispatch Center (NLDC)
+00:00 | 8338.5 | 7710.18 | 16048.68 |  | DAILY GENERATION CURVE
+00:30 | 8296.5 | 7662.74 | 15959.24
+01:00 | 8254.5 | 7615.3 | 15869.8 |  | 01-07-2026
+01:30 | 8155 | 7452.125 | 15607.125
+02:00 | 8055.5 | 7288.95 | 15344.45
+02:30 | 7990.5 | 7219.93 | 15210.43
+03:00 | 7925.5 | 7150.91 | 15076.41
+03:30 | 7748.5 | 7033.455 | 14781.955
+04:00 | 7571.5 | 6916 | 14487.5
+04:30 | 7516.5 | 6835.57 | 14352.07
+05:00 | 7461.5 | 6755.14 | 14216.64
+05:30 | 7324.09 | 6719.915 | 14044.005
+06:00 | 7186.68 | 6684.69 | 13871.37
+06:30 | 7150.745 | 6703.59 | 13854.335
+07:00 | 7114.81 | 6722.49 | 13837.3
+07:30 | 7106.12 | 6771.26 | 13877.38
+08:00 | 7097.43 | 6820.03 | 13917.46
+08:30 | 7146.895 | 6819.695 | 13966.59
+09:00 | 7196.36 | 6819.36 | 14015.72
+09:30 | 7233.82 | 6871.595 | 14105.415
+10:00 | 7271.28 | 6923.83 | 14195.11
+10:30 | 7377.54 | 6888.64 | 14266.18
+11:00 | 7483.8 | 6853.45 | 14337.25
+11:30 | 7819.085 | 6678.665 | 14497.75
+12:00 | 8154.37 | 6503.88 | 14658.25
+12:30 | 8258.58 | 6444.335 | 14702.915
+13:00 | 8362.79 | 6384.79 | 14747.58
+13:30 | 8362.38 | 6416.73 | 14779.11
+14:00 | 8361.97 | 6448.67 | 14810.64
+14:30 | 8363.975 | 6471.4 | 14835.375
+15:00 | 8365.98 | 6494.13 | 14860.11
+15:30 | 8357.91 | 6468.04 | 14825.95
+16:00 | 8349.84 | 6441.95 | 14791.79
+16:30 | 8126.015 | 6477.875 | 14603.89
+17:00 | 7902.19 | 6513.8 | 14415.99
+17:30 | 7786.58 | 6421.905 | 14208.485
+18:00 | 7670.97 | 6330.01 | 14000.98
+18:30 | 7895.635 | 6676.835 | 14572.47
+19:00 | 8120.3 | 7023.66 | 15143.96
+19:30 | 8799.86 | 7480.34 | 16280.2
+20:00 | 8768.86 | 7391.7 | 16160.56
+20:30 | 8723.36 | 7518.77 | 16242.13 |  |  |  |  |  | Executive Engineer
+21:00 | 8677.86 | 7645.84 | 16323.7 |  |  |  |  |  | Network Operation Division
+21:30 | 8653.36 | 7649.15 | 16302.51
+22:00 | 8628.86 | 7652.46 | 16281.32
+22:30 | 8639.43 | 7651.43 | 16290.86
+23:00 | 8650 | 7650.4 | 16300.4
+## Sheet: En-Curve
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | QF-LDC-12
+Date | 01-07-2026 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Power Grid Bangladesh PLC
+TIME | Gas-Public | Gas-Pvt | HVDC | Nepal | Tripura | Adani | Hydro | Coal | Solar | HFO-Public | HFO-Pvt | HSD-Public | HSD-Pvt | Wind | Shortage |  | National Load Dispatch Center (NLDC)
+00:00 | 3662 | 2019.5 | 843 | 38 | 160 | 1437.18 | 100 | 5942 | 0 | 546 | 1198 | 100 | 0 | 3 | 420 |  | DAILY  ENERGY  CURVE
+00:30 | 3652 | 1989 | 843 | 38 | 158 | 1402.24 | 99.5 | 5932.5 | 0 | 526 | 1216 | 100.5 | 0 | 2.5 | 431.5 |  | 01-07-2026
+01:00 | 3642 | 1958.5 | 843 | 38 | 156 | 1367.3 | 99 | 5923 | 0 | 506 | 1234 | 101 | 0 | 2 | 443
+01:30 | 3571 | 1980 | 843 | 38 | 154 | 1324.125 | 98 | 5919 | 0 | 495.5 | 1082 | 100.5 | 0 | 2 | 459.5 |  | Energy Generated |  |  | 363.27774707 |  |  | MKWHr
+02:00 | 3500 | 2001.5 | 843 | 38 | 152 | 1280.95 | 97 | 5915 | 0 | 485 | 930 | 100 | 0 | 2 | 476 |  | Energy not Served |  |  | 8.7 |  |  | MKWHr
+02:30 | 3482 | 1988 | 843.5 | 38 | 148 | 1269.43 | 96 | 5907 | 0 | 485 | 901.5 | 50 | 0 | 2 | 465.5 |  | Total Energy Requirement |  |  | 371.97774707 |  |  | MKWHr
+03:00 | 3464 | 1974.5 | 844 | 38 | 144 | 1257.91 | 95 | 5899 | 0 | 485 | 873 | 0 | 0 | 2 | 455
+03:30 | 3468 | 1937.5 | 844 | 38 | 146 | 1254.455 | 95 | 5899.5 | 0 | 455.5 | 638.5 | 0 | 0 | 5.5 | 446.5
+04:00 | 3472 | 1900.5 | 844 | 38 | 148 | 1251 | 95 | 5900 | 0 | 426 | 404 | 0 | 0 | 9 | 438
+04:30 | 3477.5 | 1966.5 | 844 | 38 | 146 | 1257.07 | 95 | 5711.5 | 0 | 426 | 381 | 0 | 0 | 9.5 | 409
+05:00 | 3483 | 2032.5 | 844 | 38 | 144 | 1263.14 | 95 | 5523 | 0 | 426 | 358 | 0 | 0 | 10 | 380
+05:30 | 3490 | 2021.5 | 844 | 38 | 142 | 1271.765 | 95.5 | 5387 | 14.24 | 426 | 307.5 | 0 | 0 | 6.5 | 299.5
+06:00 | 3497 | 2010.5 | 844 | 38 | 140 | 1280.39 | 96 | 5251 | 28.48 | 426 | 257 | 0 | 0 | 3 | 219
+06:30 | 3496.5 | 1972.5 | 843.5 | 38 | 138 | 1281.15 | 96 | 5241 | 65.685 | 417 | 261.5 | 0 | 0 | 3.5 | 204
+07:00 | 3496 | 1934.5 | 843 | 38 | 136 | 1281.91 | 96 | 5231 | 102.89 | 408 | 266 | 0 | 0 | 4 | 189
+07:30 | 3509 | 1932.5 | 843 | 38 | 134 | 1283.4 | 97 | 5216.5 | 166.48 | 389 | 265 | 0 | 0 | 3.5 | 104.5
+08:00 | 3522 | 1930.5 | 843 | 38 | 132 | 1284.89 | 98 | 5202 | 230.07 | 370 | 264 | 0 | 0 | 3 | 20
+08:30 | 3546.5 | 1938.5 | 843 | 38 | 135 | 1285.1 | 98 | 5196.5 | 248.49 | 378.5 | 256.5 | 0 | 0 | 2.5 | 92
+09:00 | 3571 | 1946.5 | 843 | 38 | 138 | 1285.31 | 98 | 5191 | 266.91 | 387 | 249 | 0 | 0 | 2 | 164
+09:30 | 3585.5 | 1963.5 | 843 | 38 | 137 | 1288.985 | 98.5 | 5227.5 | 338.43 | 333 | 246.5 | 0 | 0 | 5.5 | 231.5
+10:00 | 3600 | 1980.5 | 843 | 38 | 136 | 1292.66 | 99 | 5264 | 409.95 | 279 | 244 | 0 | 0 | 9 | 299
+10:30 | 3577 | 2033.5 | 843 | 38 | 142 | 1283.14 | 99 | 5310 | 435.04 | 262 | 232.5 | 0 | 0 | 11 | 289
+11:00 | 3554 | 2086.5 | 843 | 38 | 148 | 1273.62 | 99 | 5356 | 460.13 | 245 | 221 | 0 | 0 | 13 | 279
+11:30 | 3568.5 | 2145 | 681 | 38 | 152 | 1284.635 | 99 | 5433 | 429.615 | 248.5 | 385.5 | 0 | 0 | 33 | 315
+12:00 | 3583 | 2203.5 | 519 | 38 | 156 | 1295.65 | 99 | 5510 | 399.1 | 252 | 550 | 0 | 0 | 53 | 351
+12:30 | 3571 | 2147.5 | 519.5 | 38 | 159 | 1265.83 | 98.5 | 5522.5 | 389.585 | 230.5 | 721 | 0 | 0 | 40 | 336.5
+13:00 | 3559 | 2091.5 | 520 | 38 | 162 | 1236.01 | 98 | 5535 | 380.07 | 209 | 892 | 0 | 0 | 27 | 322
+13:30 | 3539 | 2101.5 | 514 | 38 | 161 | 1264.915 | 97 | 5603.5 | 339.195 | 160 | 933.5 | 0 | 0 | 27.5 | 343
+14:00 | 3519 | 2111.5 | 508 | 38 | 160 | 1293.82 | 96 | 5672 | 298.32 | 111 | 975 | 0 | 0 | 28 | 364
+14:30 | 3527 | 2101.75 | 507.5 | 38 | 159 | 1247.51 | 94.5 | 5713 | 298.515 | 112 | 1005.1 | 0 | 0 | 31.5 | 434
+15:00 | 3535 | 2092 | 507 | 38 | 158 | 1201.2 | 93 | 5754 | 298.71 | 113 | 1035.2 | 0 | 0 | 35 | 504
+15:30 | 3537 | 2076.5 | 507 | 38 | 160 | 1215.01 | 92 | 5719.5 | 258.24 | 113.5 | 1078.7 | 0 | 0 | 30.5 | 506.5
+16:00 | 3539 | 2061 | 507 | 38 | 162 | 1228.82 | 91 | 5685 | 217.77 | 114 | 1122.2 | 0 | 0 | 26 | 509
+16:30 | 3499 | 2031 | 612 | 38 | 161 | 1278.995 | 91.5 | 5616.5 | 168.295 | 113.5 | 956.1 | 0 | 0 | 38 | 481
+17:00 | 3459 | 2001 | 717 | 38 | 160 | 1329.17 | 92 | 5548 | 118.82 | 113 | 790 | 0 | 0 | 50 | 453
+17:30 | 3440 | 1947 | 809.5 | 38 | 157 | 1264.77 | 93.5 | 5409.5 | 87.315 | 177.5 | 753.9 | 0 | 0 | 30.5 | 442.5
+18:00 | 3421 | 1893 | 902 | 38 | 154 | 1200.37 | 95 | 5271 | 55.81 | 242 | 717.8 | 0 | 0 | 11 | 432
+18:30 | 3389.5 | 1913.25 | 902.5 | 38 | 161 | 1249.515 | 95.5 | 5491.5 | 27.905 | 406.5 | 891.3 | 0 | 0 | 6 | 415.5
+19:00 | 3358 | 1933.5 | 903 | 38 | 168 | 1298.66 | 96 | 5712 | 0 | 571 | 1064.8 | 0 | 0 | 1 | 399
+19:30 | 3563 | 1979.5 | 903 | 38 | 168 | 1432.34 | 97 | 5705 | 0 | 593 | 1792.36 | 0 | 0 | 9 | 498
+20:00 | 3567 | 1982.5 | 903 | 38 | 162 | 1464.7 | 97 | 5617 | 0 | 563 | 1750.36 | 0 | 0 | 16 | 393
+20:30 | 3557.5 | 2043.5 | 903.5 | 38 | 162 | 1469.77 | 97.5 | 5762.5 | 0 | 545 | 1636.36 | 0 | 0 | 26.5 | 441.5
+21:00 | 3548 | 2104.5 | 904 | 38 | 162 | 1474.84 | 98 | 5908 | 0 | 527 | 1522.36 | 0 | 0 | 37 | 490
+21:30 | 3550 | 2109 | 903.5 | 38 | 163 | 1475.15 | 98 | 5938 | 0 | 545.5 | 1452.36 | 0 | 0 | 30 | 406.5
+22:00 | 3552 | 2113.5 | 903 | 38 | 164 | 1475.46 | 98 | 5968 | 0 | 564 | 1382.36 | 0 | 0 | 23 | 323
+22:30 | 3550.5 | 2137 | 904 | 38 | 165 | 1475.43 | 98 | 5968 | 0 | 572 | 1361.93 | 0 | 0 | 21 | 350.5
+23:00 | 3549 | 2160.5 | 905 | 38 | 166 | 1475.4 | 98 | 5968 | 0 | 580 | 1341.5 | 0 | 0 | 19 | 378
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Executive Engineer
+ |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | Network Operation Division
+## Sheet: EWIC
+ |  |  |  |  |  |  |  |  |  |  | QF-LDC-40
+Power Grid Bangladesh PLC
+National Load Dispatch Center (NLDC)
+East-West Interconnector Log
+Date: | 01-07-2026
+EWIC | Ishurdi-Ghorashal |  | Sirajganj-Sreepur |  | Gopalganj-Aminbazar |  | Line |  | Export/Import |  | Energy (MkWHr)
+Time | MW | MVAR | MW | MVAR | MW | MVAR
+1900-01-01 | 128 | 3 | 510 | 196 | 1774 | 538 | Ishurdi-Ghorashal Ckt-1 |  | Export |  | 3129672.73
+1900-01-01 | 115 | 7 | 480 | 166 | 1732 | 496
+1900-01-01 | 97 | 3 | 440 | 168 | 1644 | 430 |  |  | Import |  | 0
+1900-01-01 | 95 | 7 | 434 | 184 | 1612 | 466
+1900-01-01 | 84 | 1 | 420 | 166 | 1634 | 460 | Ishurdi-Ghorashal Ckt-2 |  | Export |  | 0
+1900-01-01 | 106 | 19 | 438 | 164 | 1538 | 518
+1900-01-01 | 128 | 29 | 470 | 160 | 1624 | 512 |  |  | Import |  | 0
+1900-01-01 | 132 | 35 | 484 | 158 | 1660 | 540
+1900-01-01 | 161 | 48 | 540 | 178 | 1785 | 656 | Sirajganj-Sreepur Ckt-1 |  | Export |  | 2983000
+1900-01-01 | 190 | 66 | 628 | 222 | 1902 | 698
+1900-01-01 | 194 | 67 | 650 | 216 | 1968 | 726 |  |  | Import |  | 0
+1900-01-01 | 191 | 71 | 630 | 238 | 1816 | 762
+1900-01-01 | 119 | 65 | 490 | 214 | 1532 | 662 | Sirajganj-Sreepur Ckt-2 |  | Export |  | 2987000
+1900-01-01 | 101 | 53 | 410 | 196 | 1504 | 640
+1900-01-01 | 97 | 60 | 400 | 204 | 1504 | 646 |  |  | Import |  | 0
+1900-01-01 | 111 | 67 | 470 | 228 | 1600 | 666
+1900-01-01 | 113 | 71 | 460 | 220 | 1564 | 644 | Gopalganj-Aminbazar Ckt-1 |  | Export |  | 20020000
+1900-01-01 | 140 | 47 | 540 | 200 | 1706 | 668
+1900-01-01 | 155 | 35 | 510 | 192 | 1634 | 652 |  |  | Import |  | 0
+1900-01-01 | 153 | 32 | 540 | 220 | 1668 | 612
+1900-01-01 | 146 | 29 | 540 | 196 | 1756 | 518 | Gopalganj-Aminbazar Ckt-2 |  | Export |  | 20040000
+1900-01-01 | 106 | -2 | 460 | 138 | 1552 | 472
+1900-01-01 | 111 | -2 | 460 | 144 | 1516 | 478 |  |  | Import |  | 0
+1900-01-01 | 132 | 11 | 480 | 156 | 1690 | 518
+1900-01-01 | 131 | 8 | 480 | 154 | 1628 | 494 |  |  | Total Export |  | 49159672.73
+1900-01-01 | 136 | 12 | 500 | 180 | 1654 | 490 |  |  | Total Import |  | 0
+ | ***Positive MW indicates power flow from West to East, and negative MW indicates flow from East to West.
+ |  | Sub-Divisional Engineer |  |  |  |  | Executive Engineer
+ |  | Network Operation Division |  |  |  |  | Network Operation Division
+## Sheet: Voltage
+Power Grid Bangladesh PLC
+National Load Dispatch Center (NLDC)
+Maximum & Minimum Voltages of Grid Sub-Stations
+Date: | 01-07-2026
+Substation | Maximum Voltage | Time | Minimum Voltage | Time | Substation | Maximum Voltage | Time | Minimum Voltage | Time
+400 kV | KV |  | KV |  | 400 kV | KV |  | KV
+Aminbazar | 368 | 06:00 | 351 | 00:00 | Madunaghat | 388 | 07:00 | 381 | 00:00
+Amtali | 407 | 06:00 | 403 | 00:00 | Meghnaghat | 373 | 06:00 | 362 | 00:00
+Ashuganj | 399 | 1900-01-01 | 386 | 1900-01-01 | Payra | 410 | 08:00 | 404 | 00:00
+Bhulta | 390 | 06:00 | 375 | 11:00 | Rahanpur | 402 | 18:30 | 385 | 22:00
+Bibiana | 386 | 06:00 | 379 | 15:00 | Rampal | 391 | 18:00 | 375 | 23:00
+BIPTC | 406 | 14:00 | 394 | 23:00
+Bogura | 384 | 18:30 | 366 | 23:00
+Gopalganj | 383 | 07:00 | 371 | 00:00
+Kaliakoir | 361 | 06:00 | 348 | 11:00
+Korerhat | 385 | 07:00 | 375 | 11:00
+230 kV | KV |  | KV |  | 230 kV | KV |  | KV
+Agargaon | 225 | 06:00 | 214 | 11:00 | Ishurdi | 232 | 09:00 | 209 | 22:00
+AKSML | 225.5 | 06:00 | 218.1 | 11:00 | Jhenaidah | 225 | 09:00 | 199 | 22:00
+Aminbazar | 224 | 05:00 | 215 | 11:00 | Kachua | 218 | 06:00 | 211 | 00:00
+Ashuganj | 223 | 06:00 | 216 | 00:00 | Kaliakoir | 222 | 03:00 | 212 | 11:00
+Ashuganj-400 | 223 | 06:00 | 216 | 00:00 | Keranigonj | 223 | 06:00 | 213 | 11:00
+Baghabari | 229 | 06:00 | 217 | 22:00 | Khulna(S) | 223 | 09:00 | 203 | 22:00
+Barapukuria | 222 | 18:00 | 214 | 00:00 | Korerhat | 219 | 07:00 | 212 | 11:00
+Barapukuria-230 | 222 | 18:00 | 214 | 00:00 | Madunaghat | 225 | 06:00 | 220 | 11:00
+Barishal | 222 | 06:00 | 214 | 22:00 | Madunaghat-400 | 227 | 07:00 | 223 | 00:00
+Bheramara | 232 | 16:00 | 206 | 22:00 | Maniknagar | 221 | 07:00 | 212 | 11:00
+Bhulta | 223 | 06:00 | 213 | 11:00 | Meghnaghat | 229 | 18:30 | 222 | 11:00
+Bibiana | 221 | 06:00 | 215 | 00:00 | Meghnaghat-400 | 226 | 06:00 | 218 | 00:00
+BIPTC | 234 | 09:00 | 207 | 22:00 | Mirsorai | 223 | 06:00 | 217 | 00:00
+Bogura | 237 | 18:30 | 226 | 22:00 | Naogaon | 223 | 18:30 | 199 | 22:00
+Bogura-400 | 237 | 09:00 | 227 | 23:00 | Purbasadipur | 219 | 18:30 | 210 | 00:00
+Borhanuddin | 227 | 06:00 | 220 | 22:00 | Rajshahi | 230 | 16:00 | 202 | 22:00
+BSRM | 219 | 06:00 | 213 | 00:00 | Rampal | 222 | 18:30 | 206 | 22:00
+Charfasson | 228 | 08:00 | 221 | 00:00 | Rampur
+Chowmuhani | 219 | 15:00 | 210 | 00:00 | Rampura | 222 | 06:00 | 212 | 11:00
+Cumilla(N) | 221 | 06:00 | 213 | 00:00 | Shikalbaha | 226 | 15:00 | 219 | 10:00
+Faridpur | 218 | 18:30 | 207 | 22:00 | Shyampur | 223 | 06:00 | 214 | 11:00
+Fenchuganj | 223 | 07:00 | 215 | 00:00 | Siddhirganj | 223 | 22:00 | 217 | 00:00
+Feni | 218 | 06:00 | 211 | 00:00 | Sirajgonj | 236 | 08:00 | 229 | 00:00
+Ghorashal | 225 | 01:00 | 220 | 00:00 | Sreepur | 220 | 13:00 | 212 | 23:00
+Ghorashal-230 | 212 | 18:30 | 195 | 22:00 | Tongi | 260 | 03:00 | 201 | 00:00
+Gopalganj | 218 | 06:00 | 209 | 23:00
+GPH | 223 | 06:00 | 218 | 00:00
+Haripur | 223 | 06:00 | 214 | 11:00
+Hasnabad | 224 | 04:00 | 213 | 11:00
+Hathazari | 223 | 07:00 | 217 | 11:00
+132 kV | KV |  | KV |  | 132 kV | KV |  | KV
+Aftabnagar | 137 | 01:00 | 129 | 11:00 | Madunaghat | 130 | 06:00 | 126 | 11:00
+Agargaon | 132 | 06:00 | 125 | 11:00 | Magura | 130 | 09:00 | 110 | 00:00
+Agrabad | 129 | 07:00 | 122 | 11:00 | Mahasthangarh | 132 | 09:00 | 124 | 22:00
+AKS | 127 | 04:00 | 124 | 00:00 | Maijdee | 122 | 07:00 | 117 | 00:00
+Aminbazar | 128 | 19:30 | 122 | 10:00 | Manikganj | 130 | 02:00 | 122 | 00:00
+Amnura | 134 | 18:30 | 120 | 01:00 | Maniknagar | 131 | 06:00 | 123 | 11:00
+Ashuganj | 131 | 06:00 | 127 | 00:00 | Matarbari | 117 | 17:00 | 107 | 19:00
+Ashuganj-230 | 131 | 06:00 | 127 | 00:00 | Matuail | 129 | 04:00 | 123 | 09:00
+Bagerhat | 129 | 09:00 | 109 | 00:00 | Metrorail_Motijheel | 131 | 06:00 | 123 | 11:00
+Bajitpur | 125 | 10:00 | 119 | 00:00 | Metrorail_Uttara | 129 | 04:00 | 117 | 11:00
+Bakerganj | 130 | 06:00 | 123 | 22:00 | Millgate | 130 | 05:00 | 117 | 11:00
+Bakulia | 129 | 16:00 | 123 | 11:00 | Mirpur | 127 | 06:00 | 120 | 11:00
+Banani | 137 | 06:00 | 128 | 11:00 | Mirzapur | 130 | 02:00 | 122 | 00:00
+Bangabhaban | 130 | 06:00 | 123 | 11:00 | Mithapukur | 129 | 09:00 | 123 | 00:00
+Barapukuria | 134 | 10:00 | 125 | 00:00 | MI_Cement | 131 | 05:00 | 123 | 11:00
+Barguna | 129 | 06:00 | 122 | 22:00 | Modern
+Barishal | 128 | 05:00 | 122 | 22:00 | Mogbazar | 138 | 04:00 | 130 | 11:00
+Barishal-230 | 129 | 07:00 | 122 | 22:00 | Mongla | 128 | 09:00 | 110 | 00:00
+Baroaulia | 130 | 04:00 | 125 | 11:00 | Motijheel | 130 | 06:00 | 123 | 11:00
+Baroirhat | 127 | 06:00 | 123 | 11:00 | Muktagacha | 124 | 07:00 | 115 | 00:00
+Bashundhara | 137 | 06:00 | 117 | 11:00 | Munshiganj | 127 | 06:00 | 121 | 12:00
+BashundharaCement | 127 | 19:30 | 123 | 11:00 | Muradnagar | 123 | 06:00 | 118 | 00:00
+Beanibazar | 124 | 06:00 | 114 | 23:00 | Mymensingh | 128 | 23:00 | 106 | 00:00
+Benapole | 131 | 10:00 | 110 | 22:00 | Nabinagar | 125 | 04:00 | 117 | 15:00
+Bhaluka | 126 | 05:00 | 119 | 00:00 | Naogaon | 133 | 09:00 | 120 | 22:00
+Bhandaria | 125 | 08:00 | 106 | 00:00 | Narail | 132 | 09:00 | 108 | 21:00
+Bhangura | 132 | 18:30 | 121 | 00:00 | Narinda | 131 | 06:00 | 123 | 11:00
+Bheramara | 135 | 09:00 | 120 | 22:00 | Narshingdi | 124 | 06:00 | 116 | 11:00
+Bheramara(GK) | 135 | 16:00 | 120 | 22:00 | Natore | 133 | 09:00 | 120 | 00:00
+Bhulta | 126 | 04:00 | 120 | 11:00 | Nawabganj | 134 | 06:00 | 128 | 00:00
+Bog-Sherpur | 133 | 09:00 | 126 | 00:00 | Netrakona | 117 | 10:00 | 102 | 00:00
+Bogura | 135 | 09:00 | 128 | 00:00 | New | 129 | 19:30 | 119 | 11:00
+Bogura-230 | 136 | 09:00 | 129 | 00:00 | Niamatpur | 132 | 18:00 | 123 | 22:00
+Brahmanbaria | 125 | 07:00 | 119 | 00:00 | Noapara | 132 | 08:00 | 115 | 22:00
+Cantonment | 132 | 05:00 | 124 | 11:00 | Pabna | 133 | 09:00 | 120 | 22:00
+Chandina | 126 | 06:00 | 121 | 00:00 | Palashbari | 129 | 18:30 | 120 | 00:00
+Chandpur | 125 | 14:00 | 119 | 02:00 | Panchagarh | 137 | 19:00 | 130 | 04:00
+132 kV | KV |  | KV |  | 132 kV | KV |  | KV
+Chandraghona | 131 | 06:00 | 127 | 11:00 | Patiya | 128 | 06:00 | 123 | 11:00
+Chapai | 132 | 09:00 | 123 | 22:00 | Patuakhali | 130 | 06:00 | 122 | 22:00
+Charsaidpur | 128 | 06:00 | 122 | 11:00 | Payra | 133 | 06:00 | 130 | 00:00
+Chauddagram | 124 | 06:00 | 120 | 00:00 | PHP | 129 | 09:00 | 122 | 00:00
+Chhatak | 125 | 07:00 | 111 | 23:00 | Postogola | 133 | 07:00 | 125 | 11:00
+Chowmuhani | 122 | 05:00 | 117 | 00:00 | Pubail | 122 | 04:00 | 115 | 00:00
+Chuadanga | 133 | 09:00 | 112 | 22:00 | Purbachal | 137 | 06:00 | 128 | 13:00
+Coxsbazar | 118 | 15:00 | 109 | 19:00 | Purbasadipur | 133 | 18:30 | 127 | 00:00
+Cumilla(N) | 126 | 06:00 | 121 | 00:00 | Rahanpur | 134 | 09:00 | 127 | 22:00
+Cumilla(S) | 126 | 04:00 | 120 | 13:00 | Rahanpur-400 | 134 | 09:00 | 128 | 22:00
+Daganbhuiyan | 124 | 06:00 | 119 | 00:00 | Rahim | 129 | 06:00 | 123 | 11:00
+Daudkandi | 121 | 18:00 | 116 | 00:00 | Rajbari | 123 | 06:00 | 116 | 23:00
+DhakaUniversity | 136 | 02:00 | 129 | 11:00 | Rajendrapur | 125 | 07:00 | 120 | 23:00
+Dhamrai | 125 | 06:00 | 119 | 15:00 | Rajshahi | 130 | 09:00 | 115 | 00:00
+Dhanmondi | 136.5 | 06:00 | 128 | 11:00 | Rajshahi-230 | 132 | 09:00 | 117 | 22:00
+Dohazari | 125 | 16:00 | 118 | 11:00 | Ramganj | 121 | 11:00 | 116 | 00:00
+Faridpur | 126 | 18:00 | 120 | 00:00 | Rampur | 129 | 06:00 | 123 | 11:00
+Fatullah | 134 | 06:00 | 124 | 11:00 | Rampura | 137 | 06:00 | 128 | 12:00
+Fenchuganj | 131 | 07:00 | 124 | 23:00 | Rangamati | 130 | 04:00 | 127 | 00:00
+Feni | 127 | 16:00 | 121 | 11:00 | Rangpur | 128 | 10:00 | 122 | 21:00
+Feni-230 | 125 | 06:00 | 121 | 00:00 | Ruppur | 135 | 08:00 | 121 | 22:00
+Ghatail | 124 | 07:00 | 115 | 00:00 | Saidpur | 132 | 13:00 | 125 | 21:00
+Ghorashal | 125 | 18:00 | 119 | 00:00 | Santhia | 133 | 09:00 | 123 | 00:00
+Goalpara | 134 | 09:00 | 118 | 22:00 | Satkhira | 130 | 09:00 | 110 | 22:00
+Gollamari | 133 | 09:00 | 119 | 22:00 | Satmasjid | 132 | 06:00 | 124 | 11:00
+Gopalganj | 128 | 09:00 | 118 | 22:00 | Savar | 127 | 20:00 | 118 | 11:00
+Gopalganj-400 | 129 | 06:00 | 123 | 00:00 | SevenRings | 124 | 18:30 | 118 | 00:00
+Gulshan | 136 | 06:00 | 128 | 11:00 | ShahCement | 128 | 06:00 | 122 | 11:00
+Halishahar | 129 | 06:00 | 124 | 11:00 | Shahjadpur | 135 | 07:00 | 128 | 22:00
+Haripur | 130 | 06:00 | 124 | 11:00 | Shahjibazar | 127 | 06:00 | 121 | 00:00
+HaripurSBU | 130 | 06:00 | 124 | 12:00 | Shahmirpur | 130 | 07:00 | 125 | 11:00
+Hasnabad | 132 | 04:00 | 125 | 11:00 | Shariatpur | 127 | 07:00 | 118 | 23:00
+Hathazari | 132 | 16:00 | 125 | 11:00 | Sherpur | 126 | 23:00 | 108 | 06:00
+Hatirjheel | 137 | 06:00 | 129 | 11:00 | Shikalbaha | 120 | 06:00 | 114 | 11:00
+Ishurdi | 137 | 09:00 | 122 | 22:00 | Shikalbaha-230 | 130 | 06:00 | 118 | 1900-01-01
+Jaldhaka | 130 | 13:00 | 122 | 22:00 | Shitalakhya | 131 | 04:00 | 123 | 11:00
+Jamalpur | 130 | 23:00 | 112 | 06:00 | Sholosohor | 130 | 06:00 | 126 | 11:00
+Jashore | 132 | 09:00 | 113 | 22:00 | Shomvuganj | 118 | 14:00 | 110 | 01:00
+Jhenaidah | 137 | 09:00 | 111 | 00:00 | Shyampur | 133 | 06:00 | 126 | 11:00
+Jhenaidah-230 | 137 | 09:00 | 119 | 22:00 | Shyampur-230 | 134 | 06:00 | 127 | 11:00
+Joydebpur | 119 | 13:00 | 111 | 08:00 | Siddhirganj | 129 | 03:00 | 124 | 11:00
+Joypurhat | 132 | 16:00 | 121 | 22:00 | Sirajganj | 130 | 14:00 | 121 | 21:00
+Juldah | 129 | 04:00 | 123 | 11:00 | Sitakunda | 130 | 06:00 | 126 | 11:00
+Kabirpur | 136 | 02:00 | 114 | 11:00 | Sonargaon | 125 | 03:00 | 121 | 11:00
+Kachua | 124 | 07:00 | 120 | 00:00 | Sreemongol | 125 | 06:00 | 120 | 00:00
+Kaliakoir | 133 | 03:00 | 124 | 15:00 | Sreepur | 128 | 13:00 | 123 | 23:00
+Kaliganj | 135 | 09:00 | 116 | 22:00 | Srinagar | 134 | 05:00 | 128 | 00:00
+Kallyanpur | 127 | 05:00 | 120 | 11:00 | SSM | 132 | 02:00 | 130 | 00:00
+Kalurghat | 130 | 05:00 | 127 | 11:00 | Sunamganj | 121 | 09:00 | 109 | 23:00
+Kamrangirchar | 135 | 05:00 | 118 | 13:00 | Sylhet | 125 | 09:00 | 118 | 23:00
+Kaptai |  |  |  |  | Sylhet_(South) | 128 | 11:00 | 117 | 23:00
+Kasba | 122 | 06:00 | 117 | 01:00 | Tangail | 126 | 02:00 | 117 | 00:00
+Kazla | 130 | 07:00 | 122 | 12:00 | Taraganj | 130 | 10:00 | 124 | 23:00
+Keranigonj | 135 | 06:00 | 129 | 00:00 | Tasnim | 125 | 05:00 | 121 | 11:00
+Khagrachori | 130 | 07:00 | 124 | 11:00 | Thakurgaon | 136 | 03:00 | 129 | 04:00
+Khulna | 133 | 09:00 | 116 | 22:00 | TK | 130 | 07:00 | 125 | 19:00
+Khulna(S) | 134 | 09:00 | 118 | 22:00 | Tongi | 130 | 04:00 | 124 | 15:00
+Khulshi | 128 | 06:00 | 122 | 11:00 | Ullahpara | 131 | 09:00 | 123 | 00:00
+Kishoreganj | 125 | 19:30 | 117 | 00:00 | Ullon | 137 | 06:00 | 128 | 11:00
+Kodda | 134 | 02:00 | 123 | 15:00 | Uttara | 129 | 05:00 | 117 | 11:00
+Korerhat | 129 | 07:00 | 123 | 00:00 | UttaraNew | 129 | 04:00 | 117 | 11:00
+KSRM | 130 | 07:00 | 124 | 11:00 | Zigatola | 135 | 06:00 | 128 | 11:00
+Kulaura | 129 | 06:00 | 123 | 23:00
+Kurigram | 126 | 10:00 | 118 | 00:00
+Kushtia | 134 | 09:00 | 116 | 21:00
+Laksam | 123 | 08:00 | 119 | 00:00
+Lakshmipur | 121 | 06:00 | 116 | 00:00
+Lalbag | 135 | 06:00 | 128 | 11:00
+Lalmonirhat | 127 | 10:00 | 119 | 21:00
+Madanganj | 127 | 19:30 | 123 | 11:00
+Madaripur | 128 | 18:00 | 122 | 22:00
+Madartek | 136 | 06:00 | 127 | 11:00
+ | Sub Assistant Engineer |  |  |  |  | Sub Divisional Engineer
+ | Network Operation Division |  |  |  |  | Network Operation Division

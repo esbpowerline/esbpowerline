@@ -13,6 +13,8 @@ import {
 } from '@/lib/category-icons';
 import { CategoryIconDisplay } from '@/components/category/CategoryIconDisplay';
 
+export const revalidate = 86400;
+
 export default async function CategoriesIndex() {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);

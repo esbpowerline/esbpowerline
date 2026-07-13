@@ -30,6 +30,32 @@ export function formatEditorialTimestamp(dateStr: string | Date): string {
   return `${weekday}, ${body} at ${time}`;
 }
 
+/** Formats dates as "Day Month Year" for chart tooltips (e.g. "6 July 2026") */
+export function formatTooltipDate(dateStr: string): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/** Formats dates for X-Axis dynamically based on the total time range being viewed */
+export function formatDynamicXAxisDate(dateStr: string, totalDays: number): string {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  
+  if (totalDays <= 14) {
+    // Week preset: e.g. "Friday"
+    return d.toLocaleDateString('en-US', { weekday: 'long' });
+  } else if (totalDays <= 45) {
+    // Month preset: e.g. "06 Jul"
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+  } else {
+    // 3M, 1Y, All presets: e.g. "Jul 2026"
+    return d.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+  }
+}
+
 export function formatDate(dateStr: string | Date): string {
   const date = new Date(dateStr);
   const now = new Date();

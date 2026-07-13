@@ -19,7 +19,7 @@ import {
   gridChartXAxisProps,
   gridChartYAxisProps,
 } from '@/components/news/PowerGridChartUI';
-import { cn, formatNumber } from '@/lib/utils';
+import { cn, formatNumber, formatTooltipDate, formatDynamicXAxisDate } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { liveWeekTimelinePoints, formatLiveWeekAxisLabel } from '@/lib/data/petrobangla/computeLiveWeek';
 import { decimateTimelineDays } from '@/lib/data/petrobangla/compute';
@@ -43,7 +43,7 @@ function LiveWeekTooltip({
   const fulfillmentColor = d.fulfillment < 45 ? PB_ARCHIVE_COLORS.shortage : PB_ARCHIVE_COLORS.fertilizer;
 
   return (
-    <GridChartTooltipShell title={d.label ?? d.date} accent={nationalColor}>
+    <GridChartTooltipShell title={formatTooltipDate(d.label ?? d.date)} accent={nationalColor}>
       <div className="grid-chart-tooltip__grid">
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: nationalColor }} />
@@ -104,7 +104,7 @@ export function PbLiveTimeline({
       return timelineDays.map((d) => ({
         date: d.date,
         label: d.date,
-        axisLabel: formatLiveWeekAxisLabel(d.date, undefined, false),
+        axisLabel: formatDynamicXAxisDate(d.date, timelineDays.length),
         totalGas: d.total_gas,
         powerDemand: d.power_demand ?? 0,
         powerSupply: d.power_supply ?? 0,

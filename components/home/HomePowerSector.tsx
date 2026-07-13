@@ -66,15 +66,17 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     const container = containerRef.current;
     if (!container) return 0;
     const containerWidth = container.clientWidth;
+    // Get actual gap size based on fluid root font size (1.5rem = gap-6)
+    const gap = 1.5 * parseFloat(getComputedStyle(document.documentElement).fontSize);
     
     if (windowWidth >= 1024) {
       return -index * ((containerWidth - gap * 2) / 3 + gap);
     } else if (windowWidth >= 768) {
-      if (windowWidth >= 768) { return -index * ((containerWidth - gap) / 2 + gap); } else { return -index * (containerWidth + gap); }
+      return -index * ((containerWidth - gap) / 2 + gap);
     } else {
       return -index * (containerWidth + gap);
     }
-  }, [windowWidth, gap]);
+  }, [windowWidth]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -271,7 +273,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
           {articles.map((article) => (
             <div 
               key={article.id} 
-              className="article-card-wrapper flex-shrink-0 w-full md:w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] pointer-events-none flex flex-col h-full"
+              className="article-card-wrapper flex-shrink-0 w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] pointer-events-none flex flex-col h-full"
               style={{ userSelect: 'none' }}
               onDragStart={(e) => e.preventDefault()}
             >

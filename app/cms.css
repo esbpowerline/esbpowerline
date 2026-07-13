@@ -1,0 +1,216 @@
+/* TipTap editor â€“ keep functional but cleaner */
+.tiptap-editor {
+  border-radius: 0.625rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--background) / 0.85);
+  overflow: hidden;
+}
+
+.tiptap-editor--sticky-toolbar {
+  overflow: visible !important;
+}
+
+.tiptap-toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.25rem, 1fr));
+  gap: 0.35rem;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+  background: hsl(var(--muted) / 0.28);
+}
+
+.tiptap-toolbar--ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.4375rem 0.5625rem;
+  background: linear-gradient(180deg, hsl(var(--muted) / 0.32) 0%, hsl(var(--muted) / 0.18) 100%);
+  border-bottom: 1px solid hsl(var(--border) / 0.42);
+}
+
+.tiptap-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.0625rem;
+  padding: 0.125rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.32);
+  background: hsl(var(--background) / 0.55);
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar__group--end {
+  /* removed margin-left: auto for even wrapping */
+}
+
+.tiptap-toolbar__divider {
+  width: 1px;
+  height: 1.5rem;
+  background: hsl(var(--border) / 0.45);
+  margin: 0 0.0625rem;
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar--loading {
+  min-height: 2.75rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.tiptap-toolbar__zone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-height: 2rem;
+  min-width: 0;
+  padding: 0.15rem 0.2rem;
+  border-radius: 0.55rem;
+  border: 1px solid hsl(var(--border) / 0.28);
+  background: hsl(var(--background) / 0.38);
+}
+
+.tiptap-toolbar__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar__btn {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar__btn svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.tiptap-toolbar--ribbon .tiptap-toolbar__btn {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.375rem;
+  color: hsl(var(--muted-foreground));
+}
+
+
+.tiptap-toolbar--ribbon .tiptap-toolbar__btn:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.55);
+  color: hsl(var(--foreground));
+}
+
+.tiptap-toolbar__btn--active {
+  background: hsl(var(--muted) / 0.65);
+  color: hsl(var(--foreground));
+}
+
+@media (max-width: 767px) {
+  .tiptap-toolbar--ribbon {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .tiptap-toolbar--ribbon::-webkit-scrollbar {
+    display: none !important;
+  }
+  .tiptap-toolbar__divider {
+    margin: 0 0.25rem !important;
+  }
+}
+
+.tiptap-editor__body {
+  min-height: 280px;
+  overflow: auto;
+}
+
+.tiptap-editor__body--loading {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.tiptap-editor__body .tiptap {
+  min-height: 280px;
+}
+
+.tiptap { @apply min-h-[280px] p-4 sm:p-5 outline-none text-[15px] leading-relaxed; }
+.tiptap p { @apply mb-4 text-foreground; }
+.tiptap h1 { @apply text-2xl font-semibold tracking-tight mb-4; }
+.tiptap h2 { @apply text-xl font-semibold tracking-tight mb-3 mt-5; }
+.tiptap h3 { @apply text-lg font-semibold tracking-tight mb-2 mt-4; }
+.tiptap ul, .tiptap ol { @apply pl-6 mb-4 space-y-1; }
+.tiptap blockquote { @apply border-l-4 border-primary/60 pl-5 italic text-muted-foreground my-4; }
+.tiptap img { @apply max-w-full rounded-xl my-4 shadow-sm; }
+.tiptap img.ProseMirror-selectednode {
+  outline: 2px solid hsl(var(--primary));
+  box-shadow: 0 0 0 4px hsla(var(--primary) / 0.2);
+}
+.tiptap a { @apply text-primary underline underline-offset-2 cursor-pointer; }
+.tiptap table { @apply w-full border-collapse my-4 text-sm relative; }
+.tiptap th, .tiptap td { @apply border border-border px-3 py-2 align-top relative; }
+.tiptap th { @apply bg-muted/40 font-semibold text-left; }
+.tiptap td.selectedCell, .tiptap th.selectedCell {
+  background-color: hsla(var(--primary) / 0.12) !important;
+}
+.tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: hsl(var(--primary));
+  pointer-events: none;
+}
+.tiptap hr { @apply my-6 border-border; }
+
+/* Real-time alignment previews */
+.tiptap .align-left, .article-body .align-left { text-align: left; }
+.tiptap .align-center, .article-body .align-center { text-align: center; }
+.tiptap .align-right, .article-body .align-right { text-align: right; }
+.tiptap .align-justify, .article-body .align-justify { text-align: justify; }
+
+/* Placeholder formatting */
+.tiptap p.is-editor-empty:first-child::before,
+.tiptap p.is-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground) / 0.45);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Pre & code blocks styles */
+.tiptap pre, .article-body pre {
+  background: hsl(var(--muted) / 0.6);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid hsl(var(--border) / 0.35);
+}
+.tiptap code, .article-body code {
+  background: hsl(var(--muted) / 0.6);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.3rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9em;
+  border: 1px solid hsl(var(--border) / 0.2);
+}
+.tiptap pre code, .article-body pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  border: none;
+}
+
