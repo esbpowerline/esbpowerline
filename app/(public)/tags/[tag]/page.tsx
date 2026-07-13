@@ -5,9 +5,7 @@ import { getPublishedArticlesByTag, getPublicTagCounts } from '@/lib/category-co
 
 export const revalidate = 600;
 
-export async function generateStaticParams() {
-  return [];
-}
+
 
 interface Props {
   params: Promise<{ tag: string }>;
