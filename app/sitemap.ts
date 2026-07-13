@@ -15,17 +15,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch all categories
   const categories = await prisma.category.findMany({
-    select: { slug: true, updatedAt: true },
+    select: { slug: true, createdAt: true },
   });
 
-  // Fetch all tags (unique tags from articles)
-  // We will just do a simple aggregation if possible, or skip tags to keep sitemap clean.
-  // Actually, categories and articles are the most important.
-
   // Fetch all magazines
-  const magazines = await prisma.magazine.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { id: true, updatedAt: true }, // Or slug if they have it
+  const magazines = await prisma.magazineIssue.findMany({
+    where: { status: 'published' },
+    select: { id: true, createdAt: true },
   });
 
   const articleUrls = articles.map((article) => ({
@@ -37,14 +33,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const categoryUrls = categories.map((cat) => ({
     url: `${baseUrl}/categories/${cat.slug}`,
-    lastModified: cat.updatedAt,
+    lastModified: cat.createdAt,
     changeFrequency: 'weekly' as const,
     priority: 0.7,
   }));
 
   const magazineUrls = magazines.map((mag) => ({
-    url: `${baseUrl}/magazine`, // Depending on how magazines are routed, maybe /magazine?
-    lastModified: mag.updatedAt,
+    url: `${baseUrl}/magazine`,
+    lastModified: mag.createdAt,
     changeFrequency: 'monthly' as const,
     priority: 0.6,
   }));
