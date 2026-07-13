@@ -14,6 +14,9 @@ export const revalidate = 120;
 export const metadata = {
   title: 'Power Grid Explorer — ESB PowerLine',
   description: 'Real-time and planning data for Bangladesh’s electricity system — generation, transmission, demand & projects.',
+  alternates: {
+    canonical: '/grid-explorer',
+  },
 };
 
 export default async function PowerGridExplorerPage() {
@@ -24,8 +27,25 @@ export default async function PowerGridExplorerPage() {
   const grid = normalizeGridSettings(settings);
   const latestDate = getLatestAvailableDate();
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Dataset',
+    name: 'Bangladesh Power Grid Data Explorer',
+    description: 'Real-time and planning data for Bangladesh’s electricity system — generation, transmission, demand & projects.',
+    url: `${baseUrl}/grid-explorer`,
+    creator: {
+      '@type': 'Organization',
+      name: 'ESB PowerLine'
+    }
+  };
+
   return (
     <div id="power-grid-page-container" className="container container--shell py-8 md:py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Sleek, Compact Premium Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-border/40 pb-5 mb-6 group">
         <div>

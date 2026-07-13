@@ -15,6 +15,7 @@ const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mon
 const notoSansBengali = Noto_Sans_Bengali({ subsets: ['bengali'], variable: '--font-bengali', display: 'swap' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com'),
   title: {
     default: 'ESB PowerLine — Bangladesh Energy & Power News',
     template: '%s | ESB PowerLine',

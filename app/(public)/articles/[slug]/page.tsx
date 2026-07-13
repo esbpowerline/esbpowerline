@@ -35,6 +35,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${article.title} | ESB PowerLine`,
     description: article.excerpt,
+    alternates: {
+      canonical: `/articles/${article.slug}`,
+    },
     openGraph: {
       title: article.title,
       description: article.excerpt,
@@ -85,6 +88,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="container py-10 max-w-3xl article-page--with-sticky-author fluid-article-container">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <ArticleViewTracker articleId={article.id} />
       <Link href="/articles" className="text-sm text-primary hover:underline">← Back to news</Link>
 
