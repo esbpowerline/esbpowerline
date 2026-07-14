@@ -6,12 +6,12 @@ const distDir = surface === 'all' ? '.next' : `.next-${surface}`;
 
 const cspHeader = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data: https://*.supabase.co https://*.esbpowerline.com https://esbpowerline.com https://www.esbpowerline.com",
+  "img-src 'self' blob: data: https://*.supabase.co https://*.esbpowerline.com https://esbpowerline.com https://www.esbpowerline.com https://*.google-analytics.com https://*.googletagmanager.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co",
-  "frame-src 'self'",
+  "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+  "frame-src 'self' https://www.youtube.com",
   "media-src 'self'",
 ].join('; ');
 
@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    unoptimized: true, // Bypass Vercel 1000 image/mo limit
+    unoptimized: false, // Bypass Vercel 1000 image/mo limit
     remotePatterns: [
       { protocol: 'https', hostname: '**.supabase.co' },
       { protocol: 'https', hostname: 'esbpowerline.com' },
@@ -96,9 +96,13 @@ const nextConfig: NextConfig = {
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
-        // Short cache for public images (can be purged by CDN)
+        // Long-lived cache for public images and fonts
         source: '/images/(.*)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/fonts/(.*)',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
       {
         source: '/data/daily/(.*)',

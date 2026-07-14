@@ -47,7 +47,7 @@ function HeroLayout({ article }: { article: PublicArticleCard }) {
           alt={article.title}
           width={640}
           height={360}
-          unoptimized={true}
+          
           className="coverage-card__hero-image"
           style={heroImageStyle(article.heroMeta)}
           priority
@@ -78,7 +78,7 @@ function HorizontalLayout({ article }: { article: PublicArticleCard }) {
           src={article.imageUrl ?? ''}
           alt={article.title}
           fill
-          unoptimized={true}
+          
           className="coverage-card__thumb object-cover"
           style={heroImageStyle(article.heroMeta)}
         />
@@ -102,7 +102,7 @@ function CompactLayout({ article }: { article: PublicArticleCard }) {
           src={article.imageUrl ?? ''}
           alt={article.title}
           fill
-          unoptimized={true}
+          
           className="coverage-card__compact-image object-cover"
           style={heroImageStyle(article.heroMeta)}
         />
@@ -121,7 +121,7 @@ function OverlayLayout({ article }: { article: PublicArticleCard }) {
         src={article.imageUrl ?? ''}
         alt={article.title}
         fill
-        unoptimized={true}
+        
         className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
         style={heroImageStyle(article.heroMeta)}
         sizes="(max-width: 768px) 100vw, 400px"
@@ -150,7 +150,7 @@ function HeadlineLayout({ article }: { article: PublicArticleCard }) {
           src={article.imageUrl ?? ''}
           alt={article.title}
           fill
-          unoptimized={true}
+          
           className="coverage-card__headline-thumb object-cover"
           style={heroImageStyle(article.heroMeta)}
         />
@@ -168,7 +168,7 @@ function SplitLayout({ article }: { article: PublicArticleCard }) {
           src={article.imageUrl ?? ''}
           alt={article.title}
           fill
-          unoptimized={true}
+          
           className="object-cover"
           style={heroImageStyle(article.heroMeta)}
           sizes="(max-width: 768px) 100vw, 400px"
@@ -208,7 +208,7 @@ function BannerLayout({ article }: { article: PublicArticleCard }) {
         src={article.imageUrl ?? ''}
         alt={article.title}
         fill
-        unoptimized={true}
+        
         className="object-cover opacity-35 transition-opacity group-hover:opacity-45"
         style={heroImageStyle(article.heroMeta)}
         sizes="(max-width: 768px) 100vw, 800px"

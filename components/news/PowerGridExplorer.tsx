@@ -475,8 +475,8 @@ export function PowerGridExplorer({
 
   // Dynamic Gas Production & Supply calculations
   const safeGasProductionData = gasProductionData || [];
-  const totalGasSupply = safeGasProductionData.reduce((sum, item) => sum + item.gas, 0);
-  const totalCondensate = safeGasProductionData.reduce((sum, item) => sum + item.condensate, 0);
+  const totalGasSupply = safeGasProductionData.reduce((sum, item) => sum + (item.gas || 0), 0);
+  const totalCondensate = safeGasProductionData.reduce((sum, item) => sum + (item.condensate || 0), 0);
 
   // Chevron IOC Supply
   const chevronItem = safeGasProductionData.find(item => item.company.toLowerCase().includes('chevron'));

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { Play, X, Clock, User, Users } from 'lucide-react';
 import {
@@ -117,7 +118,7 @@ export function InterviewsSection({
         )}
       >
         <div className="min-w-0">
-          <div className="section-kicker text-emerald-500 dark:text-emerald-400 mb-1.5">
+          <div className="section-kicker text-emerald-700 dark:text-emerald-500 mb-1.5">
             {t('interviews.kicker').toUpperCase()}
           </div>
           <div className="flex items-center gap-2">
@@ -144,21 +145,22 @@ export function InterviewsSection({
             className="interview-card w-full group flex h-full flex-col text-left rounded-2xl overflow-hidden border border-border bg-card focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <div className="relative aspect-video shrink-0 overflow-hidden">
-              <img
+              <Image
                 src={encodeInterviewAssetUrl(iv.thumbnail)}
                 alt={iv.title}
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 loading="lazy"
-                decoding="async"
               />
             </div>
             <div className="flex min-h-0 flex-1 flex-col p-4">
-              <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mb-1">
+              <div className="text-xs text-emerald-700 dark:text-emerald-500 font-medium mb-1">
                 {iv.date} • {iv.guest}
               </div>
-              <h4 className="font-semibold text-[15px] leading-tight tracking-[-0.01em] line-clamp-2 group-hover:text-primary transition">
+              <h3 className="font-semibold text-[15px] leading-tight tracking-[-0.01em] line-clamp-2 group-hover:text-primary transition">
                 {iv.title}
-              </h4>
+              </h3>
               <p className="mt-2 flex-1 text-xs text-muted-foreground line-clamp-2">{iv.excerpt}</p>
               <div className="mt-3 flex items-center justify-between gap-3">
                 <div className="min-w-0 text-ui-2xs text-muted-foreground flex items-center gap-1">

@@ -187,13 +187,13 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
             <p className="text-xs font-semibold text-foreground/60 leading-normal">
               {t('footer.copyright', { year })}
             </p>
-            <p className="text-[10px] text-foreground/40 font-normal leading-normal">
+            <p className="text-[10px] text-foreground/70 font-normal leading-normal">
               Developed in-house by{' '}
               <a
                 href="https://facebook.com/chiefhamim"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-foreground/50 hover:text-primary transition-colors duration-150 font-medium"
+                className="text-foreground/70 hover:text-primary transition-colors duration-150 font-medium"
               >
                 chiefhamim
               </a>

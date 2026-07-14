@@ -60,7 +60,7 @@ export function ArticleCard({
             alt={title}
             width={500}
             height={192}
-            unoptimized={true}
+            
             className="article-card__image"
             style={heroImageStyle(heroMeta)}
           />

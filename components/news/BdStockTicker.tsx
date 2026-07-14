@@ -16,12 +16,10 @@ export function BdStockTicker({
 }) {
   const { locale, t } = useLocale();
   const [items, setItems] = useState<DseTickerItem[]>(DEFAULT_DSE_TICKER);
-  const [mounted, setMounted] = useState(false);
-
   const [marketOpen, setMarketOpen] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    let intervalId: NodeJS.Timeout;
     let cancelled = false;
 
     const checkMarketStatus = () => {
@@ -55,10 +53,10 @@ export function BdStockTicker({
     }
 
     void load();
-    const interval = setInterval(load, 30 * 60 * 1000);
+    intervalId = setInterval(load, 30 * 60 * 1000);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      clearInterval(intervalId);
     };
   }, []);
 
@@ -66,7 +64,7 @@ export function BdStockTicker({
   const animationRef = useRef<Animation | null>(null);
 
   useEffect(() => {
-    if (!mounted || !trackRef.current) return;
+    if (!trackRef.current) return;
 
     const anim = trackRef.current.animate(
       [
@@ -85,7 +83,7 @@ export function BdStockTicker({
     return () => {
       anim.cancel();
     };
-  }, [mounted, items, locale]);
+  }, [items, locale]);
 
   const handleMouseEnter = () => {
     if (animationRef.current) {
@@ -107,10 +105,6 @@ export function BdStockTicker({
       })),
     [items, locale],
   );
-
-  if (!mounted) {
-    return <div className={cn('h-8', className)} aria-hidden />;
-  }
 
   return (
     <div
@@ -162,7 +156,7 @@ export function BdStockTicker({
           ref={trackRef}
           className="market-ticker__track flex w-max items-center gap-6 pr-6 whitespace-nowrap"
         >
-          {[...displayItems, ...displayItems, ...displayItems, ...displayItems].map((item, idx) => {
+          {[...displayItems, ...displayItems].map((item, idx) => {
             const isPositive = item.change >= 0;
             return (
               <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">

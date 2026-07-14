@@ -181,7 +181,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 alt={article.heroImage?.alt ?? article.title}
                 fill
                 priority
-                unoptimized={true}
+                
                 style={heroImageStyle(article.heroImage)}
                 sizes="(max-width: 768px) 100vw, 800px"
               />

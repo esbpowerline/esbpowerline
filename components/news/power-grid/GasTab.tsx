@@ -108,9 +108,9 @@ export function GasTab({
                 <tr key={idx}>
                   <td className="font-semibold">{gp.company}</td>
                   <td className="text-left tabular-nums text-muted-foreground">{gp.fields || '—'}</td>
-                  <td className="text-left tabular-nums font-medium">{gp.gas.toFixed(1)}</td>
-                  <td className="text-left tabular-nums">{formatNumber(Math.round(gp.condensate))}</td>
-                  <td className="text-left tabular-nums text-muted-foreground">{gp.share.toFixed(1)}%</td>
+                  <td className="text-left tabular-nums font-medium">{gp.gas ? gp.gas.toFixed(1) : '-'}</td>
+                  <td className="text-left tabular-nums">{gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '-'}</td>
+                  <td className="text-left tabular-nums text-muted-foreground">{gp.share !== undefined ? `${gp.share.toFixed(1)}%` : '-'}</td>
                 </tr>
               ))}
               <tr className="border-t border-border/80 font-bold bg-muted/20">

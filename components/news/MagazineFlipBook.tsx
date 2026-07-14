@@ -203,7 +203,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src={coverUrl}
                   alt="Magazine Cover"
                   fill
-                  unoptimized={true}
+                  
                   className="object-cover"
                   priority
                 />
@@ -358,7 +358,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
               }
               alt={`Page ${currentPage}`}
               fill
-              unoptimized={true}
+              
               className="object-cover transition-all duration-300"
             />
             <div className="absolute bottom-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[10px] text-white">

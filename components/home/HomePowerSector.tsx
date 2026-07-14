@@ -157,7 +157,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     }, 5500);
 
     return () => clearInterval(timer);
-  }, [maxIndex, visibleCount, articles.length, getBaseTranslate]);
+  }, [maxIndex, visibleCount, articles.length, getBaseTranslate, currentIndex]);
 
   // Drag handlers
   const handleDragStart = (clientX: number) => {
@@ -392,7 +392,7 @@ export function HomePowerSector({
 
       {/* Top-level Featured/Curation Articles (Editors' picks) */}
       <div className="mb-12">
-        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 mb-4 flex items-center gap-2">
+        <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
           Featured Coverage
         </div>
@@ -406,9 +406,9 @@ export function HomePowerSector({
       </div>
 
       {/* Mobile Inline Ad block for 007.png */}
-      <div className="block md:hidden mb-12" suppressHydrationWarning>
-        <Link href="/advertising" className="rounded-2xl overflow-hidden relative group w-full block" suppressHydrationWarning>
-          <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+      <div className="block md:hidden mb-12">
+        <Link href="/advertising" className="rounded-2xl overflow-hidden relative group w-full block">
+          <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" />
         </Link>
       </div>
 
@@ -454,23 +454,23 @@ export function HomePowerSector({
 
                 {/* 3 Proportional Ad Spaces */}
                 {(index === 1 || index === 7) && (
-                  <div className="category-ad-block-3 grid grid-cols-3 gap-2 md:gap-6" suppressHydrationWarning>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                  <div className="category-ad-block-3 grid grid-cols-3 gap-2 md:gap-6">
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
+                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
+                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
+                      <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>
                   </div>
                 )}
 
                 {/* 1 Large Full-Width Ad Space */}
                 {(index === 4 || index === 10) && (
-                  <Link href="/advertising" className="category-ad-block-1 rounded-2xl overflow-hidden relative group w-full block" suppressHydrationWarning>
-                    <Image src="/images/promotions/005.png" alt="Advertisement" width={3126} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                  <Link href="/advertising" className="category-ad-block-1 rounded-2xl overflow-hidden relative group w-full block">
+                    <Image src="/images/promotions/005.png" alt="Advertisement" width={3126} height={480} className="w-full h-auto object-cover block" />
                   </Link>
                 )}
               </React.Fragment>

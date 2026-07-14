@@ -189,7 +189,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
                 </div>
                 <CategoryLabel
                   name={article.category}
-                  className="home-trending-wave__category section-category-label text-muted-foreground truncate"
+                  className="home-trending-wave__category section-category-label text-muted-foreground/80 truncate"
                 />
               </div>
 
@@ -201,7 +201,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
                       src={article.imageUrl}
                       alt=""
                       fill
-                      unoptimized={true}
+                      
                       style={heroImageStyle(article.heroMeta || undefined)}
                       sizes="(max-width: 768px) 100vw, 280px"
                       className="absolute inset-0 h-full w-full object-cover"
@@ -410,7 +410,7 @@ export function HomeTrendingSection({
       }`}
     >
       <div className="home-section-head__title-wrap min-w-0 flex-1">
-        <div className="section-kicker text-emerald-500 dark:text-emerald-400 mb-1.5">
+        <div className="section-kicker text-primary mb-1.5">
           {t('home.trendingKicker')}
         </div>
         <div className="flex items-center gap-2 min-w-0">
@@ -452,7 +452,7 @@ export function HomeTrendingSection({
               <TrendingHeroRailHeader />
             </div>
             <div className="flex-grow min-h-0 flex flex-col justify-center my-3">
-              <p className="text-center text-sm text-muted-foreground">{t('home.noTrending')}</p>
+              <p className="text-center text-sm text-muted-foreground/80">{t('home.noTrending')}</p>
             </div>
           </div>
         </section>
@@ -470,7 +470,7 @@ export function HomeTrendingSection({
     return (
       <section className="container home-block" aria-labelledby="home-trending-title">
         {header}
-        <p className="text-sm text-muted-foreground">{t('home.noTrending')}</p>
+        <p className="text-sm text-muted-foreground/80">{t('home.noTrending')}</p>
       </section>
     );
   }
@@ -498,7 +498,7 @@ export function HomeTrendingSection({
                 src={lead.imageUrl}
                 alt=""
                 fill
-                unoptimized={true}
+                
                 style={heroImageStyle(lead.heroMeta || undefined)}
                 sizes="(max-width: 768px) 96px, 128px"
               />
@@ -512,12 +512,12 @@ export function HomeTrendingSection({
             </span>
             <CategoryLabel
               name={lead.category}
-              className="section-category-label text-muted-foreground mb-1"
+              className="section-category-label text-muted-foreground/80 mb-1"
             />
             <h3 className="font-display font-bold text-base md:text-lg leading-snug tracking-tight group-hover:text-primary transition-colors">
               {resolveDisplayTitle(lead.title, lead.shortTitle)}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1.5">
+            <p className="text-xs text-muted-foreground/80 mt-1.5">
               {leadTimeAgo} · {lead.views.toLocaleString()} {t('common.views')}
             </p>
           </div>

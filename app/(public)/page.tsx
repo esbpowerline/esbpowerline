@@ -1,13 +1,22 @@
 import { getServerSiteLocale } from '@/lib/locale-server';
-import { HomeBottomRow } from '@/components/home/HomeBottomRow';
-import { HomePowerSector } from '@/components/home/HomePowerSector';
-import { HomeSnapshotPanel } from '@/components/home/HomeSnapshotPanel';
-import { HomeTrendingSection } from '@/components/home/HomeTrendingSection';
+import {
+  DeferredHomeBottomRow as HomeBottomRow,
+  DeferredHomePowerSector as HomePowerSector,
+  DeferredHomeTrendingSection as HomeTrendingSection,
+  DeferredInterviewsSection as InterviewsSection,
+} from '@/components/home/DeferredComponents';
+const HomeSnapshotPanel = dynamic(
+  () => import('@/components/home/HomeSnapshotPanel').then((mod) => mod.HomeSnapshotPanel),
+  { ssr: true }
+);
+
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
 import { FeaturedCarousel } from '@/components/news/FeaturedCarousel';
-import { InterviewsSection } from '@/components/news/InterviewsSection';
+
 import { normalizeInterviews } from '@/lib/interview-content';
 import {
   getPublicSettingsMap,
@@ -67,7 +76,8 @@ export default async function Home() {
 
   const categoriesWithArticles = await Promise.all(
     categories.map(async (cat) => {
-      const articles = await getPublishedArticlesByCategory(cat.name, locale);
+      let articles = await getPublishedArticlesByCategory(cat.name, locale);
+      articles = articles.slice(0, 5); // Limit to 5 items to keep DOM size small
       return {
         ...cat,
         articles,

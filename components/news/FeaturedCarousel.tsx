@@ -79,7 +79,6 @@ export function FeaturedCarousel({
 
   const [current, setCurrent] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [progress, setProgress] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const transitionTimeout = useRef<NodeJS.Timeout | null>(null);
   const currentRef = useRef(current);
@@ -94,7 +93,7 @@ export function FeaturedCarousel({
     setIsTransitioning(true);
     transitionTimeout.current = setTimeout(() => {
       setCurrent(index);
-      setProgress(0);
+      
       setIsTransitioning(false);
     }, 200);
   }, []);
@@ -110,19 +109,7 @@ export function FeaturedCarousel({
   useEffect(() => {
     if (!isPlaying || isTransitioning) return;
 
-    const progressInterval = setInterval(() => {
-      setProgress((p) => {
-        const nextP = p + 100 / 75;
-        if (nextP >= 100) {
-          next();
-          return 0;
-        }
-        return nextP;
-      });
-    }, 100);
-
-    return () => clearInterval(progressInterval);
-  }, [isPlaying, isTransitioning, next]);
+      }, [isPlaying, isTransitioning, next]);
 
   useEffect(() => {
     return () => {
@@ -165,10 +152,18 @@ export function FeaturedCarousel({
           >
             <span className="relative h-1 w-full overflow-hidden rounded-full bg-border/40">
               <span
-                className={`absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30 transition-[width] duration-100 ease-linear ${
-                  isPast ? 'w-full' : isActive ? '' : 'w-0'
+                className={`absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30 ${
+                  isPast ? 'w-full' : 'w-0'
                 }`}
-                style={isActive ? { width: `${progress}%` } : undefined}
+                style={
+                  isActive
+                    ? {
+                        animation: `progressFill 7.5s linear forwards`,
+                        animationPlayState: isPlaying && !isTransitioning ? 'running' : 'paused',
+                      }
+                    : undefined
+                }
+                onAnimationEnd={isActive ? () => next() : undefined}
               />
             </span>
           </button>
@@ -277,9 +272,9 @@ export function FeaturedCarousel({
                         src={item.imageUrl}
                         alt={item.title}
                         fill
-                        unoptimized={true}
                         priority={idx === 0}
-                        className={`absolute inset-0 h-full w-full transition-opacity duration-700 ease-in-out ${
+                        fetchPriority={idx === 0 ? "high" : "auto"}
+                        className={`absolute inset-0 h-full w-full ${
                           idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
                         }`}
                         style={heroImageStyle({ fitMode: 'fill', ...(item.heroMeta ?? {}) })}
@@ -288,7 +283,7 @@ export function FeaturedCarousel({
                     ) : (
                       <div
                         key={idx}
-                        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+                        className={`absolute inset-0 ${
                           idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
                         }`}
                       >

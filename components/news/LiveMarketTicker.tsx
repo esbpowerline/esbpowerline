@@ -48,43 +48,16 @@ export function LiveMarketTicker({
   );
 
   const [items, setItems] = useState<TickerItem[]>(localizedSeed);
-  const [mounted, setMounted] = useState(false);
-  const [marketOpen, setMarketOpen] = useState(false);
+  const [marketOpen, setMarketOpen] = useState(true);
 
   const simulateLive = isSimulatedTelemetryEnabled();
 
   useEffect(() => {
-    setItems(localizedSeed);
-  }, [localizedSeed]);
-
-  useEffect(() => {
-    setMounted(true);
-    
-    const checkMarketStatus = () => {
-      const now = new Date();
-      const dhakaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Dhaka' }));
-      const day = dhakaTime.getDay();
-      const hours = dhakaTime.getHours();
-      const minutes = dhakaTime.getMinutes();
-      
-      const isOpenDay = day >= 0 && day <= 4; // Sun-Thu
-      const timeInMins = hours * 60 + minutes;
-      const isOpenTime = timeInMins >= 10 * 60 && timeInMins <= 14 * 60 + 30; // 10:00 to 14:30
-      
-      return isOpenDay && isOpenTime;
-    };
-    
-    setMarketOpen(checkMarketStatus());
-
     if (!simulateLive) return;
 
     const interval = setInterval(() => {
       if (document.hidden) return;
       
-      const isOpen = checkMarketStatus();
-      setMarketOpen(isOpen);
-      if (!isOpen) return;
-
       setItems((prev) =>
         prev.map((item) => {
           if (Math.random() > 0.4) {
@@ -98,9 +71,9 @@ export function LiveMarketTicker({
             return { ...item, value: newVal, change: newChange };
           }
           return item;
-        }),
+        })
       );
-    }, 30 * 60 * 1000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [simulateLive]);
@@ -109,7 +82,7 @@ export function LiveMarketTicker({
   const animationRef = React.useRef<Animation | null>(null);
 
   useEffect(() => {
-    if (!mounted || !trackRef.current) return;
+    if (!trackRef.current) return;
 
     const anim = trackRef.current.animate(
       [
@@ -132,7 +105,7 @@ export function LiveMarketTicker({
     return () => {
       anim.cancel();
     };
-  }, [mounted, playing, items, locale]);
+  }, [playing, items, locale]);
 
   const handleMouseEnter = () => {
     if (animationRef.current) {
@@ -146,9 +119,7 @@ export function LiveMarketTicker({
     }
   };
 
-  if (!mounted) {
-    return <div className={compact ? 'h-8' : 'h-9'} aria-hidden />;
-  }
+
 
   const textSize = compact ? 'text-[12px] md:text-[13px]' : 'text-[13px] md:text-sm';
   const badgeSize = compact ? 'text-[10px] md:text-[11px]' : 'text-[11px] md:text-xs';
@@ -162,7 +133,7 @@ export function LiveMarketTicker({
         textSize,
       )}
     >
-      {[...items, ...items, ...items, ...items].map((item, idx) => {
+      {[...items, ...items].map((item, idx) => {
         const isPositive = item.change >= 0;
         return (
           <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">

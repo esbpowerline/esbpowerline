@@ -276,7 +276,7 @@ export function EnergyDashboard({
                   className={`energy-dashboard__stat-icon shrink-0 transition-transform duration-200 group-hover:scale-110 ${s.iconClass ?? 'text-primary'}`}
                 />
                 <div className="energy-dashboard__stat-copy flex min-w-0 flex-1 flex-col justify-center gap-[clamp(0.1rem,1vw,0.3rem)]">
-                  <div className="energy-dashboard__stat-label font-semibold uppercase tracking-wider text-muted-foreground/75 group-hover:text-foreground transition-colors duration-150 select-none leading-none truncate w-full">
+                  <div className="energy-dashboard__stat-label font-semibold uppercase tracking-wider text-muted-foreground/90 group-hover:text-foreground transition-colors duration-150 select-none leading-none truncate w-full">
                     {getLabelElements(s.label, locale)}
                   </div>
                   <div className="energy-dashboard__stat-value font-bold font-sans tabular-nums text-foreground/95 group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap">
@@ -286,7 +286,7 @@ export function EnergyDashboard({
                         )
                       : formatNumber(Math.round(s.value))}
                     {' '}
-                    <span className="energy-dashboard__stat-unit font-bold text-muted-foreground/50 uppercase tracking-wider">
+                    <span className="energy-dashboard__stat-unit font-bold text-muted-foreground/90 uppercase tracking-wider">
                       {s.unit}
                     </span>
                   </div>
@@ -295,13 +295,13 @@ export function EnergyDashboard({
             ) : (
               <>
                 <Icon className={`shrink-0 transition-transform duration-200 group-hover:scale-105 h-6 w-6 mb-2 ${s.iconClass ?? 'text-primary'}`} />
-                <div className="font-bold uppercase tracking-wider text-muted-foreground/75 group-hover:text-foreground transition-colors duration-150 text-center select-none leading-none max-w-full px-1 text-xs md:text-sm mb-1">
+                <div className="font-bold uppercase tracking-wider text-muted-foreground/90 group-hover:text-foreground transition-colors duration-150 text-center select-none leading-none max-w-full px-1 text-xs md:text-sm mb-1">
                   {localizeEnergyStatLabel(s.label, locale)}
                 </div>
                 <div className="font-bold font-sans tabular-nums text-foreground/90 group-hover:text-primary transition-colors duration-150 leading-none stat-value mt-1">
                   {s.isDecimal ? s.value.toFixed(1) : formatNumber(Math.round(s.value))}
                   {' '}
-                  <span className="font-bold text-muted-foreground/50 uppercase tracking-wider text-sm align-baseline font-normal text-muted-foreground">
+                  <span className="font-bold uppercase tracking-wider text-sm align-baseline font-normal text-muted-foreground">
                     {s.unit}
                   </span>
                 </div>

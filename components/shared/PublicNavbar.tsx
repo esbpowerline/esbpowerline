@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { ThemeBanner } from '@/components/shared/ThemeBanner';
 
 import { Search, Menu, X, Newspaper, BookOpen, BarChart3, Home } from 'lucide-react';
 import { useMemo, useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
@@ -47,6 +47,7 @@ function PublicNavLink({
   children,
   onClick,
   'aria-current': ariaCurrent,
+  'aria-label': ariaLabel,
 }: {
   href: string;
   className?: string;
@@ -54,6 +55,7 @@ function PublicNavLink({
   children: ReactNode;
   onClick?: () => void;
   'aria-current'?: 'page' | undefined;
+  'aria-label'?: string;
 }) {
   const resolvedHref = usePublicHref(href);
   return (
@@ -63,6 +65,7 @@ function PublicNavLink({
       style={style}
       onClick={onClick}
       aria-current={ariaCurrent}
+      aria-label={ariaLabel}
     >
       {children}
     </Link>
@@ -102,45 +105,9 @@ export function PublicNavbar({
   }, [categories, locale]);
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [bannerSrc, setBannerSrc] = useState('/images/banner.jpg?v=5');
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
   const activeScrollIdRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
-
-    const html = document.documentElement;
-    const updateBanner = () => {
-      const currentTheme = html.dataset.siteTheme;
-      if (currentTheme === 'midnight') {
-        setBannerSrc('/images/banner_midnight.jpg?v=5');
-      } else if (currentTheme === 'dark') {
-        setBannerSrc('/images/banner_dark.jpg?v=5');
-      } else {
-        setBannerSrc('/images/banner.jpg?v=5');
-      }
-    };
-    
-    updateBanner();
-
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === 'attributes' && m.attributeName === 'data-site-theme') {
-          updateBanner();
-        }
-      }
-    });
-
-    observer.observe(html, { attributes: true, attributeFilter: ['data-site-theme'] });
-
-    return () => observer.disconnect();
-  }, [mounted]);
 
   useEffect(() => {
     const targetPaths = ['/grid-explorer', '/articles', '/magazine', '/about', '/contact'];
@@ -237,18 +204,7 @@ export function PublicNavbar({
         <div className="container container--shell px-0">
           <div className="site-banner-frame border-l border-r border-b border-border/40 overflow-hidden">
             <PublicNavLink href="/" className="w-full block transition-opacity hover:opacity-95">
-              <img
-                src={bannerSrc}
-                alt="ESB PowerLine — Safe Energy Safe Nation"
-                className="site-banner__image block mx-auto"
-                width={3728}
-                height={343}
-                onError={() => {
-                  if (bannerSrc !== '/images/logo.jpg') {
-                    setBannerSrc('/images/logo.jpg');
-                  }
-                }}
-              />
+              <ThemeBanner />
             </PublicNavLink>
             <PublicMarketStrip energyItems={tickerItems} />
           </div>
@@ -267,6 +223,7 @@ export function PublicNavbar({
                       className={`public-nav-bar__pill-btn public-nav-bar__pill-btn--paired public-nav-bar__home${
                         pathname === '/' ? ' public-nav-bar__home--active' : ''
                       }`}
+                      aria-label={t('nav.home')}
                     >
                       <Home className="icon-sm" aria-hidden />
                       <span className="public-nav-bar__pill-label">{t('nav.home')}</span>
@@ -301,6 +258,7 @@ export function PublicNavbar({
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--latest${
                       isHubSectionActive(pathname, '/articles') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
+                    aria-label="Articles"
                   >
                     <Newspaper className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                     <span className="hidden lg:inline">{t('nav.latest')}</span>
@@ -311,6 +269,7 @@ export function PublicNavbar({
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--grid${
                       isHubSectionActive(pathname, '/grid-explorer') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
+                    aria-label="Grid Explorer"
                     aria-current={isHubSectionActive(pathname, '/grid-explorer') ? 'page' : undefined}
                   >
                     <BarChart3 className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
@@ -322,6 +281,7 @@ export function PublicNavbar({
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--magazine${
                       isHubSectionActive(pathname, '/magazine') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
+                    aria-label="Magazine"
                   >
                     <BookOpen className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                     <span className="hidden lg:inline">{t('nav.magazine')}</span>

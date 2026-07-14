@@ -43,7 +43,7 @@ export function HomeBottomRow({
         <div className="absolute -bottom-[20%] -left-[20%] w-[14rem] h-[14rem] rounded-full bg-primary/5 blur-[45px] animate-pulse duration-[9000ms]" />
       </div>
       <div>
-        <div className="flex items-center gap-2 text-emerald-500 dark:text-emerald-400 mb-2.5">
+        <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-500 mb-2.5">
           <BookOpen className="h-4 w-4" />
           <span className="section-kicker">{t('home.monthlyMagazine')}</span>
         </div>
@@ -54,7 +54,7 @@ export function HomeBottomRow({
                 src={magazine.coverUrl}
                 alt={magazine.title}
                 fill
-                unoptimized={true}
+                
                 className="object-cover"
                 sizes="72px"
               />

@@ -17,35 +17,21 @@ export function MagazineCoverMockup({
   subtitle = "& Tariff Reform",
   kicker = "ESB PowerLine"
 }: MagazineCoverMockupProps) {
-  const [aspect, setAspect] = useState<'portrait' | 'landscape'>('portrait');
-
-  const handleImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { naturalWidth, naturalHeight } = e.currentTarget;
-    if (naturalWidth >= naturalHeight) {
-      setAspect('landscape');
-    } else {
-      setAspect('portrait');
-    }
-  };
-
   return (
     <div className="flex justify-center w-full">
       <div 
         className={cn(
           "rounded-2xl overflow-hidden border border-border/80 shadow-2xl bg-[var(--bg-elev)] relative transition-all duration-300 w-full",
-          aspect === 'portrait' 
-            ? "aspect-[3/4] max-w-full sm:max-w-[380px]" 
-            : "aspect-[16/10] max-w-full sm:max-w-[480px]"
+          "aspect-[3/4] max-w-[280px] sm:max-w-[320px]" 
         )}
       >
         <Image 
           src={coverUrl} 
           alt="Magazine cover" 
-          onLoad={handleImageLoad}
           fill
-          unoptimized={coverUrl.startsWith('http')}
+          loading="lazy"
           className="absolute inset-0 w-full h-full object-cover opacity-95 block mx-auto" 
-          sizes="(max-width: 768px) 50vw, 380px"
+          sizes="(max-width: 768px) 50vw, 320px"
         />
         {/* Skeuomorphic bound/spine shading for realistic bound feel */}
         <div className="absolute top-0 left-0 bottom-0 w-2 bg-gradient-to-r from-black/35 via-transparent to-transparent opacity-90 pointer-events-none" />

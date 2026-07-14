@@ -173,7 +173,7 @@ function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
             <Icon className={`h-[11.25px] w-[11.25px] md:h-[13.5px] md:w-[13.5px] shrink-0 self-center transition-transform duration-200 group-hover:scale-110 ${s.iconClass}`} />
             
             <div className="flex flex-col min-w-0 flex-1 justify-center gap-1">
-              <div className="font-semibold uppercase tracking-wider text-muted-foreground/75 group-hover:text-foreground transition-colors duration-150 select-none leading-none truncate w-full text-[9px] md:text-[10px]">
+              <div className="font-semibold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors duration-150 select-none leading-none truncate w-full text-[9px] md:text-[10px]">
                 <span className="hidden md:inline">{fullLabel}</span>
                 <span className="inline md:hidden">{shortLabel}</span>
               </div>
@@ -182,7 +182,7 @@ function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
                   ? s.value.toFixed(s.label === 'Fuel Cost' || s.label === 'Energy Unserved' ? 2 : 1)
                   : formatNumber(Math.round(s.value))}
                 {' '}
-                <span className="font-bold text-muted-foreground/50 uppercase tracking-wider text-[8px] md:text-[9px]">
+                <span className="font-bold text-muted-foreground uppercase tracking-wider text-[8px] md:text-[9px]">
                   {s.unit}
                 </span>
               </div>
@@ -292,7 +292,7 @@ export function HomeSnapshotPanel({
     .filter(Boolean);
   const [liveWord, ...agencies] = parts;
   const sourcesText = agencies.join(' • ');
-  const headerDate =
+  const headerDateToUse =
     snapshotHeaderDate ?? formatSnapshotHeaderDate(snapshotDate, locale);
 
   if (layout === 'segment') {
@@ -301,7 +301,7 @@ export function HomeSnapshotPanel({
         snapshotStats={snapshotStats}
         snapshotLabel={snapshotLabel}
         snapshotDate={snapshotDate}
-        headerDate={headerDate}
+        headerDate={headerDateToUse}
       />
     );
   }
@@ -319,8 +319,8 @@ export function HomeSnapshotPanel({
           </h2>
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <span className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground/60 dark:text-muted-foreground/50 select-none leading-none">
-            {locale === 'bn' ? 'আপডেট: ' : 'UPDATED: '}{headerDate}
+          <span className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground select-none leading-none">
+            {locale === 'bn' ? 'আপডেট: ' : 'UPDATED: '}{headerDateToUse}
           </span>
           <span className="inline-flex items-center gap-1 rounded border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[9.5px] md:text-[10px] font-display font-extrabold uppercase tracking-widest text-rose-600 dark:text-rose-400 select-none transition-colors duration-300 shadow-[0_1px_2px_rgba(244,63,94,0.03)] leading-none mt-1.5">
             <span className="relative flex h-1.5 w-1.5 mr-0.5 shrink-0">
