@@ -113,8 +113,10 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
 
 
   const nextCard = () => {
-    if (currentIndex >= maxIndex) return;
-    const nextIdx = currentIndex + 1;
+    let nextIdx = currentIndex + 1;
+    if (nextIdx > maxIndex) {
+      nextIdx = 0; // Wrap around to start
+    }
     setCurrentIndex(nextIdx);
     if (trackRef.current) {
       trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
@@ -124,8 +126,10 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
   };
 
   const prevCard = () => {
-    if (currentIndex <= 0) return;
-    const nextIdx = currentIndex - 1;
+    let nextIdx = currentIndex - 1;
+    if (nextIdx < 0) {
+      nextIdx = maxIndex; // Wrap around to end
+    }
     setCurrentIndex(nextIdx);
     if (trackRef.current) {
       trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
@@ -192,10 +196,10 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
     const swipeThreshold = 60; // px
     let nextIndex = currentIndex;
 
-    if (dragOffsetRef.current < -swipeThreshold && currentIndex < maxIndex) {
-      nextIndex = currentIndex + 1;
-    } else if (dragOffsetRef.current > swipeThreshold && currentIndex > 0) {
-      nextIndex = currentIndex - 1;
+    if (dragOffsetRef.current < -swipeThreshold) {
+      nextIndex = currentIndex + 1 > maxIndex ? 0 : currentIndex + 1;
+    } else if (dragOffsetRef.current > swipeThreshold) {
+      nextIndex = currentIndex - 1 < 0 ? maxIndex : currentIndex - 1;
     }
 
     setCurrentIndex(nextIndex);
@@ -240,7 +244,7 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
   return (
     <div className="relative group/carousel w-full">
       {/* Left Arrow Button */}
-      {articles.length > visibleCount && currentIndex > 0 && (
+      {articles.length > visibleCount && (
         <button
           onClick={prevCard}
           className="absolute -left-5 top-[40%] -translate-y-1/2 z-40 h-12 w-12 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-0 group-hover/carousel:opacity-100 pointer-events-none group-hover/carousel:pointer-events-auto hidden lg:flex"
@@ -298,35 +302,23 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
       </div>
 
       {articles.length > visibleCount && (
-        <div className="category-carousel-dots">
-          {[0, 1, 2].map((idx) => {
-            let isActive = false;
-            if (maxIndex > 0) {
-              const ratio = currentIndex / maxIndex;
-              if (idx === 0) isActive = ratio < 0.25;
-              else if (idx === 2) isActive = ratio > 0.75;
-              else isActive = ratio >= 0.25 && ratio <= 0.75;
-            } else {
-              isActive = idx === 0;
-            }
+        <div className="category-carousel-dots flex gap-1.5 justify-center mt-4">
+          {Array.from({ length: maxIndex + 1 }).map((_, idx) => {
+            const isActive = currentIndex === idx;
 
             return (
               <button
                 key={idx}
                 onClick={() => {
-                  let targetIdx = 0;
-                  if (idx === 1) targetIdx = Math.round(maxIndex / 2);
-                  else if (idx === 2) targetIdx = maxIndex;
-
-                  setCurrentIndex(targetIdx);
+                  setCurrentIndex(idx);
                   if (trackRef.current) {
                     trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-                    const targetTranslate = getBaseTranslate(targetIdx);
+                    const targetTranslate = getBaseTranslate(idx);
                     trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
                   }
                 }}
-                className="w-11 h-11 flex items-center justify-center"
-                aria-label={`Go to section ${idx + 1}`}
+                className="w-8 h-8 flex items-center justify-center"
+                aria-label={`Go to slide ${idx + 1}`}
               >
                 <div className={`h-1.5 rounded-full transition-all duration-300 ${
                   isActive ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/30'
@@ -338,7 +330,7 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
       )}
 
       {/* Right Arrow Button */}
-      {articles.length > visibleCount && currentIndex < maxIndex && (
+      {articles.length > visibleCount && (
         <button
           onClick={nextCard}
           className="absolute -right-5 top-[40%] -translate-y-1/2 z-40 h-12 w-12 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-0 group-hover/carousel:opacity-100 pointer-events-none group-hover/carousel:pointer-events-auto hidden lg:flex"
