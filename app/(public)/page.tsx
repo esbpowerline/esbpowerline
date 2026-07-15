@@ -77,7 +77,6 @@ export default async function Home() {
   const categoriesWithArticles = await Promise.all(
     categories.map(async (cat) => {
       let articles = await getPublishedArticlesByCategory(cat.name, locale);
-      articles = articles.slice(0, 5); // Limit to 5 items to keep DOM size small
       return {
         ...cat,
         articles,
