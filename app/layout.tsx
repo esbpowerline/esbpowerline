@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { Inter, Noto_Sans_Bengali, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
@@ -79,7 +78,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }}
           />
         </ProvidersShell>
-        <GoogleAnalytics gaId="G-V04WZWK8WT" />
+        <Script
+          strategy="lazyOnload"
+          src={`https://www.googletagmanager.com/gtag/js?id=G-V04WZWK8WT`}
+        />
+        <Script id="google-analytics" strategy="lazyOnload">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-V04WZWK8WT', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
       </body>
     </html>
   );

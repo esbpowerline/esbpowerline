@@ -3,43 +3,21 @@
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 
-function useInView(options = { rootMargin: '200px' }) {
+function useInView(options = { rootMargin: '100px' }) {
   const [isIntersecting, setIntersecting] = useState(false);
-  const [canLoad, setCanLoad] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    
-    const handleLoad = () => {
-      setCanLoad(true);
-      cleanup();
-    };
+    // If IntersectionObserver is not supported, just load it immediately (fallback for very old browsers)
+    if (typeof IntersectionObserver === 'undefined') {
+      setIntersecting(true);
+      return;
+    }
 
-    const cleanup = () => {
-      clearTimeout(timer);
-      window.removeEventListener('scroll', handleLoad, { capture: true });
-      window.removeEventListener('mousemove', handleLoad, { capture: true });
-      window.removeEventListener('touchstart', handleLoad, { capture: true });
-    };
-
-    // Ensure main thread is free for LCP. Load on user interaction or fallback timeout.
-    timer = setTimeout(handleLoad, 7000);
-    
-    window.addEventListener('scroll', handleLoad, { capture: true, once: true });
-    window.addEventListener('mousemove', handleLoad, { capture: true, once: true });
-    window.addEventListener('touchstart', handleLoad, { capture: true, once: true });
-
-    return cleanup;
-  }, []);
-
-  useEffect(() => {
-    if (!canLoad) return;
-    
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setIntersecting(true);
-        observer.disconnect();
+        observer.disconnect(); // Only load once
       }
     }, options);
 
@@ -50,20 +28,21 @@ function useInView(options = { rootMargin: '200px' }) {
     return () => {
       observer.disconnect();
     };
-  }, [options.rootMargin, canLoad]);
+  }, [options.rootMargin]);
 
   return { ref, isIntersecting };
 }
 
 function InViewWrapper({ children, minHeight }: { children: React.ReactNode, minHeight: string }) {
-  const { ref, isIntersecting } = useInView({ rootMargin: '50px' });
+  const { ref, isIntersecting } = useInView({ rootMargin: '100px' }); // Load when within 100px
 
   if (isIntersecting) {
     return <>{children}</>;
   }
 
+  // Pre-allocate space to prevent Cumulative Layout Shift (CLS)
   return (
-    <div ref={ref} style={{ minHeight, contentVisibility: 'auto', containIntrinsicSize: `0 ${minHeight}` }} />
+    <div ref={ref} style={{ minHeight, width: '100%', containIntrinsicSize: `0 ${minHeight}`, contentVisibility: 'auto' }} />
   );
 }
 
