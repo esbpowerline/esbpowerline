@@ -274,6 +274,7 @@ export function FeaturedCarousel({
                         fill
                         priority={idx === 0}
                         fetchPriority={idx === 0 ? "high" : "auto"}
+                        quality={60}
                         className={`absolute inset-0 h-full w-full ${
                           idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
                         }`}
