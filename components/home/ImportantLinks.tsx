@@ -61,7 +61,7 @@ export function ImportantLinks() {
           <div className="flex items-center gap-2 min-w-0">
             <LinkIcon className="text-primary shrink-0 h-5 w-5 md:h-6 md:w-6" aria-hidden />
             <h2 id="important-links-title" className="min-w-0 truncate font-display font-bold tracking-tight text-xl md:text-2xl text-foreground">
-              {t('importantLinks') === 'importantLinks' ? 'Important Links' : t('importantLinks')}
+              {(t as any)('importantLinks') === 'importantLinks' ? 'Important Links' : (t as any)('importantLinks')}
             </h2>
           </div>
         </header>
