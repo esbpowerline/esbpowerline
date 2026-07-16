@@ -90,7 +90,7 @@ export function LiveMarketTicker({
         { transform: 'translateX(-25%)' }
       ],
       {
-        duration: 30000,
+        duration: 20000,
         iterations: Infinity,
         easing: 'linear'
       }
@@ -105,7 +105,7 @@ export function LiveMarketTicker({
     return () => {
       anim.cancel();
     };
-  }, [playing, items, locale]);
+  }, [playing, locale]);
 
   const handleMouseEnter = () => {
     if (animationRef.current) {
@@ -125,39 +125,45 @@ export function LiveMarketTicker({
   const badgeSize = compact ? 'text-[10px] md:text-[11px]' : 'text-[11px] md:text-xs';
   const labelSize = compact ? 'text-[10px] md:text-[11px]' : 'text-[11px] md:text-xs';
 
+  const renderItem = (item: TickerItem, idx: number) => {
+    const isPositive = item.change >= 0;
+    return (
+      <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">
+        <span className={cn('font-semibold text-neutral-900 dark:text-neutral-50', textSize)}>{item.name}</span>
+        <span className={cn('font-mono font-bold tabular-nums text-neutral-900 dark:text-neutral-50', textSize)}>
+          {item.prefix}
+          {item.value.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
+          {item.unit && <span className="ml-0.5 text-neutral-500 dark:text-neutral-400 font-normal">{item.unit}</span>}
+        </span>
+        <span
+          className={cn(
+            'inline-flex items-center rounded-sm px-1 py-[0.5px] text-[9px] md:text-[9.5px] font-sans font-bold tracking-tight',
+            isPositive
+              ? 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15'
+              : 'bg-rose-500/8 text-rose-600 dark:text-rose-400 border border-rose-500/15',
+          )}
+        >
+          <span className="text-[7px] md:text-[7.5px] mr-[2px]">{isPositive ? '▲' : '▼'}</span>
+          {Math.abs(item.change)}%
+        </span>
+        <span className="ml-4 text-neutral-300 dark:text-neutral-700 select-none">•</span>
+      </div>
+    );
+  };
+
   const track = (
     <div
       ref={trackRef}
       className={cn(
-        'market-ticker__track flex w-max items-center whitespace-nowrap gap-6 md:gap-7 pr-6 md:pr-7',
-        textSize,
+        'market-ticker__track flex w-max items-center whitespace-nowrap',
+        textSize
       )}
     >
-      {[...items, ...items].map((item, idx) => {
-        const isPositive = item.change >= 0;
-        return (
-          <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">
-            <span className={cn('font-semibold text-neutral-900 dark:text-neutral-50', textSize)}>{item.name}</span>
-            <span className={cn('font-mono font-bold tabular-nums text-neutral-900 dark:text-neutral-50', textSize)}>
-              {item.prefix}
-              {item.value.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
-              {item.unit && <span className="ml-0.5 text-neutral-500 dark:text-neutral-400 font-normal">{item.unit}</span>}
-            </span>
-            <span
-              className={cn(
-                'inline-flex items-center rounded-sm px-1 py-[0.5px] text-[9px] md:text-[9.5px] font-sans font-bold tracking-tight',
-                isPositive
-                  ? 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15'
-                  : 'bg-rose-500/8 text-rose-600 dark:text-rose-400 border border-rose-500/15',
-              )}
-            >
-              <span className="text-[7px] md:text-[7.5px] mr-[2px]">{isPositive ? '▲' : '▼'}</span>
-              {Math.abs(item.change)}%
-            </span>
-            <span className="ml-4 text-neutral-300 dark:text-neutral-700 select-none">•</span>
-          </div>
-        );
-      })}
+      {[...Array(4)].map((_, groupIndex) => (
+        <div key={groupIndex} className="flex w-max shrink-0 items-center gap-6 md:gap-7 pr-6 md:pr-7">
+          {items.map(renderItem)}
+        </div>
+      ))}
     </div>
   );
 

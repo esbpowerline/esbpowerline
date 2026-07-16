@@ -1,5 +1,5 @@
 -- Run once in Supabase Dashboard → SQL Editor
--- https://supabase.com/dashboard/project/sxgokpmrbgdndstygapc/sql/new
+-- https://supabase.com/dashboard/project/[project-ref]/sql/new
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
