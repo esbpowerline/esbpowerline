@@ -38,7 +38,8 @@ export function filterTimelineByPreset(
 
 export function getRequiredTierForArchivePreset(p: ArchiveRangePreset): GridAccessTier {
   if (p === '1W') return 'visitor';
-  if (p === '1M') return 'member';
+  if (p === '1M') return 'visitor';
+  if (p === '6M') return 'member';
   return 'plan_499';
 }
 

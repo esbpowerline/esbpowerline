@@ -1,0 +1,278 @@
+#!/usr/bin/env python3
+"""Reconstructed Petrobangla daily PDF -> PetrobanglaDaily archive JSON.
+
+Replaces the lost Desktop/grid_backlog/parse_petrobangla.py. Uses pymupdf word
+coordinates (robust for the dense multi-column report) and validates that the
+per-field gas sum reconciles with the printed grand total before emitting.
+
+Usage: python scripts/parse_petrobangla_archive.py <pdf> <energy_day ISO> [out.json]
+"""
+from __future__ import annotations
+import sys, json, re, hashlib, datetime
+from collections import defaultdict
+import fitz  # pymupdf
+
+COMPANY_HEADERS = {
+    'BGFCL': 'BGFCL', 'SGFL': 'SGFL', 'BAPEX': 'BAPEX',
+    'IOCS': 'CHEVRON', 'CHEVRON': 'CHEVRON', 'TULLOW': 'TULLOW', 'RPGCL': 'RPGCL',
+}
+DIST_CODES = ['TGTDCL', 'BGDCL', 'KGDCL', 'JGTDSL', 'PGCL', 'SGCL']
+NUM = re.compile(r'^-?\d+(?:\.\d+)?$')
+
+
+def rows_in(words, x0, x1, y0, y1, tol=2.5):
+    """Cluster words into rows by y-proximity (gap <= tol). Handles reports where a
+    field name and its numbers land on y-lines a pixel apart."""
+    sel = [w for w in words if x0 <= w[0] <= x1 and y0 <= w[1] <= y1]
+    sel.sort(key=lambda w: w[1])
+    out, cur, prev_y = [], [], None
+    for w in sel:
+        if prev_y is not None and w[1] - prev_y > tol and cur:
+            ys = [x[1] for x in cur]
+            out.append((round(sum(ys) / len(ys)), sorted(cur, key=lambda w: w[0])))
+            cur = []
+        cur.append(w)
+        prev_y = w[1]
+    if cur:
+        ys = [x[1] for x in cur]
+        out.append((round(sum(ys) / len(ys)), sorted(cur, key=lambda w: w[0])))
+    return out
+
+
+def slug(s):
+    return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
+
+
+def parse_production(words):
+    """Return (fields, subtotals, grand_total). Field rows carry exactly the
+    trailing 6 numerics: wells, capacity, gas, condensate, %cap, %prod.
+    Layout-independent: anchors on 'Titas' (top) and the production 'Grand' row."""
+    prod_x0, prod_x1 = 98, 390
+    titas_y = min((w[1] for w in words if w[4] == 'Titas' and w[0] < prod_x1), default=50)
+    # production grand-total row = 'Grand' word inside the production x-band
+    grand_y = min((w[1] for w in words
+                   if w[4] == 'Grand' and prod_x0 <= w[0] <= prod_x1), default=titas_y + 200)
+    fields, subtotals = [], []
+    grand = None
+    company_code = None
+    company_label = None
+    operator = None
+    for y, ws in rows_in(words, prod_x0, prod_x1, titas_y - 10, grand_y + 6):
+        toks = [w[4] for w in ws]
+        upper = [t.upper().rstrip('.') for t in toks]
+        # company header line (e.g. "1. BGFCL", "CHEVRON", "TULLOW", "5. RPGCL (R-LNG)")
+        hit = next((COMPANY_HEADERS[u] for u in upper if u in COMPANY_HEADERS), None)
+        if hit and not any(NUM.match(t) for t in toks[-4:]) or (hit and toks and toks[0] in ('5.', '5')):
+            company_code = hit
+            m = re.search(r'(\d+)\.\s*([A-Za-z]+)', ' '.join(toks))
+            company_label = f"{m.group(1)}. {hit}" if m else hit
+            operator = hit if hit in ('CHEVRON', 'TULLOW') else None
+            if 'RPGCL' in upper:
+                company_label = '5. RPGCL (R-LNG)'
+            # RPGCL header line also carries its numbers -> fall through
+            if not any(NUM.match(t) for t in toks):
+                continue
+        nums = [t for t in toks if NUM.match(t)]
+        names = [t for t in toks if not NUM.match(t)]
+        name = ' '.join(names).strip()
+        is_grand = 'Grand' in names or 'Grand' in toks
+        is_sub = name.startswith('Sub-Total') or 'Sub-Total' in names
+        # a data row needs >=6 trailing numerics
+        if len(nums) >= 6:
+            wells, cap, gas, cond, pcap, pprod = [float(x) for x in nums[-6:]]
+            rec = dict(record_type='field', id=f"{(company_code or '').lower()}/{slug(name)}",
+                       company=company_label, company_code=company_code, operator=operator,
+                       field=name, producing_wells=int(wells), capacity_mmcfd=cap,
+                       gas_mmcfd=gas, condensate_bbld=cond,
+                       pct_of_total_capacity=pcap, pct_of_total_production=pprod)
+            if is_grand:
+                rec.update(record_type='grand_total', company='Grand Total (1+2+3+4+5):',
+                           company_code='TOTAL', field='Grand Total (1+2+3+4+5):')
+                grand = rec
+            elif is_sub:
+                rec.update(record_type='subtotal', field='Sub-Total')
+                subtotals.append(rec)
+            elif name and name.upper() not in ('IOCS',):
+                fields.append(rec)
+        elif company_code == 'RPGCL' and len(nums) >= 4 and 'RPGCL' in upper:
+            # RPGCL line: capacity gas %cap %prod (no wells/condensate separate)
+            cap, gas, pcap, pprod = [float(x) for x in nums[-4:]]
+            fields.append(dict(record_type='field', id='rpgcl/r-lng-terminal',
+                          company='5. RPGCL (R-LNG)', company_code='RPGCL', operator=None,
+                          field='R-LNG Terminal', producing_wells=0, capacity_mmcfd=cap,
+                          gas_mmcfd=gas, condensate_bbld=0.0,
+                          pct_of_total_capacity=pcap, pct_of_total_production=pprod))
+    return fields, subtotals, grand
+
+
+def parse_dist_summary(words):
+    """Extract the 'Total :', 'Grand Total' and '% of Total Distribution' rows."""
+    total_row = grand_row = pct_row = None
+    # distribution grand-total = the LOWER 'Grand' word on the page (production one is higher)
+    dist_grand_y = max((w[1] for w in words if w[4] == 'Grand'), default=720)
+    for y, ws in rows_in(words, 98, 520, dist_grand_y - 45, dist_grand_y + 18):
+        toks = [w[4] for w in ws]
+        joined = ' '.join(toks)
+        nums = [float(t.rstrip('%')) for t in toks if NUM.match(t.rstrip('%'))]
+        if joined.strip().startswith('Total') and 'Non-Grid' not in joined and total_row is None and len(nums) >= 6:
+            total_row = nums
+        elif 'Grand' in toks and 'Total' in toks and len(nums) >= 6:
+            grand_row = nums
+        elif '%' in joined and 'Distribution' in joined:
+            pct_row = [float(t.rstrip('%')) for t in toks if t.rstrip('%').replace('.', '').isdigit()]
+    def pack(nums, extra=None):
+        if not nums:
+            return None
+        n = (nums + [None] * 6)[:6]
+        return dict(power_demand_mmcfd=n[0], power_supply_mmcfd=n[1],
+                    fertilizer_demand_mmcfd=n[2], fertilizer_supply_mmcfd=n[3],
+                    others_supplementary_mmcfd=n[4], total_mmcfd=n[5], extra=extra)
+    grand_total = pack(grand_row)
+    total_ = pack(total_row, extra=(grand_row[5] if grand_row and len(grand_row) >= 6 else None))
+    pct = None
+    if pct_row:
+        p = (pct_row + [None] * 4)[:4]
+        pct = dict(power_demand_mmcfd=None, power_supply_mmcfd=p[0], fertilizer_demand_mmcfd=None,
+                   fertilizer_supply_mmcfd=p[1], others_supplementary_mmcfd=p[2],
+                   total_mmcfd=p[3], extra=None)
+    empty = dict(power_demand_mmcfd=None, power_supply_mmcfd=None, fertilizer_demand_mmcfd=None,
+                 fertilizer_supply_mmcfd=None, others_supplementary_mmcfd=None, total_mmcfd=None, extra=None)
+    return {'total_': total_ or empty, 'non-grid_power': empty,
+            'grand_total': grand_total or total_ or empty, 'pct_of_total_distribution': pct or empty}
+
+
+def parse_dist_plants(words):
+    """Left plant column: name + demand (x~198-216) + supply (x~216-236).
+    Supply frequently wraps to the next y; pair by nearest y within 8px."""
+    demands, supplies, names = {}, {}, {}
+    for w in words:
+        x, y, txt = w[0], round(w[1]), w[4]
+        if 240 <= y <= 700:
+            if 98 <= x <= 196 and not NUM.match(txt):
+                names.setdefault(y, []).append((x, txt))
+            elif 196 < x <= 216 and NUM.match(txt):
+                demands[y] = float(txt)
+            elif 216 < x <= 240 and NUM.match(txt):
+                supplies[y] = float(txt)
+    plants = []
+    for y in sorted(names):
+        nm = ' '.join(t for _, t in sorted(names[y]))
+        nm = nm.strip()
+        if not nm or nm.startswith('Sub-Total') or 'Company' in nm or 'Power' in nm.split()[:1]:
+            continue
+        dem = demands.get(y)
+        # supply: same row, else nearest within +/-8px
+        sup = supplies.get(y)
+        if sup is None:
+            for dy in (3, -3, 5, -5, 8, -8):
+                if y + dy in supplies and (y + dy) not in names:
+                    sup = supplies[y + dy]; break
+        if dem is None:
+            continue
+        plants.append(dict(name=nm, demand_mmcfd=dem, supply_mmcfd=sup if sup is not None else 0.0))
+    return plants
+
+
+def main():
+    pdf, energy_iso = sys.argv[1], sys.argv[2]
+    out = sys.argv[3] if len(sys.argv) > 3 else None
+    doc = fitz.open(pdf)
+    pg = doc[0]
+    words = pg.get_text('words')
+    raw = open(pdf, 'rb').read()
+
+    fields, subtotals, grand = parse_production(words)
+    field_gas_sum = round(sum(f['gas_mmcfd'] for f in fields), 1)
+    grand_gas = grand['gas_mmcfd'] if grand else 0.0
+    variance = round(abs(field_gas_sum - grand_gas), 1)
+    reconciled = variance <= 5.0
+
+    summary = parse_dist_summary(words)
+    plants = parse_dist_plants(words)
+
+    # group plants under distribution companies by y-order of DIST_CODES labels
+    label_y = {}
+    for w in words:
+        u = w[4].upper()
+        if u in DIST_CODES and w[0] < 200:
+            label_y.setdefault(u, w[1])
+    # assign each plant to the company whose label-y is closest-below its first plant;
+    # simpler: split plant list into 6 groups by the label y boundaries
+    companies = []
+    # Fallback: keep all plants but tag by nearest company code above
+    # Build companies list preserving DIST_CODES order
+    for code in DIST_CODES:
+        companies.append(dict(company=code, company_code=code, power_plants=[],
+                              power_demand_mmcfd=None, power_supply_mmcfd=None,
+                              fertilizer=None, others_supplementary_mmcfd=None,
+                              total_mmcfd=None, remarks_shutdown_plants=[]))
+    # distribute plants: pymupdf gives them top-to-bottom; use label ys to bucket
+    ordered = sorted(label_y.items(), key=lambda kv: kv[1]) if label_y else []
+    def code_for_y(py):
+        best = DIST_CODES[0]
+        for code, ly in ordered:
+            if py >= ly - 60:  # label sits within the company's block
+                best = code
+        return best
+    # re-run plant extraction carrying y
+    plant_y = {}
+    tmpnames = defaultdict(list)
+    for w in words:
+        if 240 <= round(w[1]) <= 700 and 98 <= w[0] <= 196 and not NUM.match(w[4]):
+            tmpnames[round(w[1])].append((w[0], w[4]))
+    for p in plants:
+        # find its y by name match
+        for y, toks in tmpnames.items():
+            if ' '.join(t for _, t in sorted(toks)).strip() == p['name']:
+                plant_y[p['name']] = y; break
+    cmap = {c['company_code']: c for c in companies}
+    for p in plants:
+        code = code_for_y(plant_y.get(p['name'], 999))
+        cmap[code]['power_plants'].append(p)
+    companies = [c for c in companies if c['power_plants']]
+    plant_count = sum(len(c['power_plants']) for c in companies)
+
+    entities = [dict(type='gas_field', id=f['id'], name=f['field'], company_code=f['company_code'],
+                     operator=f['operator'], gas_mmcfd=f['gas_mmcfd'],
+                     producing_wells=f['producing_wells'], capacity_mmcfd=f['capacity_mmcfd'])
+                for f in fields]
+    for c in companies:
+        for p in c['power_plants']:
+            entities.append(dict(type='power_plant', name=p['name'], distribution_company=c['company_code'],
+                                 demand_mmcfd=p['demand_mmcfd'], supply_mmcfd=p['supply_mmcfd']))
+
+    ed = datetime.date.fromisoformat(energy_iso)
+    end = ed + datetime.timedelta(days=1)
+    label = f"{ed.day:02d}-{end.day:02d} {ed.strftime('%b')}, {ed.year}"
+    doc_json = {
+        '$schema': 'petrobangla-daily/v1',
+        'meta': dict(schema_version='1.0.0', parser_version='2.0.0-reconstructed',
+                     source_pdf=pdf, source_filename=pdf.split('\\')[-1],
+                     parsed_at=None, page_count=doc.page_count, parse_status='ok', warnings=[],
+                     content_sha256=hashlib.sha256(raw).hexdigest(),
+                     agent_summary=f"Petrobangla daily gas report for {label}. {len(fields)} producing fields, {plant_count} power plants tracked. Grand total gas production {grand_gas} MMCFD.",
+                     queryable_collections=['production.fields', 'production.subtotals',
+                                            'distribution.companies.power_plants', 'distribution.summary',
+                                            'sgfl.products', 'entities']),
+        'report': dict(reference_no=None, period='8.00 to 8.00',
+                       units=dict(gas='MMCFD', condensate='BBLD', lpg='Kg', products='BBLD'),
+                       report_date_label=label, report_date_start=energy_iso,
+                       report_date_end=end.isoformat(), month_label=ed.strftime('%b, %Y')),
+        'production': dict(fields=fields, subtotals=subtotals, grand_total=grand, field_count=len(fields)),
+        'sgfl': dict(products={}, pipeline_metrics={}, pipeline_total=None),
+        'distribution': dict(companies=companies, summary=summary, non_grid_power=[], plant_count=plant_count),
+        'validation': dict(field_gas_sum_mmcfd=field_gas_sum, grand_total_gas_mmcfd=grand_gas,
+                           variance_mmcfd=variance, reconciled=reconciled),
+        'entities': entities,
+    }
+    result = json.dumps(dict(ok=reconciled, energy=energy_iso, fields=len(fields), plants=plant_count,
+                             field_gas_sum=field_gas_sum, grand=grand_gas, variance=variance,
+                             power_demand=summary['grand_total']['power_demand_mmcfd'],
+                             power_supply=summary['grand_total']['power_supply_mmcfd']))
+    if out:
+        json.dump(doc_json, open(out, 'w', encoding='utf-8'), indent=2)
+    print(result)
+
+
+if __name__ == '__main__':
+    main()

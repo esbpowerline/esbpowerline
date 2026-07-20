@@ -5,6 +5,7 @@ import { Calendar, History, Layers } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import type { LiveWeekKpis } from '@/lib/data/petrobangla/types';
 import { formatLiveWeekDate } from '@/lib/data/petrobangla/getLiveWeek';
+import type { PeriodKpis } from './petrobangla-live/pbLiveKpiStrip';
 
 
 export function MacroGasMetaChips({ children }: { children: ReactNode }) {
@@ -71,8 +72,21 @@ export function MacroGasInnerSection({
   );
 }
 
-export function MacroGasWeekSummary({ kpis, labelPrefix }: { kpis: LiveWeekKpis, labelPrefix?: string }) {
-  const fulfillmentTone = kpis.powerFulfillmentPct < 45 ? 'text-red-500' : 'text-amber-500';
+export function MacroGasWeekSummary({
+  kpis,
+  labelPrefix,
+  periodKpis,
+}: {
+  kpis: LiveWeekKpis;
+  labelPrefix?: string;
+  periodKpis?: PeriodKpis | null;
+}) {
+  // When a period aggregation is available, the period-labelled stats (average, fulfillment, LNG
+  // share) must reflect the whole period — not the latest single day that `kpis` carries.
+  const avgGas = periodKpis ? periodKpis.avgGas : kpis.weekAvgGas;
+  const fulfillment = periodKpis ? periodKpis.avgFulfillment : kpis.powerFulfillmentPct;
+  const lngShare = periodKpis ? periodKpis.avgLngShare : kpis.lngSharePct;
+  const fulfillmentTone = fulfillment < 45 ? 'text-red-500' : 'text-amber-500';
   const deltaTone = (kpis.latestGasDelta ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500';
 
   return (
@@ -92,21 +106,23 @@ export function MacroGasWeekSummary({ kpis, labelPrefix }: { kpis: LiveWeekKpis,
       </div>
       <div className="grid-explorer-macro-gas-stat">
         <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} average` : 'Week average'}</span>
-        <span className="grid-explorer-macro-gas-stat__value">{formatNumber(kpis.weekAvgGas, 0)}</span>
+        <span className="grid-explorer-macro-gas-stat__value">{formatNumber(avgGas, 0)}</span>
         <span className="grid-explorer-macro-gas-stat__hint">MMCFD · to {formatLiveWeekDate(kpis.latestDate)}</span>
       </div>
       <div className="grid-explorer-macro-gas-stat">
         <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} Power fulfillment` : 'Power fulfillment'}</span>
         <span className={cn('grid-explorer-macro-gas-stat__value', fulfillmentTone)}>
-          {kpis.powerFulfillmentPct.toFixed(0)}%
+          {fulfillment.toFixed(0)}%
         </span>
         <span className="grid-explorer-macro-gas-stat__hint">
-          {formatNumber(kpis.powerSupply, 0)} of {formatNumber(kpis.powerDemand, 0)} MMCFD
+          {periodKpis
+            ? `avg over ${periodKpis.daysCount} days`
+            : `${formatNumber(kpis.powerSupply, 0)} of ${formatNumber(kpis.powerDemand, 0)} MMCFD`}
         </span>
       </div>
       <div className="grid-explorer-macro-gas-stat">
         <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} LNG share` : 'LNG share'}</span>
-        <span className="grid-explorer-macro-gas-stat__value">{kpis.lngSharePct.toFixed(0)}%</span>
+        <span className="grid-explorer-macro-gas-stat__value">{lngShare.toFixed(0)}%</span>
         <span className="grid-explorer-macro-gas-stat__hint">imported gas in mix</span>
       </div>
       <div className="grid-explorer-macro-gas-stat">

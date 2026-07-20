@@ -28,8 +28,8 @@ export function getLockedDateMessage(
         badge: 'Data locked',
         headline: 'Historical data is locked',
         subheadline: `Reports before your visitor window are members-only. ${selectedDate} sits outside what you can view today.`,
-        currentAccess: 'You can only view today and yesterday\'s data.',
-        upgradePrompt: 'Want to see more? Sign up free for the last 14 days of grid data.',
+        currentAccess: 'You can only view the last 7 days of data.',
+        upgradePrompt: 'Want to see more? Sign up free for the last 30 days of grid data.',
         primaryLabel: 'Sign up free',
         primaryHref: LOGIN,
         secondaryLabel: 'Already a member? Sign in',
@@ -40,8 +40,8 @@ export function getLockedDateMessage(
       return {
         badge: 'Archive locked',
         headline: 'This date needs a subscription',
-        subheadline: `${selectedDate} is beyond your free 14-day member window.`,
-        currentAccess: 'Your free account covers the last 14 days of PGCB grid reports.',
+        subheadline: `${selectedDate} is beyond your free 30-day member window.`,
+        currentAccess: 'Your free account covers the last 30 days of PGCB grid reports.',
         upgradePrompt: `Subscribe at ${formatPlanPrice(GRID_PLANS.plan_499)}/month to unlock five years of daily data.`,
         primaryLabel: 'View ৳499 plan',
         primaryHref: '/members/subscription',
@@ -85,16 +85,16 @@ export function getTierStatusMessage(
     case 'visitor':
       return {
         statusLabel: 'Visitor access',
-        accessWindow: 'Today & yesterday only',
+        accessWindow: 'Last 7 days',
         upgradeLine: archiveHint
-          ? `Want more? Sign up free → 14 days · ${archiveHint}`
-          : 'Want more? Sign up free → 14 days of grid data',
+          ? `Want more? Sign up free → 30 days · ${archiveHint}`
+          : 'Want more? Sign up free → 30 days of grid data',
         upgradeHref: LOGIN,
       };
     case 'member':
       return {
         statusLabel: 'Free member',
-        accessWindow: 'Last 14 days',
+        accessWindow: 'Last 30 days',
         upgradeLine: archiveHint
           ? `Go deeper → ৳499/mo for 5 years · ${archiveHint}`
           : 'Go deeper → ৳499/mo unlocks 5 years of history',

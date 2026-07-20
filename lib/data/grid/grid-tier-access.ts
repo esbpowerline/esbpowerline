@@ -17,16 +17,16 @@ export const GRID_TIER_LIMITS: Record<GridAccessTier, GridTierLimits> = {
   visitor: {
     tier: 'visitor',
     label: 'Visitor',
-    shortLabel: '2 days',
-    description: 'Today and yesterday — no account required.',
-    daysBack: 1,
+    shortLabel: '7 days',
+    description: 'Last 7 days — no account required.',
+    daysBack: 6,
   },
   member: {
     tier: 'member',
     label: 'Free member',
-    shortLabel: '2 weeks',
-    description: 'Last 14 days of grid data with a free account.',
-    daysBack: 13,
+    shortLabel: '1 month',
+    description: 'Last 30 days of grid data with a free account.',
+    daysBack: 29,
   },
   plan_499: {
     tier: 'plan_499',

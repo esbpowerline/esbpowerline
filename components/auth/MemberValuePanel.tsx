@@ -11,7 +11,7 @@ const MEMBER_PERKS = [
   { icon: Mail, label: 'Weekly newsletter' },
   { icon: Bookmark, label: 'Saved library' },
   { icon: BookOpen, label: 'Magazine archive' },
-  { icon: BarChart3, label: '2 weeks of grid data' },
+  { icon: BarChart3, label: '1 month of grid data' },
   { icon: Download, label: 'Data downloads' },
   { icon: MessageSquare, label: 'Comments' },
 ] as const;

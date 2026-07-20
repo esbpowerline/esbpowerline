@@ -92,7 +92,7 @@ export function buildHomeSnapshotFromDaily(
   const gasSupply = sumGasProductionMmcf(data) ?? Math.round(s.totalGasSuppliedPower);
 
   const pgcbStats: HomeSnapshotStat[] = [
-    { label: 'Current Demand', value: Math.round(s.eveningPeakDemand), unit: POWER_UNIT, icon: 'Activity' },
+    { label: 'Evening Peak Demand', value: Math.round(s.eveningPeakDemand), unit: POWER_UNIT, icon: 'Activity' },
     { label: 'Peak Generation', value: Math.round(peakGeneration), unit: POWER_UNIT, icon: 'Zap' },
     { label: 'Peak Today', value: Math.round(peakDemand), unit: POWER_UNIT, icon: 'TrendingUp' },
     {

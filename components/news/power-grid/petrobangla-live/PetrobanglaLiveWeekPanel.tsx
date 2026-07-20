@@ -221,7 +221,7 @@ export function PetrobanglaLiveWeekPanel({
       )}
     >
       {unified ? (
-        <MacroGasWeekSummary kpis={kpis} labelPrefix={labelPrefix} />
+        <MacroGasWeekSummary kpis={kpis} labelPrefix={labelPrefix} periodKpis={periodKpis} />
       ) : (
         <ArchiveInsightCallout>{weekInsight}</ArchiveInsightCallout>
       )}

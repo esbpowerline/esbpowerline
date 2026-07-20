@@ -114,7 +114,7 @@ export function GasTabHero({
             <p className="grid-explorer-gas-hero__sub">
               {isMacro ? (
                 <>
-                  Verified Petrobangla daily reports — rolling live week plus 2,000+ day archive — showing how domestic output, LNG imports, and power-sector rationing evolve as recoverable reserves shrink toward 2033–2037 exhaustion scenarios above.
+                  Verified Petrobangla daily reports — rolling live week plus 2,000+ day archive — showing how domestic output, LNG imports, and power-sector rationing evolve as recoverable reserves shrink toward 2033–2040 exhaustion scenarios above.
                   Reporting window: <span className="text-sky-500 font-semibold">8:00 AM → 8:00 AM gas-day</span>
                   {systemStatsDate ? <> · Grid report <span className="font-semibold text-foreground">{systemStatsDate}</span></> : null}
                 </>

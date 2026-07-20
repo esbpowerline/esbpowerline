@@ -24,10 +24,19 @@ export function MethodologyReconciliationBanner({
   netDailyCostBdt,
   grossDailyCostBdt,
 }: MethodologyReconciliationBannerProps) {
-  const auxOverheadMkwh = grossEnergyGenMkwh - netEnergyGenMkwh;
+  // Gross (fuel-mix chart sum) and net (dispatch KPI) are independent measurements: gross can
+  // exceed net (auxiliary use + grid loss) or fall below it (sources/adjustments not itemized in
+  // the fuel mix). Present the gap sign-aware so the arithmetic never shows an impossible negative.
+  const genGapMkwh = grossEnergyGenMkwh - netEnergyGenMkwh;
+  const grossExceedsNet = genGapMkwh > 0.05;
+  const genGapAbsMkwh = Math.abs(genGapMkwh);
+  const genGapPct = grossEnergyGenMkwh > 0 ? (genGapAbsMkwh / grossEnergyGenMkwh) * 100 : 0;
+
   const netDailyCostCr = netDailyCostBdt / 10_000_000;
   const grossDailyCostCr = grossDailyCostBdt / 10_000_000;
-  const costOverheadCr = (grossDailyCostBdt - netDailyCostBdt) / 10_000_000;
+  const costGapCr = (grossDailyCostBdt - netDailyCostBdt) / 10_000_000;
+  const grossCostExceedsNet = costGapCr > 0.005;
+  const costGapAbsCr = Math.abs(costGapCr);
 
   return (
     <div className="mb-4 bg-muted/10 border border-border/20 rounded-xl overflow-hidden transition-all duration-300">
@@ -73,8 +82,12 @@ export function MethodologyReconciliationBanner({
                 <strong>{grossEnergyGenMkwh.toFixed(1)} MKWh</strong> (Gross energy at plant generators).
               </p>
               <div className="bg-muted/10 p-2 rounded border border-border/20 font-mono text-[10px] text-foreground">
-                <div>Gross Generation = {grossEnergyGenMkwh.toFixed(1)} MKWh</div>
-                <div>(-) Station Auxiliary Cons. (~8-10%) = {auxOverheadMkwh.toFixed(1)} MKWh</div>
+                <div>Gross Generation (fuel-mix sum) = {grossEnergyGenMkwh.toFixed(1)} MKWh</div>
+                {grossExceedsNet ? (
+                  <div>(-) Station auxiliary use &amp; grid loss (~{genGapPct.toFixed(1)}%) = {genGapAbsMkwh.toFixed(1)} MKWh</div>
+                ) : (
+                  <div>(+) Sources / reconciliation not in fuel mix ({genGapPct.toFixed(1)}%) = {genGapAbsMkwh.toFixed(1)} MKWh</div>
+                )}
                 <div className="font-bold border-t border-border/30 mt-1 pt-1 text-primary">
                   Net Grid Dispatch = {netEnergyGenMkwh.toFixed(1)} MKWh
                 </div>
@@ -94,9 +107,13 @@ export function MethodologyReconciliationBanner({
               </p>
               <div className="bg-muted/10 p-2 rounded border border-border/20 font-mono text-[10px] text-foreground">
                 <div>Gross Production Cost = {grossDailyCostCr.toFixed(2)} Cr BDT</div>
-                <div>(-) Net system cost = {netDailyCostCr.toFixed(2)} Cr BDT</div>
+                {grossCostExceedsNet ? (
+                  <div>(-) Loss / aux cost overhead = {costGapAbsCr.toFixed(2)} Cr BDT</div>
+                ) : (
+                  <div>(+) Cost reconciliation adjustment = {costGapAbsCr.toFixed(2)} Cr BDT</div>
+                )}
                 <div className="font-bold border-t border-border/30 mt-1 pt-1 text-emerald-500">
-                  Loss / Aux Cost Overhead = {costOverheadCr.toFixed(2)} Cr BDT
+                  Net System Cost = {netDailyCostCr.toFixed(2)} Cr BDT
                 </div>
               </div>
             </div>
@@ -137,9 +154,11 @@ export function MethodologyReconciliationBanner({
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-border/20 text-[10px] text-muted-foreground/80 leading-relaxed">
             <div>
-              ※ <strong>Active Example:</strong> On the selected date of <strong>{reportDate}</strong>, the difference
-              is exactly <strong>{auxOverheadMkwh.toFixed(2)} MKWh</strong>, which represents generating station
-              auxiliary power overhead (~8-10%) and grid dispatch loss.
+              ※ <strong>Active Example:</strong> On the selected date of <strong>{reportDate}</strong>, the fuel-mix
+              sum and net dispatch KPI differ by <strong>{genGapAbsMkwh.toFixed(2)} MKWh</strong> ({genGapPct.toFixed(1)}%),
+              {grossExceedsNet
+                ? ' reflecting generating-station auxiliary consumption and grid dispatch loss.'
+                : ' reflecting sources and reconciliation adjustments not itemized in the plant-level fuel mix.'}
             </div>
             <button
               type="button"

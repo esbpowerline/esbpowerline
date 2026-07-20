@@ -221,7 +221,7 @@ describe('home-snapshot', () => {
     } as never, sredaSample);
     expect(stats).toHaveLength(12);
     expect(stats.map((s) => s.label)).toEqual([
-      'Current Demand',
+      'Evening Peak Demand',
       'Peak Generation',
       'Peak Today',
       'Daily Generation',

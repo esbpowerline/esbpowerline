@@ -15,6 +15,7 @@ export function slugify(text: string): string {
 /** CMS / revision timestamps — e.g. "Tue, Jun 16, 2026 at 3:45:02 PM" */
 export function formatEditorialTimestamp(dateStr: string | Date): string {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '—';
   const weekday = date.toLocaleDateString('en-US', { weekday: 'short' });
   const body = date.toLocaleDateString('en-US', {
     month: 'short',
@@ -58,6 +59,7 @@ export function formatDynamicXAxisDate(dateStr: string, totalDays: number): stri
 
 export function formatDate(dateStr: string | Date): string {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '—';
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMin = Math.floor(diffMs / 60000);
@@ -73,6 +75,7 @@ export function formatDate(dateStr: string | Date): string {
 
 export function formatExactDate(dateStr: string | Date): string {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '—';
   const now = new Date();
   
   const day = date.getDate();
@@ -121,6 +124,7 @@ function getRelativeDuration(date: Date): string {
 
 export function formatArticleDate(dateStr: string | Date, clockFormat: '12' | '24' = '12'): string {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '—';
   const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const hour12 = clockFormat === '12';
   const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12 });
@@ -129,6 +133,7 @@ export function formatArticleDate(dateStr: string | Date, clockFormat: '12' | '2
 
 export function formatArticleHoverDate(dateStr: string | Date, clockFormat: '12' | '24' = '12'): string {
   const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return '—';
   const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -151,7 +156,7 @@ export function truncate(text: string, length = 120): string {
 
 /** Subcontinental grouping (en-IN): 15,000 · 13,40,606 */
 export function formatNumber(num: number, maxFractionDigits = 0): string {
-  if (!Number.isFinite(num)) return '0';
+  if (!Number.isFinite(num)) return '—';
   return num.toLocaleString('en-IN', { maximumFractionDigits: maxFractionDigits });
 }
 

@@ -14,12 +14,27 @@ import {
   GridKpiTooltipRow,
 } from '@/components/news/power-grid/GridExplorerUI';
 import { formatNumber } from '@/lib/utils';
-import type { GridSystemStats } from '@/lib/data/grid/types';
+import { sredaRenewablesData, renewableGridSharePct } from '@/lib/data/companies/sreda';
+import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
 
 type KpiId = 'gen' | 'demand' | 'gas' | 'renew' | 'cost';
 
+/** MW with fixed 2-decimal en-IN grouping (e.g. 1,512.75) */
+const fmtMw = (n: number) =>
+  n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const renewableCapacity = (tech: string) =>
+  sredaRenewablesData.find((r) => r.tech === tech)?.capacity ?? 0;
+
+// SREDA registry is static module data; derive the breakdown so it reconciles with the headline total.
+const SOLAR_CAPACITY = renewableCapacity('Solar PV');
+const HYDRO_CAPACITY = renewableCapacity('Hydroelectric');
+const WIND_CAPACITY = renewableCapacity('Wind Energy');
+const BIO_CAPACITY = renewableCapacity('Biogas Power') + renewableCapacity('Biomass Energy');
+
 export interface OverviewKpiStripProps {
   systemStats: GridSystemStats;
+  generationData: GridDailyData['generationData'];
   totalGasSupply: number;
   importedLngGas: number;
   importedLngPct: number;
@@ -37,6 +52,7 @@ export interface OverviewKpiStripProps {
 
 export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   systemStats,
+  generationData,
   totalGasSupply,
   importedLngGas,
   importedLngPct,
@@ -142,7 +158,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
           />
           <GridKpiTooltipRow label="Day Peak Demand:" value={`${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`} />
-          <GridKpiTooltipRow label="Peak Deficit Shedding:" value="496 MW at 21:00" valueClass="text-destructive" />
+          <GridKpiTooltipRow label="Peak Deficit Shedding:" value={`${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW`} valueClass="text-destructive" />
           <GridKpiTooltipRow label="Max System Temp:" value={`${systemStats.maxTemp.toFixed(1)} °C`} />
           <GridKpiTooltipAudit>Audited by: NLDC System Operations</GridKpiTooltipAudit>
           <GridKpiTooltipRef
@@ -158,7 +174,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         iconClassName="text-sky-500"
         label={
           <>
-            Gas Production
+            Gas Supply
             <DailyBadge />
           </>
         }
@@ -218,13 +234,13 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         tooltipAccent="text-yellow-500"
       >
         <GridKpiTooltipBody>
-          <GridKpiTooltipRow label="Solar Capacity:" value="1,511.70 MW" />
-          <GridKpiTooltipRow label="Hydro Capacity:" value="230.00 MW" />
-          <GridKpiTooltipRow label="Wind Capacity:" value="62.00 MW" />
-          <GridKpiTooltipRow label="Biogas & Biomass:" value="1.09 MW" />
+          <GridKpiTooltipRow label="Solar Capacity:" value={`${fmtMw(SOLAR_CAPACITY)} MW`} />
+          <GridKpiTooltipRow label="Hydro Capacity:" value={`${fmtMw(HYDRO_CAPACITY)} MW`} />
+          <GridKpiTooltipRow label="Wind Capacity:" value={`${fmtMw(WIND_CAPACITY)} MW`} />
+          <GridKpiTooltipRow label="Biogas & Biomass:" value={`${fmtMw(BIO_CAPACITY)} MW`} />
           <div className="flex justify-between border-t border-border/20 pt-1">
             <span className="text-muted-foreground">Renewable Share:</span>
-            <span className="font-bold text-primary">~7.24% of Mix</span>
+            <span className="font-bold text-primary">~{renewableGridSharePct.toFixed(1)}% of Installed</span>
           </div>
           <GridKpiTooltipAudit>Audited by: SREDA Policy Division</GridKpiTooltipAudit>
           <GridKpiTooltipRef
@@ -258,9 +274,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             value={`${(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT`}
           />
           <GridKpiTooltipRow label="Average Bulk Cost:" value={`${avgCostPerKwh.toFixed(3)} Tk/KWh`} valueClass="text-primary" />
-          <GridKpiTooltipRow label="HFO Generation Cost:" value="18.06 Tk/KWh" valueClass="text-destructive" />
-          <GridKpiTooltipRow label="Hydro Generation Cost:" value="0.10 Tk/KWh" valueClass="text-emerald-500" />
-          <GridKpiTooltipRow label="Cross-Border Imports:" value="6.34 Tk/KWh" />
+          <GridKpiTooltipRow label="HFO Generation Cost:" value={`${(generationData.find((g) => g.name === 'HFO')?.unitCost ?? 0).toFixed(2)} Tk/KWh`} valueClass="text-destructive" />
+          <GridKpiTooltipRow label="Hydro Generation Cost:" value={`${(generationData.find((g) => g.name === 'Hydro')?.unitCost ?? 0).toFixed(2)} Tk/KWh`} valueClass="text-emerald-500" />
+          <GridKpiTooltipRow label="Cross-Border Imports:" value={`${(generationData.find((g) => g.name === 'Imports')?.unitCost ?? 0).toFixed(2)} Tk/KWh`} />
           <GridKpiTooltipAudit>Audited by: BPDB Audit Team &amp; CAG</GridKpiTooltipAudit>
           <GridKpiTooltipRef refLabel="BPC Gazettes" refHref="https://bpc.gov.bd/" dateLabel={`Date: ${systemStats.date}`} />
         </GridKpiTooltipBody>

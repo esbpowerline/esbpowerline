@@ -25,7 +25,7 @@ export const RESERVE_SCENARIOS = [
     label: 'Low demand growth',
     shortLabel: 'Low growth',
     chip: 'Optimistic',
-    exhaustionYear: 2037,
+    exhaustionYear: 2040,
     demandGrowth: '2–3% /yr',
     color: RESERVE_SCENARIO_COLORS.lowGrowth,
     description: 'Strong renewables rollout and industrial efficiency extend reserve life by ~2 years.',

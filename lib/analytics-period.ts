@@ -219,8 +219,11 @@ export function pctDelta(current: number, previous: number) {
 }
 
 export function formatDelta(n: number) {
-  const sign = n > 0 ? '+' : '';
-  return `${sign}${n.toFixed(0)}%`;
+  if (!Number.isFinite(n)) return '—';
+  const rounded = Math.round(n);
+  const normalized = rounded === 0 ? 0 : rounded; // avoid "-0%"
+  const sign = normalized > 0 ? '+' : '';
+  return `${sign}${normalized}%`;
 }
 
 export const PERIOD_LABELS: Record<AnalyticsPeriod, string> = {

@@ -51,28 +51,28 @@ const bpdbChartData = [
 const kpis = [
   {
     title: "Operating Loss (2018)",
-    value: "20.31B ৳",
+    value: "৳20.31B",
     trend: "Down from 2017",
     icon: <TrendingDown className="text-red-500 w-6 h-6" />,
     color: "border-red-500/50 bg-red-500/10",
   },
   {
     title: "Cost of Sales vs Revenue Gap",
-    value: "20.82B ৳",
+    value: "৳20.82B",
     trend: "Loss on operations",
     icon: <AlertTriangle className="text-orange-500 w-6 h-6" />,
     color: "border-orange-500/50 bg-orange-500/10",
   },
   {
     title: "Gas Development Fund (GDES)",
-    value: "117.78B ৳",
+    value: "৳117.78B",
     trend: "+134% YoY jump",
     icon: <BatteryCharging className="text-teal-400 w-6 h-6" />,
     color: "border-teal-400/50 bg-teal-400/10",
   },
   {
     title: "Accumulated Deficit",
-    value: "-107.15B ৳",
+    value: "-৳107.15B",
     trend: "Un-appropriated surplus",
     icon: <Landmark className="text-purple-500 w-6 h-6" />,
     color: "border-purple-500/50 bg-purple-500/10",

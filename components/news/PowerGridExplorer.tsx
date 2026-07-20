@@ -50,7 +50,7 @@ import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { pgcbMonthlyData, getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
-import { sredaRenewablesData, totalCapacityRenewables } from '@/lib/data/companies/sreda';
+import { sredaRenewablesData, totalCapacityRenewables, renewableGridSharePct } from '@/lib/data/companies/sreda';
 import { ongoingProjectsData } from '@/lib/data/infrastructure/projects-ongoing';
 import { upcomingProjectsData } from '@/lib/data/infrastructure/projects-upcoming';
 import { completedProjectsData } from '@/lib/data/infrastructure/projects-completed';
@@ -122,7 +122,7 @@ export function PowerGridExplorer({
   
   // Date Selection States
   const availableDatesList = useMemo<string[]>(() => {
-    return availableDates.filter((d) => /^(201[1-9]|202[0-6])-\d{2}-\d{2}$/.test(String(d)));
+    return availableDates.filter((d) => /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/.test(String(d)));
   }, []);
 
   const latestDate = gridAccess.latestDate || serverLatestDate || getLatestAvailableDate() || '2026-07-03';
@@ -1138,6 +1138,7 @@ export function PowerGridExplorer({
       >
       <OverviewKpiStrip
         systemStats={systemStats}
+        generationData={generationData}
         totalGasSupply={totalGasSupply}
         importedLngGas={importedLngGas}
         importedLngPct={importedLngPct}
@@ -1741,7 +1742,7 @@ export function PowerGridExplorer({
                   <span className="font-bold text-foreground text-left">{systemStats.maxGen.toFixed(1)} MW</span>
                   <span>Min Generation:</span>
                   <span className="font-bold text-foreground text-left">{systemStats.minGen.toFixed(1)} MW</span>
-                  <span>Max Temp Yesterday:</span>
+                  <span>Max Temp:</span>
                   <span className="font-semibold text-foreground text-left">{systemStats.maxTemp.toFixed(1)} °C</span>
                 </div>
               </div>
@@ -1752,9 +1753,9 @@ export function PowerGridExplorer({
                   <span>Gas Supplied:</span>
                   <span className="font-bold text-foreground text-left">{systemStats.totalGasSuppliedPower.toFixed(1)} MMCFD</span>
                   <span>Gas Cost:</span>
-                  <span className="font-bold text-foreground text-left">43.71 Crore Tk</span>
+                  <span className="font-bold text-foreground text-left">{((generationData.find(g => g.name === 'Gas')?.cost ?? 0) / 10000000).toFixed(2)} Crore Tk</span>
                   <span>Gas Unit Cost:</span>
-                  <span className="font-semibold text-primary text-left">3.45 Tk/KWh</span>
+                  <span className="font-semibold text-primary text-left">{(generationData.find(g => g.name === 'Gas')?.unitCost ?? 0).toFixed(2)} Tk/KWh</span>
                 </div>
               </div>
             </div>
@@ -1822,14 +1823,14 @@ export function PowerGridExplorer({
                     <th>Type</th>
                     <th className="text-left">Daily Energy Imported (MKWh)</th>
                     <th className="text-left">Peak Capacity Served (MW)</th>
-                    <th className="text-left">Estimated Cost (Tk)</th>
+                    <th className="text-left">Estimated Cost (Cr Tk)</th>
                     <th className="text-left">Unit Rate (Tk/KWh)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {borderImportsData.map((bi, idx) => {
                     const rowGen = generationData.find(g => g.name === 'Imports');
-                    const unitRate = rowGen ? rowGen.unitCost : 6.34;
+                    const unitRate = rowGen ? rowGen.unitCost : 0;
                     const calculatedCost = bi.energy * 1000000 * unitRate;
                     return (
                       <tr key={idx}>
@@ -1846,9 +1847,9 @@ export function PowerGridExplorer({
                     <td>Total Grid Imports</td>
                     <td className="text-muted-foreground">National aggregate</td>
                     <td className="text-left tabular-nums text-primary">{borderImportsData.reduce((sum, i) => sum + i.energy, 0).toFixed(2)}</td>
-                    <td className="text-left tabular-nums">2,583.6</td>
-                    <td className="text-left tabular-nums">33.40 Cr</td>
-                    <td className="text-left tabular-nums font-mono text-primary">6.34</td>
+                    <td className="text-left tabular-nums">{formatNumber(Math.round(borderImportsData.reduce((sum, i) => sum + i.peakFlow, 0)))}</td>
+                    <td className="text-left tabular-nums">{(borderImportsData.reduce((sum, i) => sum + i.energy, 0) * 1000000 * (generationData.find(g => g.name === 'Imports')?.unitCost ?? 0) / 10000000).toFixed(2)} Cr</td>
+                    <td className="text-left tabular-nums font-mono text-primary">{(generationData.find(g => g.name === 'Imports')?.unitCost ?? 0).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1934,10 +1935,10 @@ export function PowerGridExplorer({
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs font-semibold">
                     <span className="text-muted-foreground">Current Renewable Grid Share</span>
-                    <span className="text-foreground">~7.2% of Total Installed</span>
+                    <span className="text-foreground">~{renewableGridSharePct.toFixed(1)}% of Total Installed</span>
                   </div>
                   <div className="h-3 rounded-full bg-muted border border-border/40 overflow-hidden relative">
-                    <div className="h-full bg-yellow-500 rounded-full" style={{ width: '7.2%' }} />
+                    <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${renewableGridSharePct}%` }} />
                   </div>
                 </div>
 
@@ -1949,7 +1950,7 @@ export function PowerGridExplorer({
                   </div>
                   <div className="h-3 rounded-full bg-muted border border-border/40 overflow-hidden relative">
                     <div className="h-full bg-primary/40 rounded-full" style={{ width: '20%' }} />
-                    <div className="absolute top-0 bottom-0 left-[7.2%] w-0.5 bg-yellow-500" title="Current Status" />
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-yellow-500" style={{ left: `${renewableGridSharePct}%` }} title="Current Status" />
                   </div>
                 </div>
 
@@ -1961,7 +1962,7 @@ export function PowerGridExplorer({
                   </div>
                   <div className="h-3 rounded-full bg-muted border border-border/40 overflow-hidden relative">
                     <div className="h-full bg-emerald-500/40 rounded-full" style={{ width: '30%' }} />
-                    <div className="absolute top-0 bottom-0 left-[7.2%] w-0.5 bg-yellow-500" />
+                    <div className="absolute top-0 bottom-0 w-0.5 bg-yellow-500" style={{ left: `${renewableGridSharePct}%` }} />
                   </div>
                 </div>
               </div>
@@ -6516,7 +6517,7 @@ export function PowerGridExplorer({
                             return (
                               <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-80 max-w-[calc(100vw-2rem)] select-none bg-card space-y-3">
                                 <div className="font-bold text-foreground border-b border-border/40 pb-1.5 flex items-center justify-between gap-2">
-                                  <span>FY ${d.fiscal_year} Loss Analysis</span>
+                                  <span>FY {d.fiscal_year} Loss Analysis</span>
                                   <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Power Cell</span>
                                 </div>
                                 
@@ -6527,21 +6528,21 @@ export function PowerGridExplorer({
                                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                       Transmission Loss:
                                     </span>
-                                    <span className="font-bold text-emerald-500 tabular-nums">${d.transmission.toFixed(2)}%</span>
+                                    <span className="font-bold text-emerald-500 tabular-nums">{d.transmission.toFixed(2)}%</span>
                                   </div>
                                   <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground flex items-center gap-1.5">
                                       <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                                       Distribution Loss:
                                     </span>
-                                    <span className="font-bold text-purple-500 tabular-nums">${d.distribution.toFixed(2)}%</span>
+                                    <span className="font-bold text-purple-500 tabular-nums">{d.distribution.toFixed(2)}%</span>
                                   </div>
                                   <div className="flex justify-between items-center border-t border-border/30 pt-1.5">
                                     <span className="text-destructive font-bold flex items-center gap-1.5">
                                       <span className="w-1.5 h-1.5 rounded-full bg-destructive" />
                                       Total T&amp;D Loss:
                                     </span>
-                                    <span className="font-bold text-destructive tabular-nums bg-destructive/5 px-1.5 py-0.5 rounded">${d.total_td.toFixed(2)}%</span>
+                                    <span className="font-bold text-destructive tabular-nums bg-destructive/5 px-1.5 py-0.5 rounded">{d.total_td.toFixed(2)}%</span>
                                   </div>
                                 </div>
 
@@ -6551,27 +6552,27 @@ export function PowerGridExplorer({
                                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10.5px] tabular-nums">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">BPDB:</span>
-                                      <span className="text-foreground font-bold">${d.bpdb.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold">{d.bpdb.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">REB:</span>
-                                      <span className="text-foreground font-bold">${d.reb.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold">{d.reb.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">DPDC:</span>
-                                      <span className="text-foreground font-bold">${d.dpdc.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold">{d.dpdc.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">DESCO:</span>
-                                      <span className="text-foreground font-bold">${d.desco.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold">{d.desco.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between col-span-2 sm:col-span-1">
                                       <span className="text-muted-foreground font-semibold">WZPDCO:</span>
-                                      <span className="text-foreground font-bold">${d.wzpdco !== null ? `${d.wzpdco.toFixed(2)}%` : '—'}</span>
+                                      <span className="text-foreground font-bold">{d.wzpdco !== null ? `${d.wzpdco.toFixed(2)}%` : '—'}</span>
                                     </div>
                                     <div className="flex justify-between col-span-2 sm:col-span-1">
                                       <span className="text-muted-foreground font-semibold">NESCO:</span>
-                                      <span className="text-foreground font-bold">${d.nesco !== null ? `${d.nesco.toFixed(2)}%` : '—'}</span>
+                                      <span className="text-foreground font-bold">{d.nesco !== null ? `${d.nesco.toFixed(2)}%` : '—'}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -6599,7 +6600,7 @@ export function PowerGridExplorer({
                 <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2 mt-4 rounded-xl">
                   <p><strong>Overview and Trends:</strong></p>
                   <p className="leading-relaxed">
-                    Bangladesh has made significant strides in upgrading its grid performance over the last two decades. The total <strong className="text-foreground">Transmission &amp; Distribution (T&amp;D) system loss</strong> dropped from a peak of <strong className="text-foreground">27.97% in FY 2001-02</strong> to <strong className="text-foreground">10.13% in FY 2024-25</strong>.
+                    Bangladesh has made significant strides in upgrading its grid performance over the last two decades. The total <strong className="text-foreground">Transmission &amp; Distribution (T&amp;D) system loss</strong> dropped from a peak of <strong className="text-foreground">27.97% in FY 2001-02</strong> to <strong className="text-foreground">{systemLossData[0].total_td}% in FY {systemLossData[0].fiscal_year}</strong>.
                   </p>
                   <p className="leading-relaxed">
                     This rationalization was driven primarily by massive investments in prepaid metering, distribution substation reinforcement, and the conversion of low-voltage overhead lines to underground circuits in urban pockets. Technical transmission loss (high-voltage line resistance) has remained stable between <strong className="text-foreground">2.6% and 4.0%</strong> during this period.
@@ -6890,7 +6891,7 @@ export function PowerGridExplorer({
           <div className="text-lg font-bold text-foreground mt-1">{formatNumber(Math.round(systemStats.eveningPeakGen))} MW</div>
         </div>
         <div className="border border-border/60 p-3 rounded-lg bg-muted/5">
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Renewable Output</span>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Daily Generation</span>
           <div className="text-lg font-bold text-foreground mt-1">{systemStats.totalEnergyGen.toFixed(1)} MKWh</div>
         </div>
         <div className="border border-border/60 p-3 rounded-lg bg-muted/5">

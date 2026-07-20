@@ -70,7 +70,7 @@ export default async function MemberOverviewPage() {
           <div className="min-w-0 flex-1">
             <p className="font-medium text-foreground">Extend your archive</p>
             <p className="text-xs text-muted-foreground">
-              Free members get 2 weeks · ৳499 for 5 years · ৳999 for full backlog
+              Free members get 1 month · ৳499 for 5 years · ৳999 for full backlog
             </p>
           </div>
           <ArrowRight className="h-4 w-4 text-muted-foreground" />

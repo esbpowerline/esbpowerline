@@ -17,6 +17,15 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
 
   const delta = dayOverDayDelta(left, right);
 
+  // Gas-day labels can repeat across carried/duplicate entries (e.g. "29-30 Jun, 2026");
+  // append the ISO date only when a label is ambiguous so the two selects stay distinguishable.
+  const labelCounts = new Map<string, number>();
+  bundle.index_entries.forEach((e) =>
+    labelCounts.set(e.date_label, (labelCounts.get(e.date_label) ?? 0) + 1),
+  );
+  const optionLabel = (e: (typeof bundle.index_entries)[number]) =>
+    (labelCounts.get(e.date_label) ?? 0) > 1 ? `${e.date_label} · ${e.date}` : e.date_label;
+
   return (
     <div className="space-y-3">
       <h4 className="grid-explorer-chart-card__title text-sm">
@@ -30,7 +39,7 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
         >
           {bundle.index_entries.map((entry, i) => (
             <option key={entry.date} value={i}>
-              {entry.date_label}
+              {optionLabel(entry)}
             </option>
           ))}
         </select>
@@ -42,7 +51,7 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
         >
           {bundle.index_entries.map((entry, i) => (
             <option key={entry.date} value={i}>
-              {entry.date_label}
+              {optionLabel(entry)}
             </option>
           ))}
         </select>

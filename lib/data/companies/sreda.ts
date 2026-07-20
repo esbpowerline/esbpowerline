@@ -15,3 +15,10 @@ export const sredaRenewablesData: SredaRenewableItem[] = [
 ];
 
 export const totalCapacityRenewables = 1805.84;
+
+/** Total national installed grid capacity (MW) — matches the "National at a Glance" figure. */
+export const NATIONAL_INSTALLED_CAPACITY_MW = 33092;
+
+/** Renewables as a share of total national installed capacity (%). */
+export const renewableGridSharePct =
+  (totalCapacityRenewables / NATIONAL_INSTALLED_CAPACITY_MW) * 100;

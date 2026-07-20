@@ -79,7 +79,7 @@ const HERO_METRICS = [
     icon: AlertTriangle,
     iconClass: 'text-amber-500',
     label: 'Exhaustion window',
-    value: '2033–37',
+    value: '2033–40',
     hint: 'Scenario-dependent field depletion',
   },
 ] as const;

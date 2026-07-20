@@ -38,17 +38,17 @@ describe('grid-tier-access', () => {
     ).toBe('plan_999');
   });
 
-  it('allows visitors today and yesterday only', () => {
+  it('allows visitors the last 7 days inclusive', () => {
     expect(isDateAllowedForTier(LATEST, 'visitor', LATEST)).toBe(true);
-    expect(isDateAllowedForTier('2026-06-28', 'visitor', LATEST)).toBe(true);
-    expect(isDateAllowedForTier('2026-06-27', 'visitor', LATEST)).toBe(false);
+    expect(isDateAllowedForTier('2026-06-23', 'visitor', LATEST)).toBe(true); // 6 days back = earliest
+    expect(isDateAllowedForTier('2026-06-22', 'visitor', LATEST)).toBe(false);
   });
 
-  it('allows members 14 days inclusive', () => {
+  it('allows members 30 days inclusive', () => {
     const earliest = getEarliestAllowedDate('member', LATEST);
-    expect(earliest).toBe(subtractDaysFromIso(LATEST, 13));
+    expect(earliest).toBe(subtractDaysFromIso(LATEST, 29));
     expect(isDateAllowedForTier(earliest!, 'member', LATEST)).toBe(true);
-    expect(isDateAllowedForTier('2026-06-15', 'member', LATEST)).toBe(false);
+    expect(isDateAllowedForTier('2026-05-30', 'member', LATEST)).toBe(false); // 30 days back = outside
   });
 
   it('maps dates to required upgrade tier', () => {
@@ -60,7 +60,7 @@ describe('grid-tier-access', () => {
 
   it('filters date lists for tier windows', () => {
     const dates = ['2026-06-27', '2026-06-28', '2026-06-29'];
-    expect(filterDatesForTier(dates, 'visitor', LATEST)).toEqual(['2026-06-28', '2026-06-29']);
+    expect(filterDatesForTier(dates, 'visitor', LATEST)).toEqual(dates); // all within 7-day window
     expect(filterDatesForTier(dates, 'member', LATEST)).toEqual(dates);
   });
 });
