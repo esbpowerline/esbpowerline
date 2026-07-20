@@ -72,7 +72,7 @@ export function BdStockTicker({
         { transform: 'translateX(-25%)' }
       ],
       {
-        duration: 40000,
+        duration: 60000,
         iterations: Infinity,
         easing: 'linear'
       }
@@ -154,34 +154,38 @@ export function BdStockTicker({
       <div className="market-ticker__viewport mask-fade pl-2 md:pl-3 -mr-3 w-full overflow-hidden">
         <div
           ref={trackRef}
-          className="market-ticker__track flex w-max items-center gap-6 pr-6 whitespace-nowrap"
+          className="market-ticker__track flex w-max items-center whitespace-nowrap"
         >
-          {[...displayItems, ...displayItems].map((item, idx) => {
-            const isPositive = item.change >= 0;
-            return (
-              <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">
-                <span className="font-mono text-[10px] md:text-[11px] font-bold text-neutral-900 dark:text-neutral-50 bg-neutral-100 dark:bg-neutral-800/80 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700/60">
-                  {item.symbol}
-                </span>
-                <span className="font-semibold text-neutral-900 dark:text-neutral-50">{item.label}</span>
-                <span className="font-mono font-bold tabular-nums text-neutral-900 dark:text-neutral-50">
-                  ৳ {item.price.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
-                </span>
-                <span
-                  className={cn(
-                    'inline-flex items-center rounded-sm px-1 py-[0.5px] text-[9px] md:text-[9.5px] font-sans font-bold tracking-tight',
-                    isPositive
-                      ? 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15'
-                      : 'bg-rose-500/8 text-rose-600 dark:text-rose-400 border border-rose-500/15',
-                  )}
-                >
-                  <span className="text-[7px] md:text-[7.5px] mr-[2px]">{isPositive ? '▲' : '▼'}</span>
-                  {Math.abs(item.change)}%
-                </span>
-                <span className="ml-4 text-neutral-300 dark:text-neutral-700 select-none">•</span>
-              </div>
-            );
-          })}
+          {[...Array(4)].map((_, groupIndex) => (
+            <div key={groupIndex} className="flex w-max shrink-0 items-center gap-6 pr-6 whitespace-nowrap">
+              {displayItems.map((item, idx) => {
+                const isPositive = item.change >= 0;
+                return (
+                  <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">
+                    <span className="font-mono text-[10px] md:text-[11px] font-bold text-neutral-900 dark:text-neutral-50 bg-neutral-100 dark:bg-neutral-800/80 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700/60">
+                      {item.symbol}
+                    </span>
+                    <span className="font-semibold text-neutral-900 dark:text-neutral-50">{item.label}</span>
+                    <span className="font-mono font-bold tabular-nums text-neutral-900 dark:text-neutral-50">
+                      ৳ {item.price.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
+                    </span>
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-sm px-1 py-[0.5px] text-[9px] md:text-[9.5px] font-sans font-bold tracking-tight',
+                        isPositive
+                          ? 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15'
+                          : 'bg-rose-500/8 text-rose-600 dark:text-rose-400 border border-rose-500/15',
+                      )}
+                    >
+                      <span className="text-[7px] md:text-[7.5px] mr-[2px]">{isPositive ? '▲' : '▼'}</span>
+                      {Math.abs(item.change)}%
+                    </span>
+                    <span className="ml-4 text-neutral-300 dark:text-neutral-700 select-none">•</span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </div>

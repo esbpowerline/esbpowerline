@@ -57,27 +57,27 @@ export function productionSiteSettings() {
         { id: 'fx', name: 'USD/BDT', value: 117.65, unit: '', change: 0.12, prefix: '৳' },
         { id: 'solar', name: 'Solar Module', value: 0.118, unit: '/W', change: -2.1, prefix: '$' },
         { id: 'tariff', name: 'Bulk Tariff', value: 8.95, unit: 'Tk/kWh', change: 0.0, prefix: '' },
-        { id: 'gas', name: 'Petrobangla Gas', value: 1380, unit: 'MMcfd', change: -3.2, prefix: '' },
+        { id: 'gas', name: 'Petrobangla Gas', value: 2686, unit: 'MMcfd', change: 2.9, prefix: '' },
       ],
     },
     {
       key: 'snapshot',
       value: [
-        { label: 'Current Demand', value: 16741, unit: 'MW', icon: 'Activity', color: '#ef4444' },
-        { label: 'Peak Generation', value: 16181, unit: 'MW', icon: 'Zap', color: '#3b82f6' },
-        { label: 'Peak Today', value: 16741, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
-        { label: 'Daily Generation', value: 354.9, unit: 'GWh', isDecimal: true, icon: 'TrendingUp', color: '#3b82f6' },
-        { label: 'Load Shedding', value: 0, unit: 'MW', icon: 'Activity', color: '#ef4444' },
+        { label: 'Current Demand', value: 16956, unit: 'MW', icon: 'Activity', color: '#ef4444' },
+        { label: 'Peak Generation', value: 16030, unit: 'MW', icon: 'Zap', color: '#3b82f6' },
+        { label: 'Peak Today', value: 16956, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
+        { label: 'Daily Generation', value: 361.5, unit: 'GWh', isDecimal: true, icon: 'TrendingUp', color: '#3b82f6' },
+        { label: 'Load Shedding', value: 926, unit: 'MW', icon: 'Activity', color: '#ef4444' },
         { label: 'Energy Unserved', value: 2.14, unit: 'GWh', isDecimal: true, icon: 'Gauge', color: '#ef4444' },
         { label: 'Fuel Cost', value: 6.5, unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge', color: '#f59e0b' },
-        { label: 'Gas Supply', value: 2610, unit: 'MMcfd', icon: 'Flame', color: '#8b5cf6' },
+        { label: 'Gas Supply', value: 2686, unit: 'MMcfd', icon: 'Flame', color: '#8b5cf6' },
         { label: 'Coal Generation', value: 129.2, unit: 'GWh', isDecimal: true, icon: 'Flame', color: '#8b5cf6' },
         { label: 'Grid Import', value: 2570, unit: 'MW', icon: 'Cable', color: '#06b6d4' },
       ],
     },
     {
       key: 'snapshotDate',
-      value: '2026-06-29',
+      value: '2026-07-15',
     },
     {
       key: 'interviews',
@@ -123,9 +123,9 @@ export function productionSiteSettings() {
 export function productionDashboardStats() {
   return [
     { statName: 'Total Installed Capacity', value: 28420, unit: 'MW', source: 'BPDB', lastVerified: '2026-06-13' },
-    { statName: 'Current Generation', value: 15230, unit: 'MW', source: 'NLDC', lastVerified: '2026-06-14' },
+    { statName: 'Current Generation', value: 16030, unit: 'MW', source: 'NLDC', lastVerified: '2026-07-15' },
     { statName: 'Renewable Share', value: 4.8, unit: '%', source: 'SREDA', lastVerified: '2026-06-10' },
     { statName: 'System Loss', value: 7.6, unit: '%', source: 'BPDB', lastVerified: '2026-06-01' },
-    { statName: 'Peak Demand (Est.)', value: 15680, unit: 'MW', source: 'PGCB', lastVerified: '2026-06-13' },
+    { statName: 'Peak Demand (Est.)', value: 16956, unit: 'MW', source: 'PGCB', lastVerified: '2026-07-15' },
   ];
 }

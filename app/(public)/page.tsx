@@ -5,6 +5,7 @@ import {
   DeferredHomeTrendingSection as HomeTrendingSection,
   DeferredInterviewsSection as InterviewsSection,
 } from '@/components/home/DeferredComponents';
+import { ImportantLinks } from '@/components/home/ImportantLinks';
 const HomeSnapshotPanel = dynamic(
   () => import('@/components/home/HomeSnapshotPanel').then((mod) => mod.HomeSnapshotPanel),
   { ssr: true }
@@ -155,9 +156,11 @@ export default async function Home() {
               <HomeTrendingSection trending={trending} layout="hero-rail" />
               
               {/* Sidebar Ad Block */}
-              <Link href="/advertising" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block" suppressHydrationWarning>
+              <Link href="/advertising" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block mt-8" suppressHydrationWarning>
                 <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
               </Link>
+
+              <ImportantLinks />
             </aside>
           </div>
 

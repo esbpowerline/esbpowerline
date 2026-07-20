@@ -20,6 +20,7 @@ import { ArticleAuthorSticky } from '@/components/shared/ArticleAuthorSticky';
 import { NoImage } from '@/components/shared/NoImage';
 import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
+import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
 import prisma from '@/lib/prisma';
 
 export const revalidate = 600;
@@ -42,6 +43,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: article.title,
       description: article.excerpt,
       images: [{ url: normalizeArticleImageUrl(article.imageUrl) ?? '' }],
+      type: 'article',
+      publishedTime: article.date,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.excerpt,
+      images: [normalizeArticleImageUrl(article.imageUrl) ?? ''],
     },
   };
 }
@@ -161,7 +170,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             </div>
           </div>
           
-          <div className="article-meta-actions">
+          <div className="article-meta-actions flex items-center gap-2">
+            <ShareArticleMenu title={article.title} slug={slug} />
             <SaveArticleButton
               articleId={article.id}
               articleSlug={slug}
