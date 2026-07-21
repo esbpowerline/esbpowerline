@@ -7,7 +7,8 @@ import { MAX_CAROUSEL_ITEMS } from '@/lib/placement-rules';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
 
 const PUBLIC_SETTING_KEYS = [
-  'homepage', 'ticker', 'snapshot', 'snapshotDate', 'interviews', 'site', 'seo', 'hero', 'coverage',
+  'homepage', 'ticker', 'snapshot', 'snapshotDate', 'interviews', 'site', 'seo', 'hero', 'coverage', 'panels',
+  'importantLinks', 'policyFramework',
 ] as const;
 
 const GRID_SETTING_KEYS = ['gridMix', 'gridLines', 'gridProjects'] as const;
@@ -119,4 +120,15 @@ export function getProfessionalsCta(settings: Record<string, unknown>) {
 
 export function getCoverageSlotsFromSettings(settings: Record<string, unknown>): CoverageSlot[] {
   return normalizeCoverageSlots(settings.coverage);
+}
+
+export type PanelFlags = { importantLinks: boolean; policyFramework: boolean };
+
+/** Homepage sidebar panel visibility toggles (both default ON when unset). */
+export function getPanelFlags(settings: Record<string, unknown>): PanelFlags {
+  const p = settings.panels as Partial<PanelFlags> | undefined;
+  return {
+    importantLinks: p?.importantLinks !== false,
+    policyFramework: p?.policyFramework !== false,
+  };
 }

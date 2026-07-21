@@ -6,6 +6,9 @@ import {
   DeferredInterviewsSection as InterviewsSection,
 } from '@/components/home/DeferredComponents';
 import { ImportantLinks } from '@/components/home/ImportantLinks';
+import { PolicyFramework } from '@/components/home/PolicyFramework';
+import { resolvePolicies } from '@/lib/data/policy/policies';
+import { resolveImportantLinks } from '@/lib/data/important-links';
 const HomeSnapshotPanel = dynamic(
   () => import('@/components/home/HomeSnapshotPanel').then((mod) => mod.HomeSnapshotPanel),
   { ssr: true }
@@ -21,6 +24,7 @@ import { FeaturedCarousel } from '@/components/news/FeaturedCarousel';
 import { normalizeInterviews } from '@/lib/interview-content';
 import {
   getPublicSettingsMap,
+  getPanelFlags,
   getCarouselItems,
   getSnapshotLabel,
   getProfessionalsCta,
@@ -96,6 +100,7 @@ export default async function Home() {
     : 'Latest';
   const snapshotLabel = getSnapshotLabel(settings);
   const professionalsCta = getProfessionalsCta(settings);
+  const panelFlags = getPanelFlags(settings);
   const snapshotStats = dailySnapshot?.stats ?? settings.snapshot;
   const snapshotDate = (dailySnapshot?.date ?? settings.snapshotDate) as string | undefined;
   const snapshotHeaderDate = formatSnapshotHeaderDate(snapshotDate, locale);
@@ -160,7 +165,9 @@ export default async function Home() {
                 <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
               </Link>
 
-              <ImportantLinks />
+              {panelFlags.importantLinks && <ImportantLinks data={resolveImportantLinks(settings)} />}
+
+              {panelFlags.policyFramework && <PolicyFramework policies={resolvePolicies(settings)} />}
             </aside>
           </div>
 
