@@ -28,8 +28,8 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
     >
       <span
         className={cn(
-          'pointer-events-none absolute left-0.5 top-1/2 block h-5 w-5 -translate-y-1/2 rounded-full bg-background shadow-md ring-0 transition-[left] duration-200 ease-in-out',
-          checked ? 'left-[22px]' : 'left-0.5',
+          'pointer-events-none absolute top-1/2 block h-[18px] w-[18px] -translate-y-1/2 rounded-full bg-background shadow-md ring-0 transition-[left] duration-200 ease-in-out',
+          checked ? 'left-[23px]' : 'left-[3px]',
         )}
       />
     </button>
