@@ -114,7 +114,11 @@ export function PetrobanglaBootstrapProvider({ children }: { children: ReactNode
     setLiveWeekLoading(true);
     try {
       const expanded = await loadLiveWeekBundle(count);
-      setLiveWeek(expanded);
+      // Guard against out-of-order resolution: a smaller concurrent request must
+      // never overwrite an already-larger window with fewer days.
+      setLiveWeek((prev) =>
+        prev && prev.days.length >= expanded.days.length ? prev : expanded,
+      );
     } catch (e) {
       setError((prev) => prev ?? (e instanceof Error ? e.message : 'Failed to load gas-day window'));
     } finally {

@@ -5,6 +5,19 @@ import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * RFC-4180 CSV field escaping, plus spreadsheet formula-injection neutralization:
+ * a leading =, +, -, @, tab or CR is prefixed with a quote so Excel/Sheets treats
+ * the cell as text rather than a formula.
+ */
+function csvField(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return '';
+  let s = String(value);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  if (/[",\r\n]/.test(s)) s = `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const limitParam = searchParams.get('limit');
@@ -51,10 +64,9 @@ export async function GET(request: Request) {
     const val = s.calculatedValue !== null && s.calculatedValue !== undefined ? s.calculatedValue : s.value;
     const asOf = s.lastVerified || s.updatedAt.toISOString().split('T')[0];
     const source = s.source || 'BPDB/NLDC';
-    const safeMetric = s.statName.includes(',') ? `"${s.statName}"` : s.statName;
-    const safeUnit = s.unit ? (s.unit.includes(',') ? `"${s.unit}"` : s.unit) : '';
-    const safeSource = source.includes(',') ? `"${source}"` : source;
-    csvRows.push(`${safeMetric},${val},${safeUnit},${safeSource},${asOf}`);
+    csvRows.push(
+      [s.statName, val, s.unit, source, asOf].map(csvField).join(','),
+    );
   }
 
   if (stats.length === 0) {

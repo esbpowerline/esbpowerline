@@ -340,9 +340,18 @@ export async function getRecentDownloadsAction(): Promise<MemberDownloadRow[]> {
   });
 }
 
-export async function triggerGridRefresh() {
-  throw new Error(
-    "Grid ingestion disabled on serverless due to compute limits. " +
-    "Run the ingestion daemon locally (e.g. on the Pi) instead."
-  );
+/**
+ * Re-validate the Grid Explorer ISR cache so newly published grid settings and
+ * daily reports surface without a full redeploy. (Live SCADA ingestion runs off
+ * the serverless path — data is committed to public/data by the ingestion daemon —
+ * so this revalidates the render rather than pulling from PGCB directly.)
+ */
+export async function triggerGridRefresh(): Promise<{ ok: true; refreshedAt: string }> {
+  const memberSession = await getMemberSession();
+  if (!memberSession) {
+    throw new Error('Sign in required to refresh grid data.');
+  }
+
+  revalidatePath('/grid-explorer');
+  return { ok: true, refreshedAt: new Date().toISOString() };
 }
