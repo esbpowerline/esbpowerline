@@ -14,6 +14,11 @@ import {
   reserveScenarioVsBauYears,
   type ReserveScenarioId,
 } from '@/lib/data/macro/reserves';
+import {
+  liveTcfAt,
+  scenarioById,
+  type LiveReserveModel,
+} from '@/lib/data/macro/reservesLive';
 
 const FORECAST_START = String(RESERVES_AUDITED_META.forecastStartYear);
 
@@ -28,6 +33,8 @@ interface Props {
   highlightId: ReserveScenarioId | null;
   onSelect: (id: ReserveScenarioId) => void;
   onHighlight: (id: ReserveScenarioId | null) => void;
+  /** Live extraction-derived model — when present, years/draws come from the daily archive */
+  live?: LiveReserveModel | null;
 }
 
 export function GasReserveScenarioOutlook({
@@ -35,17 +42,43 @@ export function GasReserveScenarioOutlook({
   highlightId,
   onSelect,
   onHighlight,
+  live,
 }: Props) {
   const active = RESERVE_SCENARIOS.find((s) => s.id === selectedId) ?? RESERVE_SCENARIOS[1];
   const ScenarioIcon = SCENARIO_ICONS[active.id];
-  const runwayYears = active.exhaustionYear - RESERVES_AUDITED_META.forecastStartYear;
-  const tcf2030 = reserveScenarioTcfAt('2030', active.id);
+
+  const baseRemaining = live?.remainingTcf ?? RESERVES_AUDITED_META.remaining2026Tcf;
+  const forkYearLabel = live ? String(live.forkYear) : FORECAST_START;
+
+  const exhaustionOf = (id: ReserveScenarioId) =>
+    live
+      ? scenarioById(live, id).exhaustionYear
+      : RESERVE_SCENARIOS.find((s) => s.id === id)!.exhaustionYear;
+  const tcfAt = (year: string, id: ReserveScenarioId) =>
+    live ? liveTcfAt(live, Number(year), id) : reserveScenarioTcfAt(year, id);
+
+  const activeExhaustion = exhaustionOf(active.id);
+  const runwayYears = activeExhaustion - (live?.forkYear ?? RESERVES_AUDITED_META.forecastStartYear);
+  const tcf2030 = tcfAt('2030', active.id);
   const vsBau = reserveScenarioVsBauYears(active.id);
-  const annualDraw = reserveScenarioAnnualDrawTcf(active.id);
-  const depletionRate =
-    ((RESERVES_AUDITED_META.remaining2026Tcf - (tcf2030 ?? 0)) / RESERVES_AUDITED_META.remaining2026Tcf) * 100;
+  const annualDraw = live
+    ? scenarioById(live, active.id).annualDrawTcf
+    : reserveScenarioAnnualDrawTcf(active.id);
+  const depletionRate = ((baseRemaining - (tcf2030 ?? 0)) / baseRemaining) * 100;
   const endowmentLeft2030 =
     tcf2030 != null ? (tcf2030 / RESERVES_AUDITED_META.initialRecoverableTcf) * 100 : 0;
+
+  const maxRunway = Math.max(
+    12,
+    ...RESERVE_SCENARIOS.map((s) => exhaustionOf(s.id) - (live?.forkYear ?? RESERVES_AUDITED_META.forecastStartYear)),
+  );
+
+  const bauLiveLabel = live ? `Current rate (${Math.round(live.currentRateMmcfd).toLocaleString()} MMCFD)` : null;
+  const activeLabel = active.id === 'bau' && bauLiveLabel ? bauLiveLabel : active.label;
+  const activeDescription =
+    active.id === 'bau' && live
+      ? `Based on the 30-day average domestic extraction through ${live.asOfDate} (${Math.round(live.currentRateMmcfd).toLocaleString()} MMCFD) from daily Petrobangla reports.`
+      : active.description;
 
   return (
     <div className="gas-reserve-scenario-outlook space-y-3">
@@ -89,7 +122,7 @@ export function GasReserveScenarioOutlook({
                 </span>
               </div>
               <span className="gas-reserve-scenario-tile__year" style={{ color: s.color }}>
-                {s.exhaustionYear}
+                {exhaustionOf(s.id)}
               </span>
               <span className="gas-reserve-scenario-tile__hint">
                 {s.demandGrowth}
@@ -126,8 +159,8 @@ export function GasReserveScenarioOutlook({
               {s.shortLabel}
             </span>
             <span>{s.demandGrowth}</span>
-            <span className="font-semibold tabular-nums">{reserveScenarioTcfAt('2030', s.id)?.toFixed(2)} Tcf</span>
-            <span className="font-semibold tabular-nums">{s.exhaustionYear}</span>
+            <span className="font-semibold tabular-nums">{tcfAt('2030', s.id)?.toFixed(2)} Tcf</span>
+            <span className="font-semibold tabular-nums">{exhaustionOf(s.id)}</span>
           </div>
         ))}
       </div>
@@ -144,11 +177,11 @@ export function GasReserveScenarioOutlook({
             <ScenarioIcon className="h-4 w-4" />
           </span>
           <div className="min-w-0 flex-1">
-            <h4 className="gas-reserve-scenario-detail__title">{active.label}</h4>
-            <p className="gas-reserve-scenario-detail__desc">{active.description}</p>
+            <h4 className="gas-reserve-scenario-detail__title">{activeLabel}</h4>
+            <p className="gas-reserve-scenario-detail__desc">{activeDescription}</p>
           </div>
           <div className="text-right shrink-0">
-            <div className="gas-reserve-scenario-detail__year">{active.exhaustionYear}</div>
+            <div className="gas-reserve-scenario-detail__year">{activeExhaustion}</div>
             <div className="text-[9px] text-muted-foreground font-medium">exhaustion year</div>
           </div>
         </div>
@@ -191,7 +224,7 @@ export function GasReserveScenarioOutlook({
           </div>
           <div className="gas-reserve-scenario-detail__milestones-grid">
             {RESERVE_FORECAST_MILESTONES.map((year) => {
-              const tcf = reserveScenarioTcfAt(year, active.id);
+              const tcf = tcfAt(year, active.id);
               return (
                 <div key={year} className="gas-reserve-scenario-detail__milestone">
                   <span className="gas-reserve-scenario-detail__milestone-year">{year}</span>
@@ -203,7 +236,7 @@ export function GasReserveScenarioOutlook({
             })}
             <div className="gas-reserve-scenario-detail__milestone gas-reserve-scenario-detail__milestone--end">
               <span className="gas-reserve-scenario-detail__milestone-year">Empty</span>
-              <span className="gas-reserve-scenario-detail__milestone-value">{active.exhaustionYear}</span>
+              <span className="gas-reserve-scenario-detail__milestone-value">{activeExhaustion}</span>
             </div>
           </div>
           <p className="gas-reserve-scenario-detail__endowment-note">
@@ -221,7 +254,7 @@ export function GasReserveScenarioOutlook({
 
         <div className="gas-reserve-scenario-detail__runway-wrap">
           <div className="flex justify-between text-[9px] text-muted-foreground mb-1">
-            <span>{FORECAST_START} baseline</span>
+            <span>{forkYearLabel} {live ? 'live balance' : 'baseline'}</span>
             <span>{runwayYears} yr runway</span>
             <span>Field empty</span>
           </div>
@@ -229,13 +262,13 @@ export function GasReserveScenarioOutlook({
             <div
               className="gas-reserve-scenario-detail__runway-fill"
               style={{
-                width: `${(runwayYears / 12) * 100}%`,
+                width: `${(runwayYears / maxRunway) * 100}%`,
                 background: `linear-gradient(90deg, ${active.color}, color-mix(in srgb, ${active.color} 55%, transparent))`,
               }}
             />
             <span
               className="gas-reserve-scenario-detail__runway-marker"
-              style={{ left: `${(runwayYears / 12) * 100}%`, borderColor: active.color }}
+              style={{ left: `${(runwayYears / maxRunway) * 100}%`, borderColor: active.color }}
             />
           </div>
         </div>

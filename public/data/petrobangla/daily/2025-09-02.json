@@ -20,7 +20,21 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:05",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (02.09.25).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.products.kerosene",
+        "sgfl.products.diesel",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -34,7 +48,10 @@
     "report_date_label": "01-02 Sep, 2025",
     "report_date_start": "2025-09-01",
     "report_date_end": "2025-09-02",
-    "month_label": "Sep, 2025"
+    "month_label": "Sep, 2025",
+    "gas_day_start": "2025-09-01",
+    "gas_day_end": "2025-09-02",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -398,8 +415,8 @@
       "lpg": 118.56,
       "ms": 0.0,
       "octane": 4354.3,
-      "kerosene": null,
-      "diesel": null
+      "kerosene": 191.3,
+      "diesel": 158.6
     },
     "pipeline_metrics": {
       "AB1": 0.0,
@@ -921,7 +938,12 @@
         "value_mmcfd": 98.0
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 2058,
+      "fertilizer_demand_adjusted_mmcfd": 280
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2834.9,

@@ -18,7 +18,27 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:04",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (23.07.20).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.products.cond",
+        "sgfl.pipeline_metrics.AB1",
+        "sgfl.pipeline_metrics.AB2",
+        "sgfl.pipeline_metrics.BB",
+        "sgfl.pipeline_metrics.VS3",
+        "sgfl.pipeline_metrics.AM",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_total",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -32,7 +52,10 @@
     "report_date_label": "22-23 Jul, 2020",
     "report_date_start": "2020-07-22",
     "report_date_end": "2020-07-23",
-    "month_label": "Jul, 2020"
+    "month_label": "Jul, 2020",
+    "gas_day_start": "2020-07-22",
+    "gas_day_end": "2020-07-23",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -406,15 +429,21 @@
   "sgfl": {
     "products": {
       "ngl": 81.8,
-      "cond": null,
+      "cond": 0.0,
       "lpg": 3045.0,
       "ms": 711.9,
       "hsd": 116.9
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 22-23Jul, 2020 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 22-23Jul, 2020 From 8.00 to 8.00": null,
+      "AB1": 0.0,
+      "AB2": 115.4,
+      "BB": 363.4,
+      "VS3": 123.0,
+      "AM": 471.8,
+      "BD": 471.2
     },
-    "pipeline_total": null
+    "pipeline_total": 1544.9
   },
   "distribution": {
     "companies": [
@@ -907,7 +936,12 @@
         "value_mmcfd": 82.2
       }
     ],
-    "plant_count": 69
+    "plant_count": 69,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 1867,
+      "fertilizer_demand_adjusted_mmcfd": 269
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 3117.2,

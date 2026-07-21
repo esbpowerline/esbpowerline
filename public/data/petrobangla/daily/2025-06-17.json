@@ -18,7 +18,29 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:05",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (17.06.25).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.products.cond",
+        "sgfl.products.kerosene",
+        "sgfl.products.diesel",
+        "sgfl.pipeline_metrics.AB1",
+        "sgfl.pipeline_metrics.AB2",
+        "sgfl.pipeline_metrics.BB",
+        "sgfl.pipeline_metrics.VS3",
+        "sgfl.pipeline_metrics.AM",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_total",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -32,7 +54,10 @@
     "report_date_label": "16-17 Jun, 2025",
     "report_date_start": "2025-06-16",
     "report_date_end": "2025-06-17",
-    "month_label": "Jun, 2025"
+    "month_label": "Jun, 2025",
+    "gas_day_start": "2025-06-16",
+    "gas_day_end": "2025-06-17",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -392,17 +417,23 @@
   "sgfl": {
     "products": {
       "ngl": 195.0,
-      "cond": null,
+      "cond": 0.0,
       "lpg": 28.251,
       "ms": 117.4,
       "octane": 2989.6,
-      "kerosene": null,
-      "diesel": null
+      "kerosene": 189.1,
+      "diesel": 114.8
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 16-17Jun, 2025 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 16-17Jun, 2025 From 8.00 to 8.00": null,
+      "AB1": 0.0,
+      "AB2": 0.0,
+      "BB": 186.2,
+      "VS3": 165.6,
+      "AM": 484.9,
+      "BD": 368.9
     },
-    "pipeline_total": null
+    "pipeline_total": 1205.6
   },
   "distribution": {
     "companies": [
@@ -914,7 +945,12 @@
         "value_mmcfd": 94.9
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 2058,
+      "fertilizer_demand_adjusted_mmcfd": 280
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2844.2,

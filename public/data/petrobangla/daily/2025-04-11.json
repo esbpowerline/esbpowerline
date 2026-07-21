@@ -18,7 +18,31 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:05",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (11.04.25).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.products.ngl",
+        "sgfl.products.cond",
+        "sgfl.products.lpg",
+        "sgfl.products.ms",
+        "sgfl.products.hsd",
+        "sgfl.pipeline_metrics.AB1",
+        "sgfl.pipeline_metrics.AB2",
+        "sgfl.pipeline_metrics.BB",
+        "sgfl.pipeline_metrics.VS3",
+        "sgfl.pipeline_metrics.AM",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_total",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -32,7 +56,10 @@
     "report_date_label": "10-11 Apr, 2025",
     "report_date_start": "2025-04-10",
     "report_date_end": "2025-04-11",
-    "month_label": "Apr, 2025"
+    "month_label": "Apr, 2025",
+    "gas_day_start": "2025-04-10",
+    "gas_day_end": "2025-04-11",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -391,16 +418,22 @@
   },
   "sgfl": {
     "products": {
-      "ngl": null,
-      "cond": null,
-      "lpg": null,
-      "ms": null,
-      "hsd": null
+      "ngl": 0.0,
+      "cond": 0.0,
+      "lpg": 0,
+      "ms": 0.0,
+      "hsd": 0.0
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 10-11Apr, 2025 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 10-11Apr, 2025 From 8.00 to 8.00": null,
+      "AB1": 0.0,
+      "AB2": 0.0,
+      "BB": 175.8,
+      "VS3": 82.2,
+      "AM": 426.1,
+      "BD": 406.9
     },
-    "pipeline_total": null
+    "pipeline_total": 1091.0
   },
   "distribution": {
     "companies": [
@@ -912,7 +945,12 @@
         "value_mmcfd": 95.7
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 2058,
+      "fertilizer_demand_adjusted_mmcfd": 280
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2689.3,

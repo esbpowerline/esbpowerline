@@ -18,7 +18,32 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:04",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (25.03.22).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.products.ngl",
+        "sgfl.products.cond",
+        "sgfl.products.lpg",
+        "sgfl.products.ms",
+        "sgfl.products.hsd",
+        "sgfl.pipeline_metrics.AB1",
+        "sgfl.pipeline_metrics.AB2",
+        "sgfl.pipeline_metrics.BB",
+        "sgfl.pipeline_metrics.VS3",
+        "sgfl.pipeline_metrics.AM",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_total",
+        "production.remarks",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -32,7 +57,10 @@
     "report_date_label": "24-25 March, 2022",
     "report_date_start": "2022-03-24",
     "report_date_end": "2022-03-25",
-    "month_label": null
+    "month_label": null,
+    "gas_day_start": "2022-03-24",
+    "gas_day_end": "2022-03-25",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -387,20 +415,27 @@
       "pct_of_total_capacity": 81.8,
       "pct_of_total_production": 100.0
     },
-    "field_count": 23
+    "field_count": 23,
+    "remarks": "* RPGCL Shutdown."
   },
   "sgfl": {
     "products": {
-      "ngl": null,
-      "cond": null,
-      "lpg": null,
-      "ms": null,
-      "hsd": null
+      "ngl": 0.0,
+      "cond": 0.0,
+      "lpg": 0,
+      "ms": 0.0,
+      "hsd": 0.0
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 24-25March, 2022 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 24-25March, 2022 From 8.00 to 8.00": null,
+      "AB1": 0.0,
+      "AB2": 0.0,
+      "BB": 315.9,
+      "VS3": 120.4,
+      "AM": 471.9,
+      "BD": 463.7
     },
-    "pipeline_total": null
+    "pipeline_total": 1371.8
   },
   "distribution": {
     "companies": [
@@ -912,7 +947,12 @@
         "value_mmcfd": 104.1
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 1914,
+      "fertilizer_demand_adjusted_mmcfd": 269
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 3076.1,

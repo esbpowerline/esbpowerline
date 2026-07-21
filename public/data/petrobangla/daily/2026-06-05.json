@@ -18,7 +18,26 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:06",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (05.06.26).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.pipeline_metrics.AB1",
+        "sgfl.pipeline_metrics.AB2",
+        "sgfl.pipeline_metrics.BB",
+        "sgfl.pipeline_metrics.VS3",
+        "sgfl.pipeline_metrics.AM",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_total",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -32,7 +51,10 @@
     "report_date_label": "04-05 Jun, 2026",
     "report_date_start": "2026-06-04",
     "report_date_end": "2026-06-05",
-    "month_label": "Jun, 2026"
+    "month_label": "Jun, 2026",
+    "gas_day_start": "2026-06-04",
+    "gas_day_end": "2026-06-05",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -400,9 +422,15 @@
       "diesel": 196.3
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 04-05Jun, 2026 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 04-05Jun, 2026 From 8.00 to 8.00": null,
+      "AB1": 0.0,
+      "AB2": 0.0,
+      "BB": 108.0,
+      "VS3": 148.0,
+      "AM": 455.8,
+      "BD": 319.3
     },
-    "pipeline_total": null
+    "pipeline_total": 1031.2
   },
   "distribution": {
     "companies": [
@@ -914,7 +942,12 @@
         "value_mmcfd": 89.7
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 2146,
+      "fertilizer_demand_adjusted_mmcfd": 280
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2592.7,

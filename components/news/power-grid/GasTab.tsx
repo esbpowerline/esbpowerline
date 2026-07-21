@@ -5,6 +5,7 @@ import type { GasDistributionItem, GasProductionItem } from '@/lib/data/grid/typ
 import { formatNumber } from '@/lib/utils';
 import { GridLockedContent } from './GridLockedContent';
 import { GridCardFooter } from './GridExplorerUI';
+import { PetrobanglaGasKpiStrip } from './PetrobanglaGasKpiStrip';
 
 interface GasTabProps {
   selectedDate: string;
@@ -70,6 +71,8 @@ export function GasTab({
 
   return (
     <div className="grid-explorer-panel space-y-6">
+      <PetrobanglaGasKpiStrip selectedDate={selectedDate} />
+
       <div className="grid-explorer-chart-card card">
         <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
           <Droplet className="h-5 w-5 text-sky-500 shrink-0" />

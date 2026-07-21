@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { AudienceMode } from '@/lib/data/petrobangla/types';
 import {
   AlertTriangle,
@@ -33,11 +33,16 @@ import {
   RESERVE_SCENARIO_COLORS,
   RESERVE_SCENARIOS,
   RESERVES_AUDITED_META,
-  reserveDepletionPct,
   reservesChartSeries,
   reservesChartYMax,
   type ReserveScenarioId,
 } from '@/lib/data/macro/reserves';
+import {
+  computeLiveReserveModel,
+  scenarioById,
+  type LiveReserveModel,
+} from '@/lib/data/macro/reservesLive';
+import { PetrobanglaBootstrapProvider, usePetrobanglaBootstrap } from './PetrobanglaBootstrap';
 import { GridCardFooter } from './GridExplorerUI';
 import { PetrobanglaMacroGasSection } from './PetrobanglaMacroGasSection';
 import { GasReserveScenarioOutlook } from './GasReserveScenarioOutlook';
@@ -51,58 +56,47 @@ interface Props {
 
 const FORECAST_START = String(RESERVES_AUDITED_META.forecastStartYear);
 
-const HERO_METRICS = [
-  {
-    icon: Droplet,
-    iconClass: 'text-sky-500',
-    valueClass: 'text-sky-500',
-    label: 'Remaining reserves',
-    value: String(RESERVES_AUDITED_META.remaining2026Tcf),
-    hint: `Tcf recoverable · ${RESERVES_AUDITED_META.forecastStartYear} audit`,
-  },
-  {
-    icon: TrendingDown,
-    iconClass: 'text-amber-500',
-    label: 'Already extracted',
-    value: null as string | null,
-    hint: `${RESERVES_AUDITED_META.cumulativeExtracted2026Tcf} of ${RESERVES_AUDITED_META.initialRecoverableTcf} Tcf endowment`,
-  },
-  {
-    icon: Flame,
-    iconClass: 'text-red-500',
-    valueClass: 'text-red-500',
-    label: 'Decline since 2020',
-    value: null as string | null,
-    hint: 'Tcf · 12.27 → 7.63 audited path',
-  },
-  {
-    icon: AlertTriangle,
-    iconClass: 'text-amber-500',
-    label: 'Exhaustion window',
-    value: '2033–40',
-    hint: 'Scenario-dependent field depletion',
-  },
-] as const;
+function formatGasDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d} ${months[m - 1]} ${y}`;
+}
+
+type ChartRow = {
+  year: string;
+  audited: number | null;
+  lowGrowth: number | null;
+  bau: number | null;
+  highGrowth: number | null;
+};
 
 function ReservesDepletionTooltip({
   active,
   payload,
+  forkYear,
+  liveAsOf,
 }: {
   active?: boolean;
-  payload?: { payload?: ReturnType<typeof reservesChartSeries>[number] }[];
+  payload?: { payload?: ChartRow }[];
+  forkYear: number;
+  liveAsOf: string | null;
 }) {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
 
   const year = Number(d.year);
-  const isAudited = year <= RESERVES_AUDITED_META.forecastStartYear;
-  const depleted = reserveDepletionPct(d.year);
+  const isAudited = year <= forkYear;
+  const remainingHere = d.audited ?? d.bau ?? d.lowGrowth ?? d.highGrowth ?? 0;
+  const depleted =
+    ((RESERVES_AUDITED_META.initialRecoverableTcf - remainingHere) /
+      RESERVES_AUDITED_META.initialRecoverableTcf) *
+    100;
   const accent = isAudited ? RESERVE_SCENARIO_COLORS.audited : RESERVE_SCENARIO_COLORS.bau;
 
   const rows: { key: ReserveScenarioId | 'audited'; label: string; value: number | null; color: string }[] =
     isAudited
-      ? [{ key: 'audited', label: 'Audited remaining', value: d.audited, color: RESERVE_SCENARIO_COLORS.audited }]
+      ? [{ key: 'audited', label: liveAsOf ? 'Extraction-derived' : 'Audited remaining', value: d.audited, color: RESERVE_SCENARIO_COLORS.audited }]
       : RESERVE_SCENARIOS.map((s) => ({
           key: s.id,
           label: s.shortLabel,
@@ -112,7 +106,7 @@ function ReservesDepletionTooltip({
 
   return (
     <GridChartTooltipShell
-      title={`${d.year}${isAudited ? ' · Audited' : ' · Forecast'}`}
+      title={`${d.year}${isAudited ? (liveAsOf && year === forkYear ? ' · Live' : ' · Audited') : ' · Forecast'}`}
       accent={accent}
       className="min-w-[11rem]"
     >
@@ -135,14 +129,26 @@ function ReservesDepletionTooltip({
       </div>
       <div className="grid-chart-tooltip__foot">
         {isAudited
-          ? 'Petrobangla Hydrocarbon Unit year-end audit'
-          : `Forked from ${RESERVES_AUDITED_META.remaining2026Tcf} Tcf baseline`}
+          ? liveAsOf
+            ? `Daily Petrobangla archive · anchored to Hydrocarbon Unit audits`
+            : 'Petrobangla Hydrocarbon Unit year-end audit'
+          : liveAsOf
+            ? `Forked from the live balance on ${formatGasDay(liveAsOf)}`
+            : `Forked from ${RESERVES_AUDITED_META.remaining2026Tcf} Tcf baseline`}
       </div>
     </GridChartTooltipShell>
   );
 }
 
-export function GasReserveDepletionTab({
+export function GasReserveDepletionTab(props: Props) {
+  return (
+    <PetrobanglaBootstrapProvider>
+      <GasReserveDepletionContent {...props} />
+    </PetrobanglaBootstrapProvider>
+  );
+}
+
+function GasReserveDepletionContent({
   selectedDate,
   systemStatsDate,
   pgcbGasTotal,
@@ -153,25 +159,85 @@ export function GasReserveDepletionTab({
   const [highlightScenario, setHighlightScenario] = useState<ReserveScenarioId | null>(null);
   const chartHighlight = highlightScenario ?? selectedScenario;
   const [audienceMode, setAudienceMode] = useState<AudienceMode>('simple');
-  const chartData = useMemo(() => reservesChartSeries(), []);
-  const chartYMax = useMemo(() => reservesChartYMax(), []);
 
+  const { timeline, ensureTimeline } = usePetrobanglaBootstrap();
+  useEffect(() => {
+    void ensureTimeline();
+  }, [ensureTimeline]);
+
+  const live: LiveReserveModel | null = useMemo(
+    () => (timeline ? computeLiveReserveModel(timeline) : null),
+    [timeline],
+  );
+
+  const chartData: ChartRow[] = useMemo(
+    () => (live ? live.series : reservesChartSeries()),
+    [live],
+  );
+  const chartYMax = useMemo(() => (live ? live.yMax : reservesChartYMax()), [live]);
+  const forkYear = live?.forkYear ?? RESERVES_AUDITED_META.forecastStartYear;
+  const lastChartYear = chartData[chartData.length - 1]?.year ?? '2040';
+
+  const remainingTcf = live?.remainingTcf ?? RESERVES_AUDITED_META.remaining2026Tcf;
+  const extractedTcf = live?.extractedTcf ?? RESERVES_AUDITED_META.cumulativeExtracted2026Tcf;
   const extractedPct =
+    live?.extractedPct ??
     (RESERVES_AUDITED_META.cumulativeExtracted2026Tcf / RESERVES_AUDITED_META.initialRecoverableTcf) * 100;
-  const declineSince2020 = 12.27 - RESERVES_AUDITED_META.remaining2026Tcf;
+  const declineSince2020 = live?.declineSince2020Tcf ?? 12.27 - RESERVES_AUDITED_META.remaining2026Tcf;
+  const exhaustionWindow = live?.exhaustionWindowLabel ?? '2033–40';
+  const asOfLabel = live ? formatGasDay(live.asOfDate) : null;
 
-  const heroValues = [
-    HERO_METRICS[0].value,
-    `${extractedPct.toFixed(0)}%`,
-    `−${declineSince2020.toFixed(2)}`,
-    HERO_METRICS[3].value,
+  const heroMetrics = [
+    {
+      icon: Droplet,
+      iconClass: 'text-sky-500',
+      valueClass: 'text-sky-500',
+      label: 'Remaining reserves',
+      value: remainingTcf.toFixed(2),
+      hint: asOfLabel
+        ? `Tcf recoverable · live to ${asOfLabel}`
+        : `Tcf recoverable · ${RESERVES_AUDITED_META.forecastStartYear} audit`,
+    },
+    {
+      icon: TrendingDown,
+      iconClass: 'text-amber-500',
+      valueClass: '',
+      label: 'Already extracted',
+      value: `${extractedPct.toFixed(0)}%`,
+      hint: `${extractedTcf.toFixed(2)} of ${RESERVES_AUDITED_META.initialRecoverableTcf} Tcf endowment`,
+    },
+    {
+      icon: Flame,
+      iconClass: 'text-red-500',
+      valueClass: 'text-red-500',
+      label: 'Decline since 2020',
+      value: `−${declineSince2020.toFixed(2)}`,
+      hint: asOfLabel
+        ? `Tcf · 12.27 → ${remainingTcf.toFixed(2)} extraction-derived`
+        : 'Tcf · 12.27 → 7.63 audited path',
+    },
+    {
+      icon: AlertTriangle,
+      iconClass: 'text-amber-500',
+      valueClass: '',
+      label: 'Exhaustion window',
+      value: exhaustionWindow,
+      hint: live
+        ? `At ${Math.round(live.currentRateMmcfd).toLocaleString()} MMCFD, 30-day avg`
+        : 'Scenario-dependent field depletion',
+    },
   ];
 
   const legendItems = [
-    { id: 'audited', label: 'Audited history', color: RESERVE_SCENARIO_COLORS.audited, variant: 'line' as const },
+    {
+      id: 'audited',
+      label: live ? 'Extraction-derived history' : 'Audited history',
+      color: RESERVE_SCENARIO_COLORS.audited,
+      variant: 'line' as const,
+    },
     ...RESERVE_SCENARIOS.map((s) => ({
       id: s.id,
-      label: `${s.shortLabel} → ${s.exhaustionYear}`,
+      label: `${s.shortLabel} → ${live ? scenarioById(live, s.id).exhaustionYear : s.exhaustionYear}`,
       color: s.color,
       variant: (s.id === 'bau' ? 'line' : 'dashed') as 'line' | 'dashed',
     })),
@@ -188,7 +254,10 @@ export function GasReserveDepletionTab({
             <p className="gas-reserve-zone-eyebrow">Macro reserves</p>
             <h2 className="gas-reserve-hero__title">Gas Reserve Depletion</h2>
             <p className="gas-reserve-hero__sub">
-              Domestic recoverable gas is finite. Audited balances trace the decline since 2020; scenario forks show when fields run dry.
+              Domestic recoverable gas is finite.{' '}
+              {live
+                ? `Every daily Petrobangla report draws the balance down — tracked live across ${live.daysCounted.toLocaleString()} gas-days since 2020.`
+                : 'Audited balances trace the decline since 2020; scenario forks show when fields run dry.'}
             </p>
           </div>
           <span className="grid-explorer-chip text-destructive border-destructive/25 bg-destructive/10 shrink-0">
@@ -197,7 +266,7 @@ export function GasReserveDepletionTab({
         </div>
 
         <div className="gas-reserve-metric-band">
-          {HERO_METRICS.map((m, i) => {
+          {heroMetrics.map((m) => {
             const Icon = m.icon;
             return (
               <div key={m.label} className="gas-reserve-metric">
@@ -205,9 +274,7 @@ export function GasReserveDepletionTab({
                   <Icon className={`h-3.5 w-3.5 shrink-0 ${m.iconClass}`} />
                   <span className="gas-reserve-metric__label">{m.label}</span>
                 </div>
-                <span className={`gas-reserve-metric__value ${'valueClass' in m ? m.valueClass : ''}`}>
-                  {heroValues[i]}
-                </span>
+                <span className={`gas-reserve-metric__value ${m.valueClass}`}>{m.value}</span>
                 <span className="gas-reserve-metric__hint">{m.hint}</span>
               </div>
             );
@@ -230,8 +297,8 @@ export function GasReserveDepletionTab({
             />
           </div>
           <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-            <span>Extracted {RESERVES_AUDITED_META.cumulativeExtracted2026Tcf} Tcf</span>
-            <span>Left {RESERVES_AUDITED_META.remaining2026Tcf} Tcf</span>
+            <span>Extracted {extractedTcf.toFixed(2)} Tcf</span>
+            <span>Left {remainingTcf.toFixed(2)} Tcf</span>
           </div>
         </div>
       </section>
@@ -242,8 +309,9 @@ export function GasReserveDepletionTab({
           <div className="min-w-0 flex-1">
             <h3 className="grid-explorer-chart-card__title">Reserve depletion trajectory</h3>
             <p className="grid-explorer-chart-card__sub">
-              Audited balances {RESERVES_AUDITED_META.archiveStartYear}–{RESERVES_AUDITED_META.forecastStartYear} ·
-              demand scenarios fork from {RESERVES_AUDITED_META.remaining2026Tcf} Tcf after {FORECAST_START}
+              {live
+                ? `Daily extraction integrated ${RESERVES_AUDITED_META.archiveStartYear}–${forkYear}, anchored to Hydrocarbon Unit audits · scenarios fork from ${remainingTcf.toFixed(2)} Tcf on ${asOfLabel}`
+                : `Audited balances ${RESERVES_AUDITED_META.archiveStartYear}–${RESERVES_AUDITED_META.forecastStartYear} · demand scenarios fork from ${RESERVES_AUDITED_META.remaining2026Tcf} Tcf after ${FORECAST_START}`}
             </p>
           </div>
         </div>
@@ -267,35 +335,38 @@ export function GasReserveDepletionTab({
                   />
                   <ReferenceArea
                     x1={String(RESERVES_AUDITED_META.archiveStartYear)}
-                    x2={FORECAST_START}
+                    x2={String(forkYear)}
                     fill={RESERVE_SCENARIO_COLORS.audited}
                     fillOpacity={0.06}
                     strokeOpacity={0}
                   />
                   <ReferenceArea
-                    x1={FORECAST_START}
-                    x2="2038"
+                    x1={String(forkYear)}
+                    x2={lastChartYear}
                     fill={RESERVE_SCENARIO_COLORS.bau}
                     fillOpacity={0.04}
                     strokeOpacity={0}
                   />
                   <ReferenceLine
-                    x={FORECAST_START}
+                    x={String(forkYear)}
                     stroke={chartTheme.gridStroke}
                     strokeDasharray="4 4"
                     label={{
-                      value: 'Forecast fork',
+                      value: live ? 'Live fork' : 'Forecast fork',
                       position: 'insideTopRight',
                       fontSize: 9,
                       fill: chartTheme.axisTick,
                     }}
                   />
                   <ReferenceLine y={0} stroke={chartTheme.destructive} strokeOpacity={0.35} strokeDasharray="3 3" />
-                  <GridRechartsTooltip content={<ReservesDepletionTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
+                  <GridRechartsTooltip
+                    content={<ReservesDepletionTooltip forkYear={forkYear} liveAsOf={live?.asOfDate ?? null} />}
+                    cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }}
+                  />
                   <Line
                     type="monotone"
                     dataKey="audited"
-                    name="Audited"
+                    name={live ? 'Extraction-derived' : 'Audited'}
                     stroke={RESERVE_SCENARIO_COLORS.audited}
                     strokeWidth={3}
                     dot={{ fill: RESERVE_SCENARIO_COLORS.audited, r: 4, strokeWidth: 0 }}
@@ -330,12 +401,16 @@ export function GasReserveDepletionTab({
             highlightId={highlightScenario}
             onSelect={setSelectedScenario}
             onHighlight={setHighlightScenario}
+            live={live}
           />
         </div>
 
         <div className="bg-muted/10 px-5 py-3 border-t border-border/40 text-[11px] text-muted-foreground">
           <p>
-            <strong>How to read:</strong> One audited line through {FORECAST_START}; select a scenario below to inspect its fork.
+            <strong>How to read:</strong>{' '}
+            {live
+              ? `The blue line is cumulative extraction from ${live.daysCounted.toLocaleString()} daily reports, calibrated to the audited balances; select a scenario below to inspect its fork.`
+              : `One audited line through ${FORECAST_START}; select a scenario below to inspect its fork.`}{' '}
             Steeper lines mean faster depletion.
           </p>
         </div>
@@ -345,10 +420,15 @@ export function GasReserveDepletionTab({
             <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
               Petrobangla Hydrocarbon Unit
             </a>
-            {' · '}MPEMR scenario audit
+            {' · '}
+            {live ? 'Daily gas reports 2020–present' : 'MPEMR scenario audit'}
           </span>
           <span>Audited by: MPEMR · CAG Bangladesh</span>
-          <span className="font-medium">2020–2026 audited · 2026–2038 forecast</span>
+          <span className="font-medium">
+            {live
+              ? `2020–${forkYear} extraction-derived · forks to ${lastChartYear}`
+              : '2020–2026 audited · 2026–2038 forecast'}
+          </span>
         </GridCardFooter>
       </div>
 

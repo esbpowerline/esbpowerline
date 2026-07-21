@@ -20,7 +20,19 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:06",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (19.03.26).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -34,7 +46,10 @@
     "report_date_label": "18-19 March, 2026",
     "report_date_start": "2026-03-18",
     "report_date_end": "2026-03-19",
-    "month_label": null
+    "month_label": null,
+    "gas_day_start": "2026-03-18",
+    "gas_day_end": "2026-03-19",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -921,7 +936,12 @@
         "value_mmcfd": 86.3
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 2146,
+      "fertilizer_demand_adjusted_mmcfd": 280
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2423.0,

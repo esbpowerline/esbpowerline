@@ -20,7 +20,28 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:04",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (06.03.20).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.products.cond",
+        "sgfl.products.hsd",
+        "sgfl.pipeline_metrics.AB1",
+        "sgfl.pipeline_metrics.AB2",
+        "sgfl.pipeline_metrics.BB",
+        "sgfl.pipeline_metrics.VS3",
+        "sgfl.pipeline_metrics.AM",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_total",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -34,7 +55,10 @@
     "report_date_label": "05-06 Mar, 2020",
     "report_date_start": "2020-03-05",
     "report_date_end": "2020-03-06",
-    "month_label": "Mar, 2020"
+    "month_label": "Mar, 2020",
+    "gas_day_start": "2020-03-05",
+    "gas_day_end": "2020-03-06",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -338,15 +362,21 @@
   "sgfl": {
     "products": {
       "ngl": 358.5,
-      "cond": null,
+      "cond": 0.0,
       "lpg": 14339.0,
       "ms": 213.0,
-      "hsd": null
+      "hsd": 0.0
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 05-06Mar, 2020 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 05-06Mar, 2020 From 8.00 to 8.00": null,
+      "AB1": 0.0,
+      "AB2": 62.4,
+      "BB": 327.6,
+      "VS3": 116.0,
+      "AM": 560.1,
+      "BD": 454.4
     },
-    "pipeline_total": null
+    "pipeline_total": 1520.5
   },
   "distribution": {
     "companies": [
@@ -839,7 +869,12 @@
         "value_mmcfd": 13.3
       }
     ],
-    "plant_count": 69
+    "plant_count": 69,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 1867,
+      "fertilizer_demand_adjusted_mmcfd": 269
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 1484.6,

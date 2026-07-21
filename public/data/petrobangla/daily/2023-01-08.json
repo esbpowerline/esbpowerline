@@ -18,7 +18,27 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:05",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (08.01.23).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "sgfl.pipeline_metrics.AB1 Basundhara Multi Paper",
+        "sgfl.pipeline_metrics.AB2 Unique Cement",
+        "sgfl.pipeline_metrics.BB Shunsing Power",
+        "sgfl.pipeline_metrics.VS3 Meghna Pupl 38MW",
+        "sgfl.pipeline_metrics.AM Titas Non-Grid Total",
+        "sgfl.pipeline_metrics.BD",
+        "sgfl.pipeline_metrics.Total TBS",
+        "production.remarks",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -32,7 +52,10 @@
     "report_date_label": "07-08 Jan, 2023",
     "report_date_start": "2023-01-07",
     "report_date_end": "2023-01-08",
-    "month_label": "Jan, 2023"
+    "month_label": "Jan, 2023",
+    "gas_day_start": "2023-01-07",
+    "gas_day_end": "2023-01-08",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -387,7 +410,8 @@
       "pct_of_total_capacity": 70.7,
       "pct_of_total_production": 100.0
     },
-    "field_count": 23
+    "field_count": 23,
+    "remarks": "Chandpur 150 Chowddogram * RPGCL Shutdown. Maijdi Nishkunjora Total"
   },
   "sgfl": {
     "products": {
@@ -398,7 +422,14 @@
       "hsd": null
     },
     "pipeline_metrics": {
-      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 07-08Jan, 2023 From 8.00 to 8.00": null
+      "N o: 41.01.09/2604.Dec.2014 Petrobangla Date : 07-08Jan, 2023 From 8.00 to 8.00": null,
+      "AB1 Basundhara Multi Paper": 0.0,
+      "AB2 Unique Cement": 55.6,
+      "BB Shunsing Power": 240.4,
+      "VS3 Meghna Pupl 38MW": 102.5,
+      "AM Titas Non-Grid Total": 412.0,
+      "BD": 466.5,
+      "Total TBS": 1276.9
     },
     "pipeline_total": null
   },
@@ -912,7 +943,12 @@
         "value_mmcfd": 88.7
       }
     ],
-    "plant_count": 71
+    "plant_count": 71,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 1849,
+      "fertilizer_demand_adjusted_mmcfd": 269
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2659.2,

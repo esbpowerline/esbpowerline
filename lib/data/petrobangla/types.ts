@@ -101,6 +101,32 @@ export interface DistributionSummary {
   };
 }
 
+/** RPGCL/SGFL fractionation-plant output — BBLD except LPG (Kg). Enriched 2026-07 re-parse. */
+export interface PetrobanglaSgflProducts {
+  ngl?: number | null;
+  cond?: number | null;
+  lpg?: number | null;
+  ms?: number | null;
+  octane?: number | null;
+  kerosene?: number | null;
+  diesel?: number | null;
+  hsd?: number | null;
+}
+
+export interface PetrobanglaSgfl {
+  products?: PetrobanglaSgflProducts;
+  /** North-South/RA trunkline deliveries by segment (AB1, AB2, BB, VS3, AM, BD) in MMCFD */
+  pipeline_metrics?: Record<string, number | null>;
+  pipeline_total?: number | null;
+}
+
+/** Petrobangla's own diversity-factor demand adjustment — enriched 2026-07 re-parse */
+export interface DistributionDiversity {
+  factor: number | null;
+  power_demand_adjusted_mmcfd: number | null;
+  fertilizer_demand_adjusted_mmcfd: number | null;
+}
+
 export interface PetrobanglaDaily {
   $schema: string;
   meta: {
@@ -117,15 +143,23 @@ export interface PetrobanglaDaily {
     report_date_end: string;
     report_date_label: string;
     month_label?: string;
+    /** Explicit 8am–8am gas-day window — enriched fields, may be absent on unmatched days */
+    gas_day_start?: string;
+    gas_day_end?: string;
+    gas_window?: string;
   };
   production: {
     fields: ProductionField[];
     grand_total: ProductionField;
     field_count: number;
+    /** Free-text production remarks from the PDF — enriched field */
+    remarks?: string | null;
   };
+  sgfl?: PetrobanglaSgfl;
   distribution: {
     companies: DistributionCompany[];
     summary: DistributionSummary;
+    diversity?: DistributionDiversity | null;
   };
   validation?: {
     reconciled: boolean;

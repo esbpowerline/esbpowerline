@@ -20,7 +20,20 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ]
+    ],
+    "enrichment": {
+      "enriched_at": "2026-07-21T20:22:04",
+      "source": "reparse-2026-07",
+      "matched_report": "Daily-Gas-Intake-Offtake-Report (02.05.20).json",
+      "match_mode": "end",
+      "fields_added": [
+        "report.gas_day_start",
+        "report.gas_day_end",
+        "report.gas_window",
+        "production.remarks",
+        "distribution.diversity"
+      ]
+    }
   },
   "report": {
     "reference_no": null,
@@ -34,7 +47,10 @@
     "report_date_label": "01-02 May, 2020",
     "report_date_start": "2020-05-01",
     "report_date_end": "2020-05-02",
-    "month_label": "May, 2020"
+    "month_label": "May, 2020",
+    "gas_day_start": "2020-05-01",
+    "gas_day_end": "2020-05-02",
+    "gas_window": "8.00-8.00"
   },
   "production": {
     "fields": [
@@ -389,7 +405,8 @@
       "pct_of_total_capacity": 62.3,
       "pct_of_total_production": 100.0
     },
-    "field_count": 23
+    "field_count": 23,
+    "remarks": "* Rpgcl Shutdown."
   },
   "sgfl": {
     "products": {
@@ -909,7 +926,12 @@
         "value_mmcfd": 67.3
       }
     ],
-    "plant_count": 69
+    "plant_count": 69,
+    "diversity": {
+      "factor": 0.85,
+      "power_demand_adjusted_mmcfd": 1867,
+      "fertilizer_demand_adjusted_mmcfd": 269
+    }
   },
   "validation": {
     "field_gas_sum_mmcfd": 2343.9,
