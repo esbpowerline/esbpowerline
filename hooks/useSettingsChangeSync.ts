@@ -37,6 +37,10 @@ export type SettingsFormSnapshot = {
   gridLines: unknown[];
   gridProjects: unknown[];
   coverageSlots: CoverageSlot[];
+  panelImportantLinks: boolean;
+  panelPolicyFramework: boolean;
+  policyFramework: unknown[];
+  importantLinks: unknown;
 };
 
 type SettingsSetters = {
@@ -62,6 +66,10 @@ type SettingsSetters = {
   setGridLines: (value: unknown[]) => void;
   setGridProjects: (value: unknown[]) => void;
   setCoverageSlots: (value: CoverageSlot[]) => void;
+  setPanelImportantLinks: (value: boolean) => void;
+  setPanelPolicyFramework: (value: boolean) => void;
+  setPolicyFramework: (value: unknown[]) => void;
+  setImportantLinks: (value: unknown) => void;
 };
 
 function formatScalarChange(label: string, before: string, after: string) {
@@ -118,6 +126,14 @@ export function useSettingsChangeSync(
       gridLines: () => ({ gridLines: current.gridLines }),
       gridProjects: () => ({ gridProjects: current.gridProjects }),
       coverage: () => ({ coverage: current.coverageSlots }),
+      panels: () => ({
+        panels: {
+          importantLinks: current.panelImportantLinks,
+          policyFramework: current.panelPolicyFramework,
+        },
+      }),
+      policyFramework: () => ({ policyFramework: current.policyFramework }),
+      importantLinks: () => ({ importantLinks: current.importantLinks }),
     }),
     [current],
   );
@@ -382,6 +398,36 @@ export function useSettingsChangeSync(
       () => setters.setCoverageSlots(baseline.coverageSlots),
       collectors.coverage,
     );
+    syncCollection(
+      'settings:panels',
+      'Homepage panels',
+      'Sidebar panel visibility',
+      { il: baseline.panelImportantLinks, pf: baseline.panelPolicyFramework },
+      { il: current.panelImportantLinks, pf: current.panelPolicyFramework },
+      () => {
+        setters.setPanelImportantLinks(baseline.panelImportantLinks);
+        setters.setPanelPolicyFramework(baseline.panelPolicyFramework);
+      },
+      collectors.panels,
+    );
+    syncCollection(
+      'settings:policyFramework',
+      'Homepage panels',
+      'Policy & Regulatory Framework content',
+      baseline.policyFramework,
+      current.policyFramework,
+      () => setters.setPolicyFramework(baseline.policyFramework),
+      collectors.policyFramework,
+    );
+    syncCollection(
+      'settings:importantLinks',
+      'Homepage panels',
+      'Important Official Links content',
+      baseline.importantLinks,
+      current.importantLinks,
+      () => setters.setImportantLinks(baseline.importantLinks),
+      collectors.importantLinks,
+    );
   }, [
     baseline,
     current,
@@ -411,6 +457,10 @@ export function buildSettingsSnapshot(input: {
   gridLines: unknown[];
   gridProjects: unknown[];
   coverageSlots: CoverageSlot[];
+  panelImportantLinks: boolean;
+  panelPolicyFramework: boolean;
+  policyFramework: unknown[];
+  importantLinks: unknown;
 }): SettingsFormSnapshot {
   return {
     siteName: input.siteName,
@@ -435,5 +485,9 @@ export function buildSettingsSnapshot(input: {
     gridLines: input.gridLines,
     gridProjects: input.gridProjects,
     coverageSlots: input.coverageSlots,
+    panelImportantLinks: input.panelImportantLinks,
+    panelPolicyFramework: input.panelPolicyFramework,
+    policyFramework: input.policyFramework,
+    importantLinks: input.importantLinks,
   };
 }

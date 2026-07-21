@@ -4,6 +4,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { PanelsEditor } from '@/components/admin/PanelsEditor';
+import { resolvePolicies, type Policy } from '@/lib/data/policy/policies';
+import { DEFAULT_IMPORTANT_LINKS, resolveImportantLinks } from '@/lib/data/important-links';
 import { cn } from '@/lib/utils';
 import { HOMEPAGE_DEFAULTS } from '@/lib/homepage-defaults';
 import { DEFAULT_COVERAGE_SLOTS, normalizeCoverageSlots } from '@/lib/coverage-defaults';
@@ -34,7 +37,7 @@ interface SettingsFormProps {
 
 export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormProps) {
   const { count, setDockOpen } = useAdminChangeQueue();
-  const [activeTab, setActiveTab] = useState<'general' | 'markets' | 'snapshot' | 'interviews' | 'grid' | 'coverage'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'markets' | 'snapshot' | 'interviews' | 'grid' | 'coverage' | 'panels'>('general');
 
   // 1. General, SEO & Hero
   const site = (settings.site as Record<string, string>) ?? {};
@@ -177,6 +180,38 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
     ]
   );
 
+  // Homepage sidebar panel visibility toggles (both default ON)
+  const panelsSetting = (settings.panels as { importantLinks?: boolean; policyFramework?: boolean }) ?? {};
+  const [panelImportantLinks, setPanelImportantLinks] = useState(panelsSetting.importantLinks !== false);
+  const [panelPolicyFramework, setPanelPolicyFramework] = useState(panelsSetting.policyFramework !== false);
+
+  // Panel content editors
+  const [policyItems, setPolicyItems] = useState<Policy[]>(() => resolvePolicies(settings));
+  const [ilData, setIlData] = useState<unknown>(() => resolveImportantLinks(settings));
+  const [ilText, setIlText] = useState<string>(() => JSON.stringify(resolveImportantLinks(settings), null, 2));
+  const [ilError, setIlError] = useState<string | null>(null);
+
+  const handleIlTextChange = (text: string) => {
+    setIlText(text);
+    try {
+      const parsed = JSON.parse(text);
+      setIlData(parsed);
+      setIlError(null);
+    } catch (err) {
+      setIlError('Invalid JSON — ' + (err as Error).message.slice(0, 70));
+    }
+  };
+  const handleIlReset = () => {
+    setIlData(DEFAULT_IMPORTANT_LINKS);
+    setIlText(JSON.stringify(DEFAULT_IMPORTANT_LINKS, null, 2));
+    setIlError(null);
+  };
+  const setImportantLinksFromRevert = (v: unknown) => {
+    setIlData(v);
+    setIlText(JSON.stringify(v, null, 2));
+    setIlError(null);
+  };
+
   const currentSnapshot = useMemo(
     () =>
       buildSettingsSnapshot({
@@ -205,6 +240,10 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
         gridLines,
         gridProjects,
         coverageSlots,
+        panelImportantLinks,
+        panelPolicyFramework,
+        policyFramework: policyItems,
+        importantLinks: ilData,
       }),
     [
       siteName,
@@ -230,6 +269,10 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
       gridLines,
       gridProjects,
       coverageSlots,
+      panelImportantLinks,
+      panelPolicyFramework,
+      policyItems,
+      ilData,
     ],
   );
 
@@ -270,6 +313,10 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
     setGridLines,
     setGridProjects,
     setCoverageSlots,
+    setPanelImportantLinks,
+    setPanelPolicyFramework,
+    setPolicyFramework: (v) => setPolicyItems(v as Policy[]),
+    setImportantLinks: setImportantLinksFromRevert,
   });
 
   // Ticker helpers
@@ -340,6 +387,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
     { id: 'interviews', label: 'Interviews', icon: Play },
     { id: 'grid', label: 'Grid Explorer', icon: Database },
     { id: 'coverage', label: 'All Coverage', icon: LayoutGrid },
+    { id: 'panels', label: 'Sidebar Panels', icon: Layers },
   ] as const;
 
   return (
@@ -441,6 +489,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 </div>
               </div>
             </div>
+
           </div>
         )}
 
@@ -743,6 +792,21 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
               </div>
             </div>
           </div>
+        )}
+
+        {activeTab === 'panels' && (
+          <PanelsEditor
+            panelImportantLinks={panelImportantLinks}
+            setPanelImportantLinks={setPanelImportantLinks}
+            panelPolicyFramework={panelPolicyFramework}
+            setPanelPolicyFramework={setPanelPolicyFramework}
+            policyItems={policyItems}
+            setPolicyItems={setPolicyItems}
+            ilText={ilText}
+            ilError={ilError}
+            onIlTextChange={handleIlTextChange}
+            onIlReset={handleIlReset}
+          />
         )}
       </div>
 
