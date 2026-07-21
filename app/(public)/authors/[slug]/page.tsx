@@ -184,7 +184,7 @@ export default async function AuthorPage({
       <div className="flex flex-col md:flex-row gap-8 items-start mb-16 bg-muted/30 p-8 rounded-3xl border border-border/50">
         <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-3xl md:text-5xl shrink-0 overflow-hidden border border-primary/20">
           {author.avatar ? (
-            <img src={author.avatar} alt={author.name} className="w-full h-full object-cover" />
+            <img src={author.avatar} alt={author.name} width={128} height={128} loading="lazy" decoding="async" className="w-full h-full object-cover" />
           ) : (
             author.name.substring(0, 2).toUpperCase()
           )}

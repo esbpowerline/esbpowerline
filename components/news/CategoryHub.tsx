@@ -38,12 +38,12 @@ export function CategoryHub() {
           <Link
             key={cat}
             href={`/categories/${slug}`}
-            className="group flex items-center gap-2 rounded-2xl border border-border/70 bg-card px-3 py-1.5 text-sm hover:border-primary/40 hover:bg-muted/40 transition-all min-w-[150px] flex-shrink-0"
+            className="group flex items-center gap-2 rounded-2xl border border-border/70 bg-card px-3 py-1.5 text-sm hover:border-primary/40 hover:bg-muted/40 transition-all min-w-[150px] max-w-full flex-shrink-0"
           >
             <div className="icon-wrap !h-7 !w-7 shrink-0 bg-muted/60 group-hover:bg-primary/10">
               <Icon className="h-3.5 w-3.5" />
             </div>
-            <span className="font-medium leading-tight tracking-tight group-hover:text-primary transition-colors text-[12.5px] whitespace-nowrap">
+            <span className="font-medium leading-tight tracking-tight group-hover:text-primary transition-colors text-[12.5px] min-w-0">
               {label}
             </span>
           </Link>

@@ -898,7 +898,7 @@ export function PowerGridExplorer({
   }, [showMethodologyForActiveTab]);
 
   const substationRowKey = (sub: (typeof substationsData)[number]) =>
-    `${sub.voltage}:${sub.name}`;
+    `${sub.sn}:${sub.voltage}:${sub.name}`;
 
   // Substation Filtering Logic
   const filteredSubstations = substationsData.filter((sub) => {
@@ -1663,7 +1663,10 @@ export function PowerGridExplorer({
               </div>
             </div>
 
-            <div className="grid-explorer-table-wrap">
+            <p className="grid-explorer-table-scroll-hint sm:hidden mx-4" role="note">
+              Swipe horizontally to see all columns
+            </p>
+            <div className="grid-explorer-table-wrap grid-explorer-table-wrap--sticky-col">
               <table className="grid-explorer-table">
                 <thead>
                   <tr>
@@ -1815,7 +1818,10 @@ export function PowerGridExplorer({
               </div>
             </div>
 
-            <div className="grid-explorer-table-wrap">
+            <p className="grid-explorer-table-scroll-hint sm:hidden mx-4" role="note">
+              Swipe horizontally to see all columns
+            </p>
+            <div className="grid-explorer-table-wrap grid-explorer-table-wrap--sticky-col">
               <table className="grid-explorer-table">
                 <thead>
                   <tr>
@@ -3642,7 +3648,7 @@ export function PowerGridExplorer({
                   <div className="w-full rounded-2xl overflow-hidden border border-border/40 bg-card/50 shadow-2xl relative mt-2 flex flex-col">
                     <iframe
                       src="/pdf/national_grid_network.pdf#toolbar=1&navpanes=0&scrollbar=1"
-                      className="w-full h-[650px] border-none"
+                      className="w-full h-[420px] sm:h-[650px] border-none"
                       title="National Grid Network Diagram"
                     />
                   </div>
@@ -3712,7 +3718,7 @@ export function PowerGridExplorer({
                   <div className="w-full rounded-2xl overflow-hidden border border-border/40 bg-card/50 shadow-2xl relative mt-2 flex flex-col">
                     <iframe
                       src="/pdf/geo_map.pdf#toolbar=1&navpanes=0&scrollbar=1"
-                      className="w-full h-[650px] border-none"
+                      className="w-full h-[420px] sm:h-[650px] border-none"
                       title="Geographical Grid Map"
                     />
                   </div>
@@ -3782,7 +3788,7 @@ export function PowerGridExplorer({
                   <div className="w-full rounded-2xl overflow-hidden border border-border/40 bg-card/50 shadow-2xl relative mt-2 flex flex-col">
                     <iframe
                       src="/pdf/opgw_map.pdf#toolbar=1&navpanes=0&scrollbar=1"
-                      className="w-full h-[650px] border-none"
+                      className="w-full h-[420px] sm:h-[650px] border-none"
                       title="OPGW Fiber Network Map"
                     />
                   </div>
@@ -5122,7 +5128,7 @@ export function PowerGridExplorer({
                           </div>
 
                           {/* Right Column: Fuel Mix Table */}
-                          <div className="lg:col-span-6">
+                          <div className="lg:col-span-6 grid-explorer-table-wrap">
                             <table className="w-full text-[11px] leading-relaxed">
                               <thead>
                                 <tr className="border-b border-border/40 text-muted-foreground text-left">
@@ -5219,7 +5225,7 @@ export function PowerGridExplorer({
                           </div>
 
                           {/* Right Column: Regional Table */}
-                          <div className="lg:col-span-6 w-full">
+                          <div className="lg:col-span-6 w-full grid-explorer-table-wrap">
                             <table className="w-full text-[11px] leading-relaxed">
                               <thead>
                                 <tr className="border-b border-border/40 text-muted-foreground text-left">

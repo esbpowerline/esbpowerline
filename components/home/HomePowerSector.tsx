@@ -470,7 +470,7 @@ export function HomePowerSector({
 
                 {/* 3 Proportional Ad Spaces */}
                 {(index === 1 || index === 7) && (
-                  <div className="category-ad-block-3 grid grid-cols-3 gap-2 md:gap-6">
+                  <div className="category-ad-block-3 grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-6">
                     <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
                       <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>

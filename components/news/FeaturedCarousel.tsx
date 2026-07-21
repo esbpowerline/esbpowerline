@@ -223,7 +223,7 @@ export function FeaturedCarousel({
                         <button
                           type="button"
                           onClick={(e) => { e.preventDefault(); prev(); }}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
                           aria-label={t('carousel.previous')}
                         >
                           <ChevronLeft className="h-3.5 w-3.5" />
@@ -234,7 +234,7 @@ export function FeaturedCarousel({
                         <button
                           type="button"
                           onClick={(e) => { e.preventDefault(); next(); }}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
                           aria-label={t('carousel.next')}
                         >
                           <ChevronRight className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ export function FeaturedCarousel({
                         <button
                           type="button"
                           onClick={(e) => { e.preventDefault(); setIsPlaying(!isPlaying); }}
-                          className="featured-hero__play-btn flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-45 transition-all duration-150 hover:bg-muted/50 hover:text-foreground hover:opacity-100 focus-visible:opacity-100"
+                          className="featured-hero__play-btn flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-45 transition-all duration-150 hover:bg-muted/50 hover:text-foreground hover:opacity-100 focus-visible:opacity-100"
                           aria-label={isPlaying ? t('carousel.pause') : t('carousel.play')}
                         >
                           {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}

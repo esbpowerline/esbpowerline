@@ -133,6 +133,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src={currentPage >= 3 ? "/images/INNER005.jpg" : (currentPage === 2 ? "/images/INNER003.jpg" : "/images/INNER001.jpg")}
                   alt="Page Left Static"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 right-0 bottom-0 w-4 bg-gradient-to-l from-black/45 to-transparent" />
@@ -146,6 +147,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER002.jpg"
                   alt="Page 2 static"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover opacity-80"
                 />
                 <div className="absolute top-0 left-0 bottom-0 w-4 bg-gradient-to-r from-black/45 to-transparent" />
@@ -159,6 +161,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER004.jpg"
                   alt="Page 4 static"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 left-0 bottom-0 w-4 bg-gradient-to-r from-black/45 to-transparent" />
@@ -172,6 +175,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER006.jpg"
                   alt="Page 6 static"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 left-0 bottom-0 w-4 bg-gradient-to-r from-black/45 to-transparent" />
@@ -203,6 +207,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src={coverUrl}
                   alt="Magazine Cover"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   
                   className="object-cover"
                   priority
@@ -224,6 +229,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER001.jpg"
                   alt="Page 1"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 right-0 bottom-0 w-4 bg-gradient-to-l from-black/45 to-transparent" />
@@ -245,6 +251,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER002.jpg"
                   alt="Page 2"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 left-0 bottom-0 w-4 bg-gradient-to-r from-black/45 to-transparent" />
@@ -257,6 +264,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER003.jpg"
                   alt="Page 3"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 right-0 bottom-0 w-4 bg-gradient-to-l from-black/45 to-transparent" />
@@ -278,6 +286,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER004.jpg"
                   alt="Page 4"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 left-0 bottom-0 w-4 bg-gradient-to-r from-black/45 to-transparent" />
@@ -290,6 +299,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER005.jpg"
                   alt="Page 5"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 right-0 bottom-0 w-4 bg-gradient-to-l from-black/45 to-transparent" />
@@ -311,6 +321,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
                   src="/images/INNER006.jpg"
                   alt="Page 6"
                   fill
+                  sizes="(max-width: 767px) 290px, 380px"
                   className="object-cover"
                 />
                 <div className="absolute top-0 left-0 bottom-0 w-4 bg-gradient-to-r from-black/45 to-transparent" />
@@ -358,7 +369,7 @@ export function MagazineFlipBook({ coverUrl, isOpen, onClose }: MagazineFlipBook
               }
               alt={`Page ${currentPage}`}
               fill
-              
+              sizes="(max-width: 767px) 290px, 380px"
               className="object-cover transition-all duration-300"
             />
             <div className="absolute bottom-2 right-2 bg-black/60 px-2 py-0.5 rounded text-[10px] text-white">
