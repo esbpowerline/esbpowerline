@@ -37,15 +37,22 @@ function canUseSupabaseStorage() {
 
 
 
+const ALLOWED_MEDIA_FOLDERS = ['library', 'categories'] as const;
+type MediaFolder = (typeof ALLOWED_MEDIA_FOLDERS)[number];
+
 export async function uploadMediaBuffer(input: {
   buffer: Buffer;
   fileName: string;
   mimeType: string;
-  folder?: 'library' | 'categories';
+  folder?: MediaFolder;
 }): Promise<MediaStorageUploadResult> {
   assertAllowedUploadMime(input.mimeType, input.fileName);
 
-  const folder = input.folder ?? 'library';
+  // Never trust the caller-supplied folder as a path segment — pin it to the allowlist
+  // so it can't be used to escape/rewrite the storage object path.
+  const folder: MediaFolder = ALLOWED_MEDIA_FOLDERS.includes(input.folder as MediaFolder)
+    ? (input.folder as MediaFolder)
+    : 'library';
   const safeName = `${Date.now()}-${sanitizeFileName(input.fileName)}`;
   const storagePath = `${folder}/${safeName}`;
 

@@ -18,6 +18,7 @@ import { SaveArticleButton } from '@/components/members/SaveArticleButton';
 import { ArticleCommentSection } from '@/components/members/ArticleCommentSection';
 import { ArticleAuthorSticky } from '@/components/shared/ArticleAuthorSticky';
 import { NoImage } from '@/components/shared/NoImage';
+import { safeJsonLd } from '@/lib/json-ld';
 import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
@@ -99,7 +100,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     <div className="container py-10 max-w-3xl article-page--with-sticky-author fluid-article-container">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <ArticleViewTracker articleId={article.id} />
       <Link href="/articles" className="text-sm text-primary hover:underline">← Back to news</Link>
@@ -280,9 +281,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <script type="application/ld+json" suppressHydrationWarning>
-        {JSON.stringify(jsonLd)}
-      </script>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
+      />
     </div>
   );
 }

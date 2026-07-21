@@ -43,7 +43,19 @@
       ]
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/analytics/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" }
+      ]
+    },
+    {
+      "source": "/api/contact/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "private, no-store" }
+      ]
+    },
+    {
+      "source": "/api/((?!admin|auth|members|analytics|contact|upload).*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, s-maxage=60, stale-while-revalidate=300" }
       ]

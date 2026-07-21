@@ -7,10 +7,9 @@ export function resolveSafeLocalUploadPath(url: string): string | null {
   const relative = url.replace(/^\//, '');
   if (relative.includes('..') || relative.includes('\\')) return null;
 
-  const cwd = process.cwd();
-  const publicDir = `${cwd}/public`;
-  const uploadsRoot = `${publicDir}/uploads`;
-  const filePath = `${publicDir}/${relative}`;
+  const publicDir = path.resolve(process.cwd(), 'public');
+  const uploadsRoot = path.resolve(publicDir, 'uploads');
+  const filePath = path.resolve(publicDir, relative);
   if (filePath !== uploadsRoot && !filePath.startsWith(`${uploadsRoot}${path.sep}`)) {
     return null;
   }

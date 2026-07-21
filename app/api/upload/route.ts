@@ -21,7 +21,8 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
-    const folder = (formData.get('folder') as 'library' | 'categories' | null) || 'library';
+    const folderRaw = formData.get('folder');
+    const folder = folderRaw === 'categories' ? 'categories' : 'library';
 
     if (!file) return NextResponse.json({ error: 'No file provided.' }, { status: 400 });
     if (file.size > MAX_UPLOAD_BYTES) {

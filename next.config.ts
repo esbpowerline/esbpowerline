@@ -4,9 +4,17 @@ import type { NextConfig } from 'next';
 const surface = process.env.APP_SURFACE ?? 'all';
 const distDir = surface === 'all' ? '.next' : `.next-${surface}`;
 
+// 'unsafe-eval' is only needed by the dev server (React Refresh / HMR). Exclude it in
+// production to tighten the XSS surface — this stack (Recharts, ReactFlow, TipTap, GA/GTM)
+// does not use eval at runtime.
+const scriptSrc =
+  process.env.NODE_ENV === 'production'
+    ? "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com"
+    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com";
+
 const cspHeader = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com",
+  scriptSrc,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' blob: data: https://*.supabase.co https://*.esbpowerline.com https://esbpowerline.com https://www.esbpowerline.com https://*.google-analytics.com https://*.googletagmanager.com",
   "font-src 'self' data:",

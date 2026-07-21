@@ -1,5 +1,6 @@
 'use server';
 
+import { headers } from 'next/headers';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { createClient } from '@/utils/supabase/server';
@@ -12,6 +13,11 @@ import {
   type PasswordResetAudience,
 } from '@/lib/auth-redirect';
 import { validateNewPassword } from '@/lib/password-policy';
+import { checkRateLimit, clientIpFromForwarded } from '@/lib/rate-limit';
+
+// Cap reset-email requests to blunt enumeration/mailbox-flooding abuse.
+const RESET_REQUEST_LIMIT = 5;
+const RESET_REQUEST_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 
 export type RequestPasswordResetResult = {
   error?: string;
@@ -42,6 +48,18 @@ export async function requestPasswordResetAction(
 
   if (!email || !isValidEmail(email)) {
     return { error: 'Enter a valid email address.' };
+  }
+
+  const headerList = await headers();
+  const clientIp = clientIpFromForwarded(
+    headerList.get('x-forwarded-for'),
+    headerList.get('x-real-ip'),
+  );
+  const ipRate = checkRateLimit(`pwreset-ip:${clientIp}`, RESET_REQUEST_LIMIT, RESET_REQUEST_WINDOW_MS);
+  const emailRate = checkRateLimit(`pwreset-email:${email}`, RESET_REQUEST_LIMIT, RESET_REQUEST_WINDOW_MS);
+  if (!ipRate.allowed || !emailRate.allowed) {
+    // Keep the generic success response so throttling can't be used to enumerate accounts.
+    return { successMessage: PASSWORD_RESET_SUCCESS_MESSAGE };
   }
 
   if (!getSupabaseEnv().isConfigured) {

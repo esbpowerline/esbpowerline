@@ -23,23 +23,31 @@ export async function GET(request: NextRequest) {
 
     const { url: supabaseUrl } = getSupabaseEnv();
     const supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : '';
+    // Only proxy trusted media origins. Loopback is permitted in dev (local Supabase)
+    // but never in production, to avoid SSRF against internal services.
     const allowedHosts = [
       ...(supabaseHost ? [supabaseHost] : []),
-      'localhost',
-      '127.0.0.1',
+      ...(process.env.NODE_ENV !== 'production' ? ['localhost', '127.0.0.1'] : []),
     ];
-    const host = parsedUrl.hostname;
-    const isAllowed = allowedHosts.some((allowed) => host === allowed || host.endsWith('.' + allowed));
-    if (!isAllowed) {
+    const isHostAllowed = (host: string) =>
+      allowedHosts.some((allowed) => host === allowed || host.endsWith('.' + allowed));
+    if (!isHostAllowed(parsedUrl.hostname)) {
       return NextResponse.json({ error: 'Forbidden domain' }, { status: 403 });
     }
 
-    const res = await fetch(url);
+    // Do not follow redirects: an allowed host could 3xx to an internal address.
+    const res = await fetch(url, { redirect: 'manual' });
+    if (res.status >= 300 && res.status < 400) {
+      return NextResponse.json({ error: 'Redirects are not permitted' }, { status: 403 });
+    }
     if (!res.ok) {
       return NextResponse.json({ error: 'Failed to fetch remote image' }, { status: res.status });
     }
 
     const contentType = res.headers.get('content-type') || 'application/octet-stream';
+    if (!contentType.startsWith('image/')) {
+      return NextResponse.json({ error: 'Resource is not an image' }, { status: 415 });
+    }
     const arrayBuffer = await res.arrayBuffer();
 
     return new NextResponse(arrayBuffer, {
