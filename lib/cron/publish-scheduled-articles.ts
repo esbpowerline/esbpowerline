@@ -8,6 +8,7 @@ import {
   publishArticleSchema,
 } from '@/lib/validations/article';
 import { PUBLIC_REVALIDATE_PATHS } from '@/lib/public-paths';
+import { revalidateArticleContent } from '@/lib/revalidate-tags';
 
 export type PublishScheduledResult = {
   published: string[];
@@ -17,6 +18,7 @@ export type PublishScheduledResult = {
 function revalidatePublicContent(slugs: string[] = []) {
   for (const path of PUBLIC_REVALIDATE_PATHS) revalidatePath(path);
   for (const slug of slugs) revalidatePath(`/articles/${slug}`);
+  revalidateArticleContent();
 }
 
 /** Publish scheduled articles whose go-live time has passed. Cron route only — not exposed as a server action. */

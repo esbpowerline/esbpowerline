@@ -43,7 +43,9 @@ export function BdStockTicker({
       if (!isOpen) return;
 
       try {
-        const res = await fetch('/api/market/dse', { cache: 'no-store' });
+        // Let the shared CDN cache (s-maxage=60) absorb concurrent readers instead
+        // of forcing a per-poll origin round-trip; ticker data is public + non-critical.
+        const res = await fetch('/api/market/dse');
         if (!res.ok) return;
         const data = (await res.json()) as { items?: DseTickerItem[] };
         if (!cancelled && data.items?.length) setItems(data.items);

@@ -8,8 +8,12 @@ import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import { Activity } from 'lucide-react';
 import { Suspense } from 'react';
+import { safeJsonLd } from '@/lib/json-ld';
 
-export const revalidate = 120;
+// Dynamic grid data is client-fetched; settings mutations call revalidatePath('/grid-explorer'),
+// so this time window is only a safety net. 300s keeps ISR churn low (new report dates ship via
+// redeploy of the static catalog, not ISR).
+export const revalidate = 300;
 
 export const metadata = {
   title: 'Power Grid Explorer — ESB PowerLine',
@@ -44,7 +48,7 @@ export default async function PowerGridExplorerPage() {
     <div id="power-grid-page-container" className="container container--shell py-8 md:py-10">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       {/* Sleek, Compact Premium Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-border/40 pb-5 mb-6 group">

@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 
 import { PUBLIC_REVALIDATE_PATHS } from '@/lib/public-paths';
+import { revalidateAllContent, revalidateArticleContent } from '@/lib/revalidate-tags';
 import { MAX_PINNED_COVERAGE } from '@/lib/placement-rules';
 
 export async function revalidatePublicSite() {
@@ -17,6 +18,7 @@ export async function revalidatePublicSite() {
   for (const path of PUBLIC_REVALIDATE_PATHS) {
     revalidatePath(path);
   }
+  revalidateAllContent();
 
   await prisma.auditLog.create({
     data: {
@@ -290,6 +292,7 @@ export async function toggleArticleFlag(
 
   revalidatePath('/admin/articles');
   revalidatePath('/');
+  revalidateArticleContent();
 
   return { ok: true };
 }

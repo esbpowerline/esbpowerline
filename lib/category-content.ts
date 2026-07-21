@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { CONTENT_TAGS } from '@/lib/public-paths';
 import type { PublicArticleCard, PublicCategory } from '@/lib/category-types';
 import type { HeroImageMeta } from '@/lib/hero-image';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
@@ -95,7 +96,7 @@ export const getPublicCategories = unstable_cache(async (): Promise<PublicCatego
     order: c.order,
     articleCount: countMap[c.name] ?? 0,
   }));
-}, ['getPublicCategories'], { revalidate: 60 });
+}, ['getPublicCategories'], { revalidate: 60, tags: [CONTENT_TAGS.categories, CONTENT_TAGS.articles] });
 
 export async function getCategoryBySlug(slug: string): Promise<PublicCategory | null> {
   const cat = await prisma.category.findUnique({ where: { slug } });
@@ -143,7 +144,7 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
       }
     })
     .map((a) => mapArticle(a, locale));
-}, ['getPublishedArticlesByCategory'], { revalidate: 60 });
+}, ['getPublishedArticlesByCategory'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
 
 
 
@@ -164,7 +165,7 @@ export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, l
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-}, ['getPublishedArticlesForPublic'], { revalidate: 60 });
+}, ['getPublishedArticlesForPublic'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
 
 export const getPublishedArticleBySlug = unstable_cache(async function getPublishedArticleBySlug(slug: string, locale?: string): Promise<PublicArticleDetail | null> {
   const article = await prisma.article.findFirst({
@@ -202,7 +203,7 @@ export const getPublishedArticleBySlug = unstable_cache(async function getPublis
     imageCredit: article.imageCredit,
     collaborators,
   };
-}, ['getPublishedArticleBySlug'], { revalidate: 60 });
+}, ['getPublishedArticleBySlug'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
 
 export async function getRelatedPublishedArticles(
   slug: string,
@@ -240,7 +241,7 @@ export async function getRelatedPublishedArticles(
 
     const picked = (scored.length > 0 ? scored.map((x) => x.a) : filtered).slice(0, limit);
     return picked.map((a) => mapArticle(a, locale));
-  }, ['related', slug, category, tags?.join(',') ?? '', String(limit), String(locale)], { revalidate: 3600 })();
+  }, ['related', slug, category, tags?.join(',') ?? '', String(limit), String(locale)], { revalidate: 3600, tags: [CONTENT_TAGS.articles] })();
 }
 
 export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, locale?: string): Promise<PublicArticleCard[]> => {
@@ -264,7 +265,7 @@ export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, loc
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-}, ['getTrendingPublishedArticles'], { revalidate: 60 });
+}, ['getTrendingPublishedArticles'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
 
 export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
@@ -288,7 +289,7 @@ export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: str
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-}, ['getFeaturedArticles'], { revalidate: 60 });
+}, ['getFeaturedArticles'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
 
 export async function getPublicTagCounts(): Promise<{ tag: string; count: number }[]> {
   try {
@@ -343,4 +344,4 @@ export const getLatestMagazineIssue = unstable_cache(async (): Promise<PublicMag
     pdfUrl: issue.pdfUrl,
     summary: issue.summary ?? '',
   };
-}, ['getLatestMagazineIssue'], { revalidate: 60 });
+}, ['getLatestMagazineIssue'], { revalidate: 60, tags: [CONTENT_TAGS.magazine] });

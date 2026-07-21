@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
 import { slugify } from '@/lib/utils';
@@ -79,6 +80,9 @@ function enforceArticlePermissions(
 function revalidatePublicContent(slugs: string[] = []) {
   for (const path of PUBLIC_REVALIDATE_PATHS) revalidatePath(path);
   for (const slug of slugs) revalidatePath(`/articles/${slug}`);
+  // Also flush the unstable_cache data layer so freshly published/edited articles
+  // (and their category counts) appear immediately instead of after the time TTL.
+  revalidateArticleContent();
 }
 
 /** Honour editor-chosen publish dates (incl. backdating); default to now only when publishing without a date. */

@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { slugify } from '@/lib/utils';
+import { revalidateCategoryContent } from '@/lib/revalidate-tags';
 import { CATEGORY_ICON_OPTIONS } from '@/lib/category-icons';
 import { verifyAdminPassword } from '@/lib/actions/auth-verify';
 import { requireEditorialReader } from '@/lib/server-auth';
@@ -24,6 +25,7 @@ function revalidateCategoryPaths(...slugs: (string | undefined)[]) {
   for (const slug of slugs) {
     if (slug) revalidatePath(`/categories/${slug}`);
   }
+  revalidateCategoryContent();
 }
 
 export async function getCategories() {

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
 import {
@@ -222,6 +223,7 @@ export async function approveReviewSubmission(
   revalidatePath('/cms/notices');
   if (publish) revalidatePath(`/articles/${article.slug}`);
   revalidatePath('/');
+  if (publish) revalidateArticleContent();
   return { ok: true, published: publish };
 }
 

@@ -6,7 +6,7 @@ import {
   normalizeDateKey,
 } from '@/lib/data/grid/date-utils';
 import { validateDailyReport } from '@/lib/data/grid/validate-daily-report';
-import { resolveDailyLoadFromStatus } from '@/lib/data/grid/daily-loader-core';
+import { resolveDailyLoadFromStatus } from '@/lib/data/grid/daily-loader.server';
 import {
   normalizeSiteHost,
   isSameOriginDailyAccess,

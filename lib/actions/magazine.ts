@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
+import { revalidateMagazineContent } from '@/lib/revalidate-tags';
 
 async function requireAdmin() {
   const session = await auth();
@@ -38,6 +39,7 @@ export async function createMagazineIssue(data: {
   revalidatePath('/admin/magazine');
   revalidatePath('/');
   revalidatePath('/magazine');
+  revalidateMagazineContent();
   return issue;
 }
 
@@ -55,6 +57,7 @@ export async function updateMagazineIssue(id: string, data: Partial<{
   revalidatePath('/admin/magazine');
   revalidatePath('/');
   revalidatePath('/magazine');
+  revalidateMagazineContent();
   return issue;
 }
 
@@ -64,4 +67,5 @@ export async function deleteMagazineIssue(id: string) {
   revalidatePath('/admin/magazine');
   revalidatePath('/');
   revalidatePath('/magazine');
+  revalidateMagazineContent();
 }

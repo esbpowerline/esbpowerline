@@ -158,23 +158,38 @@ export async function middleware(request: NextRequest) {
       return denyDailyJson('Access Denied: Direct data access is restricted.');
     }
 
-    const { response, supabase, user } = await updateSession(request);
-    const { active, role, gridPlan } = await resolveEdgeSession(user, supabase);
-
     const dailyMatch = pathname.match(/\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/);
     const isoDate = dailyMatch?.[1];
     const latestDate = getLatestAvailableDate();
 
-    if (isoDate && latestDate) {
-      const tier = resolveGridAccessTier({
-        isAuthenticated: active,
-        role,
-        gridPlan,
-      });
+    // Fast path: dates inside the public visitor window (and the demo date) are
+    // accessible to everyone, so skip the Supabase token refresh + Postgres
+    // session lookup entirely. This is the hot path — most Grid Explorer reads
+    // are recent dates — and avoids a per-fetch DB round-trip on Vercel.
+    const isPublicDate =
+      !isoDate ||
+      !latestDate ||
+      isoDate === '2024-07-02' ||
+      isDateAllowedForTier(isoDate, 'visitor', latestDate);
 
-      if (isoDate !== '2024-07-02' && !isDateAllowedForTier(isoDate, tier, latestDate)) {
-        return denyDailyJson('Subscription required for historical grid data access.');
-      }
+    if (isPublicDate) {
+      const publicResponse = NextResponse.next({ request });
+      publicResponse.headers.set('Cache-Control', 'private, no-store');
+      return publicResponse;
+    }
+
+    // Restricted (historical) date → resolve the session and tier-gate it.
+    const { response, supabase, user } = await updateSession(request);
+    const { active, role, gridPlan } = await resolveEdgeSession(user, supabase);
+
+    const tier = resolveGridAccessTier({
+      isAuthenticated: active,
+      role,
+      gridPlan,
+    });
+
+    if (!isDateAllowedForTier(isoDate!, tier, latestDate!)) {
+      return denyDailyJson('Subscription required for historical grid data access.');
     }
 
     response.headers.set('Cache-Control', 'private, no-store');
