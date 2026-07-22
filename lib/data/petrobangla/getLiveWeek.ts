@@ -24,6 +24,8 @@ export type LiveWeekRangeOption = {
 /** Rolling window presets — always show every chip; tier locks longer windows. */
 export const LIVE_WEEK_RANGE_OPTIONS: LiveWeekRangeOption[] = [
   { days: 7, label: '1W', requiredTier: 'visitor' },
+  // Visitor-accessible by product decision — the middleware opens a matching
+  // public window for petrobangla day files (see PETROBANGLA_PUBLIC_DAYS_BACK).
   { days: 30, label: '1M', requiredTier: 'visitor' },
   { days: 180, label: '6M', requiredTier: 'member' },
   { days: 365, label: '1Y', requiredTier: 'plan_499' },

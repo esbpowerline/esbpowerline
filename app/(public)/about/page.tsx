@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Award, ShieldCheck, FileText, Users, ArrowRight, Quote, CheckCircle2 } from 'lucide-react';
+import { Award, ShieldCheck, FileText, Users, ArrowRight, Quote, CheckCircle2, ChevronDown, Briefcase, Newspaper, MonitorCog, Palette, UserRound } from 'lucide-react';
 import { getServerSiteLocale } from '@/lib/locale-server';
 import { createTranslator } from '@/lib/i18n/messages';
 import { ScrollGeometryBackdrop } from '@/components/shared/ScrollGeometryBackdrop';
@@ -27,10 +27,10 @@ export default async function AboutPage() {
       {/* Subtle mathematical geometry backdrop with parallax scroll and dynamic animations */}
       <ScrollGeometryBackdrop />
       
-      <div className="container container--shell py-12 md:py-20 max-w-4xl mx-auto space-y-14 md:space-y-20 relative z-10">
+      <div className="container container--shell py-10 md:py-14 max-w-4xl mx-auto space-y-10 md:space-y-14 relative z-10">
         
         {/* SECTION 1: Hero Header */}
-        <section className="text-center space-y-5">
+        <section className="text-center space-y-4">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 border border-primary/20">
             {t('brand.kicker')}
           </span>
@@ -145,7 +145,7 @@ export default async function AboutPage() {
         </section>
 
         {/* SECTION 4: Leadership & Publishing Team */}
-        <section className="space-y-10">
+        <section className="space-y-6">
           <div className="text-center space-y-2">
             <h2 className="text-3xl md:text-4xl font-display font-extrabold tracking-tight text-foreground">
               Publishing & Operations Team
@@ -155,7 +155,7 @@ export default async function AboutPage() {
             </p>
           </div>
           
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-5">
             {/* Top Level: Editor & Publisher */}
             <div className="relative group overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br from-card/30 to-card/10 p-6 md:p-8 hover:border-orange-500/45 transition-all duration-300 shadow-md hover:shadow-orange-500/5">
               <div className="absolute top-0 right-0 h-32 w-32 bg-orange-500/5 rounded-bl-full -mr-8 -mt-8 blur-2xl group-hover:bg-orange-500/10 transition-colors duration-300" />
@@ -187,101 +187,193 @@ export default async function AboutPage() {
               </div>
             </div>
 
-            {/* Grid Layout: Core Operational Team */}
-            <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
-              
-              {/* Obaidul Haque — Admin & Accounting */}
-              <div className="relative group overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-amber-500/40 transition-all duration-300 shadow-md hover:shadow-amber-500/5">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-amber-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl group-hover:bg-amber-500/10 transition-colors duration-300" />
-                <div className="flex items-start gap-4 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-500 text-white flex items-center justify-center font-display font-bold text-lg shadow shrink-0 ring-4 ring-amber-500/10">
-                    OH
-                  </div>
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div>
-                      <h4 className="font-display font-bold text-base text-foreground group-hover:text-amber-400 transition-colors truncate">
-                        Obaidul Haque
-                      </h4>
-                      <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mt-0.5 font-sans">
-                        Admin & Accounting
-                      </p>
+            {/* Department Dropdowns: Core Operational Team — 2×2 quad grid.
+                Two independent columns so opening a dropdown only reflows its own column. */}
+            <div className="grid sm:grid-cols-2 gap-4 md:gap-5 items-start">
+              <div className="space-y-4 md:space-y-5">
+
+              {/* Administrative Team */}
+              <details className="group rounded-2xl border border-border/40 bg-card/15 overflow-hidden shadow-md open:border-amber-500/40 transition-colors duration-300">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 hover:bg-muted/10 [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center gap-3">
+                    <span className="p-2 rounded-lg bg-amber-500/10 text-amber-500 shrink-0">
+                      <Briefcase className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <h3 className="font-display font-bold text-base text-foreground leading-tight">Administration</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5 font-sans">1 member</p>
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-180" />
+                </summary>
+                <div className="border-t border-border/30 p-5">
+                  <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-amber-500/40 transition-all duration-300">
+                    <div className="absolute top-0 right-0 h-24 w-24 bg-amber-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                    <div className="flex items-start gap-4 relative z-10">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-500 text-white flex items-center justify-center shadow shrink-0 ring-4 ring-amber-500/10">
+                        <UserRound className="h-6 w-6" />
+                      </div>
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div>
+                          <h4 className="font-display font-bold text-base text-foreground truncate">Obaidul Haque</h4>
+                          <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mt-0.5 font-sans">Admin &amp; Accounting</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                          Manages corporate finance, billing ledgers, and operational logistics, acting as a direct representative for key face-to-face deals and business relations.
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed font-light">
-                      Manages corporate finance, billing ledgers, and operational logistics, acting as a direct representative for key face-to-face deals and business relations.
-                    </p>
                   </div>
                 </div>
-              </div>
+              </details>
 
-              {/* Md Riazul Islam — Head of IT */}
-              <div className="relative group overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-emerald-500/40 transition-all duration-300 shadow-md hover:shadow-emerald-500/5">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl group-hover:bg-emerald-500/10 transition-colors duration-300" />
-                <div className="flex items-start gap-4 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center font-display font-bold text-lg shadow shrink-0 ring-4 ring-emerald-500/10">
-                    RI
-                  </div>
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div>
-                      <h4 className="font-display font-bold text-base text-foreground group-hover:text-emerald-400 transition-colors truncate">
-                        Md Riazul Islam
-                      </h4>
-                      <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-0.5 font-sans">
-                        Head of IT
-                      </p>
+              {/* Reporters */}
+              <details className="group rounded-2xl border border-border/40 bg-card/15 overflow-hidden shadow-md open:border-rose-500/40 transition-colors duration-300">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 hover:bg-muted/10 [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center gap-3">
+                    <span className="p-2 rounded-lg bg-rose-500/10 text-rose-500 shrink-0">
+                      <Newspaper className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <h3 className="font-display font-bold text-base text-foreground leading-tight">Newsroom</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5 font-sans">2 members</p>
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-180" />
+                </summary>
+                <div className="border-t border-border/30 p-5">
+                  <div className="grid gap-5">
+                    <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-rose-500/40 transition-all duration-300">
+                      <div className="absolute top-0 right-0 h-24 w-24 bg-rose-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                      <div className="flex items-start gap-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-rose-500 to-pink-500 text-white flex items-center justify-center font-display font-bold text-sm shadow shrink-0 ring-4 ring-rose-500/10">
+                          ESB
+                        </div>
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div>
+                            <h4 className="font-display font-bold text-base text-foreground truncate">ESB News Desk</h4>
+                            <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wider mt-0.5 font-sans">Staff Correspondents</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                            The collective byline for desk-compiled coverage — ministry statements, agency wires, tariff notices, and sector briefs verified and filed by the newsroom.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed font-light">
-                      Administers cloud hosting systems, secure domain infrastructure, network routing stability, and enforces platform-wide security compliance.
-                    </p>
+                    <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-blue-500/40 transition-all duration-300">
+                      <div className="absolute top-0 right-0 h-24 w-24 bg-blue-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                      <div className="flex items-start gap-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-500 text-white flex items-center justify-center shadow shrink-0 ring-4 ring-blue-500/10">
+                          <UserRound className="h-6 w-6" />
+                        </div>
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div>
+                            <h4 className="font-display font-bold text-base text-foreground truncate">Mehedi Hasan Hamim</h4>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">Reporter &amp; Sub-Editor</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                            Leads content curation and energy sector research, tracking policy revisions, aggregating data points, and compiling valuable briefs for the monthly publications.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </details>
 
-              {/* Faisal Al Mahmud — Graphics & Motion Designer */}
-              <div className="relative group overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-violet-500/40 transition-all duration-300 shadow-md hover:shadow-violet-500/5">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-violet-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl group-hover:bg-violet-500/10 transition-colors duration-300" />
-                <div className="flex items-start gap-4 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 text-white flex items-center justify-center font-display font-bold text-lg shadow shrink-0 ring-4 ring-violet-500/10">
-                    FM
-                  </div>
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div>
-                      <h4 className="font-display font-bold text-base text-foreground group-hover:text-violet-400 transition-colors truncate">
-                        Faisal Al Mahmud
-                      </h4>
-                      <p className="text-[10px] font-bold text-violet-500 uppercase tracking-wider mt-0.5 font-sans">
-                        Graphics &amp; Motion Designer
-                      </p>
+              </div>
+              <div className="space-y-4 md:space-y-5">
+
+              {/* IT Department */}
+              <details className="group rounded-2xl border border-border/40 bg-card/15 overflow-hidden shadow-md open:border-emerald-500/40 transition-colors duration-300">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 hover:bg-muted/10 [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center gap-3">
+                    <span className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0">
+                      <MonitorCog className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <h3 className="font-display font-bold text-base text-foreground leading-tight">IT Team</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5 font-sans">2 members</p>
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-180" />
+                </summary>
+                <div className="border-t border-border/30 p-5">
+                  <div className="grid gap-5">
+                    <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-emerald-500/40 transition-all duration-300">
+                      <div className="absolute top-0 right-0 h-24 w-24 bg-emerald-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                      <div className="flex items-start gap-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow shrink-0 ring-4 ring-emerald-500/10">
+                          <UserRound className="h-6 w-6" />
+                        </div>
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div>
+                            <h4 className="font-display font-bold text-base text-foreground truncate">Md Riazul Islam</h4>
+                            <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mt-0.5 font-sans">Head of IT</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                            Administers cloud hosting systems, secure domain infrastructure, network routing stability, and enforces platform-wide security compliance.
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed font-light">
-                      Directs the visual identity across all platforms, designing motion graphics, corporate logos, marketing banners, and managing the overall aesthetic of our monthly magazine.
-                    </p>
+                    <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-blue-500/40 transition-all duration-300">
+                      <div className="absolute top-0 right-0 h-24 w-24 bg-blue-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                      <div className="flex items-start gap-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-500 text-white flex items-center justify-center shadow shrink-0 ring-4 ring-blue-500/10">
+                          <UserRound className="h-6 w-6" />
+                        </div>
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div>
+                            <h4 className="font-display font-bold text-base text-foreground truncate">Mehedi Hasan Hamim</h4>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">IT Developer</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                            Develops and maintains the ESB PowerLine platform — the newsroom CMS, the Petrobangla and PGCB data pipelines, and the Grid Explorer analytics suite.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </details>
 
-              {/* Mehedi Hasan Hamim — Sub-Editor & IT Dev */}
-              <div className="relative group overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-blue-500/40 transition-all duration-300 shadow-md hover:shadow-blue-500/5">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-blue-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl group-hover:bg-blue-500/10 transition-colors duration-300" />
-                <div className="flex items-start gap-4 relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500 to-cyan-500 text-white flex items-center justify-center font-display font-bold text-lg shadow shrink-0 ring-4 ring-blue-500/10">
-                    MH
-                  </div>
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div>
-                      <h4 className="font-display font-bold text-base text-foreground group-hover:text-blue-400 transition-colors truncate">
-                        Mehedi Hasan Hamim
-                      </h4>
-                      <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">
-                        Sub-Editor &amp; IT Dev
-                      </p>
+              {/* Creative & Design */}
+              <details className="group rounded-2xl border border-border/40 bg-card/15 overflow-hidden shadow-md open:border-violet-500/40 transition-colors duration-300">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 hover:bg-muted/10 [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center gap-3">
+                    <span className="p-2 rounded-lg bg-violet-500/10 text-violet-500 shrink-0">
+                      <Palette className="h-5 w-5" />
+                    </span>
+                    <span>
+                      <h3 className="font-display font-bold text-base text-foreground leading-tight">Art &amp; Design</h3>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5 font-sans">1 member</p>
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-180" />
+                </summary>
+                <div className="border-t border-border/30 p-5">
+                  <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-violet-500/40 transition-all duration-300">
+                    <div className="absolute top-0 right-0 h-24 w-24 bg-violet-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                    <div className="flex items-start gap-4 relative z-10">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-violet-500 to-fuchsia-500 text-white flex items-center justify-center shadow shrink-0 ring-4 ring-violet-500/10">
+                        <UserRound className="h-6 w-6" />
+                      </div>
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div>
+                          <h4 className="font-display font-bold text-base text-foreground truncate">Faisal Al Mahmud</h4>
+                          <p className="text-[10px] font-bold text-violet-500 uppercase tracking-wider mt-0.5 font-sans">Graphics &amp; Motion Designer</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                          Directs the visual identity across all platforms, designing motion graphics, corporate logos, marketing banners, and managing the overall aesthetic of our monthly magazine.
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed font-light">
-                      Leads content curation and energy sector research, tracking policy revisions, aggregating data points, and compiling valuable briefs for the monthly publications.
-                    </p>
                   </div>
                 </div>
-              </div>
+              </details>
 
+              </div>
             </div>
           </div>
         </section>

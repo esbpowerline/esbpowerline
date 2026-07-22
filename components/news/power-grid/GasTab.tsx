@@ -1,11 +1,22 @@
 'use client';
 
-import { Database, Droplet, Info } from 'lucide-react';
+import { Fragment, useState } from 'react';
+import { ChevronRight, Database, Droplet, Info } from 'lucide-react';
 import type { GasDistributionItem, GasProductionItem } from '@/lib/data/grid/types';
 import { formatNumber } from '@/lib/utils';
 import { GridLockedContent } from './GridLockedContent';
 import { GridCardFooter } from './GridExplorerUI';
 import { PetrobanglaGasKpiStrip } from './PetrobanglaGasKpiStrip';
+import {
+  DISTRIBUTOR_COLORS,
+  DistributionCompanyDetail,
+  PRODUCER_COLORS,
+  ProductionCompanyDetail,
+  distributionCompanyForLabel,
+  producerKeyFromLabel,
+  productionFieldsForLabel,
+  usePetrobanglaArchiveDay,
+} from './PetrobanglaSectionDetail';
 
 interface GasTabProps {
   selectedDate: string;
@@ -30,6 +41,33 @@ export function GasTab({
   requiredTier,
   onTryDemo,
 }: GasTabProps) {
+  const { day: archiveDay, gasDay } = usePetrobanglaArchiveDay(selectedDate);
+  const [expandedProd, setExpandedProd] = useState<string | null>(null);
+  const [expandedDist, setExpandedDist] = useState<string | null>(null);
+
+  // Rounded list rows need the separate-borders model (collapsed cells can't round).
+  const listTable = 'grid-explorer-table border-separate [border-spacing:0_0.375rem]';
+  const rowTd = 'bg-muted/10 transition-colors group-hover:bg-muted/20';
+  const totalTd = 'bg-muted/25';
+  // While a detail card is open, its table goes into focus mode: the column
+  // header and totals hide (the card supersedes them) and the other rows
+  // shrink to name-only pills that switch the expansion on click.
+  const prodFocused = expandedProd != null;
+  const distFocused = expandedDist != null;
+
+  const reportCaption =
+    archiveDay && gasDay ? (
+      <p className="grid-explorer-chart-card__sub mt-0.5">
+        <span className="text-amber-500 font-semibold">
+          Report: {archiveDay.report.report_date_label}
+        </span>{' '}
+        — 8:00 AM → 8:00 AM gas day, archived under its end date ({gasDay})
+        {gasDay !== selectedDate && (
+          <span className="text-muted-foreground"> • nearest report to your selected date</span>
+        )}
+      </p>
+    ) : null;
+
   if (selectedDate < '2020-01-12') {
     return (
       <div className="grid-explorer-panel space-y-6">
@@ -83,8 +121,10 @@ export function GasTab({
             </h3>
             <p className="grid-explorer-chart-card__sub">
               Petrobangla Production &amp; Marketing Division Report •{' '}
-              <span className="text-sky-500 font-semibold">Tracked since January 12, 2020</span>
+              <span className="text-sky-500 font-semibold">Tracked since January 12, 2020</span> •{' '}
+              Click a company for per-field detail
             </p>
+            {reportCaption}
           </div>
         </div>
 
@@ -96,33 +136,103 @@ export function GasTab({
             variant="micro"
             onTryDemo={onTryDemo}
           >
-          <table className="grid-explorer-table">
-            <thead>
-              <tr>
-                <th>Field / Company Operator</th>
-                <th className="text-left">Active Fields/Wells</th>
-                <th className="text-left">Gas Produced (MMCFD)</th>
-                <th className="text-left">Condensate Produced (BBL)</th>
-                <th className="text-left">National Gas Share</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gasProductionData.map((gp, idx) => (
-                <tr key={idx}>
-                  <td className="font-semibold">{gp.company}</td>
-                  <td className="text-left tabular-nums text-muted-foreground">{gp.fields || '—'}</td>
-                  <td className="text-left tabular-nums font-medium">{gp.gas ? gp.gas.toFixed(1) : '-'}</td>
-                  <td className="text-left tabular-nums">{gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '-'}</td>
-                  <td className="text-left tabular-nums text-muted-foreground">{gp.share !== undefined ? `${gp.share.toFixed(1)}%` : '-'}</td>
+          <table className={listTable}>
+            {!prodFocused && (
+              <thead>
+                <tr>
+                  <th>Field / Company Operator</th>
+                  <th className="text-left">Active Fields/Wells</th>
+                  <th className="text-left">Gas Produced (MMCFD)</th>
+                  <th className="text-left">Condensate Produced (BBL)</th>
+                  <th className="text-left">National Gas Share</th>
                 </tr>
-              ))}
-              <tr className="border-t border-border/80 font-bold bg-muted/20">
-                <td>Grand Total Production</td>
-                <td className="text-left">{totalActiveFields} Fields</td>
-                <td className="text-left text-primary">{formatNumber(totalGasSupply, 1)}</td>
-                <td className="text-left">{formatNumber(totalCondensate, 1)}</td>
-                <td className="text-left">100.0%</td>
-              </tr>
+              </thead>
+            )}
+            <tbody>
+              {gasProductionData.map((gp, idx) => {
+                const detailFields = productionFieldsForLabel(archiveDay, gp.company);
+                const expandable = detailFields.length > 0;
+                const expanded = expandable && expandedProd === gp.company;
+                const producerKey = producerKeyFromLabel(gp.company);
+                const colors = PRODUCER_COLORS[producerKey];
+                return (
+                  <Fragment key={idx}>
+                    {!expanded && prodFocused && (
+                      <tr
+                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
+                        onClick={expandable ? () => setExpandedProd(gp.company) : undefined}
+                      >
+                        <td colSpan={5} className={`rounded-xl pl-3 !py-2 font-semibold ${rowTd}`}>
+                          <span className="inline-flex items-center gap-2 text-muted-foreground">
+                            {expandable && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
+                            {gp.company}
+                          </span>
+                        </td>
+                      </tr>
+                    )}
+                    {!expanded && !prodFocused && (
+                      <tr
+                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
+                        aria-expanded={expandable ? false : undefined}
+                        onClick={expandable ? () => setExpandedProd(gp.company) : undefined}
+                      >
+                        <td className={`font-semibold rounded-l-xl pl-3 ${rowTd}`}>
+                          <span className="inline-flex items-center gap-2">
+                            {expandable && (
+                              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            )}
+                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
+                            {gp.company}
+                          </span>
+                        </td>
+                        <td className={`text-left tabular-nums text-muted-foreground ${rowTd}`}>{gp.fields || '—'}</td>
+                        <td className={`text-left tabular-nums font-medium ${rowTd}`}>{gp.gas ? gp.gas.toFixed(1) : '-'}</td>
+                        <td className={`text-left tabular-nums ${rowTd}`}>{gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '-'}</td>
+                        <td className={`text-left rounded-r-xl ${rowTd}`}>
+                          {gp.share !== undefined ? (
+                            <span className="inline-flex items-center gap-2">
+                              <span className="h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-muted/40 sm:w-20">
+                                <span
+                                  className={`block h-full rounded-full ${colors?.bar || 'bg-primary'}`}
+                                  style={{ width: `${Math.min(100, Math.max(0, gp.share))}%` }}
+                                />
+                              </span>
+                              <span className="tabular-nums text-muted-foreground">{gp.share.toFixed(1)}%</span>
+                            </span>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                    {expanded && (
+                      <tr>
+                        <td colSpan={5} className="!p-0">
+                          <div className="py-2">
+                            <ProductionCompanyDetail
+                              fields={detailFields}
+                              grandTotal={archiveDay?.production?.grand_total ?? null}
+                              producerKey={producerKey}
+                              label={gp.company}
+                              onToggle={() => setExpandedProd(null)}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+              {!prodFocused && (
+                <tr className="font-bold">
+                  <td className={`rounded-l-xl pl-3 ${totalTd}`}>Grand Total Production</td>
+                  <td className={`text-left ${totalTd}`}>{totalActiveFields} Fields</td>
+                  <td className={`text-left text-primary ${totalTd}`}>{formatNumber(totalGasSupply, 1)}</td>
+                  <td className={`text-left ${totalTd}`}>{formatNumber(totalCondensate, 1)}</td>
+                  <td className={`text-left rounded-r-xl ${totalTd}`}>100.0%</td>
+                </tr>
+              )}
             </tbody>
           </table>
           </GridLockedContent>
@@ -132,6 +242,7 @@ export function GasTab({
           <p><strong>What is being shown?</strong></p>
           <p className="leading-relaxed">This table displays the daily gas volume (MMCFD) and associated condensate liquids (BBL) produced by local gas fields and foreign operators (Chevron, Tullow), alongside imported liquefied natural gas (LNG) regasified into the grid.</p>
           <p className="leading-relaxed"><strong>Analytical Insight:</strong> Chevron (operating the Bibiyana field) remains the dominant producer of natural gas in Bangladesh, supplying over 50% of domestic gas. The high dependency on a single field and company exposes the entire gas-to-power supply chain to operational vulnerability and highlights the urgency of expanding national exploration or gas import capacity.</p>
+          <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> Each report covers an 8:00 AM → 8:00 AM &ldquo;gas day&rdquo; and is dated by the morning it closes — the report for the 31 Dec → 1 Jan window is filed under 1 Jan. In the per-field detail, <em>% T. Cap</em> is a field&apos;s gas output divided by national installed capacity, and <em>% T. Prod</em> is its share of the day&apos;s grand-total production. Sub-totals are recomputed from volumes exactly as Petrobangla computes its own subtotal lines; the PDF&apos;s per-field % column is rounded to one decimal (and occasionally misprinted at source), so summing that printed column can drift a few tenths from the official subtotal.</p>
         </div>
 
         <GridCardFooter>
@@ -156,8 +267,10 @@ export function GasTab({
             </h3>
             <p className="grid-explorer-chart-card__sub">
               Allocated supply (MMCFD) across regional gas distributors •{' '}
-              <span className="text-sky-500 font-semibold">Tracked since January 12, 2020</span>
+              <span className="text-sky-500 font-semibold">Tracked since January 12, 2020</span> •{' '}
+              Click a distributor for per-plant detail
             </p>
+            {reportCaption}
           </div>
         </div>
 
@@ -169,33 +282,101 @@ export function GasTab({
             variant="micro"
             onTryDemo={onTryDemo}
           >
-          <table className="grid-explorer-table">
-            <thead>
-              <tr>
-                <th>Distributor</th>
-                <th className="text-left">Power Grid Supply</th>
-                <th className="text-left">Fertilizer Supply</th>
-                <th className="text-left">Industrial / Others</th>
-                <th className="text-left">Total Gas Distributed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gasDistributionData.map((gd, idx) => (
-                <tr key={idx}>
-                  <td className="font-semibold">{gd.company}</td>
-                  <td className="text-left tabular-nums">{gd.power.toFixed(1)}</td>
-                  <td className="text-left tabular-nums">{gd.fertilizer.toFixed(1)}</td>
-                  <td className="text-left tabular-nums text-muted-foreground">{gd.others.toFixed(1)}</td>
-                  <td className="text-left tabular-nums font-semibold">{gd.total.toFixed(1)}</td>
+          <table className={listTable}>
+            {!distFocused && (
+              <thead>
+                <tr>
+                  <th>Distributor</th>
+                  <th className="text-left">Power Grid Supply</th>
+                  <th className="text-left">Fertilizer Supply</th>
+                  <th className="text-left">Industrial / Others</th>
+                  <th className="text-left">Total Gas Distributed</th>
                 </tr>
-              ))}
-              <tr className="border-t border-border/80 font-bold bg-muted/20">
-                <td>National Total Supply</td>
-                <td className="text-left tabular-nums text-primary">{distPowerTotal.toFixed(1)}</td>
-                <td className="text-left tabular-nums">{distFertTotal.toFixed(1)}</td>
-                <td className="text-left tabular-nums">{distOthersTotal.toFixed(1)}</td>
-                <td className="text-left tabular-nums text-primary">{distGrandTotal.toFixed(1)}</td>
-              </tr>
+              </thead>
+            )}
+            <tbody>
+              {gasDistributionData.map((gd, idx) => {
+                const detailCompany = distributionCompanyForLabel(archiveDay, gd.company);
+                const expandable = detailCompany != null;
+                const expanded = expandable && expandedDist === gd.company;
+                const distributorKey = gd.company.toUpperCase().split(/[\s(]/)[0];
+                const colors = DISTRIBUTOR_COLORS[distributorKey];
+                const shareOfTotal = distGrandTotal > 0 ? (gd.total / distGrandTotal) * 100 : null;
+                return (
+                  <Fragment key={idx}>
+                    {!expanded && distFocused && (
+                      <tr
+                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
+                        onClick={expandable ? () => setExpandedDist(gd.company) : undefined}
+                      >
+                        <td colSpan={5} className={`rounded-xl pl-3 !py-2 font-semibold ${rowTd}`}>
+                          <span className="inline-flex items-center gap-2 text-muted-foreground">
+                            {expandable && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
+                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
+                            {gd.company}
+                          </span>
+                        </td>
+                      </tr>
+                    )}
+                    {!expanded && !distFocused && (
+                      <tr
+                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
+                        aria-expanded={expandable ? false : undefined}
+                        onClick={expandable ? () => setExpandedDist(gd.company) : undefined}
+                      >
+                        <td className={`font-semibold rounded-l-xl pl-3 ${rowTd}`}>
+                          <span className="inline-flex items-center gap-2">
+                            {expandable && (
+                              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                            )}
+                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
+                            {gd.company}
+                          </span>
+                        </td>
+                        <td className={`text-left tabular-nums ${rowTd}`}>{gd.power.toFixed(1)}</td>
+                        <td className={`text-left tabular-nums ${rowTd}`}>{gd.fertilizer.toFixed(1)}</td>
+                        <td className={`text-left tabular-nums text-muted-foreground ${rowTd}`}>{gd.others.toFixed(1)}</td>
+                        <td className={`text-left rounded-r-xl ${rowTd}`}>
+                          <span className="inline-flex items-center gap-2">
+                            {shareOfTotal != null && (
+                              <span className="h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-muted/40 sm:w-20">
+                                <span
+                                  className={`block h-full rounded-full ${colors?.bar || 'bg-primary'}`}
+                                  style={{ width: `${Math.min(100, Math.max(0, shareOfTotal))}%` }}
+                                />
+                              </span>
+                            )}
+                            <span className="tabular-nums font-semibold">{gd.total.toFixed(1)}</span>
+                          </span>
+                        </td>
+                      </tr>
+                    )}
+                    {expanded && detailCompany && (
+                      <tr>
+                        <td colSpan={5} className="!p-0">
+                          <div className="py-2">
+                            <DistributionCompanyDetail
+                              company={detailCompany}
+                              distributorKey={distributorKey}
+                              label={gd.company}
+                              onToggle={() => setExpandedDist(null)}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
+                );
+              })}
+              {!distFocused && (
+                <tr className="font-bold">
+                  <td className={`rounded-l-xl pl-3 ${totalTd}`}>National Total Supply</td>
+                  <td className={`text-left tabular-nums text-primary ${totalTd}`}>{distPowerTotal.toFixed(1)}</td>
+                  <td className={`text-left tabular-nums ${totalTd}`}>{distFertTotal.toFixed(1)}</td>
+                  <td className={`text-left tabular-nums ${totalTd}`}>{distOthersTotal.toFixed(1)}</td>
+                  <td className={`text-left tabular-nums text-primary rounded-r-xl ${totalTd}`}>{distGrandTotal.toFixed(1)}</td>
+                </tr>
+              )}
             </tbody>
           </table>
           </GridLockedContent>
@@ -205,6 +386,7 @@ export function GasTab({
           <p><strong>What is being shown?</strong></p>
           <p className="leading-relaxed">This table tracks the distribution of natural gas across different sectors (power grid generators, fertilizer plants, and industrial/domestic consumers) by regional distribution utilities.</p>
           <p className="leading-relaxed"><strong>Analytical Insight:</strong> Natural gas distribution is heavily skewed toward the power sector and industrial customers. Titas Gas (TGTDCL) remains the largest distributor by volume. Under gas supply shortages, fertilizer plants and industries are often rationed to prioritize power generation, illustrating the competing demands for limited gas supply.</p>
+          <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> In the per-plant detail, &ldquo;demand&rdquo; is each plant&apos;s nominal gas requirement at full output and &ldquo;supply&rdquo; is the metered delivery over the same 8:00 AM → 8:00 AM gas day; plants with zero supply form the report&apos;s shutdown list. Because plants never all peak simultaneously, Petrobangla also applies its own diversity factor (typically ×0.85) to raw power demand to estimate the realistic requirement — the True Power-Gas Gap KPI above is measured against that adjusted demand, not the raw plant total.</p>
         </div>
 
         <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">

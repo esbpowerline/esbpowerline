@@ -162,6 +162,18 @@ export async function middleware(request: NextRequest) {
     const isoDate = dailyMatch?.[1];
     const latestDate = getLatestAvailableDate();
 
+    // Petrobangla gas-day files power the visitor-accessible 1M rolling window,
+    // so they get a wider public window (30 gas-days + gap buffer) than the
+    // 7-day PGCB grid window. Older archive days stay tier-gated.
+    const PETROBANGLA_PUBLIC_DAYS_BACK = 45;
+    const isPetrobanglaDaily = pathname.startsWith('/data/petrobangla/daily/');
+    const inPetrobanglaPublicWindow =
+      isPetrobanglaDaily &&
+      !!isoDate &&
+      !!latestDate &&
+      isoDate <= latestDate &&
+      (Date.parse(latestDate) - Date.parse(isoDate)) / 86_400_000 <= PETROBANGLA_PUBLIC_DAYS_BACK;
+
     // Fast path: dates inside the public visitor window (and the demo date) are
     // accessible to everyone, so skip the Supabase token refresh + Postgres
     // session lookup entirely. This is the hot path — most Grid Explorer reads
@@ -170,6 +182,7 @@ export async function middleware(request: NextRequest) {
       !isoDate ||
       !latestDate ||
       isoDate === '2024-07-02' ||
+      inPetrobanglaPublicWindow ||
       isDateAllowedForTier(isoDate, 'visitor', latestDate);
 
     if (isPublicDate) {

@@ -43,7 +43,7 @@ export default async function EnergyPolicyLibraryPage() {
 
   return (
     <div className="container container--shell py-8 md:py-10">
-      <div className="mx-auto max-w-4xl">
+      <div className="w-full">
         {/* Page header */}
         <header className="border-b border-border/50 pb-6">
           <div className="flex items-center gap-2 text-primary">
@@ -78,7 +78,7 @@ export default async function EnergyPolicyLibraryPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {items.map((item) => (
                     <Link
                       key={item.slug}

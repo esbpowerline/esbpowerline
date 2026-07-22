@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/lib/auth';
 import { getMemberSession } from '@/lib/member-session';
-import { can, type Role } from '@/lib/constants';
+import { can, ROLES, type Role } from '@/lib/constants';
 import prisma from '@/lib/prisma';
 import type { PublicArticleCard } from '@/lib/category-types';
 import type { PublicMagazineIssue } from '@/lib/category-content';
@@ -347,9 +347,10 @@ export async function getRecentDownloadsAction(): Promise<MemberDownloadRow[]> {
  * so this revalidates the render rather than pulling from PGCB directly.)
  */
 export async function triggerGridRefresh(): Promise<{ ok: true; refreshedAt: string }> {
-  const memberSession = await getMemberSession();
-  if (!memberSession) {
-    throw new Error('Sign in required to refresh grid data.');
+  const session = await auth();
+  const role = session?.user?.role as Role | undefined;
+  if (!role || !ROLES[role] || ROLES[role].level < ROLES.EDITOR.level) {
+    throw new Error('Only editors and administrators can refresh grid data.');
   }
 
   revalidatePath('/grid-explorer');

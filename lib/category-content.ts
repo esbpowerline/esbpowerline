@@ -127,9 +127,6 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
     where: {
       status: 'PUBLISHED',
       category: categoryName,
-      isBreaking: false,
-      isFeatured: false,
-      isTrending: false,
     },
     include: { author: { select: { name: true } } },
     orderBy: { publishedAt: 'desc' },

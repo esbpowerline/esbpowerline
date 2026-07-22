@@ -25,6 +25,15 @@ export type PolicyGroup = {
   tint: PolicyTint;
 };
 
+/** A verified figure from the official document or an authoritative publisher. */
+export type PolicyDataPoint = {
+  label: string;
+  value: string;
+  /** When the figure was true / which version it comes from. */
+  asOf?: string;
+  source: { label: string; url: string };
+};
+
 export type Policy = {
   slug: string;
   title: string;
@@ -41,6 +50,8 @@ export type Policy = {
     keyPoints: string[];
     timeline?: { date: string; event: string }[];
   };
+  /** Official figures rendered as stat tiles on the detail page, each with its own citation. */
+  dataPoints?: PolicyDataPoint[];
   /** Optional caveat surfaced prominently (e.g. replacement under preparation). */
   note?: string;
 };
@@ -73,6 +84,13 @@ export const POLICIES: Policy[] = [
         'Modernises provisions on electricity theft, safety, offences and penalties.',
       ],
     },
+    dataPoints: [
+      { label: 'Act number & enactment', value: 'Act No. VII of 2018, enacted 12 February 2018', asOf: 'Feb 2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+      { label: 'Repealed law', value: 'Repealed and re-enacted the Electricity Act, 1910 (Act No. IX of 1910)', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+      { label: 'Theft penalty (domestic)', value: 'Up to 3 years imprisonment, or a fine of twice the electricity value or Tk 50,000, or both', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+      { label: 'Theft penalty (commercial/industrial)', value: 'Up to 3 years imprisonment, or a fine of twice the electricity value or Tk 5 lakh, or both', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+      { label: 'Licensing regime', value: 'Generation, transmission, distribution and supply licences issued by BERC under the BERC Act 2003', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+    ],
   },
   {
     slug: 'berc-act-2003',
@@ -98,6 +116,13 @@ export const POLICIES: Policy[] = [
         { date: 'Aug 2024', event: 'Section 34(k) repealed; public-hearing tariff authority restored.' },
       ],
     },
+    dataPoints: [
+      { label: 'Act number', value: 'Act No. 13 of 2003; commission effective from 2004', asOf: '2003', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/212' } },
+      { label: 'Commission composition', value: 'A Chairman and 4 Members (Section 6(1))', asOf: '2003', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/212' } },
+      { label: 'Tariff process rules', value: 'Decision within 90 days of hearing (s.34(6)); revision at most once per fiscal year absent significant cost changes (s.34(5))', asOf: '2003', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/212' } },
+      { label: 'Section 34(ka) introduced', value: 'Ordinance 1 Dec 2022; Amendment Bill passed 29 Jan 2023 — executive price-setting without hearings', asOf: 'Jan 2023', source: { label: 'BSS', url: 'https://www.bssnews.net/news/107832' } },
+      { label: 'Section 34(ka) repealed', value: 'BERC (Amendment) Ordinance issued 27 August 2024, restoring public-hearing tariff setting', asOf: 'Aug 2024', source: { label: 'The Business Standard', url: 'https://www.tbsnews.net/bangladesh/energy/ordinance-issued-revoking-govts-ability-raise-power-energy-prices-bypassing-berc' } },
+    ],
   },
   {
     slug: 'sreda-act-2012',
@@ -118,6 +143,11 @@ export const POLICIES: Policy[] = [
         'Underpins later instruments such as the Net Metering Guidelines and the EE&C Master Plan.',
       ],
     },
+    dataPoints: [
+      { label: 'Act number & assent', value: 'Act No. 48 of 2012, assented 10 December 2012', asOf: 'Dec 2012', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/216' } },
+      { label: 'SREDA operational', value: 'Functional from 2014; authentic English text of the Act gazetted 28 April 2014', asOf: '2014', source: { label: 'IEA Policies Database', url: 'https://www.iea.org/policies/6127-the-sustainable-and-renewable-energy-development-authority-act-2012-creation-of-the-sustainable-and-renewable-energy-development-authority-sreda' } },
+      { label: 'Board composition', value: 'Chairman plus up to 16 members — 5 full-time, 6 ex-officio ministry representatives, up to 5 honorary', asOf: '2012', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/216' } },
+    ],
   },
   {
     slug: 'bangladesh-petroleum-act-1974',
@@ -138,6 +168,12 @@ export const POLICIES: Policy[] = [
         'Distinct from the downstream Petroleum Act 2016 and the BPC Act 2016, which remain separate laws — 2016 did not replace the 1974 Act.',
       ],
     },
+    dataPoints: [
+      { label: 'Act number & entry into force', value: 'Act No. LXIX of 1974, in force from 22 August 1974', asOf: 'Aug 1974', source: { label: 'ECOLEX (FAO/UNEP/IUCN)', url: 'https://www.ecolex.org/details/legislation/bangladesh-petroleum-act-1974-act-no-lxix-of-1974-lex-faoc066865/' } },
+      { label: 'Rights vested', value: 'Exclusive government right to explore, develop, produce, refine and market petroleum across territory, shelf and economic zone', asOf: '1974', source: { label: 'ECOLEX (FAO/UNEP/IUCN)', url: 'https://www.ecolex.org/details/legislation/bangladesh-petroleum-act-1974-act-no-lxix-of-1974-lex-faoc066865/' } },
+      { label: 'PSC basis', value: 'Legal framework for Production Sharing Contracts, exercised through Petrobangla by delegation', asOf: '1974', source: { label: 'Banglapedia', url: 'https://en.banglapedia.org/index.php/Production_Sharing_Contract' } },
+      { label: '2023 offshore framework', value: 'Offshore Model PSC 2023 approved 26 July 2023 — gas price pegged to 10% of Brent, export option opened', asOf: 'Jul 2023', source: { label: 'Prothom Alo', url: 'https://en.prothomalo.com/bangladesh/b3iyof7ayx' } },
+    ],
   },
   {
     slug: 'atomic-energy-regulatory-act-2012',
@@ -157,6 +193,11 @@ export const POLICIES: Policy[] = [
         'Key to the regulatory framework for the Rooppur Nuclear Power Plant.',
       ],
     },
+    dataPoints: [
+      { label: 'Act number & date', value: 'Act No. 19 of 2012, dated 19 June 2012; authentic English text gazetted 30 August 2017', asOf: 'Jun 2012', source: { label: 'Bangladesh Gazette (dpp.gov.bd)', url: 'https://www.dpp.gov.bd/upload_file/gazettes/22943_94609.pdf' } },
+      { label: 'BAERA formed', value: '12 February 2013, as the independent nuclear and radiation-safety regulator', asOf: 'Feb 2013', source: { label: 'IAEA (CNS National Report)', url: 'https://www.iaea.org/sites/default/files/24/02/cns_bangladesh_national_report_2022.pdf' } },
+      { label: 'Rooppur licensing under the Act', value: 'Siting licence 21 Jun 2016; Unit 1 design & construction licence 2 Nov 2017; Unit 2 licence 8 Jul 2018', asOf: 'Jul 2018', source: { label: 'IAEA (CNS National Report)', url: 'https://www.iaea.org/sites/default/files/24/02/cns_bangladesh_national_report_2022.pdf' } },
+    ],
   },
   {
     slug: 'nuclear-power-plant-act-2015',
@@ -176,6 +217,13 @@ export const POLICIES: Policy[] = [
         'Works alongside the Atomic Energy Regulatory Act 2012 (BAERA oversight).',
       ],
     },
+    dataPoints: [
+      { label: 'Act number & enactment', value: 'Act No. 19 of 2015, enacted 16 September 2015', asOf: 'Sep 2015', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4013' } },
+      { label: 'Company established', value: 'Nuclear Power Plant Company Bangladesh Ltd (NPCBL), the operating organisation for Rooppur; BAEC is the Owner Organization (s.4(3))', asOf: '2015', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4013' } },
+      { label: 'Rooppur capacity', value: '2 × VVER-1200 reactors, 1,200 MWe each (2,400 MW total)', asOf: '2026', source: { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Rooppur_Nuclear_Power_Plant' } },
+      { label: 'Project financing', value: '≈USD 12.65 billion, with a Russian state export credit covering ≈USD 11.38 billion (~90%)', asOf: '2026', source: { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Rooppur_Nuclear_Power_Plant' } },
+      { label: 'Construction start', value: 'Unit 1 first concrete 30 Nov 2017; Unit 2 on 14 Jul 2018', asOf: 'Jul 2018', source: { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Rooppur_Nuclear_Power_Plant' } },
+    ],
     note: 'Exact official bdlaws deep-link to be confirmed before relying on the source URL.',
   },
   {
@@ -202,6 +250,13 @@ export const POLICIES: Policy[] = [
         { date: '28 Nov 2024', event: 'Repeal ordinance signed by the President.' },
       ],
     },
+    dataPoints: [
+      { label: 'Enacted', value: 'October 2010, initially valid for 2 years', asOf: '2010', source: { label: 'Gas Outlook', url: 'https://gasoutlook.com/analysis/bangladesh-interim-government-makes-sweeping-energy-sector-changes/' } },
+      { label: 'Extensions', value: 'Extended repeatedly — most recently in 2021, for five years through 2026', asOf: '2021', source: { label: 'Gas Outlook', url: 'https://gasoutlook.com/analysis/bangladesh-interim-government-makes-sweeping-energy-sector-changes/' } },
+      { label: 'Projects taken up under the Act', value: '≈96 power & energy projects implemented or pipelined; interim government suspended its use 19 Aug 2024', asOf: 'Aug 2024', source: { label: 'Gas Outlook', url: 'https://gasoutlook.com/analysis/bangladesh-interim-government-makes-sweeping-energy-sector-changes/' } },
+      { label: 'High Court ruling', value: 'Sections 6(2) and 9 (indemnity) declared illegal', asOf: '14 Nov 2024', source: { label: 'Daily Morning Voice', url: 'https://dailymorningvoice.com/38413/quick-power-supply-act-repealed-ordinance-issued/' } },
+      { label: 'Repeal', value: 'Repeal ordinance issued 28 Nov 2024; contracts already signed remain valid', asOf: '28 Nov 2024', source: { label: 'Daily Morning Voice', url: 'https://dailymorningvoice.com/38413/quick-power-supply-act-repealed-ordinance-issued/' } },
+    ],
   },
   {
     slug: 'electricity-act-1910',
@@ -220,6 +275,12 @@ export const POLICIES: Policy[] = [
         'Repealed by the Electricity Act, 2018.',
       ],
     },
+    dataPoints: [
+      { label: 'Act number', value: 'Act No. IX of 1910', asOf: '1910', source: { label: 'bdlaws.minlaw.gov.bd', url: 'http://bdlaws.minlaw.gov.bd/act-93.html' } },
+      { label: 'Repealed', value: '12 February 2018, by the Electricity Act 2018 (Act No. VII of 2018)', asOf: 'Feb 2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+      { label: 'Duration in force', value: '≈108 years, spanning British, Pakistani and Bangladeshi administrations', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/4092' } },
+      { label: 'Line-materials theft penalty (as amended)', value: 'Section 40A: 3–5 years imprisonment plus fine up to Tk 25,000 for theft of poles, conductors or transformers', asOf: '2018', source: { label: 'bdlaws.minlaw.gov.bd', url: 'http://bdlaws.minlaw.gov.bd/act-93/section-24054.html' } },
+    ],
   },
 
   // ── Policies & Master Plans ───────────────────────────────────────────────
@@ -242,6 +303,14 @@ export const POLICIES: Policy[] = [
         'Prepared with technical support from IEEJ / JICA.',
       ],
     },
+    dataPoints: [
+      { label: 'Published', value: '27 November 2023, developed with JICA / IEEJ (Japan) support', asOf: 'Nov 2023', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/bangladeshs-energy-backtrack/' } },
+      { label: 'Clean energy target', value: '40% of installed capacity by 2041 (18% by 2030) — conventional renewables only 8.8% (5,157 MW) within it', asOf: '2041 target', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/bangladeshs-energy-backtrack/' } },
+      { label: 'Demand projection', value: 'Power demand ×2.26 by 2030, ×4.5 by 2041, ×7.38 by 2050', asOf: '2023', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/2023-integrated-energy-power-master-plan-the-numbers-dont-add-up/' } },
+      { label: '2050 capacity plan', value: '111,000 MW installed by 2050 — incl. 20,000 MW wind, 11,200 MW hydrogen, 5,000 MW ammonia', asOf: '2050 target', source: { label: 'Energy & Power Magazine', url: 'https://ep-bd.com/view/details/article/OTY3NA==/title?q=IPEMP+2023:+Ambitious+And+Challenging' } },
+      { label: 'Investment need', value: '≈USD 300 billion in power-sector investment by 2050', asOf: '2050 horizon', source: { label: 'Energy & Power Magazine', url: 'https://ep-bd.com/view/details/article/OTY3NA==/title?q=IPEMP+2023:+Ambitious+And+Challenging' } },
+      { label: 'Co-firing pathway', value: 'Ammonia co-firing with coal from 2035 (20% → 50% by 2040); hydrogen co-firing with gas from 2037', asOf: '2023', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/bangladeshs-energy-backtrack/' } },
+    ],
     note: 'The interim government has begun preparing a successor Energy & Power Sector Master Plan (EPSMP) 2026–2050 — treat as under review.',
   },
   {
@@ -263,6 +332,13 @@ export const POLICIES: Policy[] = [
         'Superseded by IEPMP 2023.',
       ],
     },
+    dataPoints: [
+      { label: '2041 capacity target', value: '≈60,000 MW of generation capacity by 2041', asOf: '2016', source: { label: 'Energy & Power Magazine', url: 'https://ep-bd.com/view/details/article/NzI0NA==/title?q=revisiting+psmp+amid+volatile+global+energy+market' } },
+      { label: 'Fuel-mix target', value: '35% coal + 35% gas/LNG + 30% liquid fuel, nuclear, renewables and imports (coal cut from 50% in PSMP 2010)', asOf: '2016', source: { label: 'Energy & Power Magazine', url: 'https://ep-bd.com/view/details/article/NzI0NA==/title?q=revisiting+psmp+amid+volatile+global+energy+market' } },
+      { label: 'Renewables & imports', value: '3,864 MW domestic renewables and 9,000 MW cross-border imports planned by 2041; six nuclear units phased to 2040-41', asOf: '2016', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3219' } },
+      { label: 'Prepared by', value: 'JICA-sponsored, with Tokyo Electric Power Services Co. (TEPCO group); adopted 2016', asOf: '2016', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3219' } },
+      { label: 'Superseded', value: 'Replaced as the guiding plan by the IEPMP, published 27 Nov 2023', asOf: 'Nov 2023', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/bangladeshs-energy-backtrack/' } },
+    ],
   },
   {
     slug: 'national-energy-policy',
@@ -283,6 +359,12 @@ export const POLICIES: Policy[] = [
         'Remains the standing policy; comprehensive replacements have been discussed but not gazetted.',
       ],
     },
+    dataPoints: [
+      { label: 'First adopted', value: '1996, by the Ministry of Power, Energy and Mineral Resources', asOf: '1996', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3184' } },
+      { label: 'Updated', value: 'Revised 2004 (published as the 2005 edition) for changed domestic and global circumstances', asOf: '2004', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3184' } },
+      { label: 'Electrification goal', value: 'Whole-country electrification by 2020 set as a national objective', asOf: '2004', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3184' } },
+      { label: 'Scope', value: 'Ten objectives spanning coal, gas, power and renewables — sustainable growth and optimal use of indigenous resources', asOf: '2004', source: { label: 'Energy & Mineral Resources Division', url: 'https://emrd.portal.gov.bd/sites/default/files/files/emrd.portal.gov.bd/law/b3868d02_274c_4f1a_bd2c_d81c5b4d7c32/NEP_2004_fulldoc.pdf' } },
+    ],
   },
   {
     slug: 'renewable-energy-policy-2008',
@@ -303,6 +385,14 @@ export const POLICIES: Policy[] = [
         'A draft Renewable Energy Policy 2025 (20% RE by 2030 / 30% by 2041) is under finalisation.',
       ],
     },
+    dataPoints: [
+      { label: 'Effective', value: '18 December 2008; provided for creating SEDA, forerunner of SREDA', asOf: 'Dec 2008', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/208' } },
+      { label: 'Original targets', value: '5% of power demand from renewables by 2015; 10% by 2020', asOf: '2008', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/208' } },
+      { label: 'Outcome vs targets', value: 'Both missed — ≈1,183 MW installed (≈4.5% of capacity, ~3% of generation) by June 2023', asOf: 'Jun 2023', source: { label: 'United Nations in Bangladesh', url: 'https://bangladesh.un.org/en/260959-bangladesh%E2%80%99s-energy-transition-journey-so-far' } },
+      { label: 'Current RE share', value: '≈5.6% of installed capacity (roughly 1.5–1.6 GW)', asOf: '2025', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/resources/2025/05/Renewable-Energy-Policy-Draft-2025.pdf' } },
+      { label: 'Draft 2025 replacement targets', value: '20% of electricity (6,145 MW) from RE by 2030; 30% (17,470 MW) by 2041', asOf: 'Apr 2025', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/resources/2025/05/Renewable-Energy-Policy-Draft-2025.pdf' } },
+      { label: 'Incentives', value: '2008: 15% VAT exemption + 5-year tax holiday; draft 2025 extends to 10 years full + 5 partial', asOf: '2025', source: { label: 'Centre for Policy Dialogue', url: 'https://cpd.org.bd/resources/2025/05/Renewable-Energy-Policy-Draft-2025.pdf' } },
+    ],
     note: 'Being replaced by a draft Renewable Energy Policy 2025 — the 2008 text remains operative until the new policy is gazetted.',
   },
   {
@@ -323,6 +413,13 @@ export const POLICIES: Policy[] = [
         'Implemented by SREDA under the SREDA Act 2012.',
       ],
     },
+    dataPoints: [
+      { label: 'Published', value: 'March 2015, by SREDA / Power Division with JICA technical support', asOf: 'Mar 2015', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/2297' } },
+      { label: 'Energy-intensity targets', value: '15% reduction by 2021 and 20% by 2030 in primary energy per GDP, vs the 2013 baseline', asOf: '2015', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/2297' } },
+      { label: 'Demand impact', value: 'EE&C scenario cuts 2030 electricity demand by 8 GW vs business-as-usual', asOf: '2030 target', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/2297' } },
+      { label: 'Projected savings', value: '≈95 million toe of energy and ≈BDT 2.3 trillion in avoided fuel imports over 2015–2030', asOf: '2015', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/2297' } },
+      { label: 'Flagship programmes', value: 'Energy Management, EE Labeling and EE Buildings — implemented by SREDA', asOf: '2015', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/2297' } },
+    ],
   },
   {
     slug: 'gas-sector-master-plan-2017',
@@ -342,6 +439,13 @@ export const POLICIES: Policy[] = [
         'Guides Petrobangla’s upstream and infrastructure planning.',
       ],
     },
+    dataPoints: [
+      { label: 'Prepared by', value: 'Ramboll (Denmark) for Petrobangla and Power Cell; final report 28 February 2018', asOf: 'Feb 2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3509' } },
+      { label: 'Planning horizon', value: 'Through 2041 — updating the 2006 gas master plan that ran only to 2025', asOf: '2017', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3509' } },
+      { label: 'LNG share of gas demand', value: 'Projected 17% (2018) → 40% (2023) → 50% (2028) → 70% (2041)', asOf: '2017', source: { label: 'Bonik Barta', url: 'https://en.bonikbarta.com/bangladesh/eImo8W1Xv4hcENHN' } },
+      { label: 'LNG import volume by 2041', value: '≈30 million tonnes/year needed for industry, power and fertilizer demand', asOf: '2017', source: { label: 'S&P Global Commodity Insights', url: 'https://www.spglobal.com/commodity-insights/en/market-insights/latest-news/natural-gas/082417-bangladesh-to-need-30-million-mtyear-lng-imports-by-2041' } },
+      { label: 'Supply gap at drafting', value: '≈1,000 MMcfd (27%) daily gas shortage against ≈2,750 MMcfd consumption', asOf: '2016', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3509' } },
+    ],
   },
   {
     slug: 'national-solar-roadmap',
@@ -361,6 +465,13 @@ export const POLICIES: Policy[] = [
         'Circulated as a draft; a finalised/gazetted version should be confirmed.',
       ],
     },
+    dataPoints: [
+      { label: 'Scenario targets by 2041', value: '6 GW (business-as-usual), 20 GW (medium) or 30 GW (high deployment) of solar PV', asOf: 'Dec 2020', source: { label: 'Draft Roadmap (SREDA/UNDP, ESMAP mirror)', url: 'https://rise.esmap.org/sites/default/files/library/bangladesh/Renewable%20Energy/Bangladesh_National-Solar-Energy-Roadmap.pdf' } },
+      { label: 'Recommended scenario', value: 'High case: 30 GW, making solar ≈50% of projected generation capacity by 2041', asOf: 'Dec 2020', source: { label: 'Draft Roadmap (SREDA/UNDP)', url: 'https://rise.esmap.org/sites/default/files/library/bangladesh/Renewable%20Energy/Bangladesh_National-Solar-Energy-Roadmap.pdf' } },
+      { label: 'High-case composition', value: '12,000 MW solar hubs + 12,000 MW rooftop + 2,200 MW IPPs + 2,000 MW utility + 1,200 MW irrigation pumps', asOf: 'Dec 2020', source: { label: 'Draft Roadmap (SREDA/UNDP)', url: 'https://rise.esmap.org/sites/default/files/library/bangladesh/Renewable%20Energy/Bangladesh_National-Solar-Energy-Roadmap.pdf' } },
+      { label: 'Submitted', value: '14 December 2020 to SREDA and the UNDP SREPGen project; authored at CER, United International University', asOf: 'Dec 2020', source: { label: 'Draft Roadmap (SREDA/UNDP)', url: 'https://rise.esmap.org/sites/default/files/library/bangladesh/Renewable%20Energy/Bangladesh_National-Solar-Energy-Roadmap.pdf' } },
+      { label: 'Storage trigger', value: 'Large-scale storage recommended once grid-tied solar exceeds 10% of installed capacity', asOf: 'Dec 2020', source: { label: 'Draft Roadmap (SREDA/UNDP)', url: 'https://rise.esmap.org/sites/default/files/library/bangladesh/Renewable%20Energy/Bangladesh_National-Solar-Energy-Roadmap.pdf' } },
+    ],
     note: 'Circulated as a draft roadmap — confirm whether a finalised version has been adopted.',
   },
   {
@@ -382,6 +493,13 @@ export const POLICIES: Policy[] = [
         'A third NDC (NDC 3.0) with a 2035 target was reportedly submitted in 2025.',
       ],
     },
+    dataPoints: [
+      { label: 'Unconditional target', value: '−27.56 Mt CO₂e (6.73%) below business-as-usual by 2030', asOf: 'Aug 2021', source: { label: 'UNFCCC (official submission)', url: 'https://unfccc.int/sites/default/files/NDC/2022-06/NDC_submission_20210826revised.pdf' } },
+      { label: 'Conditional target', value: 'Further −61.9 Mt CO₂e (15.12%) with international support — combined 89.47 Mt (21.85%)', asOf: 'Aug 2021', source: { label: 'UNFCCC (official submission)', url: 'https://unfccc.int/sites/default/files/NDC/2022-06/NDC_submission_20210826revised.pdf' } },
+      { label: 'Base year & BAU', value: 'Base year 2012 (169.05 Mt CO₂e); BAU projected 409.41 Mt in 2030', asOf: 'Aug 2021', source: { label: 'UNFCCC (official submission)', url: 'https://unfccc.int/sites/default/files/NDC/2022-06/NDC_submission_20210826revised.pdf' } },
+      { label: 'Energy-sector share of cuts', value: '95.4% of the unconditional and 96.5% of the conditional reduction comes from energy', asOf: 'Aug 2021', source: { label: 'UNFCCC (official submission)', url: 'https://unfccc.int/sites/default/files/NDC/2022-06/NDC_submission_20210826revised.pdf' } },
+      { label: 'Submitted to UNFCCC', value: '26 August 2021 (updated NDC, expanding coverage to Energy, IPPU, AFOLU and Waste)', asOf: 'Aug 2021', source: { label: 'ADB Law & Policy Reform Program', url: 'https://lpr.adb.org/resource/updated-nationally-determined-contribution-2021-bangladesh' } },
+    ],
     note: 'Bangladesh has not adopted a formal legally-binding net-zero-2050 target — only its NDCs and the aspirational Mujib Climate Prosperity Plan.',
   },
 
@@ -405,6 +523,14 @@ export const POLICIES: Policy[] = [
         'Central official listing is BERC’s Laws/Regulations page.',
       ],
     },
+    dataPoints: [
+      { label: 'Enabling power', value: 'Regulations made under Section 59 of the BERC Act 2003 (Act 13 of 2003)', asOf: '2003', source: { label: 'BERC Electricity Grid Code 2018 (notification)', url: 'https://policy.asiapacificenergy.org/sites/default/files/Electricity%20Grid%20Code%202018.pdf' } },
+      { label: 'Licensing', value: 'Licensing Regulations 2006, amended 2011 & 2016 — the 2016 amendment extended licence validity from 1 to 3 years', asOf: '2016', source: { label: 'OGR Legal Resource Portal', url: 'https://resource.ogrlegal.com/laws/energy/' } },
+      { label: 'Electricity tariff regulations', value: 'Generation 2008; Transmission 2016; Distribution Retail 2016', asOf: '2016', source: { label: 'OGR Legal Resource Portal', url: 'https://resource.ogrlegal.com/laws/energy/' } },
+      { label: 'Gas tariff regulations', value: 'Natural Gas Transmission and Distribution Tariff Regulations, both 2010', asOf: '2010', source: { label: 'OGR Legal Resource Portal', url: 'https://resource.ogrlegal.com/laws/energy/' } },
+      { label: 'Dispute resolution', value: 'Dispute Settlement Regulations 2014, replaced by Dispute Resolution Regulations 2021', asOf: '2021', source: { label: 'OGR Legal Resource Portal', url: 'https://resource.ogrlegal.com/laws/energy/' } },
+      { label: 'Grid code', value: 'Electricity Grid Code Regulations 2018; revised Grid Code Regulations issued 2023', asOf: '2023', source: { label: 'OGR Legal Resource Portal', url: 'https://resource.ogrlegal.com/laws/energy/' } },
+    ],
   },
   {
     slug: 'net-metering-guidelines-2018',
@@ -425,6 +551,13 @@ export const POLICIES: Policy[] = [
         'Requires SREDA-approved equipment; SREDA has been revising the rules (2025).',
       ],
     },
+    dataPoints: [
+      { label: 'Issued', value: '28 July 2018 by the Power Division; revised November 2019', asOf: 'Nov 2019', source: { label: 'Energy & Power Magazine', url: 'https://ep-bd.com/view/details/article/NTQ0OQ==/title?q=Net+Energy+Metering:+A+Game+Changer+for+Renewable+Energy+in+Bangladesh' } },
+      { label: 'Capacity cap', value: '70% of sanctioned load (or transformer rating), with a 3 MW absolute ceiling', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3519' } },
+      { label: 'Settlement', value: 'Monthly netting with credit carry-over; annual settlement each 30 June at the bulk purchase rate', asOf: '2018', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/3519' } },
+      { label: 'Cumulative uptake', value: '2,190 net-metered rooftop systems totalling ≈100 MWp registered', asOf: 'Jul 2026', source: { label: 'National Solar Help Desk, SREDA', url: 'https://www.nshd.sreda.gov.bd/about' } },
+      { label: '2025 revision', value: 'Cap raised from 70% to 100% of sanctioned load; opened to single-phase, prepaid and smart-meter consumers', asOf: 'Sep 2025', source: { label: 'pv magazine', url: 'https://www.pv-magazine.com/2025/09/10/bangladesh-revises-net-metering-rules-to-expand-solar/' } },
+    ],
   },
   {
     slug: 'grid-code-2018',
@@ -445,6 +578,13 @@ export const POLICIES: Policy[] = [
         'A 2019 revised gazette version is published on the BERC portal.',
       ],
     },
+    dataPoints: [
+      { label: 'Legal basis', value: 'BERC (Electricity Grid Code) Regulations 2018 under Section 59 of the BERC Act; Revision 0 dated 20 Dec 2018', asOf: 'Dec 2018', source: { label: 'BERC Electricity Grid Code 2018', url: 'https://policy.asiapacificenergy.org/sites/default/files/Electricity%20Grid%20Code%202018.pdf' } },
+      { label: 'Frequency band', value: 'Nominal 50.0 Hz, controlled within 49.5–50.5 Hz (±1%)', asOf: '2018', source: { label: 'Grid Code 2018, cl. 5.4.3', url: 'https://policy.asiapacificenergy.org/sites/default/files/Electricity%20Grid%20Code%202018.pdf' } },
+      { label: 'Voltage limits', value: 'Normal: ±5% at 400 kV, ±6% at 230/132 kV; emergency: ±10% at 400 kV, +10/−15% at 230/132 kV', asOf: '2018', source: { label: 'Grid Code 2018, cl. 4.4/5.4.4', url: 'https://policy.asiapacificenergy.org/sites/default/files/Electricity%20Grid%20Code%202018.pdf' } },
+      { label: 'Generator withstand', value: 'Full rated output across 49.5–50.5 Hz; must not disconnect within 48.0–51.5 Hz', asOf: '2018', source: { label: 'Grid Code 2018, cl. 5.8.1', url: 'https://policy.asiapacificenergy.org/sites/default/files/Electricity%20Grid%20Code%202018.pdf' } },
+      { label: 'Governance', value: 'Changes go through the Grid Code Review Panel (meets at least quarterly) with Commission approval', asOf: '2018', source: { label: 'BERC Electricity Grid Code 2018', url: 'https://policy.asiapacificenergy.org/sites/default/files/Electricity%20Grid%20Code%202018.pdf' } },
+    ],
   },
   {
     slug: 'distribution-code-2015',
@@ -464,6 +604,12 @@ export const POLICIES: Policy[] = [
         'Locate the exact official PDF on BERC’s Laws/Regulations page.',
       ],
     },
+    dataPoints: [
+      { label: 'Statutory basis', value: 'Framed by BERC to enforce Sections 31 & 54 of the BERC Act 2003, read with regs 19–20 of the Licensing Regulations 2006', asOf: '2015', source: { label: 'BERC portal (official PDF)', url: 'https://berc.portal.gov.bd/sites/default/files/files/berc.portal.gov.bd/page/a250b6fc_8bcf_4c96_bb20_3c3de230467a/2021-06-07-04-24-cbc591d9d9e86f45f50013ea00684274.pdf' } },
+      { label: 'Scope', value: 'Distribution management, planning, operation, connection conditions, performance standards and safety', asOf: '2015', source: { label: 'Distribution Code 2015 (full text)', url: 'https://www.scribd.com/document/826636329/Distribution-Code-2015' } },
+      { label: 'Performance standards', value: 'Power Quality, Reliability and System Loss standards for distribution licensees, plus consumer-service provisions', asOf: '2015', source: { label: 'BERC portal (official PDF)', url: 'https://berc.portal.gov.bd/sites/default/files/files/berc.portal.gov.bd/page/a250b6fc_8bcf_4c96_bb20_3c3de230467a/2021-06-07-04-24-cbc591d9d9e86f45f50013ea00684274.pdf' } },
+      { label: 'Drafting history', value: 'Updated public draft circulated February 2012; finalised as the Distribution Code 2015', asOf: '2015', source: { label: 'BERC portal', url: 'https://berc.portal.gov.bd/sites/default/files/files/berc.portal.gov.bd/page/a250b6fc_8bcf_4c96_bb20_3c3de230467a/2021-06-07-04-24-cbc591d9d9e86f45f50013ea00684274.pdf' } },
+    ],
   },
   {
     slug: 'eec-rules-2016',
@@ -483,6 +629,12 @@ export const POLICIES: Policy[] = [
         'Confirm the exact year and official SREDA PDF before relying on it.',
       ],
     },
+    dataPoints: [
+      { label: 'Legal basis', value: 'Issued 2016 under the SREDA Act 2012 framework; amended 2023', asOf: '2016', source: { label: 'OGR Legal Resource Portal', url: 'https://resource.ogrlegal.com/laws/energy/' } },
+      { label: 'Designated Consumers', value: 'Establishments above sector-wise annual TOE thresholds must engage SREDA-certified Energy Managers', asOf: '2016', source: { label: 'SREDA (Energy Manager Certification Module)', url: 'https://sreda.portal.gov.bd/sites/default/files/files/sreda.portal.gov.bd/page/37b731e9_248c_407a_a75b_0d081364690e/2023-01-03-10-12-1cd2f30399fba886f0abbb42812c0f69.pdf' } },
+      { label: 'DC obligations', value: 'Appoint an energy manager, meet consumption norms, undergo periodic audits, and file baseline + yearly progress reports', asOf: '2018', source: { label: 'EDGG Paper 10 (Green Policy Platform)', url: 'https://www.greenpolicyplatform.org/sites/default/files/downloads/resource/EDGG+Paper+10+Energy+Efficiency+and+Energy+Auditing.pdf' } },
+      { label: 'First cohort', value: '113 industries selected as the first designated energy consumers; first published list later expanded to 150', asOf: '2018', source: { label: 'EDGG Paper 10 (Green Policy Platform)', url: 'https://www.greenpolicyplatform.org/sites/default/files/downloads/resource/EDGG+Paper+10+Energy+Efficiency+and+Energy+Auditing.pdf' } },
+    ],
   },
 
   // ── Tariff Orders & Regulators ────────────────────────────────────────────
@@ -505,6 +657,13 @@ export const POLICIES: Policy[] = [
         'Official domain is berc.org.bd (not berc.gov.bd).',
       ],
     },
+    dataPoints: [
+      { label: 'Established', value: 'BERC Act 2003 (Act No. 13 of 2003); commission effective 27 April 2004 with first appointments', asOf: '2004', source: { label: 'UN ESCAP Asia-Pacific Energy Portal', url: 'https://policy.asiapacificenergy.org/node/212' } },
+      { label: 'Composition', value: 'Five members: Chairman + Members for Admin, Gas, Petroleum and Electricity', asOf: '2026', source: { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Bangladesh_Energy_Regulatory_Commission' } },
+      { label: 'Current chairman', value: 'Jalal Ahmed, appointed August 2024', asOf: 'Jun 2026', source: { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Bangladesh_Energy_Regulatory_Commission' } },
+      { label: 'Jurisdiction', value: 'Electricity, gas and petroleum — tariffs, licensing and dispute resolution; headquartered in Dhaka', asOf: '2026', source: { label: 'Wikipedia', url: 'https://en.wikipedia.org/wiki/Bangladesh_Energy_Regulatory_Commission' } },
+      { label: 'Hearing authority restored', value: 'August 2024 ordinance restored mandatory public hearings before power/gas price changes', asOf: 'Aug 2024', source: { label: 'The Business Standard', url: 'https://www.tbsnews.net/bangladesh/energy/ordinance-issued-revoking-govts-ability-raise-power-energy-prices-bypassing-berc' } },
+    ],
   },
   {
     slug: 'berc-tariff-orders',
@@ -525,6 +684,13 @@ export const POLICIES: Policy[] = [
         'Preferred over listing individual, frequently-changing orders.',
       ],
     },
+    dataPoints: [
+      { label: 'Latest retail power tariff', value: '+16.68% — weighted average Tk 9.11 → Tk 10.63/kWh, announced 3 June 2026 (BERC’s first power determination since 2020)', asOf: 'Jun 2026', source: { label: 'Prothom Alo', url: 'https://en.prothomalo.com/business/local/x730jsk72r' } },
+      { label: 'Latest bulk tariff', value: '+19.85% — Tk 7.00 → Tk 8.39/kWh; transmission charge up to ~39 paisa/unit; lifeline rate Tk 4.63 → Tk 5.32', asOf: 'Jun 2026', source: { label: 'Dhaka Tribune', url: 'https://www.dhakatribune.com/bangladesh/power-energy/411666/how-much-does-electricity-tariff-increase-per' } },
+      { label: 'Feb 2024 retail adjustment', value: '+8.5% to average Tk 8.95/kWh (from Tk 8.25), gazetted 29 Feb 2024 effective 1 Feb 2024', asOf: 'Feb 2024', source: { label: 'Dhaka Tribune', url: 'https://www.dhakatribune.com/bangladesh/power-energy/340667/gazette-notification-issued-to-raise-8.50%25-power' } },
+      { label: 'Feb 2024 bulk adjustment', value: '+5% to Tk 7.04/kWh; distributors buy from BPDB at Tk 8.44 (230 kV), Tk 8.47 (132 kV), Tk 7.62 (33 kV)', asOf: 'Feb 2024', source: { label: 'Dhaka Tribune', url: 'https://www.dhakatribune.com/bangladesh/power-energy/340667/gazette-notification-issued-to-raise-8.50%25-power' } },
+      { label: 'Latest gas tariff order', value: '+33% for new industrial connections (Tk 30 → 40/m³) and new captive users (Tk 31.5 → 42), effective 13 April 2025', asOf: 'Apr 2025', source: { label: 'The Daily Star', url: 'https://www.thedailystar.net/news/bangladesh/news/33-hike-gas-tariff-new-industries-3870696' } },
+    ],
   },
   {
     slug: 'sreda',
@@ -545,6 +711,13 @@ export const POLICIES: Policy[] = [
         'Runs the National Solar Help Desk (solar.sreda.gov.bd).',
       ],
     },
+    dataPoints: [
+      { label: 'Operational since', value: '2014, under the SREDA Act 2012, as the national nodal agency for RE and efficiency', asOf: '2014', source: { label: 'IEA Policies Database', url: 'https://www.iea.org/policies/6127-the-sustainable-and-renewable-energy-development-authority-act-2012-creation-of-the-sustainable-and-renewable-energy-development-authority-sreda' } },
+      { label: 'Net-metered registry', value: '2,657 net-metered rooftop systems ≈116 MW, plus 264 non-net-metered systems ≈94 MW', asOf: 'Mar 2025', source: { label: 'pv magazine', url: 'https://www.pv-magazine.com/2025/03/17/bangladesh-seeking-to-improve-net-metering-for-rooftop-pv/' } },
+      { label: '2025 guideline revision', value: 'Rooftop solar allowance raised 70% → 100% of sanctioned load; single-phase and prepaid consumers made eligible', asOf: 'Sep 2025', source: { label: 'pv magazine', url: 'https://www.pv-magazine.com/2025/09/10/bangladesh-revises-net-metering-rules-to-expand-solar/' } },
+      { label: 'National Solar Help Desk', value: 'Online portal (nshd.sreda.gov.bd) processing and tracking rooftop solar applications', asOf: '2026', source: { label: 'SREDA National Solar Help Desk', url: 'https://www.nshd.sreda.gov.bd/about' } },
+      { label: 'Certification schemes', value: 'Runs Energy Manager Certification and certifies energy auditors for designated consumers under the EE&C Rules 2016', asOf: '2022', source: { label: 'SREDA (certification module)', url: 'https://sreda.portal.gov.bd/sites/default/files/files/sreda.portal.gov.bd/page/37b731e9_248c_407a_a75b_0d081364690e/2023-01-03-10-12-1cd2f30399fba886f0abbb42812c0f69.pdf' } },
+    ],
   },
   {
     slug: 'baera',
@@ -565,6 +738,14 @@ export const POLICIES: Policy[] = [
         'Established under the Atomic Energy Regulatory Act 2012.',
       ],
     },
+    dataPoints: [
+      { label: 'Formed', value: '12 February 2013 under the Atomic Energy Regulatory Act 2012; HQ Agargaon, Dhaka (Ministry of Science & Technology)', asOf: 'Feb 2013', source: { label: 'IAEA (CNS National Report)', url: 'https://www.iaea.org/sites/default/files/24/02/cns_bangladesh_national_report_2022.pdf' } },
+      { label: 'Rooppur siting licence', value: 'Issued to the Bangladesh Atomic Energy Commission on 21 June 2016', asOf: 'Jun 2016', source: { label: 'IAEA (CNS National Report)', url: 'https://www.iaea.org/sites/default/files/24/02/cns_bangladesh_national_report_2022.pdf' } },
+      { label: 'Construction licences', value: 'Rooppur Unit 1: 2 November 2017; Unit 2: 8 July 2018', asOf: 'Jul 2018', source: { label: 'IAEA (CNS National Report)', url: 'https://www.iaea.org/sites/default/files/24/02/cns_bangladesh_national_report_2022.pdf' } },
+      { label: 'Unit 1 operating licence', value: 'Issued 16 April 2026 — clearing Bangladesh’s first nuclear unit for fuel loading and commissioning', asOf: 'Apr 2026', source: { label: 'World Nuclear News', url: 'https://world-nuclear-news.org/articles/operating-licence-issued-for-first-bangladesh-nuclear-power-unit' } },
+      { label: 'Fuel loading', value: 'All 163 fuel assemblies loaded into Rooppur Unit 1 between 28 April and 12 May 2026', asOf: 'May 2026', source: { label: 'World Nuclear News', url: 'https://www.world-nuclear-news.org/articles/nuclear-fuel-loading-completed-at-rooppur-1' } },
+      { label: 'IAEA oversight', value: 'Reports under the Convention on Nuclear Safety peer-review process covering Rooppur regulation', asOf: '2022', source: { label: 'IAEA', url: 'https://www.iaea.org/sites/default/files/24/02/cns_bangladesh_national_report_2022.pdf' } },
+    ],
   },
 ];
 
@@ -577,7 +758,15 @@ export const POLICY_STATUSES: readonly PolicyStatus[] = ['In force', 'Draft', 'S
 export function resolvePolicies(settings: Record<string, unknown> | undefined): Policy[] {
   const custom = settings?.policyFramework;
   if (Array.isArray(custom) && custom.length > 0) {
-    return (custom as Policy[]).filter((p) => p && typeof p.slug === 'string' && typeof p.title === 'string');
+    return (custom as Policy[])
+      .filter((p) => p && typeof p.slug === 'string' && typeof p.title === 'string')
+      .map((p) => {
+        // CMS snapshots predating the dataPoints field would otherwise hide the
+        // curated official figures — fall back to the code defaults per slug.
+        if (p.dataPoints?.length) return p;
+        const fallback = POLICIES.find((d) => d.slug === p.slug)?.dataPoints;
+        return fallback?.length ? { ...p, dataPoints: fallback } : p;
+      });
   }
   return POLICIES;
 }

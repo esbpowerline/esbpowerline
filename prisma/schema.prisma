@@ -195,6 +195,8 @@ model Revision {
   userId    String?
   note      String?
   createdAt DateTime @default(now())
+
+  @@index([articleId])
 }
 
 // ============================================
@@ -229,6 +231,8 @@ model Comment {
   status      CommentStatus @default(PENDING)
   likes       Int           @default(0)
   createdAt   DateTime      @default(now())
+
+  @@index([articleId])
 }
 
 model SavedItem {
@@ -254,6 +258,8 @@ model MemberDownload {
   label     String
   fileUrl   String?
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 /** Paid grid archive subscription — payment webhook activates plan. */
@@ -456,6 +462,8 @@ model Notification {
   linkUrl   String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 // ============================================
@@ -480,6 +488,8 @@ model ArticleHistory {
   changedBy  String   // Profile.id
   comment    String?
   createdAt  DateTime @default(now())
+
+  @@index([articleId])
 }
 
 // ============================================

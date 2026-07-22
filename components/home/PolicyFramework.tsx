@@ -49,10 +49,21 @@ function SectionHeader({ title, tint }: { title: string; tint: PolicyTint }) {
   );
 }
 
-export function PolicyFramework({ policies = POLICIES }: { policies?: Policy[] }) {
+export function PolicyFramework({
+  policies = POLICIES,
+  layout = 'rail',
+}: {
+  policies?: Policy[];
+  /** 'rail' = compact sidebar widget; 'full' = full-width band with the four groups side by side. */
+  layout?: 'rail' | 'full';
+}) {
+  const full = layout === 'full';
   return (
-    <section className="mt-8 rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden" aria-labelledby="policy-framework-title">
-      <div className="p-4 md:p-5">
+    <section
+      className={`${full ? 'mt-10' : 'mt-8'} rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden`}
+      aria-labelledby="policy-framework-title"
+    >
+      <div className={full ? 'p-5 md:p-6' : 'p-4 md:p-5'}>
         <header className="mb-4">
           <div className="flex items-center gap-2">
             <span aria-hidden className="h-px flex-1 rounded-full bg-gradient-to-r from-transparent to-border" />
@@ -63,7 +74,7 @@ export function PolicyFramework({ policies = POLICIES }: { policies?: Policy[] }
           </div>
         </header>
 
-        <div className="flex flex-col gap-5">
+        <div className={full ? 'grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4' : 'flex flex-col gap-5'}>
           {POLICY_GROUPS.map((group) => {
             const Icon = group.icon;
             const items = policies.filter((p) => p.group === group.key && p.featured);

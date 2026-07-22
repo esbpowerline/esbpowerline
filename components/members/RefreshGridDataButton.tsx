@@ -6,13 +6,20 @@ import { RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from '@/utils/supabase/auth-context';
 import { triggerGridRefresh } from '@/lib/actions/members';
+import { ROLES } from '@/lib/constants';
 
 export function RefreshGridDataButton() {
   const router = useRouter();
-  const { status } = useSession();
+  const { data, status } = useSession();
   const [pending, startTransition] = useTransition();
 
   const signedIn = status === 'authenticated';
+  const role = data?.user?.role;
+  const canRefresh =
+    signedIn && !!role && !!ROLES[role] && ROLES[role].level >= ROLES.EDITOR.level;
+
+  // Editors and administrators only — hidden for everyone else.
+  if (!canRefresh) return null;
 
   function handleRefresh() {
     if (!signedIn) {

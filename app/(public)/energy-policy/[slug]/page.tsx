@@ -60,7 +60,7 @@ export default async function PolicyDetailPage({ params }: Props) {
 
   return (
     <div className="container container--shell py-8 md:py-10">
-      <div className="mx-auto max-w-3xl">
+      <div className="w-full">
         <Link href="/energy-policy" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           <ArrowLeft className="w-4 h-4" />
           Policy &amp; Regulatory Framework
@@ -76,11 +76,25 @@ export default async function PolicyDetailPage({ params }: Props) {
             <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${STATUS_STYLE[policy.status]}`}>{policy.status}</span>
           </div>
           <h1 className="mt-3 font-display text-3xl md:text-4xl font-bold tracking-tight text-foreground">{policy.title}</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {policy.authority} · {policy.year}
-          </p>
+
+          {/* Document fact strip — gazette-style metadata ruler */}
+          <dl className="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/50 sm:grid-cols-4">
+            {[
+              ['Instrument', group.title],
+              ['Authority', policy.authority],
+              ['Year', policy.year],
+              ['Official source', policy.source.label],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-card px-4 py-3">
+                <dt className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">{label}</dt>
+                <dd className="mt-1 text-[13px] font-semibold leading-snug text-foreground">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </header>
 
+        <div className="mt-0 lg:grid lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start lg:gap-10">
+        <div className="min-w-0">
         {/* Caveat callout */}
         {policy.note && (
           <div className="mt-6 flex gap-2.5 rounded-xl border border-amber-500/25 bg-amber-500/[0.06] px-4 py-3">
@@ -89,41 +103,36 @@ export default async function PolicyDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Overview */}
+        {/* Overview — set as a lede paragraph */}
         <section className="mt-6">
-          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Overview</h2>
-          <p className="mt-2 text-[15px] leading-relaxed text-foreground/90">{policy.brief.overview}</p>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Overview</h2>
+            <span aria-hidden className="h-px flex-1 bg-border/60" />
+          </div>
+          <p className="mt-3 text-[16px] md:text-[17px] leading-relaxed text-foreground/90">{policy.brief.overview}</p>
         </section>
 
-        {/* Key provisions */}
-        <section className="mt-6">
-          <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Key points</h2>
-          <ul className="mt-2 space-y-2">
+        {/* Key provisions — numbered like statute clauses */}
+        <section className="mt-8">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Key provisions</h2>
+            <span aria-hidden className="h-px flex-1 bg-border/60" />
+          </div>
+          <ol className="mt-3 space-y-3">
             {policy.brief.keyPoints.map((point, i) => (
-              <li key={i} className="flex gap-2 text-[15px] leading-relaxed text-foreground/90">
-                <span className={`mt-[9px] h-1.5 w-1.5 shrink-0 rounded-full ${TINT_TEXT[group.tint]} bg-current`} />
+              <li key={i} className="flex gap-3.5 text-[15px] leading-relaxed text-foreground/90">
+                <span className={`mt-px select-none font-mono text-[13px] font-bold tabular-nums ${TINT_TEXT[group.tint]}`}>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
                 <span>{point}</span>
               </li>
             ))}
-          </ul>
+          </ol>
         </section>
 
-        {/* Timeline */}
-        {policy.brief.timeline && policy.brief.timeline.length > 0 && (
-          <section className="mt-6">
-            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Timeline</h2>
-            <ul className="mt-2 space-y-2.5 border-l border-border/60 pl-4">
-              {policy.brief.timeline.map((t, i) => (
-                <li key={i} className="relative">
-                  <span className={`absolute -left-[21px] top-1 h-2 w-2 rounded-full ${TINT_TEXT[group.tint]} bg-current`} />
-                  <span className="text-[13px] font-semibold text-foreground">{t.date}</span>
-                  <span className="text-[14px] text-muted-foreground"> — {t.event}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        </div>
 
+        <aside className="mt-8 lg:mt-0 space-y-6">
         {/* Official source */}
         <section className="mt-8 rounded-2xl border border-border/60 bg-muted/20 p-4 md:p-5">
           <div className="flex items-center gap-2">
@@ -153,11 +162,69 @@ export default async function PolicyDetailPage({ params }: Props) {
           </p>
         </section>
 
+        </aside>
+        </div>
+
+        {/* Official figures — verified data points, each with its own citation */}
+        {policy.dataPoints && policy.dataPoints.length > 0 && (
+          <section className="mt-10">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Official figures</h2>
+              <span aria-hidden className="h-px flex-1 bg-border/60" />
+            </div>
+            <dl className="mt-4 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/50 sm:grid-cols-2 xl:grid-cols-3">
+              {policy.dataPoints.map((dp) => (
+                <div key={dp.label} className="flex flex-col bg-card px-4 py-3.5">
+                  <dt className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{dp.label}</dt>
+                  <dd className="mt-1.5 flex-1 text-[14.5px] font-semibold leading-snug text-foreground tabular-nums">{dp.value}</dd>
+                  <dd className="mt-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[11px] text-muted-foreground/90">
+                    <span>{dp.asOf ? `As of ${dp.asOf}` : ' '}</span>
+                    <a
+                      href={dp.source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-w-0 items-center gap-1 hover:text-primary hover:underline"
+                    >
+                      <span className="truncate">{dp.source.label}</span>
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/80">
+              Figures verified against the linked official or authoritative source shown on each row.
+            </p>
+          </section>
+        )}
+
+        {/* Timeline */}
+        {policy.brief.timeline && policy.brief.timeline.length > 0 && (
+          <section className="mt-8">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">Timeline</h2>
+              <span aria-hidden className="h-px flex-1 bg-border/60" />
+            </div>
+            <ul className="mt-4 space-y-3 border-l border-border/60 pl-5">
+              {policy.brief.timeline.map((t, i) => (
+                <li key={i} className="relative">
+                  <span className={`absolute -left-[25px] top-[5px] h-2 w-2 rounded-full ${TINT_TEXT[group.tint]} bg-current`} />
+                  <span className="font-mono text-[12.5px] font-bold tabular-nums text-foreground">{t.date}</span>
+                  <span className="text-[14px] text-muted-foreground"> — {t.event}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* Related in group */}
         {related.length > 0 && (
           <section className="mt-8">
-            <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">More in {group.title}</h2>
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">More in {group.title}</h2>
+              <span aria-hidden className="h-px flex-1 bg-border/60" />
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((r) => (
                 <Link
                   key={r.slug}
