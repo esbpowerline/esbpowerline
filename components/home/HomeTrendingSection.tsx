@@ -146,16 +146,6 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
     scheduleNext();
   };
 
-  const selectStory = (index: number) => {
-    clearTimer();
-    rotationAnchorRef.current = index;
-    rotationAnchorTimeRef.current = Date.now();
-    setActive(index);
-    hoveredRef.current = null;
-    setHovered(null);
-    scheduleNext();
-  };
-
   const article = trending[displayIndex];
   if (!article) return null;
 
@@ -245,26 +235,23 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
         <div className="flex-shrink-0 pt-3 border-t border-border/10 dark:border-border/20">
           <div
             className="home-trending-wave__queue"
-            role="tablist"
             aria-label={t('home.trendingWeek')}
             onMouseLeave={handleQueueLeave}
           >
             {trending.map((item, index) => (
-              <button
+              <Link
                 key={item.slug}
-                type="button"
-                role="tab"
-                aria-selected={index === displayIndex}
+                href={`/articles/${item.slug}`}
+                aria-current={index === displayIndex ? 'true' : undefined}
                 className={`home-trending-wave__queue-item${
                   index === displayIndex ? ' home-trending-wave__queue-item--active' : ''
                 }`}
                 onMouseEnter={() => handleQueueEnter(index)}
                 onFocus={() => handleQueueEnter(index)}
-                onClick={() => selectStory(index)}
               >
                 <span className="home-trending-wave__queue-rank">{String(index + 1).padStart(2, '0')}</span>
                 <span className="home-trending-wave__queue-title">{resolveDisplayTitle(item.title, item.shortTitle)}</span>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
