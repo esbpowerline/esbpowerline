@@ -77,6 +77,7 @@ export function ArticlesClient({ categories, allArticles, locale }: ArticlesClie
               <ArticleCard
                 key={article.id}
                 id={article.slug}
+                articleId={article.id}
                 title={article.title}
                 shortTitle={article.shortTitle}
                 excerpt={article.excerpt}

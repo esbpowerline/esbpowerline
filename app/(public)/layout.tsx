@@ -4,6 +4,7 @@ import { PublicNavbar } from '@/components/shared/PublicNavbar';
 import { PublicFooter } from '@/components/shared/PublicFooter';
 import { getPublicCategories } from '@/lib/category-content';
 import { getPublicSettingsMap } from '@/lib/homepage-content';
+import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 
 export const revalidate = 300;
 
@@ -18,16 +19,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  const [categories, settings] = await Promise.all([
+  const [categories, settings, liveTicker] = await Promise.all([
     getPublicCategories(),
     getPublicSettingsMap(),
+    getLiveTickerItems().catch(() => null),
   ]);
 
   return (
     <>
       <PublicNavbar
         categories={categories}
-        tickerItems={settings.ticker as TickerItem[] | undefined}
+        tickerItems={liveTicker ?? (settings.ticker as TickerItem[] | undefined)}
       />
       {children}
       <PublicFooter categories={categories} />

@@ -39,9 +39,25 @@ const nextConfig: NextConfig = {
     ],
   },
 
+  // The grid export route reads daily JSON + the logo from disk at runtime; force
+  // them into that function's bundle so exports work on Vercel serverless.
+  outputFileTracingIncludes: {
+    '/api/members/grid-export': [
+      './public/data/daily/**',
+      './public/data/petrobangla/daily/**',
+      './public/data/petrobangla/_index.json',
+      './public/images/esb-logo.png',
+      './public/fonts/**',
+    ],
+  },
+
   env: {
     NEXT_PUBLIC_APP_SURFACE: surface,
   },
+
+  // react-pdf ships fontkit/yoga and other Node-native bits — keep it out of the
+  // webpack server bundle so the grid-export PDF route works on serverless.
+  serverExternalPackages: ['@react-pdf/renderer'],
 
   experimental: {
     serverActions: {

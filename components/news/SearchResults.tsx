@@ -41,6 +41,7 @@ export function SearchResults({ articles }: { articles: PublicArticleCard[] }) {
           <ArticleCard
             key={a.id}
             id={a.slug}
+            articleId={a.id}
             title={a.title}
             shortTitle={a.shortTitle}
             excerpt={a.excerpt}

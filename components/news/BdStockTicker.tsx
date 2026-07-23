@@ -124,12 +124,15 @@ export function BdStockTicker({
             <span className="md:hidden">DSE</span>
             <span className="hidden md:inline">{t('ticker.dse')}</span>
           </span>
-          <span className="relative flex h-1.5 w-1.5 shrink-0">
+          <span
+            className="hidden md:inline text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70"
+            title="Curated snapshot of DSE power-sector tickers - not a live market feed"
+          >
+            Indicative
+          </span>
+          <span className="relative flex h-1.5 w-1.5 shrink-0" title={marketOpen ? 'DSE trading hours' : 'DSE closed'}>
             {marketOpen ? (
-              <>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
-              </>
+              <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
             ) : (
               <span className="relative inline-flex rounded-full h-full w-full bg-rose-500"></span>
             )}
@@ -141,12 +144,15 @@ export function BdStockTicker({
           <span className="text-[10px] font-semibold uppercase tracking-[0.1em] md:text-[11px]">
             {t('ticker.dse')}
           </span>
-          <span className="relative flex h-1.5 w-1.5 shrink-0">
+          <span
+            className="hidden md:inline text-[8px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70"
+            title="Curated snapshot of DSE power-sector tickers - not a live market feed"
+          >
+            Indicative
+          </span>
+          <span className="relative flex h-1.5 w-1.5 shrink-0" title={marketOpen ? 'DSE trading hours' : 'DSE closed'}>
             {marketOpen ? (
-              <>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
-              </>
+              <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
             ) : (
               <span className="relative inline-flex rounded-full h-full w-full bg-rose-500"></span>
             )}

@@ -6,9 +6,15 @@ import { useEffect, useState, useTransition, useCallback } from 'react';
 import { FileDown, ArrowRight, Loader2, RefreshCw, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
-import { getSavedSiteTheme, applySiteTheme, type SiteTheme } from '@/lib/site-theme';
+import { GridExportDialog } from '@/components/members/GridExportDialog';
 
-export function MemberToolsPanel() {
+export function MemberToolsPanel({
+  latestDate,
+  earliestDate,
+}: {
+  latestDate?: string;
+  earliestDate?: string;
+}) {
   const { status } = useSession();
   const signedIn = status === 'authenticated';
 
@@ -28,21 +34,6 @@ export function MemberToolsPanel() {
       }
     });
   }, [signedIn]);
-
-  function handlePdfPrint(theme: SiteTheme) {
-    if (typeof window === 'undefined') return;
-    const currentTheme = getSavedSiteTheme();
-    applySiteTheme(theme);
-    setTimeout(() => {
-      const restore = () => {
-        applySiteTheme(currentTheme);
-        window.removeEventListener('afterprint', restore);
-      };
-      window.addEventListener('afterprint', restore);
-      window.print();
-      setTimeout(restore, 2000);
-    }, 300);
-  }
 
   useEffect(() => {
     if (signedIn) {
@@ -125,38 +116,24 @@ export function MemberToolsPanel() {
         </div>
       </div>
 
-      {/* PDF Export Card */}
+      {/* Data & Report Export Card */}
       <div className="w-full border border-border/40 bg-muted/10 rounded-xl p-4 space-y-2 text-left flex flex-col justify-between">
         <div>
           <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 mb-2">
-            <Printer className="h-4 w-4 text-primary" /> PDF Report Export
+            <Printer className="h-4 w-4 text-primary" /> Data &amp; Report Export
           </h4>
           <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-            Generate and download a beautifully formatted A4 audit report with all generation statistics, transmission assets, and financial metrics in your chosen layout theme.
+            Build a curated export — pick datasets, columns and date range, then download a beautifully
+            formatted A4 report (PDF) or the raw data as Excel or CSV.
           </p>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handlePdfPrint('midnight')}
-              className="btn btn-secondary text-xs py-2 px-1 justify-center text-center font-bold bg-blue-950/20 text-blue-400 hover:bg-blue-950/40 border-blue-900/30 transition-colors"
-            >
-              Midnight
-            </button>
-            <button
-              type="button"
-              onClick={() => handlePdfPrint('dark')}
-              className="btn btn-secondary text-xs py-2 px-1 justify-center text-center font-bold bg-zinc-900/40 text-zinc-400 hover:bg-zinc-900 border-zinc-800 transition-colors"
-            >
-              Charcoal
-            </button>
-            <button
-              type="button"
-              onClick={() => handlePdfPrint('white')}
-              className="btn btn-secondary text-xs py-2 px-1 justify-center text-center font-bold bg-slate-100 text-slate-800 hover:bg-slate-200 border-slate-300 transition-colors"
-            >
-              Light Print
-            </button>
-          </div>
+          {latestDate ? (
+            <GridExportDialog
+              latestDate={latestDate}
+              earliestDate={earliestDate ?? latestDate}
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground/70 italic">Export options load with the grid data.</p>
+          )}
         </div>
       </div>
     </div>

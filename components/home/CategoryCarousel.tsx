@@ -295,6 +295,7 @@ export function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }
               <div className="pointer-events-auto">
                 <ArticleCard
                   id={article.slug}
+                  articleId={article.id}
                   title={article.title}
                   shortTitle={article.shortTitle}
                   excerpt={article.excerpt}

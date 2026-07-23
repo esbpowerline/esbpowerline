@@ -1,7 +1,7 @@
 /**
  * API path prefixes gated by middleware.ts (CRON_SECRET or role-scoped session).
  * Role requirements enforced in middleware.ts: analytics → analytics.view_all,
- * upload → media.upload, grid-export → SUBSCRIBER only.
+ * upload → media.upload, grid-export → any signed-in role (tier resolved in route).
  */
 export const PROXY_PROTECTED_API_PREFIXES = [
   '/api/analytics',

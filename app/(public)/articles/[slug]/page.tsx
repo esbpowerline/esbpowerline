@@ -22,6 +22,7 @@ import { safeJsonLd } from '@/lib/json-ld';
 import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
+import { QuickEditButton } from '@/components/editor/QuickEditButton';
 import prisma from '@/lib/prisma';
 
 export const revalidate = 600;
@@ -172,6 +173,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
           
           <div className="article-meta-actions flex items-center gap-2">
+            <QuickEditButton articleId={article.id} variant="inline" />
             <ShareArticleMenu title={article.title} slug={slug} />
             <SaveArticleButton
               articleId={article.id}
@@ -267,6 +269,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <ArticleCard
               key={r.id}
               id={r.slug}
+              articleId={r.id}
               title={r.title}
               shortTitle={r.shortTitle}
               excerpt={r.excerpt}

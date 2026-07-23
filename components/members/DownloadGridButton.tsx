@@ -13,15 +13,19 @@ export function DownloadGridButton({ className = '', onDownloadSuccess }: { clas
   function handleDownload() {
     startTransition(async () => {
       try {
-        const res = await fetch('/api/members/grid-export');
+        // Latest-day, all datasets, as a single Excel workbook.
+        const res = await fetch('/api/members/grid-export?format=xlsx&datasets=all');
         if (!res.ok) {
           throw new Error('Download failed');
         }
+        const disposition = res.headers.get('Content-Disposition');
+        const match = disposition ? /filename="?([^"]+)"?/.exec(disposition) : null;
+        const filename = match ? match[1] : 'esb-grid-export.xlsx';
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = 'esb-grid-snapshot.csv';
+        anchor.download = filename;
         anchor.click();
         URL.revokeObjectURL(url);
         toast.success('Grid snapshot downloaded');
@@ -46,7 +50,7 @@ export function DownloadGridButton({ className = '', onDownloadSuccess }: { clas
       className={cn('btn btn-primary flex items-center justify-center gap-1.5 text-xs w-full py-2', className)}
     >
       <Download className="h-3.5 w-3.5" />
-      {pending ? 'Preparing…' : 'Download Grid (CSV)'}
+      {pending ? 'Preparing…' : 'Download grid data (Excel)'}
     </button>
   );
 }

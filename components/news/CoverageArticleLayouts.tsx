@@ -247,6 +247,7 @@ export function CoverageArticle({ article, layout }: ArticleProps) {
       return (
         <ArticleCard
           id={article.slug}
+          articleId={article.id}
           title={article.title}
           shortTitle={article.shortTitle}
           excerpt={article.excerpt}

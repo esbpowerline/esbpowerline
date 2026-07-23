@@ -160,6 +160,24 @@ export function formatNumber(num: number, maxFractionDigits = 0): string {
   return num.toLocaleString('en-IN', { maximumFractionDigits: maxFractionDigits });
 }
 
+/**
+ * Format a per-unit rate (e.g. Tk/KWh) to exactly two decimals, TRUNCATING the
+ * third decimal rather than rounding — so 6.517 renders as "6.51", not "6.52".
+ * The intermediate toFixed(4) absorbs binary float error before the floor so a
+ * value like 5.83 (stored as 5.8299999…) is not truncated down to "5.82".
+ */
+export function formatUnitRate(value: number): string {
+  if (!Number.isFinite(value)) return '—';
+  const truncated = Math.floor(Number((value * 100).toFixed(4))) / 100;
+  return truncated.toFixed(2);
+}
+
+/** Format a monetary BDT amount to exactly two decimal places. */
+export function formatBdtAmount(value: number): string {
+  if (!Number.isFinite(value)) return '0.00';
+  return value.toFixed(2);
+}
+
 export function extractKeywords(title: string, contentHtml: string): string[] {
   // Simple check to avoid import loops if called from validations
   const text = (title + ' ' + (contentHtml ? contentHtml.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ') : ''))

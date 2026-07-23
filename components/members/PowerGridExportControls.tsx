@@ -2,11 +2,19 @@
 
 import { useSession } from '@/utils/supabase/auth-context';
 import Link from 'next/link';
-import { DownloadGridButton } from '@/components/members/DownloadGridButton';
+import { GridExportDialog } from '@/components/members/GridExportDialog';
 import { cn } from '@/lib/utils';
 import { Download } from 'lucide-react';
 
-export function PowerGridExportControls({ className = '' }: { className?: string }) {
+export function PowerGridExportControls({
+  className = '',
+  latestDate,
+  earliestDate,
+}: {
+  className?: string;
+  latestDate?: string;
+  earliestDate?: string;
+}) {
   const { status } = useSession();
   const signedIn = status === 'authenticated';
 
@@ -16,9 +24,13 @@ export function PowerGridExportControls({ className = '' }: { className?: string
     );
   }
 
-  if (signedIn) {
+  if (signedIn && latestDate) {
     return (
-      <DownloadGridButton className={cn('w-full justify-center py-2 text-xs', className)} />
+      <GridExportDialog
+        latestDate={latestDate}
+        earliestDate={earliestDate ?? latestDate}
+        className={className}
+      />
     );
   }
 

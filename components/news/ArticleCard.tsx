@@ -11,9 +11,12 @@ import { hasArticleImage } from '@/lib/article-image';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { heroImageStyle } from '@/lib/hero-image';
 import { resolveDisplayTitle } from '@/lib/editorial-limits';
+import { QuickEditButton } from '@/components/editor/QuickEditButton';
 
 interface ArticleCardProps {
   id: string;
+  /** Database id of the article — enables the staff quick-edit shortcut to the CMS. */
+  articleId?: string;
   title: string;
   shortTitle?: string | null;
   excerpt?: string | null;
@@ -32,6 +35,7 @@ interface ArticleCardProps {
 
 export function ArticleCard({
   id,
+  articleId,
   title,
   shortTitle,
   excerpt,
@@ -73,6 +77,7 @@ export function ArticleCard({
           {!isPinned && isFeatured ? <ArticlePlacementBadge type="featured" compact /> : null}
           {isBreaking ? <ArticlePlacementBadge type="breaking" compact /> : null}
         </div>
+        <QuickEditButton articleId={articleId} variant="card" />
       </div>
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>

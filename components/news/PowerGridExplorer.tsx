@@ -13,7 +13,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
   Tooltip, Line, CartesianGrid, Area, ComposedChart,
 } from 'recharts';
-import { cn, formatNumber } from '@/lib/utils';
+import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import {
   GridLiveBadge,
@@ -1406,7 +1406,7 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head">
               <div>
                 <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
-                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type (Total: {(totalCostBdt / 10000000).toFixed(1)} Cr Tk.) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
+                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type (Total: {formatBdtAmount(totalCostBdt / 10000000)} Cr Tk.) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
               </div>
               <span className="grid-explorer-chip">Cost Analysis</span>
             </div>
@@ -1434,7 +1434,7 @@ export function PowerGridExplorer({
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null;
                         const row = payload[0].payload;
-                        const cr = (row.cost / 10000000).toFixed(3);
+                        const cr = formatBdtAmount(row.cost / 10000000);
                         return (
                           <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                             <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
@@ -1448,7 +1448,7 @@ export function PowerGridExplorer({
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-muted-foreground">Average Unit Rate:</span>
-                                <span className="font-bold text-foreground">{row.unitCost.toFixed(3)} Tk/KWh</span>
+                                <span className="font-bold text-foreground">{formatUnitRate(row.unitCost)} Tk/KWh</span>
                               </div>
                             </div>
                             <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
@@ -1496,7 +1496,7 @@ export function PowerGridExplorer({
                   Avg Production Cost
                 </div>
                 <div className="text-2xl font-bold mt-1.5 text-primary tabular-nums leading-none">
-                  {systemStats.avgProductionCost.toFixed(3)}{' '}
+                  {formatUnitRate(systemStats.avgProductionCost)}{' '}
                   <span className="text-xs font-medium text-muted-foreground">Tk/KWh</span>
                 </div>
               </div>
@@ -1690,7 +1690,7 @@ export function PowerGridExplorer({
                         </td>
                         <td className="text-left tabular-nums">{g.gen.toFixed(2)}</td>
                         <td className="text-left tabular-nums text-muted-foreground">{genShare}%</td>
-                        <td className="text-left tabular-nums">{(g.cost / 10000000).toFixed(3)}</td>
+                        <td className="text-left tabular-nums">{formatBdtAmount(g.cost / 10000000)}</td>
                         <td className="text-left tabular-nums text-muted-foreground">{costShare}%</td>
                         <td className="text-left tabular-nums font-mono text-sm">{g.unitCost.toFixed(2)}</td>
                       </tr>
@@ -1702,7 +1702,7 @@ export function PowerGridExplorer({
                     <td className="text-left tabular-nums">100.00%</td>
                     <td className="text-left tabular-nums">{(totalCostBdt / 10000000).toFixed(2)}</td>
                     <td className="text-left tabular-nums">100.00%</td>
-                    <td className="text-left tabular-nums font-mono text-sm text-primary">{avgCostPerKwh.toFixed(3)}</td>
+                    <td className="text-left tabular-nums font-mono text-sm text-primary">{formatUnitRate(avgCostPerKwh)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -4551,7 +4551,7 @@ export function PowerGridExplorer({
                       Icon: TrendingUp,
                       iconColor: "text-destructive",
                       label: "True Gen Cost:",
-                      value: `${systemStats.avgProductionCost.toFixed(2)} Tk/KWh`,
+                      value: `${formatUnitRate(systemStats.avgProductionCost)} Tk/KWh`,
                       valueColor: "text-foreground",
                       tooltipTitle: "Real Production Cost",
                       tooltipDesc: "BPDB's current blended per-unit generation and procurement cost, factoring in fuel prices and IPP capacity payments.",
@@ -6902,7 +6902,7 @@ export function PowerGridExplorer({
         </div>
         <div className="border border-border/60 p-3 rounded-lg bg-muted/5">
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Avg. Generation Cost</span>
-          <div className="text-lg font-bold text-foreground mt-1">{systemStats.avgProductionCost.toFixed(3)} Tk/KWh</div>
+          <div className="text-lg font-bold text-foreground mt-1">{formatUnitRate(systemStats.avgProductionCost)} Tk/KWh</div>
         </div>
       </div>
 
@@ -6935,7 +6935,7 @@ export function PowerGridExplorer({
               <td className="py-1.5 px-2">Total System</td>
               <td className="text-right py-1.5 px-2 tabular-nums">{totalGenMkwhr.toFixed(2)}</td>
               <td className="text-right py-1.5 px-2 tabular-nums">{formatNumber(totalCostBdt)}</td>
-              <td className="text-right py-1.5 px-2 tabular-nums">{(totalCostBdt / (totalGenMkwhr * 1000000)).toFixed(3)} Tk</td>
+              <td className="text-right py-1.5 px-2 tabular-nums">{formatUnitRate(totalCostBdt / (totalGenMkwhr * 1000000))} Tk</td>
               <td className="text-right py-1.5 px-2">100%</td>
             </tr>
           </tbody>

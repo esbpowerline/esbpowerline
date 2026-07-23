@@ -296,6 +296,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
               <div className="pointer-events-auto flex-1 flex flex-col">
                 <ArticleCard
                   id={article.slug}
+                  articleId={article.id}
                   title={article.title}
                   shortTitle={article.shortTitle}
                   excerpt={article.excerpt}

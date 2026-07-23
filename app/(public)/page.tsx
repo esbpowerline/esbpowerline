@@ -42,6 +42,7 @@ import {
 } from '@/lib/category-content';
 import { getLatestYoutubeInterviews } from '@/lib/youtube-channel';
 import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
+import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 import { createTranslator } from '@/lib/i18n/messages';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
 
@@ -61,7 +62,7 @@ export const metadata = {
 export default async function Home() {
   const locale = await getServerSiteLocale();
   const settingsPromise = getPublicSettingsMap();
-  const [settings, trending, magazineRow, categories, featuredArticles, carouselItems, coverageSlots, pinnedArticles, interviews, dailySnapshot] =
+  const [settings, trending, magazineRow, categories, featuredArticles, carouselItems, coverageSlots, pinnedArticles, interviews, dailySnapshot, liveTicker] =
     await Promise.all([
       settingsPromise,
       getTrendingPublishedArticles(5, locale),
@@ -77,6 +78,7 @@ export default async function Home() {
       getPinnedCoverageArticles(locale),
       getLatestYoutubeInterviews(4),
       getLatestHomeSnapshot(),
+      getLiveTickerItems().catch(() => null),
     ]);
 
   const categoriesWithArticles = await Promise.all(
@@ -118,7 +120,7 @@ export default async function Home() {
             <div className="home-hero-band__hero">
               <FeaturedCarousel
                 items={carouselItems}
-                tickerItems={settings.ticker as TickerItem[] | undefined}
+                tickerItems={liveTicker ?? (settings.ticker as TickerItem[] | undefined)}
                 inBand
                 footerLabels={carouselFooterLabels}
               />

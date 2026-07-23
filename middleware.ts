@@ -64,7 +64,9 @@ function denyDailyJson(message: string, status = 403): NextResponse {
 
 function apiRoleAllowed(pathname: string, role: Role): boolean {
   if (pathname === '/api/members/grid-export' || pathname.startsWith('/api/members/grid-export/')) {
-    return role === 'SUBSCRIBER';
+    // Any signed-in account may export: members by plan tier, staff at full tier.
+    // The route resolves the tier and enforces range clamps + rate limits.
+    return Boolean(role);
   }
   if (pathname === '/api/analytics' || pathname.startsWith('/api/analytics/')) {
     return can(role, 'analytics.view_all');

@@ -3,7 +3,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { localizeTickerItem } from '@/lib/i18n/homepage-copy';
 
@@ -47,36 +46,14 @@ export function LiveMarketTicker({
     [sourceItems, locale],
   );
 
+  // Values are real (derived server-side from the daily archives + published
+  // prices) — no client-side simulation; the change % is a true daily delta.
   const [items, setItems] = useState<TickerItem[]>(localizedSeed);
-  const [marketOpen, setMarketOpen] = useState(true);
-
-  const simulateLive = isSimulatedTelemetryEnabled();
+  const [marketOpen] = useState(true);
 
   useEffect(() => {
-    if (!simulateLive) return;
-
-    const interval = setInterval(() => {
-      if (document.hidden) return;
-      
-      setItems((prev) =>
-        prev.map((item) => {
-          if (Math.random() > 0.4) {
-            const delta =
-              (Math.random() - 0.5) *
-              (item.id === 'fx' || item.id === 'tariff' ? 0.15 : item.value > 50 ? 1.2 : 0.008);
-            const newVal = Math.max(0.01, parseFloat((item.value + delta).toFixed(item.value > 100 ? 1 : 2)));
-            const newChange = parseFloat(
-              (((newVal - item.value) / item.value) * 100 * (item.id === 'fx' ? 5 : 1)).toFixed(1),
-            );
-            return { ...item, value: newVal, change: newChange };
-          }
-          return item;
-        })
-      );
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [simulateLive]);
+    setItems(localizedSeed);
+  }, [localizedSeed]);
 
   const trackRef = React.useRef<HTMLDivElement>(null);
   const animationRef = React.useRef<Animation | null>(null);

@@ -5,7 +5,7 @@ import { PowerGridExplorerClient } from '@/components/news/PowerGridExplorerClie
 import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButton';
 import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
 import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
-import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
+import { getLatestAvailableDate, availableDates } from '@/lib/data/grid/available-dates';
 import { Activity } from 'lucide-react';
 import { Suspense } from 'react';
 import { safeJsonLd } from '@/lib/json-ld';
@@ -70,7 +70,10 @@ export default async function PowerGridExplorerPage() {
             <RefreshGridDataButton />
           </div>
           <div className="flex-1 lg:flex-none transition-transform duration-200 hover:-translate-y-0.5">
-            <PowerGridExportControls />
+            <PowerGridExportControls
+              latestDate={latestDate ?? undefined}
+              earliestDate={availableDates[0]}
+            />
           </div>
         </div>
       </div>
@@ -83,7 +86,7 @@ export default async function PowerGridExplorerPage() {
         />
       </Suspense>
 
-      <MemberToolsPanel />
+      <MemberToolsPanel latestDate={latestDate ?? undefined} earliestDate={availableDates[0]} />
 
     </div>
   );
