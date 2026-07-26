@@ -98,6 +98,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Average power over the 24h day: 1 MKWh/day = 1000 MWh / 24h = 41.67 MW
+  const dailyGenAvgMw = (systemStats.totalEnergyGen * 1000) / 24;
+
   return (
     <GridKpiStrip stripRef={kpiStripRef}>
       <GridKpiCell
@@ -108,7 +111,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <DailyBadge />
           </>
         }
-        value={`${systemStats.totalEnergyGen.toFixed(1)} MKWh`}
+        value={`${formatNumber(Math.round(dailyGenAvgMw))} MW`}
         active={activeKpiTooltip === 'gen'}
         onToggle={() => toggleKpiTooltip('gen')}
         tooltipTitle="Generation Briefing"
