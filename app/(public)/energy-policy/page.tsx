@@ -13,6 +13,9 @@ export function generateMetadata() {
     title: 'Energy Policy & Regulatory Framework | ESB PowerLine',
     description:
       "The acts, policies, master plans and regulations that officially govern Bangladesh's power & energy sector — curated summaries with links to the official source documents.",
+    alternates: {
+      canonical: '/energy-policy',
+    },
   };
 }
 

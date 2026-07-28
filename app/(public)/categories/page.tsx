@@ -15,6 +15,15 @@ import { CategoryIconDisplay } from '@/components/category/CategoryIconDisplay';
 
 export const revalidate = 86400;
 
+export const metadata = {
+  title: 'Categories | ESB PowerLine',
+  description:
+    "Browse Bangladesh power & energy coverage by category — generation, renewables, policy, grid, projects and tenders.",
+  alternates: {
+    canonical: '/categories',
+  },
+};
+
 export default async function CategoriesIndex() {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);

@@ -8,6 +8,9 @@ export const revalidate = 300;
 export const metadata = {
   title: 'Monthly Magazine | ESB PowerLine',
   description: 'Read the latest issue of ESB PowerLine — in-depth analysis, data and features on Bangladesh energy & power.',
+  alternates: {
+    canonical: '/magazine',
+  },
 };
 
 export default async function MagazinePage() {

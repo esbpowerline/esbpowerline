@@ -8,6 +8,9 @@ export const revalidate = 600;
 export const metadata = {
   title: 'Search | ESB PowerLine',
   description: 'Search published power sector news and analysis.',
+  // Every ?q= variant renders the same shell — keep the whole surface out of
+  // the index rather than letting Google pick a canonical for us.
+  robots: { index: false, follow: true },
 };
 
 export default async function SearchPage() {

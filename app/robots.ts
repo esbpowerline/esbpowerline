@@ -13,7 +13,16 @@ export default function robots(): MetadataRoute.Robots {
           '/members',
           '/api',
           '/search',
-          '/data/daily/',
+          // The whole /data tree is referer-gated in middleware and 403s any
+          // direct crawl — keeping only /data/daily/ out of robots left
+          // /data/petrobangla/** crawlable, which is what GSC reports as
+          // "Blocked due to other 4xx issue".
+          '/data/',
+          // Legacy auth paths that only ever 307 to the real login screens.
+          '/login',
+          '/auth/',
+          '/sign-in',
+          '/sign-up',
         ],
       },
       {

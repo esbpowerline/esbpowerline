@@ -6,6 +6,15 @@ import { ScrollGeometryBackdrop } from '@/components/shared/ScrollGeometryBackdr
 
 export const revalidate = 86400;
 
+export const metadata = {
+  title: 'About | ESB PowerLine',
+  description:
+    "Who we are: ESB PowerLine is Bangladesh's dedicated power & energy newsroom, covering generation, renewables, policy, grid data and projects.",
+  alternates: {
+    canonical: '/about',
+  },
+};
+
 export default async function AboutPage() {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);
