@@ -475,6 +475,10 @@ export function PowerGridExplorer({
 
   // Dynamic Gas Production & Supply calculations
   const safeGasProductionData = gasProductionData || [];
+  // A day can carry PGCB grid data while the matching Petrobangla report is not
+  // out yet. Summing an empty table yields 0, which would render as a factual
+  // "0.0 MMCFD" national gas supply — distinguish absent from genuinely zero.
+  const hasGasProductionData = safeGasProductionData.length > 0;
   const totalGasSupply = safeGasProductionData.reduce((sum, item) => sum + (item.gas || 0), 0);
   const totalCondensate = safeGasProductionData.reduce((sum, item) => sum + (item.condensate || 0), 0);
 
@@ -1140,6 +1144,7 @@ export function PowerGridExplorer({
         systemStats={systemStats}
         generationData={generationData}
         totalGasSupply={totalGasSupply}
+        hasGasProductionData={hasGasProductionData}
         importedLngGas={importedLngGas}
         importedLngPct={importedLngPct}
         chevronGas={chevronGas}

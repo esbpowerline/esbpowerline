@@ -36,6 +36,8 @@ export interface OverviewKpiStripProps {
   systemStats: GridSystemStats;
   generationData: GridDailyData['generationData'];
   totalGasSupply: number;
+  /** False when the day's Petrobangla tables are absent, so 0 means "no report" not "no gas". */
+  hasGasProductionData: boolean;
   importedLngGas: number;
   importedLngPct: number;
   chevronGas: number;
@@ -54,6 +56,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   systemStats,
   generationData,
   totalGasSupply,
+  hasGasProductionData,
   importedLngGas,
   importedLngPct,
   chevronGas,
@@ -99,7 +102,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   }, []);
 
   // Average power over the 24h day: 1 MKWh/day = 1000 MWh / 24h = 41.67 MW
-  const dailyGenAvgMw = (systemStats.totalEnergyGen * 1000) / 24;
+  const mkwhToAvgMw = (mkwh: number) => (mkwh * 1000) / 24;
+  const dailyGenAvgMw = mkwhToAvgMw(systemStats.totalEnergyGen);
+  const unservedAvgMw = mkwhToAvgMw(systemStats.totalEnergyUnserved);
 
   return (
     <GridKpiStrip stripRef={kpiStripRef}>
@@ -125,7 +130,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           <GridKpiTooltipRow label="Min Base Gen:" value={`${formatNumber(Math.round(systemStats.minGen))} MW`} />
           <GridKpiTooltipRow
             label="Unserved (Load Shed):"
-            value={`${systemStats.totalEnergyUnserved.toFixed(2)} MKWh`}
+            value={`${systemStats.totalEnergyUnserved.toFixed(2)} MKWh · ${formatNumber(Math.round(unservedAvgMw))} MW`}
             valueClass="text-destructive"
           />
           <GridKpiTooltipAudit>Calculation: Demand = Gen + Load Shed</GridKpiTooltipAudit>
@@ -181,7 +186,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <DailyBadge />
           </>
         }
-        value={`${formatNumber(totalGasSupply, 1)} MMCFD`}
+        value={hasGasProductionData ? `${formatNumber(totalGasSupply, 1)} MMCFD` : '— MMCFD'}
         active={activeKpiTooltip === 'gas'}
         onToggle={() => toggleKpiTooltip('gas')}
         tooltipTitle="Gas Supply Briefing"
@@ -190,27 +195,36 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         width="lg"
       >
         <GridKpiTooltipBody>
-          <GridKpiTooltipRow label="Total Gas Supply:" value={`${formatNumber(totalGasSupply, 1)} MMCFD`} />
-          <GridKpiTooltipRow
-            label="Imported LNG:"
-            value={`${formatNumber(importedLngGas, 1)} MMCFD (${importedLngPct.toFixed(1)}%)`}
-          />
-          <GridKpiTooltipRow
-            label="Chevron IOC Supply:"
-            value={`${formatNumber(chevronGas, 1)} MMCFD (${chevronPct.toFixed(1)}%)`}
-          />
-          {tullowGas > 0 && (
-            <GridKpiTooltipRow
-              label="Tullow IOC Supply:"
-              value={`${formatNumber(tullowGas, 1)} MMCFD (${tullowPct.toFixed(1)}%)`}
-            />
+          {hasGasProductionData ? (
+            <>
+              <GridKpiTooltipRow label="Total Gas Supply:" value={`${formatNumber(totalGasSupply, 1)} MMCFD`} />
+              <GridKpiTooltipRow
+                label="Imported LNG:"
+                value={`${formatNumber(importedLngGas, 1)} MMCFD (${importedLngPct.toFixed(1)}%)`}
+              />
+              <GridKpiTooltipRow
+                label="Chevron IOC Supply:"
+                value={`${formatNumber(chevronGas, 1)} MMCFD (${chevronPct.toFixed(1)}%)`}
+              />
+              {tullowGas > 0 && (
+                <GridKpiTooltipRow
+                  label="Tullow IOC Supply:"
+                  value={`${formatNumber(tullowGas, 1)} MMCFD (${tullowPct.toFixed(1)}%)`}
+                />
+              )}
+              <GridKpiTooltipRow
+                label="State Field Output:"
+                value={`${formatNumber(stateFieldsGas, 1)} MMCFD (${stateFieldsPct.toFixed(1)}%)`}
+              />
+              <GridKpiTooltipRow label="Total Condensate:" value={`${formatNumber(totalCondensate, 1)} BBL`} />
+              <GridKpiTooltipAudit>Audited by: MABS &amp; J Partners / CAG</GridKpiTooltipAudit>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Petrobangla has not published the production and distribution tables for this
+              gas day yet. PGCB grid figures above are unaffected.
+            </p>
           )}
-          <GridKpiTooltipRow
-            label="State Field Output:"
-            value={`${formatNumber(stateFieldsGas, 1)} MMCFD (${stateFieldsPct.toFixed(1)}%)`}
-          />
-          <GridKpiTooltipRow label="Total Condensate:" value={`${formatNumber(totalCondensate, 1)} BBL`} />
-          <GridKpiTooltipAudit>Audited by: MABS &amp; J Partners / CAG</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="Petrobangla Report"
             refHref="https://www.petrobangla.org.bd/"
