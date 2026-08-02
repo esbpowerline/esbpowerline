@@ -1,0 +1,561 @@
+"""Extract the full PGCB monthly report workbook into one structured JSON document.
+
+`scripts/parse_monthly_reports.py` pulls ~21 headline numbers from two sheets.
+This reads the rest: 19 populated sheets, ~17k non-empty cells per month.
+
+Usage:
+    python scripts/parse_pgcb_monthly_workbook.py <workbook.xlsx> [out.json]
+
+Default output is lib/pgcb-monthly-detail/{YYYY-MM}.json, which
+scripts/build_pgcb_monthly_public.py merges into the published per-month file as
+a `detail` block. Detail lives per-month by design — it is fetched only for the
+month being viewed and never enters the series or the JS bundle.
+
+Sheet layouts are positional (these are print-formatted workbooks with merged
+headers), so column indices are pinned per sheet and documented at each reader.
+"""
+from __future__ import annotations
+
+import datetime
+import json
+import re
+import sys
+import warnings
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+
+warnings.filterwarnings("ignore")
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_OUT_DIR = ROOT / "lib" / "pgcb-monthly-detail"
+
+MONTHS = {
+    "january": 1, "february": 2, "march": 3, "april": 4, "may": 5, "june": 6,
+    "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
+}
+
+ZONES = [
+    "dhaka", "chattogram", "cumilla", "mymensingh", "sylhet",
+    "khulna", "barishal", "rajshahi", "rangpur",
+]
+
+
+# --------------------------------------------------------------------------- #
+# cell helpers
+# --------------------------------------------------------------------------- #
+def txt(v: Any) -> str:
+    """Cell as trimmed text. Empty string for blanks so callers can test truthiness."""
+    if v is None or (isinstance(v, float) and pd.isna(v)):
+        return ""
+    try:
+        if pd.isna(v):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    if isinstance(v, (pd.Timestamp, datetime.datetime)):
+        # Midnight is how Excel stores a bare date here; keep it date-only.
+        if v.hour == 0 and v.minute == 0:
+            return v.strftime("%Y-%m-%d")
+        return v.strftime("%Y-%m-%d %H:%M")
+    if isinstance(v, datetime.date):
+        return v.strftime("%Y-%m-%d")
+    if isinstance(v, datetime.time):
+        return v.strftime("%H:%M")
+    return str(v).strip()
+
+
+def num(v: Any) -> float | None:
+    """Cell as a number. '-', blanks and stray text become None rather than 0."""
+    if v is None:
+        return None
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        if isinstance(v, float) and pd.isna(v):
+            return None
+        return round(float(v), 6)
+    s = txt(v).replace(",", "").strip()
+    if not s or s in {"-", "--", "n/a", "N/A"}:
+        return None
+    m = re.match(r"^-?\d*\.?\d+", s)
+    return round(float(m.group(0)), 6) if m else None
+
+
+def is_date(v: Any) -> bool:
+    return isinstance(v, (pd.Timestamp, datetime.datetime, datetime.date))
+
+
+def rows_of(df: pd.DataFrame) -> list[list[Any]]:
+    return [r.tolist() for _, r in df.iterrows()]
+
+
+def cell(row: list[Any], i: int) -> Any:
+    return row[i] if i < len(row) else None
+
+
+def find_month(df: pd.DataFrame) -> tuple[str, int] | None:
+    for row in rows_of(df):
+        for v in row:
+            s = txt(v)
+            m = re.search(r"Month\s*:?\s*([A-Za-z]+)[',\s]+(\d{4})", s)
+            if m and m.group(1).lower() in MONTHS:
+                return m.group(1).capitalize(), int(m.group(2))
+    return None
+
+
+def clean_name(s: str) -> str:
+    return re.sub(r"\s+", " ", s).strip().rstrip(":").strip()
+
+
+# --------------------------------------------------------------------------- #
+# QF-MIS-03 — System Operation Data
+# cols: 0 Sl | 1 Item | 2 value | 3 date | 4 prev | 5 prev date | 6 last-yr | 8 max-till-date
+# --------------------------------------------------------------------------- #
+SYSTEM_KEYS = [
+    (r"^maximum generation", "max_generation_mw"),
+    (r"^minimum generation", "min_generation_mw"),
+    (r"^maximum evening peak generation", "max_evening_peak_gen_mw"),
+    (r"^maximum day peak generation", "max_day_peak_gen_mw"),
+    (r"^maximum evening peak demand", "max_evening_peak_demand_mw"),
+    (r"^average generation .*evening peak", "avg_gen_evening_peak_mw"),
+    (r"^average generation .*day peak", "avg_gen_day_peak_mw"),
+    (r"^maximum power import from india", "max_import_india_mw"),
+    (r"^maximum power import from tripura", "max_import_tripura_mw"),
+    (r"^maximum load shed .*evening peak", "max_load_shed_evening_mw"),
+    (r"^generation during max\. load shed .*evening", "gen_at_max_shed_evening_mw"),
+    (r"^minimum load shed .*evening peak", "min_load_shed_evening_mw"),
+    (r"^generation during min\. load shed .*evening", "gen_at_min_shed_evening_mw"),
+    (r"^maximum load shed .*day peak", "max_load_shed_day_mw"),
+    (r"^generation during max\. load shed .*day", "gen_at_max_shed_day_mw"),
+    (r"^minimum load shed .*day peak", "min_load_shed_day_mw"),
+    (r"^generation during min\. load shed .*day", "gen_at_min_shed_day_mw"),
+    (r"^nos\. of days load shed at evening", "days_load_shed_evening"),
+    (r"^nos\. of days load shed at day", "days_load_shed_day"),
+    (r"^gross generation of bpdb", "gross_generation_bpdb_mkwh"),
+    (r"^station use of bpdb", "station_use_bpdb_mkwh"),
+    (r"^net generation of bpdb", "net_generation_bpdb_mkwh"),
+    (r"^net generation of ipp", "net_generation_ipp_mkwh"),
+    (r"^net generation by generation companies", "net_generation_gencos_mkwh"),
+    (r"^net generation of reb", "net_generation_reb_mkwh"),
+    (r"^net generation of rental", "net_generation_rental_mkwh"),
+    (r"^total net generation", "total_net_generation_mkwh"),
+    (r"^monthly load factor", "monthly_load_factor_pct"),
+]
+
+
+def parse_system(df: pd.DataFrame) -> dict[str, Any]:
+    items: list[dict[str, Any]] = []
+    keyed: dict[str, Any] = {}
+    for row in rows_of(df):
+        sl, label = txt(cell(row, 0)), clean_name(txt(cell(row, 1)))
+        if not label or not sl or label.lower().startswith(("power grid", "system operation")):
+            continue
+        value = num(cell(row, 2))
+        if value is None:
+            continue
+        entry = {
+            "sl": sl,
+            "item": label,
+            "value": value,
+            "when": txt(cell(row, 3)) or None,
+            "prev_month": num(cell(row, 4)),
+            "last_year": num(cell(row, 6)),
+            "max_till_date": num(cell(row, 8)),
+        }
+        items.append(entry)
+        low = label.lower()
+        for pattern, key in SYSTEM_KEYS:
+            if re.search(pattern, low) and key not in keyed:
+                keyed[key] = {
+                    "value": value,
+                    "when": entry["when"],
+                    "prev_month": entry["prev_month"],
+                    "last_year": entry["last_year"],
+                }
+                break
+    return {"items": items, "keyed": keyed}
+
+
+# --------------------------------------------------------------------------- #
+# QF-LDC-22 — area supply at the moment of system peak (rows sit below the TOC)
+# cols: 1 area | 2 unit | 3 value
+# --------------------------------------------------------------------------- #
+AREA_ALIASES = {
+    "chittagong": "chattogram", "chattogram": "chattogram",
+    "comilla": "cumilla", "cumilla": "cumilla",
+    "barisal": "barishal", "barishal": "barishal",
+}
+
+
+def parse_area_supply(df: pd.DataFrame) -> dict[str, Any]:
+    areas: list[dict[str, Any]] = []
+    zone_totals: dict[str, float] = {}
+    peak_context: dict[str, Any] = {}
+    for row in rows_of(df):
+        label = clean_name(txt(cell(row, 1)))
+        value = num(cell(row, 3))
+        if not label:
+            continue
+        low = label.lower()
+        if "area wise supply" in low:
+            peak_context = {"generation_mw": value, "when": txt(cell(row, 4)) or None}
+            continue
+        if value is None:
+            continue
+        if low.startswith("total supply in east"):
+            zone_totals["east"] = value
+        elif low.startswith("total supply in west"):
+            zone_totals["west"] = value
+        elif low.startswith("total supply in both"):
+            zone_totals["both"] = value
+        else:
+            key = AREA_ALIASES.get(low, low)
+            if key in ZONES:
+                areas.append({"area": label, "key": key, "load_mw": value})
+    return {"areas": areas, "zone_totals": zone_totals, "peak_context": peak_context}
+
+
+# --------------------------------------------------------------------------- #
+# QF-LDC-27 / QF-LDC-28 — by grid circle, split by cause, with prev month inline
+# cols: 0 Sl | 1 circle | 2-5 prev T/EO/SO/total | 6-9 current T/EO/SO/total
+# --------------------------------------------------------------------------- #
+def parse_circle_split(df: pd.DataFrame) -> dict[str, Any]:
+    circles: list[dict[str, Any]] = []
+    total: dict[str, Any] = {}
+    for row in rows_of(df):
+        name = clean_name(txt(cell(row, 1)))
+        if not name or name.lower().startswith(("area", "sl", "power grid", "information")):
+            continue
+        cur = {
+            "tripping": num(cell(row, 6)),
+            "emergency": num(cell(row, 7)),
+            "scheduled": num(cell(row, 8)),
+            "total": num(cell(row, 9)),
+        }
+        prev = {
+            "tripping": num(cell(row, 2)),
+            "emergency": num(cell(row, 3)),
+            "scheduled": num(cell(row, 4)),
+            "total": num(cell(row, 5)),
+        }
+        if cur["total"] is None and prev["total"] is None:
+            continue
+        entry = {"circle": name, "current": cur, "previous": prev}
+        if name.lower() == "total":
+            total = entry
+        else:
+            circles.append(entry)
+    return {"circles": circles, "total": total}
+
+
+# --------------------------------------------------------------------------- #
+# QF-LDC-37 — daily load shedding, two side-by-side tables on one sheet
+# evening: 0 date, 1 gen, 2 demand, 3 shed, 4 time, 5-13 zones
+# day:    15 date, 16 gen, 17 demand, 18 shed, 19 time, 20-28 zones
+# --------------------------------------------------------------------------- #
+def parse_daily_load_shedding(df: pd.DataFrame) -> dict[str, list[dict[str, Any]]]:
+    def read(base: int) -> list[dict[str, Any]]:
+        out = []
+        for row in rows_of(df):
+            d = cell(row, base)
+            if not is_date(d):
+                continue
+            zones = {z: num(cell(row, base + 5 + i)) for i, z in enumerate(ZONES)}
+            out.append(
+                {
+                    "date": txt(d)[:10],
+                    "generation_mw": num(cell(row, base + 1)),
+                    "demand_mw": num(cell(row, base + 2)),
+                    "load_shed_mw": num(cell(row, base + 3)),
+                    "time": txt(cell(row, base + 4)) or None,
+                    "zones": zones,
+                }
+            )
+        return out
+
+    return {"evening_peak": read(0), "day_peak": read(15)}
+
+
+# --------------------------------------------------------------------------- #
+# Remaining tabular sheets
+# --------------------------------------------------------------------------- #
+def parse_substation_max_load(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """QF-LDC-33 — cols: 0 Sl | 1 substation | 2 load MW | 3 date & time."""
+    out = []
+    for row in rows_of(df):
+        name = clean_name(txt(cell(row, 1)))
+        load = num(cell(row, 2))
+        if not name or load is None or num(cell(row, 0)) is None:
+            continue
+        out.append({"substation": name, "load_mw": load, "when": txt(cell(row, 3)) or None})
+    return out
+
+
+def parse_area_max_load(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """QF-LDC-34 — each area's OWN maximum (non-coincident), cols: 0 area | 1 MW | 2 date | 3 hour."""
+    out = []
+    for row in rows_of(df):
+        name = clean_name(txt(cell(row, 0)))
+        load = num(cell(row, 1))
+        if not name or load is None:
+            continue
+        key = AREA_ALIASES.get(name.lower(), name.lower())
+        if key not in ZONES:
+            continue
+        out.append(
+            {
+                "area": name,
+                "key": key,
+                "load_mw": load,
+                "date": txt(cell(row, 2))[:10] or None,
+                "hour": txt(cell(row, 3)) or None,
+            }
+        )
+    return out
+
+
+def parse_voltages(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """QF-LDC-35 — cols: 0 Sl | 1 substation | 2 rated | 3 max | 4 when | 5 min | 6 when.
+
+    Voltage class comes from the section header row ('400 KV Substation'), so it
+    is tracked as the sheet is walked.
+    """
+    out: list[dict[str, Any]] = []
+    section: str | None = None
+    for row in rows_of(df):
+        label = clean_name(txt(cell(row, 1)))
+        m = re.match(r"^(\d{3})\s*KV\s+Substation", label, re.I)
+        if m:
+            section = f"{m.group(1)} kV"
+            continue
+        if not label or num(cell(row, 0)) is None:
+            continue
+        rated, vmax, vmin = num(cell(row, 2)), num(cell(row, 3)), num(cell(row, 5))
+        if rated is None and vmax is None and vmin is None:
+            continue
+        out.append(
+            {
+                "substation": label,
+                "class": section,
+                "rated_kv": rated,
+                "max_kv": vmax,
+                "max_when": txt(cell(row, 4)) or None,
+                "min_kv": vmin,
+                "min_when": txt(cell(row, 6)) or None,
+            }
+        )
+    return out
+
+
+def parse_transformer_loading(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """QF-LDC-36 — cols: 0 substation | 1 transformer | 2 level | 3 MVA | 4 date | 5 hour | 6 MW | 7 MVAR | 8 %."""
+    out = []
+    for row in rows_of(df):
+        name = clean_name(txt(cell(row, 0)))
+        pct = num(cell(row, 8))
+        if not name or pct is None or name.lower().startswith(("substation", "power grid", "information", "month")):
+            continue
+        out.append(
+            {
+                "substation": name,
+                "transformer": txt(cell(row, 1)) or None,
+                "voltage_level": txt(cell(row, 2)) or None,
+                "capacity_mva": num(cell(row, 3)),
+                "date": txt(cell(row, 4)) or None,
+                "hour": txt(cell(row, 5)) or None,
+                "mw": num(cell(row, 6)),
+                "mvar": num(cell(row, 7)),
+                "loading_pct": pct,
+            }
+        )
+    return out
+
+
+def parse_interruptions(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """QF-LDC-32 — cols: 0 substation | 1 count | 2 duration | 3 unserved MWh | 4 remarks."""
+    out = []
+    for row in rows_of(df):
+        name = clean_name(txt(cell(row, 0)))
+        count = num(cell(row, 1))
+        if not name or count is None:
+            continue
+        if name.lower().startswith(("sub-station", "power grid", "information", "month", "overall")):
+            continue
+        out.append(
+            {
+                "substation": name,
+                "interruptions": count,
+                "duration": txt(cell(row, 2)) or None,
+                "unserved_mwh": num(cell(row, 3)),
+            }
+        )
+    return out
+
+
+def parse_generation_system(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """QF-LDC-38 — cols: 0 Sl | 1 description | 2 unit | 3 quantity | 4 date | 5 time."""
+    out = []
+    for row in rows_of(df):
+        label = clean_name(txt(cell(row, 1)))
+        value = num(cell(row, 3))
+        if not label or value is None or num(cell(row, 0)) is None:
+            continue
+        out.append(
+            {
+                "item": label,
+                "unit": txt(cell(row, 2)) or None,
+                "value": value,
+                "date": txt(cell(row, 4))[:10] or None,
+                "time": txt(cell(row, 5)) or None,
+            }
+        )
+    return out
+
+
+def parse_outage_events(df: pd.DataFrame, kind: str) -> list[dict[str, Any]]:
+    """QF-LDC-23..26 — event logs.
+
+    cols: 0 substation (or circle header) | 1 equipment | 2 start | 3 finish |
+          4 duration | 5 type | 6 cause | 7 unserved MW | 8 unserved MWh
+    """
+    out: list[dict[str, Any]] = []
+    circle: str | None = None
+    for row in rows_of(df):
+        first = clean_name(txt(cell(row, 0)))
+        equipment = txt(cell(row, 1))
+        start = cell(row, 2)
+        if first and "grid circle" in first.lower() and not equipment:
+            circle = first
+            continue
+        if not first or not is_date(start):
+            continue
+        out.append(
+            {
+                "kind": kind,
+                "circle": circle,
+                "substation": first,
+                "equipment": equipment or None,
+                "start": txt(start),
+                "finish": txt(cell(row, 3)) or None,
+                "duration": txt(cell(row, 4)) or None,
+                "type": txt(cell(row, 5)) or None,
+                "cause": clean_name(txt(cell(row, 6))) or None,
+                "unserved_load_mw": num(cell(row, 7)),
+                "unserved_energy_mwh": num(cell(row, 8)),
+            }
+        )
+    return out
+
+
+def parse_fgmo(df: pd.DataFrame) -> list[dict[str, Any]]:
+    """FGMO — cols: 0 Sl | 1 plant | 2 owner | 3 fuel | 4 MW | 5.. daily tick marks."""
+    out = []
+    for row in rows_of(df):
+        plant = clean_name(txt(cell(row, 1)))
+        if not plant or num(cell(row, 0)) is None:
+            continue
+        # 31 chars, one per day — a bitstring rather than a boolean array, which
+        # costs ~6x less over the wire for the same information.
+        days = "".join("1" if txt(cell(row, 5 + i)) else "0" for i in range(31))
+        out.append(
+            {
+                "plant": plant,
+                "owner": txt(cell(row, 2)) or None,
+                "fuel": txt(cell(row, 3)) or None,
+                "capacity_mw": num(cell(row, 4)),
+                "days_active": days.count("1"),
+                "days": days,
+            }
+        )
+    return out
+
+
+# --------------------------------------------------------------------------- #
+def main() -> None:
+    if len(sys.argv) < 2:
+        raise SystemExit(__doc__)
+    src = Path(sys.argv[1])
+    xl = pd.ExcelFile(src)
+    sheets = {name: xl.parse(name, header=None) for name in xl.sheet_names}
+
+    def sheet(*names: str) -> pd.DataFrame | None:
+        for n in names:
+            if n in sheets and not sheets[n].empty:
+                return sheets[n]
+        return None
+
+    mis = sheet("QF-MIS-03", "MIS")
+    if mis is None:
+        raise SystemExit(f"{src.name}: no QF-MIS-03 sheet")
+
+    period = find_month(mis) or find_month(sheet("QF-LDC-22") or mis)
+    if not period:
+        raise SystemExit(f"{src.name}: could not read 'Month: <name> <year>'")
+    month_name, year = period
+    date_key = f"{year}-{MONTHS[month_name.lower()]:02d}"
+
+    doc: dict[str, Any] = {
+        "date_key": date_key,
+        "month": month_name,
+        "year": year,
+        "source_workbook": src.name,
+        "sheets_present": [n for n, d in sheets.items() if not d.empty],
+    }
+
+    doc["system"] = parse_system(mis)
+
+    if (d := sheet("QF-LDC-22")) is not None:
+        doc["area_supply_at_system_peak"] = parse_area_supply(d)
+    if (d := sheet("QF-LDC-27")) is not None:
+        doc["tripping_outage"] = parse_circle_split(d)
+    if (d := sheet("QF-LDC-28")) is not None:
+        doc["unserved_energy"] = parse_circle_split(d)
+    if (d := sheet("QF-LDC-32")) is not None:
+        doc["interruptions"] = parse_interruptions(d)
+    if (d := sheet("QF-LDC-33")) is not None:
+        doc["substation_max_load"] = parse_substation_max_load(d)
+    if (d := sheet("QF-LDC-34")) is not None:
+        doc["area_max_load"] = parse_area_max_load(d)
+    if (d := sheet("QF-LDC-35")) is not None:
+        doc["substation_voltage"] = parse_voltages(d)
+    if (d := sheet("QF-LDC-36")) is not None:
+        doc["transformer_loading"] = parse_transformer_loading(d)
+    if (d := sheet("QF_LDC_37", "QF-LDC-37")) is not None:
+        doc["daily_load_shedding"] = parse_daily_load_shedding(d)
+    if (d := sheet("QF-LDC-38")) is not None:
+        doc["generation_system"] = parse_generation_system(d)
+    if (d := sheet("FGMO")) is not None:
+        doc["fgmo"] = parse_fgmo(d)
+
+    events: list[dict[str, Any]] = []
+    for name, kind in [
+        ("QF-LDC-23", "substation_emergency"),
+        ("QF-LDC-24", "line_emergency"),
+        ("QF-LDC-25", "substation_scheduled"),
+        ("QF-LDC-26", "line_scheduled"),
+    ]:
+        if (d := sheet(name)) is not None:
+            events.extend(parse_outage_events(d, kind))
+    if events:
+        doc["outage_events"] = events
+
+    out = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_OUT_DIR / f"{date_key}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+
+    counts = {
+        k: (len(v) if isinstance(v, list) else
+            sum(len(x) for x in v.values()) if k == "daily_load_shedding" else
+            len(v.get("circles", v.get("items", v.get("areas", [])))) if isinstance(v, dict) else 1)
+        for k, v in doc.items()
+        if isinstance(v, (list, dict)) and k != "sheets_present"
+    }
+    print(f"{date_key}  ->  {out.relative_to(ROOT)}  ({out.stat().st_size / 1024:.1f} KB)")
+    for k, n in counts.items():
+        print(f"  {k:28s} {n}")
+
+
+if __name__ == "__main__":
+    main()

@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 
 import {
+  fetchPgcbMonthlyEvents,
   fetchPgcbMonthlyRecord,
   fetchPgcbMonthlySeries,
+  peekPgcbMonthlyEvents,
   peekPgcbMonthlyRecord,
   peekPgcbMonthlySeries,
   type PgcbMonthlyRecord,
   type PgcbMonthlySeriesRecord,
+  type PgcbOutageEvent,
 } from '@/lib/data/companies/pgcb';
 
 /**
@@ -92,4 +95,46 @@ export function usePgcbMonthlyRecord(
   }, [dateKey, enabled]);
 
   return { record, loading };
+}
+
+/**
+ * The month's outage event log. `enabled` should only turn true once the reader
+ * opens the events table — the file is bigger than the rest of the month combined.
+ */
+export function usePgcbMonthlyEvents(
+  dateKey: string,
+  enabled: boolean,
+): { events: PgcbOutageEvent[]; loading: boolean } {
+  const [events, setEvents] = useState<PgcbOutageEvent[]>(() =>
+    dateKey ? peekPgcbMonthlyEvents(dateKey) ?? [] : [],
+  );
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || !dateKey) return;
+
+    const cached = peekPgcbMonthlyEvents(dateKey);
+    if (cached) {
+      setEvents(cached);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setEvents([]);
+    fetchPgcbMonthlyEvents(dateKey)
+      .then((rows) => {
+        if (!cancelled) setEvents(rows);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dateKey, enabled]);
+
+  return { events, loading };
 }

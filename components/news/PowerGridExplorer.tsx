@@ -49,7 +49,12 @@ import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/d
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
-import { usePgcbMonthlyRecord, usePgcbMonthlySeries } from '@/lib/data/companies/usePgcbMonthly';
+import {
+  usePgcbMonthlyEvents,
+  usePgcbMonthlyRecord,
+  usePgcbMonthlySeries,
+} from '@/lib/data/companies/usePgcbMonthly';
+import { PgcbMonthlyDetail } from '@/components/news/power-grid/PgcbMonthlyDetail';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
 import { sredaRenewablesData, totalCapacityRenewables, renewableGridSharePct } from '@/lib/data/companies/sreda';
 import { ongoingProjectsData } from '@/lib/data/infrastructure/projects-ongoing';
@@ -720,6 +725,17 @@ export function PowerGridExplorer({
     selectedMonthlyKey,
     activeTab === 'macro',
   );
+
+  // The outage log is bigger than the rest of the month combined, so it waits
+  // for an explicit click rather than loading with the month.
+  const [monthlyEventsOpen, setMonthlyEventsOpen] = useState(false);
+  const { events: monthlyEvents, loading: monthlyEventsLoading } = usePgcbMonthlyEvents(
+    selectedMonthlyKey,
+    monthlyEventsOpen,
+  );
+  useEffect(() => {
+    setMonthlyEventsOpen(false);
+  }, [selectedMonthlyKey]);
 
   const [monthlyTrendMetric, setMonthlyTrendMetric] = useState<'peaks' | 'energy' | 'fuels'>('peaks');
   const [selectedFuelTrend, setSelectedFuelTrend] = useState<'gas' | 'coal' | 'hfo' | 'diesel' | 'import'>('gas');
@@ -5710,6 +5726,31 @@ export function PowerGridExplorer({
                   )}
                 </GridCardFooter>
               </div>
+
+              {/* Everything beyond the headline figures, from the source workbook's
+                  other 17 sheets. Only months that have been re-parsed carry it. */}
+              {selectedMonthlyRecord?.detail && selectedMonthlyRecord.date_key === selectedMonthlyKey
+                ? (() => {
+                    const detail = selectedMonthlyRecord.detail!;
+                    const [y, m] = selectedMonthlyKey.split('-').map(Number);
+                    const prev = new Date(Date.UTC(y, m - 2, 1));
+                    const prevMonthLabel = `${prev.toLocaleString('en-US', {
+                      month: 'long',
+                      timeZone: 'UTC',
+                    })} ${prev.getUTCFullYear()}`;
+                    return (
+                      <PgcbMonthlyDetail
+                        detail={detail}
+                        monthLabel={`${detail.month} ${detail.year}`}
+                        prevMonthLabel={prevMonthLabel}
+                        events={monthlyEvents}
+                        eventsLoading={monthlyEventsLoading}
+                        eventsOpened={monthlyEventsOpen}
+                        onLoadEvents={() => setMonthlyEventsOpen(true)}
+                      />
+                    );
+                  })()
+                : null}
             </div>
           )}
 

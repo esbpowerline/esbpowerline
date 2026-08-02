@@ -37,10 +37,152 @@ export interface PgcbMonthlySeriesRecord {
   generation_by_fuel: PgcbMonthlyFuelMix;
 }
 
+/** A QF-MIS-03 line: this month's figure with the comparisons the sheet prints beside it. */
+export interface PgcbSystemStat {
+  value: number;
+  when: string | null;
+  prev_month: number | null;
+  last_year: number | null;
+}
+
+export interface PgcbCircleSplit {
+  tripping: number | null;
+  emergency: number | null;
+  scheduled: number | null;
+  total: number | null;
+}
+
+export interface PgcbCircleRow {
+  circle: string;
+  current: PgcbCircleSplit;
+  previous: PgcbCircleSplit;
+}
+
+export interface PgcbDailyShedRow {
+  date: string;
+  generation_mw: number | null;
+  demand_mw: number | null;
+  load_shed_mw: number | null;
+  time: string | null;
+  zones: Record<string, number | null>;
+}
+
+export interface PgcbSubstationLoad {
+  substation: string;
+  load_mw: number;
+  when: string | null;
+}
+
+export interface PgcbSubstationVoltage {
+  substation: string;
+  class: string | null;
+  rated_kv: number | null;
+  max_kv: number | null;
+  max_when: string | null;
+  min_kv: number | null;
+  min_when: string | null;
+}
+
+export interface PgcbTransformerLoad {
+  substation: string;
+  transformer: string | null;
+  voltage_level: string | null;
+  capacity_mva: number | null;
+  date: string | null;
+  hour: string | null;
+  mw: number | null;
+  mvar: number | null;
+  loading_pct: number;
+}
+
+export interface PgcbInterruption {
+  substation: string;
+  interruptions: number;
+  duration: string | null;
+  unserved_mwh: number | null;
+}
+
+export interface PgcbAreaLoad {
+  area: string;
+  key: string;
+  load_mw: number;
+  date?: string | null;
+  hour?: string | null;
+}
+
+export interface PgcbFgmoPlant {
+  plant: string;
+  owner: string | null;
+  fuel: string | null;
+  capacity_mw: number | null;
+  days_active: number;
+  /** 31 chars, '1' = on FGMO that day. Packed to keep the per-month file small. */
+  days: string;
+}
+
+export interface PgcbOutageEvent {
+  kind: string;
+  circle: string | null;
+  substation: string;
+  equipment: string | null;
+  start: string;
+  finish: string | null;
+  duration: string | null;
+  type: string | null;
+  cause: string | null;
+  unserved_load_mw: number | null;
+  unserved_energy_mwh: number | null;
+}
+
+/** Everything beyond the headline figures, extracted from the source workbook. */
+export interface PgcbMonthlyDetail {
+  date_key: string;
+  month: string;
+  year: number;
+  source_workbook?: string;
+  sheets_present?: string[];
+  system?: {
+    items: Array<{
+      sl: string;
+      item: string;
+      value: number;
+      when: string | null;
+      prev_month: number | null;
+      last_year: number | null;
+      max_till_date: number | null;
+    }>;
+    keyed: Record<string, PgcbSystemStat>;
+  };
+  area_supply_at_system_peak?: {
+    areas: PgcbAreaLoad[];
+    zone_totals: Record<string, number>;
+    peak_context: { generation_mw?: number | null; when?: string | null };
+  };
+  tripping_outage?: { circles: PgcbCircleRow[]; total: PgcbCircleRow | Record<string, never> };
+  unserved_energy?: { circles: PgcbCircleRow[]; total: PgcbCircleRow | Record<string, never> };
+  interruptions?: PgcbInterruption[];
+  substation_max_load?: PgcbSubstationLoad[];
+  area_max_load?: PgcbAreaLoad[];
+  substation_voltage?: PgcbSubstationVoltage[];
+  transformer_loading?: PgcbTransformerLoad[];
+  daily_load_shedding?: { evening_peak: PgcbDailyShedRow[]; day_peak: PgcbDailyShedRow[] };
+  generation_system?: Array<{
+    item: string;
+    unit: string | null;
+    value: number;
+    date: string | null;
+    time: string | null;
+  }>;
+  fgmo?: PgcbFgmoPlant[];
+  /** Events ship separately; this is how many the events file holds. */
+  outage_event_count?: number;
+}
+
 /** One month in full, including detail kept out of the series. */
 export interface PgcbMonthlyRecord extends PgcbMonthlySeriesRecord {
   filename: string;
   regional_supply: Record<string, number>;
+  detail?: PgcbMonthlyDetail;
 }
 
 let seriesCache: PgcbMonthlySeriesRecord[] | null = null;
@@ -101,6 +243,43 @@ export function fetchPgcbMonthlyRecord(dateKey: string): Promise<PgcbMonthlyReco
     });
 
   recordInFlight.set(dateKey, pending);
+  return pending;
+}
+
+const eventsCache = new Map<string, PgcbOutageEvent[]>();
+const eventsInFlight = new Map<string, Promise<PgcbOutageEvent[]>>();
+
+export function peekPgcbMonthlyEvents(dateKey: string): PgcbOutageEvent[] | null {
+  return eventsCache.get(dateKey) ?? null;
+}
+
+/**
+ * The month's outage event log. Larger than the rest of the month combined, so
+ * it is only fetched once the reader actually opens the events table.
+ */
+export function fetchPgcbMonthlyEvents(dateKey: string): Promise<PgcbOutageEvent[]> {
+  if (!dateKey) return Promise.resolve([]);
+  const cached = eventsCache.get(dateKey);
+  if (cached) return Promise.resolve(cached);
+
+  const existing = eventsInFlight.get(dateKey);
+  if (existing) return existing;
+
+  const pending = fetch(`${BASE}/${dateKey}-events.json`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`pgcb monthly events ${dateKey}: HTTP ${res.status}`);
+      return res.json();
+    })
+    .then((rows: PgcbOutageEvent[]) => {
+      eventsCache.set(dateKey, rows);
+      return rows;
+    })
+    .catch(() => [] as PgcbOutageEvent[])
+    .finally(() => {
+      eventsInFlight.delete(dateKey);
+    });
+
+  eventsInFlight.set(dateKey, pending);
   return pending;
 }
 
