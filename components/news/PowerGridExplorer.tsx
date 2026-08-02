@@ -1061,15 +1061,17 @@ export function PowerGridExplorer({
           </p>
         </div>
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
-          {/* TODAY Reset Button */}
-          <button
-            type="button"
-            onClick={() => selectAccessibleDate(latestDate)}
-            className="flex items-center justify-center gap-1 px-3 py-2 text-xs md:text-sm font-bold bg-transparent border border-border/40 hover:bg-muted/10 hover:border-primary/30 rounded-xl transition-all duration-150 shadow-sm text-foreground"
-          >
-            <RotateCcw className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span>Latest</span>
-          </button>
+          {/* TODAY Reset Button — sized to match the Year control exactly */}
+          <div className="w-full sm:w-28">
+            <button
+              type="button"
+              onClick={() => selectAccessibleDate(latestDate)}
+              className="grid-explorer-control w-full flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-transparent hover:bg-muted/10 hover:border-primary/30 shadow-sm text-foreground"
+            >
+              <RotateCcw className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>Latest</span>
+            </button>
+          </div>
 
           <div className="w-full sm:w-28 relative z-50">
             <CustomDropdown
