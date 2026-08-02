@@ -112,6 +112,19 @@ interface PowerGridExplorerProps {
 }
 const DEMO_DATE = '2026-06-22';
 
+/**
+ * Shared sizing for the four controls above the 13-Year Growth Trends chart —
+ * the three metric toggles and the fuel dropdown. Kept in one place so they
+ * stay identical; `min-h-11` and `w-44` are what CustomDropdown already renders
+ * at (via .grid-explorer-control), so the toggles match it rather than the
+ * other way round.
+ */
+const TREND_CONTROL_SIZE = 'w-full sm:w-44 min-h-11';
+const TREND_TOGGLE_CLASS = cn(
+  TREND_CONTROL_SIZE,
+  'flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm',
+);
+
 export function PowerGridExplorer({
   initialLines,
   urlBoot,
@@ -5335,7 +5348,7 @@ export function PowerGridExplorer({
                       type="button"
                       onClick={() => setMonthlyTrendMetric('peaks')}
                       className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm",
+                        TREND_TOGGLE_CLASS,
                         monthlyTrendMetric === 'peaks'
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10 hover:border-primary/30"
@@ -5347,7 +5360,7 @@ export function PowerGridExplorer({
                       type="button"
                       onClick={() => setMonthlyTrendMetric('energy')}
                       className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm",
+                        TREND_TOGGLE_CLASS,
                         monthlyTrendMetric === 'energy'
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10 hover:border-primary/30"
@@ -5359,7 +5372,7 @@ export function PowerGridExplorer({
                       type="button"
                       onClick={() => setMonthlyTrendMetric('fuels')}
                       className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm",
+                        TREND_TOGGLE_CLASS,
                         monthlyTrendMetric === 'fuels'
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10 hover:border-primary/30"
@@ -5369,7 +5382,7 @@ export function PowerGridExplorer({
                     </button>
 
                     {monthlyTrendMetric === 'fuels' && (
-                      <div className="w-44 relative z-50">
+                      <div className={cn(TREND_CONTROL_SIZE, 'relative z-50')}>
                         <CustomDropdown
                           value={selectedFuelTrend}
                           onChange={(val: any) => setSelectedFuelTrend(val)}
