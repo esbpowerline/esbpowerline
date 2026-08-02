@@ -69,7 +69,8 @@ export interface PgcbDailyShedRow {
 
 export interface PgcbSubstationLoad {
   substation: string;
-  load_mw: number;
+  /** Null when the report lists the substation but records no load for it. */
+  load_mw: number | null;
   when: string | null;
 }
 

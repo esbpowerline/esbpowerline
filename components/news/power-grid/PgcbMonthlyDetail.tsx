@@ -100,6 +100,62 @@ function PanelCard({
   );
 }
 
+/* ------------------------------------------------------------- tooltip */
+
+interface TipContent {
+  heading: string;
+  value: string;
+  meta?: string | null;
+  tone?: 'good' | 'alert';
+}
+interface TipState extends TipContent {
+  x: number;
+  y: number;
+}
+
+/**
+ * Cursor-following tooltip in the site's popover idiom, rendered `fixed` so it
+ * is never clipped by the heatmap's horizontal scroll container. Replaces the
+ * browser's native `title`, which cannot be styled and appears on a delay.
+ */
+function ChartTooltip({ tip }: { tip: TipState | null }) {
+  if (!tip) return null;
+  const clampedX = Math.min(Math.max(tip.x, 90), (typeof window !== 'undefined' ? window.innerWidth : 1200) - 90);
+  return (
+    <div
+      className="fixed z-[200] pointer-events-none"
+      style={{ left: clampedX, top: tip.y - 12, transform: 'translate(-50%, -100%)' }}
+      role="tooltip"
+    >
+      <div className="bg-popover text-popover-foreground border border-border/80 rounded-lg shadow-xl px-2.5 py-2 animate-in fade-in zoom-in-95 duration-100">
+        <div className="text-[10px] font-bold whitespace-nowrap">{tip.heading}</div>
+        <div
+          className={cn(
+            'text-sm font-bold tabular-nums whitespace-nowrap',
+            tip.tone === 'good' && 'text-emerald-600 dark:text-emerald-500',
+            tip.tone === 'alert' && 'text-rose-600 dark:text-rose-500',
+          )}
+        >
+          {tip.value}
+        </div>
+        {tip.meta && (
+          <div className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{tip.meta}</div>
+        )}
+      </div>
+      {/* Caret, matching the popover border. */}
+      <div className="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2 h-2 rotate-45 bg-popover border-b border-r border-border/80" />
+    </div>
+  );
+}
+
+function useChartTooltip() {
+  const [tip, setTip] = useState<TipState | null>(null);
+  const show = (e: React.MouseEvent, content: TipContent) =>
+    setTip({ ...content, x: e.clientX, y: e.clientY });
+  const hide = () => setTip(null);
+  return { tip, show, hide };
+}
+
 /**
  * A plain-language note under a panel. These figures are industry shorthand, so
  * each panel says what its numbers actually mean rather than assuming the reader
@@ -181,7 +237,7 @@ function StatTile({
   tone?: 'default' | 'alert';
 }) {
   return (
-    <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col gap-1">
+    <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center gap-1">
       <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{label}</div>
       <div
         className={cn(
@@ -192,7 +248,7 @@ function StatTile({
         {value}
         {unit && <span className="ml-1 text-xs font-medium text-muted-foreground">{unit}</span>}
       </div>
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center justify-center gap-2 flex-wrap">
         <DeltaBadge change={change ?? null} goodWhen={goodWhen} suffix={compareLabel} />
       </div>
       {note && <div className="text-[10px] text-muted-foreground leading-relaxed">{note}</div>}
@@ -360,6 +416,7 @@ function shedCellStyle(value: number | null, max: number): { backgroundColor: st
 }
 
 function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLabel: string }) {
+  const { tip, show, hide } = useChartTooltip();
   const max = useMemo(
     () =>
       rows.reduce(
@@ -415,15 +472,25 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                   return (
                     <td
                       key={r.date}
-                      className="h-6 text-center rounded-[3px] tabular-nums font-semibold cursor-default"
+                      className="h-6 text-center rounded-[3px] tabular-nums font-semibold cursor-default transition-[filter] duration-100 hover:brightness-95 dark:hover:brightness-125"
                       style={style}
-                      title={
-                        v > 0
-                          ? `${z.label} — ${r.date}\n${fmt(v)} MW shed at ${peakLabel.toLowerCase()}${
-                              r.time ? ` (${r.time})` : ''
-                            }`
-                          : `${z.label} — ${r.date}\nNo load shedding`
+                      onMouseEnter={(e) =>
+                        show(e, {
+                          heading: `${z.label} · ${r.date}`,
+                          value: v > 0 ? `${fmt(v)} MW shed` : 'No load shedding',
+                          meta: v > 0 ? `${peakLabel}${r.time ? ` · ${r.time}` : ''}` : peakLabel,
+                          tone: v > 0 ? 'alert' : 'good',
+                        })
                       }
+                      onMouseMove={(e) =>
+                        show(e, {
+                          heading: `${z.label} · ${r.date}`,
+                          value: v > 0 ? `${fmt(v)} MW shed` : 'No load shedding',
+                          meta: v > 0 ? `${peakLabel}${r.time ? ` · ${r.time}` : ''}` : peakLabel,
+                          tone: v > 0 ? 'alert' : 'good',
+                        })
+                      }
+                      onMouseLeave={hide}
                     >
                       {/* Every non-zero cell is labelled, so "shed" vs "none" never
                           depends on telling green from red. */}
@@ -431,7 +498,18 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                     </td>
                   );
                 })}
-                <td className="px-2 text-right font-bold tabular-nums text-foreground whitespace-nowrap">
+                <td
+                  className="px-2 text-right font-bold tabular-nums text-foreground whitespace-nowrap cursor-default"
+                  onMouseEnter={(e) =>
+                    show(e, {
+                      heading: `${z.label} · month total`,
+                      value: `${fmt(z.total)} MW shed`,
+                      meta: `Summed across every ${peakLabel.toLowerCase()} this month`,
+                      tone: z.total > 0 ? 'alert' : 'good',
+                    })
+                  }
+                  onMouseLeave={hide}
+                >
                   {fmt(z.total)}
                 </td>
               </tr>
@@ -441,8 +519,19 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
               {rows.map((r) => (
                 <td
                   key={r.date}
-                  className="text-center font-bold tabular-nums text-foreground"
-                  title={`${r.date}: ${fmt(r.load_shed_mw)} MW shed in total`}
+                  className="text-center font-bold tabular-nums text-foreground cursor-default"
+                  onMouseEnter={(e) =>
+                    show(e, {
+                      heading: `All zones · ${r.date}`,
+                      value: r.load_shed_mw ? `${fmt(r.load_shed_mw)} MW shed` : 'No load shedding',
+                      meta:
+                        r.generation_mw && r.demand_mw
+                          ? `${fmt(r.generation_mw)} MW generated of ${fmt(r.demand_mw)} MW demanded`
+                          : peakLabel,
+                      tone: r.load_shed_mw ? 'alert' : 'good',
+                    })
+                  }
+                  onMouseLeave={hide}
                 >
                   {r.load_shed_mw ? Math.round(r.load_shed_mw) : ''}
                 </td>
@@ -492,6 +581,8 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
         is why it can exceed any single day by a wide margin — it measures how <em>persistently</em> a zone was cut,
         not how deep the worst cut was.
       </Explainer>
+
+      <ChartTooltip tip={tip} />
     </div>
   );
 }
@@ -499,6 +590,7 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
 /* --------------------------------------------- 3. generation by owner */
 
 function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> }) {
+  const { tip, show, hide } = useChartTooltip();
   const owners = [
     { label: 'Generation Cos.', stat: keyed.net_generation_gencos_mkwh },
     { label: 'IPP', stat: keyed.net_generation_ipp_mkwh },
@@ -515,15 +607,29 @@ function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> })
   return (
     <div className="space-y-1">
       {owners.map((o) => (
-        <MagnitudeBar
+        <div
           key={o.label}
-          label={o.label}
-          value={o.stat.value}
-          max={max}
-          unit="MKWh"
-          sub={`${((o.stat.value / total) * 100).toFixed(1)}%`}
-        />
+          onMouseEnter={(e) =>
+            show(e, {
+              heading: o.label,
+              value: `${fmt(o.stat.value, 1)} MKWh`,
+              meta: `${((o.stat.value / total) * 100).toFixed(1)}% of net generation${
+                o.stat.prev_month ? ` · ${fmt(o.stat.prev_month, 1)} last month` : ''
+              }`,
+            })
+          }
+          onMouseLeave={hide}
+        >
+          <MagnitudeBar
+            label={o.label}
+            value={o.stat.value}
+            max={max}
+            unit="MKWh"
+            sub={`${((o.stat.value / total) * 100).toFixed(1)}%`}
+          />
+        </div>
       ))}
+      <ChartTooltip tip={tip} />
       <Glossary
         items={[
           [
@@ -846,8 +952,9 @@ export function PgcbMonthlyDetail({
     [detail.interruptions],
   );
 
+  // Substations the report lists without a load sort last rather than as zero.
   const sortedSubstations = useMemo(
-    () => substations.slice().sort((a, b) => b.load_mw - a.load_mw),
+    () => substations.slice().sort((a, b) => (b.load_mw ?? -1) - (a.load_mw ?? -1)),
     [substations],
   );
 

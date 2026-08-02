@@ -355,14 +355,18 @@ def parse_daily_load_shedding(
 # Remaining tabular sheets
 # --------------------------------------------------------------------------- #
 def parse_substation_max_load(rows: list[list[Any]]) -> list[dict[str, Any]]:
-    """QF-LDC-33 — cols: 0 Sl | 1 substation | 2 load MW | 3 date & time."""
+    """QF-LDC-33 — cols: 0 Sl | 1 substation | 2 load MW | 3 date & time.
+
+    A listed substation with a blank load is kept with `load_mw: None` rather than
+    dropped — the report says it exists and recorded nothing, which is different
+    from it not being in the report. (January 2026 lists Kaptai and Modern this way.)
+    """
     out = []
     for row in rows:
         name = clean_name(txt(cell(row, 1)))
-        load = num(cell(row, 2))
-        if not name or load is None or num(cell(row, 0)) is None:
+        if not name or num(cell(row, 0)) is None:
             continue
-        out.append({"substation": name, "load_mw": load, "when": txt(cell(row, 3)) or None})
+        out.append({"substation": name, "load_mw": num(cell(row, 2)), "when": txt(cell(row, 3)) or None})
     return out
 
 
