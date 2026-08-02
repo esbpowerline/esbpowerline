@@ -573,12 +573,12 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
       </div>
 
       <Explainer>
-        <strong className="text-foreground">How to read this.</strong> Each cell is one zone on one day, and the
+        <strong className="text-foreground">How to read this.</strong>{' '}Each cell is one zone on one day, and the
         number is the megawatts of demand that had to be cut in that zone at that day&rsquo;s peak — so a blank green
-        cell means everyone who wanted power got it. <strong className="text-foreground">Evening peak</strong> is the
-        daily maximum, usually around 7&ndash;9 pm; <strong className="text-foreground">day peak</strong> is the
-        midday maximum. The <em>Total</em> column is the sum of that zone&rsquo;s daily cuts across the month, which
-        is why it can exceed any single day by a wide margin — it measures how <em>persistently</em> a zone was cut,
+        cell means everyone who wanted power got it. <strong className="text-foreground">Evening peak</strong>{' '}is the
+        daily maximum, usually around 7&ndash;9 pm; <strong className="text-foreground">day peak</strong>{' '}is the
+        midday maximum. The <em>Total</em>{' '}column is the sum of that zone&rsquo;s daily cuts across the month, which
+        is why it can exceed any single day by a wide margin — it measures how <em>persistently</em>{' '}a zone was cut,
         not how deep the worst cut was.
       </Explainer>
 
@@ -726,72 +726,157 @@ function AreaPeakComparison({
   atSystemPeak: Array<{ key: string; area: string; load_mw: number }>;
   ownMax: Array<{ key: string; area: string; load_mw: number; date?: string | null; hour?: string | null }>;
 }) {
+  const { tip, show, hide } = useChartTooltip();
   const byKey = new Map(ownMax.map((a) => [canonicalArea(a.key), a]));
   const rows = atSystemPeak
     .map((a) => {
       const own = byKey.get(canonicalArea(a.key));
+      const ownMw = own?.load_mw ?? null;
       return {
         area: a.area,
         coincident: a.load_mw,
-        own: own?.load_mw ?? null,
+        own: ownMw,
+        // Own maximum is by definition >= coincident, so the difference is the
+        // area's diversity: load it carried at some other hour entirely.
+        gap: ownMw === null ? null : Math.max(0, ownMw - a.load_mw),
         when: own ? [own.date, own.hour].filter(Boolean).join(' ') : null,
       };
     })
     .sort((x, y) => (y.own ?? y.coincident) - (x.own ?? x.coincident));
-  const max = Math.max(...rows.map((r) => Math.max(r.coincident, r.own ?? 0)), 1);
+
+  const scaleMax = Math.max(...rows.map((r) => r.own ?? r.coincident), 1);
+  const totalCoincident = rows.reduce((s, r) => s + r.coincident, 0);
+  const totalOwn = rows.reduce((s, r) => s + (r.own ?? r.coincident), 0);
+  const totalGap = totalOwn - totalCoincident;
+  const widest = rows.reduce((best, r) => ((r.gap ?? 0) > (best.gap ?? 0) ? r : best), rows[0]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4 text-[10px] font-semibold">
+    <div className="space-y-5">
+      {/* The headline the panel exists to make: the parts sum to more than the whole. */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-border/50 bg-muted/15 p-3 text-center">
+          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+            Sum at system peak
+          </div>
+          <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{fmt(totalCoincident)}</div>
+          <div className="text-[9px] text-muted-foreground">MW, all at once</div>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-muted/15 p-3 text-center">
+          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+            Sum of area peaks
+          </div>
+          <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{fmt(totalOwn)}</div>
+          <div className="text-[9px] text-muted-foreground">MW, each at its own hour</div>
+        </div>
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-center">
+          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Diversity</div>
+          <div className="text-lg font-bold tabular-nums text-amber-600 dark:text-amber-500 mt-0.5">
+            {fmt(totalGap)}
+          </div>
+          <div className="text-[9px] text-muted-foreground">
+            MW never needed together ({((totalGap / totalCoincident) * 100).toFixed(1)}%)
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-4 text-[10px] font-semibold flex-wrap">
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: SERIES_A }} />
-          At system peak (coincident)
+          Drawn at the national peak
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: SERIES_B }} />
-          Area&rsquo;s own maximum
+          Extra at the area&rsquo;s own peak
         </span>
+        <span className="text-muted-foreground font-medium">· bar length = the area&rsquo;s own maximum</span>
       </div>
 
-      <div className="space-y-2.5">
-        {rows.map((r) => (
-          <div key={r.area}>
-            <div className="flex items-center justify-between text-[11px] mb-1">
-              <span className="font-semibold text-foreground">{r.area}</span>
-              <span className="text-muted-foreground tabular-nums">
-                {fmt(r.coincident)} / {fmt(r.own)} MW
-                {r.own !== null && r.coincident > 0 && (
-                  <span className="ml-1.5 font-semibold text-foreground">
-                    +{(((r.own - r.coincident) / r.coincident) * 100).toFixed(1)}%
-                  </span>
-                )}
-              </span>
-            </div>
-            {/* 2px gap between the paired fills keeps them readable when close in value. */}
-            <div className="space-y-[2px]">
-              <div className="h-2.5 rounded-full bg-muted/40 overflow-hidden">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${(r.coincident / max) * 100}%`, backgroundColor: SERIES_A }}
-                />
+      <div className="space-y-3">
+        {rows.map((r) => {
+          const own = r.own ?? r.coincident;
+          const gapPct = r.coincident > 0 && r.gap !== null ? (r.gap / r.coincident) * 100 : null;
+          return (
+            <div
+              key={r.area}
+              className="group"
+              onMouseEnter={(e) =>
+                show(e, {
+                  heading: r.area,
+                  value: `${fmt(own)} MW own peak`,
+                  meta: `${fmt(r.coincident)} MW at the national peak · ${fmt(r.gap)} MW more at its own${
+                    r.when ? ` (${r.when})` : ''
+                  }`,
+                })
+              }
+              onMouseMove={(e) =>
+                show(e, {
+                  heading: r.area,
+                  value: `${fmt(own)} MW own peak`,
+                  meta: `${fmt(r.coincident)} MW at the national peak · ${fmt(r.gap)} MW more at its own${
+                    r.when ? ` (${r.when})` : ''
+                  }`,
+                })
+              }
+              onMouseLeave={hide}
+            >
+              <div className="flex items-baseline justify-between gap-3 mb-1.5">
+                <span className="text-[11px] font-bold text-foreground">{r.area}</span>
+                <span className="text-[10px] tabular-nums text-muted-foreground">
+                  <span className="font-bold text-foreground">{fmt(own)}</span> MW peak
+                  {gapPct !== null && (
+                    <>
+                      <span className="mx-1.5 opacity-40">|</span>
+                      <span className="font-semibold" style={{ color: SERIES_B }}>
+                        +{fmt(r.gap)} MW
+                      </span>{' '}
+                      ({gapPct.toFixed(1)}%) beyond its share of the national peak
+                    </>
+                  )}
+                </span>
               </div>
-              <div className="h-2.5 rounded-full bg-muted/40 overflow-hidden">
+              {/* One bar per area: the segments sum to the area's own maximum, so the
+                  second segment IS the diversity gap rather than something to infer
+                  by comparing two separate bars. 2px surface gap between fills. */}
+              <div className="relative h-3.5 rounded-full bg-muted/25 overflow-hidden">
                 <div
-                  className="h-full rounded-full"
-                  style={{ width: `${((r.own ?? 0) / max) * 100}%`, backgroundColor: SERIES_B }}
-                />
+                  className="absolute inset-y-0 left-0 flex gap-[2px] transition-[filter] duration-100 group-hover:brightness-105"
+                  style={{ width: `${(own / scaleMax) * 100}%` }}
+                >
+                  <div
+                    className="h-full rounded-l-full"
+                    style={{
+                      width: `${own > 0 ? (r.coincident / own) * 100 : 0}%`,
+                      backgroundColor: SERIES_A,
+                    }}
+                  />
+                  <div
+                    className="h-full rounded-r-full flex-1"
+                    style={{ backgroundColor: SERIES_B }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <p className="text-[10px] text-muted-foreground leading-relaxed border-t border-border/40 pt-3">
-        These measure different things and will not agree. <strong className="text-foreground">Coincident</strong> is
-        what each area drew at the instant the national peak occurred; <strong className="text-foreground">own
-        maximum</strong> is the highest that area reached at any point in the month. The gap between them is diversity
-        — the reason total system capacity can be lower than the sum of area peaks.
-      </p>
+      <Explainer>
+        <strong className="text-foreground">Why the parts exceed the whole.</strong>{' '}The blue segment is what an area
+        was drawing at the single instant the national peak occurred. The orange segment is the extra it reached at
+        some other hour, on its own busiest day — so the two segments together are that area&rsquo;s own maximum.
+        Because areas do not all peak at the same moment, adding up their individual maxima
+        ({fmt(totalOwn)} MW) overstates what the grid must supply at once ({fmt(totalCoincident)} MW). That{' '}
+        {fmt(totalGap)} MW difference is <strong className="text-foreground">diversity</strong>, and it is real
+        capacity the country never has to build.{' '}
+        {widest?.gap ? (
+          <>
+            <strong className="text-foreground">{widest.area}</strong>{' '}is the most out of step this month, peaking{' '}
+            {fmt(widest.gap)} MW above its national-peak draw.
+          </>
+        ) : null}
+      </Explainer>
+
+      <ChartTooltip tip={tip} />
     </div>
   );
 }
@@ -1415,9 +1500,9 @@ export function PgcbMonthlyDetail({
               ))}
           </TableShell>
           <Explainer>
-            <strong className="text-foreground">Why this matters.</strong> Grid frequency must hold near 50 Hz. When a
+            <strong className="text-foreground">Why this matters.</strong>{' '}Grid frequency must hold near 50 Hz. When a
             large plant trips, frequency falls within seconds — far too fast for an operator to react. Plants running
-            in <strong className="text-foreground">free governor mode</strong> sense the drop and raise output
+            in <strong className="text-foreground">free governor mode</strong>{' '}sense the drop and raise output
             automatically, holding the system up until slower reserves arrive. A plant is listed here for every day it
             ran in that mode, so a low day count means the plant was available but not contributing that automatic
             response. The wider the participating capacity, the better the grid absorbs a sudden loss.
