@@ -16,6 +16,13 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `#${tag} | ESB PowerLine`,
     description: `Articles tagged with #${tag} in Bangladesh power & energy news.`,
+    alternates: {
+      canonical: `/tags/${encodeURIComponent(tag)}`,
+    },
+    // Tags are auto-extracted keywords, so most of these pages list a single
+    // article and read as a thin duplicate of it. Keep them out of the index
+    // but keep following through to the articles themselves.
+    robots: { index: false, follow: true },
   };
 }
 

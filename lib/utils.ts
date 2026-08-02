@@ -180,13 +180,21 @@ export function formatBdtAmount(value: number): string {
 
 export function extractKeywords(title: string, contentHtml: string): string[] {
   // Simple check to avoid import loops if called from validations
-  const text = (title + ' ' + (contentHtml ? contentHtml.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/gi, ' ') : ''))
+  const text = (title + ' ' + (contentHtml ? contentHtml.replace(/<[^>]+>/g, ' ') : ''))
     .toLowerCase()
+    // Strip whole HTML entities first. Previously only &nbsp; was handled, so
+    // the punctuation pass below shredded &#8217; / &#8220; into the bare
+    // digits 8217 / 8220, which then ranked as top keywords and became tags.
+    .replace(/&(?:#x?[0-9a-f]+|[a-z][a-z0-9]*);/gi, ' ')
     .replace(/[^\w\s\u0980-\u09ff-]/g, ' ')
     .replace(/\s+/g, ' ');
-  
-  const words = text.split(' ').filter(w => w.length >= 3);
-  
+
+  const words = text
+    .split(' ')
+    // Bare numbers (years, quantities, figures from tables) are never useful
+    // keywords and produce thin one-article tag pages.
+    .filter(w => w.length >= 3 && !/^[\d-]+$/.test(w));
+
   const stopwords = new Set([
     'the', 'and', 'for', 'that', 'with', 'this', 'from', 'have', 'were', 'was', 'are', 'has', 'had',
     'will', 'would', 'shall', 'should', 'about', 'their', 'there', 'they', 'them', 'been', 'than',

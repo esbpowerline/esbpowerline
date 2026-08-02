@@ -14,6 +14,9 @@ export const revalidate = 300;
 export const metadata = {
   title: 'Latest News | ESB PowerLine',
   description: 'Latest power & energy sector news from Bangladesh. Filter by category, search, and read in-depth analysis.',
+  alternates: {
+    canonical: '/articles',
+  },
   openGraph: {
     title: 'Latest News | ESB PowerLine',
     description: 'Bangladesh power sector updates, renewable energy, policy, projects and tenders.',

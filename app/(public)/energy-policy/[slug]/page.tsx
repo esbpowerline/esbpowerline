@@ -45,6 +45,9 @@ export async function generateMetadata({ params }: Props) {
   return {
     title: `${policy.short} — Energy Policy & Regulatory Framework | ESB PowerLine`,
     description: policy.brief.overview,
+    alternates: {
+      canonical: `/energy-policy/${policy.slug}`,
+    },
   };
 }
 

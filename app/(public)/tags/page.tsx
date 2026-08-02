@@ -3,6 +3,11 @@ import { getPublicTagCounts } from '@/lib/category-content';
 
 export const metadata = {
   title: 'Tags | ESB PowerLine',
+  alternates: {
+    canonical: '/tags',
+  },
+  // Hub of auto-generated keyword pages — useful for navigation, not for search.
+  robots: { index: false, follow: true },
 };
 
 export default async function TagsIndex() {

@@ -29,6 +29,9 @@ export async function generateMetadata({ params }: Props) {
     description:
       localized.description ??
       `Latest news and analysis in ${localized.name} for Bangladesh's power and energy sector.`,
+    alternates: {
+      canonical: `/categories/${slug}`,
+    },
   };
 }
 

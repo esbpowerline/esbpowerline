@@ -1,0 +1,1270 @@
+{
+  "$schema": "petrobangla-daily/v1",
+  "meta": {
+    "schema_version": "1.0.0",
+    "parser_version": "2.0.0-reconstructed",
+    "source_pdf": "C:\\Users\\User\\Desktop\\31.pdf",
+    "source_filename": "31.pdf",
+    "parsed_at": null,
+    "page_count": 1,
+    "parse_status": "ok",
+    "warnings": [],
+    "content_sha256": "4a472adb7994837ffdfee5e38710b6a531bea0934420ba1c343dfec24f8ee3d8",
+    "agent_summary": "Petrobangla daily gas report for 30-31 Jul, 2026. 23 producing fields, 37 power plants tracked. Grand total gas production 2153.8 MMCFD.",
+    "queryable_collections": [
+      "production.fields",
+      "production.subtotals",
+      "distribution.companies.power_plants",
+      "distribution.summary",
+      "sgfl.products",
+      "entities"
+    ]
+  },
+  "report": {
+    "reference_no": null,
+    "period": "8.00 to 8.00",
+    "units": {
+      "gas": "MMCFD",
+      "condensate": "BBLD",
+      "lpg": "Kg",
+      "products": "BBLD"
+    },
+    "report_date_label": "30-31 Jul, 2026",
+    "report_date_start": "2026-07-30",
+    "report_date_end": "2026-07-31",
+    "month_label": "Jul, 2026",
+    "gas_day_start": "2026-07-30",
+    "gas_day_end": "2026-07-31",
+    "gas_window": "8.00-8.00"
+  },
+  "production": {
+    "fields": [
+      {
+        "record_type": "field",
+        "id": "/titas",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Titas",
+        "producing_wells": 26,
+        "capacity_mmcfd": 542.0,
+        "gas_mmcfd": 334.4,
+        "condensate_bbld": 322.0,
+        "pct_of_total_capacity": 8.7,
+        "pct_of_total_production": 15.5
+      },
+      {
+        "record_type": "field",
+        "id": "/habiganj",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Habiganj",
+        "producing_wells": 8,
+        "capacity_mmcfd": 225.0,
+        "gas_mmcfd": 102.0,
+        "condensate_bbld": 5.0,
+        "pct_of_total_capacity": 2.6,
+        "pct_of_total_production": 0.9
+      },
+      {
+        "record_type": "field",
+        "id": "/1-bgfcl-bakhrabad",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "1. BGFCL Bakhrabad",
+        "producing_wells": 7,
+        "capacity_mmcfd": 43.0,
+        "gas_mmcfd": 18.3,
+        "condensate_bbld": 17.5,
+        "pct_of_total_capacity": 0.5,
+        "pct_of_total_production": 1.0
+      },
+      {
+        "record_type": "field",
+        "id": "/narsingdi",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Narsingdi",
+        "producing_wells": 2,
+        "capacity_mmcfd": 30.0,
+        "gas_mmcfd": 22.5,
+        "condensate_bbld": 28.0,
+        "pct_of_total_capacity": 0.6,
+        "pct_of_total_production": 1.0
+      },
+      {
+        "record_type": "field",
+        "id": "/meghna",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Meghna",
+        "producing_wells": 1,
+        "capacity_mmcfd": 11.0,
+        "gas_mmcfd": 3.6,
+        "condensate_bbld": 3.6,
+        "pct_of_total_capacity": 0.1,
+        "pct_of_total_production": 0.2
+      },
+      {
+        "record_type": "field",
+        "id": "/sylhet",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Sylhet",
+        "producing_wells": 4,
+        "capacity_mmcfd": 13.0,
+        "gas_mmcfd": 5.9,
+        "condensate_bbld": 35.1,
+        "pct_of_total_capacity": 0.2,
+        "pct_of_total_production": 0.3
+      },
+      {
+        "record_type": "field",
+        "id": "/kailashtila-1-silicagel",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Kailashtila #1 (Silicagel)",
+        "producing_wells": 0,
+        "capacity_mmcfd": 0.0,
+        "gas_mmcfd": 2.9,
+        "condensate_bbld": 18.2,
+        "pct_of_total_capacity": 0.1,
+        "pct_of_total_production": 0.1
+      },
+      {
+        "record_type": "field",
+        "id": "/2-sgfl-kailashtila-2-mste",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "2. SGFL Kailashtila #2 (MSTE)",
+        "producing_wells": 4,
+        "capacity_mmcfd": 47.0,
+        "gas_mmcfd": 42.5,
+        "condensate_bbld": 280.3,
+        "pct_of_total_capacity": 1.1,
+        "pct_of_total_production": 2.0
+      },
+      {
+        "record_type": "field",
+        "id": "/rashidpur",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Rashidpur",
+        "producing_wells": 7,
+        "capacity_mmcfd": 70.0,
+        "gas_mmcfd": 70.4,
+        "condensate_bbld": 30.9,
+        "pct_of_total_capacity": 1.8,
+        "pct_of_total_production": 3.3
+      },
+      {
+        "record_type": "field",
+        "id": "/beanibazar",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Beanibazar",
+        "producing_wells": 2,
+        "capacity_mmcfd": 13.0,
+        "gas_mmcfd": 17.9,
+        "condensate_bbld": 271.5,
+        "pct_of_total_capacity": 0.5,
+        "pct_of_total_production": 0.8
+      },
+      {
+        "record_type": "field",
+        "id": "/salda",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Salda",
+        "producing_wells": 2,
+        "capacity_mmcfd": 3.0,
+        "gas_mmcfd": 2.7,
+        "condensate_bbld": 0.2,
+        "pct_of_total_capacity": 0.1,
+        "pct_of_total_production": 0.1
+      },
+      {
+        "record_type": "field",
+        "id": "/fenchuganj",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Fenchuganj",
+        "producing_wells": 2,
+        "capacity_mmcfd": 26.0,
+        "gas_mmcfd": 1.8,
+        "condensate_bbld": 0.0,
+        "pct_of_total_capacity": 0.0,
+        "pct_of_total_production": 0.1
+      },
+      {
+        "record_type": "field",
+        "id": "/shahbazpur",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Shahbazpur",
+        "producing_wells": 4,
+        "capacity_mmcfd": 50.0,
+        "gas_mmcfd": 74.2,
+        "condensate_bbld": 9.6,
+        "pct_of_total_capacity": 1.9,
+        "pct_of_total_production": 3.4
+      },
+      {
+        "record_type": "field",
+        "id": "/semutung",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Semutung",
+        "producing_wells": 2,
+        "capacity_mmcfd": 3.0,
+        "gas_mmcfd": 2.2,
+        "condensate_bbld": 0.4,
+        "pct_of_total_capacity": 0.1,
+        "pct_of_total_production": 0.1
+      },
+      {
+        "record_type": "field",
+        "id": "/3-bapex-sundalpur",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "3. BAPEX Sundalpur",
+        "producing_wells": 1,
+        "capacity_mmcfd": 5.0,
+        "gas_mmcfd": 1.1,
+        "condensate_bbld": 0.0,
+        "pct_of_total_capacity": 0.0,
+        "pct_of_total_production": 0.1
+      },
+      {
+        "record_type": "field",
+        "id": "/srikail",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Srikail",
+        "producing_wells": 3,
+        "capacity_mmcfd": 40.0,
+        "gas_mmcfd": 18.5,
+        "condensate_bbld": 66.3,
+        "pct_of_total_capacity": 0.5,
+        "pct_of_total_production": 0.9
+      },
+      {
+        "record_type": "field",
+        "id": "/begumganj",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Begumganj",
+        "producing_wells": 1,
+        "capacity_mmcfd": 10.0,
+        "gas_mmcfd": 10.4,
+        "condensate_bbld": 2.0,
+        "pct_of_total_capacity": 0.3,
+        "pct_of_total_production": 0.5
+      },
+      {
+        "record_type": "field",
+        "id": "/rupganj",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Rupganj",
+        "producing_wells": 0,
+        "capacity_mmcfd": 8.0,
+        "gas_mmcfd": 0.0,
+        "condensate_bbld": 0.0,
+        "pct_of_total_capacity": 0.0,
+        "pct_of_total_production": 0.0
+      },
+      {
+        "record_type": "field",
+        "id": "chevron/jalalabad",
+        "company": "4. CHEVRON",
+        "company_code": "CHEVRON",
+        "operator": "CHEVRON",
+        "field": "Jalalabad",
+        "producing_wells": 7,
+        "capacity_mmcfd": 270.0,
+        "gas_mmcfd": 122.5,
+        "condensate_bbld": 636.1,
+        "pct_of_total_capacity": 3.2,
+        "pct_of_total_production": 5.7
+      },
+      {
+        "record_type": "field",
+        "id": "chevron/chevron-maulavibazar",
+        "company": "4. CHEVRON",
+        "company_code": "CHEVRON",
+        "operator": "CHEVRON",
+        "field": "CHEVRON Maulavibazar",
+        "producing_wells": 5,
+        "capacity_mmcfd": 42.0,
+        "gas_mmcfd": 16.6,
+        "condensate_bbld": 1.7,
+        "pct_of_total_capacity": 0.4,
+        "pct_of_total_production": 0.8
+      },
+      {
+        "record_type": "field",
+        "id": "chevron/bibiyana",
+        "company": "4. CHEVRON",
+        "company_code": "CHEVRON",
+        "operator": "CHEVRON",
+        "field": "Bibiyana",
+        "producing_wells": 26,
+        "capacity_mmcfd": 1200.0,
+        "gas_mmcfd": 751.8,
+        "condensate_bbld": 3991.9,
+        "pct_of_total_capacity": 19.5,
+        "pct_of_total_production": 34.9
+      },
+      {
+        "record_type": "field",
+        "id": "chevron/tullow-bangora",
+        "company": "4. CHEVRON",
+        "company_code": "CHEVRON",
+        "operator": "CHEVRON",
+        "field": "TULLOW Bangora",
+        "producing_wells": 5,
+        "capacity_mmcfd": 103.0,
+        "gas_mmcfd": 30.7,
+        "condensate_bbld": 87.0,
+        "pct_of_total_capacity": 0.8,
+        "pct_of_total_production": 1.4
+      },
+      {
+        "record_type": "field",
+        "id": "rpgcl/r-lng-terminal",
+        "company": "5. RPGCL (R-LNG)",
+        "company_code": "RPGCL",
+        "operator": null,
+        "field": "R-LNG Terminal",
+        "producing_wells": 0,
+        "capacity_mmcfd": 1100.0,
+        "gas_mmcfd": 500.9,
+        "condensate_bbld": 0.0,
+        "pct_of_total_capacity": 13.0,
+        "pct_of_total_production": 23.3
+      }
+    ],
+    "subtotals": [
+      {
+        "record_type": "subtotal",
+        "id": "/sub-total",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Sub-Total",
+        "producing_wells": 44,
+        "capacity_mmcfd": 851.0,
+        "gas_mmcfd": 480.9,
+        "condensate_bbld": 376.1,
+        "pct_of_total_capacity": 12.5,
+        "pct_of_total_production": 22.3
+      },
+      {
+        "record_type": "subtotal",
+        "id": "/sub-total",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Sub-Total",
+        "producing_wells": 17,
+        "capacity_mmcfd": 143.0,
+        "gas_mmcfd": 139.6,
+        "condensate_bbld": 636.0,
+        "pct_of_total_capacity": 3.6,
+        "pct_of_total_production": 6.5
+      },
+      {
+        "record_type": "subtotal",
+        "id": "/sub-total",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Sub-Total",
+        "producing_wells": 15,
+        "capacity_mmcfd": 145.0,
+        "gas_mmcfd": 110.8,
+        "condensate_bbld": 78.4,
+        "pct_of_total_capacity": 2.9,
+        "pct_of_total_production": 5.1
+      },
+      {
+        "record_type": "subtotal",
+        "id": "/sub-total-1-2-3",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Sub-Total",
+        "producing_wells": 76,
+        "capacity_mmcfd": 1139.0,
+        "gas_mmcfd": 731.4,
+        "condensate_bbld": 1090.5,
+        "pct_of_total_capacity": 19.0,
+        "pct_of_total_production": 34.0
+      },
+      {
+        "record_type": "subtotal",
+        "id": "chevron/sub-total",
+        "company": "4. CHEVRON",
+        "company_code": "CHEVRON",
+        "operator": "CHEVRON",
+        "field": "Sub-Total",
+        "producing_wells": 43,
+        "capacity_mmcfd": 1615.0,
+        "gas_mmcfd": 921.6,
+        "condensate_bbld": 4716.6,
+        "pct_of_total_capacity": 23.9,
+        "pct_of_total_production": 42.8
+      },
+      {
+        "record_type": "subtotal",
+        "id": "rpgcl/sub-total",
+        "company": "5. RPGCL (R-LNG)",
+        "company_code": "RPGCL",
+        "operator": null,
+        "field": "Sub-Total",
+        "producing_wells": 0,
+        "capacity_mmcfd": 1100.0,
+        "gas_mmcfd": 500.9,
+        "condensate_bbld": 0.0,
+        "pct_of_total_capacity": 13.0,
+        "pct_of_total_production": 23.3
+      }
+    ],
+    "grand_total": {
+      "record_type": "grand_total",
+      "id": "rpgcl/grand-total-1-2-3-4-5",
+      "company": "Grand Total (1+2+3+4+5):",
+      "company_code": "TOTAL",
+      "operator": null,
+      "field": "Grand Total (1+2+3+4+5):",
+      "producing_wells": 119,
+      "capacity_mmcfd": 3854.0,
+      "gas_mmcfd": 2153.8,
+      "condensate_bbld": 5807.1,
+      "pct_of_total_capacity": 55.9,
+      "pct_of_total_production": 100.0
+    },
+    "field_count": 23
+  },
+  "sgfl": {
+    "products": {},
+    "pipeline_metrics": {},
+    "pipeline_total": null
+  },
+  "distribution": {
+    "companies": [
+      {
+        "company": "TGTDCL",
+        "company_code": "TGTDCL",
+        "power_plants": [
+          {
+            "name": "Ghorashal (1315 MW)",
+            "demand_mmcfd": 148.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "SUMMIT MEGHT-2 (583)",
+            "demand_mmcfd": 96.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Aggreeko (GSL)-145 MW Ren",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Siddhirganj (2x120 MW)",
+            "demand_mmcfd": 52.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Meghnaghat IPP MW",
+            "demand_mmcfd": 75.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Summit Meghn. MW",
+            "demand_mmcfd": 55.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "JERA Meghnaghat (718MW)",
+            "demand_mmcfd": 130.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "RPCL (210 MW)",
+            "demand_mmcfd": 40.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Madhabdi (27+10 MW) REB",
+            "demand_mmcfd": 9.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Ashulia (24+10 MW) REB",
+            "demand_mmcfd": 10.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Doreen Tangail MW SIPP",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Rupganj MW SIPP",
+            "demand_mmcfd": 8.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "EGCB Shiddhirgonj MW",
+            "demand_mmcfd": 55.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "HPL ( MW )",
+            "demand_mmcfd": 55.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "SGCL",
+            "demand_mmcfd": 65.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NBBL220MW",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Total :",
+            "demand_mmcfd": 2524.9,
+            "supply_mmcfd": 673.5
+          }
+        ],
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "BGDCL",
+        "company_code": "BGDCL",
+        "power_plants": [
+          {
+            "name": "Regent MW",
+            "demand_mmcfd": 27.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Ashuganj MW Rent",
+            "demand_mmcfd": 0.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Ashuganj 225MW",
+            "demand_mmcfd": 40.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "APS MW CCPP S",
+            "demand_mmcfd": 65.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "APS MW CCPP N",
+            "demand_mmcfd": 65.0,
+            "supply_mmcfd": 0.0
+          }
+        ],
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "KGDCL",
+        "company_code": "KGDCL",
+        "power_plants": [
+          {
+            "name": "APS MW CCPP E",
+            "demand_mmcfd": 75.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Jangalia-33 MW SIPP",
+            "demand_mmcfd": 7.8,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Chandpur MW CCPP",
+            "demand_mmcfd": 34.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Sikalbaha (40 MW)",
+            "demand_mmcfd": 12.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Barabkunda MW SIPP",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 0.0
+          }
+        ],
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "JGTDSL",
+        "company_code": "JGTDSL",
+        "power_plants": [
+          {
+            "name": "S.Bazar MW",
+            "demand_mmcfd": 47.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "S.Bazar MW",
+            "demand_mmcfd": 18.0,
+            "supply_mmcfd": 0.0
+          }
+        ],
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "PGCL",
+        "company_code": "PGCL",
+        "power_plants": [
+          {
+            "name": "Fenchuganj CC1 MW",
+            "demand_mmcfd": 17.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Fenchuganj CC2 MW",
+            "demand_mmcfd": 18.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "K.gaon yrs rent MW",
+            "demand_mmcfd": 12.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "K.gaon yrs rent MW",
+            "demand_mmcfd": 3.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Habiganj MW SIPP",
+            "demand_mmcfd": 3.0,
+            "supply_mmcfd": 0.0
+          }
+        ],
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "SGCL",
+        "company_code": "SGCL",
+        "power_plants": [
+          {
+            "name": "Baghabari (100+71 MW)",
+            "demand_mmcfd": 50.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NWPGCL Unit",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NWPGCL Unit",
+            "demand_mmcfd": 70.0,
+            "supply_mmcfd": 0.0
+          }
+        ],
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      }
+    ],
+    "summary": {
+      "total_": {
+        "power_demand_mmcfd": 2524.9,
+        "power_supply_mmcfd": 673.5,
+        "fertilizer_demand_mmcfd": 329.0,
+        "fertilizer_supply_mmcfd": 115.2,
+        "others_supplementary_mmcfd": 1252.7,
+        "total_mmcfd": 2041.4,
+        "extra": 2120.9
+      },
+      "non-grid_power": {
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": null,
+        "fertilizer_demand_mmcfd": null,
+        "fertilizer_supply_mmcfd": null,
+        "others_supplementary_mmcfd": null,
+        "total_mmcfd": null,
+        "extra": null
+      },
+      "grand_total": {
+        "power_demand_mmcfd": 2524.9,
+        "power_supply_mmcfd": 753.0,
+        "fertilizer_demand_mmcfd": 329.0,
+        "fertilizer_supply_mmcfd": 115.2,
+        "others_supplementary_mmcfd": 1252.7,
+        "total_mmcfd": 2120.9,
+        "extra": null
+      },
+      "pct_of_total_distribution": {
+        "power_demand_mmcfd": null,
+        "power_supply_mmcfd": 36.0,
+        "fertilizer_demand_mmcfd": null,
+        "fertilizer_supply_mmcfd": 5.0,
+        "others_supplementary_mmcfd": 59.0,
+        "total_mmcfd": 100.0,
+        "extra": null
+      }
+    },
+    "non_grid_power": [],
+    "plant_count": 37
+  },
+  "validation": {
+    "field_gas_sum_mmcfd": 2153.8,
+    "grand_total_gas_mmcfd": 2153.8,
+    "variance_mmcfd": 0.0,
+    "reconciled": true
+  },
+  "entities": [
+    {
+      "type": "gas_field",
+      "id": "/titas",
+      "name": "Titas",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 334.4,
+      "producing_wells": 26,
+      "capacity_mmcfd": 542.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/habiganj",
+      "name": "Habiganj",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 102.0,
+      "producing_wells": 8,
+      "capacity_mmcfd": 225.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/1-bgfcl-bakhrabad",
+      "name": "1. BGFCL Bakhrabad",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 18.3,
+      "producing_wells": 7,
+      "capacity_mmcfd": 43.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/narsingdi",
+      "name": "Narsingdi",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 22.5,
+      "producing_wells": 2,
+      "capacity_mmcfd": 30.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/meghna",
+      "name": "Meghna",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 3.6,
+      "producing_wells": 1,
+      "capacity_mmcfd": 11.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/sylhet",
+      "name": "Sylhet",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 5.9,
+      "producing_wells": 4,
+      "capacity_mmcfd": 13.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/kailashtila-1-silicagel",
+      "name": "Kailashtila #1 (Silicagel)",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 2.9,
+      "producing_wells": 0,
+      "capacity_mmcfd": 0.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/2-sgfl-kailashtila-2-mste",
+      "name": "2. SGFL Kailashtila #2 (MSTE)",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 42.5,
+      "producing_wells": 4,
+      "capacity_mmcfd": 47.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/rashidpur",
+      "name": "Rashidpur",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 70.4,
+      "producing_wells": 7,
+      "capacity_mmcfd": 70.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/beanibazar",
+      "name": "Beanibazar",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 17.9,
+      "producing_wells": 2,
+      "capacity_mmcfd": 13.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/salda",
+      "name": "Salda",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 2.7,
+      "producing_wells": 2,
+      "capacity_mmcfd": 3.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/fenchuganj",
+      "name": "Fenchuganj",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 1.8,
+      "producing_wells": 2,
+      "capacity_mmcfd": 26.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/shahbazpur",
+      "name": "Shahbazpur",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 74.2,
+      "producing_wells": 4,
+      "capacity_mmcfd": 50.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/semutung",
+      "name": "Semutung",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 2.2,
+      "producing_wells": 2,
+      "capacity_mmcfd": 3.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/3-bapex-sundalpur",
+      "name": "3. BAPEX Sundalpur",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 1.1,
+      "producing_wells": 1,
+      "capacity_mmcfd": 5.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/srikail",
+      "name": "Srikail",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 18.5,
+      "producing_wells": 3,
+      "capacity_mmcfd": 40.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/begumganj",
+      "name": "Begumganj",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 10.4,
+      "producing_wells": 1,
+      "capacity_mmcfd": 10.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/rupganj",
+      "name": "Rupganj",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 0.0,
+      "producing_wells": 0,
+      "capacity_mmcfd": 8.0
+    },
+    {
+      "type": "gas_field",
+      "id": "chevron/jalalabad",
+      "name": "Jalalabad",
+      "company_code": "CHEVRON",
+      "operator": "CHEVRON",
+      "gas_mmcfd": 122.5,
+      "producing_wells": 7,
+      "capacity_mmcfd": 270.0
+    },
+    {
+      "type": "gas_field",
+      "id": "chevron/chevron-maulavibazar",
+      "name": "CHEVRON Maulavibazar",
+      "company_code": "CHEVRON",
+      "operator": "CHEVRON",
+      "gas_mmcfd": 16.6,
+      "producing_wells": 5,
+      "capacity_mmcfd": 42.0
+    },
+    {
+      "type": "gas_field",
+      "id": "chevron/bibiyana",
+      "name": "Bibiyana",
+      "company_code": "CHEVRON",
+      "operator": "CHEVRON",
+      "gas_mmcfd": 751.8,
+      "producing_wells": 26,
+      "capacity_mmcfd": 1200.0
+    },
+    {
+      "type": "gas_field",
+      "id": "chevron/tullow-bangora",
+      "name": "TULLOW Bangora",
+      "company_code": "CHEVRON",
+      "operator": "CHEVRON",
+      "gas_mmcfd": 30.7,
+      "producing_wells": 5,
+      "capacity_mmcfd": 103.0
+    },
+    {
+      "type": "gas_field",
+      "id": "rpgcl/r-lng-terminal",
+      "name": "R-LNG Terminal",
+      "company_code": "RPGCL",
+      "operator": null,
+      "gas_mmcfd": 500.9,
+      "producing_wells": 0,
+      "capacity_mmcfd": 1100.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Ghorashal (1315 MW)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 148.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "SUMMIT MEGHT-2 (583)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 96.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Aggreeko (GSL)-145 MW Ren",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Siddhirganj (2x120 MW)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 52.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Meghnaghat IPP MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 75.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Summit Meghn. MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 55.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "JERA Meghnaghat (718MW)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 130.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "RPCL (210 MW)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 40.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Madhabdi (27+10 MW) REB",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 9.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Ashulia (24+10 MW) REB",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 10.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Doreen Tangail MW SIPP",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Rupganj MW SIPP",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 8.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "EGCB Shiddhirgonj MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 55.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "HPL ( MW )",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 55.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "SGCL",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 65.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NBBL220MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Total :",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 2524.9,
+      "supply_mmcfd": 673.5
+    },
+    {
+      "type": "power_plant",
+      "name": "Regent MW",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 27.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Ashuganj MW Rent",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 0.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Ashuganj 225MW",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 40.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "APS MW CCPP S",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 65.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "APS MW CCPP N",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 65.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "APS MW CCPP E",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 75.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Jangalia-33 MW SIPP",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 7.8,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Chandpur MW CCPP",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 34.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Sikalbaha (40 MW)",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 12.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Barabkunda MW SIPP",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "S.Bazar MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 47.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "S.Bazar MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 18.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Fenchuganj CC1 MW",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 17.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Fenchuganj CC2 MW",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 18.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "K.gaon yrs rent MW",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 12.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "K.gaon yrs rent MW",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 3.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Habiganj MW SIPP",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 3.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Baghabari (100+71 MW)",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 50.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NWPGCL Unit",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NWPGCL Unit",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 70.0,
+      "supply_mmcfd": 0.0
+    }
+  ]
+}

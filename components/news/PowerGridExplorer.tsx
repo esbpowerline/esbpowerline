@@ -48,7 +48,13 @@ import {
 import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
-import { pgcbMonthlyData, getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
+import { getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
+import {
+  usePgcbMonthlyEvents,
+  usePgcbMonthlyRecord,
+  usePgcbMonthlySeries,
+} from '@/lib/data/companies/usePgcbMonthly';
+import { PgcbMonthlyDetail } from '@/components/news/power-grid/PgcbMonthlyDetail';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
 import { sredaRenewablesData, totalCapacityRenewables, renewableGridSharePct } from '@/lib/data/companies/sreda';
 import { ongoingProjectsData } from '@/lib/data/infrastructure/projects-ongoing';
@@ -110,6 +116,19 @@ interface PowerGridExplorerProps {
   serverLatestDate?: string;
 }
 const DEMO_DATE = '2026-06-22';
+
+/**
+ * Shared sizing for the four controls above the 13-Year Growth Trends chart —
+ * the three metric toggles and the fuel dropdown. Kept in one place so they
+ * stay identical; `min-h-11` and `w-44` are what CustomDropdown already renders
+ * at (via .grid-explorer-control), so the toggles match it rather than the
+ * other way round.
+ */
+const TREND_CONTROL_SIZE = 'w-full sm:w-44 min-h-11';
+const TREND_TOGGLE_CLASS = cn(
+  TREND_CONTROL_SIZE,
+  'flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm',
+);
 
 export function PowerGridExplorer({
   initialLines,
@@ -475,6 +494,10 @@ export function PowerGridExplorer({
 
   // Dynamic Gas Production & Supply calculations
   const safeGasProductionData = gasProductionData || [];
+  // A day can carry PGCB grid data while the matching Petrobangla report is not
+  // out yet. Summing an empty table yields 0, which would render as a factual
+  // "0.0 MMCFD" national gas supply — distinguish absent from genuinely zero.
+  const hasGasProductionData = safeGasProductionData.length > 0;
   const totalGasSupply = safeGasProductionData.reduce((sum, item) => sum + (item.gas || 0), 0);
   const totalCondensate = safeGasProductionData.reduce((sum, item) => sum + (item.condensate || 0), 0);
 
@@ -685,11 +708,35 @@ export function PowerGridExplorer({
   const [hoveredCostIndex, setHoveredCostIndex] = useState<number | null>(null);
   const [hoveredZoneIndex, setHoveredZoneIndex] = useState<number | null>(null);
 
-  // PGCB Monthly Archives States
-  const [selectedMonthlyKey, setSelectedMonthlyKey] = useState<string>(
-    getLatestMonthlyDateKey() ??
-      (pgcbMonthlyData.length > 0 ? pgcbMonthlyData[pgcbMonthlyData.length - 1].date_key : '2026-06'),
+  // PGCB Monthly Archives States.
+  // The archive is fetched on demand rather than bundled, so it only downloads
+  // once Macro Trends is opened. `pgcbMonthlyData` is the chart/KPI series;
+  // per-month detail comes from usePgcbMonthlyRecord below.
+  const { series: pgcbMonthlyData, loading: pgcbMonthlyLoading } = usePgcbMonthlySeries(activeTab === 'macro');
+  const [selectedMonthlyKey, setSelectedMonthlyKey] = useState<string>('');
+  const latestMonthlyKey = getLatestMonthlyDateKey(pgcbMonthlyData);
+
+  // Land on the newest month once the archive arrives, without clobbering a pick.
+  useEffect(() => {
+    if (!selectedMonthlyKey && latestMonthlyKey) setSelectedMonthlyKey(latestMonthlyKey);
+  }, [selectedMonthlyKey, latestMonthlyKey]);
+
+  const { record: selectedMonthlyRecord } = usePgcbMonthlyRecord(
+    selectedMonthlyKey,
+    activeTab === 'macro',
   );
+
+  // The outage log is bigger than the rest of the month combined, so it waits
+  // for an explicit click rather than loading with the month.
+  const [monthlyEventsOpen, setMonthlyEventsOpen] = useState(false);
+  const { events: monthlyEvents, loading: monthlyEventsLoading } = usePgcbMonthlyEvents(
+    selectedMonthlyKey,
+    monthlyEventsOpen,
+  );
+  useEffect(() => {
+    setMonthlyEventsOpen(false);
+  }, [selectedMonthlyKey]);
+
   const [monthlyTrendMetric, setMonthlyTrendMetric] = useState<'peaks' | 'energy' | 'fuels'>('peaks');
   const [selectedFuelTrend, setSelectedFuelTrend] = useState<'gas' | 'coal' | 'hfo' | 'diesel' | 'import'>('gas');
   const pgcbFuelTrendData = useMemo(
@@ -698,7 +745,7 @@ export function PowerGridExplorer({
         ...row,
         fuelTrendMkwh: row.generation_by_fuel[selectedFuelTrend] ?? 0,
       })),
-    [selectedFuelTrend],
+    [pgcbMonthlyData, selectedFuelTrend],
   );
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
@@ -1057,15 +1104,17 @@ export function PowerGridExplorer({
           </p>
         </div>
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
-          {/* TODAY Reset Button */}
-          <button
-            type="button"
-            onClick={() => selectAccessibleDate(latestDate)}
-            className="flex items-center justify-center gap-1 px-3 py-2 text-xs md:text-sm font-bold bg-transparent border border-border/40 hover:bg-muted/10 hover:border-primary/30 rounded-xl transition-all duration-150 shadow-sm text-foreground"
-          >
-            <RotateCcw className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span>Latest</span>
-          </button>
+          {/* TODAY Reset Button — sized to match the Year control exactly */}
+          <div className="w-full sm:w-28">
+            <button
+              type="button"
+              onClick={() => selectAccessibleDate(latestDate)}
+              className="grid-explorer-control w-full flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-transparent hover:bg-muted/10 hover:border-primary/30 shadow-sm text-foreground"
+            >
+              <RotateCcw className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>Latest</span>
+            </button>
+          </div>
 
           <div className="w-full sm:w-28 relative z-50">
             <CustomDropdown
@@ -1140,6 +1189,7 @@ export function PowerGridExplorer({
         systemStats={systemStats}
         generationData={generationData}
         totalGasSupply={totalGasSupply}
+        hasGasProductionData={hasGasProductionData}
         importedLngGas={importedLngGas}
         importedLngPct={importedLngPct}
         chevronGas={chevronGas}
@@ -4899,18 +4949,53 @@ export function PowerGridExplorer({
           )}
 
           {/* Sub-tab: PGCB Monthly Archives */}
-          {macroSubTab === 'monthly' && (
+          {macroSubTab === 'monthly' && pgcbMonthlyLoading && pgcbMonthlyData.length === 0 && (
+            <div className="space-y-6 grid-explorer-subpanel" aria-busy="true">
+              <div className="grid-explorer-skeleton h-24 rounded-2xl" />
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="grid-explorer-skeleton h-28 rounded-2xl" />
+                ))}
+              </div>
+              <div className="grid lg:grid-cols-2 gap-6">
+                <div className="grid-explorer-skeleton h-80 rounded-2xl" />
+                <div className="grid-explorer-skeleton h-80 rounded-2xl" />
+              </div>
+            </div>
+          )}
+
+          {macroSubTab === 'monthly' && !(pgcbMonthlyLoading && pgcbMonthlyData.length === 0) && (
             <div className="space-y-6 grid-explorer-subpanel">
               {/* Month/Year Selection Control Panel */}
               {(() => {
                 const currentMonthlyData = localPgcbMonthlyData.find(d => d.date_key === selectedMonthlyKey) || localPgcbMonthlyData[localPgcbMonthlyData.length - 1];
-                const availableYears = Array.from(new Set(localPgcbMonthlyData.map(d => d.year))).sort((a, b) => b - a);
-                const availableMonths = localPgcbMonthlyData.filter(d => d.year === currentMonthlyData?.year);
-                
-                const yearOptions = availableYears.map(y => ({ label: String(y), value: String(y) }));
-                const monthOptions = availableMonths.map(d => ({ label: d.month, value: d.month }));
-                const regionalChartData = currentMonthlyData
-                  ? Object.entries(currentMonthlyData.regional_supply)
+
+                // The period pickers list the WHOLE archive, not just the tier's window, so a
+                // visitor can see how far the data actually goes. Periods outside their window
+                // render greyed via `locked` and are inert until they upgrade.
+                const unlockedKeys = new Set(localPgcbMonthlyData.map(d => d.date_key));
+                const availableYears = Array.from(new Set(pgcbMonthlyData.map(d => d.year))).sort((a, b) => b - a);
+                const availableMonths = pgcbMonthlyData.filter(d => d.year === currentMonthlyData?.year);
+
+                const yearOptions = availableYears.map(y => ({
+                  label: String(y),
+                  value: String(y),
+                  locked: !pgcbMonthlyData.some(d => d.year === y && unlockedKeys.has(d.date_key)),
+                }));
+                const monthOptions = availableMonths.map(d => ({
+                  label: d.month,
+                  value: d.month,
+                  locked: !unlockedKeys.has(d.date_key),
+                }));
+                // Regional supply is per-month detail, so it comes from the month's own
+                // file rather than the series. Guarded against showing the previous
+                // month's zones while a newly picked month is still loading.
+                const regionalRecord =
+                  selectedMonthlyRecord && selectedMonthlyRecord.date_key === currentMonthlyData?.date_key
+                    ? selectedMonthlyRecord
+                    : null;
+                const regionalChartData = regionalRecord
+                  ? Object.entries(regionalRecord.regional_supply)
                       .map(([key, value]) => ({
                         key,
                         name: key.charAt(0).toUpperCase() + key.slice(1),
@@ -4936,6 +5021,7 @@ export function PowerGridExplorer({
                             value={String(currentMonthlyData?.year)}
                             onChange={(val) => {
                               const newYear = parseInt(val);
+                              // Locked years stay inert — jump to that year's first unlocked month.
                               const firstMonth = localPgcbMonthlyData.find(d => d.year === newYear);
                               if (firstMonth) setSelectedMonthlyKey(firstMonth.date_key);
                             }}
@@ -4958,7 +5044,7 @@ export function PowerGridExplorer({
                           <CustomDropdown
                             value={currentMonthlyData?.month}
                             onChange={(val) => {
-                              const targetData = localPgcbMonthlyData.find(d => d.year === currentMonthlyData.year && d.month === val);
+                              const targetData = localPgcbMonthlyData.find(d => d.year === currentMonthlyData?.year && d.month === val);
                               if (targetData) setSelectedMonthlyKey(targetData.date_key);
                             }}
                             options={monthOptions}
@@ -5278,7 +5364,7 @@ export function PowerGridExplorer({
                       type="button"
                       onClick={() => setMonthlyTrendMetric('peaks')}
                       className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm",
+                        TREND_TOGGLE_CLASS,
                         monthlyTrendMetric === 'peaks'
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10 hover:border-primary/30"
@@ -5290,7 +5376,7 @@ export function PowerGridExplorer({
                       type="button"
                       onClick={() => setMonthlyTrendMetric('energy')}
                       className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm",
+                        TREND_TOGGLE_CLASS,
                         monthlyTrendMetric === 'energy'
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10 hover:border-primary/30"
@@ -5302,7 +5388,7 @@ export function PowerGridExplorer({
                       type="button"
                       onClick={() => setMonthlyTrendMetric('fuels')}
                       className={cn(
-                        "flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm",
+                        TREND_TOGGLE_CLASS,
                         monthlyTrendMetric === 'fuels'
                           ? "bg-primary/10 text-primary border-primary/20"
                           : "bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10 hover:border-primary/30"
@@ -5312,7 +5398,7 @@ export function PowerGridExplorer({
                     </button>
 
                     {monthlyTrendMetric === 'fuels' && (
-                      <div className="w-44 relative z-50">
+                      <div className={cn(TREND_CONTROL_SIZE, 'relative z-50')}>
                         <CustomDropdown
                           value={selectedFuelTrend}
                           onChange={(val: any) => setSelectedFuelTrend(val)}
@@ -5630,9 +5716,41 @@ export function PowerGridExplorer({
 
                 <GridCardFooter>
                   <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Monthly System Operation Reports</a></span>
-                  <span>Data Period: January 2013 - April 2026 (157 Consecutive Reports)</span>
+                  {/* Derived from the archive so it can't drift as months are ingested. */}
+                  {pgcbMonthlyData.length > 0 && (
+                    <span>
+                      Data Period: {pgcbMonthlyData[0].month} {pgcbMonthlyData[0].year} -{' '}
+                      {pgcbMonthlyData[pgcbMonthlyData.length - 1].month}{' '}
+                      {pgcbMonthlyData[pgcbMonthlyData.length - 1].year} ({pgcbMonthlyData.length} Consecutive Reports)
+                    </span>
+                  )}
                 </GridCardFooter>
               </div>
+
+              {/* Everything beyond the headline figures, from the source workbook's
+                  other 17 sheets. Only months that have been re-parsed carry it. */}
+              {selectedMonthlyRecord?.detail && selectedMonthlyRecord.date_key === selectedMonthlyKey
+                ? (() => {
+                    const detail = selectedMonthlyRecord.detail!;
+                    const [y, m] = selectedMonthlyKey.split('-').map(Number);
+                    const prev = new Date(Date.UTC(y, m - 2, 1));
+                    const prevMonthLabel = `${prev.toLocaleString('en-US', {
+                      month: 'long',
+                      timeZone: 'UTC',
+                    })} ${prev.getUTCFullYear()}`;
+                    return (
+                      <PgcbMonthlyDetail
+                        detail={detail}
+                        monthLabel={`${detail.month} ${detail.year}`}
+                        prevMonthLabel={prevMonthLabel}
+                        events={monthlyEvents}
+                        eventsLoading={monthlyEventsLoading}
+                        eventsOpened={monthlyEventsOpen}
+                        onLoadEvents={() => setMonthlyEventsOpen(true)}
+                      />
+                    );
+                  })()
+                : null}
             </div>
           )}
 

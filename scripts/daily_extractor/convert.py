@@ -7,8 +7,15 @@ import pandas as pd
 
 
 def cell_str(val) -> str:
-    if val is None or (isinstance(val, float) and pd.isna(val)):
+    if val is None:
         return ""
+    # Covers NaN and NaT alike. NaT has strftime but raises on it, so the
+    # missing-value check has to run before the date branch below.
+    try:
+        if pd.isna(val):
+            return ""
+    except (TypeError, ValueError):
+        pass
     if hasattr(val, "strftime"):
         return val.strftime("%Y-%m-%d")
     return str(val).strip().strip("'")

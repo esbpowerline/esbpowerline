@@ -434,7 +434,7 @@ export function HomePowerSector({
 
       {/* Mobile Inline Ad block for 007.png */}
       <div className="block md:hidden mb-12">
-        <Link href="/advertising" className="rounded-2xl overflow-hidden relative group w-full block">
+        <Link href="/contact#advertising" className="rounded-2xl overflow-hidden relative group w-full block">
           <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" />
         </Link>
       </div>
@@ -485,13 +485,13 @@ export function HomePowerSector({
                 {/* 3 Proportional Ad Spaces */}
                 {(index === 1 || index === 7) && (
                   <div className="category-ad-block-3 grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-6">
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
+                    <Link href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block">
                       <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
+                    <Link href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block">
                       <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>
-                    <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block">
+                    <Link href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block">
                       <Image src="/images/promotions/002.png" alt="Advertisement" width={994} height={480} className="w-full h-auto object-cover block" />
                     </Link>
                   </div>
@@ -499,7 +499,7 @@ export function HomePowerSector({
 
                 {/* 1 Large Full-Width Ad Space */}
                 {(index === 4 || index === 10) && (
-                  <Link href="/advertising" className="category-ad-block-1 rounded-2xl overflow-hidden relative group w-full block">
+                  <Link href="/contact#advertising" className="category-ad-block-1 rounded-2xl overflow-hidden relative group w-full block">
                     <Image src="/images/promotions/005.png" alt="Advertisement" width={3126} height={480} className="w-full h-auto object-cover block" />
                   </Link>
                 )}

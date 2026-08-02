@@ -97,6 +97,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.esbpowerline.com' },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Only 80 is allowed, so the built-in default (75) snaps to it — every
+    // <Image> is served at q80, matching the upload/import/Supabase pipeline.
+    qualities: [80],
     deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },

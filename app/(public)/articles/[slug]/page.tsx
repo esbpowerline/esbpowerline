@@ -221,7 +221,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {/* In-Article Ad Space */}
         {paragraphs.length > 3 && (
           <div className="article-body-ad-block my-12" suppressHydrationWarning>
-            <Link href="/advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
+            <Link href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
               <Image src="/images/promotions/008.png" alt="Advertisement" width={2136} height={420} className="w-full h-auto object-cover" suppressHydrationWarning />
             </Link>
           </div>

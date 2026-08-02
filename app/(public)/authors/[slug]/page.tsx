@@ -16,6 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
       title: 'ESB News Desk | ESB PowerLine',
       description: 'The official editorial desk of ESB PowerLine, delivering authoritative, breaking, and in-depth energy sector news in Bangladesh.',
+      alternates: { canonical: '/authors/esb-news-desk' },
     };
   }
 
@@ -27,6 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${user.name} | ESB PowerLine`,
     description: user.bio ?? `Articles written by ${user.name}`,
+    alternates: { canonical: `/authors/${slug}` },
   };
 }
 

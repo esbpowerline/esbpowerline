@@ -106,7 +106,11 @@ export function CustomDropdown({
         <div
           style={menuWidth ? { width: menuWidth } : undefined}
           className={cn(
-            'absolute mt-2.5 max-h-60 overflow-y-auto rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl p-1.5 z-[100] animate-in fade-in slide-in-from-top-1 duration-150 scrollbar-thin',
+            'absolute mt-2.5 rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl p-1.5 z-[100] animate-in fade-in slide-in-from-top-1 duration-150',
+            // Grid menus hold a bounded set (years / 12 months / ≤31 days), so they
+            // render in full — no height cap, no scrollbar. List menus are unbounded
+            // and keep the capped, scrollable behaviour.
+            layout === 'grid' ? 'overflow-visible' : 'max-h-60 overflow-y-auto scrollbar-thin',
             align === 'right' ? 'right-0' : 'left-0',
             layout === 'grid' ? 'grid gap-1' : 'flex flex-col',
             layout === 'grid' && gridColumns === 3 && 'grid-cols-3',
