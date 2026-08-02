@@ -4911,11 +4911,24 @@ export function PowerGridExplorer({
               {/* Month/Year Selection Control Panel */}
               {(() => {
                 const currentMonthlyData = localPgcbMonthlyData.find(d => d.date_key === selectedMonthlyKey) || localPgcbMonthlyData[localPgcbMonthlyData.length - 1];
-                const availableYears = Array.from(new Set(localPgcbMonthlyData.map(d => d.year))).sort((a, b) => b - a);
-                const availableMonths = localPgcbMonthlyData.filter(d => d.year === currentMonthlyData?.year);
-                
-                const yearOptions = availableYears.map(y => ({ label: String(y), value: String(y) }));
-                const monthOptions = availableMonths.map(d => ({ label: d.month, value: d.month }));
+
+                // The period pickers list the WHOLE archive, not just the tier's window, so a
+                // visitor can see how far the data actually goes. Periods outside their window
+                // render greyed via `locked` and are inert until they upgrade.
+                const unlockedKeys = new Set(localPgcbMonthlyData.map(d => d.date_key));
+                const availableYears = Array.from(new Set(pgcbMonthlyData.map(d => d.year))).sort((a, b) => b - a);
+                const availableMonths = pgcbMonthlyData.filter(d => d.year === currentMonthlyData?.year);
+
+                const yearOptions = availableYears.map(y => ({
+                  label: String(y),
+                  value: String(y),
+                  locked: !pgcbMonthlyData.some(d => d.year === y && unlockedKeys.has(d.date_key)),
+                }));
+                const monthOptions = availableMonths.map(d => ({
+                  label: d.month,
+                  value: d.month,
+                  locked: !unlockedKeys.has(d.date_key),
+                }));
                 const regionalChartData = currentMonthlyData
                   ? Object.entries(currentMonthlyData.regional_supply)
                       .map(([key, value]) => ({
@@ -4943,6 +4956,7 @@ export function PowerGridExplorer({
                             value={String(currentMonthlyData?.year)}
                             onChange={(val) => {
                               const newYear = parseInt(val);
+                              // Locked years stay inert — jump to that year's first unlocked month.
                               const firstMonth = localPgcbMonthlyData.find(d => d.year === newYear);
                               if (firstMonth) setSelectedMonthlyKey(firstMonth.date_key);
                             }}
