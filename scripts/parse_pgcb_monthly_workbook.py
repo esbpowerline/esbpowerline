@@ -43,6 +43,9 @@ MONTHS = {
     "july": 7, "august": 8, "september": 9, "october": 10, "november": 11, "december": 12,
 }
 
+# No reader indexes beyond column 29; the cap keeps pathological sheets tractable.
+MAX_COLUMNS = 160
+
 ZONES = [
     "dhaka", "chattogram", "cumilla", "mymensingh", "sylhet",
     "khulna", "barishal", "rajshahi", "rangpur",
@@ -101,20 +104,74 @@ def num(v: Any) -> float | None:
 
 
 ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}")
+# Reports before ~2021 print dates day-first: 01-06-13, 23/02/20.
+DMY_DATE = re.compile(r"^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})\b")
 
 
 def is_date(v: Any) -> bool:
-    """True for a real date cell (xlsx) or an ISO-prefixed string (txt dump)."""
+    """True for a real date cell (xlsx), an ISO string, or a day-first string."""
     if isinstance(v, (pd.Timestamp, datetime.datetime, datetime.date)):
         return True
-    return isinstance(v, str) and bool(ISO_DATE.match(v.strip()))
+    if not isinstance(v, str):
+        return False
+    s = v.strip()
+    return bool(ISO_DATE.match(s) or DMY_DATE.match(s))
 
 
 def day_of(v: Any) -> int | None:
+    """Day of month, whichever of the three date shapes the cell uses."""
     if isinstance(v, (pd.Timestamp, datetime.datetime, datetime.date)):
         return v.day
     s = txt(v)
-    return int(s[8:10]) if ISO_DATE.match(s) else None
+    if ISO_DATE.match(s):
+        return int(s[8:10])
+    m = DMY_DATE.match(s)
+    return int(m.group(1)) if m else None
+
+
+def iso_when(v: Any) -> str | None:
+    """Normalise a date-bearing cell to ISO so old and new reports render alike.
+
+    Day-first strings are converted; anything unrecognised is passed through
+    untouched rather than guessed at.
+    """
+    s = txt(v)
+    if not s:
+        return None
+    if ISO_DATE.match(s):
+        return s
+    m = DMY_DATE.match(s)
+    if not m:
+        return s
+    day, month, year = (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    if year < 100:
+        year += 2000
+    if not (1 <= month <= 12 and 1 <= day <= 31):
+        return s
+    return f"{year}-{month:02d}-{day:02d}"
+
+
+def _edit_distance(a: str, b: str) -> int:
+    prev = list(range(len(b) + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i]
+        for j, cb in enumerate(b, 1):
+            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
+        prev = cur
+    return prev[-1]
+
+
+def _month_from_word(word: str) -> str | None:
+    """Month name, tolerating the odd typo — February 2020 is printed 'Fabruary'."""
+    w = word.lower()
+    if w in MONTHS:
+        return w
+    best, best_d = None, 99
+    for name in MONTHS:
+        d = _edit_distance(w, name)
+        if d < best_d:
+            best, best_d = name, d
+    return best if best_d <= 2 else None
 
 
 def cell(row: list[Any], i: int) -> Any:
@@ -126,8 +183,10 @@ def find_month(rows: list[list[Any]]) -> tuple[str, int] | None:
         for v in row:
             s = txt(v)
             m = re.search(r"Month\s*:?\s*([A-Za-z]+)[-',\s]+(\d{4})", s)
-            if m and m.group(1).lower() in MONTHS:
-                return m.group(1).capitalize(), int(m.group(2))
+            if m:
+                name = _month_from_word(m.group(1))
+                if name:
+                    return name.capitalize(), int(m.group(2))
     return None
 
 
@@ -152,18 +211,25 @@ def load_txt(path: Path) -> dict[str, list[list[Any]]]:
     """
     out: dict[str, list[list[Any]]] = {}
     current: str | None = None
-    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
-        if line.startswith("## Sheet:"):
-            current = line.split(":", 1)[1].strip()
-            out[current] = []
-            continue
-        if current is None or not line.startswith("|"):
-            continue
-        stripped = line.strip()
-        if stripped.startswith("|:") or re.match(r"^\|\s*Col 1\s*\|", stripped):
-            continue
-        parts = line.split("|")
-        out[current].append([p.strip() for p in parts[1:-1]] if len(parts) > 2 else [])
+    # Streamed rather than read whole: a couple of these dumps run to hundreds of
+    # megabytes because every column is padded to its widest cell and some sheets
+    # carry tens of thousands of empty trailing columns. Only the leading columns
+    # are ever indexed (the widest reader reaches column 29), so the rest is
+    # dropped per line instead of being held in memory.
+    with path.open("r", encoding="utf-8", errors="ignore") as fh:
+        for line in fh:
+            line = line.rstrip("\n")
+            if line.startswith("## Sheet:"):
+                current = line.split(":", 1)[1].strip()
+                out[current] = []
+                continue
+            if current is None or not line.startswith("|"):
+                continue
+            stripped = line.lstrip()
+            if stripped.startswith("|:") or re.match(r"^\|\s*Col 1\s*\|", stripped):
+                continue
+            parts = line.split("|", MAX_COLUMNS + 2)
+            out[current].append([p.strip() for p in parts[1 : MAX_COLUMNS + 1]] if len(parts) > 2 else [])
     return out
 
 
@@ -171,6 +237,30 @@ def load_report(path: Path) -> dict[str, list[list[Any]]]:
     if path.suffix.lower() in {".xlsx", ".xls"}:
         return load_xlsx(path)
     return load_txt(path)
+
+
+def _norm_sheet(name: str) -> str:
+    """Sheet names are typed by hand and drift: 'QF_LDC_37', 'QF-LDC-23 ' with a
+    trailing space, and June 2023's '"QF-LDC-37' with a stray leading quote.
+    Comparing on alphanumerics only makes the lookup immune to all of it."""
+    return re.sub(r"[^A-Za-z0-9]", "", name).upper()
+
+
+def sheet_getter(sheets: dict[str, list[list[Any]]]):
+    """Return a lookup that finds a sheet by any of its spellings."""
+    index: dict[str, list[list[Any]]] = {}
+    for name, rows in sheets.items():
+        if rows:
+            index.setdefault(_norm_sheet(name), rows)
+
+    def get(*names: str) -> list[list[Any]] | None:
+        for n in names:
+            found = index.get(_norm_sheet(n))
+            if found:
+                return found
+        return None
+
+    return get
 
 
 def clean_name(s: str) -> str:
@@ -227,7 +317,7 @@ def parse_system(rows: list[list[Any]], year: int | None = None, month: int | No
             "sl": sl,
             "item": label,
             "value": value,
-            "when": txt(cell(row, 3)) or None,
+            "when": iso_when(cell(row, 3)),
             "prev_month": num(cell(row, 4)),
             "last_year": num(cell(row, 6)),
             "max_till_date": num(cell(row, 8)),
@@ -387,7 +477,7 @@ def parse_substation_max_load(rows: list[list[Any]]) -> list[dict[str, Any]]:
         name = clean_name(txt(cell(row, 1)))
         if not name or num(cell(row, 0)) is None:
             continue
-        out.append({"substation": name, "load_mw": num(cell(row, 2)), "when": txt(cell(row, 3)) or None})
+        out.append({"substation": name, "load_mw": num(cell(row, 2)), "when": iso_when(cell(row, 3))})
     return out
 
 
@@ -407,7 +497,7 @@ def parse_area_max_load(rows: list[list[Any]]) -> list[dict[str, Any]]:
                 "area": name,
                 "key": key,
                 "load_mw": load,
-                "date": txt(cell(row, 2))[:10] or None,
+                "date": iso_when(cell(row, 2)),
                 "hour": txt(cell(row, 3)) or None,
             }
         )
@@ -439,9 +529,9 @@ def parse_voltages(rows: list[list[Any]]) -> list[dict[str, Any]]:
                 "class": section,
                 "rated_kv": rated,
                 "max_kv": vmax,
-                "max_when": txt(cell(row, 4)) or None,
+                "max_when": iso_when(cell(row, 4)),
                 "min_kv": vmin,
-                "min_when": txt(cell(row, 6)) or None,
+                "min_when": iso_when(cell(row, 6)),
             }
         )
     return out
@@ -461,7 +551,7 @@ def parse_transformer_loading(rows: list[list[Any]]) -> list[dict[str, Any]]:
                 "transformer": txt(cell(row, 1)) or None,
                 "voltage_level": txt(cell(row, 2)) or None,
                 "capacity_mva": num(cell(row, 3)),
-                "date": txt(cell(row, 4)) or None,
+                "date": iso_when(cell(row, 4)),
                 "hour": txt(cell(row, 5)) or None,
                 "mw": num(cell(row, 6)),
                 "mvar": num(cell(row, 7)),
@@ -505,7 +595,7 @@ def parse_generation_system(rows: list[list[Any]]) -> list[dict[str, Any]]:
                 "item": label,
                 "unit": txt(cell(row, 2)) or None,
                 "value": value,
-                "date": txt(cell(row, 4))[:10] or None,
+                "date": iso_when(cell(row, 4)),
                 "time": txt(cell(row, 5)) or None,
             }
         )
@@ -535,8 +625,8 @@ def parse_outage_events(rows: list[list[Any]], kind: str) -> list[dict[str, Any]
                 "circle": circle,
                 "substation": first,
                 "equipment": equipment or None,
-                "start": txt(start),
-                "finish": txt(cell(row, 3)) or None,
+                "start": iso_when(start),
+                "finish": iso_when(cell(row, 3)),
                 "duration": txt(cell(row, 4)) or None,
                 "type": txt(cell(row, 5)) or None,
                 "cause": clean_name(txt(cell(row, 6))) or None,
@@ -577,11 +667,7 @@ def main() -> None:
     src = Path(sys.argv[1])
     sheets = load_report(src)
 
-    def sheet(*names: str) -> list[list[Any]] | None:
-        for n in names:
-            if sheets.get(n):
-                return sheets[n]
-        return None
+    sheet = sheet_getter(sheets)
 
     mis = sheet("QF-MIS-03", "MIS")
     if mis is None:
