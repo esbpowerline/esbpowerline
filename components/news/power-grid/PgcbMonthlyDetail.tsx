@@ -989,8 +989,47 @@ export function PgcbMonthlyDetail({
         : 'bg-transparent border-border/40 text-muted-foreground hover:bg-muted/10',
     );
 
+  const stale = detail.data_quality?.stale_current_month_figures ?? [];
+  const STALE_LABELS: Record<string, string> = {
+    max_evening_peak_gen_mw: 'Maximum evening peak generation',
+    max_evening_peak_demand_mw: 'Maximum evening peak demand',
+    max_generation_mw: 'Maximum generation',
+    max_load_shed_evening_mw: 'Maximum load shed at evening peak',
+  };
+
   return (
     <div className="space-y-6">
+      {/* Source-integrity notice. Shown before the figures it concerns, because a
+          reader should know before reading them, not after. */}
+      {stale.length > 0 && (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+          <div className="flex items-start gap-2.5">
+            <span className="text-amber-600 dark:text-amber-500 font-bold text-sm leading-none mt-0.5" aria-hidden="true">
+              ⚠
+            </span>
+            <div className="min-w-0">
+              <h4 className="text-xs font-bold text-foreground">Source data note for {monthLabel}</h4>
+              <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
+                PGCB&rsquo;s report prints{' '}
+                {stale.length === 1 ? 'a figure' : `${stale.length} figures`}{' '}
+                in the &ldquo;Current Month&rdquo; column carrying a date from an earlier month — the previous month&rsquo;s number appears to have been
+                left in the cell. The published value is shown unchanged below, but it should not be read as{' '}
+                {monthLabel}&rsquo;s own maximum.
+              </p>
+              <ul className="mt-2 space-y-0.5">
+                {stale.map((s) => (
+                  <li key={s.key} className="text-[11px] text-foreground">
+                    <span className="font-bold">{STALE_LABELS[s.key] ?? s.key}</span>{' '}
+                    <span className="tabular-nums">{fmt(s.value, 2)}</span>{' '}
+                    <span className="text-muted-foreground">— dated {s.printed_date}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1 — reliability headline */}
       {detail.system && (
         <PanelCard

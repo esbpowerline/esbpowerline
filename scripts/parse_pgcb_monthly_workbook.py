@@ -52,6 +52,14 @@ ZONES = [
 # --------------------------------------------------------------------------- #
 # cell helpers
 # --------------------------------------------------------------------------- #
+# The .txt dumps keep a ':00' seconds component and encode in-cell line breaks
+# as literal <br>, where the .xlsx path yields time objects and real newlines.
+# Both are normalised so a month backfilled from a dump is byte-identical to the
+# same month parsed from its workbook (verified on July 2025, which has both).
+_TRAILING_SECONDS = re.compile(r"(?<=\d\d:\d\d):00\b")
+_HTML_BREAK = re.compile(r"<br\s*/?>", re.I)
+
+
 def txt(v: Any) -> str:
     """Cell as trimmed text. Empty string for blanks so callers can test truthiness."""
     if v is None or (isinstance(v, float) and pd.isna(v)):
@@ -69,8 +77,10 @@ def txt(v: Any) -> str:
     if isinstance(v, datetime.date):
         return v.strftime("%Y-%m-%d")
     if isinstance(v, datetime.time):
-        return v.strftime("%H:%M")
-    return str(v).strip()
+        # Seconds are kept only when they carry information.
+        return v.strftime("%H:%M:%S") if v.second else v.strftime("%H:%M")
+    s = _HTML_BREAK.sub(" ", str(v)).strip()
+    return _TRAILING_SECONDS.sub("", s)
 
 
 def num(v: Any) -> float | None:
@@ -203,7 +213,7 @@ SYSTEM_KEYS = [
 ]
 
 
-def parse_system(rows: list[list[Any]]) -> dict[str, Any]:
+def parse_system(rows: list[list[Any]], year: int | None = None, month: int | None = None) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
     keyed: dict[str, Any] = {}
     for row in rows:
@@ -233,6 +243,17 @@ def parse_system(rows: list[list[Any]]) -> dict[str, Any]:
                     "last_year": entry["last_year"],
                 }
                 break
+
+    # A "Current Month" figure stamped with a date outside the report month is the
+    # previous month's number left in the cell — a source error, seen in several
+    # 2025 reports on the evening-peak generation row. The printed value is kept
+    # (it is what PGCB published) but flagged so the site can say so.
+    if year and month:
+        prefix = f"{year}-{month:02d}"
+        for stat in keyed.values():
+            when = stat.get("when")
+            if when and ISO_DATE.match(when) and not when.startswith(prefix):
+                stat["suspect_date"] = True
     return {"items": items, "keyed": keyed}
 
 
@@ -580,7 +601,7 @@ def main() -> None:
         "sheets_present": [n for n, d in sheets.items() if d],
     }
 
-    doc["system"] = parse_system(mis)
+    doc["system"] = parse_system(mis, year, MONTHS[month_name.lower()])
 
     if (d := sheet("QF-LDC-22")) is not None:
         doc["area_supply_at_system_peak"] = parse_area_supply(d)
@@ -605,6 +626,14 @@ def main() -> None:
     if (d := sheet("FGMO")) is not None:
         doc["fgmo"] = parse_fgmo(d)
 
+    suspect = [
+        {"key": k, "value": v["value"], "printed_date": v.get("when")}
+        for k, v in doc["system"]["keyed"].items()
+        if v.get("suspect_date")
+    ]
+    if suspect:
+        doc["data_quality"] = {"stale_current_month_figures": suspect}
+
     events: list[dict[str, Any]] = []
     for name, kind in [
         ("QF-LDC-23", "substation_emergency"),
@@ -628,7 +657,11 @@ def main() -> None:
         for k, v in doc.items()
         if isinstance(v, (list, dict)) and k != "sheets_present"
     }
-    print(f"{date_key}  ->  {out.relative_to(ROOT)}  ({out.stat().st_size / 1024:.1f} KB)")
+    try:
+        shown = out.relative_to(ROOT)
+    except ValueError:  # an explicit output path outside the repo
+        shown = out
+    print(f"{date_key}  ->  {shown}  ({out.stat().st_size / 1024:.1f} KB)")
     for k, n in counts.items():
         print(f"  {k:28s} {n}")
 

@@ -43,6 +43,8 @@ export interface PgcbSystemStat {
   when: string | null;
   prev_month: number | null;
   last_year: number | null;
+  /** Set when the printed date falls outside the report month — see data_quality. */
+  suspect_date?: boolean;
 }
 
 export interface PgcbCircleSplit {
@@ -175,6 +177,18 @@ export interface PgcbMonthlyDetail {
     time: string | null;
   }>;
   fgmo?: PgcbFgmoPlant[];
+  /**
+   * Figures PGCB printed in the "Current Month" column carrying a date from a
+   * previous month — the earlier month's number left in the cell. Reported
+   * rather than silently corrected or silently passed on.
+   */
+  data_quality?: {
+    stale_current_month_figures: Array<{
+      key: string;
+      value: number;
+      printed_date: string | null;
+    }>;
+  };
   /** Events ship separately; this is how many the events file holds. */
   outage_event_count?: number;
 }
