@@ -101,6 +101,32 @@ function PanelCard({
 }
 
 /**
+ * A plain-language note under a panel. These figures are industry shorthand, so
+ * each panel says what its numbers actually mean rather than assuming the reader
+ * already knows.
+ */
+function Explainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mt-4 pt-3 border-t border-border/40">
+      <p className="text-[10px] text-muted-foreground leading-relaxed">{children}</p>
+    </div>
+  );
+}
+
+/** A term and its definition, for panels that need several at once. */
+function Glossary({ items }: { items: Array<[string, React.ReactNode]> }) {
+  return (
+    <div className="mt-4 pt-3 border-t border-border/40 grid sm:grid-cols-2 gap-x-6 gap-y-1.5">
+      {items.map(([term, def]) => (
+        <p key={term} className="text-[10px] text-muted-foreground leading-relaxed">
+          <span className="font-bold text-foreground">{term}</span> — {def}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/**
  * Direction is stated with a glyph and a word, never colour alone — the colour
  * is a reinforcement for readers who can use it.
  */
@@ -311,14 +337,22 @@ function ReliabilityStrip({ keyed, prevLabel }: { keyed: Record<string, PgcbSyst
 
 /* ------------------------------------------------ 2. load-shed heatmap */
 
-/** Single-hue sequential ramp, light → dark. Zero is a neutral surface, not a hue step. */
+/**
+ * Zero is a state, not a quantity, so it gets its own green rather than the
+ * bottom step of the ramp. Everything above zero is magnitude on a single-hue
+ * rose ramp, light → dark.
+ *
+ * Green-to-red is the classic colour-vision trap, so the distinction never rests
+ * on hue: every non-zero cell carries its number and zero cells are blank, which
+ * separates the two states for a reader who cannot tell the hues apart at all.
+ */
 function shedCellStyle(value: number | null, max: number): { backgroundColor: string; color: string } {
   if (!value || value <= 0 || max <= 0) {
-    return { backgroundColor: 'rgba(148,163,184,0.14)', color: 'transparent' };
+    return { backgroundColor: 'rgba(16, 185, 129, 0.18)', color: 'transparent' };
   }
   // sqrt keeps the many small values legible against a few very large ones.
   const t = Math.min(1, Math.sqrt(value / max));
-  const alpha = 0.12 + t * 0.88;
+  const alpha = 0.15 + t * 0.85;
   return {
     backgroundColor: `rgba(190, 18, 60, ${alpha.toFixed(3)})`,
     color: t > 0.55 ? '#fff' : 'inherit',
@@ -349,12 +383,20 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
   return (
     <div className="space-y-3">
       <div className="grid-explorer-table-wrap overflow-x-auto">
-        <table className="text-[10px] border-separate" style={{ borderSpacing: '2px' }}>
+        {/* Full width so the grid fills the card instead of leaving the right third empty. */}
+        <table className="w-full min-w-[46rem] text-[10px] border-separate table-fixed" style={{ borderSpacing: '2px' }}>
+          <colgroup>
+            <col style={{ width: '5.5rem' }} />
+            {rows.map((r) => (
+              <col key={r.date} />
+            ))}
+            <col style={{ width: '3.5rem' }} />
+          </colgroup>
           <thead>
             <tr>
               <th className="sticky left-0 z-10 bg-card text-left font-bold text-muted-foreground px-1">Zone</th>
               {rows.map((r) => (
-                <th key={r.date} className="font-semibold text-muted-foreground w-6 text-center">
+                <th key={r.date} className="font-semibold text-muted-foreground text-center">
                   {Number(r.date.slice(8, 10))}
                 </th>
               ))}
@@ -373,13 +415,19 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                   return (
                     <td
                       key={r.date}
-                      className="w-6 h-6 text-center rounded-[3px] tabular-nums font-semibold cursor-default"
+                      className="h-6 text-center rounded-[3px] tabular-nums font-semibold cursor-default"
                       style={style}
-                      title={`${z.label} — ${r.date}\n${fmt(v)} MW shed at ${peakLabel.toLowerCase()}${
-                        r.time ? ` (${r.time})` : ''
-                      }`}
+                      title={
+                        v > 0
+                          ? `${z.label} — ${r.date}\n${fmt(v)} MW shed at ${peakLabel.toLowerCase()}${
+                              r.time ? ` (${r.time})` : ''
+                            }`
+                          : `${z.label} — ${r.date}\nNo load shedding`
+                      }
                     >
-                      {v > 0 ? (v >= 100 ? Math.round(v) : '') : ''}
+                      {/* Every non-zero cell is labelled, so "shed" vs "none" never
+                          depends on telling green from red. */}
+                      {v > 0 ? Math.round(v) : ''}
                     </td>
                   );
                 })}
@@ -394,9 +442,9 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                 <td
                   key={r.date}
                   className="text-center font-bold tabular-nums text-foreground"
-                  title={`${r.date}: ${fmt(r.load_shed_mw)} MW total`}
+                  title={`${r.date}: ${fmt(r.load_shed_mw)} MW shed in total`}
                 >
-                  {r.load_shed_mw && r.load_shed_mw >= 100 ? Math.round(r.load_shed_mw) : ''}
+                  {r.load_shed_mw ? Math.round(r.load_shed_mw) : ''}
                 </td>
               ))}
               <td className="px-2 text-right font-bold tabular-nums text-foreground">{fmt(monthTotal)}</td>
@@ -406,25 +454,44 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
       </div>
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span className="font-semibold">Less</span>
-          {[0.12, 0.34, 0.56, 0.78, 1].map((a) => (
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
+          <span className="inline-flex items-center gap-1.5">
             <span
-              key={a}
               className="inline-block w-6 h-3 rounded-[3px]"
-              style={{ backgroundColor: `rgba(190, 18, 60, ${a})` }}
+              style={{ backgroundColor: 'rgba(16, 185, 129, 0.18)' }}
             />
-          ))}
-          <span className="font-semibold">More</span>
-          <span className="ml-1">· peak zone shed {fmt(max)} MW · cells show MW when ≥ 100</span>
+            <span className="font-semibold">No shedding</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="font-semibold">Less</span>
+            {[0.15, 0.36, 0.57, 0.78, 1].map((a) => (
+              <span
+                key={a}
+                className="inline-block w-6 h-3 rounded-[3px]"
+                style={{ backgroundColor: `rgba(190, 18, 60, ${a})` }}
+              />
+            ))}
+            <span className="font-semibold">More</span>
+          </span>
+          <span>· worst single cell {fmt(max)} MW</span>
         </div>
         <div className="text-[10px] text-muted-foreground">
-          Worst zone:{' '}
+          Worst zone this month:{' '}
           <span className="font-bold text-foreground">
             {zoneTotals.slice().sort((a, b) => b.total - a.total)[0]?.label}
           </span>
         </div>
       </div>
+
+      <Explainer>
+        <strong className="text-foreground">How to read this.</strong> Each cell is one zone on one day, and the
+        number is the megawatts of demand that had to be cut in that zone at that day&rsquo;s peak — so a blank green
+        cell means everyone who wanted power got it. <strong className="text-foreground">Evening peak</strong> is the
+        daily maximum, usually around 7&ndash;9 pm; <strong className="text-foreground">day peak</strong> is the
+        midday maximum. The <em>Total</em> column is the sum of that zone&rsquo;s daily cuts across the month, which
+        is why it can exceed any single day by a wide margin — it measures how <em>persistently</em> a zone was cut,
+        not how deep the worst cut was.
+      </Explainer>
     </div>
   );
 }
@@ -457,11 +524,23 @@ function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> })
           sub={`${((o.stat.value / total) * 100).toFixed(1)}%`}
         />
       ))}
-      <div className="pt-3 mt-2 border-t border-border/40 text-[10px] text-muted-foreground leading-relaxed">
-        Net generation by owner, {fmt(total, 1)} MKWh total.
-        {stationUse && ` BPDB station use of ${fmt(stationUse.value, 1)} MKWh is already deducted.`} Imports are
-        reported separately and excluded here.
-      </div>
+      <Glossary
+        items={[
+          [
+            'MKWh',
+            `million kilowatt-hours — the energy actually produced over the month, not capacity. ${fmt(total, 1)} MKWh in total here.`,
+          ],
+          ['Net generation', 'output after the plant’s own consumption is subtracted, i.e. what reached the grid.'],
+          ['Generation Cos.', 'state-owned generators such as NWPGCL, APSCL and EGCB.'],
+          ['IPP', 'Independent Power Producers — privately owned plants selling to the grid under contract.'],
+          ['BPDB', 'the Bangladesh Power Development Board’s own plants.'],
+          ['REB / Rental', 'Rural Electrification Board plants, and short-term contracted rental capacity.'],
+        ]}
+      />
+      <p className="mt-2 text-[10px] text-muted-foreground leading-relaxed">
+        {stationUse && `BPDB station use of ${fmt(stationUse.value, 1)} MKWh is already deducted. `}
+        Electricity imported from India is reported separately and is not counted in these shares.
+      </p>
     </div>
   );
 }
@@ -705,6 +784,23 @@ function OutageEventsPanel({
         ))}
       </TableShell>
       <MoreButton shown={Math.min(limit, filtered.length)} total={filtered.length} onMore={() => setLimit((l) => l + PAGE)} />
+      <Glossary
+        items={[
+          [
+            'Equipment',
+            'the specific asset that went out — a transformer, breaker or line bay — not the whole substation.',
+          ],
+          ['Duration', 'how long it stayed out, as hours:minutes:seconds.'],
+          [
+            'Cause',
+            'as recorded by the operator on the day. Wording is theirs and is not standardised between circles.',
+          ],
+          [
+            'Unserved (MWh)',
+            'energy not delivered because of that one event. Several rows can share a cause when one fault takes out multiple units at once.',
+          ],
+        ]}
+      />
     </div>
   );
 }
@@ -796,6 +892,28 @@ export function PgcbMonthlyDetail({
           subtitle={`How often supply fell short in ${monthLabel}, against ${prevMonthLabel}`}
         >
           <ReliabilityStrip keyed={keyed} prevLabel={`vs ${prevMonthLabel}`} />
+          <Glossary
+            items={[
+              [
+                'Load shedding',
+                'deliberately cutting supply to part of the country because generation cannot meet demand. It is rationing, not a fault.',
+              ],
+              [
+                'Days with load shed',
+                `how many days that month needed a cut at the evening peak. ${
+                  keyed.days_load_shed_evening ? fmt(keyed.days_load_shed_evening.value) : '—'
+                } means it happened on that many separate days.`,
+              ],
+              [
+                'Max / min load shed',
+                'the largest and smallest cut made at any evening peak in the month — the worst and best evening.',
+              ],
+              [
+                'Load factor',
+                'average demand as a percentage of peak demand. High means demand stayed near its peak all month; low means a short spike over a quiet baseline.',
+              ],
+            ]}
+          />
         </PanelCard>
       )}
 
@@ -881,6 +999,24 @@ export function PgcbMonthlyDetail({
               prevLabel={prevMonthLabel}
             />
           ) : null}
+          <Glossary
+            items={[
+              [
+                'Grid circle',
+                'PGCB’s maintenance regions for the transmission network. They do not line up exactly with the supply zones above.',
+              ],
+              [
+                'Unserved energy',
+                'electricity that could not be delivered, in megawatt-hours. Unlike load shedding this is caused by faults and maintenance, not by a supply shortfall.',
+              ],
+              ['Tripping', 'equipment disconnecting itself automatically in response to a fault — unplanned.'],
+              ['Emergency', 'an unplanned outage taken deliberately, e.g. to make an urgent repair.'],
+              [
+                'Scheduled',
+                'planned maintenance work. High scheduled numbers are usually a sign of upkeep, not of failure.',
+              ],
+            ]}
+          />
         </PanelCard>
       )}
 
@@ -1057,6 +1193,35 @@ export function PgcbMonthlyDetail({
               />
             </>
           )}
+
+          <Glossary
+            items={[
+              [
+                'Substation',
+                'where transmission voltage is stepped down for distribution. Effectively the grid’s delivery point for a town or district.',
+              ],
+              [
+                'Peak load',
+                'the highest power that substation delivered at any moment in the month, with the timestamp it happened.',
+              ],
+              [
+                'Rated voltage',
+                'the level the substation is designed to run at. Grid voltage drifts with load, and a sustained drop damages equipment.',
+              ],
+              [
+                'Min vs rated',
+                'how far the lowest recorded voltage fell below rated. Beyond about −10% (flagged ⚠) is a serious under-voltage event.',
+              ],
+              [
+                'Transformer loading',
+                'peak throughput as a percentage of the transformer’s MVA rating. Above 80% (⚠) leaves little headroom for a fault elsewhere.',
+              ],
+              [
+                'Interruptions',
+                'how many times supply from that substation was cut, for how long in total, and the resulting unserved energy.',
+              ],
+            ]}
+          />
         </PanelCard>
       )}
 
@@ -1103,6 +1268,14 @@ export function PgcbMonthlyDetail({
                 </tr>
               ))}
           </TableShell>
+          <Explainer>
+            <strong className="text-foreground">Why this matters.</strong> Grid frequency must hold near 50 Hz. When a
+            large plant trips, frequency falls within seconds — far too fast for an operator to react. Plants running
+            in <strong className="text-foreground">free governor mode</strong> sense the drop and raise output
+            automatically, holding the system up until slower reserves arrive. A plant is listed here for every day it
+            ran in that mode, so a low day count means the plant was available but not contributing that automatic
+            response. The wider the participating capacity, the better the grid absorbs a sudden loss.
+          </Explainer>
         </PanelCard>
       )}
 

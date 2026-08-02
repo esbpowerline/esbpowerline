@@ -1,10 +1,16 @@
-"""Extract the full PGCB monthly report workbook into one structured JSON document.
+"""Extract the full PGCB monthly report into one structured JSON document.
 
 `scripts/parse_monthly_reports.py` pulls ~21 headline numbers from two sheets.
 This reads the rest: 19 populated sheets, ~17k non-empty cells per month.
 
+Accepts either the source workbook (.xlsx/.xls) or the padded markdown dumps in
+`W:\\PGCB\\Monthy Reports - D` (.txt). Both carry every sheet and — verified
+against January 2026 — the same column positions, so one set of readers serves
+both: the .txt is converted back to a cell matrix where `raw[i]` is
+`line.split("|")[i + 1]`.
+
 Usage:
-    python scripts/parse_pgcb_monthly_workbook.py <workbook.xlsx> [out.json]
+    python scripts/parse_pgcb_monthly_workbook.py <report.xlsx|report.txt> [out.json]
 
 Default output is lib/pgcb-monthly-detail/{YYYY-MM}.json, which
 scripts/build_pgcb_monthly_public.py merges into the published per-month file as
@@ -16,6 +22,7 @@ headers), so column indices are pinned per sheet and documented at each reader.
 """
 from __future__ import annotations
 
+import calendar
 import datetime
 import json
 import re
@@ -83,26 +90,77 @@ def num(v: Any) -> float | None:
     return round(float(m.group(0)), 6) if m else None
 
 
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}")
+
+
 def is_date(v: Any) -> bool:
-    return isinstance(v, (pd.Timestamp, datetime.datetime, datetime.date))
+    """True for a real date cell (xlsx) or an ISO-prefixed string (txt dump)."""
+    if isinstance(v, (pd.Timestamp, datetime.datetime, datetime.date)):
+        return True
+    return isinstance(v, str) and bool(ISO_DATE.match(v.strip()))
 
 
-def rows_of(df: pd.DataFrame) -> list[list[Any]]:
-    return [r.tolist() for _, r in df.iterrows()]
+def day_of(v: Any) -> int | None:
+    if isinstance(v, (pd.Timestamp, datetime.datetime, datetime.date)):
+        return v.day
+    s = txt(v)
+    return int(s[8:10]) if ISO_DATE.match(s) else None
 
 
 def cell(row: list[Any], i: int) -> Any:
     return row[i] if i < len(row) else None
 
 
-def find_month(df: pd.DataFrame) -> tuple[str, int] | None:
-    for row in rows_of(df):
+def find_month(rows: list[list[Any]]) -> tuple[str, int] | None:
+    for row in rows:
         for v in row:
             s = txt(v)
-            m = re.search(r"Month\s*:?\s*([A-Za-z]+)[',\s]+(\d{4})", s)
+            m = re.search(r"Month\s*:?\s*([A-Za-z]+)[-',\s]+(\d{4})", s)
             if m and m.group(1).lower() in MONTHS:
                 return m.group(1).capitalize(), int(m.group(2))
     return None
+
+
+# --------------------------------------------------------------------------- #
+# loaders — both produce {sheet name: rows of cells}
+# --------------------------------------------------------------------------- #
+def load_xlsx(path: Path) -> dict[str, list[list[Any]]]:
+    xl = pd.ExcelFile(path)
+    out: dict[str, list[list[Any]]] = {}
+    for name in xl.sheet_names:
+        df = xl.parse(name, header=None)
+        out[name] = [r.tolist() for _, r in df.iterrows()]
+    return out
+
+
+def load_txt(path: Path) -> dict[str, list[list[Any]]]:
+    """Read a padded-markdown sheet dump back into a cell matrix.
+
+    Each data line is `| c1 | c2 | ... |`, so splitting on '|' yields an empty
+    leading element and raw column i lands at index i + 1. The generated
+    `| Col 1 | Col 2 |` header and its `|:---|` rule carry no data and are skipped.
+    """
+    out: dict[str, list[list[Any]]] = {}
+    current: str | None = None
+    for line in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if line.startswith("## Sheet:"):
+            current = line.split(":", 1)[1].strip()
+            out[current] = []
+            continue
+        if current is None or not line.startswith("|"):
+            continue
+        stripped = line.strip()
+        if stripped.startswith("|:") or re.match(r"^\|\s*Col 1\s*\|", stripped):
+            continue
+        parts = line.split("|")
+        out[current].append([p.strip() for p in parts[1:-1]] if len(parts) > 2 else [])
+    return out
+
+
+def load_report(path: Path) -> dict[str, list[list[Any]]]:
+    if path.suffix.lower() in {".xlsx", ".xls"}:
+        return load_xlsx(path)
+    return load_txt(path)
 
 
 def clean_name(s: str) -> str:
@@ -145,10 +203,10 @@ SYSTEM_KEYS = [
 ]
 
 
-def parse_system(df: pd.DataFrame) -> dict[str, Any]:
+def parse_system(rows: list[list[Any]]) -> dict[str, Any]:
     items: list[dict[str, Any]] = []
     keyed: dict[str, Any] = {}
-    for row in rows_of(df):
+    for row in rows:
         sl, label = txt(cell(row, 0)), clean_name(txt(cell(row, 1)))
         if not label or not sl or label.lower().startswith(("power grid", "system operation")):
             continue
@@ -189,11 +247,11 @@ AREA_ALIASES = {
 }
 
 
-def parse_area_supply(df: pd.DataFrame) -> dict[str, Any]:
+def parse_area_supply(rows: list[list[Any]]) -> dict[str, Any]:
     areas: list[dict[str, Any]] = []
     zone_totals: dict[str, float] = {}
     peak_context: dict[str, Any] = {}
-    for row in rows_of(df):
+    for row in rows:
         label = clean_name(txt(cell(row, 1)))
         value = num(cell(row, 3))
         if not label:
@@ -221,10 +279,10 @@ def parse_area_supply(df: pd.DataFrame) -> dict[str, Any]:
 # QF-LDC-27 / QF-LDC-28 — by grid circle, split by cause, with prev month inline
 # cols: 0 Sl | 1 circle | 2-5 prev T/EO/SO/total | 6-9 current T/EO/SO/total
 # --------------------------------------------------------------------------- #
-def parse_circle_split(df: pd.DataFrame) -> dict[str, Any]:
+def parse_circle_split(rows: list[list[Any]]) -> dict[str, Any]:
     circles: list[dict[str, Any]] = []
     total: dict[str, Any] = {}
-    for row in rows_of(df):
+    for row in rows:
         name = clean_name(txt(cell(row, 1)))
         if not name or name.lower().startswith(("area", "sl", "power grid", "information")):
             continue
@@ -255,17 +313,31 @@ def parse_circle_split(df: pd.DataFrame) -> dict[str, Any]:
 # evening: 0 date, 1 gen, 2 demand, 3 shed, 4 time, 5-13 zones
 # day:    15 date, 16 gen, 17 demand, 18 shed, 19 time, 20-28 zones
 # --------------------------------------------------------------------------- #
-def parse_daily_load_shedding(df: pd.DataFrame) -> dict[str, list[dict[str, Any]]]:
+def parse_daily_load_shedding(
+    rows: list[list[Any]], year: int, month: int
+) -> dict[str, list[dict[str, Any]]]:
+    """Read both halves of the sheet, re-dating each row onto the report month.
+
+    The printed year is not trustworthy — January 2026's rows are dated 2025-01-xx
+    in the source — but the day-of-month is. Rows are therefore rebuilt from the
+    report period plus the row's own day, and any row whose day is out of range
+    for that month is dropped rather than guessed at.
+    """
+    last_day = calendar.monthrange(year, month)[1]
+
     def read(base: int) -> list[dict[str, Any]]:
         out = []
-        for row in rows_of(df):
+        for row in rows:
             d = cell(row, base)
             if not is_date(d):
+                continue
+            day = day_of(d)
+            if day is None or not 1 <= day <= last_day:
                 continue
             zones = {z: num(cell(row, base + 5 + i)) for i, z in enumerate(ZONES)}
             out.append(
                 {
-                    "date": txt(d)[:10],
+                    "date": f"{year}-{month:02d}-{day:02d}",
                     "generation_mw": num(cell(row, base + 1)),
                     "demand_mw": num(cell(row, base + 2)),
                     "load_shed_mw": num(cell(row, base + 3)),
@@ -273,6 +345,7 @@ def parse_daily_load_shedding(df: pd.DataFrame) -> dict[str, list[dict[str, Any]
                     "zones": zones,
                 }
             )
+        out.sort(key=lambda r: r["date"])
         return out
 
     return {"evening_peak": read(0), "day_peak": read(15)}
@@ -281,10 +354,10 @@ def parse_daily_load_shedding(df: pd.DataFrame) -> dict[str, list[dict[str, Any]
 # --------------------------------------------------------------------------- #
 # Remaining tabular sheets
 # --------------------------------------------------------------------------- #
-def parse_substation_max_load(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_substation_max_load(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """QF-LDC-33 — cols: 0 Sl | 1 substation | 2 load MW | 3 date & time."""
     out = []
-    for row in rows_of(df):
+    for row in rows:
         name = clean_name(txt(cell(row, 1)))
         load = num(cell(row, 2))
         if not name or load is None or num(cell(row, 0)) is None:
@@ -293,10 +366,10 @@ def parse_substation_max_load(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def parse_area_max_load(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_area_max_load(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """QF-LDC-34 — each area's OWN maximum (non-coincident), cols: 0 area | 1 MW | 2 date | 3 hour."""
     out = []
-    for row in rows_of(df):
+    for row in rows:
         name = clean_name(txt(cell(row, 0)))
         load = num(cell(row, 1))
         if not name or load is None:
@@ -316,7 +389,7 @@ def parse_area_max_load(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def parse_voltages(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_voltages(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """QF-LDC-35 — cols: 0 Sl | 1 substation | 2 rated | 3 max | 4 when | 5 min | 6 when.
 
     Voltage class comes from the section header row ('400 KV Substation'), so it
@@ -324,7 +397,7 @@ def parse_voltages(df: pd.DataFrame) -> list[dict[str, Any]]:
     """
     out: list[dict[str, Any]] = []
     section: str | None = None
-    for row in rows_of(df):
+    for row in rows:
         label = clean_name(txt(cell(row, 1)))
         m = re.match(r"^(\d{3})\s*KV\s+Substation", label, re.I)
         if m:
@@ -349,10 +422,10 @@ def parse_voltages(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def parse_transformer_loading(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_transformer_loading(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """QF-LDC-36 — cols: 0 substation | 1 transformer | 2 level | 3 MVA | 4 date | 5 hour | 6 MW | 7 MVAR | 8 %."""
     out = []
-    for row in rows_of(df):
+    for row in rows:
         name = clean_name(txt(cell(row, 0)))
         pct = num(cell(row, 8))
         if not name or pct is None or name.lower().startswith(("substation", "power grid", "information", "month")):
@@ -373,10 +446,10 @@ def parse_transformer_loading(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def parse_interruptions(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_interruptions(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """QF-LDC-32 — cols: 0 substation | 1 count | 2 duration | 3 unserved MWh | 4 remarks."""
     out = []
-    for row in rows_of(df):
+    for row in rows:
         name = clean_name(txt(cell(row, 0)))
         count = num(cell(row, 1))
         if not name or count is None:
@@ -394,10 +467,10 @@ def parse_interruptions(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def parse_generation_system(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_generation_system(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """QF-LDC-38 — cols: 0 Sl | 1 description | 2 unit | 3 quantity | 4 date | 5 time."""
     out = []
-    for row in rows_of(df):
+    for row in rows:
         label = clean_name(txt(cell(row, 1)))
         value = num(cell(row, 3))
         if not label or value is None or num(cell(row, 0)) is None:
@@ -414,7 +487,7 @@ def parse_generation_system(df: pd.DataFrame) -> list[dict[str, Any]]:
     return out
 
 
-def parse_outage_events(df: pd.DataFrame, kind: str) -> list[dict[str, Any]]:
+def parse_outage_events(rows: list[list[Any]], kind: str) -> list[dict[str, Any]]:
     """QF-LDC-23..26 — event logs.
 
     cols: 0 substation (or circle header) | 1 equipment | 2 start | 3 finish |
@@ -422,7 +495,7 @@ def parse_outage_events(df: pd.DataFrame, kind: str) -> list[dict[str, Any]]:
     """
     out: list[dict[str, Any]] = []
     circle: str | None = None
-    for row in rows_of(df):
+    for row in rows:
         first = clean_name(txt(cell(row, 0)))
         equipment = txt(cell(row, 1))
         start = cell(row, 2)
@@ -449,10 +522,10 @@ def parse_outage_events(df: pd.DataFrame, kind: str) -> list[dict[str, Any]]:
     return out
 
 
-def parse_fgmo(df: pd.DataFrame) -> list[dict[str, Any]]:
+def parse_fgmo(rows: list[list[Any]]) -> list[dict[str, Any]]:
     """FGMO — cols: 0 Sl | 1 plant | 2 owner | 3 fuel | 4 MW | 5.. daily tick marks."""
     out = []
-    for row in rows_of(df):
+    for row in rows:
         plant = clean_name(txt(cell(row, 1)))
         if not plant or num(cell(row, 0)) is None:
             continue
@@ -477,12 +550,11 @@ def main() -> None:
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
     src = Path(sys.argv[1])
-    xl = pd.ExcelFile(src)
-    sheets = {name: xl.parse(name, header=None) for name in xl.sheet_names}
+    sheets = load_report(src)
 
-    def sheet(*names: str) -> pd.DataFrame | None:
+    def sheet(*names: str) -> list[list[Any]] | None:
         for n in names:
-            if n in sheets and not sheets[n].empty:
+            if sheets.get(n):
                 return sheets[n]
         return None
 
@@ -500,8 +572,8 @@ def main() -> None:
         "date_key": date_key,
         "month": month_name,
         "year": year,
-        "source_workbook": src.name,
-        "sheets_present": [n for n, d in sheets.items() if not d.empty],
+        "source_file": src.name,
+        "sheets_present": [n for n, d in sheets.items() if d],
     }
 
     doc["system"] = parse_system(mis)
@@ -523,7 +595,7 @@ def main() -> None:
     if (d := sheet("QF-LDC-36")) is not None:
         doc["transformer_loading"] = parse_transformer_loading(d)
     if (d := sheet("QF_LDC_37", "QF-LDC-37")) is not None:
-        doc["daily_load_shedding"] = parse_daily_load_shedding(d)
+        doc["daily_load_shedding"] = parse_daily_load_shedding(d, year, MONTHS[month_name.lower()])
     if (d := sheet("QF-LDC-38")) is not None:
         doc["generation_system"] = parse_generation_system(d)
     if (d := sheet("FGMO")) is not None:
