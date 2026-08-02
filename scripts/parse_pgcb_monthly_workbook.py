@@ -178,6 +178,42 @@ def cell(row: list[Any], i: int) -> Any:
     return row[i] if i < len(row) else None
 
 
+def month_from_dates(rows: list[list[Any]]) -> tuple[int, int] | None:
+    """The year-month most of the sheet's own 'Current Month' dates fall in.
+
+    Used to sanity-check the printed period, which is not always right: the ERP
+    copy of April 2021 is headed 'Month: March 2021' while every date inside it
+    is in April. Requires a clear majority so a handful of stale cells cannot
+    swing the result.
+    """
+    counts: dict[str, int] = {}
+    for row in rows:
+        if not clean_name(txt(cell(row, 1))) or num(cell(row, 2)) is None:
+            continue
+        when = iso_when(cell(row, 3))
+        if when and ISO_DATE.match(when):
+            counts[when[:7]] = counts.get(when[:7], 0) + 1
+    if not counts:
+        return None
+    ym, n = max(counts.items(), key=lambda kv: kv[1])
+    if n < 3 or n * 2 <= sum(counts.values()):
+        return None
+    year, month = ym.split("-")
+    return int(year), int(month)
+
+
+def resolve_period(mis: list[list[Any]], header: tuple[str, int]) -> tuple[str, int, bool]:
+    """Return (month name, year, header_was_wrong), preferring the sheet's dates."""
+    month_name, year = header
+    mnum = MONTHS[month_name.lower()]
+    dated = month_from_dates(mis)
+    if dated and dated != (year, mnum):
+        year, mnum = dated
+        month_name = next(k for k, v in MONTHS.items() if v == mnum).capitalize()
+        return month_name, year, True
+    return month_name, year, False
+
+
 def find_month(rows: list[list[Any]]) -> tuple[str, int] | None:
     for row in rows:
         for v in row:
@@ -676,7 +712,7 @@ def main() -> None:
     period = find_month(mis) or find_month(sheet("QF-LDC-22") or mis)
     if not period:
         raise SystemExit(f"{src.name}: could not read 'Month: <name> <year>'")
-    month_name, year = period
+    month_name, year, header_wrong = resolve_period(mis, period)
     date_key = f"{year}-{MONTHS[month_name.lower()]:02d}"
 
     doc: dict[str, Any] = {
@@ -717,8 +753,17 @@ def main() -> None:
         for k, v in doc["system"]["keyed"].items()
         if v.get("suspect_date")
     ]
+    quality: dict[str, Any] = {}
     if suspect:
-        doc["data_quality"] = {"stale_current_month_figures": suspect}
+        quality["stale_current_month_figures"] = suspect
+    if header_wrong:
+        quality["header_period_mismatch"] = {
+            "printed": f"{period[0]} {period[1]}",
+            "resolved": f"{month_name} {year}",
+            "note": "the printed period disagreed with the dates inside the report; the dates were used",
+        }
+    if quality:
+        doc["data_quality"] = quality
 
     events: list[dict[str, Any]] = []
     for name, kind in [
