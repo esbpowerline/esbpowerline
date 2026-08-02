@@ -139,6 +139,8 @@ export type MessageKey =
   | 'interviews.close'
   | 'interviews.noVideo'
   | 'interviews.watchFull'
+  | 'interviews.openOnFacebook'
+  | 'interviews.openOnYoutube'
   | 'member.loading'
   | 'member.guestPitch'
   | 'member.login'
@@ -313,8 +315,10 @@ const EN: Record<MessageKey, string> = {
   'interviews.title': 'Latest Interviews',
   'interviews.watchAll': 'Watch all on YouTube',
   'interviews.close': 'Close interview player',
-  'interviews.noVideo': 'This interview does not have a valid YouTube video ID yet.',
+  'interviews.noVideo': 'This interview does not have a playable video yet.',
   'interviews.watchFull': 'Watch the full conversation on our YouTube channel.',
+  'interviews.openOnFacebook': 'Watch full on Facebook',
+  'interviews.openOnYoutube': 'Watch full on YouTube',
   'member.loading': 'Loading member access…',
   'member.guestPitch':
     'Sign in to save articles and magazine issues, download data packages, join discussions, and unlock in-depth analysis across the power sector.',
@@ -496,6 +500,8 @@ const BN: Record<MessageKey, string> = {
   'interviews.close': 'সাক্ষাৎকার বন্ধ করুন',
   'interviews.noVideo': 'এই সাক্ষাৎকারের ভিডিও এখনও যুক্ত হয়নি।',
   'interviews.watchFull': 'সম্পূর্ণ সাক্ষাৎকার ইউটিউব চ্যানেলে দেখুন।',
+  'interviews.openOnFacebook': 'ফেসবুকে সম্পূর্ণ দেখুন',
+  'interviews.openOnYoutube': 'ইউটিউবে সম্পূর্ণ দেখুন',
   'member.loading': 'সদস্য প্রবেশ যাচাই হচ্ছে…',
   'member.guestPitch':
     'সংবাদ ও ম্যাগাজিন সংরক্ষণ, তথ্য ডাউনলোড, মতামত ও গভীর বিশ্লেষণের জন্য সদস্য হিসেবে প্রবেশ করুন।',

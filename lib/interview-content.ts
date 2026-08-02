@@ -6,8 +6,19 @@ export type Interview = {
   duration: string;
   date: string;
   thumbnail: string;
+  /** Empty for entries that live on another platform — see `videoUrl`. */
   youtubeId: string;
   excerpt: string;
+  /**
+   * Short label for the card's cramped role chip — a programme or series name.
+   * The card prefers this over `role`, which is often a full job title too long
+   * to fit; the player modal always shows the full `role`.
+   */
+  programme?: string;
+  /** Defaults to 'youtube' when absent, so existing entries are unaffected. */
+  provider?: 'youtube' | 'facebook';
+  /** Canonical watch URL. Required for Facebook, which has no short id we can embed by. */
+  videoUrl?: string;
 };
 
 export const DEFAULT_INTERVIEWS: Interview[] = [
@@ -57,6 +68,61 @@ export const DEFAULT_INTERVIEWS: Interview[] = [
   },
 ];
 
+/**
+ * Interviews pinned to the front of the rail, newest-first left to right.
+ *
+ * Titles, guest and role are taken verbatim from each video's own Open Graph
+ * data — nothing here is written by us. Facebook truncates the guest's full
+ * description ("... ও সাবেক সহ-সভাপতি, …"), so `role` stops at the part the
+ * source actually states. Duration and publish date are not exposed by
+ * Facebook's metadata, hence the em dash.
+ *
+ * Thumbnails are copied into /public because fbcdn URLs are signed and expire.
+ */
+export const PINNED_INTERVIEWS: Interview[] = [
+  {
+    id: 'fb-express-talk-manpower-1',
+    title: 'Manpower Export: Crisis and Potential — Express Talk',
+    guest: 'Alhaj A K M Moazzem Hossain',
+    role: 'Chairman & Managing Director, Anik Industrial Enterprise Ltd',
+    programme: 'Express Talk',
+    duration: '38:53',
+    date: 'Jul 19',
+    thumbnail: '/images/interviews/express-talk-manpower-part1.jpg',
+    youtubeId: '',
+    excerpt: 'Part one of Express Talk on the crisis and the potential in Bangladesh’s manpower export.',
+    provider: 'facebook',
+    videoUrl: 'https://www.facebook.com/newsexpressofficial/videos/970961285991321/',
+  },
+  {
+    id: 'fb-express-talk-manpower-2',
+    title: 'Manpower Export: Crisis and Potential, Part 2 — Express Talk',
+    guest: 'Alhaj A K M Moazzem Hossain',
+    role: 'Chairman & Managing Director, Anik Industrial Enterprise Ltd',
+    programme: 'Express Talk',
+    duration: '34:24',
+    date: 'Jul 21',
+    thumbnail: '/images/interviews/express-talk-manpower-part2.jpg',
+    youtubeId: '',
+    excerpt: 'The second part of the same conversation.',
+    provider: 'facebook',
+    videoUrl: 'https://www.facebook.com/newsexpressofficial/videos/1598169481936488/',
+  },
+];
+
+/** The rail holds one row — more than this spills into a ragged second row. */
+export const INTERVIEW_RAIL_LIMIT = 4;
+
+/**
+ * Put the pinned interviews first, then whatever the channel feed returned,
+ * de-duplicated so a pinned video can never appear twice, and capped so the
+ * rail shows a single tidy row.
+ */
+export function withPinnedInterviews(list: Interview[], limit = INTERVIEW_RAIL_LIMIT): Interview[] {
+  const pinnedIds = new Set(PINNED_INTERVIEWS.map((i) => i.id));
+  return [...PINNED_INTERVIEWS, ...list.filter((i) => !pinnedIds.has(i.id))].slice(0, limit);
+}
+
 /** Encode local asset paths that may contain spaces or special characters. */
 export function encodeInterviewAssetUrl(url: string): string {
   const trimmed = url?.trim() ?? '';
@@ -89,9 +155,13 @@ function normalizeInterviewEntry(raw: unknown, index: number): Interview | null 
 
   const item = raw as Partial<Interview>;
   const youtubeId = extractYoutubeId(item.youtubeId) ?? '';
+  const provider = item.provider === 'facebook' ? 'facebook' : 'youtube';
+  const videoUrl = item.videoUrl?.trim() || '';
   const id = typeof item.id === 'string' && item.id.trim() ? item.id.trim() : `interview-${index + 1}`;
 
-  if (!youtubeId && !item.title?.trim() && !item.guest?.trim()) return null;
+  // A Facebook entry has no youtubeId, so it must not be dropped for lacking one.
+  const playable = provider === 'facebook' ? !!videoUrl : !!youtubeId;
+  if (!playable && !item.title?.trim() && !item.guest?.trim()) return null;
 
   return {
     id,
@@ -103,6 +173,9 @@ function normalizeInterviewEntry(raw: unknown, index: number): Interview | null 
     thumbnail: encodeInterviewAssetUrl(item.thumbnail?.trim() || '/images/yt_tm_1.jpg'),
     youtubeId,
     excerpt: item.excerpt?.trim() || '',
+    provider,
+    ...(item.programme?.trim() ? { programme: item.programme.trim() } : {}),
+    ...(videoUrl ? { videoUrl } : {}),
   };
 }
 
@@ -114,6 +187,28 @@ export function normalizeInterviews(source: unknown): Interview[] {
     .filter((row): row is Interview => row !== null);
 
   return normalized.length > 0 ? normalized : DEFAULT_INTERVIEWS;
+}
+
+/**
+ * Facebook has no embeddable short id — its video plugin takes the full watch
+ * URL. Needs `https://www.facebook.com` in the CSP frame-src to render.
+ */
+export function facebookEmbedUrl(videoUrl: string, autoplay = true): string {
+  const href = videoUrl?.trim();
+  if (!href) return '';
+  const params = new URLSearchParams({
+    href,
+    show_text: 'false',
+    autoplay: autoplay ? 'true' : 'false',
+    allowfullscreen: 'true',
+  });
+  return `https://www.facebook.com/plugins/video.php?${params.toString()}`;
+}
+
+/** The right embed for whichever platform an interview lives on. */
+export function interviewEmbedUrl(interview: Interview, autoplay = true): string {
+  if (interview.provider === 'facebook') return facebookEmbedUrl(interview.videoUrl ?? '', autoplay);
+  return youtubeEmbedUrl(interview.youtubeId, autoplay);
 }
 
 export function youtubeEmbedUrl(youtubeId: string, autoplay = true): string {

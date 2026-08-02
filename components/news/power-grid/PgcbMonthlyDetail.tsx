@@ -435,10 +435,35 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
   );
   const monthTotal = zoneTotals.reduce((s, z) => s + z.total, 0);
 
+  // Older reports (and a few later ones) publish a system-wide load-shed figure
+  // without the zone breakdown. Those cells are null, not zero — and painting
+  // them green would assert "no load shedding" on months that had plenty of it
+  // (Jul 2022 peaked at 2,385 MW with no zone table at all).
+  const zonesReported = useMemo(
+    () => rows.some((r) => ZONE_LABELS.some((z) => r.zones?.[z.key] != null)),
+    [rows],
+  );
+  const systemPeakShed = useMemo(
+    () => rows.reduce((m, r) => Math.max(m, r.load_shed_mw ?? 0), 0),
+    [rows],
+  );
+
   if (!rows.length) return <p className="text-xs text-muted-foreground">No daily load shedding recorded.</p>;
 
   return (
     <div className="space-y-3">
+      {!zonesReported && systemPeakShed > 0 && (
+        <p className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] leading-relaxed text-amber-700 dark:text-amber-300">
+          This month&apos;s report gives a system-wide load shed of up to {fmt(systemPeakShed)} MW but publishes no
+          zone-by-zone breakdown. The zone rows below are blank because the figures were not reported — not because
+          nothing was shed. Read the <strong>All zones</strong> row for what PGCB did record.
+        </p>
+      )}
+      {zonesReported && monthTotal === 0 && systemPeakShed === 0 && (
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          PGCB&apos;s report records no load shedding at {peakLabel.toLowerCase()} on any day this month.
+        </p>
+      )}
       <div className="grid-explorer-table-wrap overflow-x-auto">
         {/* Full width so the grid fills the card instead of leaving the right third empty. */}
         <table className="w-full min-w-[46rem] text-[10px] border-separate table-fixed" style={{ borderSpacing: '2px' }}>
@@ -467,29 +492,24 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                   {z.label}
                 </th>
                 {rows.map((r) => {
-                  const v = r.zones?.[z.key] ?? 0;
+                  const raw = r.zones?.[z.key];
+                  const v = raw ?? 0;
                   const style = shedCellStyle(v, max);
+                  // A null cell is "not reported", not "nothing shed" — say so
+                  // rather than let the green read as a measured zero.
+                  const tip = {
+                    heading: `${z.label} · ${r.date}`,
+                    value: raw == null ? 'Not reported' : raw > 0 ? `${fmt(raw)} MW shed` : 'No load shedding',
+                    meta: raw == null ? 'No zone breakdown in this report' : `${peakLabel}${raw > 0 && r.time ? ` · ${r.time}` : ''}`,
+                    ...(raw == null ? {} : { tone: (raw > 0 ? 'alert' : 'good') as 'alert' | 'good' }),
+                  };
                   return (
                     <td
                       key={r.date}
                       className="h-6 text-center rounded-[3px] tabular-nums font-semibold cursor-default transition-[filter] duration-100 hover:brightness-95 dark:hover:brightness-125"
                       style={style}
-                      onMouseEnter={(e) =>
-                        show(e, {
-                          heading: `${z.label} · ${r.date}`,
-                          value: v > 0 ? `${fmt(v)} MW shed` : 'No load shedding',
-                          meta: v > 0 ? `${peakLabel}${r.time ? ` · ${r.time}` : ''}` : peakLabel,
-                          tone: v > 0 ? 'alert' : 'good',
-                        })
-                      }
-                      onMouseMove={(e) =>
-                        show(e, {
-                          heading: `${z.label} · ${r.date}`,
-                          value: v > 0 ? `${fmt(v)} MW shed` : 'No load shedding',
-                          meta: v > 0 ? `${peakLabel}${r.time ? ` · ${r.time}` : ''}` : peakLabel,
-                          tone: v > 0 ? 'alert' : 'good',
-                        })
-                      }
+                      onMouseEnter={(e) => show(e, tip)}
+                      onMouseMove={(e) => show(e, tip)}
                       onMouseLeave={hide}
                     >
                       {/* Every non-zero cell is labelled, so "shed" vs "none" never

@@ -19,7 +19,8 @@ const cspHeader = [
   "img-src 'self' blob: data: https://*.supabase.co https://*.esbpowerline.com https://esbpowerline.com https://www.esbpowerline.com https://*.google-analytics.com https://*.googletagmanager.com",
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
-  "frame-src 'self' https://www.youtube.com",
+  // facebook.com is needed for the video plugin used by Facebook-hosted interviews.
+  "frame-src 'self' https://www.youtube.com https://www.facebook.com",
   "media-src 'self'",
 ].join('; ');
 
