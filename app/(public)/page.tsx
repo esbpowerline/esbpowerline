@@ -7,6 +7,7 @@ import {
 } from '@/components/home/DeferredComponents';
 import { ImportantLinks } from '@/components/home/ImportantLinks';
 import { PolicyFramework } from '@/components/home/PolicyFramework';
+import { TitasGasWatch } from '@/components/home/TitasGasWatch';
 import { resolvePolicies } from '@/lib/data/policy/policies';
 import { resolveImportantLinks } from '@/lib/data/important-links';
 const HomeSnapshotPanel = dynamic(
@@ -170,6 +171,8 @@ export default async function Home() {
               {panelFlags.importantLinks && <ImportantLinks data={resolveImportantLinks(settings)} />}
 
               {panelFlags.policyFramework && <PolicyFramework policies={resolvePolicies(settings)} />}
+
+              <TitasGasWatch />
             </aside>
           </div>
 
