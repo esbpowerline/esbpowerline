@@ -5637,7 +5637,14 @@ export function PowerGridExplorer({
 
                 <GridCardFooter>
                   <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Monthly System Operation Reports</a></span>
-                  <span>Data Period: January 2013 - April 2026 (157 Consecutive Reports)</span>
+                  {/* Derived from the archive so it can't drift as months are ingested. */}
+                  {pgcbMonthlyData.length > 0 && (
+                    <span>
+                      Data Period: {pgcbMonthlyData[0].month} {pgcbMonthlyData[0].year} -{' '}
+                      {pgcbMonthlyData[pgcbMonthlyData.length - 1].month}{' '}
+                      {pgcbMonthlyData[pgcbMonthlyData.length - 1].year} ({pgcbMonthlyData.length} Consecutive Reports)
+                    </span>
+                  )}
                 </GridCardFooter>
               </div>
             </div>
