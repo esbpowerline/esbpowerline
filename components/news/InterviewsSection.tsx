@@ -3,12 +3,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
-import { Play, X, Clock, User, Users } from 'lucide-react';
+import { Play, X, Clock, User, Users, ExternalLink } from 'lucide-react';
 import {
   DEFAULT_INTERVIEWS,
   encodeInterviewAssetUrl,
   normalizeInterviews,
-  youtubeEmbedUrl,
+  interviewEmbedUrl,
   type Interview,
 } from '@/lib/interview-content';
 import { ESB_YOUTUBE_CHANNEL_URL } from '@/lib/youtube-channel';
@@ -51,7 +51,15 @@ export function InterviewsSection({
     };
   }, [selected]);
 
-  const embedSrc = selected ? youtubeEmbedUrl(selected.youtubeId) : '';
+  const embedSrc = selected ? interviewEmbedUrl(selected) : '';
+  const isFacebook = selected?.provider === 'facebook';
+  // Facebook links to the post itself; YouTube keeps its existing channel link
+  // when an entry has no watch URL of its own.
+  const watchHref = isFacebook
+    ? selected?.videoUrl ?? ESB_YOUTUBE_CHANNEL_URL
+    : selected?.youtubeId
+      ? `https://www.youtube.com/watch?v=${selected.youtubeId}`
+      : ESB_YOUTUBE_CHANNEL_URL;
   const isEditorial = className?.includes('home-editorial__interviews');
 
   const modal = selected ? (
@@ -66,19 +74,28 @@ export function InterviewsSection({
         className="w-full max-w-4xl rounded-2xl overflow-hidden bg-card border border-border shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-3 border-b border-border gap-3">
+        <div className="flex items-start justify-between gap-3 px-5 py-3.5 border-b border-border">
           <div className="min-w-0">
-            <div id="interview-modal-title" className="font-semibold text-lg tracking-tight truncate">
+            <div id="interview-modal-title" className="font-semibold text-lg leading-snug tracking-tight line-clamp-2">
               {selected.title}
             </div>
-            <div className="text-xs text-muted-foreground truncate">
-              {selected.guest} • {selected.role} • {selected.duration}
+            {/* Only the parts we actually have — Facebook gives no duration or date. */}
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <span className="font-medium text-emerald-700 dark:text-emerald-500">{selected.guest}</span>
+              {selected.role && <span className="truncate">· {selected.role}</span>}
+              {selected.date && <span>· {selected.date}</span>}
+              {selected.duration && selected.duration !== '—' && (
+                <span className="inline-flex items-center gap-1">
+                  · <Clock className="h-3 w-3" />
+                  {selected.duration}
+                </span>
+              )}
             </div>
           </div>
           <button
             type="button"
             onClick={() => setSelected(null)}
-            className="p-2 text-muted-foreground hover:text-foreground shrink-0"
+            className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label={t('interviews.close')}
           >
             <X className="h-5 w-5" />
@@ -102,8 +119,23 @@ export function InterviewsSection({
           )}
         </div>
 
-        <div className="p-5 text-sm text-muted-foreground">
-          {selected.excerpt} — {t('interviews.watchFull')}
+        {/* Footer: the blurb, and a link that goes where the video actually lives. */}
+        <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <p className="min-w-0 flex-1 text-sm leading-relaxed text-muted-foreground">
+            {selected.excerpt || t('interviews.watchFull')}
+          </p>
+          <a
+            href={watchHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              'group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors',
+              isFacebook ? 'bg-[#1877F2] hover:bg-[#166FE5]' : 'bg-[#FF0000] hover:bg-[#E60000]',
+            )}
+          >
+            {isFacebook ? t('interviews.openOnFacebook') : t('interviews.openOnYoutube')}
+            <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
         </div>
       </div>
     </div>
@@ -155,23 +187,31 @@ export function InterviewsSection({
               />
             </div>
             <div className="flex min-h-0 flex-1 flex-col p-4">
+              {/* Separator only when there is a date to separate — an empty one
+                  used to leave the line starting with a stray bullet. */}
               <div className="text-xs text-emerald-700 dark:text-emerald-500 font-medium mb-1">
-                {iv.date} • {iv.guest}
+                {iv.date ? `${iv.date} • ` : ''}{iv.guest}
               </div>
               <h3 className="font-semibold text-[15px] leading-tight tracking-[-0.01em] line-clamp-2 group-hover:text-primary transition">
                 {iv.title}
               </h3>
               <p className="mt-2 flex-1 text-xs text-muted-foreground line-clamp-2">{iv.excerpt}</p>
               <div className="mt-3 flex items-center justify-between gap-3">
+                {/* Prefer the short programme label here — a full job title
+                    truncates to nonsense in this chip. The modal shows `role`. */}
                 <div className="min-w-0 text-ui-2xs text-muted-foreground flex items-center gap-1">
                   <User className="h-3 w-3 shrink-0" />
-                  <span className="truncate">{iv.role}</span>
+                  <span className="truncate">{iv.programme || iv.role}</span>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5" aria-hidden>
-                  <span className="inline-flex items-center gap-1 text-ui-2xs font-medium text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {iv.duration}
-                  </span>
+                  {/* Facebook publishes no duration, so the clock is dropped
+                      rather than shown against an em dash. */}
+                  {iv.duration && iv.duration !== '—' && (
+                    <span className="inline-flex items-center gap-1 text-ui-2xs font-medium text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {iv.duration}
+                    </span>
+                  )}
                   <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20 transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
                     <Play className="h-3 w-3 ml-0.5" />
                   </span>

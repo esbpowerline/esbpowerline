@@ -368,6 +368,14 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
   );
 }
 
+/**
+ * A category row needs enough stories to fill its carousel — one or two leaves a
+ * half-empty shelf that reads as broken rather than sparse. Categories below
+ * this are held back from the homepage feed until they have the copy to carry a
+ * row; they remain reachable at /articles and on their own category page.
+ */
+const MIN_CATEGORY_ARTICLES = 3;
+
 export function HomePowerSector({
   categoriesWithArticles,
   coverageSlots,
@@ -407,8 +415,10 @@ export function HomePowerSector({
         </Link>
       </div>
 
-      {/* Top-level Featured/Curation Articles (Editors' picks) */}
-      <div className="mb-12">
+      {/* Top-level Featured/Curation Articles (Editors' picks). Margin stays
+          modest because .category-feed-container already adds its own
+          padding-top below — mb-12 here stacked with it into a ~80px void. */}
+      <div className="mb-5">
         <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4 flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
           Featured Coverage
@@ -432,7 +442,7 @@ export function HomePowerSector({
       {/* 10 Vertical Categories Section */}
       <div className="category-feed-container border-t border-border/40">
         {categoriesWithArticles
-          .filter((cat) => cat.articles.length > 0)
+          .filter((cat) => cat.articles.length >= MIN_CATEGORY_ARTICLES)
           .map((cat, index) => {
             const IconComponent = (cat.icon && IconMap[cat.icon]) || Zap;
             return (
@@ -449,8 +459,11 @@ export function HomePowerSector({
                       <div>
                         <h3 className="text-lg md:text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
                           {cat.name}
+                          {/* Count what this reader can actually open. cat.articleCount
+                              is the all-locale total, so the English page was billing
+                              25 English stories as "50" by counting the Bangla ones. */}
                           <span className="text-xs font-normal text-muted-foreground px-2 py-0.5 rounded-full bg-muted border border-border/40">
-                            {cat.articleCount}
+                            {cat.articles.length}
                           </span>
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">{cat.description}</p>

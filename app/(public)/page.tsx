@@ -22,7 +22,7 @@ import dynamic from 'next/dynamic';
 
 import { FeaturedCarousel } from '@/components/news/FeaturedCarousel';
 
-import { normalizeInterviews } from '@/lib/interview-content';
+import { normalizeInterviews, withPinnedInterviews } from '@/lib/interview-content';
 import {
   getPublicSettingsMap,
   getPanelFlags,
@@ -142,7 +142,7 @@ export default async function Home() {
             <div className="home-editorial__main">
               <InterviewsSection
                 className="home-block home-editorial__interviews"
-                initialInterviews={normalizeInterviews(interviews)}
+                initialInterviews={withPinnedInterviews(normalizeInterviews(interviews))}
               />
 
               {/* Mobile/Tablet Inline Ad block for 004.png */}
