@@ -16,6 +16,17 @@ async function requireEditor() {
   return session.user;
 }
 
+/**
+ * Article.category (the denormalized name every read path queries) and
+ * Article.categoryId (the FK) drift — migration 0002 backfilled the FK by
+ * name-match and left non-matching rows NULL. Selecting by FK alone made rename
+ * and delete skip those rows, orphaning them under a category name that no
+ * longer exists. Match either.
+ */
+function articlesInCategory(categoryId: string, categoryName: string) {
+  return { OR: [{ categoryId }, { category: categoryName }] };
+}
+
 function revalidateCategoryPaths(...slugs: (string | undefined)[]) {
   revalidatePath('/categories');
   revalidatePath('/admin/categories');
@@ -35,19 +46,17 @@ export async function getCategories() {
 
 export async function getCategoriesWithCounts() {
   await requireEditorialReader();
-  const [categories, counts] = await Promise.all([
+  // Count by the same OR predicate rename/delete use, so the number shown next
+  // to Delete is the number that operation will actually touch. Counting by name
+  // alone let the UI promise a reassign that deleteCategory then skipped.
+  const [categories, rows] = await Promise.all([
     prisma.category.findMany({ orderBy: { order: 'asc' } }),
-    prisma.article.groupBy({
-      by: ['category'],
-      _count: { category: true },
-    }),
+    prisma.article.findMany({ select: { category: true, categoryId: true } }),
   ]);
-
-  const countMap = Object.fromEntries(counts.map((c) => [c.category, c._count.category]));
 
   return categories.map((c) => ({
     ...c,
-    articleCount: countMap[c.name] ?? 0,
+    articleCount: rows.filter((r) => r.categoryId === c.id || r.category === c.name).length,
   }));
 }
 
@@ -148,7 +157,7 @@ export async function updateCategory(
       updateData.slug = slug;
 
       await prisma.article.updateMany({
-        where: { categoryId: existing.id },
+        where: articlesInCategory(existing.id, existing.name),
         data: { category: name, categoryId: existing.id },
       });
     }
@@ -205,7 +214,7 @@ export async function deleteCategory(
   if (!cat) throw new Error('Category not found');
 
   const affectedArticles = await prisma.article.findMany({
-    where: { categoryId: cat.id },
+    where: articlesInCategory(cat.id, cat.name),
     select: { id: true, title: true, authorId: true },
   });
 
@@ -219,7 +228,7 @@ export async function deleteCategory(
     if (!target) throw new Error('Reassign target not found');
 
     await prisma.article.updateMany({
-      where: { categoryId: cat.id },
+      where: articlesInCategory(cat.id, cat.name),
       data: { category: target.name, categoryId: target.id },
     });
 

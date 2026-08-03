@@ -1,84 +1,80 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 
-function useInView(options = { rootMargin: '100px' }) {
-  const [isIntersecting, setIntersecting] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // If IntersectionObserver is not supported, just load it immediately (fallback for very old browsers)
-    if (typeof IntersectionObserver === 'undefined') {
-      setIntersecting(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIntersecting(true);
-        observer.disconnect(); // Only load once
-      }
-    }, options);
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [options.rootMargin]);
-
-  return { ref, isIntersecting };
-}
-
-function InViewWrapper({ children, minHeight }: { children: React.ReactNode, minHeight: string }) {
-  const { ref, isIntersecting } = useInView({ rootMargin: '100px' }); // Load when within 100px
-
-  if (isIntersecting) {
-    return <>{children}</>;
-  }
-
-  // Pre-allocate space to prevent Cumulative Layout Shift (CLS)
+/**
+ * Below-the-fold home sections.
+ *
+ * These were previously `dynamic(..., { ssr: false })` *and* gated behind an
+ * IntersectionObserver that rendered an empty spacer until scrolled into view.
+ * The combination meant the entire category grid, trending rail, interviews and
+ * bottom row emitted no server HTML at all: the homepage's rendered markup
+ * carried exactly one article link, while the server still ran every category
+ * query and serialised all those article props into the RSC payload. Crawlers
+ * saw an empty page on the site's highest-authority URL.
+ *
+ * They now server-render. Offscreen work is still deferred, but by the browser
+ * via `content-visibility: auto`, which skips layout and paint for offscreen
+ * subtrees *without* removing them from the DOM — so crawlers, no-JS readers and
+ * the LCP all get real markup. `contain-intrinsic-size` keeps the scrollbar
+ * honest so this costs no layout shift.
+ */
+function DeferredPaint({
+  children,
+  minHeight,
+}: {
+  children: React.ReactNode;
+  minHeight: string;
+}) {
   return (
-    <div ref={ref} style={{ minHeight, width: '100%', containIntrinsicSize: `0 ${minHeight}`, contentVisibility: 'auto' }} />
+    <div style={{ contentVisibility: 'auto', containIntrinsicSize: `0 ${minHeight}` }}>
+      {children}
+    </div>
   );
 }
 
-const HomeBottomRowClient = dynamic(() => import('@/components/home/HomeBottomRow').then(m => m.HomeBottomRow), { ssr: false });
-const HomePowerSectorClient = dynamic(() => import('@/components/home/HomePowerSector').then(m => m.HomePowerSector), { ssr: false });
-const HomeTrendingSectionClient = dynamic(() => import('@/components/home/HomeTrendingSection').then(m => m.HomeTrendingSection), { ssr: false });
-const InterviewsSectionClient = dynamic(() => import('@/components/news/InterviewsSection').then(m => m.InterviewsSection), { ssr: false });
+// Still code-split (these are large), but server-rendered.
+const HomeBottomRowClient = dynamic(() =>
+  import('@/components/home/HomeBottomRow').then((m) => m.HomeBottomRow),
+);
+const HomePowerSectorClient = dynamic(() =>
+  import('@/components/home/HomePowerSector').then((m) => m.HomePowerSector),
+);
+const HomeTrendingSectionClient = dynamic(() =>
+  import('@/components/home/HomeTrendingSection').then((m) => m.HomeTrendingSection),
+);
+const InterviewsSectionClient = dynamic(() =>
+  import('@/components/news/InterviewsSection').then((m) => m.InterviewsSection),
+);
 
 export function DeferredHomeBottomRow(props: any) {
   return (
-    <InViewWrapper minHeight="800px">
+    <DeferredPaint minHeight="800px">
       <HomeBottomRowClient {...props} />
-    </InViewWrapper>
+    </DeferredPaint>
   );
 }
 
 export function DeferredHomePowerSector(props: any) {
   return (
-    <InViewWrapper minHeight="1200px">
+    <DeferredPaint minHeight="1200px">
       <HomePowerSectorClient {...props} />
-    </InViewWrapper>
+    </DeferredPaint>
   );
 }
 
 export function DeferredHomeTrendingSection(props: any) {
   return (
-    <InViewWrapper minHeight="800px">
+    <DeferredPaint minHeight="800px">
       <HomeTrendingSectionClient {...props} />
-    </InViewWrapper>
+    </DeferredPaint>
   );
 }
 
 export function DeferredInterviewsSection(props: any) {
   return (
-    <InViewWrapper minHeight="600px">
+    <DeferredPaint minHeight="600px">
       <InterviewsSectionClient {...props} />
-    </InViewWrapper>
+    </DeferredPaint>
   );
 }

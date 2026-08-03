@@ -13,6 +13,8 @@ export type PublicArticleDetail = PublicArticleCard & {
   heroImage?: HeroImageMeta;
   imageCredit?: string | null;
   collaborators?: { id: string; name: string }[];
+  /** ISO timestamp — feeds NewsArticle.dateModified, which Google uses for freshness. */
+  updatedAt: string;
 };
 
 
@@ -24,6 +26,41 @@ export type PublicMagazineIssue = {
   pdfUrl: string | null;
   summary: string;
 };
+
+/**
+ * Exactly the columns mapArticle reads.
+ *
+ * These card queries used `include: { author: … }` with no `select`, so Prisma
+ * pulled `Article.*` — including `content` and `contentBn`, the full article
+ * HTML — and mapArticle threw both away. The homepage alone runs ten of these
+ * at `take: 60`, so it was transferring tens of MB of article bodies per ISR
+ * regeneration to render title-and-image cards.
+ */
+export const ARTICLE_CARD_SELECT = {
+  id: true,
+  slug: true,
+  title: true,
+  titleBn: true,
+  shortTitle: true,
+  excerpt: true,
+  excerptBn: true,
+  category: true,
+  readTime: true,
+  views: true,
+  imageUrl: true,
+  publishedAt: true,
+  createdAt: true,
+  isFeatured: true,
+  isBreaking: true,
+  isPinned: true,
+  isTrending: true,
+  postAsNewsDesk: true,
+  seo: true,
+  // Small JSON array, used by the related-articles relevance score. Cheap,
+  // unlike `content`, which is what this select exists to exclude.
+  tags: true,
+  author: { select: { name: true } },
+} as const;
 
 function mapArticle(
   a: {
@@ -128,7 +165,7 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
       status: 'PUBLISHED',
       category: categoryName,
     },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
     take: 60,
   });
@@ -148,7 +185,7 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
 export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: [{ isPinned: 'desc' }, { isFeatured: 'desc' }, { publishedAt: 'desc' }],
     take: limit * 2,
   });
@@ -199,6 +236,7 @@ export const getPublishedArticleBySlug = unstable_cache(async function getPublis
     heroImage: seo.heroImage,
     imageCredit: article.imageCredit,
     collaborators,
+    updatedAt: article.updatedAt.toISOString(),
   };
 }, ['getPublishedArticleBySlug'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
 
@@ -212,7 +250,7 @@ export async function getRelatedPublishedArticles(
   return unstable_cache(async () => {
     const candidates = await prisma.article.findMany({
     where: { status: 'PUBLISHED', slug: { not: slug } },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: { views: 'desc' },
     take: 60,
   });
@@ -248,7 +286,7 @@ export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, loc
       isBreaking: false,
       isFeatured: false,
     },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: [{ isTrending: 'desc' }, { views: 'desc' }],
     take: limit * 2,
   });
@@ -272,7 +310,7 @@ export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: str
       isBreaking: false,
       isTrending: false,
     },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
     take: limit * 2,
   });
@@ -312,7 +350,7 @@ export async function getPublishedArticlesByTag(tag: string, locale?: string): P
       status: 'PUBLISHED',
       tags: { array_contains: tag } 
     },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
     take: 60,
   });

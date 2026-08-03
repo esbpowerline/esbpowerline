@@ -5,6 +5,7 @@ import { normalizeCoverageSlots } from '@/lib/coverage-defaults';
 import type { CoverageSlot } from '@/lib/coverage-types';
 import { MAX_CAROUSEL_ITEMS } from '@/lib/placement-rules';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
+import { ARTICLE_CARD_SELECT } from '@/lib/category-content';
 
 const PUBLIC_SETTING_KEYS = [
   'homepage', 'ticker', 'snapshot', 'snapshotDate', 'interviews', 'site', 'seo', 'hero', 'coverage', 'panels',
@@ -69,8 +70,6 @@ function mapCarouselArticle(
 }
 
 async function fetchManagedCarouselItems(locale?: string): Promise<CarouselItem[]> {
-  const include = { author: { select: { name: true } } } as const;
-
   const articles = await prisma.article.findMany({
     where: {
       status: 'PUBLISHED',
@@ -78,7 +77,7 @@ async function fetchManagedCarouselItems(locale?: string): Promise<CarouselItem[
       isTrending: false,
       isBreaking: true,
     },
-    include,
+    select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
     take: MAX_CAROUSEL_ITEMS * 2,
   });

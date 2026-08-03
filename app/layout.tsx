@@ -33,6 +33,41 @@ export const metadata: Metadata = {
   },
 };
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
+
+/**
+ * Organization + WebSite, graphed together so the publisher on every article's
+ * NewsArticle block resolves to a real entity. Neither existed before, which is
+ * why no page other than an article carried structured data at all.
+ */
+const SITE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'NewsMediaOrganization',
+      '@id': `${SITE_URL}/#organization`,
+      name: 'ESB PowerLine',
+      url: SITE_URL,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_URL}/images/esb-logo.png`,
+        width: 563,
+        height: 162,
+      },
+      description:
+        "Bangladesh's premier source for power sector news, renewable energy, policy, projects and tenders.",
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: 'ESB PowerLine',
+      publisher: { '@id': `${SITE_URL}/#organization` },
+      inLanguage: 'en',
+    },
+  ],
+};
+
 const bodyClass = [
   inter.variable,
   spaceGrotesk.variable,
@@ -52,6 +87,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         {process.env.NEXT_PUBLIC_SUPABASE_URL && <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />}
+        {/* Site-level entities. Article pages add their own NewsArticle block. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+        />
         {/* Critical theme CSS injected before paint to avoid flash */}
         <style dangerouslySetInnerHTML={{ __html: SITE_THEME_CRITICAL_CSS }} suppressHydrationWarning />
         {/* Theme + locale hydration — must run before React tree */}

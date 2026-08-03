@@ -94,7 +94,7 @@ export function PolicyFramework({
                         <div className="font-bold text-[12.5px] leading-snug text-foreground group-hover:text-primary transition-colors tracking-tight">{item.title}</div>
                         <div className="mt-1 flex flex-wrap items-center gap-1.5">
                           <span className={`rounded-full px-1.5 py-[1px] text-[8.5px] font-bold uppercase tracking-wide ${STATUS_STYLE[item.status]}`}>{item.status}</span>
-                          <span className="text-[10.5px] text-muted-foreground/80 leading-snug">{item.authority} · {item.year}</span>
+                          <span className="text-[10.5px] text-muted-foreground leading-snug">{item.authority} · {item.year}</span>
                         </div>
                       </div>
                       <ChevronRight className="mt-[3px] w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />

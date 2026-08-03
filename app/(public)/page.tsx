@@ -50,7 +50,9 @@ import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
 export const revalidate = 180;
 
 export const metadata = {
-  title: 'ESB PowerLine — Bangladesh Energy & Power News',
+  // `absolute` opts out of the root '%s | ESB PowerLine' template, which was
+  // appending the brand to a title that already starts with it.
+  title: { absolute: 'ESB PowerLine — Bangladesh Energy & Power News' },
   description:
     "Bangladesh's premier source for power sector news, renewable energy, policy, projects & tenders, grid explorer, and the monthly magazine.",
   alternates: {

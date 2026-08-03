@@ -633,11 +633,51 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   <div>
                     <Label>Guest Role / Designation</Label>
                     <Input value={iv.role} onChange={(e) => updateInterviewField(idx, 'role', e.target.value)} className="mt-1" />
+                    <p className="mt-1 text-xs text-muted-foreground">Shown in full in the player modal.</p>
                   </div>
                   <div>
-                    <Label>YouTube Video ID (embed)</Label>
-                    <Input value={iv.youtubeId} onChange={(e) => updateInterviewField(idx, 'youtubeId', e.target.value)} className="mt-1" />
+                    <Label>Programme / Series (card chip)</Label>
+                    <Input
+                      value={iv.programme ?? ''}
+                      onChange={(e) => updateInterviewField(idx, 'programme', e.target.value)}
+                      className="mt-1"
+                      placeholder="e.g. Express Talk"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      The card chip is narrow — a full job title truncates there. Falls back to the role if left blank.
+                    </p>
                   </div>
+                  <div>
+                    <Label>Video Platform</Label>
+                    <select
+                      value={iv.provider ?? 'youtube'}
+                      onChange={(e) => updateInterviewField(idx, 'provider', e.target.value)}
+                      className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                      <option value="youtube">YouTube</option>
+                      <option value="facebook">Facebook</option>
+                    </select>
+                  </div>
+                  {(iv.provider ?? 'youtube') === 'facebook' ? (
+                    <div>
+                      <Label>Facebook Video URL</Label>
+                      <Input
+                        value={iv.videoUrl ?? ''}
+                        onChange={(e) => updateInterviewField(idx, 'videoUrl', e.target.value)}
+                        className="mt-1"
+                        placeholder="https://www.facebook.com/…/videos/…"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Required — Facebook has no short embed id, so the card cannot play without this.
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <Label>YouTube Video ID (embed)</Label>
+                      <Input value={iv.youtubeId} onChange={(e) => updateInterviewField(idx, 'youtubeId', e.target.value)} className="mt-1" />
+                      <p className="mt-1 text-xs text-muted-foreground">Just the id, not the full URL.</p>
+                    </div>
+                  )}
                   <div>
                     <Label>Thumbnail Image URL</Label>
                     <Input value={iv.thumbnail} onChange={(e) => updateInterviewField(idx, 'thumbnail', e.target.value)} className="mt-1" />

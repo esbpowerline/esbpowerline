@@ -1,11 +1,25 @@
+/** Matches any C0 control character or DEL. */
+const CONTROL_CHARS = new RegExp('[\u0000-\u001F\u007F]');
+
 /** Same-origin relative paths only — blocks open redirects. */
 export function safeAuthRedirectPath(raw: string | null | undefined, fallback: string): string {
   if (!raw?.trim()) return fallback;
   const value = raw.trim();
-  
-  // Same-origin relative paths are safe
+
+  // A tab/CR/LF in the middle of the path — reachable as ?to=/%09/evil.com,
+  // which searchParams decodes into a raw control char — passes the prefix
+  // checks below but is stripped by the URL parser, so "/\t/evil.com" resolves
+  // to https://evil.com. trim() does not help; the char is not at either end.
+  if (CONTROL_CHARS.test(value)) return fallback;
+
+  // Same-origin relative paths are safe. Resolve rather than pattern-match so
+  // anything a URL parser reads as a different origin is rejected.
   if (value.startsWith('/') && !value.startsWith('//') && !value.includes('\\')) {
-    return value;
+    try {
+      const base = 'https://esbpowerline.com';
+      if (new URL(value, base).origin === base) return value;
+    } catch {}
+    return fallback;
   }
 
   // Absolute URLs that point to our own workspaces are safe

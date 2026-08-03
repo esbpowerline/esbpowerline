@@ -325,7 +325,9 @@ export async function bulkArticleAction(
   action: BulkArticleAction,
   options?: { password?: string; authorNote?: string }
 ) {
-  const ids = z.array(z.string().uuid()).min(1).max(100).parse(rawIds);
+  // Article.id is a cuid, not a uuid — .uuid() rejected every real id, which
+  // made every bulk action on /admin/articles throw a raw ZodError.
+  const ids = z.array(z.string().min(1)).min(1).max(100).parse(rawIds);
   const user = await requireAuth();
   if (!ids.length) throw new Error('No articles selected');
 

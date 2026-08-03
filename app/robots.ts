@@ -12,7 +12,12 @@ export default function robots(): MetadataRoute.Robots {
           '/cms',
           '/members',
           '/api',
-          '/search',
+          // Only the query form is disallowed. /search itself carries
+          // `robots: noindex, follow` and is the densest set of internal article
+          // links on the site — a bare `Disallow: /search` stopped Googlebot
+          // fetching it at all, so it never saw the noindex and never followed
+          // those links.
+          '/search?',
           // The whole /data tree is referer-gated in middleware and 403s any
           // direct crawl — keeping only /data/daily/ out of robots left
           // /data/petrobangla/** crawlable, which is what GSC reports as

@@ -12,6 +12,18 @@ const scriptSrc =
     ? "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com"
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com";
 
+// Host of the Supabase project that serves media, derived from the same env var
+// the app uses. Falls back to null so a missing var drops the pattern entirely
+// rather than silently re-opening the proxy.
+const supabaseImageHost = (() => {
+  try {
+    const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    return raw ? new URL(raw).hostname : null;
+  } catch {
+    return null;
+  }
+})();
+
 const cspHeader = [
   "default-src 'self'",
   scriptSrc,
@@ -90,8 +102,24 @@ const nextConfig: NextConfig = {
 
   images: {
     unoptimized: false, // Bypass Vercel 1000 image/mo limit
+    // Pin host AND path. A bare `**.supabase.co` with no pathname turns
+    // /_next/image into an open proxy: anyone could pass any Supabase project's
+    // URL and bill this project's Vercel transformation quota.
     remotePatterns: [
-      { protocol: 'https', hostname: '**.supabase.co' },
+      ...(supabaseImageHost
+        ? ([
+            {
+              protocol: 'https' as const,
+              hostname: supabaseImageHost,
+              pathname: '/storage/v1/object/public/**',
+            },
+            {
+              protocol: 'https' as const,
+              hostname: supabaseImageHost,
+              pathname: '/storage/v1/render/image/public/**',
+            },
+          ])
+        : []),
       { protocol: 'https', hostname: 'esbpowerline.com' },
       { protocol: 'https', hostname: 'www.esbpowerline.com' },
       { protocol: 'https', hostname: '**.esbpowerline.com' },
@@ -100,8 +128,15 @@ const nextConfig: NextConfig = {
     // Only 80 is allowed, so the built-in default (75) snaps to it — every
     // <Image> is served at q80, matching the upload/import/Supabase pipeline.
     qualities: [80],
-    deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1920],
+    // 2560 exists for retina desktops: the masthead banner (1480 CSS px) and the
+    // article hero (1224 CSS px) both need >1920 at DPR 2, and without a larger
+    // candidate they were being upscaled from 1920. Only those two request it —
+    // everything else is gated below 1920 by its own `sizes`.
+    deviceSizes: [360, 480, 640, 750, 828, 1080, 1200, 1920, 2560],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Stored media filenames are content-addressed (`${Date.now()}-${name}`) and
+    // never mutate, so the 4h default just re-runs transforms for nothing.
+    minimumCacheTTL: 31536000,
   },
 
   async headers() {

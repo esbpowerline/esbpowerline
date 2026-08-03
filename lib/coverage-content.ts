@@ -6,6 +6,7 @@ import type { CoverageSlot, ResolvedCoverageSlot } from '@/lib/coverage-types';
 import type { PublicArticleCard } from '@/lib/category-types';
 import { MAX_PINNED_COVERAGE } from '@/lib/placement-rules';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
+import { ARTICLE_CARD_SELECT } from '@/lib/category-content';
 
 function mapArticle(
   a: {
@@ -55,8 +56,11 @@ function mapArticle(
 export const getPinnedCoverageArticles = cache(async (locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
     where: { status: 'PUBLISHED', isPinned: true },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
+    // Was unbounded and sliced in JS — one bulk-pin made the homepage fetch the
+    // whole table. Over-fetch slightly to survive the locale filter below.
+    take: MAX_PINNED_COVERAGE * 4,
   });
   return articles
     .filter((a) => {
@@ -75,7 +79,7 @@ export const resolveCoverageSlots = cache(async (slots: CoverageSlot[], locale?:
   const articles = slugs.length
     ? await prisma.article.findMany({
         where: { status: 'PUBLISHED', slug: { in: slugs } },
-        include: { author: { select: { name: true } } },
+        select: ARTICLE_CARD_SELECT,
       })
     : [];
 
@@ -93,7 +97,7 @@ export const resolveCoverageSlots = cache(async (slots: CoverageSlot[], locale?:
 
   const fallbackPool = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
-    include: { author: { select: { name: true } } },
+    select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
     take: 36,
   });

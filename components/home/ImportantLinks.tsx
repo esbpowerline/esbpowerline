@@ -67,7 +67,7 @@ function iconFor(name?: ILIconName): LucideIcon {
 function IconChip({ Icon, tint }: { Icon: LucideIcon; tint?: ILTint }) {
   return (
     <div className="w-8 h-8 rounded-lg bg-muted/40 border border-border/50 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
-      <Icon className={`w-4 h-4 stroke-[1.75] ${tint ? TINT[tint] : 'text-muted-foreground/70'} group-hover:text-primary transition-colors`} />
+      <Icon className={`w-4 h-4 stroke-[1.75] ${tint ? TINT[tint] : 'text-muted-foreground'} group-hover:text-primary transition-colors`} />
     </div>
   );
 }
@@ -110,7 +110,7 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
                 <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors tracking-tight">{org.short}</span>
                 <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-[1px] text-[9.5px] font-semibold tabular-nums ${org.tint ? TINT_BADGE[org.tint] : 'bg-muted text-muted-foreground'}`}>
                   {count}
-                  <span className="font-normal opacity-70">companies</span>
+                  <span className="font-normal">companies</span>
                 </span>
               </div>
               <div className="text-[11px] text-muted-foreground leading-snug mt-0.5">{org.name}</div>
@@ -199,7 +199,7 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-bold text-sm text-foreground group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors tracking-tight">{ministry.short}</span>
-              <span className="rounded-full bg-rose-500/15 px-1.5 py-[1px] text-[8.5px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Ministry</span>
+              <span className="rounded-full bg-rose-500/15 px-1.5 py-[1px] text-[8.5px] font-bold uppercase tracking-wider text-rose-800 dark:text-rose-300">Ministry</span>
               <ExternalLink className="ml-auto w-3.5 h-3.5 text-rose-500/50 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 shrink-0" />
             </div>
             <div className="text-[11px] text-muted-foreground leading-snug mt-0.5">{ministry.name}</div>
@@ -228,7 +228,7 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
                       <DIcon className={`w-3 h-3 ${TINT[d.tint]}`} />
                     </span>
                     <span className="min-w-0 text-[10px] font-semibold leading-tight text-foreground/80 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">
-                      {d.name} <span className="whitespace-nowrap font-bold text-muted-foreground/70">({d.short})</span>
+                      {d.name} <span className="whitespace-nowrap font-bold text-muted-foreground">({d.short})</span>
                     </span>
                   </a>
                 );

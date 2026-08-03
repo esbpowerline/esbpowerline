@@ -4,15 +4,25 @@ import { POLICIES } from '@/lib/data/policy/policies';
 
 export const revalidate = 3600; // revalidate sitemap every hour
 
+/** Same test getPublishedArticleBySlug uses to decide an article is not English. */
+const BENGALI_SCRIPT = /[ঀ-৿]/;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
 
-  // Fetch all published articles
-  const articles = await prisma.article.findMany({
+  // Fetch all published articles.
+  //
+  // getPublishedArticleBySlug rejects Bengali-titled rows while the server
+  // locale is pinned to 'en' (lib/category-content.ts), so those articles
+  // render a hard 404. Submitting them here is what Search Console reports as
+  // "Submitted URL not found (404)" — filter them out until they carry an
+  // English title, or until real /bn routes exist.
+  const publishedArticles = await prisma.article.findMany({
     where: { status: 'PUBLISHED' },
-    select: { slug: true, updatedAt: true },
+    select: { slug: true, title: true, updatedAt: true },
     orderBy: { publishedAt: 'desc' },
   });
+  const articles = publishedArticles.filter((a) => !BENGALI_SCRIPT.test(a.title));
 
   // Fetch all categories
   const categories = await prisma.category.findMany({
@@ -27,8 +37,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     orderBy: { createdAt: 'desc' },
   });
 
+  // Non-ASCII slugs must be percent-encoded to be a valid <loc>.
   const articleUrls = articles.map((article) => ({
-    url: `${baseUrl}/articles/${article.slug}`,
+    url: `${baseUrl}/articles/${encodeURIComponent(article.slug)}`,
     lastModified: article.updatedAt,
     changeFrequency: 'daily' as const,
     priority: 0.8,

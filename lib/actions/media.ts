@@ -14,6 +14,29 @@ async function requireAuth() {
   return session.user;
 }
 
+/**
+ * A media URL we are willing to write into an article. Either a relative
+ * /uploads/ path, or an absolute URL on our own Supabase storage host — never an
+ * arbitrary third-party origin.
+ */
+function isAllowedMediaUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+  if (trimmed.startsWith('/uploads/')) return !trimmed.includes('..');
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'https:') return false;
+    const supabase = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const allowedHosts = new Set<string>();
+    if (supabase) allowedHosts.add(new URL(supabase).hostname);
+    allowedHosts.add('esbpowerline.com');
+    allowedHosts.add('www.esbpowerline.com');
+    return allowedHosts.has(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
 async function backfillMissingMediaSizes(items: any[]) {
   await Promise.all(
     items.map(async (m) => {
@@ -326,9 +349,12 @@ export async function deleteMedia(id: string) {
   const canDeleteOwn = media.uploadedById === user.id && can(user.role, 'media.delete_own');
   if (!canDeleteAny && !canDeleteOwn) throw new Error('You can only delete files you uploaded');
 
+  // getMediaUsageMap keys by the full URL, so looking up a bare filename never
+  // matched — usageCount was always 0 and this guard never fired. The UI's
+  // canDelete flag was the only thing stopping an in-use image being deleted,
+  // and that is client-side only.
   const usageMap = await getMediaUsageMap();
-  const origKey = getNormalizedBase(media.url);
-  const storiesMap = usageMap.get(origKey);
+  const storiesMap = usageMap.get(media.url);
   const usageCount = storiesMap ? storiesMap.size : 0;
 
   if (usageCount > 0) {
@@ -369,8 +395,25 @@ export async function replaceMediaAndFeaturedImage(
   });
   if (!media) throw new Error('Media not found');
 
+  // This action rewrites the media row AND every article pointing at it. Gating
+  // it on article.edit_own (the lowest staff level) with no ownership check let
+  // a CONTRIBUTOR repoint the site's hero images and overwrite the seo blob of
+  // articles they do not own. Require ownership of the media, or the explicit
+  // right to edit other people's articles.
+  const ownsMedia = media.uploadedById === session.user.id;
+  const canEditAny = can(session.user.role, 'article.edit_any');
+  if (!ownsMedia && !canEditAny) {
+    throw new Error('You can only replace files you uploaded');
+  }
+
   const oldUrl = media.url;
   const newUrl = data.newUrl || oldUrl;
+
+  // A caller-supplied newUrl must stay inside our own storage — otherwise this
+  // is an arbitrary-URL injection into every article using the image.
+  if (data.newUrl && !isAllowedMediaUrl(data.newUrl)) {
+    throw new Error('Replacement URL must point at this site’s media storage');
+  }
 
   // 2. Update the media record itself
   await prisma.media.update({
@@ -385,10 +428,13 @@ export async function replaceMediaAndFeaturedImage(
     }
   });
 
-  // 3. Find all articles using this media URL (both old and new URLs to be safe)
+  // 3. Find all articles using this media URL (both old and new URLs to be safe).
+  //    Without article.edit_any, only the caller's own articles are touched —
+  //    replacing your own upload must not rewrite someone else's published story.
   const articles = await prisma.article.findMany({
     where: {
-      imageUrl: { in: [oldUrl, newUrl] }
+      imageUrl: { in: [oldUrl, newUrl] },
+      ...(canEditAny ? {} : { authorId: session.user.id }),
     }
   });
 

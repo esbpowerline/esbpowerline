@@ -14,6 +14,9 @@ import { hasArticleImage } from '@/lib/article-image';
 import { heroImageStyle } from '@/lib/hero-image';
 import { FeaturedCarouselFooter, type FeaturedCarouselFooterLabels } from '@/components/news/FeaturedCarouselFooter';
 
+/** How long each hero slide stays up before advancing. */
+const AUTOPLAY_INTERVAL_MS = 6000;
+
 interface FeaturedItem {
   slug: string;
   title: string;
@@ -108,8 +111,11 @@ export function FeaturedCarousel({
 
   useEffect(() => {
     if (!isPlaying || isTransitioning) return;
+    if (featured.length < 2) return;
 
-      }, [isPlaying, isTransitioning, next]);
+    const timer = setInterval(next, AUTOPLAY_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [isPlaying, isTransitioning, next, featured.length]);
 
   useEffect(() => {
     return () => {
@@ -265,7 +271,12 @@ export function FeaturedCarousel({
 
               <div className="featured-hero__image-wrap relative">
                 <div className="featured-hero__image relative w-full overflow-hidden rounded-xl">
+                  {/* Every slide used to be mounted at once. They sit in the viewport,
+                      so opacity-0 does not defer them — all five hero photos downloaded
+                      during initial load and competed with the LCP. Mount only the
+                      visible slide and the next one, which is all the swap needs. */}
                   {featured.map((item, idx) =>
+                    idx !== current && idx !== (current + 1) % featured.length ? null :
                     hasArticleImage(item.imageUrl) ? (
                       <Image
                         key={idx}
@@ -273,12 +284,13 @@ export function FeaturedCarousel({
                         alt={item.title}
                         fill
                         priority={idx === 0}
-                        fetchPriority={idx === 0 ? "high" : "auto"}
                         className={`absolute inset-0 h-full w-full ${
                           idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
                         }`}
                         style={heroImageStyle({ fitMode: 'fill', ...(item.heroMeta ?? {}) })}
-                        sizes="(max-width: 768px) 100vw, 50vw"
+                        // Image column is ~460px at 1920 and ~404px at 1440 — 50vw
+                        // over-declared it by roughly 2x.
+                        sizes="(max-width: 767px) 100vw, (max-width: 1279px) 340px, 460px"
                       />
                     ) : (
                       <div

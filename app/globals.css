@@ -285,6 +285,33 @@ html[data-site-theme='white'],
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/*
+ * The seam where a category card's image meets its text block, measured from
+ * the top of the carousel wrapper the nav arrows are positioned in. The arrows
+ * centre on this, so each button sits half over the image and half over the
+ * text.
+ *
+ *   0.25rem  track container's pt-1
+ * + 0.5rem   inner track's py-2
+ * + 12rem    the h-48 image
+ * + 1px      the card's own top border (.article-card is `border`)
+ * = calc(12.75rem + 1px)
+ *
+ * In rem, not px, because this site scales its root font size with the
+ * viewport — html is clamp(10.67px, 1.0417vw, 16px) above 1024px, and similar
+ * below. A pixel constant only holds at a 16px root (roughly >=1536px wide);
+ * at a 1280px viewport the root is ~13.3px, so the image is ~160px tall, not
+ * 192px, and any fixed value drops the arrows into the text block. The border
+ * stays in px because Tailwind's `border` is a fixed 1px.
+ *
+ * Measured from the top rather than as a percentage on purpose: everything
+ * above the seam scales together, while the text block below it varies with
+ * title length, so a 50%-based value would drift card to card.
+ */
+:root {
+  --category-nav-seam: calc(12.75rem + 1px);
+}
+
 .article-card:hover .article-card__image {
   transform: scale(1.03);
 }
@@ -1450,7 +1477,8 @@ body {
 
 .home-trending-wave__queue-item:hover .home-trending-wave__queue-rank,
 .home-trending-wave__queue-item--active .home-trending-wave__queue-rank {
-  color: hsl(0 72% 50% / 0.9);
+  /* 50% at 0.9 alpha gave 4.37:1 on white — just under the 4.5 minimum. */
+  color: hsl(0 72% 42%);
 }
 
 .home-trending-wave__queue-rank {
@@ -1465,7 +1493,8 @@ body {
   align-self: flex-start;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  color: hsl(var(--primary) / 0.55);
+  /* 0.55 alpha over white was 2.85:1 at this 10px bold size. */
+  color: hsl(var(--primary));
 }
 
 .home-trending-wave__queue-title {
@@ -16556,9 +16585,11 @@ html.theme-white .cms-datetime-grid-cell {
 }
 
 .article-placement-badge--amber {
-  background: hsl(38 92% 46%);
-  border-color: hsl(38 92% 40%);
-  box-shadow: 0 1px 3px hsl(38 92% 46% / 0.28);
+  /* White label on 46% amber was 2.52:1. Amber needs to go this dark to carry
+     white text at the badge's 7px size. */
+  background: hsl(38 95% 30%);
+  border-color: hsl(38 95% 25%);
+  box-shadow: 0 1px 3px hsl(38 95% 30% / 0.28);
 }
 
 .article-placement-badge--red {

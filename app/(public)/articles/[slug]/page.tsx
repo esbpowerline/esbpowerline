@@ -80,13 +80,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const firstHalf = paragraphs.slice(0, middleIndex).join('</p>') + (middleIndex > 0 ? '</p>' : '');
   const secondHalf = paragraphs.slice(middleIndex).join('</p>');
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
+  const heroImage = normalizeArticleImageUrl(article.imageUrl);
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
-    headline: article.title,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/articles/${article.slug}` },
+    // Google ignores headlines over 110 characters.
+    headline: article.title.slice(0, 110),
     description: article.excerpt,
-    image: normalizeArticleImageUrl(article.imageUrl) ?? '',
+    // An empty `image` invalidates the whole block — omit it instead.
+    ...(heroImage ? { image: [heroImage] } : {}),
     datePublished: article.date,
+    dateModified: article.updatedAt ?? article.date,
     author: {
       '@type': 'Person',
       name: article.author,
@@ -94,6 +101,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     publisher: {
       '@type': 'Organization',
       name: 'ESB PowerLine',
+      // Required by Google for the Article rich result.
+      logo: { '@type': 'ImageObject', url: `${siteUrl}/images/esb-logo.png` },
     },
   };
 
@@ -196,7 +205,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 priority
                 
                 style={heroImageStyle(article.heroImage)}
-                sizes="(max-width: 768px) 100vw, 800px"
+                // .container (globals.css) is declared after @tailwind utilities, so it
+                // overrides max-w-3xl — the real column is up to 1224px, not 768px.
+                // Declaring 800px made the browser pick an 828w candidate for a 1224px
+                // box and upscale it.
+                sizes="(max-width: 1023px) 100vw, 1224px"
               />
               {article.imageCredit && (
                 <span className="image-credit-overlay">
@@ -284,11 +297,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <script
-        type="application/ld+json"
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
-      />
     </div>
   );
 }

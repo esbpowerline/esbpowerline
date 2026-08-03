@@ -11,3 +11,12 @@ dev.db
 dev.db-journal
 tsconfig.tsbuildinfo
 .git
+# Perf-audit artifacts (~74 MB at the repo root). These are gitignored, but a CLI
+# deploy reads .vercelignore instead of .gitignore, so they need listing here too
+# or every `vercel deploy` uploads them.
+lighthouse-report*
+lh-*.json
+*.report.html
+*.report.json
+test-results
+scratch

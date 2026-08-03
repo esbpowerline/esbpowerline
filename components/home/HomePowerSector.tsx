@@ -261,7 +261,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       {articles.length > visibleCount && currentIndex > 0 && (
         <button
           onClick={prevCard}
-          className="absolute -left-3 md:-left-5 top-[40%] -translate-y-1/2 z-40 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:pointer-events-none lg:group-hover/carousel:pointer-events-auto shadow-sm"
+          className="absolute left-1 top-[var(--category-nav-seam)] -translate-y-1/2 z-50 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto shadow-md"
           aria-label="Previous slide"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -344,7 +344,13 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
                     trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
                   }
                 }}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
+                // The button is the bar itself, so the three stay grouped in the
+                // row's 6px gap rather than being pushed ~50px apart by their own
+                // boxes. Tapping room comes from a pseudo-element that grows only
+                // vertically (44px tall), which costs nothing visually. Width still
+                // tracks the bar, so these sit under the 24px WCAG 2.5.8 target
+                // minimum — a deliberate trade to keep the grouped look.
+                className={`relative h-1.5 rounded-full transition-all duration-300 before:absolute before:left-0 before:right-0 before:-top-[19px] before:-bottom-[19px] before:content-[''] ${
                   isActive ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/30'
                 }`}
                 aria-label={`Go to section ${idx + 1}`}
@@ -358,7 +364,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       {articles.length > visibleCount && currentIndex < maxIndex && (
         <button
           onClick={nextCard}
-          className="absolute -right-3 md:-right-5 top-[40%] -translate-y-1/2 z-40 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:pointer-events-none lg:group-hover/carousel:pointer-events-auto shadow-sm"
+          className="absolute right-1 top-[var(--category-nav-seam)] -translate-y-1/2 z-50 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto shadow-md"
           aria-label="Next slide"
         >
           <ChevronRight className="h-5 w-5" />

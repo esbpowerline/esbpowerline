@@ -14,15 +14,15 @@ import { DEFAULT_COVERAGE_SLOTS } from '../lib/coverage-defaults';
 import { slugify } from '../lib/utils';
 import { upsertSupabaseAuthUser } from '../lib/supabase/sync-auth-user';
 import { MEMBER_DEMO_EMAIL, seedPasswordForEmail } from '../lib/seed-credentials';
+import { assertSafeSeedTarget } from '../lib/seed-target-guard';
 
 
 const prisma = createScriptPrismaClient();
 
 async function main() {
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PRODUCTION_SEED !== 'true') {
-    console.error('❌ Refusing to seed: set ALLOW_PRODUCTION_SEED=true to override in production.');
-    process.exit(1);
-  }
+  // Gates on the DATABASE_URL host, not NODE_ENV — no npm script sets NODE_ENV,
+  // so the old check never fired and this ran against the live database.
+  assertSafeSeedTarget('prisma/seed.ts');
 
   console.log('🌱 Seeding ESB PowerLine database...');
 

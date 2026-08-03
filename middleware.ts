@@ -38,6 +38,34 @@ const standardRateLimit = redis ? new Ratelimit({
   analytics: true,
 }) : null;
 
+/**
+ * Every path that accepts a credential or mints a reset token. The limiter used
+ * to cover only /login and /api/auth, which left /members/login (a Server Action
+ * post, not under /api) and the password-reset routes completely unthrottled —
+ * unlimited brute force against every subscriber account.
+ */
+function isCredentialPath(pathname: string): boolean {
+  return (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/members/login') ||
+    pathname.startsWith('/auth/forgot-password') ||
+    pathname.startsWith('/auth/reset-password') ||
+    pathname.startsWith('/sign-in') ||
+    pathname.startsWith('/sign-up')
+  );
+}
+
+/**
+ * Runtime-published days are served by /api/data/*, which mirrors the static
+ * /data/* path exactly. Canonicalising here means the gating below is written
+ * once and applies to both — a second copy of the tier rules for the API twin
+ * is precisely the kind of thing that drifts and quietly opens a hole.
+ */
+function canonicalDataPath(pathname: string): string {
+  return pathname.startsWith('/api/data/') ? pathname.slice('/api'.length) : pathname;
+}
+
 function isDailyJsonPath(pathname: string): boolean {
   return /^\/data\/daily\/\d{4}-\d{2}-\d{2}\.json$/.test(pathname);
 }
@@ -49,7 +77,8 @@ function isPetrobanglaJsonPath(pathname: string): boolean {
 }
 
 function isProtectedDataJsonPath(pathname: string): boolean {
-  return isDailyJsonPath(pathname) || isPetrobanglaJsonPath(pathname);
+  const canonical = canonicalDataPath(pathname);
+  return isDailyJsonPath(canonical) || isPetrobanglaJsonPath(canonical);
 }
 
 function denyDailyJson(message: string, status = 403): NextResponse {
@@ -127,18 +156,32 @@ export async function middleware(request: NextRequest) {
     request.headers.get('x-real-ip'),
   );
 
-  // Global Upstash Rate Limiting
+  // Global Upstash Rate Limiting. An Upstash outage used to reject inside
+  // middleware with no catch, which 500s every route on the site — a limiter
+  // failure must degrade, not take the site down.
   if (redis) {
-    if (pathname.startsWith('/login') || pathname.startsWith('/api/auth')) {
-      const { success } = await authRateLimit!.limit(ip);
-      if (!success) {
-        return new NextResponse('Too many login attempts. Please try again later.', { status: 429 });
+    const limiter = isCredentialPath(pathname)
+      ? authRateLimit
+      : pathname.startsWith('/api/')
+        // Protect API routes from abuse, but avoid draining the 10,000 Upstash
+        // Free Tier limit on regular page views.
+        ? standardRateLimit
+        : null;
+
+    if (limiter) {
+      let allowed = true;
+      try {
+        allowed = (await limiter.limit(ip)).success;
+      } catch {
+        allowed = true; // fail open rather than take the site offline
       }
-    } else if (pathname.startsWith('/api/')) {
-      // Protect API routes from abuse, but avoid draining the 10,000 Upstash Free Tier limit on regular page views
-      const { success } = await standardRateLimit!.limit(ip);
-      if (!success) {
-        return new NextResponse('Too many requests. Please slow down.', { status: 429 });
+      if (!allowed) {
+        return new NextResponse(
+          isCredentialPath(pathname)
+            ? 'Too many login attempts. Please try again later.'
+            : 'Too many requests. Please slow down.',
+          { status: 429 },
+        );
       }
     }
   }
@@ -160,7 +203,10 @@ export async function middleware(request: NextRequest) {
       return denyDailyJson('Access Denied: Direct data access is restricted.');
     }
 
-    const dailyMatch = pathname.match(/\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/);
+    // Everything below reasons about the static shape, so runtime /api/data/*
+    // requests are gated by the same rules as their /data/* twin.
+    const dataPath = canonicalDataPath(pathname);
+    const dailyMatch = dataPath.match(/\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/);
     const isoDate = dailyMatch?.[1];
     const latestDate = getLatestAvailableDate();
 
@@ -168,7 +214,7 @@ export async function middleware(request: NextRequest) {
     // so they get a wider public window (30 gas-days + gap buffer) than the
     // 7-day PGCB grid window. Older archive days stay tier-gated.
     const PETROBANGLA_PUBLIC_DAYS_BACK = 45;
-    const isPetrobanglaDaily = pathname.startsWith('/data/petrobangla/daily/');
+    const isPetrobanglaDaily = dataPath.startsWith('/data/petrobangla/daily/');
     const inPetrobanglaPublicWindow =
       isPetrobanglaDaily &&
       !!isoDate &&
@@ -180,10 +226,19 @@ export async function middleware(request: NextRequest) {
     // accessible to everyone, so skip the Supabase token refresh + Postgres
     // session lookup entirely. This is the hot path — most Grid Explorer reads
     // are recent dates — and avoids a per-fetch DB round-trip on Vercel.
+    // `latestDate` comes from the build-time catalog, so it cannot see a day
+    // published at runtime — and isDateAllowedForTier rejects anything past
+    // latest outright, which would 403 every newly published day. A date beyond
+    // the shipped archive can only exist because it was just published, and the
+    // newest day is always inside the public window, so treat it as public.
+    // Nothing leaks: if no release exists the route simply 404s.
+    const isBeyondShippedArchive = !!isoDate && !!latestDate && isoDate > latestDate;
+
     const isPublicDate =
       !isoDate ||
       !latestDate ||
       isoDate === '2024-07-02' ||
+      isBeyondShippedArchive ||
       inPetrobanglaPublicWindow ||
       isDateAllowedForTier(isoDate, 'visitor', latestDate);
 
