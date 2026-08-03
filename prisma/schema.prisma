@@ -526,6 +526,7 @@ enum DataFeed {
   GAS_TIMELINE         // public/data/petrobangla/timeline-summary.json
   PGCB_MONTHLY_SERIES  // public/data/pgcb-monthly/_series.json
   PGCB_MONTHLY         // public/data/pgcb-monthly/{YYYY-MM}.json
+  SREDA_DAILY          // public/data/sreda/daily/{date}.json
 }
 
 /// A parsed payload awaiting review. Transient: cleared once published or discarded.

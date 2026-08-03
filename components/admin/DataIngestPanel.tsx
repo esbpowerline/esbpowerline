@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket } from 'lucide-react';
+import { Upload, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun } from 'lucide-react';
 import { AdminCard } from '@/components/admin/AdminUI';
 
 type ParseSummary = {
@@ -106,7 +106,79 @@ function StatusBanner({ status }: { status: IngestStatus }) {
   );
 }
 
-export function DataIngestPanel({ status }: { status: IngestStatus }) {
+type SredaResult =
+  | { ok: true; unchanged?: boolean; date: string; lastUpdate: string; totalRenewableMw?: number; reGridSharePct?: number; message?: string }
+  | { ok: false; error: string };
+
+/**
+ * SREDA is the third daily source, but it publishes a web page rather than a
+ * file — so it is a refresh button, not an upload. It also needs no Python,
+ * which is why this one works from the deployed site too.
+ */
+function SredaCard({ latestSredaDate }: { latestSredaDate: string | null }) {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<SredaResult | null>(null);
+
+  async function refresh() {
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await fetch('/api/admin/data/sreda', { method: 'POST' });
+      setResult((await res.json()) as SredaResult);
+    } catch (e) {
+      setResult({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AdminCard title="SREDA renewables" icon={Sun}>
+      <div className="space-y-3">
+        <p className="text-[12px] leading-snug text-muted-foreground">
+          Total renewable capacity and RE share of grid, scraped from ndre.sreda.gov.bd. These feed
+          the homepage snapshot. SREDA publishes no file, so this reads their page directly.
+        </p>
+        {latestSredaDate && (
+          <Row label="Snapshot on the site" value={latestSredaDate} />
+        )}
+        <button
+          onClick={refresh}
+          disabled={busy}
+          className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-muted/30 px-4 py-2 text-[13px] font-semibold transition hover:bg-muted/60 disabled:opacity-40"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sun className="h-4 w-4" />}
+          {busy ? 'Checking SREDA…' : 'Refresh from SREDA'}
+        </button>
+
+        {result?.ok === true && (
+          <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/[0.07] p-3 text-[12px]">
+            {result.unchanged ? (
+              <span className="text-muted-foreground">{result.message}</span>
+            ) : (
+              <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                Published {result.date} — {result.totalRenewableMw} MW renewable, {result.reGridSharePct}% of grid.
+              </span>
+            )}
+          </div>
+        )}
+        {result?.ok === false && (
+          <div className="rounded-lg border border-rose-500/40 bg-rose-500/[0.06] p-3 text-[12px] text-muted-foreground">
+            {result.error}
+          </div>
+        )}
+      </div>
+    </AdminCard>
+  );
+}
+
+export function DataIngestPanel({
+  status,
+  latestSredaDate,
+}: {
+  status: IngestStatus;
+  latestSredaDate: string | null;
+}) {
   const latestArchiveDate = status.latestGridDay;
   const [pgcb, setPgcb] = useState<File | null>(null);
   const [pb, setPb] = useState<File | null>(null);
@@ -187,6 +259,8 @@ export function DataIngestPanel({ status }: { status: IngestStatus }) {
   return (
     <div className="space-y-4">
       <StatusBanner status={status} />
+
+      <SredaCard latestSredaDate={latestSredaDate} />
 
       <AdminCard title="1 · Upload the source files" icon={Upload}>
         <div className="space-y-4">
