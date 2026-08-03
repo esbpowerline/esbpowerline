@@ -34,7 +34,16 @@ export function formatEditorialTimestamp(dateStr: string | Date): string {
 /** Formats dates as "Day Month Year" for chart tooltips (e.g. "6 July 2026") */
 export function formatTooltipDate(dateStr: string): string {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+
+  // Only parse what is unambiguously an ISO date. `new Date()` accepts a great
+  // deal else and fails silently rather than loudly: the Petrobangla window
+  // label "01-02 Aug, 2026" parses as day 01, month Aug, year 02 — rendering
+  // "1 August 2002" and discarding the real year. An isNaN guard cannot catch
+  // that, because the parse succeeds; it is simply wrong by 24 years.
+  // Anything not ISO is passed through as written, which is always readable.
+  if (!/^\d{4}-\d{2}-\d{2}(T|$)/.test(dateStr)) return dateStr;
+
+  const d = new Date(`${dateStr.slice(0, 10)}T12:00:00`);
   if (isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 }

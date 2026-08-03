@@ -30,6 +30,7 @@ function validateKey(feed: DataFeed, key: string): string | null {
   switch (feed) {
     case 'GRID_DAILY':
     case 'GAS_DAILY':
+    case 'SREDA_DAILY':
       return ISO_DATE_RE.test(key) ? null : `Key must be an ISO date, got "${key}"`;
     case 'PGCB_MONTHLY':
       return MONTH_RE.test(key) ? null : `Key must be YYYY-MM, got "${key}"`;

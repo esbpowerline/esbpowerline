@@ -37,7 +37,13 @@ type ParseResponse =
       payload: Record<string, unknown>;
       /** Full Petrobangla day — null when no PDF was supplied or it failed. */
       gasArchive: Record<string, unknown> | null;
-      validation: { warnings: string[]; summary: ParseSummary; gas: GasSummary | null };
+      validation: {
+        warnings: string[];
+        /** Same messages, graded — see classify() in ingest_bridge.py. */
+        notes?: Array<{ level: 'blocking' | 'caution' | 'info'; message: string }>;
+        summary: ParseSummary;
+        gas: GasSummary | null;
+      };
     }
   | { ok: false; error: string };
 
@@ -254,7 +260,11 @@ export function DataIngestPanel({
 
   const summary = result?.ok ? result.validation.summary : null;
   const gas = result?.ok ? result.validation.gas : null;
-  const warnings = result?.ok ? result.validation.warnings : [];
+  const notes = result?.ok
+    ? result.validation.notes ??
+      result.validation.warnings.map((message) => ({ level: 'caution' as const, message }))
+    : [];
+  const blocking = notes.filter((n) => n.level === 'blocking');
 
   return (
     <div className="space-y-4">
@@ -336,16 +346,34 @@ export function DataIngestPanel({
       {summary && (
         <AdminCard title="2 · Review before publishing" icon={CheckCircle2}>
           <div className="space-y-4">
-            {warnings.length > 0 && (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/[0.07] p-3">
-                <p className="mb-1.5 text-[12px] font-bold text-amber-700 dark:text-amber-400">
-                  {warnings.length} thing{warnings.length > 1 ? 's' : ''} to check
-                </p>
-                <ul className="space-y-1">
-                  {warnings.map((w) => (
-                    <li key={w} className="text-[11.5px] leading-snug text-muted-foreground">• {w}</li>
-                  ))}
-                </ul>
+            {/* Graded, because a note saying "I corrected your data" must not
+                look like a note saying "this is the wrong day's file". Falls
+                back to treating everything as caution if the parser predates
+                the levels. */}
+            {notes.length > 0 && (
+              <div className="space-y-2">
+                {(['blocking', 'caution', 'info'] as const).map((level) => {
+                  const group = notes.filter((n) => n.level === level);
+                  if (group.length === 0) return null;
+                  const style =
+                    level === 'blocking'
+                      ? { box: 'border-rose-500/50 bg-rose-500/[0.07]', text: 'text-rose-700 dark:text-rose-400', title: `Do not publish — ${group.length} problem${group.length > 1 ? 's' : ''}` }
+                      : level === 'caution'
+                        ? { box: 'border-amber-500/40 bg-amber-500/[0.07]', text: 'text-amber-700 dark:text-amber-400', title: `${group.length} thing${group.length > 1 ? 's' : ''} to check` }
+                        : { box: 'border-border/50 bg-muted/25', text: 'text-muted-foreground', title: `${group.length} correction${group.length > 1 ? 's' : ''} applied automatically` };
+                  return (
+                    <div key={level} className={`rounded-lg border p-3 ${style.box}`}>
+                      <p className={`mb-1.5 text-[12px] font-bold ${style.text}`}>{style.title}</p>
+                      <ul className="space-y-1">
+                        {group.map((n) => (
+                          <li key={n.message} className="text-[11.5px] leading-snug text-muted-foreground">
+                            • {n.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -448,7 +476,12 @@ export function DataIngestPanel({
             ) : (
               <button
                 onClick={handlePublish}
-                disabled={publishing}
+                // A blocking note means the parse produced something that must
+                // not reach the site — the wrong day's PDF, a failed
+                // reconciliation. Disabling is the honest response; a warning
+                // beside an enabled button invites publishing anyway.
+                disabled={publishing || blocking.length > 0}
+                title={blocking.length > 0 ? 'Resolve the problems above before publishing' : undefined}
                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40"
               >
                 {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}

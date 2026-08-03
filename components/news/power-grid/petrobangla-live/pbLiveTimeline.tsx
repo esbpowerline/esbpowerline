@@ -42,8 +42,10 @@ function LiveWeekTooltip({
   const supplyColor = PB_ARCHIVE_COLORS.powerSupply;
   const fulfillmentColor = d.fulfillment < 45 ? PB_ARCHIVE_COLORS.shortage : PB_ARCHIVE_COLORS.fertilizer;
 
+  // Format the ISO date, not the window label: "01-02 Aug, 2026" parses as
+  // 1 August 2002. Every other tooltip in the grid UI passes d.date.
   return (
-    <GridChartTooltipShell title={formatTooltipDate(d.label ?? d.date)} accent={nationalColor}>
+    <GridChartTooltipShell title={formatTooltipDate(d.date)} accent={nationalColor}>
       <div className="grid-chart-tooltip__grid">
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: nationalColor }} />

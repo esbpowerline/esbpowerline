@@ -154,7 +154,12 @@ async function loadLiveWeekDays(
 
 async function fetchStaticLiveWeekBundle(): Promise<PetrobanglaLiveWeekBundle | null> {
   try {
-    const res = await fetch('/data/petrobangla/_live_week.json');
+    let res = await fetch('/data/petrobangla/_live_week.json');
+    // Rebuilt on every publish, so on a deployed site the current bundle exists
+    // only as a DataRelease — the static copy is whatever shipped with the build.
+    if (res.status === 404) {
+      res = await fetch('/api/data/petrobangla/_live_week.json');
+    }
     if (!res.ok) return null;
     return (await res.json()) as PetrobanglaLiveWeekBundle;
   } catch {
