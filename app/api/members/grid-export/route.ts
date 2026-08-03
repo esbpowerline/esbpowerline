@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { createClient } from '@/utils/supabase/server';
 import { resolvePrismaUserId } from '@/lib/resolve-prisma-user-id';
 import prisma from '@/lib/prisma';
-import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
+import { getRuntimeLatestDate } from '@/lib/data/grid/available-dates.server';
 import {
   resolveGridAccessTier,
   parseGridPlanId,
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
   }
   const format = formatParam as ExportFormat;
 
-  const latestDate = getLatestAvailableDate();
+  const latestDate = await getRuntimeLatestDate();
   if (!latestDate) {
     return NextResponse.json({ error: 'No grid data is available yet.' }, { status: 503 });
   }

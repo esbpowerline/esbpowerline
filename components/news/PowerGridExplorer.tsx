@@ -114,6 +114,12 @@ interface PowerGridExplorerProps {
   urlBoot?: GridExplorerUrlBoot;
   prefetchedDailyReports?: Record<string, GridDailyData>;
   serverLatestDate?: string;
+  /**
+   * Days published from the admin panel since the last deploy. `availableDates`
+   * is compiled into this bundle at build time and cannot know about them, so
+   * the server passes them in and they are merged into the picker.
+   */
+  runtimeDates?: string[];
 }
 const DEMO_DATE = '2026-06-22';
 
@@ -135,14 +141,24 @@ export function PowerGridExplorer({
   urlBoot,
   prefetchedDailyReports,
   serverLatestDate,
+  runtimeDates,
 }: PowerGridExplorerProps = {}) {
   const chartTheme = useChartTheme();
-  const gridAccess = useGridTierAccess();
+  // The server knows the true newest day (bundled catalog ∪ runtime releases);
+  // the hook's own bundled value would gate a freshly published day as locked.
+  const gridAccess = useGridTierAccess(
+    runtimeDates && runtimeDates.length > 0 ? runtimeDates[runtimeDates.length - 1] : serverLatestDate,
+  );
   
   // Date Selection States
   const availableDatesList = useMemo<string[]>(() => {
-    return availableDates.filter((d) => /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/.test(String(d)));
-  }, []);
+    const valid = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
+    const merged = new Set(availableDates.filter((d) => valid.test(String(d))));
+    for (const d of runtimeDates ?? []) {
+      if (valid.test(d)) merged.add(d);
+    }
+    return [...merged].sort();
+  }, [runtimeDates]);
 
   const latestDate = gridAccess.latestDate || serverLatestDate || getLatestAvailableDate() || '2026-07-03';
   const bootDate = urlBoot?.date ?? latestDate;

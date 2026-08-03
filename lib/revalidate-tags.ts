@@ -32,6 +32,12 @@ export function revalidateMagazineContent() {
   expireTag(CONTENT_TAGS.magazine);
 }
 
+/** A grid/gas day was published or withdrawn → flush the release caches. */
+export function revalidateDataRelease(feedTag: string, allTag: string) {
+  expireTag(allTag);
+  expireTag(feedTag);
+}
+
 /** Nuclear "refresh the whole public site" — flush every content cache. */
 export function revalidateAllContent() {
   expireTag(CONTENT_TAGS.articles);

@@ -5,6 +5,7 @@ import {
   parseIsoDate,
   type DailyLoadResult,
 } from '@/lib/data/grid/daily-loader-core';
+import { runtimeDailyReportPath } from '@/lib/data/grid/date-utils';
 import { getCachedDailyReport, setCachedDailyReport } from '@/lib/data/grid/daily-cache';
 import { warnIfInvalidDailyReport } from '@/lib/data/grid/validate-daily-report';
 
@@ -13,6 +14,21 @@ export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loa
 async function loadArchiveFallback(isoDate: string): Promise<GridDailyData | null> {
   const { getArchiveFallback } = await import('@/lib/data/grid/archive-fallback');
   return getArchiveFallback(isoDate);
+}
+
+/**
+ * A day published after the last deploy, served from the DataRelease table.
+ * Returns null for anything not published so the caller drops through to the
+ * bundled archive fallback unchanged.
+ */
+async function loadRuntimeRelease(isoDate: string): Promise<GridDailyData | null> {
+  try {
+    const res = await fetch(runtimeDailyReportPath(isoDate), { cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as GridDailyData;
+  } catch {
+    return null;
+  }
 }
 
 /** Client-side fetch of a daily PGCB report JSON. */
@@ -36,6 +52,14 @@ export async function fetchDailyReport(
     const res = await fetch(dailyReportPath(parsed), { cache: 'default' });
     if (!res.ok) {
       if (shouldUseArchiveFallback(res.status)) {
+        // Not in the shipped archive — it may have been published since the last
+        // deploy. Only a 404 gets here, so a tier denial (403) is never retried.
+        const runtime = await loadRuntimeRelease(parsed);
+        if (runtime) {
+          warnIfInvalidDailyReport(runtime, parsed);
+          setCachedDailyReport(parsed, runtime);
+          return { ok: true, data: runtime, source: 'network' };
+        }
         const fallback = await loadArchiveFallback(parsed);
         if (fallback) {
           setCachedDailyReport(parsed, fallback);

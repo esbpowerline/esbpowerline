@@ -21,6 +21,8 @@ export function PowerGridExplorerClient(props: {
   initialLines?: Array<{ name: string; status: string; capacity: string; owner: string; load: number }>;
   prefetchedDailyReports?: Record<string, GridDailyData>;
   latestDate?: string;
+  /** Days published without a deploy; absent from the compiled catalog. */
+  runtimeDates?: string[];
 }) {
   const searchParams = useSearchParams();
 
@@ -35,6 +37,7 @@ export function PowerGridExplorerClient(props: {
         prefetchedDailyReports={props.prefetchedDailyReports}
         urlBoot={urlBoot}
         serverLatestDate={props.latestDate}
+        runtimeDates={props.runtimeDates}
       />
     </PowerGridExplorerErrorBoundary>
   );

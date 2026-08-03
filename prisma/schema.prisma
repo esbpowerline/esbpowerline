@@ -505,3 +505,68 @@ model ContactMessage {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+// ============================================
+// DATA RELEASES (grid + gas data published without a deployment)
+//
+// Historically every daily report shipped as a static file under public/data
+// and therefore needed a rebuild. These tables let a parsed day be staged,
+// reviewed and published at runtime instead. The static archive stays exactly
+// as it is — it is the substrate the local parser reads and it serves ~6,800
+// unchanging days straight from the CDN. Only days published after the last
+// deploy live here, and a release always wins over a static file of the same
+// key so a correction can supersede a shipped day.
+// ============================================
+
+enum DataFeed {
+  GRID_DAILY           // public/data/daily/{date}.json          (PGCB)
+  GAS_DAILY            // public/data/petrobangla/daily/{date}.json
+  GAS_INDEX            // public/data/petrobangla/_index.json
+  GAS_LIVE_WEEK        // public/data/petrobangla/_live_week.json
+  GAS_TIMELINE         // public/data/petrobangla/timeline-summary.json
+  PGCB_MONTHLY_SERIES  // public/data/pgcb-monthly/_series.json
+  PGCB_MONTHLY         // public/data/pgcb-monthly/{YYYY-MM}.json
+}
+
+/// A parsed payload awaiting review. Transient: cleared once published or discarded.
+model DataDraft {
+  id          String   @id @default(cuid())
+  feed        DataFeed
+  /// ISO date for daily feeds, YYYY-MM for monthly, "singleton" for aggregates.
+  key         String
+  payload     Json
+  /// Parser output: reconciliation results, warnings, and anything the
+  /// reviewer must see before approving. Shape is owned by the parser.
+  validation  Json?
+  /// SHA-256 of the canonical payload, so an unchanged re-parse is detectable.
+  checksum    String
+  sourceName  String?  // original upload filename, e.g. "23.07.26.pdf"
+  sourceUrl   String?  // archived original in Supabase Storage
+  parserVersion String?
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  @@unique([feed, key])
+  @@index([createdAt])
+}
+
+/// A published payload. This is what the site serves.
+model DataRelease {
+  id            String   @id @default(cuid())
+  feed          DataFeed
+  key           String
+  payload       Json
+  checksum      String
+  sourceName    String?
+  sourceUrl     String?
+  parserVersion String?
+  /// Set when a release is withdrawn; the loader then falls back to the static
+  /// archive rather than serving a known-bad day.
+  revokedAt     DateTime?
+  publishedAt   DateTime @default(now())
+  publishedById String?
+  updatedAt     DateTime @updatedAt
+
+  @@unique([feed, key])
+  @@index([feed, revokedAt])
+}

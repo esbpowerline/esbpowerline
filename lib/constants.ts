@@ -77,6 +77,11 @@ export const PERMISSIONS: Record<string, number> = {
 
   // Ads
   'ads.manage':           80,
+
+  // Grid/gas data releases. Publishing writes straight to the live homepage
+  // numbers, so it sits at the admin level rather than with editorial roles.
+  'data.publish':         80,
+  'data.revoke':          80,
 };
 
 /** Optimized 10-category editorial structure */

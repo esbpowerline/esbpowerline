@@ -64,3 +64,13 @@ export function normalizeDateKey(value: string): string | null {
 export function dailyReportPath(isoDate: string): string {
   return `/data/daily/${isoDate}.json`;
 }
+
+/**
+ * Runtime twin of `dailyReportPath`, backed by the DataRelease table instead of
+ * a file shipped with the build. Tried only after the static path 404s, so days
+ * in the archive keep costing nothing and only days published since the last
+ * deploy reach a function.
+ */
+export function runtimeDailyReportPath(isoDate: string): string {
+  return `/api/data/daily/${isoDate}.json`;
+}

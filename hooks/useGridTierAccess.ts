@@ -30,7 +30,14 @@ export type GridTierAccessState = {
   isStaff: boolean;
 };
 
-export function useGridTierAccess(): GridTierAccessState {
+/**
+ * @param runtimeLatestDate The newest day the site is actually serving, which
+ * the server must supply. `availableDates` is compiled at build time, so a day
+ * published from the admin panel is *newer* than the bundled latest — and
+ * `isDateAllowedForTier` rejects anything past latest outright. Without this the
+ * freshest day reads as locked for every tier, including staff.
+ */
+export function useGridTierAccess(runtimeLatestDate?: string): GridTierAccessState {
   const { data: session, status } = useSession();
   const loading = status === 'loading';
 
@@ -40,7 +47,9 @@ export function useGridTierAccess(): GridTierAccessState {
   const isMember = signedIn && role === 'SUBSCRIBER';
   const isStaff = signedIn && role !== 'SUBSCRIBER';
 
-  const latestDate = getLatestAvailableDate() ?? '2026-06-29';
+  const bundledLatest = getLatestAvailableDate() ?? '2026-06-29';
+  const latestDate =
+    runtimeLatestDate && runtimeLatestDate > bundledLatest ? runtimeLatestDate : bundledLatest;
 
   const tier = useMemo(
     () =>

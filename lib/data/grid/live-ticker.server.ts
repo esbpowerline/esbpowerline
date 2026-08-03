@@ -1,7 +1,7 @@
 import 'server-only';
 
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
-import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/available-dates';
+import { getRuntimeAvailableDates } from '@/lib/data/grid/available-dates.server';
 import { loadDailyReportFromDisk } from '@/lib/data/grid/daily-loader.server';
 import { loadPetrobanglaIndexDays } from '@/lib/data/grid/grid-export.server';
 import { macroTariffData } from '@/lib/data/macro/tariff';
@@ -37,9 +37,12 @@ async function fetchUsdBdt(): Promise<number | null> {
 }
 
 export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
-  const latest = getLatestAvailableDate();
+  // Runtime catalog, so the ticker follows days published from the admin panel
+  // rather than freezing on the last day that shipped with a deploy.
+  const runtime = await getRuntimeAvailableDates();
+  const latest = runtime[runtime.length - 1] ?? null;
   if (!latest) return null;
-  const prevDate = availableDates[availableDates.length - 2];
+  const prevDate = runtime[runtime.length - 2];
 
   const [latestRes, prevRes, pbDays, fxLive] = await Promise.all([
     loadDailyReportFromDisk(latest),

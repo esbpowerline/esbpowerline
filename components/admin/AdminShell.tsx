@@ -19,7 +19,7 @@ import { AdminPendingChangesDialog } from '@/components/admin/AdminPendingChange
 import { UserProfileSettings } from '@/components/staff/UserProfileSettings';
 import type { LucideIcon } from 'lucide-react';
 import {
-  LayoutGrid, UsersRound, LibraryBig, Activity, Settings2, FileClock,
+  LayoutGrid, UsersRound, LibraryBig, Activity, Settings2, FileClock, Database,
   Images, Tag, Hash, BookOpenText, LogOut, ExternalLink, Zap, Menu, X, Shield,
   ChevronRight, ChevronLeft, Shapes, MessageCircleReply, PanelLeftClose, PanelLeft,
   Mail,
@@ -50,6 +50,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: 'System',
     items: [
+      { href: '/admin/data', label: 'Grid Data Ingest', icon: Database },
       { href: '/admin/users', label: 'Users', icon: UsersRound },
       { href: '/admin/settings', label: 'Settings', icon: Settings2 },
       { href: '/admin/logs', label: 'Activity Logs', icon: FileClock },
@@ -67,6 +68,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/media': 'Media',
   '/admin/comments': 'Comments',
   '/admin/messages': 'Contact Messages',
+  '/admin/data': 'Grid Data Ingest',
   '/admin/users': 'Users',
   '/admin/users/new': 'New User',
   '/admin/settings': 'Settings',

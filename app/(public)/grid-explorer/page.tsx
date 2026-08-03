@@ -6,6 +6,7 @@ import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButto
 import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
 import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
 import { getLatestAvailableDate, availableDates } from '@/lib/data/grid/available-dates';
+import { getRuntimeOnlyDates } from '@/lib/data/grid/available-dates.server';
 import { Activity } from 'lucide-react';
 import { Suspense } from 'react';
 import { safeJsonLd } from '@/lib/json-ld';
@@ -24,12 +25,19 @@ export const metadata = {
 };
 
 export default async function PowerGridExplorerPage() {
-  const [settings, prefetchedDailyReports] = await Promise.all([
+  const [settings, prefetchedDailyReports, runtimeDates] = await Promise.all([
     getGridSettingsMap(),
     prefetchGridExplorerDailyReports(null),
+    // Days published from the admin panel since the last deploy. The bundled
+    // catalog is compiled into the client bundle and cannot see them, so the
+    // server hands them down and the picker merges the two.
+    getRuntimeOnlyDates(),
   ]);
   const grid = normalizeGridSettings(settings);
-  const latestDate = getLatestAvailableDate();
+  const latestDate =
+    runtimeDates.length > 0
+      ? runtimeDates[runtimeDates.length - 1]
+      : getLatestAvailableDate();
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
   const jsonLd = {
@@ -83,6 +91,7 @@ export default async function PowerGridExplorerPage() {
           initialLines={grid.gridLines}
           prefetchedDailyReports={prefetchedDailyReports}
           latestDate={latestDate ?? undefined}
+          runtimeDates={runtimeDates}
         />
       </Suspense>
 

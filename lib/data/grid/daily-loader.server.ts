@@ -66,6 +66,18 @@ export async function loadDailyReportFromDisk(isoDate: string): Promise<DailyLoa
   } catch (err) {
     const code = err && typeof err === 'object' && 'code' in err ? String((err as NodeJS.ErrnoException).code) : '';
     const status = code === 'ENOENT' ? 404 : null;
+
+    // Missing from the shipped archive — it may have been published at runtime
+    // since the last deploy. Only ENOENT is retried: a malformed file should
+    // surface as an error, not be masked by a release that may not exist.
+    if (status === 404) {
+      const { getReleasePayload } = await import('@/lib/data/releases.server');
+      const payload = await getReleasePayload('GRID_DAILY', parsed);
+      if (payload) {
+        return { ok: true, data: payload as GridDailyData, source: 'disk' };
+      }
+    }
+
     return resolveDailyLoadFromStatus(isoDate, status);
   }
 }
