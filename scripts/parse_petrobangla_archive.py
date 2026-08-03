@@ -62,7 +62,17 @@ def parse_production(words):
         upper = [t.upper().rstrip('.') for t in toks]
         # company header line (e.g. "1. BGFCL", "CHEVRON", "TULLOW", "5. RPGCL (R-LNG)")
         hit = next((COMPANY_HEADERS[u] for u in upper if u in COMPANY_HEADERS), None)
-        if hit and not any(NUM.match(t) for t in toks[-4:]) or (hit and toks and toks[0] in ('5.', '5')):
+        # RPGCL is the one company whose header row also carries its figures, so
+        # the "no numbers in the last four tokens" test never matches it. Older
+        # reports print "5. RPGCL (R-LNG)" and were caught by the "5." check;
+        # newer ones drop the numeral and print plain "RPGCL (R-LNG)", which fell
+        # through both tests. company_code then stayed on the previous company,
+        # the `elif company_code == 'RPGCL'` branch below never fired, and the
+        # R-LNG Terminal row vanished — 501 MMCFD short on 2026-08-01, with the
+        # subtotal misattributed to CHEVRON. Match on the company itself.
+        if (hit and not any(NUM.match(t) for t in toks[-4:])) \
+                or (hit and toks and toks[0] in ('5.', '5')) \
+                or hit == 'RPGCL':
             company_code = hit
             m = re.search(r'(\d+)\.\s*([A-Za-z]+)', ' '.join(toks))
             company_label = f"{m.group(1)}. {hit}" if m else hit
@@ -108,8 +118,25 @@ def parse_production(words):
 def parse_dist_summary(words):
     """Extract the 'Total :', 'Grand Total' and '% of Total Distribution' rows."""
     total_row = grand_row = pct_row = None
-    # distribution grand-total = the LOWER 'Grand' word on the page (production one is higher)
-    dist_grand_y = max((w[1] for w in words if w[4] == 'Grand'), default=720)
+
+    # The distribution grand total is the LOWER 'Grand' on the page, the
+    # production one being higher. But some reports carry no non-grid power
+    # block, and therefore no distribution 'Grand Total' row at all — their
+    # "Total :" line is the whole distribution total. On those, max() falls back
+    # to the PRODUCTION grand row and reads its wells and capacity as demand and
+    # supply (119.0 / 3854.0 on 2026-08-01, against a true 2524.9 / 682.3).
+    #
+    # So anchor on the last 'Grand' that sits below the production section, and
+    # when there is none, anchor on the distribution "Total :" row instead.
+    prod_grand_y = min((w[1] for w in words
+                        if w[4] == 'Grand' and 98 <= w[0] <= 390), default=0)
+    dist_grands = [w[1] for w in words if w[4] == 'Grand' and w[1] > prod_grand_y + 50]
+    if dist_grands:
+        dist_grand_y = max(dist_grands)
+    else:
+        totals = [w[1] for w in words if w[4] == 'Total' and w[1] > prod_grand_y + 50]
+        dist_grand_y = max(totals) if totals else 720
+
     for y, ws in rows_in(words, 98, 520, dist_grand_y - 45, dist_grand_y + 18):
         toks = [w[4] for w in ws]
         joined = ' '.join(toks)

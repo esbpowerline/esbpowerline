@@ -242,6 +242,36 @@ def derive_gas_production(gas_archive: dict, existing: list) -> tuple[list, floa
     return out, round(total, 1)
 
 
+# Not every note is a problem. Showing "I rebuilt the gas summary correctly"
+# in the same amber box as "this is the wrong day's PDF" trains the operator to
+# ignore both. Classify at output time, in one place, so no message can be added
+# later without falling into a sensible default.
+BLOCKING_PATTERNS = (
+    r"REJECTED",
+    r"reconciliation FAILED",
+    r"have an empty plant",
+    r"parsed no production fields",
+    r"could not be determined",
+)
+INFO_PATTERNS = (
+    r"summary rebuilt from",
+    r"Recovered the cause text",
+    r"Energy day taken from the workbook",
+    r"left as scraped",
+)
+
+
+def classify(message: str) -> str:
+    """blocking = do not publish; info = something was handled; caution = look."""
+    for pat in BLOCKING_PATTERNS:
+        if re.search(pat, message, re.IGNORECASE):
+            return "blocking"
+    for pat in INFO_PATTERNS:
+        if re.search(pat, message, re.IGNORECASE):
+            return "info"
+    return "caution"
+
+
 def window_label(start: datetime.date, end: datetime.date) -> str:
     """Label for an 8am-8am gas window, in the form the archive already uses.
 
@@ -452,12 +482,19 @@ def main() -> None:
         printed_start = printed_window_start(pb_text)
         if printed_start and printed_start != op_date:
             gas_archive = None
+            # The six-row summary was scraped from this PDF a moment ago, so it
+            # holds the WRONG day's production. Discard it too, or rejecting the
+            # archive achieves nothing: the grid file would still carry another
+            # day's gas figures, which is the exact duplication this guard
+            # exists to prevent. Blank them and let the day publish gas-less.
+            payload.pop("gasProductionData", None)
+            payload.pop("gasDistributionData", None)
             warnings.append(
                 f"GAS PDF REJECTED — it covers the gas day starting {printed_start.isoformat()}, but this "
                 f"upload is energy day {op_date.isoformat()}. Its window is printed on the report itself. "
                 f"You need the report whose window OPENS on {op_date.isoformat()} "
                 f"(usually the file named for {(op_date + datetime.timedelta(days=1)).isoformat()}). "
-                "Gas was not parsed; the grid day is unaffected."
+                "Gas figures were discarded, including the summary; the grid day is unaffected."
             )
         else:
             gas_archive, gas_warnings = parse_gas_archive(Path(args.pb), op_date, tmpdir)
@@ -616,6 +653,7 @@ def main() -> None:
 
     validation = {
         "warnings": warnings,
+        "notes": [{"level": classify(w), "message": w} for w in warnings],
         "summary": {
             "energyDay": op_date.isoformat(),
             "sourceGridDate": source_grid_date,
