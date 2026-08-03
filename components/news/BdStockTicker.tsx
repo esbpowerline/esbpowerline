@@ -6,6 +6,7 @@ import type { DseTickerItem } from '@/lib/bd-stock-market';
 import { DEFAULT_DSE_TICKER } from '@/lib/bd-stock-market';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { cn } from '@/lib/utils';
+import { tickerDurationMs, TICKER_SPEED_FACTOR } from '@/lib/ticker-speed';
 
 export function BdStockTicker({
   className,
@@ -66,24 +67,35 @@ export function BdStockTicker({
   const animationRef = useRef<Animation | null>(null);
 
   useEffect(() => {
-    if (!trackRef.current) return;
+    const track = trackRef.current;
+    if (!track) return;
 
-    const anim = trackRef.current.animate(
-      [
-        { transform: 'translateX(0)' },
-        { transform: 'translateX(-25%)' }
-      ],
-      {
-        duration: 60000,
-        iterations: Infinity,
-        easing: 'linear'
-      }
-    );
+    let anim: Animation | null = null;
 
-    animationRef.current = anim;
+    // Runs at the base rate; commodities is offset to 90% of it. The row count
+    // here comes from /api/market/dse and changes at runtime, so a fixed
+    // duration would drift off that relationship.
+    const start = () => {
+      anim?.cancel();
+      anim = track.animate(
+        [{ transform: 'translateX(0)' }, { transform: 'translateX(-25%)' }],
+        {
+          duration: tickerDurationMs(track.scrollWidth, TICKER_SPEED_FACTOR.dse),
+          iterations: Infinity,
+          easing: 'linear',
+        },
+      );
+      animationRef.current = anim;
+    };
+
+    start();
+
+    const observer = new ResizeObserver(start);
+    observer.observe(track);
 
     return () => {
-      anim.cancel();
+      observer.disconnect();
+      anim?.cancel();
     };
   }, [items, locale]);
 

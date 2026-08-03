@@ -83,11 +83,16 @@ export const TITAS_RECORD = {
         { label: 'now', value: '10.13%' },
       ],
     },
+    /**
+     * `asOf` is carried per figure, not just in the footnote: these four are a
+     * per-household monthly bill, two single-year totals and a three-year
+     * cumulative, and without a date each they read as one comparable series.
+     */
     stats: [
-      { value: 'Tk 468', sub: 'a month a non-metered home is billed for gas Titas’s own meters say it never burned' },
-      { value: 'Tk 3,000cr', sub: 'of gas gone in a single year — Tk 8.2 crore a day, every day' },
-      { value: 'Tk 2,422cr', sub: 'booked by its own auditor as lost gas inside one year’s cost of sales' },
-      { value: 'Tk 1,680cr', sub: 'lost over three straight years, while the dividend fell from 26% to 2%' },
+      { value: 'Tk 468', asOf: '2022', sub: 'a month a non-metered home is billed for gas Titas’s own meters say it never burned' },
+      { value: 'Tk 3,000cr', asOf: 'FY2024-25', sub: 'of gas gone in a single year — Tk 8.2 crore a day, every day' },
+      { value: 'Tk 2,422cr', asOf: 'FY2024-25', sub: 'booked by its own auditor as lost gas inside one year’s cost of sales' },
+      { value: 'Tk 1,680cr', asOf: 'FY23–FY25', sub: 'lost over three straight years, while the dividend fell from 26% to 2%' },
     ],
     footnote: 'From Titas’s audited accounts, its auditor, BERC and the Dhaka Stock Exchange.',
     cta: 'Read the full record',

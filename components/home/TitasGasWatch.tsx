@@ -3,6 +3,21 @@ import { Flame, ArrowRight } from 'lucide-react';
 import { TITAS_RECORD } from '@/lib/data/titas/titas-record';
 
 /**
+ * Split "Tk 3,000cr" into its currency prefix, numeral and unit suffix so each
+ * can be set separately: the numeral carries the weight, the currency and unit
+ * recede. Setting "cr" at full weight makes "3,000cr" read as a single token
+ * and stops the four numerals comparing cleanly down the column.
+ *
+ * Falls back to rendering the string whole if it isn't in this shape, so an
+ * unusual future figure degrades to the old treatment rather than breaking.
+ */
+function splitFigure(value: string) {
+  const m = /^(Tk\s*)?([\d,.]+)\s*(cr|crore|lakh|bn|m)?$/i.exec(value.trim());
+  if (!m) return null;
+  return { prefix: m[1]?.trim() ?? '', numeral: m[2], suffix: m[3] ?? '' };
+}
+
+/**
  * Titas Gas watch — a standalone rail panel, deliberately its own container
  * rather than a section of the Policy & Regulatory Framework card: this tracks
  * a licensee's own reported numbers, not a legal instrument.
@@ -39,15 +54,19 @@ export function TitasGasWatch() {
         <div className="mt-4 rounded-xl border border-border/60 bg-muted/20 px-3.5 py-3.5">
           <div className="flex items-baseline justify-between gap-2">
             <p className="text-[11px] font-semibold leading-snug text-foreground">{lead.caption}</p>
-            <span className="shrink-0 font-mono text-[9.5px] tabular-nums text-muted-foreground/70">{lead.asOf}</span>
+            <span className="shrink-0 font-mono text-[9.5px] tabular-nums text-muted-foreground">{lead.asOf}</span>
           </div>
 
-          <dl className="mt-3 space-y-2">
+          {/* Not a <dl>: a definition list's grouping <div> may contain only <dt>
+              and <dd>, and each row here also carries a progress bar. The list
+              markup bought no semantics for a stat-plus-bar widget, so it only
+              produced invalid HTML. */}
+          <div className="mt-3 space-y-2">
             {[lead.allowed, lead.actual].map((row, i) => (
               <div key={row.label}>
                 <div className="flex items-baseline justify-between gap-2">
-                  <dt className="text-[10.5px] text-muted-foreground">{row.label}</dt>
-                  <dd
+                  <span className="text-[10.5px] text-muted-foreground">{row.label}</span>
+                  <span
                     className={
                       i === 1
                         ? 'text-[15px] font-bold leading-none text-rose-600 dark:text-rose-400'
@@ -55,9 +74,13 @@ export function TitasGasWatch() {
                     }
                   >
                     {row.value}
-                  </dd>
+                  </span>
                 </div>
-                <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-border/60">
+                <div
+                  className="mt-1 h-2 w-full overflow-hidden rounded-full bg-border/60"
+                  role="img"
+                  aria-label={`${row.label}: ${row.value}`}
+                >
                   <div
                     className={`h-full rounded-full ${i === 1 ? 'bg-rose-600 dark:bg-rose-500' : 'bg-rose-500/30'}`}
                     style={{ width: `${row.pct}%` }}
@@ -65,7 +88,7 @@ export function TitasGasWatch() {
                 </div>
               </div>
             ))}
-          </dl>
+          </div>
 
           <p className="mt-3 text-[12px] font-bold leading-snug text-rose-700 dark:text-rose-400">{lead.verdict}</p>
 
@@ -84,26 +107,51 @@ export function TitasGasWatch() {
                   >
                     {p.value}
                   </span>
-                  <span className="text-[9px] uppercase tracking-wide text-muted-foreground/70">{p.label}</span>
+                  <span className="text-[9px] uppercase tracking-wide text-muted-foreground">{p.label}</span>
                 </li>
               );
             })}
           </ol>
         </div>
 
-        {/* Supporting figures */}
+        {/* Supporting figures.
+
+            The unit sits in a fixed slot to the right of the numeral, so the
+            numerals themselves stack on one axis and "cr" hangs into the gutter
+            — 468 lines up under 3,000 rather than under the "cr". Each figure
+            carries its own period underneath, because these are not one series:
+            a monthly household bill, two single years, and a three-year total. */}
         <dl className="mt-3.5 divide-y divide-border/50 border-y border-border/50">
-          {stats.map((s) => (
-            <div key={s.value} className="flex items-baseline gap-2.5 py-2.5">
-              <dt className="w-[78px] shrink-0 text-[14px] font-bold leading-tight tabular-nums text-rose-600 dark:text-rose-400">
-                {s.value}
-              </dt>
-              <dd className="min-w-0 flex-1 text-[11.5px] leading-snug text-muted-foreground">{s.sub}</dd>
-            </div>
-          ))}
+          {stats.map((s) => {
+            const f = splitFigure(s.value);
+            return (
+              <div key={s.value} className="flex items-baseline gap-3 py-2.5">
+                <dt className="w-[5.5rem] shrink-0 text-right leading-tight text-rose-600 dark:text-rose-400">
+                  <span className="flex items-baseline justify-end whitespace-nowrap">
+                    {f ? (
+                      <>
+                        <span className="mr-1 text-[10px] font-semibold opacity-70">{f.prefix}</span>
+                        <span className="text-[16px] font-bold tabular-nums">{f.numeral}</span>
+                        {/* Fixed slot: keeps the numeral axis true whether or not there is a unit. */}
+                        <span className="w-[15px] shrink-0 text-left text-[10px] font-semibold opacity-70">
+                          {f.suffix}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-[14px] font-bold tabular-nums">{s.value}</span>
+                    )}
+                  </span>
+                  <span className="mt-1 block pr-[15px] text-[9px] font-medium uppercase tracking-wide tabular-nums text-muted-foreground">
+                    {s.asOf}
+                  </span>
+                </dt>
+                <dd className="min-w-0 flex-1 text-[11.5px] leading-snug text-muted-foreground">{s.sub}</dd>
+              </div>
+            );
+          })}
         </dl>
 
-        <p className="mt-3 text-[10.5px] leading-snug text-muted-foreground/70">{footnote}</p>
+        <p className="mt-3 text-[10.5px] leading-snug text-muted-foreground">{footnote}</p>
 
         <Link
           href="/titas-gas"

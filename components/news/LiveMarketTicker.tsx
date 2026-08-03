@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { localizeTickerItem } from '@/lib/i18n/homepage-copy';
+import { tickerDurationMs, TICKER_SPEED_FACTOR } from '@/lib/ticker-speed';
 
 export interface TickerItem {
   id: string;
@@ -59,30 +60,39 @@ export function LiveMarketTicker({
   const animationRef = React.useRef<Animation | null>(null);
 
   useEffect(() => {
-    if (!trackRef.current) return;
+    const track = trackRef.current;
+    if (!track) return;
 
-    const anim = trackRef.current.animate(
-      [
-        { transform: 'translateX(0)' },
-        { transform: 'translateX(-25%)' }
-      ],
-      {
-        duration: 20000,
-        iterations: Infinity,
-        easing: 'linear'
-      }
-    );
+    let anim: Animation | null = null;
 
-    animationRef.current = anim;
+    // Duration follows the measured width, so this holds a fixed px/s whatever
+    // it is showing — deliberately 90% of the DSE ticker beside it, close enough
+    // to read as the same system but not in lockstep with it.
+    const start = () => {
+      anim?.cancel();
+      anim = track.animate(
+        [{ transform: 'translateX(0)' }, { transform: 'translateX(-25%)' }],
+        {
+          duration: tickerDurationMs(track.scrollWidth, TICKER_SPEED_FACTOR.commodities),
+          iterations: Infinity,
+          easing: 'linear',
+        },
+      );
+      animationRef.current = anim;
+      if (!playing) anim.pause();
+    };
 
-    if (!playing) {
-      anim.pause();
-    }
+    start();
+
+    // Fonts and locale swaps change the track width after first paint.
+    const observer = new ResizeObserver(start);
+    observer.observe(track);
 
     return () => {
-      anim.cancel();
+      observer.disconnect();
+      anim?.cancel();
     };
-  }, [playing, locale]);
+  }, [playing, locale, items]);
 
   const handleMouseEnter = () => {
     if (animationRef.current) {
