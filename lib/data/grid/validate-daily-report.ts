@@ -10,14 +10,17 @@ const systemStatsSchema = z.object({
   date: z.string().min(1),
   dayPeakGen: z.number(),
   eveningPeakGen: z.number(),
-  dayPeakDemand: z.number(),
+  dayPeakDemand: z.number().nullable(),
   eveningPeakDemand: z.number(),
-  minGen: z.number(),
-  maxGen: z.number(),
+  // Nullable across the board: every one of these is read from the source
+  // report, and a layout that does not publish one reports null rather than
+  // an estimate dressed as a measurement.
+  minGen: z.number().nullable(),
+  maxGen: z.number().nullable(),
   totalEnergyGen: z.number(),
-  totalEnergyUnserved: z.number(),
-  totalEnergyDemand: z.number(),
-  maxTemp: z.number(),
+  totalEnergyUnserved: z.number().nullable(),
+  totalEnergyDemand: z.number().nullable(),
+  maxTemp: z.number().nullable(),
   totalGasSuppliedPower: z.number(),
   avgProductionCost: z.number(),
   totalDailyCost: z.number(),
@@ -26,8 +29,10 @@ const systemStatsSchema = z.object({
 const generationItemSchema = z.object({
   name: z.string(),
   gen: z.number(),
-  cost: z.number(),
-  unitCost: z.number(),
+  // Published cost, and the unit cost derived from it. Null where the source
+  // layout carries no production-cost block.
+  cost: z.number().nullable(),
+  unitCost: z.number().nullable(),
   color: z.string(),
 });
 
@@ -74,8 +79,9 @@ export const dailyReportSchema = z.object({
   hourlyLoadData: z.array(z.object({
     time: z.string(),
     generation: z.number(),
-    loadShed: z.number(),
-    demand: z.number(),
+    // Populated on the published evening peak hour only.
+    loadShed: z.number().nullable(),
+    demand: z.number().nullable(),
   })).optional(),
 });
 

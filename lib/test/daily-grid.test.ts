@@ -78,6 +78,61 @@ describe('validate-daily-report', () => {
     const result = validateDailyReport({ generationData: [] });
     expect(result.success).toBe(false);
   });
+
+  it('accepts null daily extremes', () => {
+    // Days whose source states neither extreme and carries no load curve
+    // report null. The alternative — a number derived from an unrelated
+    // peak — is indistinguishable from a measured value once archived.
+    const result = validateDailyReport({
+      ...sampleReport,
+      systemStats: { ...sampleReport.systemStats, minGen: null, maxGen: null },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('still rejects a non-numeric, non-null extreme', () => {
+    const result = validateDailyReport({
+      ...sampleReport,
+      systemStats: { ...sampleReport.systemStats, maxGen: 'n/a' },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts null for every figure the source may not publish', () => {
+    // Older layouts print generation but not demand, unserved energy or the
+    // day's temperature. Those days report null rather than the estimates the
+    // site used to synthesise (maxTemp was the constant 32.8 throughout).
+    const result = validateDailyReport({
+      ...sampleReport,
+      systemStats: {
+        ...sampleReport.systemStats,
+        dayPeakDemand: null,
+        totalEnergyUnserved: null,
+        totalEnergyDemand: null,
+        maxTemp: null,
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts fuel rows with no published cost', () => {
+    const result = validateDailyReport({
+      ...sampleReport,
+      generationData: [{ name: 'Gas', gen: 126.19, cost: null, unitCost: null, color: '#0ea5e9' }],
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts an hourly curve carrying shedding on the peak hour only', () => {
+    const result = validateDailyReport({
+      ...sampleReport,
+      hourlyLoadData: [
+        { time: '00:00', generation: 13000, loadShed: null, demand: null },
+        { time: '21:00', generation: 16180.9, loadShed: 359, demand: 16740.5 },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('daily-loader-core status handling', () => {

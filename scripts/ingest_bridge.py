@@ -44,7 +44,11 @@ def derive_energy_day(filename: str) -> str | None:
 
     "Daily Report 02-08-2026.xlsx" therefore describes energy day 2026-08-01.
     """
-    m = re.search(r"(\d{2})[-_. ](\d{2})[-_. ](\d{4})", filename)
+    # Day and month may be one or two digits ("01-7-2023"), matching
+    # parse_date_from_filename. The lookahead refuses a 5-digit year rather
+    # than clipping it: "21-8-20223_.xlsm" would otherwise read as 2022-08-21
+    # when the sheet inside says 2023-08-20.
+    m = re.search(r"(\d{1,2})[-_. ](\d{1,2})[-_. ](\d{4})(?!\d)", filename)
     if m:
         d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
         try:
@@ -55,6 +59,18 @@ def derive_energy_day(filename: str) -> str | None:
     if m:
         try:
             return datetime.date(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
+        except ValueError:
+            return None
+    # Two-digit year, e.g. "Daily Report 01-03-18_.xlsm" — 375 of the 1,185
+    # workbooks on W: are named this way and returned nothing here, which sent
+    # them down the workbook-date path unnecessarily. Tried last, and the
+    # lookahead stops it from clipping "01-05-20" out of "01-05-2026".
+    m = re.search(r"(\d{1,2})[-_. ](\d{1,2})[-_. ](\d{2})(?!\d)", filename)
+    if m:
+        d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        y += 2000 if y < 50 else 1900
+        try:
+            return (datetime.date(y, mo, d) - datetime.timedelta(days=1)).isoformat()
         except ValueError:
             return None
     return None
@@ -146,30 +162,71 @@ GAS_PRODUCTION_LABELS = [
 ]
 
 
-def workbook_energy_day(text: str) -> str | None:
-    """The day a PGCB workbook describes, taken from its most frequent date.
-
-    A workbook carries two dates: the energy day it reports on, repeated through
-    every sheet header, and the publication date, which appears a handful of
-    times. On all three August 2026 reports the split was decisive — 18
-    occurrences of the energy day against 7 of the publication date.
-
-    Picking the first "Date:" match instead is unreliable: in
-    "Daily Report 03-08-2026.xlsx" the earliest match is the *publication* date,
-    which would have keyed the day a full 24 hours late.
-    """
-    counts: dict[str, int] = {}
-    for d, m, y in re.findall(r"(\d{2})[-/.](\d{2})[-/.](\d{4})", text):
-        try:
-            iso = datetime.date(int(y), int(m), int(d)).isoformat()
-        except ValueError:
-            continue
-        counts[iso] = counts.get(iso, 0) + 1
-    if not counts:
+def _parse_loose_date(value: str) -> datetime.date | None:
+    """A date cell in either form the workbooks use: 2022-07-01 or 01-07-2022."""
+    m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", value)
+    if m:
+        y, mo, d = (int(g) for g in m.groups())
+    else:
+        m = re.match(r"^(\d{1,2})[-./](\d{1,2})[-./](\d{4})$", value)
+        if not m:
+            return None
+        d, mo, y = (int(g) for g in m.groups())
+    try:
+        return datetime.date(y, mo, d)
+    except ValueError:
         return None
-    # Ties break toward the earlier date — the energy day always precedes the
-    # publication date, never the other way round.
-    return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+
+
+def curve_sheet_date(text: str) -> str | None:
+    """The energy day as stated in the load-curve sheet's own Date header.
+
+    This is the one label that means the same thing on both workbook layouts.
+    P1 does not: the 2025+ sheet's "Date :" is the energy day, but the older
+    sheet's "Reporting Date :" is the *publication* date, a day later.
+
+    Correct on 82 of 83 workbooks sampled across 2019-2026, and the exception
+    is not one: "Daily Report 26-01-2021_.xlsm" prints 2022-01-25, and its
+    figures (8842 / 10021 MW, 199.04 MKWh) sit squarely in January 2022's
+    range, not January 2021's — 2022-01-25 being the day missing from the
+    archive. The filename carries the typo, not the sheet. Two W: workbooks
+    are misnamed this way, and in both the printed date is the right one.
+    """
+    from parse_daily_reports import get_sheet_content, norm_text, split_cells
+
+    for sheet in ("L-Curve", "En-Curve"):
+        block = get_sheet_content(text, sheet)
+        if not block:
+            continue
+        for line in block.split("\n")[:8]:
+            cells = split_cells(line)
+            for i, cell in enumerate(cells):
+                if re.match(r"^date\b", norm_text(cell)) and i + 1 < len(cells):
+                    parsed = _parse_loose_date(cells[i + 1])
+                    if parsed:
+                        return parsed.isoformat()
+    return None
+
+
+def workbook_energy_day(text: str) -> str | None:
+    """The day a PGCB workbook describes, or None when it does not say.
+
+    Only the load-curve sheet's own Date header counts. This used to fall
+    back to the most frequent date in the file, a heuristic tuned on the 2025+
+    layout where the energy day repeats through every sheet header (18
+    occurrences against 7 of the publication date on the August 2026 reports).
+
+    That fallback is actively harmful on the pre-2018 .xls workbooks, which
+    have no load-curve sheet: across 24 of them it returned the *publication*
+    date — keying the day 24 hours late, the very error this module exists to
+    prevent — or a stray template date of 2010-07-18. Returning None instead
+    lets the caller keep the filename's day, which for those files is right
+    and agrees with parse_date_from_filename on 1,181 of 1,184 workbooks.
+
+    Picking the first "Date:" match is no better: in
+    "Daily Report 03-08-2026.xlsx" the earliest match is the publication date.
+    """
+    return curve_sheet_date(text)
 
 
 def clean_field_name(raw) -> str:
@@ -252,6 +309,8 @@ BLOCKING_PATTERNS = (
     r"have an empty plant",
     r"parsed no production fields",
     r"could not be determined",
+    r"not\s+physically possible",
+    r"the two are crossed",
 )
 INFO_PATTERNS = (
     r"summary rebuilt from",
@@ -383,15 +442,12 @@ def main() -> None:
         fail(f"Could not import parsers: {exc}")
 
     iso = args.date or derive_energy_day(args.pgcb_name or Path(args.pgcb).name)
-    if not iso:
-        fail(
-            "Could not determine the energy day from the filename. "
-            "Expected something like 'Daily Report 02-08-2026.xlsx'; pass --date to override."
-        )
-    try:
-        op_date = datetime.date.fromisoformat(iso)
-    except ValueError:
-        fail(f"Invalid date: {iso}")
+    op_date = None
+    if iso:
+        try:
+            op_date = datetime.date.fromisoformat(iso)
+        except ValueError:
+            fail(f"Invalid date: {iso}")
 
     warnings: list[str] = []
     tmpdir = Path(tempfile.mkdtemp(prefix="esb-ingest-src-"))
@@ -408,38 +464,70 @@ def main() -> None:
     if "## Sheet: P1" not in pgcb_text:
         warnings.append("No 'P1' sheet found — this may not be a PGCB daily report.")
 
-
-    payload = parse_pgcb_file(str(pgcb_txt_path), datetime.datetime.combine(op_date, datetime.time()))
-    if not payload:
-        fail("The PGCB parser returned nothing. Is this the daily report workbook?")
-
     # The filename is the *publication* date, a day ahead of the data, so the
     # authority on which day this is must be the workbook's own printed date.
     # Report it either way so the reviewer can see the derivation was right,
     # rather than having to trust the filename arithmetic.
-    # The workbook states the day it reports on; the filename states when it was
-    # published. Where they disagree the file's own content is authoritative, so
-    # it wins unless an explicit --date override was given. Filename conventions
-    # vary ("Daily Report 03-08-2026.xlsx" holds 2026-08-02) and guessing from
-    # them is what keys a day wrong.
+    # Which day is this? The filename minus one and the load-curve sheet's own
+    # Date header normally agree — they do on 173 of 173 workbooks from 2018
+    # on, including the August 2026 reports. So a disagreement is itself the
+    # anomaly, and its SIZE says which side is wrong:
+    #
+    #   * a day or two apart -> the sheet header is stale, copied from the
+    #     previous report. "18-11-2024_.xlsm" and "18-09-2024_.xlsm" both hold
+    #     the day their filename implies while their curve sheet names the day
+    #     before, which the archive's own neighbouring entries confirm.
+    #   * a year apart -> the filename is a typo. "26-01-2021_.xlsm" holds
+    #     2022-01-25 and "21-8-20223_.xlsm" holds 2023-08-20.
+    #
+    # Either way the operator is told, because either way one of the two
+    # sources for the most important field in the file is wrong.
+    #
+    # This has to settle BEFORE the workbook is parsed: parse_pgcb_file stamps
+    # systemStats.date from whatever it is given, so deciding the day
+    # afterwards published "25 Jan 2021" inside a file keyed 2022-01-25.
     source_grid_date = workbook_energy_day(pgcb_text)
-    if source_grid_date:
+
+    if op_date is None:
+        if not source_grid_date:
+            fail(
+                "Could not determine the energy day from either the filename or the workbook's own "
+                "printed date. Expected a name like 'Daily Report 02-08-2026.xlsx'; pass --date to set it."
+            )
+        op_date = datetime.date.fromisoformat(source_grid_date)
+        warnings.append(
+            f"The filename gave no usable date, so the energy day was taken from the workbook itself "
+            f"({op_date.isoformat()}). Confirm it before publishing."
+        )
+    elif source_grid_date:
         try:
             printed = datetime.date.fromisoformat(source_grid_date)
+            gap = abs((printed - op_date).days)
             if printed != op_date:
                 if args.date:
                     warnings.append(
-                        f"You set the energy day to {op_date.isoformat()}, but the workbook's own printed "
-                        f"date is {printed.isoformat()}. Your override was kept — confirm it is right."
+                        f"You set the energy day to {op_date.isoformat()}, but the workbook's load-curve "
+                        f"sheet is dated {printed.isoformat()}. Your override was kept — confirm it is right."
                     )
-                else:
+                elif gap > 3:
                     warnings.append(
-                        f"Energy day taken from the workbook's printed date ({printed.isoformat()}), not "
-                        f"the filename, which would have given {op_date.isoformat()}."
+                        f"The workbook's load-curve sheet is dated {printed.isoformat()}, {gap} days from "
+                        f"what the filename implies ({op_date.isoformat()}). At that distance the filename "
+                        "is the likelier typo, so the sheet's date was used. Confirm before publishing."
                     )
                     op_date = printed
+                else:
+                    warnings.append(
+                        f"The workbook's load-curve sheet is dated {printed.isoformat()} but the filename "
+                        f"implies {op_date.isoformat()}. These agree on every clean report, and a one-day "
+                        "gap is a stale sheet header, so the filename was used. Confirm before publishing."
+                    )
         except ValueError:
             pass
+
+    payload = parse_pgcb_file(str(pgcb_txt_path), datetime.datetime.combine(op_date, datetime.time()))
+    if not payload:
+        fail("The PGCB parser returned nothing. Is this the daily report workbook?")
 
     # --- Petrobangla gas -------------------------------------------------
     #
@@ -550,12 +638,48 @@ def main() -> None:
     unstructured = [o for o in outages if not str(o.get("plant") or "").strip()]
     if outages and len(unstructured) == len(outages):
         warnings.append(
-            f"All {len(outages)} outage rows have an empty plant 2014 the workbook columns have shifted. "
+            f"All {len(outages)} outage rows have an empty plant — the workbook columns have shifted. "
             "Do not publish; the outage detail is being lost."
         )
     elif len(outages) < 5:
         warnings.append(
             f"Only {len(outages)} outage rows parsed; a normal day has 28-72. Check the Event Summary section."
+        )
+
+    # The daily extremes are the one pair a workbook states twice — once for
+    # the day it reports on, once as tomorrow's projection — so they are the
+    # pair most likely to be keyed a day out. Every archived day before this
+    # fix carried the projection. A max below the day's own peak is the
+    # signature, and it is cheap to check here.
+    extremes = payload.get("systemStats") or {}
+    max_gen, min_gen = extremes.get("maxGen"), extremes.get("minGen")
+    peak = max(float(extremes.get("dayPeakGen") or 0), float(extremes.get("eveningPeakGen") or 0))
+    if max_gen is None or min_gen is None:
+        warnings.append(
+            "Max/min generation could not be read from this workbook and will publish as null. "
+            "The site renders those as — rather than a number."
+        )
+    else:
+        # PGCB's own figures disagree slightly on a few days — 2022-05-19
+        # prints an evening peak of 12907 MW and a maximum of 12887 MW, both
+        # at 19:30, with the load curve backing the lower one. Tolerate that
+        # scale of source rounding; a day carrying the next day's forecast is
+        # out by hundreds or thousands of MW, not twenty.
+        tolerance = max(50.0, peak * 0.01)
+        if peak and float(max_gen) < peak - tolerance:
+            warnings.append(
+                f"Max generation ({max_gen} MW) is BELOW this day's own peak ({peak} MW), which is not "
+                "physically possible. The forecast sheet's next-day figure may have been read instead."
+            )
+        if float(min_gen) > float(max_gen):
+            warnings.append(f"Min generation ({min_gen} MW) exceeds max ({max_gen} MW) — the two are crossed.")
+
+    # A flat curve means the L-Curve sheet was not read; the site charts it.
+    curve = payload.get("hourlyLoadData") or []
+    if len({round(float(h.get("generation") or 0), 3) for h in curve}) <= 3:
+        warnings.append(
+            f"The hourly load curve has only {len({round(float(h.get('generation') or 0), 3) for h in curve})} "
+            "distinct values — the L-Curve sheet was not parsed and the chart will be a placeholder."
         )
 
     # The same PDF produces two gas figures: the six-row summary embedded in the
@@ -661,7 +785,10 @@ def main() -> None:
             "sections": sorted(payload.keys()),
             "dayPeak": stats.get("dayPeakGen"),
             "eveningPeak": stats.get("eveningPeakGen"),
+            "maxGen": stats.get("maxGen"),
+            "minGen": stats.get("minGen"),
             "totalEnergy": stats.get("totalEnergyGen"),
+            "curvePoints": len(payload.get("hourlyLoadData") or []),
         },
         "gas": None
         if not gas_archive

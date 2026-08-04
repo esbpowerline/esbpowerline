@@ -138,6 +138,11 @@ export type GridExportDataset =
 const num = (value: number | null | undefined): number =>
   typeof value === 'number' && Number.isFinite(value) ? value : 0;
 
+/** Like `num`, but exports an empty cell for a genuinely unknown value.
+ *  Coercing those to 0 would read as "the grid generated nothing". */
+const numOrBlank = (value: number | null | undefined): number | string =>
+  typeof value === 'number' && Number.isFinite(value) ? value : '';
+
 // ---- daily grid datasets ---------------------------------------------------
 
 const DAILY_DATASETS: Record<string, DailyDataset> = {
@@ -171,14 +176,14 @@ const DAILY_DATASETS: Record<string, DailyDataset> = {
           date,
           day_peak_gen_mw: num(s.dayPeakGen),
           evening_peak_gen_mw: num(s.eveningPeakGen),
-          day_peak_demand_mw: num(s.dayPeakDemand),
+          day_peak_demand_mw: numOrBlank(s.dayPeakDemand),
           evening_peak_demand_mw: num(s.eveningPeakDemand),
-          min_gen_mw: num(s.minGen),
-          max_gen_mw: num(s.maxGen),
+          min_gen_mw: numOrBlank(s.minGen),
+          max_gen_mw: numOrBlank(s.maxGen),
           total_energy_gen_mkwh: num(s.totalEnergyGen),
-          total_energy_demand_mkwh: num(s.totalEnergyDemand),
-          total_energy_unserved_mkwh: num(s.totalEnergyUnserved),
-          max_temp_c: num(s.maxTemp),
+          total_energy_demand_mkwh: numOrBlank(s.totalEnergyDemand),
+          total_energy_unserved_mkwh: numOrBlank(s.totalEnergyUnserved),
+          max_temp_c: numOrBlank(s.maxTemp),
           gas_to_power_mmcfd: num(s.totalGasSuppliedPower),
           avg_production_cost_tk_kwh: num(s.avgProductionCost),
           total_daily_cost_bdt: num(s.totalDailyCost),
@@ -283,8 +288,10 @@ const DAILY_DATASETS: Record<string, DailyDataset> = {
         date,
         hour: h.time,
         generation_mw: num(h.generation),
-        demand_mw: num(h.demand),
-        load_shed_mw: num(h.loadShed),
+        // Blank on every hour but the published evening peak. Exporting 0
+        // would read as "no shedding this hour" rather than "not reported".
+        demand_mw: numOrBlank(h.demand),
+        load_shed_mw: numOrBlank(h.loadShed),
       })),
   },
   gas_production: {

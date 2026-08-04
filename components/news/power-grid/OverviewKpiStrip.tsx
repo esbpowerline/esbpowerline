@@ -103,8 +103,17 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
   // Average power over the 24h day: 1 MKWh/day = 1000 MWh / 24h = 41.67 MW
   const mkwhToAvgMw = (mkwh: number) => (mkwh * 1000) / 24;
+  // Fuel costs come from the source report or not at all, so a missing one is
+  // rendered as an em dash rather than collapsing to zero.
+  const hasPublishedFuelCost = generationData.some((g) => g.cost != null);
+  const fuelUnitRate = (name: string) => {
+    const rate = generationData.find((g) => g.name === name)?.unitCost;
+    return rate == null ? '—' : `${rate.toFixed(2)} Tk/KWh`;
+  };
+
   const dailyGenAvgMw = mkwhToAvgMw(systemStats.totalEnergyGen);
-  const unservedAvgMw = mkwhToAvgMw(systemStats.totalEnergyUnserved);
+  const unservedAvgMw =
+    systemStats.totalEnergyUnserved == null ? null : mkwhToAvgMw(systemStats.totalEnergyUnserved);
 
   return (
     <GridKpiStrip stripRef={kpiStripRef}>
@@ -126,14 +135,24 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       >
         <GridKpiTooltipBody>
           <GridKpiTooltipRow label="Total Energy Gen:" value={`${systemStats.totalEnergyGen.toFixed(2)} MKWh`} />
-          <GridKpiTooltipRow label="Max Peak Gen:" value={`${formatNumber(Math.round(systemStats.maxGen))} MW`} />
-          <GridKpiTooltipRow label="Min Base Gen:" value={`${formatNumber(Math.round(systemStats.minGen))} MW`} />
+          <GridKpiTooltipRow
+            label="Max Peak Gen:"
+            value={systemStats.maxGen == null ? '—' : `${formatNumber(Math.round(systemStats.maxGen))} MW`}
+          />
+          <GridKpiTooltipRow
+            label="Min Base Gen:"
+            value={systemStats.minGen == null ? '—' : `${formatNumber(Math.round(systemStats.minGen))} MW`}
+          />
           <GridKpiTooltipRow
             label="Unserved (Load Shed):"
-            value={`${systemStats.totalEnergyUnserved.toFixed(2)} MKWh · ${formatNumber(Math.round(unservedAvgMw))} MW`}
+            value={
+              systemStats.totalEnergyUnserved == null || unservedAvgMw == null
+                ? '—'
+                : `${systemStats.totalEnergyUnserved.toFixed(2)} MKWh · ${formatNumber(Math.round(unservedAvgMw))} MW`
+            }
             valueClass="text-destructive"
           />
-          <GridKpiTooltipAudit>Calculation: Demand = Gen + Load Shed</GridKpiTooltipAudit>
+          <GridKpiTooltipAudit>Figures as published by PGCB</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB Daily Log"
             refHref="https://www.pgcb.gov.bd/"
@@ -165,9 +184,19 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             label="Evening Peak Demand:"
             value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
           />
-          <GridKpiTooltipRow label="Day Peak Demand:" value={`${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`} />
+          <GridKpiTooltipRow
+            label="Day Peak Demand:"
+            value={
+              systemStats.dayPeakDemand == null
+                ? '—'
+                : `${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`
+            }
+          />
           <GridKpiTooltipRow label="Peak Deficit Shedding:" value={`${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW`} valueClass="text-destructive" />
-          <GridKpiTooltipRow label="Max System Temp:" value={`${systemStats.maxTemp.toFixed(1)} °C`} />
+          <GridKpiTooltipRow
+            label="Max System Temp:"
+            value={systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
+          />
           <GridKpiTooltipAudit>Audited by: NLDC System Operations</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB/NLDC SCADA"
@@ -290,10 +319,16 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             label="Total Daily Cost:"
             value={`${(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT`}
           />
-          <GridKpiTooltipRow label="Average Bulk Cost:" value={`${avgCostPerKwh.toFixed(3)} Tk/KWh`} valueClass="text-primary" />
-          <GridKpiTooltipRow label="HFO Generation Cost:" value={`${(generationData.find((g) => g.name === 'HFO')?.unitCost ?? 0).toFixed(2)} Tk/KWh`} valueClass="text-destructive" />
-          <GridKpiTooltipRow label="Hydro Generation Cost:" value={`${(generationData.find((g) => g.name === 'Hydro')?.unitCost ?? 0).toFixed(2)} Tk/KWh`} valueClass="text-emerald-500" />
-          <GridKpiTooltipRow label="Cross-Border Imports:" value={`${(generationData.find((g) => g.name === 'Imports')?.unitCost ?? 0).toFixed(2)} Tk/KWh`} />
+          {/* A day whose report carries no production-cost block has no unit
+              rate to show. "0.00 Tk/KWh" would read as free electricity. */}
+          <GridKpiTooltipRow
+            label="Average Bulk Cost:"
+            value={hasPublishedFuelCost ? `${avgCostPerKwh.toFixed(3)} Tk/KWh` : '—'}
+            valueClass="text-primary"
+          />
+          <GridKpiTooltipRow label="HFO Generation Cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
+          <GridKpiTooltipRow label="Hydro Generation Cost:" value={fuelUnitRate('Hydro')} valueClass="text-emerald-500" />
+          <GridKpiTooltipRow label="Cross-Border Imports:" value={fuelUnitRate('Imports')} />
           <GridKpiTooltipAudit>Audited by: BPDB Audit Team &amp; CAG</GridKpiTooltipAudit>
           <GridKpiTooltipRef refLabel="BPC Gazettes" refHref="https://bpc.gov.bd/" dateLabel={`Date: ${systemStats.date}`} />
         </GridKpiTooltipBody>

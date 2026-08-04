@@ -4,14 +4,26 @@ export interface GridSystemStats {
   date: string;
   dayPeakGen: number;
   eveningPeakGen: number;
-  dayPeakDemand: number;
+  dayPeakDemand: number | null;
   eveningPeakDemand: number;
-  minGen: number;
-  maxGen: number;
+  /**
+   * The day's own generation extremes, as PGCB defines them: `maxGen` is the
+   * peak of the daily load curve, `minGen` the 08:00 morning trough.
+   * null where the source report states neither and carries no load curve —
+   * chiefly days archived before 2018. Never inferred from another figure.
+   */
+  minGen: number | null;
+  maxGen: number | null;
   totalEnergyGen: number;
-  totalEnergyUnserved: number;
-  totalEnergyDemand: number;
-  maxTemp: number;
+  /**
+   * All four are read from the source report, never inferred. null on layouts
+   * that do not publish them — previously these were an estimate
+   * (load-shed x 4 / 1000, generation + that, day peak + half the shedding)
+   * and maxTemp was the constant 32.8 on every day in the archive.
+   */
+  totalEnergyUnserved: number | null;
+  totalEnergyDemand: number | null;
+  maxTemp: number | null;
   totalGasSuppliedPower: number;
   avgProductionCost: number;
   totalDailyCost: number;
@@ -20,8 +32,11 @@ export interface GridSystemStats {
 export interface GridGenerationItem {
   name: string;
   gen: number;
-  cost: number;
-  unitCost: number;
+  /** PGCB's published production cost in Taka; null where the layout omits it.
+   *  Was generation x a hardcoded per-fuel tariff. */
+  cost: number | null;
+  /** Derived from the two published figures (cost / kWh), not an input. */
+  unitCost: number | null;
   color: string;
 }
 
@@ -65,9 +80,16 @@ export interface DailyOutageItem {
 
 export interface HourlyLoadItem {
   time: string;
+  /** Measured — the L-Curve TOTAL column for this hour. */
   generation: number;
-  loadShed: number;
-  demand: number;
+  /**
+   * PGCB publishes load shedding at the evening peak hour only, so these are
+   * non-null on exactly that one hour and null everywhere else. They used to
+   * be filled across 18:00-23:00 with total shedding x 0.8 and charted as a
+   * measured profile.
+   */
+  loadShed: number | null;
+  demand: number | null;
 }
 
 export interface GridDailyData {

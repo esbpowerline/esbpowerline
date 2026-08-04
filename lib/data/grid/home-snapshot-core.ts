@@ -87,7 +87,7 @@ export function buildHomeSnapshotFromDaily(
   sreda?: SredaDailyData | null,
 ): HomeSnapshotStat[] {
   const s = data.systemStats;
-  const peakDemand = Math.max(s.eveningPeakDemand, s.dayPeakDemand);
+  const peakDemand = Math.max(s.eveningPeakDemand, s.dayPeakDemand ?? 0);
   const peakGeneration = Math.max(s.eveningPeakGen, s.dayPeakGen);
   const gasSupply = sumGasProductionMmcf(data) ?? Math.round(s.totalGasSuppliedPower);
 
@@ -102,12 +102,17 @@ export function buildHomeSnapshotFromDaily(
       icon: 'TrendingUp',
     },
     { label: 'Load Shedding', value: peakLoadShedMw(data), unit: POWER_UNIT, icon: 'Activity' },
-    {
-      label: 'Energy Unserved',
-      value: gwhToAvgMw(s.totalEnergyUnserved),
-      unit: POWER_UNIT,
-      icon: 'Gauge',
-    },
+    // Dropped rather than shown as zero on days whose report does not publish
+    // unserved energy — a homepage tile reading "0 MW" would assert that no
+    // load was shed, which is not what an absent figure means.
+    ...(s.totalEnergyUnserved == null
+      ? []
+      : [{
+          label: 'Energy Unserved',
+          value: gwhToAvgMw(s.totalEnergyUnserved),
+          unit: POWER_UNIT,
+          icon: 'Gauge',
+        }]),
     {
       label: 'Fuel Cost',
       value: parseFloat(s.avgProductionCost.toFixed(2)),

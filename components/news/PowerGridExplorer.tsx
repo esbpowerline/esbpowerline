@@ -487,14 +487,14 @@ export function PowerGridExplorer({
       date: '',
       dayPeakGen: 0,
       eveningPeakGen: 0,
-      dayPeakDemand: 0,
+      dayPeakDemand: null,
       eveningPeakDemand: 0,
-      minGen: 0,
-      maxGen: 0,
+      minGen: null,
+      maxGen: null,
       totalEnergyGen: 0,
-      totalEnergyUnserved: 0,
-      totalEnergyDemand: 0,
-      maxTemp: 0,
+      totalEnergyUnserved: null,
+      totalEnergyDemand: null,
+      maxTemp: null,
       totalGasSuppliedPower: 0,
       avgProductionCost: 0,
       totalDailyCost: 0,
@@ -709,14 +709,17 @@ export function PowerGridExplorer({
   const dailyCostChartData = useMemo(
     () =>
       generationData
-        .filter((d) => d.cost > 0)
-        .map((d) => ({ ...d, costCrore: d.cost / BDT_TO_CRORE })),
+        .filter((d) => (d.cost ?? 0) > 0)
+        .map((d) => ({ ...d, costCrore: (d.cost ?? 0) / BDT_TO_CRORE })),
     [generationData],
   );
 
+  // Demand is published for the evening peak hour alone, so this is that hour
+  // when the day carries it, not the argmax of a synthesised profile.
   const peakDemandTime = useMemo(() => {
-    if (!hourlyLoadData.length) return null;
-    return [...hourlyLoadData].sort((a, b) => b.demand - a.demand)[0]?.time ?? null;
+    const withDemand = hourlyLoadData.filter((h) => h.demand != null);
+    if (!withDemand.length) return null;
+    return [...withDemand].sort((a, b) => (b.demand ?? 0) - (a.demand ?? 0))[0]?.time ?? null;
   }, [hourlyLoadData]);
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -994,7 +997,10 @@ export function PowerGridExplorer({
 
   // Overview calculations
   const totalGenMkwhr = generationData.reduce((sum, item) => sum + item.gen, 0);
-  const totalCostBdt = generationData.reduce((sum, item) => sum + item.cost, 0);
+  const totalCostBdt = generationData.reduce((sum, item) => sum + (item.cost ?? 0), 0);
+  // Summing nulls yields 0, which would read as "this day cost nothing to
+  // generate" rather than "the report carries no production-cost block".
+  const hasPublishedFuelCost = generationData.some((item) => item.cost != null);
   const avgCostPerKwh = totalCostBdt / (totalGenMkwhr * 1000000);
 
   const methodologyBanner = showMethodologyBanner ? (
@@ -1591,13 +1597,24 @@ export function PowerGridExplorer({
           <div className="grid-explorer-chart-card__head">
             <div>
               <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<DailyBadge /></h3>
-              <p className="grid-explorer-chart-card__sub">SCADA demand, actual generation, and load shedding profile (Date: {systemStats.date}) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
+              <p className="grid-explorer-chart-card__sub">Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date}) • <span className="text-primary font-semibold text-xs">Tracked since December 31, 2013</span></p>
             </div>
             <span className="grid-explorer-chip bg-destructive/10 text-destructive border-destructive/20">NLDC SCADA Curve</span>
           </div>
 
           <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[24rem]">
-            {chartsReady ? (
+            {hourlyLoadData.length === 0 ? (
+              // Reports before 2018 carry no load-curve sheet. Drawing empty
+              // axes would imply a flat or missing grid rather than an
+              // unpublished measurement.
+              <div className="h-full flex flex-col items-center justify-center text-center gap-2 px-6">
+                <p className="text-sm font-semibold text-muted-foreground">No load curve published for this day</p>
+                <p className="text-xs text-muted-foreground/80 max-w-md">
+                  PGCB&apos;s report for {systemStats.date} does not include the half-hourly NLDC load-curve
+                  sheet. Daily totals and peaks above are unaffected.
+                </p>
+              </div>
+            ) : chartsReady ? (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                   <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
@@ -1616,20 +1633,20 @@ export function PowerGridExplorer({
                           </div>
                           <div className="space-y-2 text-[11px] md:text-xs">
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">System Demand:</span>
-                              <span className="font-bold text-foreground">{formatNumber(Math.round(d.demand))} MW</span>
-                            </div>
-                            <div className="flex justify-between">
                               <span className="text-muted-foreground text-sky-500">Actual Gen:</span>
                               <span className="font-bold text-sky-500">{formatNumber(Math.round(d.generation))} MW</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground text-destructive">Load Shedding Deficit:</span>
-                              <span className="font-bold text-destructive">{formatNumber(Math.round(d.loadShed))} MW</span>
+                              <span className="text-muted-foreground">System Demand:</span>
+                              <span className="font-bold text-foreground">{d.demand == null ? 'not published for this hour' : `${formatNumber(Math.round(d.demand))} MW`}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground text-destructive">Load Shedding:</span>
+                              <span className="font-bold text-destructive">{d.loadShed == null ? 'not published for this hour' : `${formatNumber(Math.round(d.loadShed))} MW`}</span>
                             </div>
                           </div>
                           <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                            Calculation: Demand = Actual Gen + Load Shedding Deficit
+                            Generation is logged hourly. PGCB reports demand and load shedding at the evening peak hour only.
                           </div>
                           <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                             <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB NLDC Daily Curve Sheet</a></div>
@@ -1646,14 +1663,17 @@ export function PowerGridExplorer({
                     wrapperStyle={{ fontSize: '11px' }}
                     colorResolver={(value) => {
                       if (value === 'Actual Generation') return '#0ea5e9';
-                      if (value === 'Total Demand') return '#eab308';
-                      if (value === 'Load Shedding Deficit') return chartTheme.destructive;
+                      if (value === 'Peak Demand (published)') return '#eab308';
+                      if (value === 'Peak Load Shedding (published)') return chartTheme.destructive;
                       return 'inherit';
                     }}
                   />
                   <Area type="monotone" dataKey="generation" name="Actual Generation" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.15} strokeWidth={2.5} />
-                  <Line type="monotone" dataKey="demand" name="Total Demand" stroke="#eab308" strokeWidth={2} dot={false} strokeDasharray="4 4" />
-                  <Bar dataKey="loadShed" name="Load Shedding Deficit" fill={chartTheme.destructive} fillOpacity={0.2} stroke={chartTheme.destructive} strokeWidth={1} radius={[2, 2, 0, 0]} maxBarSize={15} />
+                  {/* Demand and shedding exist for one hour only, so these render
+                      as a single marked point and bar rather than a continuous
+                      series interpolated across the evening. */}
+                  <Line type="monotone" dataKey="demand" name="Peak Demand (published)" stroke="#eab308" strokeWidth={0} connectNulls={false} dot={{ r: 5, fill: '#eab308', stroke: '#eab308' }} activeDot={{ r: 7 }} />
+                  <Bar dataKey="loadShed" name="Peak Load Shedding (published)" fill={chartTheme.destructive} fillOpacity={0.2} stroke={chartTheme.destructive} strokeWidth={1} radius={[2, 2, 0, 0]} maxBarSize={15} />
                 </ComposedChart>
               </ResponsiveContainer>
             ) : (
@@ -1663,28 +1683,28 @@ export function PowerGridExplorer({
           
           {/* Card Explanation Block */}
           {(() => {
-            const maxDemandRow = hourlyLoadData.length > 0 ? [...hourlyLoadData].sort((a, b) => b.demand - a.demand)[0] : null;
-            const maxLoadShedRow = hourlyLoadData.length > 0 ? [...hourlyLoadData].sort((a, b) => b.loadShed - a.loadShed)[0] : null;
+            // PGCB publishes demand and load shedding for the evening peak
+            // hour only, so this reports that hour rather than the maximum of
+            // a series that used to be filled in across 18:00-23:00.
+            const peakRow = hourlyLoadData.find((h) => h.demand != null || h.loadShed != null) ?? null;
 
             return (
               <div className="bg-muted/10 p-4 border border-border/40 rounded-xl text-xs text-muted-foreground space-y-2 mt-4">
                 <p><strong>What is being shown?</strong></p>
-                <p className="leading-relaxed">This chart displays the 24-hour daily load curve, comparing real-time <span className="text-amber-500 font-semibold">Total Demand</span>, <span className="text-sky-500 font-semibold">Actual Generation</span>, and the <span className="text-destructive font-semibold">Load Shedding Deficit</span> across all hourly SCADA logs.</p>
+                <p className="leading-relaxed">The hourly <span className="text-sky-500 font-semibold">Actual Generation</span> curve is the NLDC load-curve sheet, logged every half hour. <span className="text-amber-500 font-semibold">Total Demand</span> and the <span className="text-destructive font-semibold">Load Shedding Deficit</span> are published for the evening peak hour only, so they appear as single marked points rather than a continuous line.</p>
                 <p className="leading-relaxed">
-                  <strong>Operational Insights:</strong> The load curve illustrates peak demand profiles on this day. 
-                  {maxDemandRow ? (
+                  <strong>Operational Insights:</strong> The load curve illustrates the shape of generation across this day.
+                  {peakRow && peakRow.demand != null ? (
                     <>
-                      {' '}The daily peak demand reached a maximum of <span className="font-bold text-foreground">{formatNumber(Math.round(maxDemandRow.demand))} MW</span> at <span className="font-semibold text-primary">{maxDemandRow.time} Hr</span>.
+                      {' '}At the evening peak (<span className="font-semibold text-primary">{peakRow.time} Hr</span>) PGCB reported demand of <span className="font-bold text-foreground">{formatNumber(Math.round(peakRow.demand))} MW</span>
+                      {peakRow.loadShed != null && peakRow.loadShed > 0 ? (
+                        <> against <span className="font-bold text-destructive">{formatNumber(Math.round(peakRow.loadShed))} MW</span> of load shedding.</>
+                      ) : (
+                        ' with no load shedding recorded.'
+                      )}
                     </>
                   ) : (
-                    ' The daily peak demand typically manifests as commercial daytime cooling and evening domestic lighting peaks.'
-                  )}
-                  {maxLoadShedRow && maxLoadShedRow.loadShed > 0 ? (
-                    <>
-                      {' '}Load-shedding deficit peaked at <span className="font-bold text-destructive">{formatNumber(Math.round(maxLoadShedRow.loadShed))} MW</span> at <span className="font-semibold text-primary">{maxLoadShedRow.time} Hr</span> when generation reserves were exhausted relative to the grid load.
-                    </>
-                  ) : (
-                    ' Zero or minimal load-shedding was recorded throughout the day, indicating that generation reserves successfully met all peak requirements.'
+                    ' This report does not publish an evening-peak demand or load-shedding figure.'
                   )}
                 </p>
               </div>
@@ -1747,7 +1767,7 @@ export function PowerGridExplorer({
                 <tbody>
                   {generationData.map((g, idx) => {
                     const genShare = ((g.gen / totalGenMkwhr) * 100).toFixed(2);
-                    const costShare = ((g.cost / totalCostBdt) * 100).toFixed(2);
+                    const costShare = g.cost == null ? null : ((g.cost / totalCostBdt) * 100).toFixed(2);
                     return (
                       <tr key={idx} className={cn(g.gen === 0 && 'opacity-40')}>
                         <td className="font-semibold flex items-center gap-2">
@@ -1756,9 +1776,9 @@ export function PowerGridExplorer({
                         </td>
                         <td className="text-left tabular-nums">{g.gen.toFixed(2)}</td>
                         <td className="text-left tabular-nums text-muted-foreground">{genShare}%</td>
-                        <td className="text-left tabular-nums">{formatBdtAmount(g.cost / 10000000)}</td>
-                        <td className="text-left tabular-nums text-muted-foreground">{costShare}%</td>
-                        <td className="text-left tabular-nums font-mono text-sm">{g.unitCost.toFixed(2)}</td>
+                        <td className="text-left tabular-nums">{g.cost == null ? '—' : formatBdtAmount(g.cost / 10000000)}</td>
+                        <td className="text-left tabular-nums text-muted-foreground">{costShare == null ? '—' : `${costShare}%`}</td>
+                        <td className="text-left tabular-nums font-mono text-sm">{g.unitCost == null ? '—' : g.unitCost.toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -1766,9 +1786,9 @@ export function PowerGridExplorer({
                     <td>Total System / Average</td>
                     <td className="text-left tabular-nums">{totalGenMkwhr.toFixed(2)}</td>
                     <td className="text-left tabular-nums">100.00%</td>
-                    <td className="text-left tabular-nums">{(totalCostBdt / 10000000).toFixed(2)}</td>
-                    <td className="text-left tabular-nums">100.00%</td>
-                    <td className="text-left tabular-nums font-mono text-sm text-primary">{formatUnitRate(avgCostPerKwh)}</td>
+                    <td className="text-left tabular-nums">{hasPublishedFuelCost ? (totalCostBdt / 10000000).toFixed(2) : '—'}</td>
+                    <td className="text-left tabular-nums">{hasPublishedFuelCost ? '100.00%' : '—'}</td>
+                    <td className="text-left tabular-nums font-mono text-sm text-primary">{hasPublishedFuelCost ? formatUnitRate(avgCostPerKwh) : '—'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -1800,7 +1820,9 @@ export function PowerGridExplorer({
                   <span>Peak Generation:</span>
                   <span className="font-bold text-foreground text-left">{systemStats.eveningPeakGen.toFixed(1)} MW</span>
                   <span>Unserved Energy:</span>
-                  <span className="font-semibold text-destructive text-left">{systemStats.totalEnergyUnserved.toFixed(2)} MKWh</span>
+                  <span className="font-semibold text-destructive text-left">
+                    {systemStats.totalEnergyUnserved == null ? '—' : `${systemStats.totalEnergyUnserved.toFixed(2)} MKWh`}
+                  </span>
                 </div>
               </div>
 
@@ -1808,11 +1830,17 @@ export function PowerGridExplorer({
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Daily System Margins</div>
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Max Generation:</span>
-                  <span className="font-bold text-foreground text-left">{systemStats.maxGen.toFixed(1)} MW</span>
+                  <span className="font-bold text-foreground text-left">
+                    {systemStats.maxGen == null ? '—' : `${systemStats.maxGen.toFixed(1)} MW`}
+                  </span>
                   <span>Min Generation:</span>
-                  <span className="font-bold text-foreground text-left">{systemStats.minGen.toFixed(1)} MW</span>
+                  <span className="font-bold text-foreground text-left">
+                    {systemStats.minGen == null ? '—' : `${systemStats.minGen.toFixed(1)} MW`}
+                  </span>
                   <span>Max Temp:</span>
-                  <span className="font-semibold text-foreground text-left">{systemStats.maxTemp.toFixed(1)} °C</span>
+                  <span className="font-semibold text-foreground text-left">
+                    {systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
+                  </span>
                 </div>
               </div>
 
@@ -1822,9 +1850,19 @@ export function PowerGridExplorer({
                   <span>Gas Supplied:</span>
                   <span className="font-bold text-foreground text-left">{systemStats.totalGasSuppliedPower.toFixed(1)} MMCFD</span>
                   <span>Gas Cost:</span>
-                  <span className="font-bold text-foreground text-left">{((generationData.find(g => g.name === 'Gas')?.cost ?? 0) / 10000000).toFixed(2)} Crore Tk</span>
+                  <span className="font-bold text-foreground text-left">
+                    {(() => {
+                      const c = generationData.find(g => g.name === 'Gas')?.cost;
+                      return c == null ? '—' : `${(c / 10000000).toFixed(2)} Crore Tk`;
+                    })()}
+                  </span>
                   <span>Gas Unit Cost:</span>
-                  <span className="font-semibold text-primary text-left">{(generationData.find(g => g.name === 'Gas')?.unitCost ?? 0).toFixed(2)} Tk/KWh</span>
+                  <span className="font-semibold text-primary text-left">
+                    {(() => {
+                      const u = generationData.find(g => g.name === 'Gas')?.unitCost;
+                      return u == null ? '—' : `${u.toFixed(2)} Tk/KWh`;
+                    })()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1902,16 +1940,18 @@ export function PowerGridExplorer({
                 <tbody>
                   {borderImportsData.map((bi, idx) => {
                     const rowGen = generationData.find(g => g.name === 'Imports');
-                    const unitRate = rowGen ? rowGen.unitCost : 0;
-                    const calculatedCost = bi.energy * 1000000 * unitRate;
+                    // Null when the day's report carries no production cost —
+                    // the per-line cost cannot then be apportioned at all.
+                    const unitRate = rowGen?.unitCost ?? null;
+                    const calculatedCost = unitRate == null ? null : bi.energy * 1000000 * unitRate;
                     return (
                       <tr key={idx}>
                         <td className="font-semibold">{bi.source}</td>
                         <td className="text-muted-foreground">{bi.type}</td>
                         <td className="text-left tabular-nums font-semibold">{bi.energy.toFixed(2)}</td>
                         <td className="text-left tabular-nums">{formatNumber(Math.round(bi.peakFlow))}</td>
-                        <td className="text-left tabular-nums">{(calculatedCost / 10000000).toFixed(2)} Cr</td>
-                        <td className="text-left tabular-nums font-mono">{unitRate.toFixed(2)}</td>
+                        <td className="text-left tabular-nums">{calculatedCost == null ? '—' : `${(calculatedCost / 10000000).toFixed(2)} Cr`}</td>
+                        <td className="text-left tabular-nums font-mono">{unitRate == null ? '—' : unitRate.toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -7060,16 +7100,16 @@ export function PowerGridExplorer({
               <tr key={item.name} className="border-b border-border/40">
                 <td className="py-1.5 px-2 font-medium">{item.name}</td>
                 <td className="text-right py-1.5 px-2 tabular-nums">{item.gen.toFixed(2)}</td>
-                <td className="text-right py-1.5 px-2 tabular-nums">{item.cost > 0 ? formatNumber(item.cost) : '—'}</td>
-                <td className="text-right py-1.5 px-2 tabular-nums">{item.unitCost > 0 ? `${item.unitCost.toFixed(2)} Tk` : '—'}</td>
+                <td className="text-right py-1.5 px-2 tabular-nums">{item.cost != null && item.cost > 0 ? formatNumber(item.cost) : '—'}</td>
+                <td className="text-right py-1.5 px-2 tabular-nums">{item.unitCost != null && item.unitCost > 0 ? `${item.unitCost.toFixed(2)} Tk` : '—'}</td>
                 <td className="text-right py-1.5 px-2 tabular-nums">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}%</td>
               </tr>
             ))}
             <tr className="font-bold bg-muted/5 border-t border-border">
               <td className="py-1.5 px-2">Total System</td>
               <td className="text-right py-1.5 px-2 tabular-nums">{totalGenMkwhr.toFixed(2)}</td>
-              <td className="text-right py-1.5 px-2 tabular-nums">{formatNumber(totalCostBdt)}</td>
-              <td className="text-right py-1.5 px-2 tabular-nums">{formatUnitRate(totalCostBdt / (totalGenMkwhr * 1000000))} Tk</td>
+              <td className="text-right py-1.5 px-2 tabular-nums">{hasPublishedFuelCost ? formatNumber(totalCostBdt) : '—'}</td>
+              <td className="text-right py-1.5 px-2 tabular-nums">{hasPublishedFuelCost ? `${formatUnitRate(totalCostBdt / (totalGenMkwhr * 1000000))} Tk` : '—'}</td>
               <td className="text-right py-1.5 px-2">100%</td>
             </tr>
           </tbody>

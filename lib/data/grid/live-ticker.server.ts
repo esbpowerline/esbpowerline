@@ -74,7 +74,9 @@ export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
   for (const [fuel, id, name] of fuelRows) {
     const c = cur.generationData?.find((g) => g.name === fuel);
     const p = prev?.generationData?.find((g) => g.name === fuel);
-    if (c && c.unitCost > 0 && c.gen > 0) {
+    // unitCost is null when the day's report carries no production-cost
+    // block; such a day is skipped rather than shown as a 0 Tk/kWh fuel.
+    if (c && c.unitCost != null && c.unitCost > 0 && c.gen > 0) {
       items.push({ id, name, value: round(c.unitCost), unit: 'Tk/kWh', change: pct(c.unitCost, p?.unitCost ?? 0), prefix: '' });
     }
   }

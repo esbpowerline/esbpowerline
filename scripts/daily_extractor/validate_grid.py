@@ -26,6 +26,15 @@ SYSTEM_STATS_KEYS = (
     "totalDailyCost",
 )
 
+# Read from the source or not at all. Each is null on layouts that do not
+# publish it, rather than carrying an estimate: the extremes when the report
+# states neither and has no load curve, and demand/unserved/temperature on
+# older layouts that print only generation.
+NULLABLE_STATS_KEYS = frozenset({
+    "minGen", "maxGen", "dayPeakDemand", "totalEnergyUnserved",
+    "totalEnergyDemand", "maxTemp",
+})
+
 
 @dataclass
 class ValidationResult:
@@ -54,8 +63,12 @@ def validate_grid_daily(data: dict, iso_date: str) -> ValidationResult:
         for key in SYSTEM_STATS_KEYS:
             if key == "date":
                 continue
-            if key in stats and not isinstance(stats[key], (int, float)):
-                errors.append(f"systemStats.{key} must be a number")
+            val = stats.get(key)
+            if key in stats and val is None and key in NULLABLE_STATS_KEYS:
+                continue
+            if key in stats and not isinstance(val, (int, float)):
+                suffix = " or null" if key in NULLABLE_STATS_KEYS else ""
+                errors.append(f"systemStats.{key} must be a number{suffix}")
 
     gen = data.get("generationData")
     if not isinstance(gen, list) or len(gen) < 1:

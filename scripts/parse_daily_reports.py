@@ -84,6 +84,240 @@ def get_sheet_content(content, sheet_name):
         return rest[:next_sheet]
     return rest
 
+def norm_text(val):
+    return ' '.join(str(val).lower().split())
+
+def split_cells(line):
+    return [c.strip() for c in line.split('|') if c.strip()]
+
+def is_new_p1_layout(p1):
+    """True for the 2025+ P1, which states both daily extremes for the reported day.
+
+    Before that the sheet is two columns — left "The Summary of Yesterday's
+    Generation & Demand", right "Today's Actual Min Gen. & Probable Gen. &
+    Demand" — and only the left column belongs to the day being reported.
+    The changeover lands between the reports published 2024-12-30 and
+    2025-01-05.
+    """
+    return bool(re.search(r'minimum generation of the day', p1, re.I))
+
+def forecast_reported_section(forecast):
+    """The part of the old Forecast sheet that describes the REPORTED day.
+
+    That sheet carries two summaries separated by a lone "Forecast" cell.
+    Above it, items 1-7 restate the reported day's actuals (Highest
+    Generation, Minimum Generation, Total Gas Supplied, Total Energy
+    Generation); below it, items 1-5 project the NEXT day, including
+    "Maximum Generation (Generation end)".
+
+    Scanning the whole sheet lets the projection overwrite the actuals, which
+    is how every archived day acquired the following day's max generation.
+    The divider is present on every old-layout workbook checked, always with
+    the reported-day block above it.
+    """
+    lines = forecast.split('\n')
+    for idx, line in enumerate(lines):
+        if split_cells(line) == ['Forecast']:
+            return '\n'.join(lines[:idx])
+    return forecast
+
+def labelled_value(block, pattern, reject=None):
+    """First positive number following a cell whose normalised text matches `pattern`.
+
+    Patterns are anchored by their callers so that "Maximum Generation :"
+    cannot be satisfied by "Till now the maximum generation is :" (an
+    all-time record, not a daily figure) or by "Actual Minimum Generation up
+    to 8:00 hrs." (the publication day's trough, not the reported day's).
+
+    `reject` is a second guard for blocks that state the same measure twice
+    for two different days: the old Forecast sheet carries both "Maximum
+    Temperature in Dhaka was 32.4 C" (the reported day) and "Probable max.
+    temperature in Dhaka 34.4 C" (tomorrow), and only the anchor stands
+    between them.
+    """
+    for line in block.split('\n'):
+        cells = split_cells(line)
+        for idx, cell in enumerate(cells):
+            text = norm_text(cell)
+            if reject and re.search(reject, text):
+                continue
+            if re.search(pattern, text):
+                for nxt in cells[idx + 1:]:
+                    val = clean_float(nxt)
+                    if val > 0.0:
+                        return val
+                break
+    return None
+
+def lcurve_total_series(content):
+    """Half-hourly national generation from the L-Curve sheet, keyed by "HH:MM".
+
+    The TOTAL column is located from the header rather than a fixed offset.
+    It sits at index 3 on the 2025+ sheet (TIME|EAST|WEST|TOTAL) but at index
+    4 on the older one (TIME|E-W INT.(Export)|EAST|WEST|TOTAL), where a fixed
+    index 3 silently yields West Grid — roughly a third of the national
+    total — instead.
+    """
+    lcurve = get_sheet_content(content, 'L-Curve')
+    if not lcurve:
+        return {}
+    total_idx = None
+    series = {}
+    for line in lcurve.split('\n'):
+        if '|' not in line:
+            continue
+        parts = [p.strip() for p in line.split('|')]
+        while parts and not parts[0]:
+            parts.pop(0)
+        if not parts:
+            continue
+        upper = [p.upper() for p in parts]
+        if total_idx is None:
+            if upper[0] == 'TIME' and 'TOTAL' in upper:
+                total_idx = upper.index('TOTAL')
+            continue
+        m = re.match(r'^(\d{2}:\d{2})(?::\d{2})?$', parts[0])
+        if not m or total_idx >= len(parts):
+            continue
+        # Older sheets close with a 24:00 row. That instant is midnight
+        # *ending* the day — the next day's 00:00 — so it is left out of both
+        # the charted curve and the extremes.
+        if m.group(1) == '24:00':
+            continue
+        val = clean_float(parts[total_idx])
+        if val > 0.0:
+            series[m.group(1)] = val
+    return series
+
+def published_demand_stats(p1, forecast):
+    """Figures P1 states outright that the site used to estimate instead.
+
+    All four sit in P1's right-hand column beside the generation figures, and
+    every one was being replaced by a formula: max temperature by the constant
+    32.8 (so every day since 2013 showed the same weather), unserved energy by
+    load-shed x 4 / 1000 (which understated 2026-06-04 as 1.44 MKWh against a
+    published 5.529), and peak/total demand by generation plus that estimate.
+
+    Note the source's own spelling, "Energy Unserverd". Returns None per field
+    where the layout does not publish it, rather than a substitute.
+    """
+    block = p1 + "\n" + forecast_reported_section(forecast)
+    return {
+        'dayPeakDemand': labelled_value(block, r'^day peak demand'),
+        'totalEnergyUnserved': labelled_value(block, r'^energy unserve'),
+        'totalEnergyDemand': labelled_value(block, r'^energy demand'),
+        # "probable" is tomorrow's forecast and sits in the same block.
+        'maxTemp': labelled_value(block, r'^max(imum)?\.? temp', reject=r'probable|forecast'),
+    }
+
+
+def evening_peak_hour(p1):
+    """The hour PGCB stamps on the evening peak, as "HH:00".
+
+    The published load-shed figure belongs to this hour and no other, so the
+    chart needs to know which one it is rather than smearing it across a range.
+    """
+    for line in p1.split('\n'):
+        cells = split_cells(line)
+        for idx, cell in enumerate(cells):
+            if re.search(r'^evening peak generation', norm_text(cell)):
+                for nxt in cells[idx + 1:]:
+                    m = re.match(r'^(\d{1,2}):(\d{2})', nxt.strip())
+                    if m:
+                        return f"{int(m.group(1)):02d}:00"
+    return None
+
+
+def published_fuel_costs(p1):
+    """Per-fuel production cost in Taka, from P1's "Production Cost (Tk.)" block.
+
+    The block lists fuels in two column pairs (Gas/Hydro, Coal/Solar,
+    HFO/Import, HSD/Wind). These are PGCB's own costs; the site was pricing
+    every fuel with a hardcoded tariff instead, which on 2026-06-04 overstated
+    HFO by 29.4M Tk and imports by 31.7M Tk, and priced gas at 3.45 Tk/kWh
+    against a published 3.52.
+    """
+    costs = {}
+    started = False
+    for line in p1.split('\n'):
+        cells = split_cells(line)
+        if not cells:
+            continue
+        # The older sheet writes the same figures inline under "Cost of the
+        # Consumed Fuel (PDB+Pvt)", labelling them "Gas :", "Coal :", "Oil :"
+        # — Oil being what the newer layout splits into HFO and HSD. Reading
+        # these keeps real costs on pre-2025 days instead of nulling them.
+        if any('cost of the consumed fuel' in norm_text(c) for c in cells):
+            started = True
+        if started:
+            for idx, cell in enumerate(cells[:-1]):
+                label = norm_text(cell).rstrip(':').strip()
+                canon = {'gas': 'Gas', 'coal': 'Coal', 'oil': 'HFO'}.get(label)
+                if canon and re.search(r'\d', cells[idx + 1]):
+                    costs.setdefault(canon, clean_float(cells[idx + 1]))
+        if any('production cost' in norm_text(c) for c in cells):
+            started = True
+            continue
+        if not started:
+            continue
+        # The block ends at the next section heading — a row with no numbers.
+        found = False
+        for idx, cell in enumerate(cells[:-1]):
+            name = norm_text(cell)
+            if name in FUEL_ALIASES:
+                val = clean_float(cells[idx + 1])
+                if cells[idx + 1] and re.search(r'\d', cells[idx + 1]):
+                    costs[FUEL_ALIASES[name]] = val
+                    found = True
+        if not found and costs and not any(re.search(r'\d', c) for c in cells):
+            break
+    return costs
+
+
+# Canonical fuel names as the site labels them, keyed by the source's spelling.
+FUEL_ALIASES = {
+    'gas': 'Gas', 'coal': 'Coal', 'hfo': 'HFO', 'hsd': 'HSD',
+    'hydro': 'Hydro', 'solar': 'Solar', 'import': 'Imports', 'wind': 'Wind',
+}
+FUEL_COLORS = {
+    'Gas': '#0ea5e9', 'Coal': '#64748b', 'HFO': '#f97316', 'Hydro': '#06b6d4',
+    'Solar': '#eab308', 'Imports': '#a855f7', 'HSD': '#ef4444', 'Wind': '#22c55e',
+}
+# Order the site has always rendered these in; Wind is appended because it only
+# appears in the newer layout.
+FUEL_ORDER = ['Gas', 'Coal', 'HFO', 'Hydro', 'Solar', 'Imports', 'HSD', 'Wind']
+
+
+def daily_extremes(p1, forecast, series):
+    """(minGen, maxGen) for the day the report describes; None where unknown.
+
+    PGCB's own definitions, verified against the load curve on both layouts:
+    "Maximum Generation" is the peak of the day's TOTAL curve, and "Minimum
+    Generation" is the 08:00 morning trough — NOT the curve's global minimum,
+    which can sit lower during an evening dip (2022-07-01: 9944 MW at 18:00
+    against a stated 10047 MW at 08:00).
+
+    The printed figure wins where the sheet states one for the reported day;
+    the curve is the fallback, and both being absent yields None rather than
+    a number derived from an unrelated peak.
+    """
+    if is_new_p1_layout(p1):
+        min_gen = labelled_value(p1, r'^minimum generation of the day')
+        max_gen = labelled_value(p1, r'^maximum generation of the day')
+    else:
+        reported = forecast_reported_section(forecast)
+        # P1's left column and the Forecast sheet's pre-divider block state
+        # the same two figures; either is authoritative for the reported day.
+        max_gen = (labelled_value(p1, r'^maximum\s+generation\s*:?$')
+                   or labelled_value(reported, r'^highest generation\s*:?$'))
+        min_gen = labelled_value(reported, r'^minimum generation\s*:?$')
+
+    if max_gen is None and series:
+        max_gen = max(series.values())
+    if min_gen is None:
+        min_gen = series.get('08:00')
+    return min_gen, max_gen
+
 def parse_pgcb_file(filepath, op_date):
     try:
         with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
@@ -104,11 +338,16 @@ def parse_pgcb_file(filepath, op_date):
     total_energy_gen = 0.0
     total_gas_supplied_power = 0.0
     total_daily_cost = 0.0
-    min_gen = 0.0
-    max_gen = 0.0
 
-    # Combine P1 and Forecast for basic stats parsing to cover all formats
-    stats_content = p1 + "\n" + forecast
+    # The Forecast sheet is still read, but only the part of it that restates
+    # the REPORTED day, and only for figures it alone carries: early-2025 P1s
+    # omit Total Gas Supplied, and older ones omit it and the daily extremes
+    # too. Everything the two sheets share, they agree on.
+    #
+    # What this no longer does is scan the next-day half. The daily extremes
+    # are the one genuinely forward-looking pair here and they are now derived
+    # separately, by daily_extremes, from labels tied to the reported day.
+    stats_content = p1 + "\n" + forecast_reported_section(forecast)
     for line in stats_content.split('\n'):
         line_lower = line.lower()
         parts = [p.strip() for p in line.split('|') if p.strip()]
@@ -132,14 +371,6 @@ def parse_pgcb_file(filepath, op_date):
                 if total_gas_supplied_power == 0.0:
                     nums = re.findall(r'[-+]?\d*\.\d+|\d+', cell)
                     if nums: total_gas_supplied_power = float(nums[0])
-            elif 'min. gen.' in cell_lower or 'minimum generation' in cell_lower:
-                if idx + 1 < len(parts):
-                    val = clean_float(parts[idx+1])
-                    if val > 0: min_gen = val
-            elif 'max. gen.' in cell_lower or 'maximum generation' in cell_lower:
-                if idx + 1 < len(parts):
-                    val = clean_float(parts[idx+1])
-                    if val > 0: max_gen = val
             elif 'coal    :' in cell_lower or 'total   :' in cell_lower or 'total:' in cell_lower:
                 if 'total' in cell_lower:
                     if idx + 1 < len(parts): total_daily_cost = clean_float(parts[idx+1])
@@ -331,59 +562,46 @@ def parse_pgcb_file(filepath, op_date):
             'pct': round(pct, 1)
         })
 
-    # Extract hourly load data from L-Curve (TOTAL column = index 3 in ERP pipe layout)
+    # Hourly load from the L-Curve TOTAL column, located by header (see
+    # lcurve_total_series). The curve is half-hourly; the on-the-hour points
+    # are what the site charts.
+    #
+    # Only `generation` is measured hourly. PGCB publishes load shedding at the
+    # evening peak hour alone, so the previous per-hour figures — total shed
+    # x 0.8 spread across 18:00-23:00, with demand as generation plus that —
+    # were invented, and the chart presented them as SCADA logs. The published
+    # evening-peak pair is attached to its own hour and nothing is spread.
     hourly_load_data = []
-    lcurve = get_sheet_content(content, 'L-Curve')
-    if lcurve:
-        for line in lcurve.split('\n'):
-            if '|' not in line:
-                continue
-            parts = [p.strip() for p in line.split('|')]
-            while parts and not parts[0]:
-                parts.pop(0)
-            if not parts:
-                continue
-            time_match = re.match(r'^(\d{2}:\d{2})(?::\d{2})?$', parts[0])
-            if not time_match:
-                continue
-            time_str = time_match.group(1)
+    lcurve_series = lcurve_total_series(content)
+    peak_hour, peak_shed = evening_peak_hour(p1), sum(regional_loadshed.values())
+    if lcurve_series:
+        for time_str, gen_val in sorted(lcurve_series.items()):
             if not time_str.endswith(':00'):
                 continue
-            gen_val = 0.0
-            if len(parts) >= 4 and parts[3]:
-                gen_val = clean_float(parts[3])
-            elif len(parts) >= 5:
-                gen_val = clean_float(parts[4])
-            if gen_val <= 0:
-                continue
-            total_shed = sum(regional_loadshed.values())
-            hour_shed = 0.0
-            hour_int = int(time_str[:2])
-            if 18 <= hour_int <= 23 and total_shed > 0.0:
-                hour_shed = total_shed * 0.8
-            demand_val = gen_val + hour_shed
+            is_peak = peak_hour is not None and time_str == peak_hour and peak_shed > 0.0
+            # Demand at that hour is the figure P1 prints as Evening Peak
+            # Demand, not generation plus shedding — PGCB reports 15275.03 for
+            # 2026-06-04 where the sum gives 15259.03.
             hourly_load_data.append({
                 'time': time_str,
                 'generation': gen_val,
-                'loadShed': round(hour_shed, 2),
-                'demand': round(demand_val, 2)
+                'loadShed': round(peak_shed, 2) if is_peak else None,
+                'demand': (evening_peak_demand or round(gen_val + peak_shed, 2)) if is_peak else None,
             })
-    if not hourly_load_data:
-        for h in range(24):
-            time_str = f"{h:02d}:00"
-            gen_val = evening_peak_gen if h >= 18 and h <= 22 else day_peak_gen
-            hourly_load_data.append({
-                'time': time_str,
-                'generation': gen_val,
-                'loadShed': 0.0,
-                'demand': gen_val
-            })
+    # A report without a load-curve sheet gets no curve. This used to fabricate
+    # one — a flat line at the day peak, stepping to the evening peak for
+    # 18:00-22:00 — which charted as though it were a measured profile.
+
+    # Uses the full half-hourly curve, not the charted hourly subset, so a
+    # peak falling on a half hour is not missed.
+    min_gen, max_gen = daily_extremes(p1, forecast, lcurve_series)
 
     # Extract fuel mix generation
     gas_gen, coal_gen, solar_gen, oil_gen, hydro_gen = 0.0, 0.0, 0.0, 0.0, 0.0
     wind_gen = 0.0
     total_imports = 0.0
     parsed_via_table = False
+    fuel_gen = {}
 
     # Look for Zone-wise Generation Summary (MKWHr.) table in P1
     header_idx = -1
@@ -414,6 +632,12 @@ def parse_pgcb_file(filepath, op_date):
                     solar_gen = val_map.get('solar', 0.0)
                     wind_gen = val_map.get('wind', 0.0)
                     total_imports = val_map.get('import', 0.0)
+                    # Keep each published fuel under its own name. Folding HSD
+                    # into HFO and dropping Wind entirely lost two of the eight
+                    # fuels PGCB reports.
+                    for src_name, canon in FUEL_ALIASES.items():
+                        if src_name in val_map:
+                            fuel_gen[canon] = val_map[src_name]
                     parsed_via_table = True
                     break
 
@@ -507,18 +731,37 @@ def parse_pgcb_file(filepath, op_date):
     if total_energy_gen > 0.0:
         avg_production_cost = total_daily_cost / (total_energy_gen * 1000000.0)
         
-    generation_data = [
-        { 'name': 'Gas', 'gen': round(gas_gen, 2), 'cost': int(gas_gen * 1000000 * 3.45), 'unitCost': 3.45, 'color': '#0ea5e9' },
-        { 'name': 'Coal', 'gen': round(coal_gen, 2), 'cost': int(coal_gen * 1000000 * 6.62), 'unitCost': 6.62, 'color': '#64748b' },
-        { 'name': 'HFO', 'gen': round(oil_gen, 2), 'cost': int(oil_gen * 1000000 * 18.06), 'unitCost': 18.06, 'color': '#f97316' },
-        { 'name': 'Hydro', 'gen': round(hydro_gen, 2), 'cost': int(hydro_gen * 1000000 * 0.10), 'unitCost': 0.10, 'color': '#06b6d4' },
-        { 'name': 'Solar', 'gen': round(solar_gen, 2), 'cost': int(solar_gen * 1000000 * 15.77), 'unitCost': 15.77, 'color': '#eab308' },
-        { 'name': 'Imports', 'gen': round(total_imports, 2), 'cost': int(total_imports * 1000000 * 6.34), 'unitCost': 6.34, 'color': '#a855f7' },
-        { 'name': 'HSD (Diesel)', 'gen': 0.0, 'cost': 0, 'unitCost': 0.0, 'color': '#ef4444' }
-    ]
+    # Fuel costs come from P1's own "Production Cost (Tk.)" block. They used to
+    # be generation x a hardcoded tariff, which is why the site showed gas at a
+    # flat 3.45 Tk/kWh on every day PGCB has ever published; the real figure
+    # moves daily (3.52 on 2026-06-04). `unitCost` is now derived from the two
+    # published numbers rather than being the input to one of them.
+    published_costs = published_fuel_costs(p1)
+    if not fuel_gen:
+        fuel_gen = {'Gas': gas_gen, 'Coal': coal_gen, 'HFO': oil_gen,
+                    'Hydro': hydro_gen, 'Solar': solar_gen, 'Imports': total_imports}
+    fuel_gen.setdefault('Imports', total_imports)
 
-    total_unserved = sum(regional_loadshed.values()) * 4.0 / 1000.0
-    total_demand = total_energy_gen + total_unserved
+    generation_data = []
+    for name in FUEL_ORDER:
+        gen = float(fuel_gen.get(name) or 0.0)
+        cost = published_costs.get(name)
+        if gen <= 0.0 and not cost and name in ('Wind', 'HSD'):
+            # Only carried when the layout reports them at all.
+            if name not in fuel_gen and name not in published_costs:
+                continue
+        unit = round(cost / (gen * 1000000.0), 4) if (cost and gen > 0.0) else None
+        generation_data.append({
+            'name': name,
+            'gen': round(gen, 2),
+            'cost': int(cost) if cost is not None else None,
+            'unitCost': unit,
+            'color': FUEL_COLORS[name],
+        })
+
+    published = published_demand_stats(p1, forecast)
+    total_unserved = published['totalEnergyUnserved']
+    total_demand = published['totalEnergyDemand']
     formatted_date = op_date.strftime("%d %b %Y")
 
     return {
@@ -526,14 +769,22 @@ def parse_pgcb_file(filepath, op_date):
             'date': formatted_date,
             'dayPeakGen': day_peak_gen,
             'eveningPeakGen': evening_peak_gen,
-            'dayPeakDemand': round(day_peak_gen + sum(regional_loadshed.values()) * 0.5, 2),
+            # Published, not inferred. This was day-peak generation plus half
+            # the day's load shedding, which is not a figure PGCB reports.
+            'dayPeakDemand': published['dayPeakDemand'],
             'eveningPeakDemand': evening_peak_demand,
-            'minGen': min_gen if min_gen > 0.0 else day_peak_gen * 0.7,
-            'maxGen': max_gen if max_gen > 0.0 else evening_peak_gen * 1.1,
+            # null, not a multiple of an unrelated peak: a day whose source
+            # states no extremes and carries no load curve has no basis for
+            # these, and a fabricated number is indistinguishable from a
+            # measured one once it is in the archive.
+            'minGen': min_gen,
+            'maxGen': max_gen,
             'totalEnergyGen': total_energy_gen,
-            'totalEnergyUnserved': round(total_unserved, 2),
-            'totalEnergyDemand': round(total_demand, 2),
-            'maxTemp': 32.8,
+            'totalEnergyUnserved': round(total_unserved, 3) if total_unserved is not None else None,
+            'totalEnergyDemand': round(total_demand, 3) if total_demand is not None else None,
+            # The source prints the day's maximum temperature. This was the
+            # constant 32.8, shown identically on every day since 2013.
+            'maxTemp': published['maxTemp'],
             'totalGasSuppliedPower': total_gas_supplied_power,
             'avgProductionCost': round(avg_production_cost, 3),
             'totalDailyCost': int(total_daily_cost)
