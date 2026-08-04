@@ -50,7 +50,7 @@ SOURCE_DIRS = [
 ]
 
 from ingest_bridge import derive_energy_day, workbook_energy_day, xlsx_to_md  # noqa: E402
-from parse_daily_reports import parse_pgcb_file  # noqa: E402
+from parse_daily_reports import NOT_AN_EVENT, parse_pgcb_file  # noqa: E402
 
 
 def alpha(s) -> str:
@@ -71,6 +71,19 @@ def read_source(path: Path) -> str:
 
 
 TRUSTED = ("dayPeakGen", "eveningPeakGen", "totalEnergyGen")
+
+# Days where the archive contradicts the source but the source has been shown
+# to be right, so the content test must be waived. Each needs a reason that
+# someone can re-check, because waiving it overwrites an archived day.
+#
+#   2026-06-25 — "Daily Report 26-06-2026_.xlsx" says 25-06-2026 in its
+#   filename, its P1 header AND its load-curve sheet; all three agree. Its
+#   figures (14318.96 / 16193.27 / 355.21) appear on no day in the archive,
+#   and the archived 2026-06-25 sits inside the window written by the degraded
+#   parser. The nine events that day holds — Khulna (C) 415 T, Munshiganj
+#   ROCOF, Saidpur TR-3 — appear in no workbook on W: between 2026-06-15 and
+#   2026-07-10, so they belong to some other day and cannot be placed.
+CONTENT_CHECK_WAIVED = {"2026-06-25"}
 
 
 def matches_archive(parsed: dict, archived: dict) -> bool:
@@ -159,7 +172,8 @@ def index_sources(cache: Path | None = None) -> dict[str, Path]:
                 parsed = parse_pgcb_file(str(t), datetime.date.fromisoformat(day))
             except Exception:  # noqa: BLE001
                 continue
-            if parsed and matches_archive(parsed, json.loads(fp.read_text(encoding="utf-8"))):
+            if parsed and (day in CONTENT_CHECK_WAIVED
+                           or matches_archive(parsed, json.loads(fp.read_text(encoding="utf-8")))):
                 confirmed = day
                 break
         if confirmed:
@@ -338,8 +352,17 @@ def main() -> None:
             new_rows = parsed.get("dailyOutages") or []
             blob = alpha(" ".join((r.get("full_desc") or "") + (r.get("time") or "") + (r.get("reason") or "")
                                   for r in new_rows))
+            # Rows the archive holds that are not events at all — P1's hourly
+            # remarks, "Evening Peak Generation is 14899 MW." — are dropped by
+            # design, so their absence must not read as data loss and block
+            # the repair for the whole day.
+            def is_real_event(r):
+                text = r.get("full_desc") or r.get("reason") or r.get("time") or ""
+                return not NOT_AN_EVENT.search(re.sub(r"^\d{1,2}:\d{2}\s*-\s*", "", text).strip())
+
             lost = [r for r in old_rows
-                    if len(alpha(r.get("full_desc") or r.get("reason") or r.get("time") or "")[:45]) >= 25
+                    if is_real_event(r)
+                    and len(alpha(r.get("full_desc") or r.get("reason") or r.get("time") or "")[:45]) >= 25
                     and alpha(r.get("full_desc") or r.get("reason") or r.get("time") or "")[:45] not in blob]
             if lost:
                 outage_skips.append(f"{day} ({len(lost)} row(s) would be lost)")

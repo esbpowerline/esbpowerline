@@ -193,14 +193,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "11:11 - 12:55",
           "plant": "Mithapukur 132/33kV S/S TR-1(404T) LT Forced S/D",
-          "load": "HT Outage",
+          "load": "22.0MW",
           "reason": "Due to Red hot maintenance.",
           "full_desc": "Mithapukur 132/33kV S/S TR-1(404T) LT Forced S/D Due to Red hot maintenance."
         },
         {
           "time": "11:11 - 12:55",
           "plant": "Mithapukur 132/33kV S/S TR-1(404T) HT Forced S/D",
-          "load": "HT Outage",
+          "load": "22.0MW",
           "reason": "Due to Red hot maintenance.",
           "full_desc": "Mithapukur 132/33kV S/S TR-1(404T) HT Forced S/D Due to Red hot maintenance."
         },
@@ -212,13 +212,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Shyampur-Shyampur(New) 132kV Ckt-2 Scheduled S/D from Shyampur 230/132kV end Due to Maintenance work at Shyampur old Substation end"
         },
         {
-          "time": "12:00",
-          "plant": "Day Peak Generation",
-          "load": "11712 MW",
-          "reason": "Day Peak Generation is 11712 MW.",
-          "full_desc": "Day Peak Generation is 11712 MW."
-        },
-        {
           "time": "12:25 - 12:56",
           "plant": "Lalmonirhat-Rangpur 132 kV Ckt-2 Tripped from Lalmonirhat 132/33kV end showing Directional E/F Relay relays. and from Rangpur 132/33kV end showing Distance Relay relays",
           "load": "HT Outage",
@@ -228,35 +221,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "12:25 - 12:41",
           "plant": "Kurigram 132/33kV S/S Transformer T-1 (Tr-403T) LT Tripped showing Over current at 33 kV side relays",
-          "load": "HT Outage",
+          "load": "29.0MW",
           "reason": "Due to None",
           "full_desc": "Kurigram 132/33kV S/S Transformer T-1 (Tr-403T) LT Tripped showing Over current at 33 kV side relays Due to None"
         },
         {
           "time": "12:25 - 12:41",
           "plant": "Kurigram 132/33kV S/S Transformer T-1 (Tr-403T) HT Tripped showing Over current at 33 kv side relays",
-          "load": "HT Outage",
+          "load": "29.0MW",
           "reason": "Due to None",
           "full_desc": "Kurigram 132/33kV S/S Transformer T-1 (Tr-403T) HT Tripped showing Over current at 33 kv side relays Due to None"
         },
         {
           "time": "12:25 - 12:41",
           "plant": "Kurigram 132/33kV S/S Transformer T-2 (Tr-413T) HT Tripped showing Over current at 33 kV side relays",
-          "load": "HT Outage",
+          "load": "29.0MW",
           "reason": "Due to None",
           "full_desc": "Kurigram 132/33kV S/S Transformer T-2 (Tr-413T) HT Tripped showing Over current at 33 kV side relays Due to None"
         },
         {
           "time": "12:25 - 12:41",
           "plant": "Kurigram 132/33kV S/S Transformer T-2 (Tr-413T) LT Tripped showing Over current at 33 kV side relays",
-          "load": "HT Outage",
+          "load": "29.0MW",
           "reason": "Due to None",
           "full_desc": "Kurigram 132/33kV S/S Transformer T-2 (Tr-413T) LT Tripped showing Over current at 33 kV side relays Due to None"
         },
         {
           "time": "13:41 - 14:14",
           "plant": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Tripped from Mithapukur 132/33kV end showing R,Y phase operated, DIST/DEF carrier receive, ZCOM trip, 86A relay optd, 86B relay optd, 86LO relay optd. relays.",
-          "load": "100MW",
+          "load": "15.0MW",
           "reason": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Tripped from Mithapukur 132/33kV end showing R,Y phase operated, DIST/DEF carrier receive, ZCOM trip, 86A relay optd, 86B relay optd, 86LO relay optd. relays.",
           "full_desc": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Tripped from Mithapukur 132/33kV end showing R,Y phase operated, DIST/DEF carrier receive, ZCOM trip, 86A relay optd, 86B relay optd, 86LO relay optd. relays."
         },
@@ -319,7 +312,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "20:22 - 20:38",
           "plant": "Ghorashal 230kV S/S TARFO-2 HT Forced S/D",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to Ghorasal PDB AIS Grid End fault",
           "full_desc": "Ghorashal 230kV S/S TARFO-2 HT Forced S/D Due to Ghorasal PDB AIS Grid End fault"
         },
@@ -392,13 +385,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Aftabnagar-Rampura 132kV Ckt-1 is restored.",
           "full_desc": "Aftabnagar-Rampura 132kV Ckt-1 is restored."
-        },
-        {
-          "time": "07:00",
-          "plant": "Minimum Generation",
-          "load": "12247 MW",
-          "reason": "Minimum Generation is 12247 MW.",
-          "full_desc": "Minimum Generation is 12247 MW."
         }
       ],
       "hourlyLoadData": [
@@ -819,37 +805,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "11:18 - 11:44",
           "plant": "Sreemongol 132/33kV S/S 132/33kv T-2 LT Tripped showing Earth fault and over current fault relays",
-          "load": "HT Outage",
+          "load": "23.0MW",
           "reason": "Due to 33KV bus coupler fault",
           "full_desc": "Sreemongol 132/33kV S/S 132/33kv T-2 LT Tripped showing Earth fault and over current fault relays Due to 33KV bus coupler fault"
         },
         {
           "time": "11:18 - 11:43",
           "plant": "Sreemongol 132/33kV S/S 132/33kv T-3 LT Tripped showing Earth fault and over current relays",
-          "load": "HT Outage",
+          "load": "23.0MW",
           "reason": "Due to 33KV bus coupler fault",
           "full_desc": "Sreemongol 132/33kV S/S 132/33kv T-3 LT Tripped showing Earth fault and over current relays Due to 33KV bus coupler fault"
         },
         {
           "time": "11:18 - 11:41",
           "plant": "Sreemongol 132/33kV S/S 132/33kv T-3 HT Tripped showing Earth fault and over current relays",
-          "load": "HT Outage",
+          "load": "23.0MW",
           "reason": "Due to 33KV bus coupler fault",
           "full_desc": "Sreemongol 132/33kV S/S 132/33kv T-3 HT Tripped showing Earth fault and over current relays Due to 33KV bus coupler fault"
         },
         {
           "time": "11:18 - 11:43",
           "plant": "Sreemongol 132/33kV S/S 132/33kv T-2 HT Tripped showing Earth fault and over current relays",
-          "load": "HT Outage",
+          "load": "23.0MW",
           "reason": "Due to 132KV bus coupler fault",
           "full_desc": "Sreemongol 132/33kV S/S 132/33kv T-2 HT Tripped showing Earth fault and over current relays Due to 132KV bus coupler fault"
-        },
-        {
-          "time": "12:00",
-          "plant": "Day Peak Generation",
-          "load": "13116 MW",
-          "reason": "Day Peak Generation is 13116 MW.",
-          "full_desc": "Day Peak Generation is 13116 MW."
         },
         {
           "time": "12:53 - 14:26",
@@ -882,7 +861,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "14:35 - 15:48",
           "plant": "Ramganj 132/33kV S/S Transformer -02 LT Forced S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to 33 kV lakshmipur feeder maintenance",
           "full_desc": "Ramganj 132/33kV S/S Transformer -02 LT Forced S/D Due to 33 kV lakshmipur feeder maintenance"
         },
@@ -896,14 +875,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "16:49 - 17:53",
           "plant": "Chandraghona 132/33kV S/S TR-01(406T) LT Forced S/D",
-          "load": "HT Outage",
+          "load": "25.0MW",
           "reason": "Chandraghona 132/33kV S/S TR-01(406T) LT Forced S/D",
           "full_desc": "Chandraghona 132/33kV S/S TR-01(406T) LT Forced S/D"
         },
         {
           "time": "16:50 - 17:52",
           "plant": "Chandraghona 132/33kV S/S TR-01(406T) HT Forced S/D",
-          "load": "HT Outage",
+          "load": "25.0MW",
           "reason": "Due to Wasa 33 kv Feeder high temperature maintenance work under 33kv bus-1",
           "full_desc": "Chandraghona 132/33kV S/S TR-01(406T) HT Forced S/D Due to Wasa 33 kv Feeder high temperature maintenance work under 33kv bus-1"
         },
@@ -915,37 +894,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Ghorasal Repowered CCPP Unit-4 Shutdown"
         },
         {
-          "time": "21:00",
-          "plant": "Evening Peak Generation",
-          "load": "15127 MW",
-          "reason": "Evening Peak Generation is 15127 MW.",
-          "full_desc": "Evening Peak Generation is 15127 MW."
-        },
-        {
           "time": "22:24 - 00:19",
           "plant": "Bhulta 132/33kV S/S 132kV BUS Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS",
           "full_desc": "Bhulta 132/33kV S/S 132kV BUS Scheduled S/D Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS"
         },
         {
           "time": "22:24 - 00:19",
           "plant": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS",
           "full_desc": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS"
         },
         {
           "time": "23:01 - 00:46",
           "plant": "Chauddagram 132/33kV S/S 132 kv T-1 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to 33kv bus-1 redhot maintanace work by Md.Masud Miah AGM PBS-4 (O&M).",
           "full_desc": "Chauddagram 132/33kV S/S 132 kv T-1 HT Scheduled S/D Due to 33kv bus-1 redhot maintanace work by Md.Masud Miah AGM PBS-4 (O&M)."
         },
         {
           "time": "23:01 - 00:46",
           "plant": "Chauddagram 132/33kV S/S 132 kv T-1 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to 33kv bus-1 redhot maintanace work by Md.Masud Miah AGM PBS-4 (O&M).",
           "full_desc": "Chauddagram 132/33kV S/S 132 kv T-1 LT Scheduled S/D Due to 33kv bus-1 redhot maintanace work by Md.Masud Miah AGM PBS-4 (O&M)."
         },
@@ -969,13 +941,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Due to Auto TR-2 R.Bus Alignment correction and Red hot maintenance.",
           "full_desc": "Hasnabad 132/33kV S/S 132kV Reserve Bus Scheduled S/D Due to Auto TR-2 R.Bus Alignment correction and Red hot maintenance."
-        },
-        {
-          "time": "07:00",
-          "plant": "Minimum generation 13010 MW",
-          "load": "13010 MW",
-          "reason": "Minimum generation 13010 MW",
-          "full_desc": "Minimum generation 13010 MW"
         },
         {
           "time": "07:40",
@@ -1940,49 +1905,49 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "12:59 - 13:15",
           "plant": "Satkhira 132/33kV S/S Transformer-2 (T-2) HT Tripped showing WTI relays",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to Winding temperature trip",
           "full_desc": "Satkhira 132/33kV S/S Transformer-2 (T-2) HT Tripped showing WTI relays Due to Winding temperature trip"
         },
         {
           "time": "12:59 - 13:15",
           "plant": "Satkhira 132/33kV S/S Transformer-2 (T-2) LT Tripped showing WTI relays",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to Winding temperature trip",
           "full_desc": "Satkhira 132/33kV S/S Transformer-2 (T-2) LT Tripped showing WTI relays Due to Winding temperature trip"
         },
         {
           "time": "14:24 - 14:30",
           "plant": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing Micom relays.",
-          "load": "HT Outage",
+          "load": "118.0MW",
           "reason": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing Micom relays.",
           "full_desc": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing Micom relays."
         },
         {
           "time": "14:24 - 14:30",
           "plant": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing Micom relays.",
-          "load": "HT Outage",
+          "load": "118.0MW",
           "reason": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing Micom relays.",
           "full_desc": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing Micom relays."
         },
         {
           "time": "15:24 - 17:16",
           "plant": "Satkhira 132/33kV S/S Transformer-2 (T-2) HT Tripped showing WTI relays",
-          "load": "HT Outage",
+          "load": "62.0MW",
           "reason": "Due to Winding temperature trip",
           "full_desc": "Satkhira 132/33kV S/S Transformer-2 (T-2) HT Tripped showing WTI relays Due to Winding temperature trip"
         },
         {
           "time": "15:24 - 17:19",
           "plant": "Satkhira 132/33kV S/S Transformer-2 (T-2) LT Tripped showing WTI relays",
-          "load": "HT Outage",
+          "load": "62.0MW",
           "reason": "Due to Winding temperature trip",
           "full_desc": "Satkhira 132/33kV S/S Transformer-2 (T-2) LT Tripped showing WTI relays Due to Winding temperature trip"
         },
         {
           "time": "16:24 - 17:27",
           "plant": "Feni 132/33kV S/S T-1(405T) LT Tripped showing O/C,E/F relays",
-          "load": "HT Outage",
+          "load": "58.0MW",
           "reason": "Due to REB-1 33KV feeder CT blust",
           "full_desc": "Feni 132/33kV S/S T-1(405T) LT Tripped showing O/C,E/F relays Due to REB-1 33KV feeder CT blust"
         },
@@ -2017,16 +1982,9 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "18:23 - 18:55",
           "plant": "Shahjadpur 132/33kV S/S T-4(435T) LT Forced",
-          "load": "HT Outage",
+          "load": "10.0MW",
           "reason": "for red hot maintenance at BUS DS.",
           "full_desc": "Shahjadpur 132/33kV S/S T-4(435T) LT Forced S/D Due to SD Taken by New Bera 33kv Feeder for red hot maintenance at BUS DS."
-        },
-        {
-          "time": "21:00",
-          "plant": "Evening Peak Generation",
-          "load": "15869 MW",
-          "reason": "Evening Peak Generation is 15869 MW.",
-          "full_desc": "Evening Peak Generation is 15869 MW."
         },
         {
           "time": "01:22",
@@ -2059,21 +2017,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "07:24",
           "plant": "Noapara 132/33kV S/S T-1 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to DUE TO RED HOT MAINTENANCE OF REB-3 FEEDER BY PBS.",
           "full_desc": "Noapara 132/33kV S/S T-1 HT Scheduled S/D Due to DUE TO RED HOT MAINTENANCE OF REB-3 FEEDER BY PBS."
         },
         {
           "time": "07:24",
           "plant": "Noapara 132/33kV S/S T-1 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to DUE TO RED HOT MAINTENANCE OF REB-3 FEEDER BY PBS.",
           "full_desc": "Noapara 132/33kV S/S T-1 LT Scheduled S/D Due to DUE TO RED HOT MAINTENANCE OF REB-3 FEEDER BY PBS."
         },
         {
           "time": "07:28",
           "plant": "Noapara 132/33kV S/S Bus Section-1 Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to DUE TO RED HOT MAINTENANCE OF REB-3 FEEDER BY PBS.",
           "full_desc": "Noapara 132/33kV S/S Bus Section-1 Scheduled S/D Due to DUE TO RED HOT MAINTENANCE OF REB-3 FEEDER BY PBS."
         },
@@ -2087,7 +2045,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "07:42",
           "plant": "Madaripur 132/33kV S/S T2-415T LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "25.0MW",
           "reason": "Due to Agoiljhora 33kv feeder source ds problem",
           "full_desc": "Madaripur 132/33kV S/S T2-415T LT Scheduled S/D Due to Agoiljhora 33kv feeder source ds problem"
         },
@@ -2510,14 +2468,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "08:34 - 09:38",
           "plant": "Dohazari 132/33kV S/S Power Transformer -T-2 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "63.0MW",
           "reason": "Due to Due to Keranihat 33 kv feeder redhot maintenance. <br> Shutdown taken by <br> Shahidul Islam <br> AGM (Zonal office Satkania) <br> Ctg pbs -01",
           "full_desc": "Dohazari 132/33kV S/S Power Transformer -T-2 LT Scheduled S/D Due to Due to Keranihat 33 kv feeder redhot maintenance. <br> Shutdown taken by <br> Shahidul Islam <br> AGM (Zonal office Satkania) <br> Ctg pbs -01"
         },
         {
           "time": "08:34 - 09:38",
           "plant": "Dohazari 132/33kV S/S Power Transformer -T-2 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "63.0MW",
           "reason": "Due to Due to Keranihat 33 kv feeder redhot maintenance. <br> Shutdown taken by <br> Shahidul Islam <br> AGM (Zonal office Satkania) <br> Ctg pbs -01",
           "full_desc": "Dohazari 132/33kV S/S Power Transformer -T-2 HT Scheduled S/D Due to Due to Keranihat 33 kv feeder redhot maintenance. <br> Shutdown taken by <br> Shahidul Islam <br> AGM (Zonal office Satkania) <br> Ctg pbs -01"
         },
@@ -2559,7 +2517,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "08:50 - 09:16",
           "plant": "Mahasthangarh 132/33kV S/S 416T MTR 2 LT Tripped showing P142 relays",
-          "load": "HT Outage",
+          "load": "39.0MW",
           "reason": "Due to Durgapur 33 kv feeder fault.",
           "full_desc": "Mahasthangarh 132/33kV S/S 416T MTR 2 LT Tripped showing P142 relays Due to Durgapur 33 kv feeder fault."
         },
@@ -2608,7 +2566,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "10:45 - 11:40",
           "plant": "Bajitpur 132/33kV S/S Tr-2(414T) HT Tripped showing RET650 <br> REC650 relays",
-          "load": "HT Outage",
+          "load": "24.0MW",
           "reason": "Due to OIL SURGED Trip <br> Closed Blocked Signal show",
           "full_desc": "Bajitpur 132/33kV S/S Tr-2(414T) HT Tripped showing RET650 <br> REC650 relays Due to OIL SURGED Trip <br> Closed Blocked Signal show"
         },
@@ -2632,13 +2590,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Noapara 132/33kV S/S Bus Section-1 is restored.",
           "full_desc": "Noapara 132/33kV S/S Bus Section-1 is restored."
-        },
-        {
-          "time": "12:00",
-          "plant": "Day Peak Generation",
-          "load": "14740 MW",
-          "reason": "Day Peak Generation is 14740 MW.",
-          "full_desc": "Day Peak Generation is 14740 MW."
         },
         {
           "time": "12:22",
@@ -2665,8 +2616,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "time": "13:11 - 15:16",
           "plant": "BSRM 230/33kV S/S GPH Ispat Ckt. -01 Forced S/D",
           "load": "HT Outage",
-          "reason": "Due to Emergency work by Mirshary 230kV ss",
-          "full_desc": "BSRM 230/33kV S/S GPH Ispat Ckt. -01 Forced S/D Due to Emergency work by Mirshary 230kV ss"
+          "reason": "Due to Emergency work by Mirshary 230kV",
+          "full_desc": "BSRM 230/33kV S/S GPH Ispat Ckt. -01 Forced S/D Due to Emergency work by Mirshary 230kV"
         },
         {
           "time": "15:27",
@@ -2723,13 +2674,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Bogura 400/230kV S/S 400 KV Reactor (125 MVAR) Forced S/D",
           "full_desc": "Bogura 400/230kV S/S 400 KV Reactor (125 MVAR) Forced S/D"
-        },
-        {
-          "time": "21:00",
-          "plant": "Evening Peak Generation",
-          "load": "14899 MW",
-          "reason": "Evening Peak Generation is 14899 MW.",
-          "full_desc": "Evening Peak Generation is 14899 MW."
         },
         {
           "time": "00:14",
@@ -2797,14 +2741,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "05:54",
           "plant": "Mymensingh RPCL-Tangail  132kV Ckt-1 Forced",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to OPGW Restringing in Tangail Grid Sub-Station.",
           "full_desc": "Mymensingh RPCL-Tangail  132kV Ckt-1 Forced S/D from Ghatail 132/33kV end Due to OPGW Restringing in Tangail Grid Sub-Station."
         },
         {
           "time": "05:59",
           "plant": "Mymensingh RPCL-Tangail  132kV Ckt-2 Forced",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to OPGW Restringing in Tangail Grid Sub-Station.",
           "full_desc": "Mymensingh RPCL-Tangail  132kV Ckt-2 Forced S/D from Ghatail 132/33kV end Due to OPGW Restringing in Tangail Grid Sub-Station."
         },
@@ -2832,7 +2776,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "06:18",
           "plant": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to Maintenance work at Narsingdi line DS-104 (Substation drawing identification number DS-201S)",
           "full_desc": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D Due to Maintenance work at Narsingdi line DS-104 (Substation drawing identification number DS-201S)"
         },
@@ -2846,14 +2790,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "07:14",
           "plant": "Jhenaidah 132/33kV S/S Transformer T-1 LT Forced S/D",
-          "load": "HT Outage",
+          "load": "32.0MW",
           "reason": "Due to Maintainance of 'DS' Y-phase, 33kv T-1A  Redhot.",
           "full_desc": "Jhenaidah 132/33kV S/S Transformer T-1 LT Forced S/D Due to Maintainance of 'DS' Y-phase, 33kv T-1A  Redhot."
         },
         {
           "time": "07:14",
           "plant": "Jhenaidah 132/33kV S/S Transformer T-1 HT Forced S/D",
-          "load": "HT Outage",
+          "load": "32.0MW",
           "reason": "Due to Maintainance of 'DS' Y-phase, 33kv T-1A  Redhot.",
           "full_desc": "Jhenaidah 132/33kV S/S Transformer T-1 HT Forced S/D Due to Maintainance of 'DS' Y-phase, 33kv T-1A  Redhot."
         }
@@ -3260,13 +3204,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Meghnaghat CCPP(Summit)-2 GT Synchronized with remarks:- 00:14 hrs. on 05.06.2026 GT Sync"
         },
         {
-          "time": "09:00",
-          "plant": "Day Peak Generation",
-          "load": "12457 MW",
-          "reason": "Day Peak Generation is 12457 MW.",
-          "full_desc": "Day Peak Generation is 12457 MW."
-        },
-        {
           "time": "09:17 - 10:30",
           "plant": "Aminbazar 400/230/132kV S/S Bus-1 (400kV) Project Work S/D",
           "load": "HT Outage",
@@ -3430,21 +3367,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "13:24 - 14:21",
           "plant": "Feni 132/33kV S/S T-1(405T) LT Tripped showing O/C,E/F relays",
-          "load": "HT Outage",
+          "load": "34.0MW",
           "reason": "Due to Heavy rain.",
           "full_desc": "Feni 132/33kV S/S T-1(405T) LT Tripped showing O/C,E/F relays Due to Heavy rain."
         },
         {
           "time": "14:52 - 15:07",
           "plant": "Madaripur 132/33kV S/S T1-405T LT Tripped showing Frequency and earth fault relays",
-          "load": "HT Outage",
+          "load": "32.0MW",
           "reason": "Due to Earth fault,under frequency takerhat 1 feeder",
           "full_desc": "Madaripur 132/33kV S/S T1-405T LT Tripped showing Frequency and earth fault relays Due to Earth fault,under frequency takerhat 1 feeder"
         },
         {
           "time": "14:52 - 15:11",
           "plant": "Madaripur 132/33kV S/S T2-415T LT Tripped showing Frequency,earth fault relays",
-          "load": "HT Outage",
+          "load": "32.0MW",
           "reason": "Due to Earth fault,under frequency takerhat 1 feeder",
           "full_desc": "Madaripur 132/33kV S/S T2-415T LT Tripped showing Frequency,earth fault relays Due to Earth fault,under frequency takerhat 1 feeder"
         },
@@ -3465,7 +3402,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "18:44 - 20:41",
           "plant": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "54.0MW",
           "reason": "Due to For Redhot GT-01 HT side (R phase) bushing and shutdown taken by Deepok Kumar Sutradhar(AE), Bhulta 132 KV Grid substation",
           "full_desc": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D Due to For Redhot GT-01 HT side (R phase) bushing and shutdown taken by Deepok Kumar Sutradhar(AE), Bhulta 132 KV Grid substation"
         },
@@ -3484,37 +3421,23 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Siddhirganj 132/33kV S/S T-1 LT Forced S/D Due to Red Hot 33 kV ACB Breaker Y-Phase Pole"
         },
         {
-          "time": "21:00",
-          "plant": "Evening peak generation 14449 MW",
-          "load": "14449 MW",
-          "reason": "Evening peak generation 14449 MW",
-          "full_desc": "Evening peak generation 14449 MW"
-        },
-        {
           "time": "22:55 - 23:54",
           "plant": "Chowmuhani 230/132/33kV S/S TR1-415T LT Forced",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "for 33kV BUS Loop Red-hot Maintenance",
           "full_desc": "Chowmuhani 230/132/33kV S/S TR1-415T LT Forced S/D Due to 132/33 kV, TR-01 X-former S/D for 33kV BUS Loop Red-hot Maintenance"
         },
         {
           "time": "22:55 - 23:54",
           "plant": "Chowmuhani 230/132/33kV S/S TR1-415T HT Forced S/D",
-          "load": "HT Outage",
+          "load": "50.0MW",
           "reason": "Due to 33kV BUS Loop Redhot",
           "full_desc": "Chowmuhani 230/132/33kV S/S TR1-415T HT Forced S/D Due to 33kV BUS Loop Redhot"
         },
         {
-          "time": "06:00",
-          "plant": "Minimum generation 12674 MW",
-          "load": "12674 MW",
-          "reason": "Minimum generation 12674 MW",
-          "full_desc": "Minimum generation 12674 MW"
-        },
-        {
           "time": "06:58 - 07:14",
           "plant": "Sonargaon 132/33kV S/S Tr-1 LT Tripped showing Trip Relay(MVAJM) relays Due to pbs 33kv side Everest Feeder trip",
-          "load": "HT Outage",
+          "load": "30.0MW",
           "reason": "due to isolator jumper blast",
           "full_desc": "Sonargaon 132/33kV S/S Tr-1 LT Tripped showing Trip Relay(MVAJM) relays Due to pbs 33kv side Everest Feeder trip due to isolator jumper blast"
         }
@@ -7201,14 +7124,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "14:08 - 14:13",
           "plant": "Chowmuhani 230/132/33kV S/S TR1-415T LT Tripped showing instantaneous relays",
-          "load": "HT Outage",
+          "load": "54.0MW",
           "reason": "Due to Beg-2 33 kv feeder E/F, O/C tripped.",
           "full_desc": "Chowmuhani 230/132/33kV S/S TR1-415T LT Tripped showing instantaneous relays Due to Beg-2 33 kv feeder E/F, O/C tripped."
         },
         {
           "time": "17:33 - 19:58",
           "plant": "Brahmanbaria 132/33kV S/S 401T HT Tripped showing Main Pressure relife",
-          "load": "HT Outage",
+          "load": "50.0MW",
           "reason": "Brahmanbaria 132/33kV S/S 401T HT Tripped showing Main Pressure relife tripped relays.",
           "full_desc": "Brahmanbaria 132/33kV S/S 401T HT Tripped showing Main Pressure relife tripped relays."
         },
@@ -7222,21 +7145,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "20:55 - 22:18",
           "plant": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to Red Hot Maintenance at 33kv side.",
           "full_desc": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D Due to Red Hot Maintenance at 33kv side."
         },
         {
           "time": "20:56 - 22:17",
           "plant": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to Red Hot Maintenance at 33kv side.",
           "full_desc": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D Due to Red Hot Maintenance at 33kv side."
         },
         {
           "time": "21:09 - 21:16",
           "plant": "Chowmuhani 230/132/33kV S/S TR1-415T LT Tripped showing Earth Fault INST. relays",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to 33 kV feeder Beg-2 O/C, E/F .",
           "full_desc": "Chowmuhani 230/132/33kV S/S TR1-415T LT Tripped showing Earth Fault INST. relays Due to 33 kV feeder Beg-2 O/C, E/F ."
         },
@@ -7250,7 +7173,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:22 - 00:55",
           "plant": "Chowmuhani 230/132/33kV S/S TR2-425T LT Forced S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to 33 KV L-Bus Red Hot Maintenance",
           "full_desc": "Chowmuhani 230/132/33kV S/S TR2-425T LT Forced S/D Due to 33 KV L-Bus Red Hot Maintenance"
         },
@@ -7271,23 +7194,16 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:38 - 01:57",
           "plant": "Rangpur 132/33kV S/S T-1(414T) LT Tripped showing No relay operated. relays",
-          "load": "HT Outage",
+          "load": "50.0MW",
           "reason": "Due to T-1 132 KV PRD trip",
           "full_desc": "Rangpur 132/33kV S/S T-1(414T) LT Tripped showing No relay operated. relays Due to T-1 132 KV PRD trip"
         },
         {
           "time": "00:38 - 01:55",
           "plant": "Rangpur 132/33kV S/S T-1(414T) HT Tripped showing Lock out (86) relay relays",
-          "load": "HT Outage",
+          "load": "50.0MW",
           "reason": "Due to Due to PRD Trip",
           "full_desc": "Rangpur 132/33kV S/S T-1(414T) HT Tripped showing Lock out (86) relay relays Due to Due to PRD Trip"
-        },
-        {
-          "time": "06:00",
-          "plant": "Minimum Generation 12691 MW.",
-          "load": "12691 MW",
-          "reason": "Minimum Generation 12691 MW.",
-          "full_desc": "Minimum Generation 12691 MW."
         },
         {
           "time": "06:07",
@@ -7306,14 +7222,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "06:18",
           "plant": "Barishal 230/132kV S/S T-5 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to Replacement of source DS of 33 kV Nobogram Feeder by Jhalokathi PBS.",
           "full_desc": "Barishal 230/132kV S/S T-5 HT Scheduled S/D Due to Replacement of source DS of 33 kV Nobogram Feeder by Jhalokathi PBS."
         },
         {
           "time": "06:18",
           "plant": "Barishal 230/132kV S/S T-5 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to Replacement of source DS of 33 kV Nobogram Feeder by Jhalokathi PBS.",
           "full_desc": "Barishal 230/132kV S/S T-5 LT Scheduled S/D Due to Replacement of source DS of 33 kV Nobogram Feeder by Jhalokathi PBS."
         },
@@ -7743,14 +7659,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "08:41 - 11:06",
           "plant": "Gopalganj 132/33kV S/S Transformer-03 LT Forced S/D",
-          "load": "HT Outage",
+          "load": "17.0MW",
           "reason": "Due to Bus D's maintenance of Bpbs-1",
           "full_desc": "Gopalganj 132/33kV S/S Transformer-03 LT Forced S/D Due to Bus D's maintenance of Bpbs-1"
         },
         {
           "time": "08:42 - 11:05",
           "plant": "Gopalganj 132/33kV S/S Transformer-03 HT Forced S/D",
-          "load": "HT Outage",
+          "load": "17.0MW",
           "reason": "Due to Bus D's maintenance of Bpbs-1",
           "full_desc": "Gopalganj 132/33kV S/S Transformer-03 HT Forced S/D Due to Bus D's maintenance of Bpbs-1"
         },
@@ -7778,7 +7694,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "11:08 - 13:15",
           "plant": "Bhaluka 132/33kV S/S 02. Transformer- 02 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "30.0MW",
           "reason": "Bhaluka 132/33kV S/S 02. Transformer- 02 HT Scheduled S/D",
           "full_desc": "Bhaluka 132/33kV S/S 02. Transformer- 02 HT Scheduled S/D"
         },
@@ -7816,13 +7732,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "for  CT maintenance at their end",
           "full_desc": "Gopalganj (O) - Gopalgan (N) Ckt-1 Forced S/D from Gopalganj 132/33kV end Due to CT Y-phase unusual sound trouble and from Gopalganj 400/132kV end Due to Gopalganj 132 KV SS has taken S/D for  CT maintenance at their end"
-        },
-        {
-          "time": "12:00",
-          "plant": "Day Peak Generation",
-          "load": "13863 MW",
-          "reason": "Day Peak Generation is 13863 MW.",
-          "full_desc": "Day Peak Generation is 13863 MW."
         },
         {
           "time": "12:43",
@@ -7869,14 +7778,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "15:02 - 18:38",
           "plant": "Shahjibazar 132/33kV S/S TR-04 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to To connect new TR-06 transformer to the 33 kv bus",
           "full_desc": "Shahjibazar 132/33kV S/S TR-04 LT Scheduled S/D Due to To connect new TR-06 transformer to the 33 kv bus"
         },
         {
           "time": "15:03 - 18:36",
           "plant": "Shahjibazar 132/33kV S/S TR-04 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to To connect new TR-06 transformer to the 33 kv bus",
           "full_desc": "Shahjibazar 132/33kV S/S TR-04 HT Scheduled S/D Due to To connect new TR-06 transformer to the 33 kv bus"
         },
@@ -7904,44 +7813,37 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "02:15 - 03:00",
           "plant": "Jaldhaka 132/33kV S/S 416T-2 LT Tripped showing Over Current Protection P142 relays.",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Jaldhaka 132/33kV S/S 416T-2 LT Tripped showing Over Current Protection P142 relays.",
           "full_desc": "Jaldhaka 132/33kV S/S 416T-2 LT Tripped showing Over Current Protection P142 relays."
         },
         {
           "time": "02:15 - 02:59",
           "plant": "Jaldhaka 132/33kV S/S 406T-1 LT Tripped showing Over Current Protection P142 relays.",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Jaldhaka 132/33kV S/S 406T-1 LT Tripped showing Over Current Protection P142 relays.",
           "full_desc": "Jaldhaka 132/33kV S/S 406T-1 LT Tripped showing Over Current Protection P142 relays."
         },
         {
           "time": "05:40 - 06:10",
           "plant": "Chattak-Sunamganj 132 kV Ckt-1 Tripped from Sunamganj 132/33kV end showing REL670 relays",
-          "load": "HT Outage",
+          "load": "5.0MW",
           "reason": "Due to Rainy weather",
           "full_desc": "Chattak-Sunamganj 132 kV Ckt-1 Tripped from Sunamganj 132/33kV end showing REL670 relays Due to Rainy weather"
         },
         {
           "time": "05:40 - 05:59",
           "plant": "Chattak-Sylhet 132 kV Ckt-2 Tripped from Sylhet 132/33kV end showing SOTF, relays.",
-          "load": "HT Outage",
+          "load": "19.0MW",
           "reason": "Chattak-Sylhet 132 kV Ckt-2 Tripped from Sylhet 132/33kV end showing SOTF, relays.",
           "full_desc": "Chattak-Sylhet 132 kV Ckt-2 Tripped from Sylhet 132/33kV end showing SOTF, relays."
         },
         {
           "time": "05:56 - 06:40",
           "plant": "Kalurghat 132/33kV S/S TRFO-02(516T) LT Tripped showing 33 kv REF 615 Relay relays",
-          "load": "HT Outage",
+          "load": "10.0MW",
           "reason": "Due to Due to PDB 33kV Feeder-3 ( PDB grid incomer-3) <br> Showing Earth fault & Over current trip.",
           "full_desc": "Kalurghat 132/33kV S/S TRFO-02(516T) LT Tripped showing 33 kv REF 615 Relay relays Due to Due to PDB 33kV Feeder-3 ( PDB grid incomer-3) <br> Showing Earth fault & Over current trip."
-        },
-        {
-          "time": "06:00",
-          "plant": "Minimum Generation 13665 MW.",
-          "load": "13665 MW",
-          "reason": "Minimum Generation 13665 MW.",
-          "full_desc": "Minimum Generation 13665 MW."
         },
         {
           "time": "06:07",
@@ -10139,7 +10041,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "14:22 - 14:40",
           "plant": "Madanganj 132/33kV S/S Madanganj -Summit 55 MW 132 kv Ckt Tripped showing Directional O/C relays",
-          "load": "55 MW",
+          "load": "17.0MW",
           "reason": "Due to Heavy rain and storm",
           "full_desc": "Madanganj 132/33kV S/S Madanganj -Summit 55 MW 132 kv Ckt Tripped showing Directional O/C relays Due to Heavy rain and storm"
         },
@@ -10279,14 +10181,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:48 - 00:33",
           "plant": "Chuadanga 132/33kV S/S 132kV Tr. T1(416T) LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "50.0MW",
           "reason": "Due to Red hot maintenance work.",
           "full_desc": "Chuadanga 132/33kV S/S 132kV Tr. T1(416T) LT Scheduled S/D Due to Red hot maintenance work."
         },
         {
           "time": "22:49 - 00:32",
           "plant": "Chuadanga 132/33kV S/S 132kV Tr. T1(416T) HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "50.0MW",
           "reason": "Due to Red hot maintenance work.",
           "full_desc": "Chuadanga 132/33kV S/S 132kV Tr. T1(416T) HT Scheduled S/D Due to Red hot maintenance work."
         },
@@ -10744,14 +10646,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "09:01 - 12:21",
           "plant": "Sonargaon 132/33kV S/S Tr-1 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to PBS 33 kv Astha feeder cable heat shrink work",
           "full_desc": "Sonargaon 132/33kV S/S Tr-1 LT Scheduled S/D Due to PBS 33 kv Astha feeder cable heat shrink work"
         },
         {
           "time": "09:01 - 12:20",
           "plant": "Sonargaon 132/33kV S/S Tr-1 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "40.0MW",
           "reason": "Due to PBS 33 kv Astha feeder cable heat shrink work",
           "full_desc": "Sonargaon 132/33kV S/S Tr-1 HT Scheduled S/D Due to PBS 33 kv Astha feeder cable heat shrink work"
         },
@@ -10765,14 +10667,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "09:04 - 09:36",
           "plant": "Saidpur 132/33kV S/S TR-3 (424T) LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to 33kv parbatipur Nesco feeder Y-phase raiser loop change.",
           "full_desc": "Saidpur 132/33kV S/S TR-3 (424T) LT Scheduled S/D Due to 33kv parbatipur Nesco feeder Y-phase raiser loop change."
         },
         {
           "time": "09:05 - 09:35",
           "plant": "Saidpur 132/33kV S/S TR-3 (424T) HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "Due to 33kv parbatipur Nesco feeder Y-phase raiser loop change.",
           "full_desc": "Saidpur 132/33kV S/S TR-3 (424T) HT Scheduled S/D Due to 33kv parbatipur Nesco feeder Y-phase raiser loop change."
         },
@@ -10793,14 +10695,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "09:15 - 10:17",
           "plant": "Dohazari 132/33kV S/S Power Transformer -T-2 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "33.0MW",
           "reason": "Due to Due to keranihat 33 kv feeder Redhot maintenance.",
           "full_desc": "Dohazari 132/33kV S/S Power Transformer -T-2 LT Scheduled S/D Due to Due to keranihat 33 kv feeder Redhot maintenance."
         },
         {
           "time": "09:15 - 10:17",
           "plant": "Dohazari 132/33kV S/S Power Transformer -T-2 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "33.0MW",
           "reason": "Due to Due to keranihat 33 kv feeder Redhot maintenance",
           "full_desc": "Dohazari 132/33kV S/S Power Transformer -T-2 HT Scheduled S/D Due to Due to keranihat 33 kv feeder Redhot maintenance"
         },
@@ -10887,13 +10789,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Patuakhali-Payra  132kV Ckt-1 is restored.",
           "full_desc": "Patuakhali-Payra  132kV Ckt-1 is restored."
-        },
-        {
-          "time": "21:00",
-          "plant": "Evening Peak Generation",
-          "load": "14958 MW",
-          "reason": "Evening Peak Generation is 14958 MW.",
-          "full_desc": "Evening Peak Generation is 14958 MW."
         },
         {
           "time": "22:52",
@@ -11730,16 +11625,9 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "dailyOutages": [
         {
-          "time": "09:00",
-          "plant": "Day Peak Generation",
-          "load": "14067 MW",
-          "reason": "Day Peak Generation is 14067 MW.",
-          "full_desc": "Day Peak Generation is 14067 MW."
-        },
-        {
           "time": "10:05 - 10:40",
           "plant": "Shahjadpur 132/33kV S/S T-2(415T) LT Forced",
-          "load": "HT Outage",
+          "load": "8.0MW",
           "reason": "for red hot maintenance",
           "full_desc": "Shahjadpur 132/33kV S/S T-2(415T) LT Forced S/D Due to SD taken by Shahjadpur -01 33Kv feeder for red hot maintenance"
         },
@@ -11802,7 +11690,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "14:51 - 15:47",
           "plant": "Bhaluka 132/33kV S/S BR Powergen Ckt- 01 Tripped showing R phase zone 2 relays",
-          "load": "HT Outage",
+          "load": "63.0MW",
           "reason": "Due to Power plant trip",
           "full_desc": "Bhaluka 132/33kV S/S BR Powergen Ckt- 01 Tripped showing R phase zone 2 relays Due to Power plant trip"
         },
@@ -11830,14 +11718,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "16:55 - 18:07",
           "plant": "Aminbazar-Manikgonj PP 132kV Ckt-1 Tripped from Aminbazar 400/230/132kV end showing Over Current relays",
-          "load": "HT Outage",
+          "load": "120.0MW",
           "reason": "Due to Over load",
           "full_desc": "Aminbazar-Manikgonj PP 132kV Ckt-1 Tripped from Aminbazar 400/230/132kV end showing Over Current relays Due to Over load"
         },
         {
           "time": "17:05 - 17:24",
           "plant": "Mahasthangarh 132/33kV S/S 416T MTR 2 LT Tripped showing P 142 relays",
-          "load": "HT Outage",
+          "load": "38.0MW",
           "reason": "Due to PBS Durgapur 33 kv feeder fault.",
           "full_desc": "Mahasthangarh 132/33kV S/S 416T MTR 2 LT Tripped showing P 142 relays Due to PBS Durgapur 33 kv feeder fault."
         },
@@ -11865,14 +11753,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "17:34 - 18:21",
           "plant": "Keraniganj-Sreenagar 132kV Ckt-1 Tripped from Keranigonj 230/132/33kV end showing Distance Relay. relays",
-          "load": "HT Outage",
+          "load": "1.0MW",
           "reason": "Due to Bad weather and thundering.",
           "full_desc": "Keraniganj-Sreenagar 132kV Ckt-1 Tripped from Keranigonj 230/132/33kV end showing Distance Relay. relays Due to Bad weather and thundering."
         },
         {
           "time": "17:34 - 18:45",
           "plant": "Keraniganj-Sreenagar (T at Powerpac 100MW) 132kV Ckt-2 Tripped from Keranigonj 230/132/33kV end showing Distance Relay relays",
-          "load": "100MW",
+          "load": "1.0MW",
           "reason": "Due to Bad weather and thundering.",
           "full_desc": "Keraniganj-Sreenagar (T at Powerpac 100MW) 132kV Ckt-2 Tripped from Keranigonj 230/132/33kV end showing Distance Relay relays Due to Bad weather and thundering."
         },
@@ -11907,21 +11795,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "17:53 - 18:36",
           "plant": "Aminbazar-Manikgonj PP 132kV Ckt-2 Tripped from Aminbazar 400/230/132kV end showing Distance relays",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to Distance Trip",
           "full_desc": "Aminbazar-Manikgonj PP 132kV Ckt-2 Tripped from Aminbazar 400/230/132kV end showing Distance relays Due to Distance Trip"
         },
         {
           "time": "17:56 - 18:24",
           "plant": "Narshingdi 132/33kV S/S T-2 LT Tripped showing Inter trip relays",
-          "load": "HT Outage",
+          "load": "45.0MW",
           "reason": "Due to Inter trip",
           "full_desc": "Narshingdi 132/33kV S/S T-2 LT Tripped showing Inter trip relays Due to Inter trip"
         },
         {
           "time": "17:56 - 18:22",
           "plant": "Narshingdi 132/33kV S/S T-2 HT Tripped showing 50 relays",
-          "load": "HT Outage",
+          "load": "45.0MW",
           "reason": "Due to Over current",
           "full_desc": "Narshingdi 132/33kV S/S T-2 HT Tripped showing 50 relays Due to Over current"
         },
@@ -11935,35 +11823,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "18:19 - 19:02",
           "plant": "Bhaluka 132/33kV S/S BR Powergen Ckt- 02 Tripped showing R phase zone 2,36.3km relays",
-          "load": "HT Outage",
+          "load": "45.0MW",
           "reason": "Due to power plant trip.",
           "full_desc": "Bhaluka 132/33kV S/S BR Powergen Ckt- 02 Tripped showing R phase zone 2,36.3km relays Due to power plant trip."
         },
         {
           "time": "18:19 - 18:24",
           "plant": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing SPS trip. relays",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to BR Power plant trip.",
           "full_desc": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing SPS trip. relays Due to BR Power plant trip."
         },
         {
           "time": "18:19 - 18:24",
           "plant": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing SPS trip. relays",
-          "load": "HT Outage",
+          "load": "60.0MW",
           "reason": "Due to BR power plant trip.",
           "full_desc": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing SPS trip. relays Due to BR power plant trip."
         },
         {
           "time": "18:19 - 18:24",
           "plant": "Bhaluka 132/33kV S/S 03. Transformer-03 LT Tripped showing SPS trip. relays",
-          "load": "HT Outage",
+          "load": "19.0MW",
           "reason": "Due to BR Power plant trip.",
           "full_desc": "Bhaluka 132/33kV S/S 03. Transformer-03 LT Tripped showing SPS trip. relays Due to BR Power plant trip."
         },
         {
           "time": "18:19 - 19:01",
           "plant": "Bhaluka 132/33kV S/S BR Powergen Ckt- 01 Tripped showing R phase zone 2,36.7km. relays",
-          "load": "HT Outage",
+          "load": "45.0MW",
           "reason": "Due to BR Power plant trip.",
           "full_desc": "Bhaluka 132/33kV S/S BR Powergen Ckt- 01 Tripped showing R phase zone 2,36.7km. relays Due to BR Power plant trip."
         },
@@ -11996,13 +11884,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Barishal(N)-Madaripur 132 kV Ckt-2 Scheduled S/D from Barishal 230/132kV end Due to Tripped line conductor repair work"
         },
         {
-          "time": "21:00",
-          "plant": "Evening Peak Generation",
-          "load": "14630 MW",
-          "reason": "Evening Peak Generation is 14630 MW.",
-          "full_desc": "Evening Peak Generation is 14630 MW."
-        },
-        {
           "time": "23:28",
           "plant": "Maniknagar-Siddhirganj 230kV Ckt-2",
           "load": "HT Outage",
@@ -12015,13 +11896,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Maniknagar-Siddhirganj 230kV Ckt-2 is restored.",
           "full_desc": "Maniknagar-Siddhirganj 230kV Ckt-2 is restored."
-        },
-        {
-          "time": "06:00",
-          "plant": "Minimum generation",
-          "load": "12623 MW",
-          "reason": "Minimum generation is 12623 MW.",
-          "full_desc": "Minimum generation is 12623 MW."
         },
         {
           "time": "06:21",
@@ -12040,14 +11914,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "07:19",
           "plant": "Narail 132/33kV S/S TR2 (413-T) LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "7.0MW",
           "reason": "Due to 33kV N6 Feeder Bus Side Red Hot Maintenance.",
           "full_desc": "Narail 132/33kV S/S TR2 (413-T) LT Scheduled S/D Due to 33kV N6 Feeder Bus Side Red Hot Maintenance."
         },
         {
           "time": "07:20",
           "plant": "Narail 132/33kV S/S TR2 (413-T) HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "7.0MW",
           "reason": "Due to 33kV N6 Feeder Bus Side Red Hot Maintenance.",
           "full_desc": "Narail 132/33kV S/S TR2 (413-T) HT Scheduled S/D Due to 33kV N6 Feeder Bus Side Red Hot Maintenance."
         },
@@ -12505,28 +12379,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "09:07 - 10:26",
           "plant": "Srinagar 132/33kV S/S Tr-01 LT Scheduled",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "for PBS red hot maintenance.",
           "full_desc": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D Due to 33 kv bus -01 shutdown for PBS red hot maintenance."
         },
         {
           "time": "09:08 - 10:24",
           "plant": "Srinagar 132/33kV S/S Tr-01 HT Scheduled",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "for PBS red hot maintenance.",
           "full_desc": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D Due to 33 kv bus -01 shutdown for PBS red hot maintenance."
         },
         {
           "time": "09:19 - 10:17",
           "plant": "Srinagar 132/33kV S/S 33 kV bus Scheduled",
-          "load": "HT Outage",
+          "load": "20.0MW",
           "reason": "for PBS red hot maintenance.",
           "full_desc": "Srinagar 132/33kV S/S 33 kV bus Scheduled S/D Due to 33 kv bus -01 shutdown for PBS red hot maintenance."
         },
         {
           "time": "09:20 - 09:59",
           "plant": "Shahjadpur 132/33kV S/S T-2(415T) HT Forced S/D",
-          "load": "HT Outage",
+          "load": "9.0MW",
           "reason": "Due to Maintenance",
           "full_desc": "Shahjadpur 132/33kV S/S T-2(415T) HT Forced S/D Due to Maintenance"
         },
@@ -12547,14 +12421,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "10:22 - 12:34",
           "plant": "Chhatak 132/33kV S/S T-1 LT Scheduled",
-          "load": "HT Outage",
+          "load": "12.0MW",
           "reason": "for 33KV T-1 Bus section red hot maintenance.",
           "full_desc": "Chhatak 132/33kV S/S T-1 LT Scheduled S/D Due to Shutdown for 33KV T-1 Bus section red hot maintenance."
         },
         {
           "time": "10:22 - 12:34",
           "plant": "Chhatak 132/33kV S/S T-1 HT Scheduled",
-          "load": "HT Outage",
+          "load": "12.0MW",
           "reason": "for 33KV T-1 Bus section red hot maintenance.",
           "full_desc": "Chhatak 132/33kV S/S T-1 HT Scheduled S/D Due to Shutdown for 33KV T-1 Bus section red hot maintenance."
         },
@@ -12596,21 +12470,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "15:47 - 17:30",
           "plant": "Daganbhuiyan 132/33kV S/S Transformer-1 LT Forced",
-          "load": "HT Outage",
+          "load": "14.0MW",
           "reason": "for  Red Hot Maintenance",
           "full_desc": "Daganbhuiyan 132/33kV S/S Transformer-1 LT Forced S/D Due to shutdown for  Red Hot Maintenance"
         },
         {
           "time": "16:06 - 17:07",
           "plant": "Fenchuganj 230/132/33kV S/S TR-01 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "11.0MW",
           "reason": "Due to PDB Feeder maintenance",
           "full_desc": "Fenchuganj 230/132/33kV S/S TR-01 HT Scheduled S/D Due to PDB Feeder maintenance"
         },
         {
           "time": "16:23 - 16:45",
           "plant": "Chapai 132/33kV S/S T-4 (435T) HT Forced S/D",
-          "load": "HT Outage",
+          "load": "8.0MW",
           "reason": "Due to Nest Remove",
           "full_desc": "Chapai 132/33kV S/S T-4 (435T) HT Forced S/D Due to Nest Remove"
         },
@@ -12634,13 +12508,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "HT Outage",
           "reason": "Due to Red-hot Maintenance",
           "full_desc": "Dhamrai 132/33kV S/S Transformer-1 HT Scheduled S/D Due to Red-hot Maintenance"
-        },
-        {
-          "time": "07:00",
-          "plant": "Minimum Generation",
-          "load": "13639 MW",
-          "reason": "Minimum Generation is 13639 MW.",
-          "full_desc": "Minimum Generation is 13639 MW."
         }
       ],
       "hourlyLoadData": [
@@ -13033,14 +12900,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "08:09 - 09:44",
           "plant": "Charfasson 230/33kV S/S Power Transformer-2 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "24.0MW",
           "reason": "Due to CT ratio with burden test.",
           "full_desc": "Charfasson 230/33kV S/S Power Transformer-2 LT Scheduled S/D Due to CT ratio with burden test."
         },
         {
           "time": "08:11 - 09:43",
           "plant": "Charfasson 230/33kV S/S Power Transformer-2 HT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "24.0MW",
           "reason": "Due to CT Ratio with burden test.",
           "full_desc": "Charfasson 230/33kV S/S Power Transformer-2 HT Scheduled S/D Due to CT Ratio with burden test."
         },
@@ -13101,13 +12968,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Bajitpur 132/33kV S/S 132 kV Bus-2 Forced S/D"
         },
         {
-          "time": "12:00",
-          "plant": "Day Peak Generation",
-          "load": "14581 MW",
-          "reason": "Day Peak Generation is 14581 MW.",
-          "full_desc": "Day Peak Generation is 14581 MW."
-        },
-        {
           "time": "13:37 - 17:14",
           "plant": "Purbasadipur-Thakurgaon-EPV  132kV Ckt-2 Tripped from Purbasadipur 230/132/33kV end showing Main-1 Diatance relay <br> Main-2 Distance Relay relays.",
           "load": "HT Outage",
@@ -13117,21 +12977,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "15:10 - 15:17",
           "plant": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing SPS trip. relays",
-          "load": "HT Outage",
+          "load": "59.0MW",
           "reason": "Due to Fault at BR Powergen end.",
           "full_desc": "Bhaluka 132/33kV S/S 02. Transformer- 02 LT Tripped showing SPS trip. relays Due to Fault at BR Powergen end."
         },
         {
           "time": "15:10 - 15:31",
           "plant": "Bhaluka 132/33kV S/S BR Powergen Ckt- 01 Tripped showing R Phase zone 2 trip. relays",
-          "load": "HT Outage",
+          "load": "41.0MW",
           "reason": "Due to BR Powergen end fault.",
           "full_desc": "Bhaluka 132/33kV S/S BR Powergen Ckt- 01 Tripped showing R Phase zone 2 trip. relays Due to BR Powergen end fault."
         },
         {
           "time": "15:10 - 15:17",
           "plant": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing SPS trip relays",
-          "load": "HT Outage",
+          "load": "59.0MW",
           "reason": "Due to Fault at BR Powergen end",
           "full_desc": "Bhaluka 132/33kV S/S 01. Transformer- 01 LT Tripped showing SPS trip relays Due to Fault at BR Powergen end"
         },
@@ -13568,28 +13428,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "08:17 - 09:03",
           "plant": "Sylhet 132/33kV S/S T2 HT Tripped showing LV E/F, LV O/C and Gen trip relays",
-          "load": "HT Outage",
+          "load": "61.0MW",
           "reason": "Due to None",
           "full_desc": "Sylhet 132/33kV S/S T2 HT Tripped showing LV E/F, LV O/C and Gen trip relays Due to None"
         },
         {
           "time": "08:17 - 09:06",
           "plant": "Sylhet 132/33kV S/S T2 LT Tripped showing LV E/F, LV O/C and gen trip relays",
-          "load": "HT Outage",
+          "load": "61.0MW",
           "reason": "Due to None",
           "full_desc": "Sylhet 132/33kV S/S T2 LT Tripped showing LV E/F, LV O/C and gen trip relays Due to None"
         },
         {
           "time": "08:17 - 08:47",
           "plant": "Chattak-Sylhet 132 kV Ckt-2 Tripped from Sylhet 132/33kV end showing Distance relays.",
-          "load": "HT Outage",
+          "load": "32.0MW",
           "reason": "Chattak-Sylhet 132 kV Ckt-2 Tripped from Sylhet 132/33kV end showing Distance relays.",
           "full_desc": "Chattak-Sylhet 132 kV Ckt-2 Tripped from Sylhet 132/33kV end showing Distance relays."
         },
         {
           "time": "08:38 - 10:27",
           "plant": "Gopalganj 132/33kV S/S Transformer-03 LT Scheduled S/D",
-          "load": "HT Outage",
+          "load": "14.0MW",
           "reason": "Due to Md.Shakil Agm(A/C) Mollahat zonel office, Bagerhat Pbs. Breaker to ds clamp maintenance (B-Phase).",
           "full_desc": "Gopalganj 132/33kV S/S Transformer-03 LT Scheduled S/D Due to Md.Shakil Agm(A/C) Mollahat zonel office, Bagerhat Pbs. Breaker to ds clamp maintenance (B-Phase)."
         },
@@ -13685,13 +13545,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Sherpur 132/33kV S/S Transformer- 03 HT Scheduled S/D Due to TR-03 132 KV DS box installation works."
         },
         {
-          "time": "12:00",
-          "plant": "Day peak generation",
-          "load": "14441 MW",
-          "reason": "Day peak generation is 14441 MW.",
-          "full_desc": "Day peak generation is 14441 MW."
-        },
-        {
           "time": "12:23 - 13:06",
           "plant": "Ishurdi 230/132kV S/S 230 kV Bus 1 Project Work S/D",
           "load": "HT Outage",
@@ -13702,8 +13555,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "time": "17:10 - 18:25",
           "plant": "Purbasadipur-Thakurgaon-EPV  132kV Ckt-2 Forced",
           "load": "HT Outage",
-          "reason": "Due to \u09ac\u09be\u09b8\u09be\u09ac\u09be\u09dc\u09bf\u09b0 \u09aa\u09cd\u09af\u09be\u09a8\u09c7\u09b2 \u09a4\u09c1\u09b2\u09a4\u09c7 \u0997\u09bf\u09df\u09c7 \u0995\u09a8\u09cd\u09a1\u09be\u0995\u09b0 \u099b\u09bf\u09dc\u09c7 \u09ab\u09c7\u09b2\u09c7\u099b\u09c7\u0964 \u09a4\u09be\u0987 \u0986\u09b0\u09cd\u09ae\u09be\u09b0\u09bf\u0982 \u0995\u09b0\u09be\u09b0 \u099c\u09a8\u09cd\u09af \u09b6\u09be\u099f\u09a1\u09be\u0989\u09a8 \u09aa\u09cd\u09b0\u09df\u09cb\u099c\u09a8\u0964",
-          "full_desc": "Purbasadipur-Thakurgaon-EPV  132kV Ckt-2 Forced S/D from Purbasadipur 230/132/33kV end Due to \u09ac\u09be\u09b8\u09be\u09ac\u09be\u09dc\u09bf\u09b0 \u09aa\u09cd\u09af\u09be\u09a8\u09c7\u09b2 \u09a4\u09c1\u09b2\u09a4\u09c7 \u0997\u09bf\u09df\u09c7 \u0995\u09a8\u09cd\u09a1\u09be\u0995\u09b0 \u099b\u09bf\u09dc\u09c7 \u09ab\u09c7\u09b2\u09c7\u099b\u09c7\u0964 \u09a4\u09be\u0987 \u0986\u09b0\u09cd\u09ae\u09be\u09b0\u09bf\u0982 \u0995\u09b0\u09be\u09b0 \u099c\u09a8\u09cd\u09af \u09b6\u09be\u099f\u09a1\u09be\u0989\u09a8 \u09aa\u09cd\u09b0\u09df\u09cb\u099c\u09a8\u0964"
+          "reason": "Due to \u09ac\u09be\u09b8\u09be\u09ac\u09be\u09dc\u09bf\u09b0 \u09aa\u09cd\u09af\u09be\u09a8\u09c7\u09b2 \u09a4\u09c1\u09b2\u09a4\u09c7 \u0997\u09bf\u09df\u09c7 \u0995\u09a8\u09cd\u09a1\u09be\u0995\u09b0 \u099b\u09bf\u09dc\u09c7 \u09ab\u09c7\u09b2\u09c7\u099b\u09c7\u0964 \u09a4\u09be\u0987 \u0986\u09b0\u09cd\u09ae\u09be\u09b0\u09bf\u0982 \u0995\u09b0\u09be\u09b0 \u099c\u09a8\u09cd\u09af \u09b6\u09be\u099f\u09a1\u09be\u0989\u09a8",
+          "full_desc": "Purbasadipur-Thakurgaon-EPV  132kV Ckt-2 Forced S/D from Purbasadipur 230/132/33kV end Due to \u09ac\u09be\u09b8\u09be\u09ac\u09be\u09dc\u09bf\u09b0 \u09aa\u09cd\u09af\u09be\u09a8\u09c7\u09b2 \u09a4\u09c1\u09b2\u09a4\u09c7 \u0997\u09bf\u09df\u09c7 \u0995\u09a8\u09cd\u09a1\u09be\u0995\u09b0 \u099b\u09bf\u09dc\u09c7 \u09ab\u09c7\u09b2\u09c7\u099b\u09c7\u0964 \u09a4\u09be\u0987 \u0986\u09b0\u09cd\u09ae\u09be\u09b0\u09bf\u0982 \u0995\u09b0\u09be\u09b0 \u099c\u09a8\u09cd\u09af \u09b6\u09be\u099f\u09a1\u09be\u0989\u09a8"
         },
         {
           "time": "19:26",
@@ -13725,13 +13578,6 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "load": "1320 MW",
           "reason": "Rampal 1320 MW (BIFPCL) Synchronized with remarks:- U1",
           "full_desc": "Rampal 1320 MW (BIFPCL) Synchronized with remarks:- U1"
-        },
-        {
-          "time": "21:00",
-          "plant": "Evening Peak Generation: 15700 MW.",
-          "load": "15700 MW",
-          "reason": "Evening Peak Generation: 15700 MW.",
-          "full_desc": "Evening Peak Generation: 15700 MW."
         },
         {
           "time": "06:00",

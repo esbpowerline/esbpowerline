@@ -211,6 +211,111 @@ def published_demand_stats(p1, forecast):
     }
 
 
+TIME_CELL = re.compile(r'^\d{1,2}:\d{2}(?::\d{2})?$')
+# "not applicable" markers PGCB puts in a time column it has nothing for.
+PLACEHOLDER_CELL = re.compile(r'^[-–—.]+$|^n/?a$', re.IGNORECASE)
+# P1's hourly remarks share the event table's shape — a time cell followed by
+# a sentence — so they have to be excluded by content: "12:00 | Day Peak
+# Generation is 14740 MW." is a restatement of a headline figure, not an outage.
+NOT_AN_EVENT = re.compile(
+    r'^(day|evening)\s+peak\s+(generation|demand)\b'
+    r'|^(minimum|maximum)\s+generation\b'
+    r'|^total\s+(gen|energy)\b'
+    r'|^load\s*shed(ding)?\s*(is|:)',
+    re.IGNORECASE,
+)
+
+
+def split_event_text(desc, load_cell=None):
+    """Asset, cause and lost load teased out of one free-text event description."""
+    plant_val, reason_val = desc, ""
+    for keyword in [' due to ', ' for ', ' Due to ']:
+        if keyword in desc:
+            split_parts = desc.split(keyword, 1)
+            plant_val = split_parts[0]
+            reason_val = keyword.strip() + " " + split_parts[1]
+            break
+    for verb in [' was ', ' is ', ' tripped ', ' synchronized ', ' S/D ', ' Scheduled S/D ']:
+        if verb in plant_val:
+            plant_val = plant_val.split(verb, 1)[0]
+            break
+    load_match = re.search(r'(\d+(?:\.\d+)?\s*MW)', load_cell or '', re.IGNORECASE) \
+        or re.search(r'(\d+(?:\.\d+)?\s*MW)', desc, re.IGNORECASE)
+    return (
+        plant_val.strip(),
+        reason_val.strip() if reason_val else desc.strip(),
+        load_match.group(1) if load_match else "HT Outage",
+    )
+
+
+def outage_row(line):
+    """(time_in, time_out, description, load_cell) for an event row, else None.
+
+    Columns are found by shape, not offset. They sit at parts[2..4] on the
+    2025+ sheet but at parts[1..3] on the older one, which has no leading
+    spacer column — so reading the newer offsets against an older report put
+    the restoration time in `time`, the description in `time_out`, and left
+    plant, reason and load empty on every pre-2025 day in the archive. The
+    header row cannot be used to align them either: its cells are merged and
+    do not line up with the data beneath.
+    """
+    cells = [c.strip() for c in line.split('|')]
+    idx = [i for i, c in enumerate(cells) if c]
+    # A restoration-only entry leaves the outage-time column as a dash:
+    # "| - | 10:34 | Rajshahi 132/33kV S/S Main Bus is restored. |". Treating
+    # that dash as content stopped 170 days' worth of these from parsing.
+    while idx and PLACEHOLDER_CELL.match(cells[idx[0]]):
+        idx = idx[1:]
+    if not idx or not TIME_CELL.match(cells[idx[0]]):
+        return None
+    time_in, rest = cells[idx[0]], idx[1:]
+    time_out = ''
+    if rest and TIME_CELL.match(cells[rest[0]]):
+        time_out, rest = cells[rest[0]], rest[1:]
+    desc_at = next((i for i in rest if len(cells[i]) > 12 and re.search(r'[A-Za-z]{3}', cells[i])), None)
+    if desc_at is None or NOT_AN_EVENT.match(cells[desc_at]):
+        return None
+    load_cell = next(
+        (cells[i] for i in rest if i > desc_at and re.search(r'\d+(?:\.\d+)?\s*MW', cells[i], re.I)),
+        None,
+    )
+    return time_in, time_out, cells[desc_at], load_cell, desc_at
+
+
+# Headings that sit alone in a cell and would otherwise be swallowed into the
+# preceding event as if they were wrapped description text.
+SECTION_HEADING = re.compile(
+    r'^(event summary|description of event|planned|forced|status of unavailable'
+    r'|zone-?wise|total|remarks|outage time|restoration time)\b',
+    re.IGNORECASE,
+)
+
+
+def outage_continuation(line, desc_col):
+    """The wrapped tail of the previous event's description, or None.
+
+    Keyed to the column the description itself occupied, because a wrapped row
+    is not necessarily a lone cell: on 2025-05-23 the Natore event continues
+    with "maintenance" in the description column AND "interrup." in the
+    lost-load column, and the tail can be as short as "Filling." — so neither
+    a one-cell rule nor a length floor works. A row carrying a time is a new
+    event, never a continuation.
+    """
+    if desc_col is None:
+        return None
+    cells = [c.strip() for c in line.split('|')]
+    if desc_col >= len(cells) or not cells[desc_col]:
+        return None
+    if any(TIME_CELL.match(c) for c in cells if c):
+        return None
+    text = cells[desc_col]
+    if NOT_AN_EVENT.match(text) or SECTION_HEADING.match(text):
+        return None
+    if not re.search(r'[A-Za-z]{3}', text):
+        return None
+    return text
+
+
 def evening_peak_hour(p1):
     """The hour PGCB stamps on the evening peak, as "HH:00".
 
@@ -422,70 +527,38 @@ def parse_pgcb_file(filepath, op_date):
     # Extract outages from P1
     daily_outages = []
     current_outage = None
+    current_load_cell = None
+    current_desc_col = None
     for line in p1.split('\n'):
         parts = [p.strip() for p in line.split('|')]
-        # Format 1: Tabular format (newer reports)
-        if len(parts) >= 5:
-            time_in = parts[2]
-            time_out = parts[3]
-            desc = parts[4]
-            
-            is_new = False
-            if time_in and re.match(r'^\d{2}:\d{2}', time_in):
-                is_new = True
-            elif time_out and re.match(r'^\d{2}:\d{2}', time_out):
-                is_new = True
-                
-            if is_new:
-                time_val = f"{time_in} - {time_out}" if (time_in and time_out) else (time_in or time_out)
-                plant_val = desc
-                reason_val = ""
-                for keyword in [' due to ', ' for ', ' Due to ']:
-                    if keyword in desc:
-                        split_parts = desc.split(keyword, 1)
-                        plant_val = split_parts[0]
-                        reason_val = keyword.strip() + " " + split_parts[1]
-                        break
-                for verb in [' was ', ' is ', ' tripped ', ' synchronized ', ' S/D ', ' Scheduled S/D ']:
-                    if verb in plant_val:
-                        plant_val = plant_val.split(verb, 1)[0]
-                        break
-                load_match = re.search(r'(\d+(?:\.\d+)?\s*MW)', desc, re.IGNORECASE)
-                load_val = load_match.group(1) if load_match else "HT Outage"
-                
-                current_outage = {
-                    'time': time_val,
-                    'plant': plant_val.strip(),
-                    'load': load_val,
-                    'reason': reason_val.strip() if reason_val else desc.strip(),
-                    'full_desc': desc
-                }
-                daily_outages.append(current_outage)
-                continue
-            elif current_outage and desc and len(parts) > 4 and not parts[1] and not parts[2] and not parts[3]:
-                # Continuation of description line
-                current_outage['full_desc'] += " " + desc
-                desc_full = current_outage['full_desc']
-                plant_val = desc_full
-                reason_val = ""
-                for keyword in [' due to ', ' for ', ' Due to ']:
-                    if keyword in desc_full:
-                        split_parts = desc_full.split(keyword, 1)
-                        plant_val = split_parts[0]
-                        reason_val = keyword.strip() + " " + split_parts[1]
-                        break
-                for verb in [' was ', ' is ', ' tripped ', ' synchronized ', ' S/D ', ' Scheduled S/D ']:
-                    if verb in plant_val:
-                        plant_val = plant_val.split(verb, 1)[0]
-                        break
-                load_match = re.search(r'(\d+(?:\.\d+)?\s*MW)', desc_full, re.IGNORECASE)
-                load_val = load_match.group(1) if load_match else "HT Outage"
-                
-                current_outage['plant'] = plant_val.strip()
+        # Format 1: the tabular event summary, on both sheet generations.
+        row = outage_row(line)
+        if row:
+            time_in, time_out, desc, load_cell, desc_col = row
+            current_desc_col = desc_col
+            plant_val, reason_val, load_val = split_event_text(desc, load_cell)
+            current_outage = {
+                'time': f"{time_in} - {time_out}" if (time_in and time_out) else (time_in or time_out),
+                'plant': plant_val,
+                'load': load_val,
+                'reason': reason_val,
+                'full_desc': desc,
+            }
+            current_load_cell = load_cell
+            daily_outages.append(current_outage)
+            continue
+
+        if current_outage:
+            more = outage_continuation(line, current_desc_col)
+            if more:
+                current_outage['full_desc'] = f"{current_outage['full_desc']} {more}"
+                plant_val, reason_val, load_val = split_event_text(
+                    current_outage['full_desc'], current_load_cell)
+                current_outage['plant'] = plant_val
+                current_outage['reason'] = reason_val
                 current_outage['load'] = load_val
-                current_outage['reason'] = reason_val.strip() if reason_val else desc_full.strip()
                 continue
-                
+
         # Format 2: Fallback to lettered list pattern (legacy reports)
         cells = [c.strip() for c in line.split('|') if c.strip()]
         if not cells:
@@ -497,26 +570,15 @@ def parse_pgcb_file(filepath, op_date):
             time_match = re.search(r'((?:from|at|since|under)\s*\d{2}:\d{2}(?:\s*to\s*\d{2}:\d{2})?)', desc, re.IGNORECASE)
             time_val = time_match.group(1) if time_match else "Outage"
             
-            plant_val = desc
-            reason_val = ""
-            for keyword in [' due to ', ' for ']:
-                if keyword in desc:
-                    parts_legacy = desc.split(keyword, 1)
-                    plant_val = parts_legacy[0]
-                    reason_val = keyword.strip() + " " + parts_legacy[1]
-                    break
-            for verb in [' was ', ' is ', ' tripped ', ' synchronized ']:
-                if verb in plant_val:
-                    plant_val = plant_val.split(verb, 1)[0]
-                    break
-            load_match = re.search(r'(\d+(?:\.\d+)?\s*MW)', desc, re.IGNORECASE)
-            load_val = load_match.group(1) if load_match else "HT Outage"
-            
+            plant_val, reason_val, load_val = split_event_text(desc)
             daily_outages.append({
                 'time': time_val,
-                'plant': plant_val.strip(),
+                'plant': plant_val,
                 'load': load_val,
-                'reason': reason_val.strip() if reason_val else desc.strip()
+                'reason': reason_val,
+                # Carried here too so every row has the same shape, whichever
+                # branch produced it.
+                'full_desc': desc,
             })
 
     # Extract regional max load served from P3
