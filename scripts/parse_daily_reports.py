@@ -316,6 +316,155 @@ def outage_continuation(line, desc_col):
     return text
 
 
+# Columns in GenLog that are roll-ups or unrelated readings, not power stations.
+GENLOG_AGGREGATES = {
+    'national grid total': 'national',
+    'eastern total': 'eastern',
+    'western total': 'western',
+}
+GENLOG_IGNORED = {'water level', 'hour', ''}
+
+
+def parse_genlog(content):
+    """Hourly generation per power station, from the GenLog sheet.
+
+    A single wide matrix: one header row of station names, a row of installed
+    capacities beneath it, then one row per hour. Only the 2025+ workbooks
+    carry it — older reports have a `YesterdayGen` sheet of a different shape —
+    so this returns None rather than guessing when the sheet is absent.
+
+    `national` is PGCB's own total column, kept so the per-station figures can
+    be checked against it and against the L-Curve rather than trusted blind.
+    """
+    sheet = get_sheet_content(content, 'GenLog')
+    if not sheet:
+        return None
+    lines = [l for l in sheet.split('\n') if l.strip('| ')]
+
+    header_at = next(
+        (i for i, l in enumerate(lines)
+         if any(c.strip().lower() == 'hour' for c in l.split('|'))),
+        None,
+    )
+    if header_at is None or header_at + 1 >= len(lines):
+        return None
+    header = [c.strip() for c in lines[header_at].split('|')]
+    capacity = [c.strip() for c in lines[header_at + 1].split('|')]
+    hour_col = next(i for i, c in enumerate(header) if c.lower() == 'hour')
+
+    stations, aggregates = [], {}
+    for col, name in enumerate(header):
+        key = name.lower().strip()
+        if col == hour_col or key in GENLOG_IGNORED:
+            continue
+        if key in GENLOG_AGGREGATES:
+            aggregates[GENLOG_AGGREGATES[key]] = col
+        else:
+            stations.append({
+                'col': col,
+                'name': name,
+                'capacityMw': clean_float(capacity[col]) if col < len(capacity) else 0.0,
+            })
+    if not stations:
+        return None
+
+    hours, values = [], {c: [] for c in [s['col'] for s in stations] + list(aggregates.values())}
+    for line in lines[header_at + 1:]:
+        cells = [c.strip() for c in line.split('|')]
+        if hour_col >= len(cells):
+            continue
+        m = re.match(r'^(\d{1,2}):(\d{2})', cells[hour_col])
+        if not m:
+            continue
+        stamp = f"{int(m.group(1)):02d}:{m.group(2)}"
+        # 24:00 is midnight closing the day — the next day's 00:00.
+        if not stamp.endswith(':00') or stamp == '24:00':
+            continue
+        hours.append(stamp)
+        for col in values:
+            values[col].append(clean_float(cells[col]) if col < len(cells) else 0.0)
+
+    if not hours:
+        return None
+    return {
+        'hours': hours,
+        'stations': [
+            {'name': s['name'], 'capacityMw': s['capacityMw'], 'hourlyMw': values[s['col']]}
+            for s in stations
+        ],
+        'totals': {name: values[col] for name, col in aggregates.items()},
+    }
+
+
+def parse_plant_actuals(forecast):
+    """Per-station figures for the REPORTED day, from the Forecast sheet.
+
+    That sheet is laid out for the next day, but its "Actual Generation on
+    <reported day>" pair is the one block on it that belongs to the day being
+    reported. Everything to the right — forecast availability, effective
+    availability and the Remarks that explain them — describes tomorrow, and is
+    deliberately not read here: mixing the two is the defect this whole repair
+    exists to remove.
+
+    Column positions are taken from the header row rather than assumed, since
+    the sheet gained columns between layouts.
+    """
+    if not forecast:
+        return None
+    lines = [l for l in forecast.split('\n') if l.strip('| ')]
+    header_at = next(
+        (i for i, l in enumerate(lines)
+         if re.search(r'name of the', l, re.I) and re.search(r'actual generation', l, re.I)),
+        None,
+    )
+    if header_at is None:
+        return None
+    header = [c.strip() for c in lines[header_at].split('|')]
+
+    def col_of(pattern):
+        return next((i for i, c in enumerate(header) if re.search(pattern, norm_text(c))), None)
+
+    name_col = col_of(r'^name of the')
+    fuel_col = col_of(r'^fuel$')
+    producer_col = col_of(r'^producer')
+    installed_col = col_of(r'^installed capacity')
+    present_col = col_of(r'^present capacity')
+    actual_col = col_of(r'^actual generation on')
+    if name_col is None or actual_col is None:
+        return None
+
+    plants = []
+    for line in lines[header_at + 1:]:
+        cells = [c.strip() for c in line.split('|')]
+        if name_col >= len(cells):
+            continue
+        name = cells[name_col]
+        # Skip the two sub-header rows (dates, "Day Peak"/"Ev. Peak", units)
+        # and any total line.
+        if not name or len(name) < 4 or re.match(r'^(day|ev\.?|mw|unit no)', norm_text(name)):
+            continue
+        if re.match(r'^(total|grand total)\b', norm_text(name)):
+            break
+
+        def cell(i):
+            return cells[i] if i is not None and i < len(cells) else ''
+
+        plants.append({
+            'name': re.sub(r'\s*<br>\s*', ' ', name).strip(),
+            'fuel': cell(fuel_col),
+            'producer': cell(producer_col),
+            # "Installed Capacity" spans two sub-columns: the unit breakdown
+            # ("1*210") and its total in MW.
+            'installedCapacity': cell(installed_col),
+            'installedMw': clean_float(cell(installed_col + 1 if installed_col is not None else None)) or None,
+            'presentCapacityMw': clean_float(cell(present_col)) or None,
+            # The two columns immediately under "Actual Generation on <date>".
+            'dayPeakMw': clean_float(cell(actual_col)),
+            'eveningPeakMw': clean_float(cell(actual_col + 1)),
+        })
+    return plants or None
+
+
 def evening_peak_hour(p1):
     """The hour PGCB stamps on the evening peak, as "HH:00".
 

@@ -6,7 +6,7 @@ import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } f
 import Link from 'next/link';
 import {
   Zap, Activity, Cable, TrendingUp, FileText, BarChart3, MapPin, DollarSign, Database, Droplet, Globe, Sun,
-  Search, ChevronLeft, ChevronRight, ChevronDown, Check, Info, Map, Network, CheckSquare, Calendar, RotateCcw, History, Landmark
+  Search, ChevronLeft, ChevronRight, ChevronDown, Check, Info, Map, Network, CheckSquare, Calendar, RotateCcw, History, Landmark, Factory
 } from 'lucide-react';
 import { substationsData } from '@/lib/data/infrastructure/substations';
 import {
@@ -70,6 +70,7 @@ import { nationalBudgetData } from '@/lib/data/macro/budget';
 import { systemLossData } from '@/lib/data/macro/system-loss';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
 import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
+import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
 import { DailyBadge, GridCardFooter, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
 import { GridDataTable, type GridTableDensity } from '@/components/news/power-grid/GridDataTable';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -604,7 +605,7 @@ export function PowerGridExplorer({
 
   const totalCompletedProjectPages = Math.ceil(filteredCompletedProjects.length / completedPerPage);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'plants'>(
     urlBoot?.tab ?? 'overview',
   );
   
@@ -932,12 +933,17 @@ export function PowerGridExplorer({
       blob2: 'bg-teal-500/4',
       blob3: 'bg-primary/3',
     },
+    plants: {
+      blob1: 'bg-sky-500/6',
+      blob2: 'bg-indigo-500/4',
+      blob3: 'bg-primary/3',
+    },
   };
 
   const glow = tabGlowColors[activeTab] || tabGlowColors.overview;
 
   interface TabInfo {
-    id: 'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'pricing';
+    id: 'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'plants' | 'pricing';
     label: string;
     icon: any;
   }
@@ -949,6 +955,7 @@ export function PowerGridExplorer({
     { id: 'imports', label: 'C/B Imports', icon: Globe },
     { id: 'regional', label: 'Regional Grid', icon: Cable },
     { id: 'renewables', label: 'Renewables (SREDA)', icon: Sun },
+    { id: 'plants', label: 'Power Stations', icon: Factory },
     { id: 'transmission', label: 'Technical Information', icon: Activity },
     { id: 'macro', label: 'Macro Trends', icon: TrendingUp },
   ] as const;
@@ -2093,6 +2100,10 @@ export function PowerGridExplorer({
           </div>
         </div>
         </GridLockedContent>
+      )}
+
+      {!isDataMissing && activeTab === 'plants' && (
+        <PowerStationsTab isoDate={selectedDate} systemStats={systemStats} />
       )}
 
       {!isDataMissing && activeTab === 'transmission' && (

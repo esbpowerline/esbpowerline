@@ -6,7 +6,8 @@ export type GridExplorerTab =
   | 'renewables'
   | 'transmission'
   | 'regional'
-  | 'macro';
+  | 'macro'
+  | 'plants';
 
 export type GridMacroSubTab =
   | 'overview'
@@ -34,6 +35,7 @@ const TAB_IDS: GridExplorerTab[] = [
   'transmission',
   'regional',
   'macro',
+  'plants',
 ];
 
 const MACRO_IDS: GridMacroSubTab[] = [

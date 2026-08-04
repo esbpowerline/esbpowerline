@@ -92,6 +92,46 @@ export interface HourlyLoadItem {
   demand: number | null;
 }
 
+/** One power station's figures for the reported day, from the Forecast sheet. */
+export interface PlantActual {
+  name: string;
+  fuel: string;
+  producer: string;
+  /** Unit breakdown as printed, e.g. "1*273+1*139". */
+  installedCapacity: string;
+  installedMw: number | null;
+  presentCapacityMw: number | null;
+  /** Output at the day and evening peaks — the reported day, not the forecast. */
+  dayPeakMw: number;
+  eveningPeakMw: number;
+}
+
+/** Hourly output per station, from the GenLog sheet (2025+ reports only). */
+export interface GenLogStation {
+  name: string;
+  capacityMw: number;
+  /** One value per entry in `hours`. */
+  hourlyMw: number[];
+}
+
+export interface GenLog {
+  hours: string[];
+  stations: GenLogStation[];
+  /** PGCB's own roll-up columns, kept so the station figures can be checked. */
+  totals: { national?: number[]; eastern?: number[]; western?: number[] };
+}
+
+/**
+ * Per-station detail for one day, served from `{date}-plants.json` rather than
+ * the daily payload — it is ~55KB a day and only needed when the tab is opened.
+ * A day only has a file if its figures reconciled against P1 and the load curve.
+ */
+export interface DailyPlantDetail {
+  date: string;
+  plants?: PlantActual[];
+  genlog?: GenLog;
+}
+
 export interface GridDailyData {
   systemStats: GridSystemStats;
   generationData: GridGenerationItem[];

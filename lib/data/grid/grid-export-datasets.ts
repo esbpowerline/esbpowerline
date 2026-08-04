@@ -721,6 +721,10 @@ export function tabToDatasetKeys(tab: GridExplorerTab): GridExportDatasetKey[] {
       return ['regional'];
     case 'transmission':
       return ['outages', 'hourly', 'fin_system_loss'];
+    // Per-station detail lives in its own lazy-loaded file, so the closest
+    // exportable equivalent is the hourly system curve plus the fuel mix.
+    case 'plants':
+      return ['hourly', 'generation'];
     case 'overview':
       return ['kpi', 'generation'];
     case 'macro':
