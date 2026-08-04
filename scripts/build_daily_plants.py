@@ -1,4 +1,4 @@
-"""Emit per-station detail for each day: public/data/daily/{date}-plants.json.
+"""Emit per-station detail for each day: public/data/plants/{date}.json.
 
 Two sheets the site has never read:
 
@@ -11,6 +11,10 @@ Two sheets the site has never read:
 
 Kept in its own file per day rather than inside the daily payload, which the
 Grid Explorer loads on every view; this is fetched only when the tab is opened.
+
+It lives outside public/data/daily on purpose: Next traces that directory into
+every function importing the server-side daily loader, so 17MB placed there
+took a 250MB Vercel function to 256MB and the deploy failed.
 
 Both parses are checked against figures the day already publishes before the
 file is written — the station sum at each peak against P1, and GenLog's own
@@ -32,6 +36,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from backfill_daily_extremes import DAILY, index_sources, read_source  # noqa: E402
+
+PLANTS = DAILY.parent / "plants"
 from parse_daily_reports import (  # noqa: E402
     get_sheet_content,
     lcurve_total_series,
@@ -134,7 +140,8 @@ def main() -> None:
         written_bytes += len(body)
         stats["days written"] += 1
         if args.apply:
-            (DAILY / f"{day}-plants.json").write_text(body, encoding="utf-8")
+            PLANTS.mkdir(parents=True, exist_ok=True)
+            (PLANTS / f"{day}.json").write_text(body, encoding="utf-8")
         if (i + 1) % 400 == 0:
             print(f"  …{i + 1}/{len(days)}", flush=True)
 

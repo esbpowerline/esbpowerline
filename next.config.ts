@@ -43,6 +43,14 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   // Cron ingest uses runtime temp downloads — keep bulky local datasets out of the serverless bundle.
+  //
+  // The wildcard entries matter as much as the cron one. The daily loader
+  // builds its path with `path.join(process.cwd(), 'public', 'data', 'daily', …)`,
+  // which the tracer cannot resolve statically, so it pulls the WHOLE archive
+  // into every function that transitively imports it — `admin/media` alone was
+  // tracing 4,814 files it never reads, and at 256MB it broke the 250MB
+  // function limit and failed the deploy. Only the routes that genuinely read
+  // the archive from disk keep it, via outputFileTracingIncludes below.
   outputFileTracingExcludes: {
     '/api/cron/ingest': [
       './public/data/**/*',
@@ -50,6 +58,11 @@ const nextConfig: NextConfig = {
       './public/uploads/**/*',
       './agent-tools/**/*',
     ],
+    '/admin/**': ['./public/data/**/*', './public/uploads/**/*'],
+    '/cms/**': ['./public/data/**/*', './public/uploads/**/*'],
+    // Station detail is fetched over HTTP by the browser and never read from
+    // disk on the server, so it belongs in no function bundle at all.
+    '**': ['./public/data/plants/**/*'],
   },
 
   // The grid export route reads daily JSON + the logo from disk at runtime; force

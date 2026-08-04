@@ -67,7 +67,11 @@ function canonicalDataPath(pathname: string): string {
 }
 
 function isDailyJsonPath(pathname: string): boolean {
-  return /^\/data\/daily\/\d{4}-\d{2}-\d{2}\.json$/.test(pathname);
+  // `plants` is the per-station detail for the same day, split into its own
+  // directory so Next stops tracing it into serverless bundles. It is the same
+  // day's data and must sit behind the same tier gate — matching only
+  // /data/daily/ here would publish every locked day's station-level figures.
+  return /^\/data\/(daily|plants)\/\d{4}-\d{2}-\d{2}\.json$/.test(pathname);
 }
 
 function isPetrobanglaJsonPath(pathname: string): boolean {
@@ -206,7 +210,9 @@ export async function middleware(request: NextRequest) {
     // Everything below reasons about the static shape, so runtime /api/data/*
     // requests are gated by the same rules as their /data/* twin.
     const dataPath = canonicalDataPath(pathname);
-    const dailyMatch = dataPath.match(/\/data\/(?:daily|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/);
+    const dailyMatch = dataPath.match(
+      /\/data\/(?:daily|plants|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/,
+    );
     const isoDate = dailyMatch?.[1];
     const latestDate = getLatestAvailableDate();
 

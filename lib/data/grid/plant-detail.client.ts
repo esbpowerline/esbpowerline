@@ -11,8 +11,16 @@ import { parseIsoDate } from '@/lib/data/grid/date-utils';
  * GenLog or Forecast plant sheets have one — 299 days of 4,515 — and days whose
  * figures did not reconcile against P1 are deliberately left without one.
  */
+/**
+ * Deliberately NOT under `public/data/daily`. Next traces that directory into
+ * every function that transitively imports the server-side daily loader —
+ * `admin/media` alone bundles 4,814 files from it — so 17MB of station detail
+ * added there pushed that function to 256MB against a 250MB Vercel limit and
+ * the deploy failed. These files are only ever fetched over HTTP by the
+ * browser, so they belong outside anything the tracer follows.
+ */
 export function plantDetailPath(isoDate: string): string {
-  return `/data/daily/${isoDate}-plants.json`;
+  return `/data/plants/${isoDate}.json`;
 }
 
 const cache = new Map<string, DailyPlantDetail | null>();
