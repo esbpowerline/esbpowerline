@@ -3,14 +3,14 @@
     "date": "17 Oct 2025",
     "dayPeakGen": 12577.99,
     "eveningPeakGen": 14149.86,
-    "dayPeakDemand": 12606.99,
+    "dayPeakDemand": 12577.99,
     "eveningPeakDemand": 14210.47,
     "minGen": 11293.28,
-    "maxGen": 14150,
+    "maxGen": 14255.36,
     "totalEnergyGen": 309.66643729,
-    "totalEnergyUnserved": 0.23,
-    "totalEnergyDemand": 309.9,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": 0.864,
+    "totalEnergyDemand": 310.53,
+    "maxTemp": 33.0,
     "totalGasSuppliedPower": 887.71,
     "avgProductionCost": 6.51,
     "totalDailyCost": 2015804529
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 118.19,
-      "cost": 407768092,
-      "unitCost": 3.45,
+      "cost": 421385402,
+      "unitCost": 3.5652,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 93.96,
-      "cost": 622039092,
-      "unitCost": 6.62,
+      "cost": 589651018,
+      "unitCost": 6.2753,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 32.95,
-      "cost": 595163312,
-      "unitCost": 18.06,
+      "cost": 601441147,
+      "unitCost": 18.2505,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 4.62,
-      "cost": 72839816,
-      "unitCost": 15.77,
+      "cost": 73991878,
+      "unitCost": 16.0194,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 54.65,
-      "cost": 346461656,
-      "unitCost": 6.34,
+      "cost": 328729084,
+      "unitCost": 6.0155,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.01,
+      "cost": 77668,
+      "unitCost": 14.71,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -343,8 +350,8 @@
       "time": "06:15",
       "plant": "Barishal-Patuakhali(Barguna T at Bakergonj) 132 kV Ckt Project Work",
       "load": "HT Outage",
-      "reason": "Due to Stringing work of T-17/3 to T-17/4 Span  <br> (G2G project Work ) and from Barguna 132/33kV end Due to Barishal-Patuakhali 230kV Line stringing work.",
-      "full_desc": "Barishal-Patuakhali(Barguna T at Bakergonj) 132 kV Ckt Project Work S/D from Patuakhali 132/33kV end Due to Stringing work of T-17/3 to T-17/4 Span  <br> (G2G project Work ) and from Barguna 132/33kV end Due to Barishal-Patuakhali 230kV Line stringing work."
+      "reason": "Due to Stringing work of T-17/3 to T-17/4 Span <br> (G2G project Work ) and from Barguna 132/33kV end Due to Barishal-Patuakhali 230kV Line stringing work.",
+      "full_desc": "Barishal-Patuakhali(Barguna T at Bakergonj) 132 kV Ckt Project Work S/D from Patuakhali 132/33kV end Due to Stringing work of T-17/3 to T-17/4 Span <br> (G2G project Work ) and from Barguna 132/33kV end Due to Barishal-Patuakhali 230kV Line stringing work."
     },
     {
       "time": "06:35",
@@ -483,147 +490,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 13987.39,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 13750.43,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 13365.25,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12713.06,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12465.97,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12096.75,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11876.36,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11614.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11547.9,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11293.28,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11364.56,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11826.25,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12998.36,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12447.8,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12523.59,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 12087.81,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 11763.47,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 14149.86,
-      "loadShed": 0,
-      "demand": 14149.86
+      "generation": 13387.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
       "generation": 14149.86,
-      "loadShed": 0,
-      "demand": 14149.86
+      "loadShed": 58.0,
+      "demand": 14210.47
     },
     {
       "time": "20:00",
-      "generation": 14149.86,
-      "loadShed": 0,
-      "demand": 14149.86
+      "generation": 14094.86,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 14149.86,
-      "loadShed": 0,
-      "demand": 14149.86
+      "generation": 13633.86,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 14149.86,
-      "loadShed": 0,
-      "demand": 14149.86
+      "generation": 14255.36,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 12577.99,
-      "loadShed": 0,
-      "demand": 12577.99
+      "generation": 14175.36,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

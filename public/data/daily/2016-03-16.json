@@ -3,14 +3,14 @@
     "date": "16 Mar 2016",
     "dayPeakGen": 6707,
     "eveningPeakGen": 7814,
-    "dayPeakDemand": 6790.5,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 8000,
-    "minGen": 5835,
-    "maxGen": 8115,
+    "minGen": 5655.0,
+    "maxGen": 7814.0,
     "totalEnergyGen": 162.223103,
-    "totalEnergyUnserved": 0.67,
-    "totalEnergyDemand": 162.89,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 32.2,
     "totalGasSuppliedPower": 930.26,
     "avgProductionCost": 3.052,
     "totalDailyCost": 495074183
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 102.54,
-      "cost": 353759822,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 4.11,
-      "cost": 27240697,
-      "unitCost": 6.62,
+      "cost": 10503254,
+      "unitCost": 2.5525,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 41.82,
-      "cost": 755192156,
-      "unitCost": 18.06,
+      "cost": 424218051,
+      "unitCost": 10.1449,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 2.86,
-      "cost": 286247,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -185,13 +178,6 @@
       "reason": "Siddhirganj S/S-Ullon Ckt-1 tripped  at 18:12 from Siddhirganj end  showing dist trip 1 & 2 and were switched on at ."
     },
     {
-      "time": "00:30 (17/03/16).",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "from 14:02 to 14:09",
       "plant": "Mymensing 132/33 kV T2 transformer",
       "load": "35 MW",
@@ -216,152 +202,7 @@
       "reason": "For the first time, Power flow has been starting from Tripura since 01:00(17/03/2016)"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "01:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "02:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "03:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "04:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "05:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "06:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "07:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "08:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "09:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "10:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "11:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "12:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "13:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "14:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "15:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "16:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "17:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    },
-    {
-      "time": "18:00",
-      "generation": 7814,
-      "loadShed": 0,
-      "demand": 7814
-    },
-    {
-      "time": "19:00",
-      "generation": 7814,
-      "loadShed": 0,
-      "demand": 7814
-    },
-    {
-      "time": "20:00",
-      "generation": 7814,
-      "loadShed": 0,
-      "demand": 7814
-    },
-    {
-      "time": "21:00",
-      "generation": 7814,
-      "loadShed": 0,
-      "demand": 7814
-    },
-    {
-      "time": "22:00",
-      "generation": 7814,
-      "loadShed": 0,
-      "demand": 7814
-    },
-    {
-      "time": "23:00",
-      "generation": 6707,
-      "loadShed": 0,
-      "demand": 6707
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

@@ -3,14 +3,14 @@
     "date": "20 Sep 2018",
     "dayPeakGen": 8790.6,
     "eveningPeakGen": 10420,
-    "dayPeakDemand": 8790.6,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 10420,
-    "minGen": 6983.900000000001,
-    "maxGen": 12670,
+    "minGen": 7314.2,
+    "maxGen": 10760.0,
     "totalEnergyGen": 219.88912000000002,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 219.89,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 34.5,
     "totalGasSuppliedPower": 1034.7,
     "avgProductionCost": 3.194,
     "totalDailyCost": 702339624
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 127.74,
-      "cost": 440692694,
-      "unitCost": 3.45,
+      "cost": 93501600,
+      "unitCost": 0.732,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 3.99,
-      "cost": 26393940,
-      "unitCost": 6.62,
+      "cost": 15389820,
+      "unitCost": 3.86,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 63.8,
-      "cost": 1152221913,
-      "unitCost": 18.06,
+      "cost": 593448203,
+      "unitCost": 9.3017,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 3.22,
-      "cost": 321637,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
       "gen": 0.07,
-      "cost": 1053436,
-      "unitCost": 15.77,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 21.08,
-      "cost": 133661585,
-      "unitCost": 6.34,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [
@@ -240,11 +233,11 @@
       "time": "at 13:25",
       "plant": "Khulna(c)-Noapara 132 kV Ckt-1 & 2",
       "load": "157 MW",
-      "reason": "due to a coal carring About 157 MW Power interruption occurred under Khulna©,Goalpara"
+      "reason": "due to a coal carring About 157 MW Power interruption occurred under Khulna\u00a9,Goalpara"
     },
     {
       "time": "at 13:25",
-      "plant": "Khulna(S)-Khulna© 132 kV Ckt-1 & 2",
+      "plant": "Khulna(S)-Khulna\u00a9 132 kV Ckt-1 & 2",
       "load": "HT Outage",
       "reason": "due to Jessore-Noapara"
     },
@@ -324,147 +317,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 9777,
-      "loadShed": 0,
-      "demand": 9777
+      "generation": 9777.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 10760,
-      "loadShed": 0,
-      "demand": 10760
+      "generation": 10760.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 9940,
-      "loadShed": 0,
-      "demand": 9940
+      "generation": 9940.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 9374,
-      "loadShed": 0,
-      "demand": 9374
+      "generation": 9374.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 9110,
-      "loadShed": 0,
-      "demand": 9110
+      "generation": 9110.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 8550,
-      "loadShed": 0,
-      "demand": 8550
+      "generation": 8550.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
       "generation": 7897.38,
-      "loadShed": 0,
-      "demand": 7897.38
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
       "generation": 7429.5,
-      "loadShed": 0,
-      "demand": 7429.5
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
       "generation": 7314.2,
-      "loadShed": 0,
-      "demand": 7314.2
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
       "generation": 7856.2,
-      "loadShed": 0,
-      "demand": 7856.2
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
       "generation": 8353.2,
-      "loadShed": 0,
-      "demand": 8353.2
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 8705,
-      "loadShed": 0,
-      "demand": 8705
+      "generation": 8705.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 8790.6,
-      "loadShed": 0,
-      "demand": 8790.6
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 9054,
-      "loadShed": 0,
-      "demand": 9054
+      "generation": 9054.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
       "generation": 9091.5,
-      "loadShed": 0,
-      "demand": 9091.5
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
       "generation": 9442.8,
-      "loadShed": 0,
-      "demand": 9442.8
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
       "generation": 9233.3,
-      "loadShed": 0,
-      "demand": 9233.3
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 8959,
-      "loadShed": 0,
-      "demand": 8959
+      "generation": 8959.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 9526,
-      "loadShed": 0,
-      "demand": 9526
+      "generation": 9526.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 10420,
-      "loadShed": 0,
-      "demand": 10420
+      "generation": 10420.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 10198,
-      "loadShed": 0,
-      "demand": 10198
+      "generation": 10198.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 9568,
-      "loadShed": 0,
-      "demand": 9568
+      "generation": 9568.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 9360,
-      "loadShed": 0,
-      "demand": 9360
+      "generation": 9360.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 9774,
-      "loadShed": 0,
-      "demand": 9774
+      "generation": 9774.0,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

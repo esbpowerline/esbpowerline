@@ -3,14 +3,14 @@
     "date": "06 Apr 2015",
     "dayPeakGen": 4729,
     "eveningPeakGen": 6327,
-    "dayPeakDemand": 4729,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 6327,
-    "minGen": 4308,
-    "maxGen": 6950,
+    "minGen": 2869.0,
+    "maxGen": 6327.0,
     "totalEnergyGen": 110.315221,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 110.32,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 34.5,
     "totalGasSuppliedPower": 934.04,
     "avgProductionCost": 2.011,
     "totalDailyCost": 221835859
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 86.26,
-      "cost": 297602126,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 2.4,
-      "cost": 15879334,
-      "unitCost": 6.62,
+      "cost": 9335705,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 11.31,
-      "cost": 204177474,
-      "unitCost": 18.06,
+      "cost": 152176322,
+      "unitCost": 13.4604,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 0.7,
-      "cost": 69790,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -173,13 +166,6 @@
       "reason": "Barisal-Madaripur 132 kV Ckt-1 tripped at 18:35 from Barisal end  showing TROT23 relay at Barisal end at the About 68 MW power interruption occurred under Barisal S/S areas"
     },
     {
-      "time": "18:48,18:49,18:50 respectively.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "at 20:30",
       "plant": "After maint Bogra-Naogaon 132 kV Ckt-1 switched on at 20:30.",
       "load": "HT Outage",
@@ -198,152 +184,7 @@
       "reason": "due to vacume fall."
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "01:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "02:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "03:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "04:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "05:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "06:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "07:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "08:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "09:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "10:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "11:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "12:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "13:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "14:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "15:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "16:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "17:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    },
-    {
-      "time": "18:00",
-      "generation": 6327,
-      "loadShed": 0,
-      "demand": 6327
-    },
-    {
-      "time": "19:00",
-      "generation": 6327,
-      "loadShed": 0,
-      "demand": 6327
-    },
-    {
-      "time": "20:00",
-      "generation": 6327,
-      "loadShed": 0,
-      "demand": 6327
-    },
-    {
-      "time": "21:00",
-      "generation": 6327,
-      "loadShed": 0,
-      "demand": 6327
-    },
-    {
-      "time": "22:00",
-      "generation": 6327,
-      "loadShed": 0,
-      "demand": 6327
-    },
-    {
-      "time": "23:00",
-      "generation": 4729,
-      "loadShed": 0,
-      "demand": 4729
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

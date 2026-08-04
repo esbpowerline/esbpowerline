@@ -3,14 +3,14 @@
     "date": "20 Nov 2015",
     "dayPeakGen": 4210,
     "eveningPeakGen": 6312,
-    "dayPeakDemand": 4210,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 6312,
-    "minGen": 3821,
-    "maxGen": 7720,
+    "minGen": 3921.0,
+    "maxGen": 6312.0,
     "totalEnergyGen": 109.247031,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 109.25,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 31.6,
     "totalGasSuppliedPower": 884.32,
     "avgProductionCost": 1.559,
     "totalDailyCost": 170325113
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 87.15,
-      "cost": 300663498,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 2.12,
-      "cost": 14018988,
-      "unitCost": 6.62,
+      "cost": 8241979,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 10.56,
-      "cost": 190749250,
-      "unitCost": 18.06,
+      "cost": 110443090,
+      "unitCost": 10.4567,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 1.54,
-      "cost": 154000,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -180,13 +173,6 @@
       "reason": "Madanaghat-Hathazari 132 kV Ckt-1 tripped at 23:20 showing dist.Z3 and was switched on at"
     },
     {
-      "time": "00:22(21/11/15).",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "at 06:24",
       "plant": "Bheramara-Bottail 132 kV Ckt-2",
       "load": "HT Outage",
@@ -211,152 +197,7 @@
       "reason": "Patuakhali 132/33 kV T1 transformer is shut down since 07:13 (21/11/15)."
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "01:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "02:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "03:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "04:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "05:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "06:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "07:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "08:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "09:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "10:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "11:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "12:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "13:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "14:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "15:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "16:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "17:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    },
-    {
-      "time": "18:00",
-      "generation": 6312,
-      "loadShed": 0,
-      "demand": 6312
-    },
-    {
-      "time": "19:00",
-      "generation": 6312,
-      "loadShed": 0,
-      "demand": 6312
-    },
-    {
-      "time": "20:00",
-      "generation": 6312,
-      "loadShed": 0,
-      "demand": 6312
-    },
-    {
-      "time": "21:00",
-      "generation": 6312,
-      "loadShed": 0,
-      "demand": 6312
-    },
-    {
-      "time": "22:00",
-      "generation": 6312,
-      "loadShed": 0,
-      "demand": 6312
-    },
-    {
-      "time": "23:00",
-      "generation": 4210,
-      "loadShed": 0,
-      "demand": 4210
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

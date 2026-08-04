@@ -3,14 +3,14 @@
     "date": "12 Jun 2014",
     "dayPeakGen": 5616,
     "eveningPeakGen": 6788,
-    "dayPeakDemand": 5710,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7000,
-    "minGen": 4346,
-    "maxGen": 6990,
+    "minGen": 5061.0,
+    "maxGen": 6788.0,
     "totalEnergyGen": 140.46872,
-    "totalEnergyUnserved": 0.75,
-    "totalEnergyDemand": 141.22,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 36.3,
     "totalGasSuppliedPower": 905.37,
     "avgProductionCost": 4.287,
     "totalDailyCost": 602211255
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 89.13,
-      "cost": 307492151,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 4.19,
-      "cost": 27705779,
-      "unitCost": 6.62,
+      "cost": 16288654,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 37.28,
-      "cost": 673272483,
-      "unitCost": 18.06,
+      "cost": 499728102,
+      "unitCost": 13.4048,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 1.18,
-      "cost": 117600,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -221,165 +214,13 @@
       "reason": "due to problem at Fenchuganj S/S and was synchronized at"
     },
     {
-      "time": "09:06(13/06/14)",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "at 07:21",
       "plant": "Sreemongal-Fenchuganj 132 kV Ckt 1& 2 both",
       "load": "HT Outage",
       "reason": "Sreemongal-Fenchuganj 132 kV Ckt 1& 2 both tripped at 07:21 from Both end showing Dist A at"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "01:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "02:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "03:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "04:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "05:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "06:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "07:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "08:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "09:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "10:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "11:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "12:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "13:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "14:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "15:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "16:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "17:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    },
-    {
-      "time": "18:00",
-      "generation": 6788,
-      "loadShed": 0,
-      "demand": 6788
-    },
-    {
-      "time": "19:00",
-      "generation": 6788,
-      "loadShed": 0,
-      "demand": 6788
-    },
-    {
-      "time": "20:00",
-      "generation": 6788,
-      "loadShed": 0,
-      "demand": 6788
-    },
-    {
-      "time": "21:00",
-      "generation": 6788,
-      "loadShed": 0,
-      "demand": 6788
-    },
-    {
-      "time": "22:00",
-      "generation": 6788,
-      "loadShed": 0,
-      "demand": 6788
-    },
-    {
-      "time": "23:00",
-      "generation": 5616,
-      "loadShed": 0,
-      "demand": 5616
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

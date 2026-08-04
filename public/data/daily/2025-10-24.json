@@ -6,11 +6,11 @@
     "dayPeakDemand": 12326.06,
     "eveningPeakDemand": 13867.41,
     "minGen": 11252.61,
-    "maxGen": 14750,
+    "maxGen": 14444.0,
     "totalEnergyGen": 309.70807536,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 309.71,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": 0.426,
+    "totalEnergyDemand": 310.134,
+    "maxTemp": 35.0,
     "totalGasSuppliedPower": 896.34,
     "avgProductionCost": 6.026,
     "totalDailyCost": 1866146843
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 119.87,
-      "cost": 413564185,
-      "unitCost": 3.45,
+      "cost": 438311713,
+      "unitCost": 3.6564,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 104.35,
-      "cost": 690792178,
-      "unitCost": 6.62,
+      "cost": 663072481,
+      "unitCost": 6.3544,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 20.53,
-      "cost": 370860731,
-      "unitCost": 18.06,
+      "cost": 361256430,
+      "unitCost": 17.5923,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 4.46,
-      "cost": 70331447,
-      "unitCost": 15.77,
+      "cost": 71097317,
+      "unitCost": 15.9417,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 55.64,
-      "cost": 352758189,
-      "unitCost": 6.34,
+      "cost": 331790627,
+      "unitCost": 5.9632,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.01,
+      "cost": 134155,
+      "unitCost": 14.71,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -413,147 +420,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 14444.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 13979.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 13516.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 13064.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 12579.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 12406.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11738.51,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11575.59,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11633.93,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11252.61,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11315.3,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11778.08,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 12992.57,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 12322.96,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 12400.42,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11927.77,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 11474.91,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 13867.41,
-      "loadShed": 0,
-      "demand": 13867.41
+      "generation": 13739.73,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 13867.41,
-      "loadShed": 0,
-      "demand": 13867.41
+      "generation": 13817.31,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 13867.41,
-      "loadShed": 0,
-      "demand": 13867.41
+      "generation": 13825.39,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
       "generation": 13867.41,
-      "loadShed": 0,
-      "demand": 13867.41
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 13867.41,
-      "loadShed": 0,
-      "demand": 13867.41
+      "generation": 13899.77,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 12326.06,
-      "loadShed": 0,
-      "demand": 12326.06
+      "generation": 13925.61,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

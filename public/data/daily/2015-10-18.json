@@ -3,14 +3,14 @@
     "date": "18 Oct 2015",
     "dayPeakGen": 6493,
     "eveningPeakGen": 7994,
-    "dayPeakDemand": 6493,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7994,
-    "minGen": 5185,
-    "maxGen": 8220,
+    "minGen": 5188.0,
+    "maxGen": 7994.0,
     "totalEnergyGen": 156.054241,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 156.05,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 33.0,
     "totalGasSuppliedPower": 1013.72,
     "avgProductionCost": 2.706,
     "totalDailyCost": 422358327
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 108.61,
-      "cost": 374687781,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 1.72,
-      "cost": 11394582,
-      "unitCost": 6.62,
+      "cost": 6699050,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 29.06,
-      "cost": 524910197,
-      "unitCost": 18.06,
+      "cost": 348510837,
+      "unitCost": 11.9908,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 5.6,
-      "cost": 559542,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -215,13 +208,6 @@
       "reason": "Maniknagar-Bangabhaban 132 kV Ckt-1,2 tripped at 09:57 showing main protection relay & high Voltage and was switched on at"
     },
     {
-      "time": "10:15(18/10/15),10:57(19/10/15) respectively.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "from 10:13 to 13:18",
       "plant": "Hathazari 230/132 kV MT-3 transformer",
       "load": "HT Outage",
@@ -234,152 +220,7 @@
       "reason": "Gallamari 132/33 kV T1,T2 transformer tripped at 11:23 showing O/C,E/F relay and was switched on at 11:44. About 37 MW power interruption occurred under Gallamari S/S area"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "01:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "02:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "03:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "04:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "05:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "06:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "07:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "08:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "09:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "10:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "11:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "12:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "13:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "14:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "15:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "16:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "17:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    },
-    {
-      "time": "18:00",
-      "generation": 7994,
-      "loadShed": 0,
-      "demand": 7994
-    },
-    {
-      "time": "19:00",
-      "generation": 7994,
-      "loadShed": 0,
-      "demand": 7994
-    },
-    {
-      "time": "20:00",
-      "generation": 7994,
-      "loadShed": 0,
-      "demand": 7994
-    },
-    {
-      "time": "21:00",
-      "generation": 7994,
-      "loadShed": 0,
-      "demand": 7994
-    },
-    {
-      "time": "22:00",
-      "generation": 7994,
-      "loadShed": 0,
-      "demand": 7994
-    },
-    {
-      "time": "23:00",
-      "generation": 6493,
-      "loadShed": 0,
-      "demand": 6493
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

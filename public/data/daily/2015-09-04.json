@@ -3,14 +3,14 @@
     "date": "04 Sep 2015",
     "dayPeakGen": 5254,
     "eveningPeakGen": 7350,
-    "dayPeakDemand": 5254,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7350,
-    "minGen": 5188,
-    "maxGen": 7824,
+    "minGen": 4847.0,
+    "maxGen": 7350.0,
     "totalEnergyGen": 139.74952,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 139.75,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 31.0,
     "totalGasSuppliedPower": 1017.74,
     "avgProductionCost": 2.167,
     "totalDailyCost": 302811047
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 105.12,
-      "cost": 362674450,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 2.01,
-      "cost": 13288147,
-      "unitCost": 6.62,
+      "cost": 7812306,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 16.61,
-      "cost": 300063125,
-      "unitCost": 18.06,
+      "cost": 231717033,
+      "unitCost": 13.9464,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 5.64,
-      "cost": 563570,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -149,152 +142,7 @@
       "reason": "Ullon 132/33 kV T1 & T2 transformers tripped at 07:32 (05/09/2015) showing HRT relay and were switched on at 07:49. About 36 MW power interruption occurred under Ullon S/S area"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "01:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "02:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "03:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "04:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "05:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "06:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "07:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "08:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "09:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "10:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "11:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "12:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "13:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "14:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "15:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "16:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "17:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    },
-    {
-      "time": "18:00",
-      "generation": 7350,
-      "loadShed": 0,
-      "demand": 7350
-    },
-    {
-      "time": "19:00",
-      "generation": 7350,
-      "loadShed": 0,
-      "demand": 7350
-    },
-    {
-      "time": "20:00",
-      "generation": 7350,
-      "loadShed": 0,
-      "demand": 7350
-    },
-    {
-      "time": "21:00",
-      "generation": 7350,
-      "loadShed": 0,
-      "demand": 7350
-    },
-    {
-      "time": "22:00",
-      "generation": 7350,
-      "loadShed": 0,
-      "demand": 7350
-    },
-    {
-      "time": "23:00",
-      "generation": 5254,
-      "loadShed": 0,
-      "demand": 5254
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

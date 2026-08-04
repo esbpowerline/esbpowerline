@@ -3,14 +3,14 @@
     "date": "06 Mar 2016",
     "dayPeakGen": 6968,
     "eveningPeakGen": 5946,
-    "dayPeakDemand": 6968,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 5946,
-    "minGen": 4352,
-    "maxGen": 8037,
+    "minGen": 3615.0,
+    "maxGen": 7130.0,
     "totalEnergyGen": 142.645856,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 142.65,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 33.6,
     "totalGasSuppliedPower": 851.6,
     "avgProductionCost": 2.76,
     "totalDailyCost": 393707675
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 95.54,
-      "cost": 329628956,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 2.04,
-      "cost": 13487462,
-      "unitCost": 6.62,
+      "cost": 10451764,
+      "unitCost": 5.13,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 31.95,
-      "cost": 577013243,
-      "unitCost": 18.06,
+      "cost": 326053559,
+      "unitCost": 10.2052,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 2.53,
-      "cost": 253442,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -197,24 +190,10 @@
       "reason": "Feni-Comilla 132 kV Ckt-1 tripped  at  18:15 from both end  showing dist Z1,Z2,BC phase and  was switched on at"
     },
     {
-      "time": "06:27(07/03/2016)",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "at  19:30",
       "plant": "Feni-Comilla 132 kV Ckt-2 tripped  at  19:30 from both end  showing dist A,Z2,C phase and and",
       "load": "HT Outage",
       "reason": "Feni-Comilla 132 kV Ckt-2 tripped  at  19:30 from both end  showing dist A,Z2,C phase and and was switched on at"
-    },
-    {
-      "time": "06:28(7/03/16)..",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
     },
     {
       "time": "at  19:42",
@@ -241,152 +220,7 @@
       "reason": "for 33 kV project work. About 60 MW power interruption occurred under Mymensing S/S"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "01:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "02:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "03:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "04:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "05:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "06:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "07:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "08:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "09:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "10:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "11:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "12:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "13:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "14:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "15:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "16:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "17:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    },
-    {
-      "time": "18:00",
-      "generation": 5946,
-      "loadShed": 0,
-      "demand": 5946
-    },
-    {
-      "time": "19:00",
-      "generation": 5946,
-      "loadShed": 0,
-      "demand": 5946
-    },
-    {
-      "time": "20:00",
-      "generation": 5946,
-      "loadShed": 0,
-      "demand": 5946
-    },
-    {
-      "time": "21:00",
-      "generation": 5946,
-      "loadShed": 0,
-      "demand": 5946
-    },
-    {
-      "time": "22:00",
-      "generation": 5946,
-      "loadShed": 0,
-      "demand": 5946
-    },
-    {
-      "time": "23:00",
-      "generation": 6968,
-      "loadShed": 0,
-      "demand": 6968
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

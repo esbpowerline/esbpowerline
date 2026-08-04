@@ -3,14 +3,14 @@
     "date": "19 May 2025",
     "dayPeakGen": 13029.32,
     "eveningPeakGen": 14729.75,
-    "dayPeakDemand": 13051.32,
+    "dayPeakDemand": 13123.32,
     "eveningPeakDemand": 14775.75,
     "minGen": 11712.09,
-    "maxGen": 14770,
+    "maxGen": 14729.75,
     "totalEnergyGen": 314.67649287,
-    "totalEnergyUnserved": 0.18,
-    "totalEnergyDemand": 314.85,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": 1.292,
+    "totalEnergyDemand": 315.968,
+    "maxTemp": 34.2,
     "totalGasSuppliedPower": 1015.21,
     "avgProductionCost": 6.355,
     "totalDailyCost": 1999829538
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 134.98,
-      "cost": 465670264,
-      "unitCost": 3.45,
+      "cost": 491176731,
+      "unitCost": 3.639,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 98.19,
-      "cost": 650045725,
-      "unitCost": 6.62,
+      "cost": 652016345,
+      "unitCost": 6.6401,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 29.26,
-      "cost": 528447003,
-      "unitCost": 18.06,
+      "cost": 551731987,
+      "unitCost": 18.8558,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 3.23,
-      "cost": 50862883,
-      "unitCost": 15.77,
+      "cost": 51332796,
+      "unitCost": 15.9157,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 47.89,
-      "cost": 303640231,
-      "unitCost": 6.34,
+      "cost": 250758060,
+      "unitCost": 5.2358,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.19,
+      "cost": 2719526,
+      "unitCost": 14.64,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -147,8 +154,8 @@
       "time": "08:20 - 08:20",
       "plant": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Tripped showing Distance Relay <br> CB Line : Auto reclosing <br> Z1: operate phs A relays",
       "load": "HT Outage",
-      "reason": "Due to Poesha feeder trial এ  o/c & E/F  signal এসে ট্রিপ করে ।",
-      "full_desc": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Tripped showing Distance Relay <br> CB Line : Auto reclosing <br> Z1: operate phs A relays Due to Poesha feeder trial এ  o/c & E/F  signal এসে ট্রিপ করে ।"
+      "reason": "Due to Poesha feeder trial \u098f  o/c & E/F  signal \u098f\u09b8\u09c7 \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7 \u0964",
+      "full_desc": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Tripped showing Distance Relay <br> CB Line : Auto reclosing <br> Z1: operate phs A relays Due to Poesha feeder trial \u098f  o/c & E/F  signal \u098f\u09b8\u09c7 \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7 \u0964"
     },
     {
       "time": "08:24 - 08:48",
@@ -448,8 +455,8 @@
       "time": "17:39 - 21:09",
       "plant": "Gopalganj(N)-Madaripur   132kV Ckt-3 Tripped from Madaripur 132/33kV end showing Distance Relay relays",
       "load": "HT Outage",
-      "reason": "Due to A-B-N <br> Trip ABC  <br> Over Current  <br> Earth Fault  <br> Z-1, 1.388 km  <br> A- 9732, B- 9827, C - 238.7 and from Gopalganj 400/132kV end showing Distance relay relays Due to Phase to phase fault",
-      "full_desc": "Gopalganj(N)-Madaripur   132kV Ckt-3 Tripped from Madaripur 132/33kV end showing Distance Relay relays Due to A-B-N <br> Trip ABC  <br> Over Current  <br> Earth Fault  <br> Z-1, 1.388 km  <br> A- 9732, B- 9827, C - 238.7 and from Gopalganj 400/132kV end showing Distance relay relays Due to Phase to phase fault"
+      "reason": "Due to A-B-N <br> Trip ABC <br> Over Current <br> Earth Fault <br> Z-1, 1.388 km <br> A- 9732, B- 9827, C - 238.7 and from Gopalganj 400/132kV end showing Distance relay relays Due to Phase to phase fault",
+      "full_desc": "Gopalganj(N)-Madaripur   132kV Ckt-3 Tripped from Madaripur 132/33kV end showing Distance Relay relays Due to A-B-N <br> Trip ABC <br> Over Current <br> Earth Fault <br> Z-1, 1.388 km <br> A- 9732, B- 9827, C - 238.7 and from Gopalganj 400/132kV end showing Distance relay relays Due to Phase to phase fault"
     },
     {
       "time": "19:30",
@@ -581,147 +588,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 13573.67,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 13377.59,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 13048.8,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12708.97,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12456.13,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12111.72,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 11730.98,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 11750.14,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 11712.09,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 11720.1,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12301.04,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12753.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12997.55,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12822.05,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12962.22,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 13043.85,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 12788.28,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 14729.75,
-      "loadShed": 0,
-      "demand": 14729.75
+      "generation": 12603.06,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 14729.75,
-      "loadShed": 0,
-      "demand": 14729.75
+      "generation": 13895.78,
+      "loadShed": 44.0,
+      "demand": 14775.75
     },
     {
       "time": "20:00",
-      "generation": 14729.75,
-      "loadShed": 0,
-      "demand": 14729.75
+      "generation": 14563.2,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 14729.75,
-      "loadShed": 0,
-      "demand": 14729.75
+      "generation": 14687.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 14729.75,
-      "loadShed": 0,
-      "demand": 14729.75
+      "generation": 14439.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 13029.32,
-      "loadShed": 0,
-      "demand": 13029.32
+      "generation": 14365.5,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

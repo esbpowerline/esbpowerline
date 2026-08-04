@@ -3,14 +3,14 @@
     "date": "08 Jan 2016",
     "dayPeakGen": 4370,
     "eveningPeakGen": 6157,
-    "dayPeakDemand": 4370,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 6157,
-    "minGen": 3512,
-    "maxGen": 8063,
+    "minGen": 3779.0,
+    "maxGen": 6157.0,
     "totalEnergyGen": 108.331899,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 108.33,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 26.8,
     "totalGasSuppliedPower": 841.97,
     "avgProductionCost": 1.688,
     "totalDailyCost": 182885024
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 88.77,
-      "cost": 306269520,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 1.99,
-      "cost": 13155264,
-      "unitCost": 6.62,
+      "cost": 7734182,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 8.57,
-      "cost": 154845085,
-      "unitCost": 18.06,
+      "cost": 122976932,
+      "unitCost": 14.3431,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 0.94,
-      "cost": 94100,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -239,152 +232,7 @@
       "reason": "Jhenaidah 132/33 kV T1 and T2 33 kV side tripped at 04:58 (09/01/2016) showing Inst. E/F and switched on About 26 MW power interruption occurred under Jhenaidah S/S areas"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "01:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "02:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "03:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "04:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "05:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "06:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "07:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "08:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "09:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "10:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "11:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "12:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "13:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "14:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "15:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "16:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "17:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    },
-    {
-      "time": "18:00",
-      "generation": 6157,
-      "loadShed": 0,
-      "demand": 6157
-    },
-    {
-      "time": "19:00",
-      "generation": 6157,
-      "loadShed": 0,
-      "demand": 6157
-    },
-    {
-      "time": "20:00",
-      "generation": 6157,
-      "loadShed": 0,
-      "demand": 6157
-    },
-    {
-      "time": "21:00",
-      "generation": 6157,
-      "loadShed": 0,
-      "demand": 6157
-    },
-    {
-      "time": "22:00",
-      "generation": 6157,
-      "loadShed": 0,
-      "demand": 6157
-    },
-    {
-      "time": "23:00",
-      "generation": 4370,
-      "loadShed": 0,
-      "demand": 4370
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

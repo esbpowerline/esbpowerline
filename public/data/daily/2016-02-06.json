@@ -3,14 +3,14 @@
     "date": "06 Feb 2016",
     "dayPeakGen": 5338,
     "eveningPeakGen": 7074,
-    "dayPeakDemand": 5338,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7074,
-    "minGen": 4101,
-    "maxGen": 7617,
+    "minGen": 3727.0,
+    "maxGen": 7074.0,
     "totalEnergyGen": 123.697501,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 123.7,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 26.8,
     "totalGasSuppliedPower": 859.44,
     "avgProductionCost": 2.676,
     "totalDailyCost": 331065531
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 86.43,
-      "cost": 298173570,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 1.69,
-      "cost": 11162041,
-      "unitCost": 6.62,
+      "cost": 8649739,
+      "unitCost": 5.13,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 25.11,
-      "cost": 453441269,
-      "unitCost": 18.06,
+      "cost": 266307365,
+      "unitCost": 10.6067,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 1.06,
-      "cost": 105859,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -251,152 +244,7 @@
       "reason": "Chatak 132/33 kV T1 transformer tripped at 22:27 showing O/C relay and was switched on at 22:34."
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "01:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "02:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "03:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "04:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "05:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "06:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "07:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "08:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "09:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "10:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "11:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "12:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "13:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "14:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "15:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "16:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "17:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    },
-    {
-      "time": "18:00",
-      "generation": 7074,
-      "loadShed": 0,
-      "demand": 7074
-    },
-    {
-      "time": "19:00",
-      "generation": 7074,
-      "loadShed": 0,
-      "demand": 7074
-    },
-    {
-      "time": "20:00",
-      "generation": 7074,
-      "loadShed": 0,
-      "demand": 7074
-    },
-    {
-      "time": "21:00",
-      "generation": 7074,
-      "loadShed": 0,
-      "demand": 7074
-    },
-    {
-      "time": "22:00",
-      "generation": 7074,
-      "loadShed": 0,
-      "demand": 7074
-    },
-    {
-      "time": "23:00",
-      "generation": 5338,
-      "loadShed": 0,
-      "demand": 5338
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

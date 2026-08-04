@@ -3,14 +3,14 @@
     "date": "22 Aug 2015",
     "dayPeakGen": 5902,
     "eveningPeakGen": 7973,
-    "dayPeakDemand": 5902,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7973,
-    "minGen": 5583,
-    "maxGen": 8300,
+    "minGen": 5077.0,
+    "maxGen": 7973.0,
     "totalEnergyGen": 149.011391,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 149.01,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 33.3,
     "totalGasSuppliedPower": 1058.09,
     "avgProductionCost": 2.176,
     "totalDailyCost": 324291875
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 107.87,
-      "cost": 372160625,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 2.72,
-      "cost": 18005440,
-      "unitCost": 6.62,
+      "cost": 10585675,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 22.58,
-      "cost": 407706631,
-      "unitCost": 18.06,
+      "cost": 246672658,
+      "unitCost": 10.9267,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 5.17,
-      "cost": 516740,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -179,152 +172,7 @@
       "reason": "B.Baria 132/33 kV T1,T2 & T3 transformers tripped at 05:51 (23/8/15) showing E/F relay at 33 kV end and were switched About 60 MW power interruption occurred under B.Baria S/S"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "01:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "02:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "03:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "04:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "05:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "06:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "07:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "08:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "09:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "10:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "11:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "12:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "13:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "14:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "15:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "16:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "17:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    },
-    {
-      "time": "18:00",
-      "generation": 7973,
-      "loadShed": 0,
-      "demand": 7973
-    },
-    {
-      "time": "19:00",
-      "generation": 7973,
-      "loadShed": 0,
-      "demand": 7973
-    },
-    {
-      "time": "20:00",
-      "generation": 7973,
-      "loadShed": 0,
-      "demand": 7973
-    },
-    {
-      "time": "21:00",
-      "generation": 7973,
-      "loadShed": 0,
-      "demand": 7973
-    },
-    {
-      "time": "22:00",
-      "generation": 7973,
-      "loadShed": 0,
-      "demand": 7973
-    },
-    {
-      "time": "23:00",
-      "generation": 5902,
-      "loadShed": 0,
-      "demand": 5902
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

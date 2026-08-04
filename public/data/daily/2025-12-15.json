@@ -6,11 +6,11 @@
     "dayPeakDemand": 10129.82,
     "eveningPeakDemand": 11237.44,
     "minGen": 7628.22,
-    "maxGen": 11230,
+    "maxGen": 11237.44,
     "totalEnergyGen": 225.4867859,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 225.49,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": 225.487,
+    "maxTemp": 28.8,
     "totalGasSuppliedPower": 698.68,
     "avgProductionCost": 5.565,
     "totalDailyCost": 1254738475
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 98.13,
-      "cost": 338537404,
-      "unitCost": 3.45,
+      "cost": 343075684,
+      "unitCost": 3.4962,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 68.39,
-      "cost": 452745808,
-      "unitCost": 6.62,
+      "cost": 439679310,
+      "unitCost": 6.4289,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 7.8,
-      "cost": 140790649,
-      "unitCost": 18.06,
+      "cost": 131261313,
+      "unitCost": 16.8376,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 3.97,
-      "cost": 62613671,
-      "unitCost": 15.77,
+      "cost": 62381123,
+      "unitCost": 15.7114,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 46.15,
-      "cost": 292606533,
-      "unitCost": 6.34,
+      "cost": 276967815,
+      "unitCost": 6.0012,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.09,
+      "cost": 1276828,
+      "unitCost": 14.71,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -574,15 +581,15 @@
       "time": "19:52",
       "plant": "Kachua-Chowmuhoni 230 kV ckt-1",
       "load": "HT Outage",
-      "reason": "Kachua-Chowmuhoni 230 kV ckt-1 was switched ON for the first time",
-      "full_desc": "Kachua-Chowmuhoni 230 kV ckt-1 was switched ON for the first time"
+      "reason": "Kachua-Chowmuhoni 230 kV ckt-1 was switched ON for\u00a0the\u00a0first\u00a0time",
+      "full_desc": "Kachua-Chowmuhoni 230 kV ckt-1 was switched ON for\u00a0the\u00a0first\u00a0time"
     },
     {
       "time": "19:58",
       "plant": "Kachua-Chowmuhoni 230 kV ckt-3",
       "load": "HT Outage",
-      "reason": "Kachua-Chowmuhoni 230 kV ckt-3 was switched ON for the first time",
-      "full_desc": "Kachua-Chowmuhoni 230 kV ckt-3 was switched ON for the first time"
+      "reason": "Kachua-Chowmuhoni 230 kV ckt-3 was switched ON for\u00a0the\u00a0first\u00a0time",
+      "full_desc": "Kachua-Chowmuhoni 230 kV ckt-3 was switched ON for\u00a0the\u00a0first\u00a0time"
     },
     {
       "time": "20:22",
@@ -595,8 +602,8 @@
       "time": "21:12",
       "plant": "250/350 MVA, 230/132 kV TR-2 transformer",
       "load": "HT Outage",
-      "reason": "250/350 MVA, 230/132 kV TR-2 transformer was charged from the high voltage side at Chowmuhoni GIS grid substation for the first time",
-      "full_desc": "250/350 MVA, 230/132 kV TR-2 transformer was charged from the high voltage side at Chowmuhoni GIS grid substation for the first time"
+      "reason": "250/350 MVA, 230/132 kV TR-2 transformer was charged from the high voltage side at Chowmuhoni GIS grid substation for\u00a0the\u00a0first\u00a0time",
+      "full_desc": "250/350 MVA, 230/132 kV TR-2 transformer was charged from the high voltage side at Chowmuhoni GIS grid substation for\u00a0the\u00a0first\u00a0time"
     },
     {
       "time": "05:00",
@@ -609,147 +616,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9264.42,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 8687.15,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 8292.96,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 7994.08,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 7628.22,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 7670.42,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 7936.49,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 8564.44,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9457.96,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9716.34,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9515.78,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9640.64,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 10615.33,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 10230.87,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9619.37,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9535.29,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9777.55,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
       "generation": 11237.44,
-      "loadShed": 0,
-      "demand": 11237.44
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 11237.44,
-      "loadShed": 0,
-      "demand": 11237.44
+      "generation": 10921.67,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 11237.44,
-      "loadShed": 0,
-      "demand": 11237.44
+      "generation": 10639.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 11237.44,
-      "loadShed": 0,
-      "demand": 11237.44
+      "generation": 10489.4,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 11237.44,
-      "loadShed": 0,
-      "demand": 11237.44
+      "generation": 10055.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 10129.82,
-      "loadShed": 0,
-      "demand": 10129.82
+      "generation": 9588.0,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

@@ -3,14 +3,14 @@
     "date": "17 May 2014",
     "dayPeakGen": 6018,
     "eveningPeakGen": 6548,
-    "dayPeakDemand": 6110.5,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 6750,
-    "minGen": 5408,
-    "maxGen": 6753,
+    "minGen": 5420.0,
+    "maxGen": 6561.0,
     "totalEnergyGen": 144.263188,
-    "totalEnergyUnserved": 0.74,
-    "totalEnergyDemand": 145,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 36.5,
     "totalGasSuppliedPower": 900.99,
     "avgProductionCost": 4.334,
     "totalDailyCost": 625183421
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 93.5,
-      "cost": 322589107,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 3.53,
-      "cost": 23387136,
-      "unitCost": 6.62,
+      "cost": 13749657,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 36.77,
-      "cost": 663980812,
-      "unitCost": 18.06,
+      "cost": 528673024,
+      "unitCost": 14.3797,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 1.25,
-      "cost": 125230,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -147,161 +140,9 @@
       "plant": "Sreemongal-Fenchuganj 132 kV Ckt-1 & 2",
       "load": "72 MW",
       "reason": "Sreemongal-Fenchuganj 132 kV Ckt-1 & 2 tripped at 05:01 (18/05/2014) showing distance relay from About 72 MW power interruption occurred under Fenchuganj, Sylhet &"
-    },
-    {
-      "time": "05:39, 06:15, 05:39, 10:13, 05:45, 09:04, 05:35, 06:00, 05:10 & 05:02 (18/05/2014) respectively.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "01:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "02:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "03:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "04:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "05:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "06:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "07:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "08:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "09:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "10:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "11:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "12:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "13:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "14:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "15:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "16:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "17:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    },
-    {
-      "time": "18:00",
-      "generation": 6548,
-      "loadShed": 0,
-      "demand": 6548
-    },
-    {
-      "time": "19:00",
-      "generation": 6548,
-      "loadShed": 0,
-      "demand": 6548
-    },
-    {
-      "time": "20:00",
-      "generation": 6548,
-      "loadShed": 0,
-      "demand": 6548
-    },
-    {
-      "time": "21:00",
-      "generation": 6548,
-      "loadShed": 0,
-      "demand": 6548
-    },
-    {
-      "time": "22:00",
-      "generation": 6548,
-      "loadShed": 0,
-      "demand": 6548
-    },
-    {
-      "time": "23:00",
-      "generation": 6018,
-      "loadShed": 0,
-      "demand": 6018
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

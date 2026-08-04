@@ -3,14 +3,14 @@
     "date": "23 Jan 2014",
     "dayPeakGen": 4623,
     "eveningPeakGen": 5852,
-    "dayPeakDemand": 4623,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 5852,
-    "minGen": 3253,
-    "maxGen": 5911,
+    "minGen": null,
+    "maxGen": null,
     "totalEnergyGen": 104.977155,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 104.98,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
     "totalGasSuppliedPower": 740.93,
     "avgProductionCost": 2.078,
     "totalDailyCost": 218113805
@@ -19,50 +19,50 @@
     {
       "name": "Gas",
       "gen": 73.94,
-      "cost": 255106413,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 1.77,
-      "cost": 11693568,
-      "unitCost": 6.62,
+      "cost": null,
+      "unitCost": null,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 16.96,
-      "cost": 306260721,
-      "unitCost": 18.06,
+      "cost": null,
+      "unitCost": null,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 0.93,
-      "cost": 93000,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
       "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
     },
     {
       "name": "HSD (Diesel)",
       "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
+      "cost": null,
+      "unitCost": null,
       "color": "#ef4444"
     }
   ],
@@ -180,7 +180,7 @@
     },
     {
       "time": "from 09:30 to 12:41",
-      "plant": "Khulna© 132/33 kV T2",
+      "plant": "Khulna\u00a9 132/33 kV T2",
       "load": "HT Outage",
       "reason": "due to oil leakage"
     },
@@ -197,152 +197,7 @@
       "reason": "Bheramara HVDC filter bank 10CF16 tripped at 20:45 showing differential relay and was"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "01:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "02:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "03:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "04:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "05:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "06:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "07:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "08:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "09:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "10:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "11:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "12:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "13:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "14:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "15:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "16:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "17:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    },
-    {
-      "time": "18:00",
-      "generation": 5852,
-      "loadShed": 0,
-      "demand": 5852
-    },
-    {
-      "time": "19:00",
-      "generation": 5852,
-      "loadShed": 0,
-      "demand": 5852
-    },
-    {
-      "time": "20:00",
-      "generation": 5852,
-      "loadShed": 0,
-      "demand": 5852
-    },
-    {
-      "time": "21:00",
-      "generation": 5852,
-      "loadShed": 0,
-      "demand": 5852
-    },
-    {
-      "time": "22:00",
-      "generation": 5852,
-      "loadShed": 0,
-      "demand": 5852
-    },
-    {
-      "time": "23:00",
-      "generation": 4623,
-      "loadShed": 0,
-      "demand": 4623
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

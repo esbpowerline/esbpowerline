@@ -3,14 +3,14 @@
     "date": "09 Sep 2014",
     "dayPeakGen": 5385,
     "eveningPeakGen": 6133,
-    "dayPeakDemand": 5775,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7000,
-    "minGen": 5322,
-    "maxGen": 6430,
+    "minGen": 5243.0,
+    "maxGen": 6294.0,
     "totalEnergyGen": 136.812391,
-    "totalEnergyUnserved": 3.12,
-    "totalEnergyDemand": 139.93,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 33.4,
     "totalGasSuppliedPower": 795.58,
     "avgProductionCost": 4.582,
     "totalDailyCost": 626856621
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 81.13,
-      "cost": 279907300,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 3.64,
-      "cost": 24117977,
-      "unitCost": 6.62,
+      "cost": 14179330,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 40.38,
-      "cost": 729185268,
-      "unitCost": 18.06,
+      "cost": 553989486,
+      "unitCost": 13.7209,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 2.8,
-      "cost": 279984,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -155,152 +148,7 @@
       "reason": "Panchagar 132 kV Ckt tripped at 03:40 (10/09/2014) showing O/C relay and was switched on at 03:50 (10/09/2014). About 10 MW power interruption occurred under Panchagar S/S areas"
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "01:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "02:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "03:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "04:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "05:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "06:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "07:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "08:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "09:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "10:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "11:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "12:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "13:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "14:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "15:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "16:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "17:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    },
-    {
-      "time": "18:00",
-      "generation": 6133,
-      "loadShed": 0,
-      "demand": 6133
-    },
-    {
-      "time": "19:00",
-      "generation": 6133,
-      "loadShed": 0,
-      "demand": 6133
-    },
-    {
-      "time": "20:00",
-      "generation": 6133,
-      "loadShed": 0,
-      "demand": 6133
-    },
-    {
-      "time": "21:00",
-      "generation": 6133,
-      "loadShed": 0,
-      "demand": 6133
-    },
-    {
-      "time": "22:00",
-      "generation": 6133,
-      "loadShed": 0,
-      "demand": 6133
-    },
-    {
-      "time": "23:00",
-      "generation": 5385,
-      "loadShed": 0,
-      "demand": 5385
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

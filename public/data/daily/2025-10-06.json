@@ -6,11 +6,11 @@
     "dayPeakDemand": 12735.08,
     "eveningPeakDemand": 14417.72,
     "minGen": 10960.48,
-    "maxGen": 14800,
+    "maxGen": 14417.72,
     "totalEnergyGen": 299.47128911,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 299.47,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": 299.471,
+    "maxTemp": 30.4,
     "totalGasSuppliedPower": 920.03,
     "avgProductionCost": 6.001,
     "totalDailyCost": 1797165414
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 119.09,
-      "cost": 410860931,
-      "unitCost": 3.45,
+      "cost": 425002121,
+      "unitCost": 3.5687,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 92.35,
-      "cost": 611382014,
-      "unitCost": 6.62,
+      "cost": 509997526,
+      "unitCost": 5.5222,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 27.96,
-      "cost": 504915545,
-      "unitCost": 18.06,
+      "cost": 508675021,
+      "unitCost": 18.1945,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 3.53,
-      "cost": 55662058,
-      "unitCost": 15.77,
+      "cost": 51245349,
+      "unitCost": 14.5187,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 51.19,
-      "cost": 324537074,
-      "unitCost": 6.34,
+      "cost": 300550779,
+      "unitCost": 5.8714,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.08,
+      "cost": 1167408,
+      "unitCost": 14.74,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -441,8 +448,8 @@
       "time": "18:49 - 19:31",
       "plant": "Madaripur-Shariatpur  132kV Ckt-2 Tripped from Madaripur 132/33kV end showing Distance Relay relays",
       "load": "HT Outage",
-      "reason": "Due to lightning and from Shariatpur 132/33kV end showing Distance Relay(Main protection) <br>  <br>  <br>  <br>  <br>  relays Due to Distance Trip(Main Protection Operate) <br> Zone-1 Trip",
-      "full_desc": "Madaripur-Shariatpur  132kV Ckt-2 Tripped from Madaripur 132/33kV end showing Distance Relay relays Due to lightning and from Shariatpur 132/33kV end showing Distance Relay(Main protection) <br>  <br>  <br>  <br>  <br>  relays Due to Distance Trip(Main Protection Operate) <br> Zone-1 Trip"
+      "reason": "Due to lightning and from Shariatpur 132/33kV end showing Distance Relay(Main protection) <br> relays Due to Distance Trip(Main Protection Operate) <br> Zone-1 Trip",
+      "full_desc": "Madaripur-Shariatpur  132kV Ckt-2 Tripped from Madaripur 132/33kV end showing Distance Relay relays Due to lightning and from Shariatpur 132/33kV end showing Distance Relay(Main protection) <br> relays Due to Distance Trip(Main Protection Operate) <br> Zone-1 Trip"
     },
     {
       "time": "20:06",
@@ -539,147 +546,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12962.03,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12579.84,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12189.57,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11736.13,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11489.58,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11187.05,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 10960.48,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11201.43,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11370.06,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11554.11,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 11776.41,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12073.32,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12977.29,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12934.49,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12927.75,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12685.14,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 12648.07,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 14417.72,
-      "loadShed": 0,
-      "demand": 14417.72
+      "generation": 13729.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
       "generation": 14417.72,
-      "loadShed": 0,
-      "demand": 14417.72
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 14417.72,
-      "loadShed": 0,
-      "demand": 14417.72
+      "generation": 14102.72,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 14417.72,
-      "loadShed": 0,
-      "demand": 14417.72
+      "generation": 14119.19,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 14417.72,
-      "loadShed": 0,
-      "demand": 14417.72
+      "generation": 13975.3,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 12735.08,
-      "loadShed": 0,
-      "demand": 12735.08
+      "generation": 13759.38,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

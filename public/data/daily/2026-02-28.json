@@ -6,11 +6,11 @@
     "dayPeakDemand": 11372.42,
     "eveningPeakDemand": 12280.58,
     "minGen": 8617.5,
-    "maxGen": 12630,
+    "maxGen": 12280.58,
     "totalEnergyGen": 265.95127134,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 265.95,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": 265.951,
+    "maxTemp": 32.4,
     "totalGasSuppliedPower": 850.79,
     "avgProductionCost": 5.489,
     "totalDailyCost": 1459698358
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 116.47,
-      "cost": 401829477,
-      "unitCost": 3.45,
+      "cost": 401181069,
+      "unitCost": 3.4444,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 82.97,
-      "cost": 549229482,
-      "unitCost": 6.62,
+      "cost": 539598186,
+      "unitCost": 6.5039,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 9.95,
-      "cost": 179623669,
-      "unitCost": 18.06,
+      "cost": 168251286,
+      "unitCost": 16.9166,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 4.43,
-      "cost": 69884186,
-      "unitCost": 15.77,
+      "cost": 69405771,
+      "unitCost": 15.662,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 50.18,
-      "cost": 318153353,
-      "unitCost": 6.34,
+      "cost": 281024523,
+      "unitCost": 5.6001,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.0,
+      "cost": 42364,
+      "unitCost": 14.71,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -341,10 +348,10 @@
     },
     {
       "time": "04:47 - 06:44",
-      "plant": "Aminbazar-Meghnaghat 400kV Ckt-2 Tripped from Aminbazar 400/230/132kV end showing 86 -1 and 86-2 master relay trip  <br> Main CB AR Block relays",
+      "plant": "Aminbazar-Meghnaghat 400kV Ckt-2 Tripped from Aminbazar 400/230/132kV end showing 86 -1 and 86-2 master relay trip <br> Main CB AR Block relays",
       "load": "HT Outage",
       "reason": "Due to Meghnaghat ckt-2 trip and from Meghnaghat 400/230kV end showing SEL Relay relays Due to Tripped by 87L, Ground fault & ZCOM",
-      "full_desc": "Aminbazar-Meghnaghat 400kV Ckt-2 Tripped from Aminbazar 400/230/132kV end showing 86 -1 and 86-2 master relay trip  <br> Main CB AR Block relays Due to Meghnaghat ckt-2 trip and from Meghnaghat 400/230kV end showing SEL Relay relays Due to Tripped by 87L, Ground fault & ZCOM"
+      "full_desc": "Aminbazar-Meghnaghat 400kV Ckt-2 Tripped from Aminbazar 400/230/132kV end showing 86 -1 and 86-2 master relay trip <br> Main CB AR Block relays Due to Meghnaghat ckt-2 trip and from Meghnaghat 400/230kV end showing SEL Relay relays Due to Tripped by 87L, Ground fault & ZCOM"
     },
     {
       "time": "05:02 - 05:13",
@@ -369,10 +376,10 @@
     },
     {
       "time": "05:30",
-      "plant": "Aminbazar 400/230/132kV S/S Gopalganj-1 Tripped showing General trip  <br> Distance trip zone 1 relays",
+      "plant": "Aminbazar 400/230/132kV S/S Gopalganj-1 Tripped showing General trip <br> Distance trip zone 1 relays",
       "load": "HT Outage",
       "reason": "Due to General trip,  dustance trip",
-      "full_desc": "Aminbazar 400/230/132kV S/S Gopalganj-1 Tripped showing General trip  <br> Distance trip zone 1 relays Due to General trip,  dustance trip"
+      "full_desc": "Aminbazar 400/230/132kV S/S Gopalganj-1 Tripped showing General trip <br> Distance trip zone 1 relays Due to General trip,  dustance trip"
     },
     {
       "time": "05:34 - 07:57",
@@ -420,147 +427,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 10366.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 9775.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 9506.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 9642.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 10616.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 9607.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 8617.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 8861.02,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 9559.99,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 10385.14,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 10596.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 11006.58,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 11657.15,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 11901.3,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 11763.37,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 11892.45,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 12139.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 12280.58,
-      "loadShed": 0,
-      "demand": 12280.58
+      "generation": 11952.11,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 12280.58,
-      "loadShed": 0,
-      "demand": 12280.58
+      "generation": 12255.06,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 12280.58,
-      "loadShed": 0,
-      "demand": 12280.58
+      "generation": 12257.36,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 12280.58,
-      "loadShed": 0,
-      "demand": 12280.58
+      "generation": 12156.23,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 12280.58,
-      "loadShed": 0,
-      "demand": 12280.58
+      "generation": 12121.75,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 11372.42,
-      "loadShed": 0,
-      "demand": 11372.42
+      "generation": 11492.97,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

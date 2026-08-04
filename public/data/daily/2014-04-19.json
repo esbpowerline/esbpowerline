@@ -3,14 +3,14 @@
     "date": "19 Apr 2014",
     "dayPeakGen": 6207,
     "eveningPeakGen": 6686,
-    "dayPeakDemand": 6394.5,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7100,
-    "minGen": 5852,
-    "maxGen": 7104,
+    "minGen": 5717.0,
+    "maxGen": 6868.0,
     "totalEnergyGen": 152.735326,
-    "totalEnergyUnserved": 1.5,
-    "totalEnergyDemand": 154.24,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 37.7,
     "totalGasSuppliedPower": 929.089,
     "avgProductionCost": 4.75,
     "totalDailyCost": 725566841
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 96.58,
-      "cost": 333187341,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 4.18,
-      "cost": 27639334,
-      "unitCost": 6.62,
+      "cost": 16249590,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 42.3,
-      "cost": 763908851,
-      "unitCost": 18.06,
+      "cost": 625585638,
+      "unitCost": 14.7898,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 1.28,
-      "cost": 127850,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -143,13 +136,6 @@
       "reason": "Ashuganj-Ghorashal 132 kV Ckt-1 & 2 tripped at 12:44 showing distance relay from both end and were"
     },
     {
-      "time": "17:39, 15:50, 15:15 respectively.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "at 15:21",
       "plant": "Haripur-Madanganj 132 kV Ckt tripped at 15:21 showing over current relay from both end and",
       "load": "165 MW",
@@ -162,13 +148,6 @@
       "reason": "due to GBC pressure high and GT & ST were synchronized on"
     },
     {
-      "time": "23:25, 00:43(20/04/2014).",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "Outage",
       "plant": "After maintenance Faridpur-Madaripur 132 kV Ckt-1",
       "load": "HT Outage",
@@ -179,161 +158,9 @@
       "plant": "Daudkandi-Comilla (N) 132 kV Ckt-1 & 2",
       "load": "HT Outage",
       "reason": "Daudkandi-Comilla (N) 132 kV Ckt-1 & 2 tripped at 20:12 showing distance & over current relay at"
-    },
-    {
-      "time": "21:48.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "01:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "02:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "03:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "04:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "05:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "06:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "07:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "08:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "09:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "10:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "11:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "12:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "13:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "14:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "15:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "16:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "17:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    },
-    {
-      "time": "18:00",
-      "generation": 6686,
-      "loadShed": 0,
-      "demand": 6686
-    },
-    {
-      "time": "19:00",
-      "generation": 6686,
-      "loadShed": 0,
-      "demand": 6686
-    },
-    {
-      "time": "20:00",
-      "generation": 6686,
-      "loadShed": 0,
-      "demand": 6686
-    },
-    {
-      "time": "21:00",
-      "generation": 6686,
-      "loadShed": 0,
-      "demand": 6686
-    },
-    {
-      "time": "22:00",
-      "generation": 6686,
-      "loadShed": 0,
-      "demand": 6686
-    },
-    {
-      "time": "23:00",
-      "generation": 6207,
-      "loadShed": 0,
-      "demand": 6207
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

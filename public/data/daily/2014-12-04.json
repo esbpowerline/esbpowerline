@@ -3,14 +3,14 @@
     "date": "04 Dec 2014",
     "dayPeakGen": 4458,
     "eveningPeakGen": 5972,
-    "dayPeakDemand": 4458,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 5972,
-    "minGen": 3277,
-    "maxGen": 6002,
+    "minGen": 3256.0,
+    "maxGen": 5972.0,
     "totalEnergyGen": 100.327704,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 100.33,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 28.0,
     "totalGasSuppliedPower": 790.42,
     "avgProductionCost": 2.307,
     "totalDailyCost": 231464016
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 78.58,
-      "cost": 271087548,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 2.18,
-      "cost": 14417638,
-      "unitCost": 6.62,
+      "cost": 8476351,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 11.97,
-      "cost": 216099115,
-      "unitCost": 18.06,
+      "cost": 163976930,
+      "unitCost": 13.704,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 0.83,
-      "cost": 83500,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -156,7 +149,7 @@
     },
     {
       "time": "from 09:37 to 15:25",
-      "plant": "Khulna (S)-Khulna © 132 kV Ckt-2",
+      "plant": "Khulna (S)-Khulna \u00a9 132 kV Ckt-2",
       "load": "HT Outage",
       "reason": "due to A/M."
     },
@@ -275,152 +268,7 @@
       "reason": "due to A/M."
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "01:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "02:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "03:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "04:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "05:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "06:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "07:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "08:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "09:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "10:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "11:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "12:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "13:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "14:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "15:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "16:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "17:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    },
-    {
-      "time": "18:00",
-      "generation": 5972,
-      "loadShed": 0,
-      "demand": 5972
-    },
-    {
-      "time": "19:00",
-      "generation": 5972,
-      "loadShed": 0,
-      "demand": 5972
-    },
-    {
-      "time": "20:00",
-      "generation": 5972,
-      "loadShed": 0,
-      "demand": 5972
-    },
-    {
-      "time": "21:00",
-      "generation": 5972,
-      "loadShed": 0,
-      "demand": 5972
-    },
-    {
-      "time": "22:00",
-      "generation": 5972,
-      "loadShed": 0,
-      "demand": 5972
-    },
-    {
-      "time": "23:00",
-      "generation": 4458,
-      "loadShed": 0,
-      "demand": 4458
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

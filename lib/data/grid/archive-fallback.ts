@@ -8,14 +8,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "31 May 2026",
         "dayPeakGen": 11716.03,
         "eveningPeakGen": 14206.5,
-        "dayPeakDemand": 11739.53,
+        "dayPeakDemand": 11716.03,
         "eveningPeakDemand": 14255.5,
         "minGen": 11105.13,
-        "maxGen": 14550,
+        "maxGen": 14513.5,
         "totalEnergyGen": 303.6267983,
-        "totalEnergyUnserved": 0.19,
-        "totalEnergyDemand": 303.81,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 0.641,
+        "totalEnergyDemand": 304.268,
+        "maxTemp": 36.4,
         "totalGasSuppliedPower": 1142.66,
         "avgProductionCost": 5.523,
         "totalDailyCost": 1677078190
@@ -24,22 +24,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 157.32,
-          "cost": 542743979,
-          "unitCost": 3.45,
+          "cost": 568408756,
+          "unitCost": 3.6131,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 84.51,
-          "cost": 559433327,
-          "unitCost": 6.62,
+          "cost": 555629070,
+          "unitCost": 6.575,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 15.89,
-          "cost": 286899812,
-          "unitCost": 18.06,
+          "cost": 265508449,
+          "unitCost": 16.7134,
           "color": "#f97316"
         },
         {
@@ -52,23 +52,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 5.01,
-          "cost": 79029815,
-          "unitCost": 15.77,
+          "cost": 80991763,
+          "unitCost": 16.1615,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 39.16,
-          "cost": 248304768,
-          "unitCost": 6.34,
+          "cost": 205391268,
+          "unitCost": 5.2443,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.07,
+          "cost": 981451,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -397,147 +404,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 13623,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 13300,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12999,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12641,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12408,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12128,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11426.78,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11391.23,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11325.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11255.85,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11105.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11225.75,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12280.1,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12533.63,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12473.11,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 12207.3,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 11776.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 14206.5,
-          "loadShed": 0,
-          "demand": 14206.5
+          "generation": 11450.79,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 14206.5,
-          "loadShed": 0,
-          "demand": 14206.5
+          "generation": 13112.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 14206.5,
-          "loadShed": 0,
-          "demand": 14206.5
+          "generation": 13830.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 14206.5,
-          "loadShed": 0,
-          "demand": 14206.5
+          "loadShed": 47,
+          "demand": 14255.5
         },
         {
           "time": "22:00",
-          "generation": 14206.5,
-          "loadShed": 0,
-          "demand": 14206.5
+          "generation": 14450.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 11716.03,
-          "loadShed": 0,
-          "demand": 11716.03
+          "generation": 14513.5,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -546,28 +553,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 462.4,
           "condensate": 303.4,
-          "share": 22.6
+          "share": 22.1
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 95,
-          "condensate": 351,
-          "share": 4.7
+          "gas": 141.1,
+          "condensate": 654.3,
+          "share": 6.8
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 105,
           "condensate": 38.3,
-          "share": 5.1
+          "share": 5
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 910.8,
           "condensate": 4702.4,
-          "share": 44.6
+          "share": 43.6
         },
         {
           "company": "Tullow (Bangora)",
@@ -580,8 +587,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 452.1,
-          "condensate": 0,
-          "share": 22.1
+          "condensate": 11.7,
+          "share": 21.7
         }
       ],
       "gasDistributionData": [
@@ -634,14 +641,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "01 Jun 2026",
         "dayPeakGen": 13150.4,
         "eveningPeakGen": 15128.26,
-        "dayPeakDemand": 13223.4,
+        "dayPeakDemand": 13166.08,
         "eveningPeakDemand": 15281.26,
         "minGen": 12250.89,
-        "maxGen": 15700,
+        "maxGen": 15178.71,
         "totalEnergyGen": 326.97527476,
-        "totalEnergyUnserved": 0.58,
-        "totalEnergyDemand": 327.56,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 1.085,
+        "totalEnergyDemand": 328.06,
+        "maxTemp": 36.3,
         "totalGasSuppliedPower": 1040.72,
         "avgProductionCost": 5.871,
         "totalDailyCost": 1919626033
@@ -650,22 +657,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 144.21,
-          "cost": 497515090,
-          "unitCost": 3.45,
+          "cost": 515064904,
+          "unitCost": 3.5717,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 103.96,
-          "cost": 688248293,
-          "unitCost": 6.62,
+          "cost": 684869776,
+          "unitCost": 6.5875,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 21.8,
-          "cost": 393630490,
-          "unitCost": 18.06,
+          "cost": 357970750,
+          "unitCost": 16.4239,
           "color": "#f97316"
         },
         {
@@ -678,23 +685,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 4.95,
-          "cost": 77990169,
-          "unitCost": 15.77,
+          "cost": 80441371,
+          "unitCost": 16.2656,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 49.99,
-          "cost": 316958498,
-          "unitCost": 6.34,
+          "cost": 279810090,
+          "unitCost": 5.5969,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.09,
+          "cost": 1270944,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -911,15 +925,15 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "time": "22:24 - 00:19",
           "plant": "Bhulta 132/33kV S/S 132kV BUS Scheduled S/D",
           "load": "HT Outage",
-          "reason": "Due to 132 KV Bus DS-126 red hot <br>  <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS",
-          "full_desc": "Bhulta 132/33kV S/S 132kV BUS Scheduled S/D Due to 132 KV Bus DS-126 red hot <br>  <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS"
+          "reason": "Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS",
+          "full_desc": "Bhulta 132/33kV S/S 132kV BUS Scheduled S/D Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS"
         },
         {
           "time": "22:24 - 00:19",
           "plant": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D",
           "load": "HT Outage",
-          "reason": "Due to 132 KV Bus DS-126 red hot <br>  <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS",
-          "full_desc": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D Due to 132 KV Bus DS-126 red hot <br>  <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS"
+          "reason": "Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS",
+          "full_desc": "Bhulta 132/33kV S/S GT1 HT Scheduled S/D Due to 132 KV Bus DS-126 red hot <br> Shut down taken by Deepok kumar sutradhar, AE Bhulta 132 KV Grid SS"
         },
         {
           "time": "23:01 - 00:46",
@@ -981,147 +995,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 14464,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 14277,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13657,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13303,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12965,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12690,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12313.71,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12250.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12304.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12604.87,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12695.71,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 12840.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13567.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13558.28,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13572.02,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13484.4,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 13217.78,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 15128.26,
-          "loadShed": 0,
-          "demand": 15128.26
+          "generation": 12547.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 15128.26,
-          "loadShed": 0,
-          "demand": 15128.26
+          "generation": 14261.94,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 15128.26,
-          "loadShed": 0,
-          "demand": 15128.26
+          "generation": 14951.57,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 15128.26,
-          "loadShed": 0,
-          "demand": 15128.26
+          "loadShed": 146,
+          "demand": 15281.26
         },
         {
           "time": "22:00",
-          "generation": 15128.26,
-          "loadShed": 0,
-          "demand": 15128.26
+          "generation": 15141.49,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 13150.4,
-          "loadShed": 0,
-          "demand": 13150.4
+          "generation": 15178.71,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -1130,28 +1144,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 467.9,
           "condensate": 326.7,
-          "share": 21.4
+          "share": 20.9
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 95,
-          "condensate": 347.6,
-          "share": 4.3
+          "gas": 141.1,
+          "condensate": 651,
+          "share": 6.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 110.5,
           "condensate": 67.7,
-          "share": 5
+          "share": 4.9
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 915.4,
           "condensate": 4880.6,
-          "share": 41.8
+          "share": 40.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -1164,8 +1178,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 573.9,
-          "condensate": 0,
-          "share": 26.2
+          "condensate": 14.9,
+          "share": 25.7
         }
       ],
       "gasDistributionData": [
@@ -1218,14 +1232,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "02 Jun 2026",
         "dayPeakGen": 13824.9,
         "eveningPeakGen": 15820.76,
-        "dayPeakDemand": 14012.4,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 16212.76,
-        "minGen": 12967.61,
-        "maxGen": 16220,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 347.34938775,
-        "totalEnergyUnserved": 1.5,
-        "totalEnergyDemand": 348.85,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 940.87,
         "avgProductionCost": 6.486,
         "totalDailyCost": 2252767434
@@ -1234,50 +1248,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 130.8,
-          "cost": 451249796,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 111.89,
-          "cost": 740689469,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 37.92,
-          "cost": 684918893,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 2.4,
-          "cost": 239959,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.83,
-          "cost": 76181405,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 59.48,
-          "cost": 377121364,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -1304,9 +1318,9 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 0.0,
+          "loadShed": 0,
           "demand": 5885.23,
-          "pct": 0.0
+          "pct": 0
         },
         {
           "zone": "Chattogram",
@@ -1618,180 +1632,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Sirajgonj 225MW CCPP Unit-2, FGMO is OFF with remarks:- Gas Shortage"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "01:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "02:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "03:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "04:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "05:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "06:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "07:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "08:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "09:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "10:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "11:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "12:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "13:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "14:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "15:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "16:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "17:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        },
-        {
-          "time": "18:00",
-          "generation": 15820.76,
-          "loadShed": 0,
-          "demand": 15820.76
-        },
-        {
-          "time": "19:00",
-          "generation": 15820.76,
-          "loadShed": 0,
-          "demand": 15820.76
-        },
-        {
-          "time": "20:00",
-          "generation": 15820.76,
-          "loadShed": 0,
-          "demand": 15820.76
-        },
-        {
-          "time": "21:00",
-          "generation": 15820.76,
-          "loadShed": 0,
-          "demand": 15820.76
-        },
-        {
-          "time": "22:00",
-          "generation": 15820.76,
-          "loadShed": 0,
-          "demand": 15820.76
-        },
-        {
-          "time": "23:00",
-          "generation": 13824.9,
-          "loadShed": 0,
-          "demand": 13824.9
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 469.6,
           "condensate": 322.3,
-          "share": 19.8
+          "share": 19.5
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.8,
-          "condensate": 342,
-          "share": 4
+          "gas": 140.9,
+          "condensate": 645.2,
+          "share": 5.8
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 110.5,
           "condensate": 73.2,
-          "share": 4.7
+          "share": 4.6
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 914.9,
           "condensate": 4898.9,
-          "share": 38.6
+          "share": 37.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -1804,8 +1673,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 744.2,
-          "condensate": 0,
-          "share": 31.4
+          "condensate": 19.3,
+          "share": 30.8
         }
       ],
       "gasDistributionData": [
@@ -1858,14 +1727,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "03 Jun 2026",
         "dayPeakGen": 14553.08,
         "eveningPeakGen": 15870.67,
-        "dayPeakDemand": 14753.58,
+        "dayPeakDemand": 14871.08,
         "eveningPeakDemand": 16289.67,
         "minGen": 13295.83,
-        "maxGen": 16800,
+        "maxGen": 15979.83,
         "totalEnergyGen": 356.84943604,
-        "totalEnergyUnserved": 1.6,
-        "totalEnergyDemand": 358.45,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 5.885,
+        "totalEnergyDemand": 362.734,
+        "maxTemp": 36.8,
         "totalGasSuppliedPower": 932.1,
         "avgProductionCost": 6.71,
         "totalDailyCost": 2394414168
@@ -1874,22 +1743,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 126.56,
-          "cost": 436635672,
-          "unitCost": 3.45,
+          "cost": 448149130,
+          "unitCost": 3.541,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 120.82,
-          "cost": 799830615,
-          "unitCost": 6.62,
+          "cost": 796147820,
+          "unitCost": 6.5895,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 41.88,
-          "cost": 756360052,
-          "unitCost": 18.06,
+          "cost": 719233566,
+          "unitCost": 17.1735,
           "color": "#f97316"
         },
         {
@@ -1902,23 +1771,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 5.16,
-          "cost": 81330139,
-          "unitCost": 15.77,
+          "cost": 81103635,
+          "unitCost": 15.7261,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 59.91,
-          "cost": 379837654,
-          "unitCost": 6.34,
+          "cost": 349149418,
+          "unitCost": 5.8278,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.03,
+          "cost": 381283,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -2226,147 +2102,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15810.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15520.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15162.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 14807.56,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 14478,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 14319,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 13612.84,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 13434.78,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 13295.83,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 13504.65,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 13941.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 14063.45,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15039.49,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15193.19,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15189.41,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15153.1,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 14375.03,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 15870.67,
-          "loadShed": 0,
-          "demand": 15870.67
+          "generation": 13447.48,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 15870.67,
-          "loadShed": 0,
-          "demand": 15870.67
+          "generation": 14922.67,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 15870.67,
-          "loadShed": 0,
-          "demand": 15870.67
+          "generation": 15506.46,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 15870.67,
-          "loadShed": 0,
-          "demand": 15870.67
+          "loadShed": 401,
+          "demand": 16289.67
         },
         {
           "time": "22:00",
-          "generation": 15870.67,
-          "loadShed": 0,
-          "demand": 15870.67
+          "generation": 15806.4,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14553.08,
-          "loadShed": 0,
-          "demand": 14553.08
+          "generation": 15979.83,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -2375,28 +2251,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 469.6,
           "condensate": 327.1,
-          "share": 18.6
+          "share": 18.3
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.9,
-          "condensate": 348.1,
-          "share": 3.7
+          "gas": 140,
+          "condensate": 652.6,
+          "share": 5.4
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 109,
           "condensate": 71.7,
-          "share": 4.3
+          "share": 4.2
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 916.9,
           "condensate": 4930.7,
-          "share": 36.3
+          "share": 35.7
         },
         {
           "company": "Tullow (Bangora)",
@@ -2409,8 +2285,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 902.1,
-          "condensate": 0,
-          "share": 35.7
+          "condensate": 23.4,
+          "share": 35.1
         }
       ],
       "gasDistributionData": [
@@ -2463,14 +2339,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "04 Jun 2026",
         "dayPeakGen": 14743.95,
         "eveningPeakGen": 14900.03,
-        "dayPeakDemand": 14923.45,
+        "dayPeakDemand": 14971.95,
         "eveningPeakDemand": 15275.03,
         "minGen": 13452.95,
-        "maxGen": 14600,
+        "maxGen": 16015.91,
         "totalEnergyGen": 352.03621357,
-        "totalEnergyUnserved": 1.44,
-        "totalEnergyDemand": 353.47,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 5.529,
+        "totalEnergyDemand": 357.565,
+        "maxTemp": 36.8,
         "totalGasSuppliedPower": 934.11,
         "avgProductionCost": 6.4,
         "totalDailyCost": 2253153971
@@ -2479,22 +2355,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 127.09,
-          "cost": 438460494,
-          "unitCost": 3.45,
+          "cost": 447545545,
+          "unitCost": 3.5215,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 128.57,
-          "cost": 851145926,
-          "unitCost": 6.62,
+          "cost": 844547831,
+          "unitCost": 6.5687,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 32.61,
-          "cost": 589007257,
-          "unitCost": 18.06,
+          "cost": 559574372,
+          "unitCost": 17.1575,
           "color": "#f97316"
         },
         {
@@ -2507,23 +2383,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 4.62,
-          "cost": 72883458,
-          "unitCost": 15.77,
+          "cost": 72242314,
+          "unitCost": 15.6313,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 56.82,
-          "cost": 360243377,
-          "unitCost": 6.34,
+          "cost": 328514194,
+          "unitCost": 5.7816,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.03,
+          "cost": 501316,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -2726,8 +2609,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "time": "10:45 - 11:40",
           "plant": "Bajitpur 132/33kV S/S Tr-2(414T) HT Tripped showing RET650 <br> REC650 relays",
           "load": "HT Outage",
-          "reason": "Due to OIL SURGED Trip  <br> Closed Blocked Signal show",
-          "full_desc": "Bajitpur 132/33kV S/S Tr-2(414T) HT Tripped showing RET650 <br> REC650 relays Due to OIL SURGED Trip  <br> Closed Blocked Signal show"
+          "reason": "Due to OIL SURGED Trip <br> Closed Blocked Signal show",
+          "full_desc": "Bajitpur 132/33kV S/S Tr-2(414T) HT Tripped showing RET650 <br> REC650 relays Due to OIL SURGED Trip <br> Closed Blocked Signal show"
         },
         {
           "time": "10:55",
@@ -2808,10 +2691,10 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         },
         {
           "time": "17:36 - 18:14",
-          "plant": "Bogura(New)-Naogaon 132 kV Ckt-2 Tripped from Bogura 230/132kV end showing Distance Protection Trip <br> Zone 1 <br> Fault Location: 27.71 k.m. <br> Type: Phase A to G  <br> Fault Current: 3562A relays",
+          "plant": "Bogura(New)-Naogaon 132 kV Ckt-2 Tripped from Bogura 230/132kV end showing Distance Protection Trip <br> Zone 1 <br> Fault Location: 27.71 k.m. <br> Type: Phase A to G <br> Fault Current: 3562A relays",
           "load": "HT Outage",
           "reason": "Due to Bad Weather",
-          "full_desc": "Bogura(New)-Naogaon 132 kV Ckt-2 Tripped from Bogura 230/132kV end showing Distance Protection Trip <br> Zone 1 <br> Fault Location: 27.71 k.m. <br> Type: Phase A to G  <br> Fault Current: 3562A relays Due to Bad Weather"
+          "full_desc": "Bogura(New)-Naogaon 132 kV Ckt-2 Tripped from Bogura 230/132kV end showing Distance Protection Trip <br> Zone 1 <br> Fault Location: 27.71 k.m. <br> Type: Phase A to G <br> Fault Current: 3562A relays Due to Bad Weather"
         },
         {
           "time": "17:52 - 21:01",
@@ -2978,147 +2861,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 16015.91,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 15752.02,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 15243.67,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 14912.88,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 14547.56,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 14183.44,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 13711.62,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 13596.27,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 13452.95,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 13680.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 13944.79,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 14305.44,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 14997.22,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 15001.97,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 15147.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 14652.61,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 13970.71,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 14900.03,
-          "loadShed": 0,
-          "demand": 14900.03
+          "generation": 12975.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 14900.03,
-          "loadShed": 0,
-          "demand": 14900.03
+          "generation": 14245.04,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 14900.03,
-          "loadShed": 0,
-          "demand": 14900.03
+          "generation": 14881.17,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 14900.03,
-          "loadShed": 0,
-          "demand": 14900.03
+          "loadShed": 359,
+          "demand": 15275.03
         },
         {
           "time": "22:00",
-          "generation": 14900.03,
-          "loadShed": 0,
-          "demand": 14900.03
+          "generation": 14858.25,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14743.95,
-          "loadShed": 0,
-          "demand": 14743.95
+          "generation": 15048.56,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -3127,28 +3010,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 469.8,
           "condensate": 317.9,
-          "share": 18.4
+          "share": 18.1
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.4,
-          "condensate": 346.1,
-          "share": 3.7
+          "gas": 140.5,
+          "condensate": 651.1,
+          "share": 5.4
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 109,
           "condensate": 71.7,
-          "share": 4.3
+          "share": 4.2
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 918.1,
           "condensate": 4896.3,
-          "share": 36.1
+          "share": 35.4
         },
         {
           "company": "Tullow (Bangora)",
@@ -3161,8 +3044,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 922.2,
-          "condensate": 0,
-          "share": 36.2
+          "condensate": 23.9,
+          "share": 35.6
         }
       ],
       "gasDistributionData": [
@@ -3215,14 +3098,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "05 Jun 2026",
         "dayPeakGen": 12461.11,
         "eveningPeakGen": 14449.5,
-        "dayPeakDemand": 12595.61,
+        "dayPeakDemand": 12671.11,
         "eveningPeakDemand": 14730.5,
         "minGen": 11765.1,
-        "maxGen": 15414,
+        "maxGen": 15282.89,
         "totalEnergyGen": 323.86187523,
-        "totalEnergyUnserved": 1.08,
-        "totalEnergyDemand": 324.94,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 3.708,
+        "totalEnergyDemand": 327.57,
+        "maxTemp": 33.5,
         "totalGasSuppliedPower": 897.07,
         "avgProductionCost": 5.943,
         "totalDailyCost": 1924576349
@@ -3231,22 +3114,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 123.45,
-          "cost": 425887962,
-          "unitCost": 3.45,
+          "cost": 433733467,
+          "unitCost": 3.5136,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 117.88,
-          "cost": 780386167,
-          "unitCost": 6.62,
+          "cost": 773624002,
+          "unitCost": 6.5626,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 19.49,
-          "cost": 352062759,
-          "unitCost": 18.06,
+          "cost": 329437339,
+          "unitCost": 16.8994,
           "color": "#f97316"
         },
         {
@@ -3259,23 +3142,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 3.75,
-          "cost": 59182559,
-          "unitCost": 15.77,
+          "cost": 58896381,
+          "unitCost": 15.6937,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 56.92,
-          "cost": 360898927,
-          "unitCost": 6.34,
+          "cost": 327933659,
+          "unitCost": 5.7609,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.05,
+          "cost": 720201,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -3632,147 +3522,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 15282.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 15224.44,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 15176.44,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 14691.22,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 14244.09,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 13895.82,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 13225.46,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12743.65,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12531.77,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
           "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12361.4,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12239.01,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12340.06,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12671.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12196.14,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 12055.95,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 11929.52,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 11765.1,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 14449.5,
-          "loadShed": 0,
-          "demand": 14449.5
+          "generation": 11710.95,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 14449.5,
-          "loadShed": 0,
-          "demand": 14449.5
+          "generation": 13240.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 14449.5,
-          "loadShed": 0,
-          "demand": 14449.5
+          "generation": 13914,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 14449.5,
-          "loadShed": 0,
-          "demand": 14449.5
+          "loadShed": 269,
+          "demand": 14730.5
         },
         {
           "time": "22:00",
-          "generation": 14449.5,
-          "loadShed": 0,
-          "demand": 14449.5
+          "generation": 14536.6,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 12461.11,
-          "loadShed": 0,
-          "demand": 12461.11
+          "generation": 14669.6,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -3781,28 +3671,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 468,
           "condensate": 332.5,
-          "share": 18.8
+          "share": 18.5
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.1,
-          "condensate": 344.6,
-          "share": 3.8
+          "gas": 140.2,
+          "condensate": 650.6,
+          "share": 5.5
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 71.3,
           "condensate": 54.3,
-          "share": 2.9
+          "share": 2.8
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 916.1,
           "condensate": 4706.4,
-          "share": 36.9
+          "share": 36.2
         },
         {
           "company": "Tullow (Bangora)",
@@ -3815,8 +3705,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 901.7,
-          "condensate": 0,
-          "share": 36.3
+          "condensate": 23.4,
+          "share": 35.6
         }
       ],
       "gasDistributionData": [
@@ -3869,14 +3759,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "06 Jun 2026",
         "dayPeakGen": 13987.35,
         "eveningPeakGen": 15289.62,
-        "dayPeakDemand": 14176.35,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 15684.62,
-        "minGen": 12676.78,
-        "maxGen": 16290,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 337.3558542,
-        "totalEnergyUnserved": 1.51,
-        "totalEnergyDemand": 338.87,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 881.12,
         "avgProductionCost": 6.33,
         "totalDailyCost": 2135606409
@@ -3885,50 +3775,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 121.14,
-          "cost": 417919839,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 121.66,
-          "cost": 805417420,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 30.97,
-          "cost": 559231894,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 2.33,
-          "cost": 233262,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.71,
-          "cost": 58573528,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 57.47,
-          "cost": 364340780,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -4325,166 +4215,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Barishal 230/132kV S/S T-5 HT Scheduled S/D Due to red hot maintenance of  33 kVSwarupkathi-1 and Banaripara feeder by Pirojpur PBS"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "01:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "02:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "03:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "04:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "05:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "06:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "07:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "08:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "09:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "10:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "11:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "12:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "13:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "14:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "15:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "16:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "17:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        },
-        {
-          "time": "18:00",
-          "generation": 15289.62,
-          "loadShed": 0,
-          "demand": 15289.62
-        },
-        {
-          "time": "19:00",
-          "generation": 15289.62,
-          "loadShed": 0,
-          "demand": 15289.62
-        },
-        {
-          "time": "20:00",
-          "generation": 15289.62,
-          "loadShed": 0,
-          "demand": 15289.62
-        },
-        {
-          "time": "21:00",
-          "generation": 15289.62,
-          "loadShed": 0,
-          "demand": 15289.62
-        },
-        {
-          "time": "22:00",
-          "generation": 15289.62,
-          "loadShed": 0,
-          "demand": 15289.62
-        },
-        {
-          "time": "23:00",
-          "generation": 13987.35,
-          "loadShed": 0,
-          "demand": 13987.35
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 469.6,
           "condensate": 324.8,
-          "share": 18.7
+          "share": 18.4
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.1,
-          "condensate": 340.1,
-          "share": 3.7
+          "gas": 140.2,
+          "condensate": 644.6,
+          "share": 5.5
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
@@ -4498,7 +4243,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 3,
           "gas": 917.2,
           "condensate": 5059.7,
-          "share": 36.5
+          "share": 35.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -4511,8 +4256,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 921.9,
-          "condensate": 0,
-          "share": 36.7
+          "condensate": 23.9,
+          "share": 36
         }
       ],
       "gasDistributionData": [
@@ -4565,14 +4310,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "07 Jun 2026",
         "dayPeakGen": 14729.93,
         "eveningPeakGen": 15621.23,
-        "dayPeakDemand": 14934.43,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 16048.23,
-        "minGen": 13008,
-        "maxGen": 16000,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 349.35743445,
-        "totalEnergyUnserved": 1.64,
-        "totalEnergyDemand": 350.99,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 900.93,
         "avgProductionCost": 6.556,
         "totalDailyCost": 2290239016
@@ -4581,50 +4326,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 121.51,
-          "cost": 419199577,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 126.19,
-          "cost": 835400680,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 36.36,
-          "cost": 656748959,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 2.25,
-          "cost": 224918,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.04,
-          "cost": 63788233,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 58.76,
-          "cost": 372537429,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -4965,180 +4710,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Barishal 230/132kV S/S T-4 HT Scheduled S/D Due to 33kv  Babuganj Ds problem"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "01:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "02:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "03:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "04:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "05:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "06:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "07:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "08:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "09:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "10:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "11:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "12:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "13:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "14:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "15:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "16:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "17:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        },
-        {
-          "time": "18:00",
-          "generation": 15621.23,
-          "loadShed": 0,
-          "demand": 15621.23
-        },
-        {
-          "time": "19:00",
-          "generation": 15621.23,
-          "loadShed": 0,
-          "demand": 15621.23
-        },
-        {
-          "time": "20:00",
-          "generation": 15621.23,
-          "loadShed": 0,
-          "demand": 15621.23
-        },
-        {
-          "time": "21:00",
-          "generation": 15621.23,
-          "loadShed": 0,
-          "demand": 15621.23
-        },
-        {
-          "time": "22:00",
-          "generation": 15621.23,
-          "loadShed": 0,
-          "demand": 15621.23
-        },
-        {
-          "time": "23:00",
-          "generation": 14729.93,
-          "loadShed": 0,
-          "demand": 14729.93
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 470.4,
           "condensate": 331.9,
-          "share": 18.4
+          "share": 18.1
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.3,
-          "condensate": 337.2,
-          "share": 3.7
+          "gas": 140.4,
+          "condensate": 643.1,
+          "share": 5.4
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 110.4,
           "condensate": 73.8,
-          "share": 4.3
+          "share": 4.2
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 915.9,
           "condensate": 4837,
-          "share": 35.9
+          "share": 35.2
         },
         {
           "company": "Tullow (Bangora)",
@@ -5151,8 +4751,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 929.7,
-          "condensate": 0,
-          "share": 36.4
+          "condensate": 24.1,
+          "share": 35.8
         }
       ],
       "gasDistributionData": [
@@ -5205,14 +4805,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "08 Jun 2026",
         "dayPeakGen": 14850.02,
         "eveningPeakGen": 15773.2,
-        "dayPeakDemand": 15174.52,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 16451.2,
-        "minGen": 13350.83,
-        "maxGen": 16040,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 354.95228448,
-        "totalEnergyUnserved": 2.6,
-        "totalEnergyDemand": 357.55,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 909.55,
         "avgProductionCost": 6.64,
         "totalDailyCost": 2357059472
@@ -5221,50 +4821,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 121.22,
-          "cost": 418225506,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 130.08,
-          "cost": 861124393,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 38.84,
-          "cost": 701498338,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.53,
-          "cost": 152834,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.38,
-          "cost": 69141485,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 58.59,
-          "cost": 371469964,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -5612,180 +5212,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Meghnaghat 230/132kV S/S Bus2 Scheduled S/D Due to rad hot maintenance"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "01:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "02:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "03:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "04:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "05:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "06:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "07:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "08:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "09:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "10:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "11:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "12:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "13:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "14:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "15:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "16:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "17:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        },
-        {
-          "time": "18:00",
-          "generation": 15773.2,
-          "loadShed": 0,
-          "demand": 15773.2
-        },
-        {
-          "time": "19:00",
-          "generation": 15773.2,
-          "loadShed": 0,
-          "demand": 15773.2
-        },
-        {
-          "time": "20:00",
-          "generation": 15773.2,
-          "loadShed": 0,
-          "demand": 15773.2
-        },
-        {
-          "time": "21:00",
-          "generation": 15773.2,
-          "loadShed": 0,
-          "demand": 15773.2
-        },
-        {
-          "time": "22:00",
-          "generation": 15773.2,
-          "loadShed": 0,
-          "demand": 15773.2
-        },
-        {
-          "time": "23:00",
-          "generation": 14850.02,
-          "loadShed": 0,
-          "demand": 14850.02
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 470.4,
           "condensate": 333.5,
-          "share": 18
+          "share": 17.7
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.2,
-          "condensate": 338.6,
-          "share": 3.6
+          "gas": 140.4,
+          "condensate": 644,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 111.4,
           "condensate": 74.8,
-          "share": 4.3
+          "share": 4.2
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 917,
           "condensate": 5009.2,
-          "share": 35.2
+          "share": 34.6
         },
         {
           "company": "Tullow (Bangora)",
@@ -5798,8 +5253,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 982.4,
-          "condensate": 0,
-          "share": 37.7
+          "condensate": 25.5,
+          "share": 37
         }
       ],
       "gasDistributionData": [
@@ -5852,14 +5307,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "09 Jun 2026",
         "dayPeakGen": 14141,
         "eveningPeakGen": 14520,
-        "dayPeakDemand": 14230.5,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 14707.06,
-        "minGen": 13125,
-        "maxGen": 15796.51,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 342.15150821,
-        "totalEnergyUnserved": 0.72,
-        "totalEnergyDemand": 342.87,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 916.72,
         "avgProductionCost": 6.298,
         "totalDailyCost": 2154825895
@@ -5868,50 +5323,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 123.09,
-          "cost": 424647156,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 126.03,
-          "cost": 834331356,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 28.6,
-          "cost": 516596345,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.45,
-          "cost": 145170,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.5,
-          "cost": 55183851,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 59.12,
-          "cost": 374814250,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -6378,180 +5833,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Barishal 230/132kV S/S T-5 LT Scheduled S/D Due to 33 kV bus Section DS, Babuganj & Jhalakathi 33 kV feeder source DS Work. Work done by PBS"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "01:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "02:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "03:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "04:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "05:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "06:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "07:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "08:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "09:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "10:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "11:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "12:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "13:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "14:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "15:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "16:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "17:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        },
-        {
-          "time": "18:00",
-          "generation": 14520,
-          "loadShed": 0,
-          "demand": 14520
-        },
-        {
-          "time": "19:00",
-          "generation": 14520,
-          "loadShed": 0,
-          "demand": 14520
-        },
-        {
-          "time": "20:00",
-          "generation": 14520,
-          "loadShed": 0,
-          "demand": 14520
-        },
-        {
-          "time": "21:00",
-          "generation": 14520,
-          "loadShed": 0,
-          "demand": 14520
-        },
-        {
-          "time": "22:00",
-          "generation": 14520,
-          "loadShed": 0,
-          "demand": 14520
-        },
-        {
-          "time": "23:00",
-          "generation": 14141,
-          "loadShed": 0,
-          "demand": 14141
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 468.2,
           "condensate": 317.5,
-          "share": 18
+          "share": 17.7
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.2,
-          "condensate": 338.5,
-          "share": 3.6
+          "gas": 140.3,
+          "condensate": 643.7,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 109,
           "condensate": 71,
-          "share": 4.2
+          "share": 4.1
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 916,
           "condensate": 4939.8,
-          "share": 35.2
+          "share": 34.6
         },
         {
           "company": "Tullow (Bangora)",
@@ -6564,8 +5874,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 983,
-          "condensate": 0,
-          "share": 37.8
+          "condensate": 25.5,
+          "share": 37.1
         }
       ],
       "gasDistributionData": [
@@ -6618,14 +5928,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "10 Jun 2026",
         "dayPeakGen": 13966.46,
         "eveningPeakGen": 15203.2,
-        "dayPeakDemand": 14057.46,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 15393.2,
-        "minGen": 12340,
-        "maxGen": 15650,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 331.23059995,
-        "totalEnergyUnserved": 0.73,
-        "totalEnergyDemand": 331.96,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 879.17,
         "avgProductionCost": 6.335,
         "totalDailyCost": 2098405760
@@ -6634,50 +5944,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 119.85,
-          "cost": 413499481,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 118.94,
-          "cost": 787365305,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 29.55,
-          "cost": 533662915,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.38,
-          "cost": 138435,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.13,
-          "cost": 49415228,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 58.22,
-          "cost": 369138036,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -6990,180 +6300,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Maijdee 132/33kV S/S Chowmuhoni-Maijdee ckt -02 Project Work S/D Due to Project work at chowmuhani 230/132/33 KV S/S."
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "01:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "02:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "03:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "04:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "05:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "06:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "07:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "08:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "09:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "10:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "11:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "12:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "13:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "14:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "15:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "16:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "17:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        },
-        {
-          "time": "18:00",
-          "generation": 15203.2,
-          "loadShed": 0,
-          "demand": 15203.2
-        },
-        {
-          "time": "19:00",
-          "generation": 15203.2,
-          "loadShed": 0,
-          "demand": 15203.2
-        },
-        {
-          "time": "20:00",
-          "generation": 15203.2,
-          "loadShed": 0,
-          "demand": 15203.2
-        },
-        {
-          "time": "21:00",
-          "generation": 15203.2,
-          "loadShed": 0,
-          "demand": 15203.2
-        },
-        {
-          "time": "22:00",
-          "generation": 15203.2,
-          "loadShed": 0,
-          "demand": 15203.2
-        },
-        {
-          "time": "23:00",
-          "generation": 13966.46,
-          "loadShed": 0,
-          "demand": 13966.46
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 466,
           "condensate": 336.5,
-          "share": 17.9
+          "share": 17.5
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94,
-          "condensate": 343.6,
-          "share": 3.6
+          "gas": 140.1,
+          "condensate": 647.5,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 98,
           "condensate": 65.9,
-          "share": 3.8
+          "share": 3.7
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 916.5,
           "condensate": 4867.1,
-          "share": 35.1
+          "share": 34.5
         },
         {
           "company": "Tullow (Bangora)",
@@ -7176,8 +6341,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1003.3,
-          "condensate": 0,
-          "share": 38.4
+          "condensate": 26,
+          "share": 37.8
         }
       ],
       "gasDistributionData": [
@@ -7230,14 +6395,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "11 Jun 2026",
         "dayPeakGen": 14464.11,
         "eveningPeakGen": 15068.4,
-        "dayPeakDemand": 14697.61,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 15556.4,
-        "minGen": 12720.04,
-        "maxGen": 14730,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 338.53868576,
-        "totalEnergyUnserved": 1.87,
-        "totalEnergyDemand": 340.41,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 855.5,
         "avgProductionCost": 6.836,
         "totalDailyCost": 2314243766
@@ -7246,50 +6411,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 116.32,
-          "cost": 401290183,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 115.99,
-          "cost": 767828154,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 41.32,
-          "cost": 746194996,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.08,
-          "cost": 107925,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.63,
-          "cost": 57301890,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 59.75,
-          "cost": 378809883,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -7658,180 +6823,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Daganbhuiyan 132/33kV S/S Transformer-2 HT Scheduled S/D Due to Tr-02 33 KV load side PT change & loop jumpering."
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "01:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "02:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "03:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "04:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "05:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "06:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "07:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "08:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "09:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "10:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "11:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "12:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "13:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "14:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "15:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "16:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "17:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        },
-        {
-          "time": "18:00",
-          "generation": 15068.4,
-          "loadShed": 0,
-          "demand": 15068.4
-        },
-        {
-          "time": "19:00",
-          "generation": 15068.4,
-          "loadShed": 0,
-          "demand": 15068.4
-        },
-        {
-          "time": "20:00",
-          "generation": 15068.4,
-          "loadShed": 0,
-          "demand": 15068.4
-        },
-        {
-          "time": "21:00",
-          "generation": 15068.4,
-          "loadShed": 0,
-          "demand": 15068.4
-        },
-        {
-          "time": "22:00",
-          "generation": 15068.4,
-          "loadShed": 0,
-          "demand": 15068.4
-        },
-        {
-          "time": "23:00",
-          "generation": 14464.11,
-          "loadShed": 0,
-          "demand": 14464.11
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 469.5,
           "condensate": 323.2,
-          "share": 18.1
+          "share": 17.8
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.1,
-          "condensate": 344.6,
-          "share": 3.6
+          "gas": 140.2,
+          "condensate": 650.6,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 85.4,
           "condensate": 58.7,
-          "share": 3.3
+          "share": 3.2
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 913.9,
           "condensate": 4847.3,
-          "share": 35.2
+          "share": 34.6
         },
         {
           "company": "Tullow (Bangora)",
@@ -7844,8 +6864,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1003,
-          "condensate": 0,
-          "share": 38.6
+          "condensate": 26,
+          "share": 37.9
         }
       ],
       "gasDistributionData": [
@@ -7898,14 +6918,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "12 Jun 2026",
         "dayPeakGen": 13213.87,
         "eveningPeakGen": 15007.4,
-        "dayPeakDemand": 13413.37,
+        "dayPeakDemand": 13363.87,
         "eveningPeakDemand": 15424.4,
         "minGen": 12248.97,
-        "maxGen": 15680,
+        "maxGen": 15007.4,
         "totalEnergyGen": 325.444341,
-        "totalEnergyUnserved": 1.6,
-        "totalEnergyDemand": 327.04,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 5.987,
+        "totalEnergyDemand": 331.431,
+        "maxTemp": 35.1,
         "totalGasSuppliedPower": 874.51,
         "avgProductionCost": 6.708,
         "totalDailyCost": 2183057665
@@ -7914,22 +6934,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 118.14,
-          "cost": 407581206,
-          "unitCost": 3.45,
+          "cost": 411529313,
+          "unitCost": 3.4834,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 105.77,
-          "cost": 700206555,
-          "unitCost": 6.62,
+          "cost": 706475389,
+          "unitCost": 6.6793,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 37.81,
-          "cost": 682907071,
-          "unitCost": 18.06,
+          "cost": 655555195,
+          "unitCost": 17.3367,
           "color": "#f97316"
         },
         {
@@ -7942,23 +6962,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 4.16,
-          "cost": 65582058,
-          "unitCost": 15.77,
+          "cost": 65573908,
+          "unitCost": 15.768,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 58.72,
-          "cost": 372306996,
-          "unitCost": 6.34,
+          "cost": 342423465,
+          "unitCost": 5.8311,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.1,
+          "cost": 1426281,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -8315,147 +7342,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 14654.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 14393.26,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 14212.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 13729.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 13341.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12971,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12449.01,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12403.85,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12248.97,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12407.35,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12540.05,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12684.35,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 14069.32,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 13329.25,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 13361.59,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12917.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 12341.82,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 15007.4,
-          "loadShed": 0,
-          "demand": 15007.4
+          "generation": 12146.92,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 15007.4,
-          "loadShed": 0,
-          "demand": 15007.4
+          "generation": 13279,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 15007.4,
-          "loadShed": 0,
-          "demand": 15007.4
+          "generation": 14504.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 15007.4,
-          "loadShed": 0,
-          "demand": 15007.4
+          "loadShed": 399,
+          "demand": 15424.4
         },
         {
           "time": "22:00",
-          "generation": 15007.4,
-          "loadShed": 0,
-          "demand": 15007.4
+          "generation": 14770.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 13213.87,
-          "loadShed": 0,
-          "demand": 13213.87
+          "generation": 14619.9,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -8464,28 +7491,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 468.9,
           "condensate": 333.9,
-          "share": 18.3
+          "share": 18
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.8,
-          "condensate": 340.3,
-          "share": 3.7
+          "gas": 139.9,
+          "condensate": 644,
+          "share": 5.4
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 86.5,
           "condensate": 56.2,
-          "share": 3.4
+          "share": 3.3
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 916.6,
           "condensate": 5007.1,
-          "share": 35.8
+          "share": 35.2
         },
         {
           "company": "Tullow (Bangora)",
@@ -8498,8 +7525,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 962.7,
-          "condensate": 0,
-          "share": 37.6
+          "condensate": 25,
+          "share": 36.9
         }
       ],
       "gasDistributionData": [
@@ -8552,14 +7579,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "13 Jun 2026",
         "dayPeakGen": 13863.2,
         "eveningPeakGen": 15031.7,
-        "dayPeakDemand": 14621.2,
+        "dayPeakDemand": 14165.2,
         "eveningPeakDemand": 16615.7,
         "minGen": 12690.61,
-        "maxGen": 16040,
+        "maxGen": 15031.7,
         "totalEnergyGen": 336.66728428,
-        "totalEnergyUnserved": 6.06,
-        "totalEnergyDemand": 342.73,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 14.75,
+        "totalEnergyDemand": 351.417,
+        "maxTemp": 34,
         "totalGasSuppliedPower": 865.6,
         "avgProductionCost": 6.851,
         "totalDailyCost": 2306544087
@@ -8568,22 +7595,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 119.39,
-          "cost": 411911027,
-          "unitCost": 3.45,
+          "cost": 417370032,
+          "unitCost": 3.4957,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 109.17,
-          "cost": 722702847,
-          "unitCost": 6.62,
+          "cost": 728497061,
+          "unitCost": 6.6731,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 41.99,
-          "cost": 758388162,
-          "unitCost": 18.06,
+          "cost": 732384105,
+          "unitCost": 17.4407,
           "color": "#f97316"
         },
         {
@@ -8596,23 +7623,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 4.4,
-          "cost": 69376992,
-          "unitCost": 15.77,
+          "cost": 69067173,
+          "unitCost": 15.6996,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 60.76,
-          "cost": 385200819,
-          "unitCost": 6.34,
+          "cost": 356311174,
+          "unitCost": 5.8645,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.19,
+          "cost": 2838441,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -8941,147 +7975,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14462.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14259.32,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14113.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13884.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13670.4,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13345.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 12690.61,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 12871.54,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 12741.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 12947.14,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13109.92,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13388.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14164.45,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14146.6,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14161.97,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13987.02,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 13711.05,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 15031.7,
-          "loadShed": 0,
-          "demand": 15031.7
+          "generation": 13585.18,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 15031.7,
-          "loadShed": 0,
-          "demand": 15031.7
+          "generation": 14520.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 15031.7,
-          "loadShed": 0,
-          "demand": 15031.7
+          "generation": 14914.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 15031.7,
-          "loadShed": 0,
-          "demand": 15031.7
+          "loadShed": 1516,
+          "demand": 16615.7
         },
         {
           "time": "22:00",
-          "generation": 15031.7,
-          "loadShed": 0,
-          "demand": 15031.7
+          "generation": 14888.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 13863.2,
-          "loadShed": 0,
-          "demand": 13863.2
+          "generation": 14829.7,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -9090,14 +8124,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 468.4,
           "condensate": 344,
-          "share": 18.2
+          "share": 17.9
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.1,
-          "condensate": 338.5,
-          "share": 3.7
+          "gas": 140.2,
+          "condensate": 642.2,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
@@ -9111,7 +8145,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 3,
           "gas": 915.9,
           "condensate": 4897.6,
-          "share": 35.6
+          "share": 34.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -9124,8 +8158,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 972.1,
-          "condensate": 0,
-          "share": 37.7
+          "condensate": 25.2,
+          "share": 37.1
         }
       ],
       "gasDistributionData": [
@@ -9178,14 +8212,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "14 Jun 2026",
         "dayPeakGen": 14136.76,
         "eveningPeakGen": 15047.9,
-        "dayPeakDemand": 15161.76,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 17189.9,
-        "minGen": 13664.79,
-        "maxGen": 15100,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 344.73415076,
-        "totalEnergyUnserved": 8.2,
-        "totalEnergyDemand": 352.93,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 880.63,
         "avgProductionCost": 6.89,
         "totalDailyCost": 2375193889
@@ -9194,50 +8228,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 119.4,
-          "cost": 411921447,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 116.96,
-          "cost": 774252309,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 42.48,
-          "cost": 767142707,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.17,
-          "cost": 117198,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.03,
-          "cost": 63626378,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 60.48,
-          "cost": 383452412,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -9571,180 +8605,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Kushtia 132/33kV S/S 132 KV Bus-B Project Work S/D Due to DWZTGE \u09aa\u09cd\u09b0\u0995\u09b2\u09cd\u09aa\u09c7\u09b0 \u0986\u0993\u09a4\u09be\u09df \u0995\u09c1\u09b7\u09cd\u099f\u09bf\u09df\u09be-\u09ae\u09c7\u09b9\u09c7\u09b0\u09aa\u09c1\u09b0  \u09ac\u09c7 \u098f\u09b0 \u0995\u09be\u099c\u09c7\u09b0 \u099c\u09a8\u09cd\u09af \u09ac\u09be\u09b8 A \u09a5\u09c7\u0995\u09c7 B \u09a4\u09c7 \u09b6\u09bf\u09ab\u099f"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "01:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "02:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "03:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "04:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "05:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "06:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "07:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "08:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "09:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "10:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "11:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "12:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "13:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "14:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "15:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "16:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "17:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        },
-        {
-          "time": "18:00",
-          "generation": 15047.9,
-          "loadShed": 0,
-          "demand": 15047.9
-        },
-        {
-          "time": "19:00",
-          "generation": 15047.9,
-          "loadShed": 0,
-          "demand": 15047.9
-        },
-        {
-          "time": "20:00",
-          "generation": 15047.9,
-          "loadShed": 0,
-          "demand": 15047.9
-        },
-        {
-          "time": "21:00",
-          "generation": 15047.9,
-          "loadShed": 0,
-          "demand": 15047.9
-        },
-        {
-          "time": "22:00",
-          "generation": 15047.9,
-          "loadShed": 0,
-          "demand": 15047.9
-        },
-        {
-          "time": "23:00",
-          "generation": 14136.76,
-          "loadShed": 0,
-          "demand": 14136.76
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 467.5,
           "condensate": 349.5,
-          "share": 17.6
+          "share": 17.3
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.3,
-          "condensate": 335.3,
-          "share": 3.5
+          "gas": 140.2,
+          "condensate": 640,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 92,
           "condensate": 60,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 916.6,
           "condensate": 4916.2,
-          "share": 34.5
+          "share": 33.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -9757,8 +8646,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1055.7,
-          "condensate": 0,
-          "share": 39.7
+          "condensate": 27.4,
+          "share": 39
         }
       ],
       "gasDistributionData": [
@@ -9811,14 +8700,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "15 Jun 2026",
         "dayPeakGen": 14247.86,
         "eveningPeakGen": 15150.5,
-        "dayPeakDemand": 15099.36,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 16930.5,
-        "minGen": 13460.5,
-        "maxGen": 15150,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 340.87983799,
-        "totalEnergyUnserved": 6.81,
-        "totalEnergyDemand": 347.69,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 892.79,
         "avgProductionCost": 6.612,
         "totalDailyCost": 2253923236
@@ -9827,50 +8716,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 121.83,
-          "cost": 420313827,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 115.29,
-          "cost": 763232009,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 35.82,
-          "cost": 646854261,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.68,
-          "cost": 168256,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.87,
-          "cost": 61042544,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 62.28,
-          "cost": 394870790,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -10120,166 +9009,21 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Lakshmipur 132/33kV S/S Transformer-2 LT Scheduled S/D Due to 33kV Load Side Redhot Work."
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "01:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "02:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "03:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "04:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "05:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "06:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "07:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "08:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "09:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "10:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "11:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "12:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "13:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "14:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "15:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "16:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "17:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        },
-        {
-          "time": "18:00",
-          "generation": 15150.5,
-          "loadShed": 0,
-          "demand": 15150.5
-        },
-        {
-          "time": "19:00",
-          "generation": 15150.5,
-          "loadShed": 0,
-          "demand": 15150.5
-        },
-        {
-          "time": "20:00",
-          "generation": 15150.5,
-          "loadShed": 0,
-          "demand": 15150.5
-        },
-        {
-          "time": "21:00",
-          "generation": 15150.5,
-          "loadShed": 0,
-          "demand": 15150.5
-        },
-        {
-          "time": "22:00",
-          "generation": 15150.5,
-          "loadShed": 0,
-          "demand": 15150.5
-        },
-        {
-          "time": "23:00",
-          "generation": 14247.86,
-          "loadShed": 0,
-          "demand": 14247.86
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 465.7,
           "condensate": 351.2,
-          "share": 17.6
+          "share": 17.3
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.7,
-          "condensate": 326.1,
-          "share": 3.6
+          "gas": 140.8,
+          "condensate": 630.4,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
@@ -10293,7 +9037,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 3,
           "gas": 915.4,
           "condensate": 4738.8,
-          "share": 34.6
+          "share": 34
         },
         {
           "company": "Tullow (Bangora)",
@@ -10306,8 +9050,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1050.3,
-          "condensate": 0,
-          "share": 39.7
+          "condensate": 27.3,
+          "share": 39
         }
       ],
       "gasDistributionData": [
@@ -10360,14 +9104,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "16 Jun 2026",
         "dayPeakGen": 13655.83,
         "eveningPeakGen": 14579.39,
-        "dayPeakDemand": 15078.83,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 17553.39,
-        "minGen": 13257.23,
-        "maxGen": 14950,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 332.42743681,
-        "totalEnergyUnserved": 11.38,
-        "totalEnergyDemand": 343.81,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 901.71,
         "avgProductionCost": 6.805,
         "totalDailyCost": 2262197132
@@ -10376,50 +9120,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 123.39,
-          "cost": 425682077,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 106.37,
-          "cost": 704161329,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 35.59,
-          "cost": 642808626,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.61,
-          "cost": 161038,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.14,
-          "cost": 65275438,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 61.19,
-          "cost": 387922302,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -10627,180 +9371,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Shahjibazar 132/33kV S/S TR-06 HT Tripped showing Over current Relay relays Due to Bisic and Lakhai Feeder Trip"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "01:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "02:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "03:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "04:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "05:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "06:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "07:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "08:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "09:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "10:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "11:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "12:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "13:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "14:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "15:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "16:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "17:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        },
-        {
-          "time": "18:00",
-          "generation": 14579.39,
-          "loadShed": 0,
-          "demand": 14579.39
-        },
-        {
-          "time": "19:00",
-          "generation": 14579.39,
-          "loadShed": 0,
-          "demand": 14579.39
-        },
-        {
-          "time": "20:00",
-          "generation": 14579.39,
-          "loadShed": 0,
-          "demand": 14579.39
-        },
-        {
-          "time": "21:00",
-          "generation": 14579.39,
-          "loadShed": 0,
-          "demand": 14579.39
-        },
-        {
-          "time": "22:00",
-          "generation": 14579.39,
-          "loadShed": 0,
-          "demand": 14579.39
-        },
-        {
-          "time": "23:00",
-          "generation": 13655.83,
-          "loadShed": 0,
-          "demand": 13655.83
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 467.7,
           "condensate": 355,
-          "share": 17.7
+          "share": 17.4
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.6,
-          "condensate": 330.5,
-          "share": 3.6
+          "gas": 140.6,
+          "condensate": 634.8,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 91.7,
           "condensate": 53.5,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 914.4,
           "condensate": 4882.5,
-          "share": 34.6
+          "share": 34
         },
         {
           "company": "Tullow (Bangora)",
@@ -10813,8 +9412,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1046.4,
-          "condensate": 0,
-          "share": 39.5
+          "condensate": 27.2,
+          "share": 38.9
         }
       ],
       "gasDistributionData": [
@@ -10867,14 +9466,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "17 Jun 2026",
         "dayPeakGen": 13880.15,
         "eveningPeakGen": 15461.46,
-        "dayPeakDemand": 14773.65,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 17328.46,
-        "minGen": 13421.25,
-        "maxGen": 15460,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 340.72479055,
-        "totalEnergyUnserved": 7.15,
-        "totalEnergyDemand": 347.87,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 886.55,
         "avgProductionCost": 6.791,
         "totalDailyCost": 2313978161
@@ -10883,50 +9482,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 125.27,
-          "cost": 432170760,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 112.55,
-          "cost": 745048832,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 36.14,
-          "cost": 652726256,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.29,
-          "cost": 128980,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.1,
-          "cost": 64664926,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 61.2,
-          "cost": 388034653,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -11225,180 +9824,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Korerhat 400/230/132kV S/S ATR-4(7403T) HT Project Work S/D Due to Due to project work"
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "01:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "02:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "03:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "04:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "05:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "06:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "07:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "08:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "09:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "10:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "11:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "12:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "13:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "14:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "15:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "16:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "17:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        },
-        {
-          "time": "18:00",
-          "generation": 15461.46,
-          "loadShed": 0,
-          "demand": 15461.46
-        },
-        {
-          "time": "19:00",
-          "generation": 15461.46,
-          "loadShed": 0,
-          "demand": 15461.46
-        },
-        {
-          "time": "20:00",
-          "generation": 15461.46,
-          "loadShed": 0,
-          "demand": 15461.46
-        },
-        {
-          "time": "21:00",
-          "generation": 15461.46,
-          "loadShed": 0,
-          "demand": 15461.46
-        },
-        {
-          "time": "22:00",
-          "generation": 15461.46,
-          "loadShed": 0,
-          "demand": 15461.46
-        },
-        {
-          "time": "23:00",
-          "generation": 13880.15,
-          "loadShed": 0,
-          "demand": 13880.15
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 467.7,
           "condensate": 361.9,
-          "share": 17.7
+          "share": 17.4
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.4,
-          "condensate": 328.5,
-          "share": 3.6
+          "gas": 140.4,
+          "condensate": 632.7,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 91.6,
           "condensate": 59.1,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 912.1,
           "condensate": 4931.1,
-          "share": 34.4
+          "share": 33.8
         },
         {
           "company": "Tullow (Bangora)",
@@ -11411,8 +9865,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1051.6,
-          "condensate": 0,
-          "share": 39.7
+          "condensate": 27.3,
+          "share": 39
         }
       ],
       "gasDistributionData": [
@@ -11465,14 +9919,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "18 Jun 2026",
         "dayPeakGen": 14101.96,
         "eveningPeakGen": 14783.7,
-        "dayPeakDemand": 14134.96,
+        "dayPeakDemand": 14351.27,
         "eveningPeakDemand": 14852.7,
         "minGen": 12801.92,
-        "maxGen": 14920,
+        "maxGen": 14783.7,
         "totalEnergyGen": 334.39110724,
-        "totalEnergyUnserved": 0.26,
-        "totalEnergyDemand": 334.66,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 10.199,
+        "totalEnergyDemand": 344.59,
+        "maxTemp": 33.4,
         "totalGasSuppliedPower": 878.23,
         "avgProductionCost": 6.514,
         "totalDailyCost": 2178352952
@@ -11481,22 +9935,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 123.14,
-          "cost": 424834195,
-          "unitCost": 3.45,
+          "cost": 425464051,
+          "unitCost": 3.4551,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 119.19,
-          "cost": 789060631,
-          "unitCost": 6.62,
+          "cost": 784889327,
+          "unitCost": 6.585,
           "color": "#64748b"
         },
         {
           "name": "HFO",
-          "gen": 29.28,
-          "cost": 528831948,
-          "unitCost": 18.06,
+          "gen": 28.95,
+          "cost": 564621657,
+          "unitCost": 19.5002,
           "color": "#f97316"
         },
         {
@@ -11509,23 +9963,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 2.15,
-          "cost": 33966146,
-          "unitCost": 15.77,
+          "cost": 33968125,
+          "unitCost": 15.7709,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 59.73,
-          "cost": 378702908,
-          "unitCost": 6.34,
+          "cost": 359387459,
+          "unitCost": 6.0166,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
-          "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "name": "HSD",
+          "gen": 0.33,
+          "cost": 7324649,
+          "unitCost": 22.3749,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.18,
+          "cost": 2626617,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -11868,147 +10329,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 14607.18,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 14238.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13969.84,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13874.8,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13747.18,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13577.87,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13277.6,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13272.28,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13413.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13642.12,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13850.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
           "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13886.27,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13689.86,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13406.58,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13035.05,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 13026.29,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 12801.92,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 14783.7,
-          "loadShed": 0,
-          "demand": 14783.7
+          "generation": 12913.09,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 14783.7,
-          "loadShed": 0,
-          "demand": 14783.7
+          "generation": 14226.28,
+          "loadShed": 66,
+          "demand": 14852.7
         },
         {
           "time": "20:00",
-          "generation": 14783.7,
-          "loadShed": 0,
-          "demand": 14783.7
+          "generation": 14680.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
-          "generation": 14783.7,
-          "loadShed": 0,
-          "demand": 14783.7
+          "generation": 14749.79,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "22:00",
-          "generation": 14783.7,
-          "loadShed": 0,
-          "demand": 14783.7
+          "generation": 14548.07,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14101.96,
-          "loadShed": 0,
-          "demand": 14101.96
+          "generation": 14444.58,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -12017,28 +10478,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 474.5,
           "condensate": 362,
-          "share": 17.9
+          "share": 17.6
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.5,
-          "condensate": 324.2,
-          "share": 3.6
+          "gas": 140.5,
+          "condensate": 627.3,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 92,
           "condensate": 54.7,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 912.4,
           "condensate": 4916.5,
-          "share": 34.3
+          "share": 33.8
         },
         {
           "company": "Tullow (Bangora)",
@@ -12051,8 +10512,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1051.4,
-          "condensate": 0,
-          "share": 39.6
+          "condensate": 27.3,
+          "share": 38.9
         }
       ],
       "gasDistributionData": [
@@ -12105,14 +10566,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "19 Jun 2026",
         "dayPeakGen": 12701.44,
         "eveningPeakGen": 14958.07,
-        "dayPeakDemand": 12748.94,
+        "dayPeakDemand": 12701.44,
         "eveningPeakDemand": 15057.35,
         "minGen": 11665.13,
-        "maxGen": 14951.66,
+        "maxGen": 14998.98,
         "totalEnergyGen": 317.7872035,
-        "totalEnergyUnserved": 0.38,
-        "totalEnergyDemand": 318.17,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 1.202,
+        "totalEnergyDemand": 318.989,
+        "maxTemp": 32,
         "totalGasSuppliedPower": 918.04,
         "avgProductionCost": 6.147,
         "totalDailyCost": 1953566977
@@ -12121,22 +10582,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 127.08,
-          "cost": 438424828,
-          "unitCost": 3.45,
+          "cost": 442179221,
+          "unitCost": 3.4795,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 105.64,
-          "cost": 699332067,
-          "unitCost": 6.62,
+          "cost": 696809582,
+          "unitCost": 6.5961,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 22.1,
-          "cost": 399120954,
-          "unitCost": 18.06,
+          "cost": 412545310,
+          "unitCost": 18.6674,
           "color": "#f97316"
         },
         {
@@ -12149,23 +10610,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 3.64,
-          "cost": 57378267,
-          "unitCost": 15.77,
+          "cost": 57514602,
+          "unitCost": 15.8075,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 57.25,
-          "cost": 362974085,
-          "unitCost": 6.34,
+          "cost": 341133595,
+          "unitCost": 5.9585,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.22,
+          "cost": 3198542,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -12452,147 +10920,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 14449.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 14306.23,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 13626.6,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 13183.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12846.92,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12641.58,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 11960.31,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 11954.63,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12034.57,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 11911.85,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 11665.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12035.93,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 13448.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 13018.56,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12930.12,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12576.99,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 12164.86,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 14958.07,
-          "loadShed": 0,
-          "demand": 14958.07
+          "generation": 11961.95,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 14958.07,
-          "loadShed": 0,
-          "demand": 14958.07
+          "generation": 13225.01,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 14958.07,
-          "loadShed": 0,
-          "demand": 14958.07
+          "generation": 14431.75,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 14958.07,
-          "loadShed": 0,
-          "demand": 14958.07
+          "loadShed": 95,
+          "demand": 15057.35
         },
         {
           "time": "22:00",
-          "generation": 14958.07,
-          "loadShed": 0,
-          "demand": 14958.07
+          "generation": 14932.57,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 12701.44,
-          "loadShed": 0,
-          "demand": 12701.44
+          "generation": 14998.98,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -12601,28 +11069,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 478.6,
           "condensate": 369,
-          "share": 18
+          "share": 17.7
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.9,
-          "condensate": 319.7,
-          "share": 3.5
+          "gas": 139.9,
+          "condensate": 622.4,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 92.4,
           "condensate": 58.6,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 910.8,
           "condensate": 4871.1,
-          "share": 34.3
+          "share": 33.7
         },
         {
           "company": "Tullow (Bangora)",
@@ -12635,8 +11103,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1050.5,
-          "condensate": 0,
-          "share": 39.5
+          "condensate": 27.3,
+          "share": 38.9
         }
       ],
       "gasDistributionData": [
@@ -12689,14 +11157,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "20 Jun 2026",
         "dayPeakGen": 13823.66,
         "eveningPeakGen": 15782.47,
-        "dayPeakDemand": 14764.66,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 17749.16,
-        "minGen": 12917.26,
-        "maxGen": 14700,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 341.5720875,
-        "totalEnergyUnserved": 7.53,
-        "totalEnergyDemand": 349.1,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 908.5,
         "avgProductionCost": 6.952,
         "totalDailyCost": 2374775310
@@ -12705,50 +11173,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 127.31,
-          "cost": 439229605,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 111.85,
-          "cost": 740420505,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 42.33,
-          "cost": 764566697,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 1.95,
-          "cost": 194836,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.74,
-          "cost": 58933419,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 54.02,
-          "cost": 342483566,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
           "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -13019,180 +11487,35 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": "Jashore 132/33kV S/S T-1 HT Scheduled S/D Due to repair work of 33/.4 kv, 200 KVA Auxiliary Transformer."
         }
       ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "01:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "02:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "03:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "04:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "05:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "06:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "07:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "08:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "09:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "10:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "11:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "12:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "13:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "14:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "15:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "16:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "17:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        },
-        {
-          "time": "18:00",
-          "generation": 15782.47,
-          "loadShed": 0,
-          "demand": 15782.47
-        },
-        {
-          "time": "19:00",
-          "generation": 15782.47,
-          "loadShed": 0,
-          "demand": 15782.47
-        },
-        {
-          "time": "20:00",
-          "generation": 15782.47,
-          "loadShed": 0,
-          "demand": 15782.47
-        },
-        {
-          "time": "21:00",
-          "generation": 15782.47,
-          "loadShed": 0,
-          "demand": 15782.47
-        },
-        {
-          "time": "22:00",
-          "generation": 15782.47,
-          "loadShed": 0,
-          "demand": 15782.47
-        },
-        {
-          "time": "23:00",
-          "generation": 13823.66,
-          "loadShed": 0,
-          "demand": 13823.66
-        }
-      ],
+      "hourlyLoadData": [],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
           "gas": 478.2,
           "condensate": 374.1,
-          "share": 18
+          "share": 17.7
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.8,
-          "condensate": 330.3,
-          "share": 3.5
+          "gas": 139.8,
+          "condensate": 633.9,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 93,
           "condensate": 55.9,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 908.8,
           "condensate": 4827.4,
-          "share": 34.3
+          "share": 33.7
         },
         {
           "company": "Tullow (Bangora)",
@@ -13205,8 +11528,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1046.2,
-          "condensate": 0,
-          "share": 39.5
+          "condensate": 27.1,
+          "share": 38.8
         }
       ],
       "gasDistributionData": [
@@ -13259,14 +11582,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "21 Jun 2026",
         "dayPeakGen": 14066.19,
         "eveningPeakGen": 14649.64,
-        "dayPeakDemand": 14088.19,
+        "dayPeakDemand": 15930.43,
         "eveningPeakDemand": 14695.64,
         "minGen": 12844.11,
-        "maxGen": 15790,
+        "maxGen": 15034.74,
         "totalEnergyGen": 338.69261397,
-        "totalEnergyUnserved": 0.18,
-        "totalEnergyDemand": 338.87,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 28.088,
+        "totalEnergyDemand": 366.781,
+        "maxTemp": 34.2,
         "totalGasSuppliedPower": 902.57,
         "avgProductionCost": 6.864,
         "totalDailyCost": 2324950073
@@ -13275,22 +11598,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 124.74,
-          "cost": 430365050,
-          "unitCost": 3.45,
+          "cost": 431952131,
+          "unitCost": 3.4627,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 117.61,
-          "cost": 778571830,
-          "unitCost": 6.62,
+          "cost": 774503636,
+          "unitCost": 6.5854,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 39.85,
-          "cost": 719644658,
-          "unitCost": 18.06,
+          "cost": 745807057,
+          "unitCost": 18.7166,
           "color": "#f97316"
         },
         {
@@ -13303,23 +11626,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 2.16,
-          "cost": 34122150,
-          "unitCost": 15.77,
+          "cost": 32953239,
+          "unitCost": 15.2298,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 51.19,
-          "cost": 324543021,
-          "unitCost": 6.34,
+          "cost": 332554560,
+          "unitCost": 6.4965,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.47,
+          "cost": 6912523,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -13739,147 +12069,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14280.08,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14158.12,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13964.28,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14008.76,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13946.97,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13910.21,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13628.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13877.08,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13937.51,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
           "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14052.81,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14040.95,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13951.43,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14202.66,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 14035.34,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13597,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 13366.17,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 12844.11,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 14649.64,
-          "loadShed": 0,
-          "demand": 14649.64
+          "generation": 12671.44,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 14649.64,
-          "loadShed": 0,
-          "demand": 14649.64
+          "generation": 13613.41,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 14649.64,
-          "loadShed": 0,
-          "demand": 14649.64
+          "generation": 14170.96,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 14649.64,
-          "loadShed": 0,
-          "demand": 14649.64
+          "loadShed": 44,
+          "demand": 14695.64
         },
         {
           "time": "22:00",
-          "generation": 14649.64,
-          "loadShed": 0,
-          "demand": 14649.64
+          "generation": 14933.73,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14066.19,
-          "loadShed": 0,
-          "demand": 14066.19
+          "generation": 15034.74,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -13976,13 +12306,13 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "22 Jun 2026",
         "dayPeakGen": 14171.86,
         "eveningPeakGen": 16154.41,
-        "dayPeakDemand": 14419.86,
+        "dayPeakDemand": 14610.86,
         "eveningPeakDemand": 16854.11,
         "minGen": 12623.38,
-        "maxGen": 16100,
+        "maxGen": 16154.41,
         "totalEnergyGen": 343.2675271,
-        "totalEnergyUnserved": 1.98,
-        "totalEnergyDemand": 345.25,
+        "totalEnergyUnserved": 7.257,
+        "totalEnergyDemand": 350.525,
         "maxTemp": 32.8,
         "totalGasSuppliedPower": 907.35,
         "avgProductionCost": 6.615,
@@ -13992,22 +12322,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 126.76,
-          "cost": 437334272,
-          "unitCost": 3.45,
+          "cost": 437084201,
+          "unitCost": 3.448,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 123.3,
-          "cost": 816220928,
-          "unitCost": 6.62,
+          "cost": 816663901,
+          "unitCost": 6.6236,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 35.03,
-          "cost": 632710287,
-          "unitCost": 18.06,
+          "cost": 632836198,
+          "unitCost": 18.0636,
           "color": "#f97316"
         },
         {
@@ -14020,23 +12350,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 2.99,
-          "cost": 47092826,
-          "unitCost": 15.77,
+          "cost": 47087758,
+          "unitCost": 15.7683,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 52.72,
-          "cost": 334268613,
-          "unitCost": 6.34,
+          "cost": 334044072,
+          "unitCost": 6.3357,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.19,
+          "cost": 2789016,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -14309,147 +12646,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14867.66,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14369.99,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 13886.39,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 13620.49,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 13114.79,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 12781.57,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 12623.38,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 12774.42,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 12806.47,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 13134.56,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 13367.8,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 13676.68,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14415.72,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14587.64,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14723.27,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14579.4,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 14220.97,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 16154.41,
-          "loadShed": 0,
-          "demand": 16154.41
+          "generation": 14179.01,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 16154.41,
-          "loadShed": 0,
-          "demand": 16154.41
+          "generation": 15354.07,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 16154.41,
-          "loadShed": 0,
-          "demand": 16154.41
+          "generation": 15846.44,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 16154.41,
-          "loadShed": 0,
-          "demand": 16154.41
+          "loadShed": 496,
+          "demand": 16854.11
         },
         {
           "time": "22:00",
-          "generation": 16154.41,
-          "loadShed": 0,
-          "demand": 16154.41
+          "generation": 15718.99,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14171.86,
-          "loadShed": 0,
-          "demand": 14171.86
+          "generation": 15554.84,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -14546,14 +12883,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "23 Jun 2026",
         "dayPeakGen": 14580.7,
         "eveningPeakGen": 15506.14,
-        "dayPeakDemand": 15579.2,
+        "dayPeakDemand": 15596.7,
         "eveningPeakDemand": 17593.14,
         "minGen": 13639.05,
-        "maxGen": 15020,
+        "maxGen": 15758.04,
         "totalEnergyGen": 351.24831128,
-        "totalEnergyUnserved": 7.99,
-        "totalEnergyDemand": 359.24,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": 23.191,
+        "totalEnergyDemand": 374.439,
+        "maxTemp": 34.2,
         "totalGasSuppliedPower": 888.38,
         "avgProductionCost": 6.822,
         "totalDailyCost": 2396364493
@@ -14562,22 +12899,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 125.96,
-          "cost": 434567425,
-          "unitCost": 3.45,
+          "cost": 434994004,
+          "unitCost": 3.4534,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 116,
-          "cost": 767888438,
-          "unitCost": 6.62,
+          "cost": 762477011,
+          "unitCost": 6.5733,
           "color": "#64748b"
         },
         {
           "name": "HFO",
-          "gen": 41.77,
-          "cost": 754399625,
-          "unitCost": 18.06,
+          "gen": 41.42,
+          "cost": 764713485,
+          "unitCost": 18.4646,
           "color": "#f97316"
         },
         {
@@ -14590,23 +12927,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 3.33,
-          "cost": 52438520,
-          "unitCost": 15.77,
+          "cost": 51823392,
+          "unitCost": 15.585,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 61.88,
-          "cost": 392335861,
-          "unitCost": 6.34,
+          "cost": 374232641,
+          "unitCost": 6.0475,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
-          "gen": 0,
-          "cost": 0,
-          "unitCost": 0,
+          "name": "HSD",
+          "gen": 0.36,
+          "cost": 7205521,
+          "unitCost": 20.2,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.05,
+          "cost": 691958,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -14837,147 +13181,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 15758.04,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 15664.66,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14663.77,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14351.22,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14243.64,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14038.13,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 13675.92,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 13639.05,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 13769.66,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 13870.65,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14345.21,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14567.22,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14430.69,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14211.43,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14213.96,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 14138.56,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 13981.11,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 15506.14,
-          "loadShed": 0,
-          "demand": 15506.14
+          "generation": 13949.3,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 15506.14,
-          "loadShed": 0,
-          "demand": 15506.14
+          "generation": 15175.9,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 15506.14,
-          "loadShed": 0,
-          "demand": 15506.14
+          "generation": 15272.66,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 15506.14,
-          "loadShed": 0,
-          "demand": 15506.14
+          "loadShed": 1997,
+          "demand": 17593.14
         },
         {
           "time": "22:00",
-          "generation": 15506.14,
-          "loadShed": 0,
-          "demand": 15506.14
+          "generation": 15498.15,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14580.7,
-          "loadShed": 0,
-          "demand": 14580.7
+          "generation": 15359.75,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -14986,28 +13330,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 479.9,
           "condensate": 380,
-          "share": 18.5
+          "share": 18.2
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94,
-          "condensate": 332.8,
-          "share": 3.6
+          "gas": 139.9,
+          "condensate": 636.8,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 93.1,
           "condensate": 67.4,
-          "share": 3.6
+          "share": 3.5
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 895.7,
           "condensate": 4875.7,
-          "share": 34.5
+          "share": 33.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -15020,8 +13364,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1002.9,
-          "condensate": 0,
-          "share": 38.6
+          "condensate": 26,
+          "share": 37.9
         }
       ],
       "gasDistributionData": [
@@ -15074,13 +13418,13 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "24 Jun 2026",
         "dayPeakGen": 14441.07,
         "eveningPeakGen": 15700.01,
-        "dayPeakDemand": 15333.57,
+        "dayPeakDemand": 15598.07,
         "eveningPeakDemand": 17565.01,
         "minGen": 13478.64,
-        "maxGen": 15700,
+        "maxGen": 15762.39,
         "totalEnergyGen": 347.06060948,
-        "totalEnergyUnserved": 7.14,
-        "totalEnergyDemand": 354.2,
+        "totalEnergyUnserved": 29.581,
+        "totalEnergyDemand": 376.642,
         "maxTemp": 32.8,
         "totalGasSuppliedPower": 890.08,
         "avgProductionCost": 6.657,
@@ -15090,22 +13434,22 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 127.27,
-          "cost": 439088274,
-          "unitCost": 3.45,
+          "cost": 438719200,
+          "unitCost": 3.4471,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 120.35,
-          "cost": 796735616,
-          "unitCost": 6.62,
+          "cost": 796389932,
+          "unitCost": 6.6171,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 36.08,
-          "cost": 651623495,
-          "unitCost": 18.06,
+          "cost": 663054017,
+          "unitCost": 18.3768,
           "color": "#f97316"
         },
         {
@@ -15118,23 +13462,30 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Solar",
           "gen": 4.06,
-          "cost": 64062812,
-          "unitCost": 15.77,
+          "cost": 65773748,
+          "unitCost": 16.1912,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 56.99,
-          "cost": 361294517,
-          "unitCost": 6.34,
+          "cost": 345127206,
+          "unitCost": 6.0563,
           "color": "#a855f7"
         },
         {
-          "name": "HSD (Diesel)",
+          "name": "HSD",
           "gen": 0,
           "cost": 0,
-          "unitCost": 0,
+          "unitCost": null,
           "color": "#ef4444"
+        },
+        {
+          "name": "Wind",
+          "gen": 0.07,
+          "cost": 1023816,
+          "unitCost": 14.71,
+          "color": "#22c55e"
         }
       ],
       "borderImportsData": [
@@ -15414,147 +13765,147 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14548.3,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14128.64,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13941.78,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13839.06,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13773.64,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13773.77,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13478.64,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13753.59,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 13820.09,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14049.82,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14215.82,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14350.49,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14542.36,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14315.95,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14524.73,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14453.52,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 14197.74,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 15700.01,
-          "loadShed": 0,
-          "demand": 15700.01
+          "generation": 14234.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 15700.01,
-          "loadShed": 0,
-          "demand": 15700.01
+          "generation": 15178.43,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 15700.01,
-          "loadShed": 0,
-          "demand": 15700.01
+          "generation": 15342.89,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
           "generation": 15700.01,
-          "loadShed": 0,
-          "demand": 15700.01
+          "loadShed": 1785,
+          "demand": 17565.01
         },
         {
           "time": "22:00",
-          "generation": 15700.01,
-          "loadShed": 0,
-          "demand": 15700.01
+          "generation": 15762.39,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14441.07,
-          "loadShed": 0,
-          "demand": 14441.07
+          "generation": 15615.83,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
@@ -15563,28 +13914,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 477.7,
           "condensate": 370,
-          "share": 18.4
+          "share": 18.1
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 92.7,
-          "condensate": 359.8,
-          "share": 3.6
+          "gas": 138.6,
+          "condensate": 662.7,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 93.4,
           "condensate": 69.1,
-          "share": 3.6
+          "share": 3.5
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 895.8,
           "condensate": 4776.5,
-          "share": 34.5
+          "share": 33.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -15597,8 +13948,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1002.7,
-          "condensate": 0,
-          "share": 38.7
+          "condensate": 26,
+          "share": 38
         }
       ],
       "gasDistributionData": [
@@ -15651,14 +14002,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "25 Jun 2026",
         "dayPeakGen": 13116.69,
         "eveningPeakGen": 15650.06,
-        "dayPeakDemand": 13450.19,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 16347.06,
-        "minGen": 12404.47,
-        "maxGen": 15650.0,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 332.33436583,
-        "totalEnergyUnserved": 2.67,
-        "totalEnergyDemand": 335.0,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 889.26,
         "avgProductionCost": 6.273,
         "totalDailyCost": 2084685893
@@ -15667,50 +14018,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 123.81,
-          "cost": 427159120,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 119.64,
-          "cost": 792014067,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 24.03,
-          "cost": 433902242,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 0.98,
-          "cost": 97782,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.12,
-          "cost": 64951410,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 59.59,
-          "cost": 377794367,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
-          "gen": 0.0,
-          "cost": 0,
-          "unitCost": 0.0,
+          "gen": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -15718,7 +14069,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "HVDC Bheramara (India)",
           "energy": 21.65,
-          "peakFlow": 902.0,
+          "peakFlow": 902,
           "type": "C/B Interconnector (West)"
         },
         {
@@ -15730,64 +14081,64 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "Tripura Cumilla (India)",
           "energy": 3.62,
-          "peakFlow": 152.0,
+          "peakFlow": 152,
           "type": "C/B Interconnector (East)"
         }
       ],
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 77.0,
+          "loadShed": 77,
           "demand": 5521.23,
           "pct": 1.4
         },
         {
           "zone": "Chattogram",
-          "loadShed": 0.0,
-          "demand": 1482.0,
-          "pct": 0.0
+          "loadShed": 0,
+          "demand": 1482,
+          "pct": 0
         },
         {
           "zone": "Cumilla",
-          "loadShed": 30.0,
-          "demand": 1571.0,
+          "loadShed": 30,
+          "demand": 1571,
           "pct": 1.9
         },
         {
           "zone": "Mymensingh",
-          "loadShed": 468.0,
-          "demand": 1441.0,
+          "loadShed": 468,
+          "demand": 1441,
           "pct": 32.5
         },
         {
           "zone": "Sylhet",
-          "loadShed": 0.0,
-          "demand": 644.0,
-          "pct": 0.0
+          "loadShed": 0,
+          "demand": 644,
+          "pct": 0
         },
         {
           "zone": "Khulna",
-          "loadShed": 77.0,
+          "loadShed": 77,
           "demand": 1949.8,
           "pct": 3.9
         },
         {
           "zone": "Barishal",
-          "loadShed": 0.0,
+          "loadShed": 0,
           "demand": 518.2,
-          "pct": 0.0
+          "pct": 0
         },
         {
           "zone": "Rajshahi",
-          "loadShed": 15.0,
+          "loadShed": 15,
           "demand": 1657.6,
           "pct": 0.9
         },
         {
           "zone": "Rangpur",
-          "loadShed": 0.0,
-          "demand": 1053.0,
-          "pct": 0.0
+          "loadShed": 0,
+          "demand": 1053,
+          "pct": 0
         }
       ],
       "dailyOutages": [
@@ -15855,150 +14206,93 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": ""
         }
       ],
-      "hourlyLoadData": [
+      "hourlyLoadData": [],
+      "gasProductionData": [
         {
-          "time": "00:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+          "fields": 5,
+          "gas": 481.4,
+          "condensate": 372.8,
+          "share": 18.4
         },
         {
-          "time": "01:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+          "fields": 5,
+          "gas": 93.5,
+          "condensate": 362.6,
+          "share": 3.6
         },
         {
-          "time": "02:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+          "fields": 9,
+          "gas": 94.2,
+          "condensate": 69.6,
+          "share": 3.6
         },
         {
-          "time": "03:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+          "fields": 3,
+          "gas": 902.8,
+          "condensate": 4813.5,
+          "share": 34.5
         },
         {
-          "time": "04:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "Tullow (Bangora)",
+          "fields": 1,
+          "gas": 31.7,
+          "condensate": 93.8,
+          "share": 1.2
         },
         {
-          "time": "05:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "RPGCL (R-LNG Import / LNG Terminal)",
+          "fields": 0,
+          "gas": 1010.5,
+          "condensate": 0,
+          "share": 38.7
+        }
+      ],
+      "gasDistributionData": [
+        {
+          "company": "TGTDCL (Dhaka & Mymensingh)",
+          "power": 272.5,
+          "fertilizer": 73.6,
+          "others": 1062.5,
+          "total": 1408.6
         },
         {
-          "time": "06:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "BGDCL (Cumilla & Sylhet)",
+          "power": 208.8,
+          "fertilizer": 0,
+          "others": 89,
+          "total": 297.8
         },
         {
-          "time": "07:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "KGDCL (Chattogram)",
+          "power": 36.9,
+          "fertilizer": 38.6,
+          "others": 172.3,
+          "total": 247.8
         },
         {
-          "time": "08:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "JGTDSL (Sylhet region)",
+          "power": 222.8,
+          "fertilizer": 40.4,
+          "others": 114,
+          "total": 377.2
         },
         {
-          "time": "09:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "PGCL (Rajshahi & Rangpur)",
+          "power": 128.9,
+          "fertilizer": 0,
+          "others": 29.7,
+          "total": 158.6
         },
         {
-          "time": "10:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "11:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "12:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "13:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "14:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "15:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "16:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "17:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
-        },
-        {
-          "time": "18:00",
-          "generation": 15650.06,
-          "loadShed": 0.0,
-          "demand": 15650.06
-        },
-        {
-          "time": "19:00",
-          "generation": 15650.06,
-          "loadShed": 0.0,
-          "demand": 15650.06
-        },
-        {
-          "time": "20:00",
-          "generation": 15650.06,
-          "loadShed": 0.0,
-          "demand": 15650.06
-        },
-        {
-          "time": "21:00",
-          "generation": 15650.06,
-          "loadShed": 0.0,
-          "demand": 15650.06
-        },
-        {
-          "time": "22:00",
-          "generation": 15650.06,
-          "loadShed": 0.0,
-          "demand": 15650.06
-        },
-        {
-          "time": "23:00",
-          "generation": 13116.69,
-          "loadShed": 0.0,
-          "demand": 13116.69
+          "company": "SGCL (Barishal & Khulna)",
+          "power": 54.6,
+          "fertilizer": 0,
+          "others": 4.6,
+          "total": 59.2
         }
       ]
     },
@@ -16007,14 +14301,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "26 Jun 2026",
         "dayPeakGen": 13725.37,
         "eveningPeakGen": 15298.25,
-        "dayPeakDemand": 15162.37,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 18301.25,
-        "minGen": 13201.11,
-        "maxGen": 15650.0,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 340.18957446,
-        "totalEnergyUnserved": 11.5,
-        "totalEnergyDemand": 351.69,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 905.31,
         "avgProductionCost": 6.383,
         "totalDailyCost": 2171540197
@@ -16023,50 +14317,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 127.62,
-          "cost": 440285991,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 114.93,
-          "cost": 760861835,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 29.18,
-          "cost": 527071091,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 2.13,
-          "cost": 213302,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 4.75,
-          "cost": 74839445,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 61.33,
-          "cost": 388839072,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
-          "gen": 0.0,
-          "cost": 0,
-          "unitCost": 0.0,
+          "gen": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -16074,7 +14368,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "HVDC Bheramara (India)",
           "energy": 21.07,
-          "peakFlow": 798.0,
+          "peakFlow": 798,
           "type": "C/B Interconnector (West)"
         },
         {
@@ -16086,63 +14380,63 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "Tripura Cumilla (India)",
           "energy": 3.94,
-          "peakFlow": 154.0,
+          "peakFlow": 154,
           "type": "C/B Interconnector (East)"
         }
       ],
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 538.0,
+          "loadShed": 538,
           "demand": 6313.42,
           "pct": 8.5
         },
         {
           "zone": "Chattogram",
-          "loadShed": 162.0,
+          "loadShed": 162,
           "demand": 1635.3,
           "pct": 9.9
         },
         {
           "zone": "Cumilla",
-          "loadShed": 343.0,
-          "demand": 1712.0,
-          "pct": 20.0
+          "loadShed": 343,
+          "demand": 1712,
+          "pct": 20
         },
         {
           "zone": "Mymensingh",
-          "loadShed": 519.0,
-          "demand": 1550.0,
+          "loadShed": 519,
+          "demand": 1550,
           "pct": 33.5
         },
         {
           "zone": "Sylhet",
-          "loadShed": 247.0,
-          "demand": 784.0,
+          "loadShed": 247,
+          "demand": 784,
           "pct": 31.5
         },
         {
           "zone": "Khulna",
-          "loadShed": 375.0,
+          "loadShed": 375,
           "demand": 2081.4,
-          "pct": 18.0
+          "pct": 18
         },
         {
           "zone": "Barishal",
-          "loadShed": 142.0,
+          "loadShed": 142,
           "demand": 569.6,
           "pct": 24.9
         },
         {
           "zone": "Rajshahi",
-          "loadShed": 352.0,
+          "loadShed": 352,
           "demand": 1891.4,
           "pct": 18.6
         },
         {
           "zone": "Rangpur",
-          "loadShed": 196.0,
-          "demand": 1136.0,
+          "loadShed": 196,
+          "demand": 1136,
           "pct": 17.3
         }
       ],
@@ -16225,150 +14519,93 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": ""
         }
       ],
-      "hourlyLoadData": [
+      "hourlyLoadData": [],
+      "gasProductionData": [
         {
-          "time": "00:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+          "fields": 5,
+          "gas": 480.9,
+          "condensate": 372.4,
+          "share": 18.4
         },
         {
-          "time": "01:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+          "fields": 5,
+          "gas": 93.4,
+          "condensate": 362.2,
+          "share": 3.6
         },
         {
-          "time": "02:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+          "fields": 9,
+          "gas": 94.1,
+          "condensate": 69.5,
+          "share": 3.6
         },
         {
-          "time": "03:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+          "fields": 3,
+          "gas": 901.7,
+          "condensate": 4807.9,
+          "share": 34.5
         },
         {
-          "time": "04:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "Tullow (Bangora)",
+          "fields": 1,
+          "gas": 31.6,
+          "condensate": 93.7,
+          "share": 1.2
         },
         {
-          "time": "05:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "RPGCL (R-LNG Import / LNG Terminal)",
+          "fields": 0,
+          "gas": 1009.3,
+          "condensate": 0,
+          "share": 38.7
+        }
+      ],
+      "gasDistributionData": [
+        {
+          "company": "TGTDCL (Dhaka & Mymensingh)",
+          "power": 272.2,
+          "fertilizer": 73.5,
+          "others": 1061.3,
+          "total": 1407
         },
         {
-          "time": "06:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "BGDCL (Cumilla & Sylhet)",
+          "power": 208.5,
+          "fertilizer": 0,
+          "others": 88.8,
+          "total": 297.3
         },
         {
-          "time": "07:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "KGDCL (Chattogram)",
+          "power": 36.8,
+          "fertilizer": 38.5,
+          "others": 172.1,
+          "total": 247.4
         },
         {
-          "time": "08:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "JGTDSL (Sylhet region)",
+          "power": 222.5,
+          "fertilizer": 40.3,
+          "others": 113.9,
+          "total": 376.7
         },
         {
-          "time": "09:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "PGCL (Rajshahi & Rangpur)",
+          "power": 128.8,
+          "fertilizer": 0,
+          "others": 29.6,
+          "total": 158.4
         },
         {
-          "time": "10:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "11:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "12:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "13:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "14:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "15:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "16:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "17:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
-        },
-        {
-          "time": "18:00",
-          "generation": 15298.25,
-          "loadShed": 0.0,
-          "demand": 15298.25
-        },
-        {
-          "time": "19:00",
-          "generation": 15298.25,
-          "loadShed": 0.0,
-          "demand": 15298.25
-        },
-        {
-          "time": "20:00",
-          "generation": 15298.25,
-          "loadShed": 0.0,
-          "demand": 15298.25
-        },
-        {
-          "time": "21:00",
-          "generation": 15298.25,
-          "loadShed": 0.0,
-          "demand": 15298.25
-        },
-        {
-          "time": "22:00",
-          "generation": 15298.25,
-          "loadShed": 0.0,
-          "demand": 15298.25
-        },
-        {
-          "time": "23:00",
-          "generation": 13725.37,
-          "loadShed": 0.0,
-          "demand": 13725.37
+          "company": "SGCL (Barishal & Khulna)",
+          "power": 54.5,
+          "fertilizer": 0,
+          "others": 4.6,
+          "total": 59.1
         }
       ]
     },
@@ -16377,14 +14614,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "27 Jun 2026",
         "dayPeakGen": 14398.75,
         "eveningPeakGen": 16038.59,
-        "dayPeakDemand": 15506.75,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 18354.59,
-        "minGen": 13712.44,
-        "maxGen": 16030.0,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 350.52263338,
-        "totalEnergyUnserved": 8.86,
-        "totalEnergyDemand": 359.39,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 891.07,
         "avgProductionCost": 6.44,
         "totalDailyCost": 2257271078
@@ -16393,50 +14630,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 126.64,
-          "cost": 436898957,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 123.87,
-          "cost": 820050834,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 32.98,
-          "cost": 595574677,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 2.1,
-          "cost": 209808,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 3.68,
-          "cost": 58048488,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 61.02,
-          "cost": 386867846,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
-          "gen": 0.0,
-          "cost": 0,
-          "unitCost": 0.0,
+          "gen": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -16444,7 +14681,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "HVDC Bheramara (India)",
           "energy": 20.78,
-          "peakFlow": 798.0,
+          "peakFlow": 798,
           "type": "C/B Interconnector (West)"
         },
         {
@@ -16456,63 +14693,63 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "Tripura Cumilla (India)",
           "energy": 3.84,
-          "peakFlow": 172.0,
+          "peakFlow": 172,
           "type": "C/B Interconnector (East)"
         }
       ],
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 385.0,
+          "loadShed": 385,
           "demand": 6205.36,
           "pct": 6.2
         },
         {
           "zone": "Chattogram",
-          "loadShed": 122.0,
-          "demand": 1612.0,
+          "loadShed": 122,
+          "demand": 1612,
           "pct": 7.6
         },
         {
           "zone": "Cumilla",
-          "loadShed": 257.0,
-          "demand": 1748.0,
+          "loadShed": 257,
+          "demand": 1748,
           "pct": 14.7
         },
         {
           "zone": "Mymensingh",
-          "loadShed": 420.0,
-          "demand": 1513.0,
+          "loadShed": 420,
+          "demand": 1513,
           "pct": 27.8
         },
         {
           "zone": "Sylhet",
-          "loadShed": 211.0,
-          "demand": 827.0,
+          "loadShed": 211,
+          "demand": 827,
           "pct": 25.5
         },
         {
           "zone": "Khulna",
-          "loadShed": 298.0,
+          "loadShed": 298,
           "demand": 2105.4,
           "pct": 14.2
         },
         {
           "zone": "Barishal",
-          "loadShed": 133.0,
+          "loadShed": 133,
           "demand": 593.5,
           "pct": 22.4
         },
         {
           "zone": "Rajshahi",
-          "loadShed": 288.0,
-          "demand": 1925.0,
-          "pct": 15.0
+          "loadShed": 288,
+          "demand": 1925,
+          "pct": 15
         },
         {
           "zone": "Rangpur",
-          "loadShed": 102.0,
-          "demand": 1108.0,
+          "loadShed": 102,
+          "demand": 1108,
           "pct": 9.2
         }
       ],
@@ -16532,150 +14769,93 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "full_desc": ""
         }
       ],
-      "hourlyLoadData": [
+      "hourlyLoadData": [],
+      "gasProductionData": [
         {
-          "time": "00:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+          "fields": 5,
+          "gas": 471.4,
+          "condensate": 365.1,
+          "share": 18.4
         },
         {
-          "time": "01:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+          "fields": 5,
+          "gas": 91.5,
+          "condensate": 355.1,
+          "share": 3.6
         },
         {
-          "time": "02:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+          "fields": 9,
+          "gas": 92.2,
+          "condensate": 68.2,
+          "share": 3.6
         },
         {
-          "time": "03:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+          "fields": 3,
+          "gas": 884,
+          "condensate": 4713.6,
+          "share": 34.5
         },
         {
-          "time": "04:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "Tullow (Bangora)",
+          "fields": 1,
+          "gas": 31,
+          "condensate": 91.8,
+          "share": 1.2
         },
         {
-          "time": "05:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "RPGCL (R-LNG Import / LNG Terminal)",
+          "fields": 0,
+          "gas": 989.5,
+          "condensate": 0,
+          "share": 38.7
+        }
+      ],
+      "gasDistributionData": [
+        {
+          "company": "TGTDCL (Dhaka & Mymensingh)",
+          "power": 266.8,
+          "fertilizer": 72.1,
+          "others": 1040.5,
+          "total": 1379.4
         },
         {
-          "time": "06:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "BGDCL (Cumilla & Sylhet)",
+          "power": 204.4,
+          "fertilizer": 0,
+          "others": 87.1,
+          "total": 291.5
         },
         {
-          "time": "07:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "KGDCL (Chattogram)",
+          "power": 36.1,
+          "fertilizer": 37.8,
+          "others": 168.7,
+          "total": 242.6
         },
         {
-          "time": "08:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "JGTDSL (Sylhet region)",
+          "power": 218.2,
+          "fertilizer": 39.5,
+          "others": 111.6,
+          "total": 369.3
         },
         {
-          "time": "09:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "PGCL (Rajshahi & Rangpur)",
+          "power": 126.2,
+          "fertilizer": 0,
+          "others": 29,
+          "total": 155.2
         },
         {
-          "time": "10:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "11:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "12:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "13:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "14:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "15:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "16:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "17:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
-        },
-        {
-          "time": "18:00",
-          "generation": 16038.59,
-          "loadShed": 0.0,
-          "demand": 16038.59
-        },
-        {
-          "time": "19:00",
-          "generation": 16038.59,
-          "loadShed": 0.0,
-          "demand": 16038.59
-        },
-        {
-          "time": "20:00",
-          "generation": 16038.59,
-          "loadShed": 0.0,
-          "demand": 16038.59
-        },
-        {
-          "time": "21:00",
-          "generation": 16038.59,
-          "loadShed": 0.0,
-          "demand": 16038.59
-        },
-        {
-          "time": "22:00",
-          "generation": 16038.59,
-          "loadShed": 0.0,
-          "demand": 16038.59
-        },
-        {
-          "time": "23:00",
-          "generation": 14398.75,
-          "loadShed": 0.0,
-          "demand": 14398.75
+          "company": "SGCL (Barishal & Khulna)",
+          "power": 53.5,
+          "fertilizer": 0,
+          "others": 4.5,
+          "total": 58
         }
       ]
     },
@@ -16684,14 +14864,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         "date": "28 Jun 2026",
         "dayPeakGen": 14669.72,
         "eveningPeakGen": 16082.14,
-        "dayPeakDemand": 14803.22,
+        "dayPeakDemand": null,
         "eveningPeakDemand": 16487.88,
-        "minGen": 13577.73,
-        "maxGen": 16080.0,
+        "minGen": null,
+        "maxGen": null,
         "totalEnergyGen": 352.9664129,
-        "totalEnergyUnserved": 1.07,
-        "totalEnergyDemand": 354.03,
-        "maxTemp": 32.8,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
         "totalGasSuppliedPower": 921.67,
         "avgProductionCost": 6.452,
         "totalDailyCost": 2277177949
@@ -16700,50 +14880,50 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "name": "Gas",
           "gen": 128.74,
-          "cost": 444138172,
-          "unitCost": 3.45,
+          "cost": null,
+          "unitCost": null,
           "color": "#0ea5e9"
         },
         {
           "name": "Coal",
           "gen": 126.57,
-          "cost": 837920242,
-          "unitCost": 6.62,
+          "cost": null,
+          "unitCost": null,
           "color": "#64748b"
         },
         {
           "name": "HFO",
           "gen": 35.26,
-          "cost": 636849805,
-          "unitCost": 18.06,
+          "cost": null,
+          "unitCost": null,
           "color": "#f97316"
         },
         {
           "name": "Hydro",
           "gen": 2.1,
-          "cost": 209746,
-          "unitCost": 0.1,
+          "cost": null,
+          "unitCost": null,
           "color": "#06b6d4"
         },
         {
           "name": "Solar",
           "gen": 1.79,
-          "cost": 28175539,
-          "unitCost": 15.77,
+          "cost": null,
+          "unitCost": null,
           "color": "#eab308"
         },
         {
           "name": "Imports",
           "gen": 58.16,
-          "cost": 368713731,
-          "unitCost": 6.34,
+          "cost": null,
+          "unitCost": null,
           "color": "#a855f7"
         },
         {
           "name": "HSD (Diesel)",
-          "gen": 0.0,
-          "cost": 0,
-          "unitCost": 0.0,
+          "gen": 0,
+          "cost": null,
+          "unitCost": null,
           "color": "#ef4444"
         }
       ],
@@ -16751,7 +14931,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "HVDC Bheramara (India)",
           "energy": 19.36,
-          "peakFlow": 892.0,
+          "peakFlow": 892,
           "type": "C/B Interconnector (West)"
         },
         {
@@ -16763,64 +14943,64 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "source": "Tripura Cumilla (India)",
           "energy": 3.62,
-          "peakFlow": 156.0,
+          "peakFlow": 156,
           "type": "C/B Interconnector (East)"
         }
       ],
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 30.0,
+          "loadShed": 30,
           "demand": 5991.27,
           "pct": 0.5
         },
         {
           "zone": "Chattogram",
-          "loadShed": 0.0,
+          "loadShed": 0,
           "demand": 1537.2,
-          "pct": 0.0
+          "pct": 0
         },
         {
           "zone": "Cumilla",
-          "loadShed": 48.0,
-          "demand": 1541.0,
+          "loadShed": 48,
+          "demand": 1541,
           "pct": 3.1
         },
         {
           "zone": "Mymensingh",
-          "loadShed": 93.0,
-          "demand": 1217.0,
+          "loadShed": 93,
+          "demand": 1217,
           "pct": 7.6
         },
         {
           "zone": "Sylhet",
-          "loadShed": 96.0,
-          "demand": 672.0,
+          "loadShed": 96,
+          "demand": 672,
           "pct": 14.3
         },
         {
           "zone": "Khulna",
-          "loadShed": 0.0,
+          "loadShed": 0,
           "demand": 1856.4,
-          "pct": 0.0
+          "pct": 0
         },
         {
           "zone": "Barishal",
-          "loadShed": 0.0,
-          "demand": 491.0,
-          "pct": 0.0
+          "loadShed": 0,
+          "demand": 491,
+          "pct": 0
         },
         {
           "zone": "Rajshahi",
-          "loadShed": 0.0,
+          "loadShed": 0,
           "demand": 1513.6,
-          "pct": 0.0
+          "pct": 0
         },
         {
           "zone": "Rangpur",
-          "loadShed": 0.0,
-          "demand": 975.0,
-          "pct": 0.0
+          "loadShed": 0,
+          "demand": 975,
+          "pct": 0
         }
       ],
       "dailyOutages": [
@@ -16884,710 +15064,637 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "hourlyLoadData": [
         {
           "time": "00:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 15036.92,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "01:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14432.56,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "02:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14192.59,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "03:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14068.36,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "04:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14229.24,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "05:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14213.52,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "06:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 13786.88,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "07:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 13577.73,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "08:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 13732.52,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "09:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 13960.18,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "10:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14122.2,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "11:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14254.77,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "12:00",
           "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "13:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14500.25,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "14:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14363.22,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "15:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14100.7,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "16:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14454.63,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "17:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
+          "generation": 14268.46,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "18:00",
-          "generation": 16082.14,
-          "loadShed": 0.0,
-          "demand": 16082.14
+          "generation": 14221.5,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "19:00",
-          "generation": 16082.14,
-          "loadShed": 0.0,
-          "demand": 16082.14
+          "generation": 15661.83,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "20:00",
-          "generation": 16082.14,
-          "loadShed": 0.0,
-          "demand": 16082.14
+          "generation": 15879.06,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "21:00",
-          "generation": 16082.14,
-          "loadShed": 0.0,
-          "demand": 16082.14
+          "generation": 15913.88,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "22:00",
-          "generation": 16082.14,
-          "loadShed": 0.0,
-          "demand": 16082.14
+          "generation": 15821.11,
+          "loadShed": null,
+          "demand": null
         },
         {
           "time": "23:00",
-          "generation": 14669.72,
-          "loadShed": 0.0,
-          "demand": 14669.72
-        }
-      ]
-    },
-  "2026-06-29": {
-      "systemStats": {
-        "date": "29 Jun 2026",
-        "dayPeakGen": 14670.0,
-        "eveningPeakGen": 16082.0,
-        "dayPeakDemand": 14670.0,
-        "eveningPeakDemand": 16487.0,
-        "minGen": 13577.0,
-        "maxGen": 16082.0,
-        "totalEnergyGen": 352.97,
-        "totalEnergyUnserved": 1.07,
-        "totalEnergyDemand": 354.04,
-        "maxTemp": 32.0,
-        "totalGasSuppliedPower": 921.67,
-        "avgProductionCost": 6.45,
-        "totalDailyCost": 2277000000
-      },
-      "generationData": [
-        {
-          "name": "Gas",
-          "gen": 128.74,
-          "cost": 426330000,
-          "unitCost": 3.45,
-          "color": "#0ea5e9"
-        },
-        {
-          "name": "Coal",
-          "gen": 126.57,
-          "cost": 836300000,
-          "unitCost": 6.62,
-          "color": "#64748b"
-        },
-        {
-          "name": "HFO",
-          "gen": 35.15,
-          "cost": 615960000,
-          "unitCost": 18.06,
-          "color": "#f97316"
-        },
-        {
-          "name": "Hydro",
-          "gen": 2.1,
-          "cost": 7990000,
-          "unitCost": 0.1,
-          "color": "#06b6d4"
-        },
-        {
-          "name": "Solar",
-          "gen": 1.79,
-          "cost": 27780000,
-          "unitCost": 15.77,
-          "color": "#eab308"
-        },
-        {
-          "name": "Imports",
-          "gen": 58.16,
-          "cost": 355390000,
-          "unitCost": 6.34,
-          "color": "#a855f7"
-        },
-        {
-          "name": "HSD (Diesel)",
-          "gen": 0.11,
-          "cost": 2240000,
-          "unitCost": 0.0,
-          "color": "#ef4444"
-        }
-      ],
-      "borderImportsData": [
-        {
-          "source": "HVDC Bheramara (India)",
-          "energy": 19.36,
-          "peakFlow": 892,
-          "type": "C/B Interconnector (West)"
-        },
-        {
-          "source": "Adani Godda (India)",
-          "energy": 34.26,
-          "peakFlow": 1427,
-          "type": "C/B Interconnector (North)"
-        },
-        {
-          "source": "Tripura Cumilla (India)",
-          "energy": 3.62,
-          "peakFlow": 156,
-          "type": "C/B Interconnector (East)"
-        }
-      ],
-      "regionalDemandData": [
-        {
-          "zone": "Dhaka",
-          "loadShed": 30.0,
-          "demand": 5991.0,
-          "pct": 0.5
-        },
-        {
-          "zone": "Chattogram",
-          "loadShed": 0.0,
-          "demand": 1484.0,
-          "pct": 0.0
-        },
-        {
-          "zone": "Cumilla",
-          "loadShed": 48.0,
-          "demand": 1541.0,
-          "pct": 3.11
-        },
-        {
-          "zone": "Mymensingh",
-          "loadShed": 93.0,
-          "demand": 1217.0,
-          "pct": 7.64
-        },
-        {
-          "zone": "Sylhet",
-          "loadShed": 96.0,
-          "demand": 672.0,
-          "pct": 14.29
-        },
-        {
-          "zone": "Khulna",
-          "loadShed": 0.0,
-          "demand": 1856.0,
-          "pct": 0.0
-        },
-        {
-          "zone": "Barishal",
-          "loadShed": 0.0,
-          "demand": 491.0,
-          "pct": 0.0
-        },
-        {
-          "zone": "Rajshahi",
-          "loadShed": 0.0,
-          "demand": 1514.0,
-          "pct": 0.0
-        },
-        {
-          "zone": "Rangpur",
-          "loadShed": 0.0,
-          "demand": 975.0,
-          "pct": 0.0
-        }
-      ],
-      "dailyOutages": [
-        {
-          "time": "08:20",
-          "plant": "Muradnagar 132/33kV S/S 132 KV Muradnagar- Cumilla(N) Ckt-01 is restored.",
-          "load": "HT Outage",
-          "reason": "Muradnagar 132/33kV S/S 132 KV Muradnagar- Cumilla(N) Ckt-01 is restored.",
-          "full_desc": "Muradnagar 132/33kV S/S 132 KV Muradnagar- Cumilla(N) Ckt-01 is restored. Muradnagar 132/33kV S/S 132 KV Muradnagar- Cumilla(N) Ckt-01 is restored."
-        },
-        {
-          "time": "08:40 - 16:29",
-          "plant": "Chowmuhani-Feni 132 kV Ckt-1 Project Work S/D from Daganbhuiyan 132/33kV end Due to Shutdown taken at feni 230 kv end",
-          "load": "HT Outage",
-          "reason": "due to project work. and from Feni 230/132kV end Due to project work",
-          "full_desc": "Chowmuhani-Feni 132 kV Ckt-1 Project Work S/D from Daganbhuiyan 132/33kV end Due to Shutdown taken at feni 230 kv end due to project work. and from Feni 230/132kV end Due to project work"
-        },
-        {
-          "time": "08:47",
-          "plant": "Gopalganj(N)-Madaripur   132kV Ckt-1 Scheduled S/D from Gopalganj 400/132kV end.",
-          "load": "HT Outage",
-          "reason": "Gopalganj(N)-Madaripur   132kV Ckt-1 Scheduled S/D from Gopalganj 400/132kV end.",
-          "full_desc": "Gopalganj(N)-Madaripur   132kV Ckt-1 Scheduled S/D from Gopalganj 400/132kV end. Gopalganj(N)-Madaripur   132kV Ckt-1 Scheduled S/D from Gopalganj 400/132kV end."
-        },
-        {
-          "time": "08:50",
-          "plant": "Jashore 132/33kV S/S T-2 HT is restored.",
-          "load": "HT Outage",
-          "reason": "Jashore 132/33kV S/S T-2 HT is restored.",
-          "full_desc": "Jashore 132/33kV S/S T-2 HT is restored. Jashore 132/33kV S/S T-2 HT is restored."
-        },
-        {
-          "time": "08:51",
-          "plant": "Jashore 132/33kV S/S T-2 LT is restored.",
-          "load": "HT Outage",
-          "reason": "Jashore 132/33kV S/S T-2 LT is restored.",
-          "full_desc": "Jashore 132/33kV S/S T-2 LT is restored. Jashore 132/33kV S/S T-2 LT is restored."
-        },
-        {
-          "time": "09:00 - 16:56",
-          "plant": "KSRM 132/33kV S/S Transformer-01 HT Scheduled S/D",
-          "load": "HT Outage",
-          "reason": "Due to secondary CT (33kv side) maintenance",
-          "full_desc": "KSRM 132/33kV S/S Transformer-01 HT Scheduled S/D Due to secondary CT (33kv side) maintenance"
-        },
-        {
-          "time": "09:16 - 10:31",
-          "plant": "Panchagarh 132/33kV S/S T-2(417T) HT Scheduled S/D",
-          "load": "HT Outage",
-          "reason": "Due to Red Hot Maintenance work on 33kv bus Section-02 (T-2)",
-          "full_desc": "Panchagarh 132/33kV S/S T-2(417T) HT Scheduled S/D Due to Red Hot Maintenance work on 33kv bus Section-02 (T-2)"
-        },
-        {
-          "time": "09:16 - 10:31",
-          "plant": "Panchagarh 132/33kV S/S T-2(417T) LT Scheduled S/D",
-          "load": "HT Outage",
-          "reason": "Due to Red Hot Maintenance work on 33kv bus Section-02 (T-2)",
-          "full_desc": "Panchagarh 132/33kV S/S T-2(417T) LT Scheduled S/D Due to Red Hot Maintenance work on 33kv bus Section-02 (T-2)"
-        },
-        {
-          "time": "09:17",
-          "plant": "Khulshi-Madunaghat  132kV Ckt-2 Tripped from Madunaghat 132/33kV end showing REL 670 relays",
-          "load": "HT Outage",
-          "reason": "Due to Jumper out",
-          "full_desc": "Khulshi-Madunaghat  132kV Ckt-2 Tripped from Madunaghat 132/33kV end showing REL 670 relays Due to Jumper out"
-        },
-        {
-          "time": "09:45 - 17:04",
-          "plant": "Ruppur 132/11kV S/S TR-02 LT Forced S/D",
-          "load": "HT Outage",
-          "reason": "Due to Emergency maintenance work",
-          "full_desc": "Ruppur 132/11kV S/S TR-02 LT Forced S/D Due to Emergency maintenance work"
-        },
-        {
-          "time": "09:46 - 16:55",
-          "plant": "Ruppur 132/11kV S/S TR-02 HT Forced S/D",
-          "load": "HT Outage",
-          "reason": "Due to Emergency maintenance work",
-          "full_desc": "Ruppur 132/11kV S/S TR-02 HT Forced S/D Due to Emergency maintenance work"
-        },
-        {
-          "time": "09:48 - 14:46",
-          "plant": "Madunaghat 132/33kV S/S TR-2(517T) HT Scheduled S/D",
-          "load": "HT Outage",
-          "reason": "Due to B phase cable ceiling maintenance.full load served by T-01.",
-          "full_desc": "Madunaghat 132/33kV S/S TR-2(517T) HT Scheduled S/D Due to B phase cable ceiling maintenance.full load served by T-01."
-        },
-        {
-          "time": "10:41 - 11:47",
-          "plant": "Cumilla(S) 132/33kV S/S Cumilla North-2 Forced S/D",
-          "load": "HT Outage",
-          "reason": "Due to Red hot maintenance at Cum (North) End",
-          "full_desc": "Cumilla(S) 132/33kV S/S Cumilla North-2 Forced S/D Due to Red hot maintenance at Cum (North) End"
-        },
-        {
-          "time": "10:51 - 13:58",
-          "plant": "Haripur 230/132kV S/S 132kV Reserve Bus Sec-2 Scheduled S/D",
-          "load": "HT Outage",
-          "reason": "Due to project work.",
-          "full_desc": "Haripur 230/132kV S/S 132kV Reserve Bus Sec-2 Scheduled S/D Due to project work."
-        },
-        {
-          "time": "11:10",
-          "plant": "Khulshi-Madunaghat  132kV Ckt-2 Scheduled S/D from Madunaghat 132/33kV end",
-          "load": "HT Outage",
-          "reason": "Due to B-phase jumper maintenance at 822 tower by Khulsi SS",
-          "full_desc": "Khulshi-Madunaghat  132kV Ckt-2 Scheduled S/D from Madunaghat 132/33kV end Due to B-phase jumper maintenance at 822 tower by Khulsi SS"
-        },
-        {
-          "time": "12:00",
-          "plant": "Day peak generation is 14670 MW.",
-          "load": "HT Outage",
-          "reason": "Day peak generation is 14670 MW.",
-          "full_desc": "Day peak generation is 14670 MW. Day peak generation is 14670 MW."
-        },
-        {
-          "time": "12:04 - 12:56",
-          "plant": "Bhulta-Haripur 132 kV Ckt-1 Tripped from Bhulta 132/33kV end showing Impedance Relay relays",
-          "load": "HT Outage",
-          "reason": "Due to \u09b8\u09c2\u09ac\u09b0\u09cd\u09a3\u0997\u09cd\u09b0\u09be\u09ae \u09aa\u09bf\u0995\u09a8\u09bf\u0995 \u09b8\u09cd\u09aa\u099f\u09c7 \u09e7\u09e9\u09e8\u0995\u09c7\u09ad\u09bf \u09b2\u09be\u0987\u09a8\u09c7\u09b0 \u09b8\u09be\u09a5\u09c7 \u0985\u09cd\u09af\u09be\u09b2\u09c1\u09ae\u09bf\u09a8\u09bf\u09df\u09be\u09ae\u09c7\u09b0 \u09ae\u0987 \u09b2\u09be\u0997\u09be\u09b0 \u0995\u09be\u09b0\u09a3\u09c7 \u09ad\u09c1\u09b2\u09a4\u09be \u09a8\u09bf\u0989 \u09b8\u09be\u09ac\u09b8\u09cd\u099f\u09c7\u09b6\u09a8\u09c7\u09b0 \u09ac\u09cd\u09b0\u09c7\u0995\u09be\u09b0 \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7 \u098f\u09ac\u0982 \u09ad\u09c1\u09b2\u09a4\u09be \u0993\u09b2\u09cd\u09a1 \u09b8\u09be\u09ac\u09b8\u09cd\u099f\u09c7\u09b6\u09a8 \u09ac\u09cd\u09b2\u09be\u0995 \u0986\u0989\u099f \u09b9\u09df\u09c7 \u09af\u09be\u09df\u0964",
-          "full_desc": "Bhulta-Haripur 132 kV Ckt-1 Tripped from Bhulta 132/33kV end showing Impedance Relay relays Due to \u09b8\u09c2\u09ac\u09b0\u09cd\u09a3\u0997\u09cd\u09b0\u09be\u09ae \u09aa\u09bf\u0995\u09a8\u09bf\u0995 \u09b8\u09cd\u09aa\u099f\u09c7 \u09e7\u09e9\u09e8\u0995\u09c7\u09ad\u09bf \u09b2\u09be\u0987\u09a8\u09c7\u09b0 \u09b8\u09be\u09a5\u09c7 \u0985\u09cd\u09af\u09be\u09b2\u09c1\u09ae\u09bf\u09a8\u09bf\u09df\u09be\u09ae\u09c7\u09b0 \u09ae\u0987 \u09b2\u09be\u0997\u09be\u09b0 \u0995\u09be\u09b0\u09a3\u09c7 \u09ad\u09c1\u09b2\u09a4\u09be \u09a8\u09bf\u0989 \u09b8\u09be\u09ac\u09b8\u09cd\u099f\u09c7\u09b6\u09a8\u09c7\u09b0 \u09ac\u09cd\u09b0\u09c7\u0995\u09be\u09b0 \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7 \u098f\u09ac\u0982 \u09ad\u09c1\u09b2\u09a4\u09be \u0993\u09b2\u09cd\u09a1 \u09b8\u09be\u09ac\u09b8\u09cd\u099f\u09c7\u09b6\u09a8 \u09ac\u09cd\u09b2\u09be\u0995 \u0986\u0989\u099f \u09b9\u09df\u09c7 \u09af\u09be\u09df\u0964"
-        },
-        {
-          "time": "12:40",
-          "plant": "Purbasadipur 230/132/33kV S/S TR-2 HT Project Work S/D",
-          "load": "HT Outage",
-          "reason": "Due to old name T-1. project work.\ntransformer in open condition",
-          "full_desc": "Purbasadipur 230/132/33kV S/S TR-2 HT Project Work S/D Due to old name T-1. project work.\ntransformer in open condition"
-        },
-        {
-          "time": "12:45",
-          "plant": "Purbasadipur 230/132/33kV S/S TR-3 HT Project Work S/D",
-          "load": "HT Outage",
-          "reason": "Due to old name T-2. project work.\ntransformer in open condition",
-          "full_desc": "Purbasadipur 230/132/33kV S/S TR-3 HT Project Work S/D Due to old name T-2. project work.\ntransformer in open condition"
-        },
-        {
-          "time": "12:46 - 14:45",
-          "plant": "BSRM-Cumilla(N) 230 kV Ckt-1 Scheduled S/D from Feni 230/132kV end",
-          "load": "HT Outage",
-          "reason": "Due to Red hot maintainance  Cumilla north Grid end",
-          "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-1 Scheduled S/D from Feni 230/132kV end Due to Red hot maintainance  Cumilla north Grid end"
-        },
-        {
-          "time": "13:58",
-          "plant": "Haripur 230/132kV S/S 132kV Bus Coupler-2 is restored.",
-          "load": "HT Outage",
-          "reason": "Haripur 230/132kV S/S 132kV Bus Coupler-2 is restored.",
-          "full_desc": "Haripur 230/132kV S/S 132kV Bus Coupler-2 is restored. Haripur 230/132kV S/S 132kV Bus Coupler-2 is restored."
-        },
-        {
-          "time": "15:35 - 17:40",
-          "plant": "Lalmonirhat 132/33kV S/S T-2 (415T) LT Forced S/D",
-          "load": "HT Outage",
-          "reason": "Due to T-2 33 kV riser DS (R phase) emergency red hot maintenance work.",
-          "full_desc": "Lalmonirhat 132/33kV S/S T-2 (415T) LT Forced S/D Due to T-2 33 kV riser DS (R phase) emergency red hot maintenance work."
-        },
-        {
-          "time": "18:10",
-          "plant": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 LT is restored.",
-          "load": "HT Outage",
-          "reason": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 LT is restored.",
-          "full_desc": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 LT is restored. Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 LT is restored."
-        },
-        {
-          "time": "18:10",
-          "plant": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 HT is restored.",
-          "load": "HT Outage",
-          "reason": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 HT is restored.",
-          "full_desc": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 HT is restored. Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 HT is restored."
-        },
-        {
-          "time": "19:30",
-          "plant": "Evening Peak Generation: 16082",
-          "load": "HT Outage",
-          "reason": "Evening Peak Generation: 16082",
-          "full_desc": "Evening Peak Generation: 16082 Evening Peak Generation: 16082"
-        },
-        {
-          "time": "19:31 - 21:43",
-          "plant": "Barishal-Bhandaria 132 kV Ckt-1 Tripped from Barishal 132/33kV end showing Distance relays",
-          "load": "HT Outage",
-          "reason": "Due to Conductor cut",
-          "full_desc": "Barishal-Bhandaria 132 kV Ckt-1 Tripped from Barishal 132/33kV end showing Distance relays Due to Conductor cut"
-        }
-      ],
-      "hourlyLoadData": [
-        {
-          "time": "00:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "01:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "02:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "03:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "04:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "05:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "06:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "07:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "08:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "09:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "10:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "11:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "12:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "13:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "14:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "15:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "16:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "17:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
-        },
-        {
-          "time": "18:00",
-          "generation": 16082.0,
-          "loadShed": 0.0,
-          "demand": 16082.0
-        },
-        {
-          "time": "19:00",
-          "generation": 16082.0,
-          "loadShed": 0.0,
-          "demand": 16082.0
-        },
-        {
-          "time": "20:00",
-          "generation": 16082.0,
-          "loadShed": 0.0,
-          "demand": 16082.0
-        },
-        {
-          "time": "21:00",
-          "generation": 16082.0,
-          "loadShed": 0.0,
-          "demand": 16082.0
-        },
-        {
-          "time": "22:00",
-          "generation": 16082.0,
-          "loadShed": 0.0,
-          "demand": 16082.0
-        },
-        {
-          "time": "23:00",
-          "generation": 14670.0,
-          "loadShed": 0.0,
-          "demand": 14670.0
+          "generation": 15990.53,
+          "loadShed": null,
+          "demand": null
         }
       ],
       "gasProductionData": [
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
-          "gas": 479.9,
-          "condensate": 380.0,
-          "share": 18.5
+          "gas": 478.6,
+          "condensate": 374.3,
+          "share": 18
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 94.0,
-          "condensate": 332.8,
-          "share": 3.6
+          "gas": 93.7,
+          "condensate": 329.1,
+          "share": 3.5
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
-          "gas": 93.1,
-          "condensate": 67.4,
-          "share": 3.6
+          "gas": 91.9,
+          "condensate": 48.2,
+          "share": 3.5
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
-          "gas": 895.7,
-          "condensate": 4875.7,
-          "share": 34.5
+          "gas": 896.9,
+          "condensate": 4781.6,
+          "share": 33.7
         },
         {
           "company": "Tullow (Bangora)",
           "fields": 1,
-          "gas": 31.4,
-          "condensate": 94.0,
+          "gas": 31,
+          "condensate": 88,
           "share": 1.2
         },
         {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
-          "gas": 1002.9,
-          "condensate": 0.0,
-          "share": 38.6
+          "gas": 1070.7,
+          "condensate": 0,
+          "share": 40.2
         }
       ],
       "gasDistributionData": [
         {
           "company": "TGTDCL (Dhaka & Mymensingh)",
-          "power": 271.8,
-          "fertilizer": 73.4,
-          "others": 1059.9,
-          "total": 1405.1
+          "power": 268.2,
+          "fertilizer": 73.3,
+          "others": 1093.7,
+          "total": 1435.2
         },
         {
           "company": "BGDCL (Cumilla & Sylhet)",
-          "power": 208.2,
+          "power": 221.4,
           "fertilizer": 0,
-          "others": 88.7,
-          "total": 296.9
+          "others": 88.8,
+          "total": 310.2
         },
         {
           "company": "KGDCL (Chattogram)",
-          "power": 36.8,
+          "power": 38.1,
           "fertilizer": 38.5,
-          "others": 171.9,
-          "total": 247.2
+          "others": 163.7,
+          "total": 240.3
         },
         {
           "company": "JGTDSL (Sylhet region)",
-          "power": 222.2,
-          "fertilizer": 40.3,
-          "others": 113.7,
-          "total": 376.2
+          "power": 222,
+          "fertilizer": 40.1,
+          "others": 111,
+          "total": 373
         },
         {
           "company": "PGCL (Rajshahi & Rangpur)",
-          "power": 128.6,
+          "power": 124.6,
           "fertilizer": 0,
-          "others": 29.6,
-          "total": 158.2
+          "others": 29.8,
+          "total": 154.4
         },
         {
           "company": "SGCL (Barishal & Khulna)",
-          "power": 54.5,
+          "power": 55.1,
           "fertilizer": 0,
-          "others": 4.6,
-          "total": 59.1
+          "others": 4.5,
+          "total": 59.6
+        }
+      ]
+    },
+  "2026-06-29": {
+      "systemStats": {
+        "date": "29 Jun 2026",
+        "dayPeakGen": 14920,
+        "eveningPeakGen": 16152.14,
+        "dayPeakDemand": null,
+        "eveningPeakDemand": 16726.14,
+        "minGen": null,
+        "maxGen": null,
+        "totalEnergyGen": 358.06819343,
+        "totalEnergyUnserved": null,
+        "totalEnergyDemand": null,
+        "maxTemp": null,
+        "totalGasSuppliedPower": 933.78,
+        "avgProductionCost": 6.369,
+        "totalDailyCost": 2280500601
+      },
+      "generationData": [
+        {
+          "name": "Gas",
+          "gen": 129.23,
+          "cost": null,
+          "unitCost": null,
+          "color": "#0ea5e9"
+        },
+        {
+          "name": "Coal",
+          "gen": 133.76,
+          "cost": null,
+          "unitCost": null,
+          "color": "#64748b"
+        },
+        {
+          "name": "HFO",
+          "gen": 30.05,
+          "cost": null,
+          "unitCost": null,
+          "color": "#f97316"
+        },
+        {
+          "name": "Hydro",
+          "gen": 2.33,
+          "cost": null,
+          "unitCost": null,
+          "color": "#06b6d4"
+        },
+        {
+          "name": "Solar",
+          "gen": 4.04,
+          "cost": null,
+          "unitCost": null,
+          "color": "#eab308"
+        },
+        {
+          "name": "Imports",
+          "gen": 58.49,
+          "cost": null,
+          "unitCost": null,
+          "color": "#a855f7"
+        },
+        {
+          "name": "HSD (Diesel)",
+          "gen": 0,
+          "cost": null,
+          "unitCost": null,
+          "color": "#ef4444"
+        }
+      ],
+      "borderImportsData": [
+        {
+          "source": "HVDC Bheramara (India)",
+          "energy": 20.63,
+          "peakFlow": 904,
+          "type": "C/B Interconnector (West)"
+        },
+        {
+          "source": "Adani Godda (India)",
+          "energy": 33.44,
+          "peakFlow": 1420.78,
+          "type": "C/B Interconnector (North)"
+        },
+        {
+          "source": "Tripura Cumilla (India)",
+          "energy": 3.51,
+          "peakFlow": 144,
+          "type": "C/B Interconnector (East)"
+        }
+      ],
+      "regionalDemandData": [
+        {
+          "zone": "Dhaka",
+          "loadShed": 77,
+          "demand": 5962.14,
+          "pct": 1.3
+        },
+        {
+          "zone": "Chattogram",
+          "loadShed": 0,
+          "demand": 1568.7,
+          "pct": 0
+        },
+        {
+          "zone": "Cumilla",
+          "loadShed": 96,
+          "demand": 1557,
+          "pct": 6.2
+        },
+        {
+          "zone": "Mymensingh",
+          "loadShed": 308,
+          "demand": 1378,
+          "pct": 22.4
+        },
+        {
+          "zone": "Sylhet",
+          "loadShed": 14,
+          "demand": 679,
+          "pct": 2.1
+        },
+        {
+          "zone": "Khulna",
+          "loadShed": 51,
+          "demand": 1917,
+          "pct": 2.7
+        },
+        {
+          "zone": "Barishal",
+          "loadShed": 3,
+          "demand": 467,
+          "pct": 0.6
+        },
+        {
+          "zone": "Rajshahi",
+          "loadShed": 0,
+          "demand": 1640.8,
+          "pct": 0
+        },
+        {
+          "zone": "Rangpur",
+          "loadShed": 0,
+          "demand": 1052,
+          "pct": 0
+        }
+      ],
+      "dailyOutages": [
+        {
+          "time": "19:40 - Barishal-Bhandaria 132 kV Ckt-1 Tripped from Barishal 132/33kV end showing Instt. R",
+          "plant": "",
+          "load": "HT Outage",
+          "reason": "",
+          "full_desc": ""
+        },
+        {
+          "time": "20:45 - Ramganj 132/33kV S/S Transformer -02 LT Tripped showing over current relay relays Due to",
+          "plant": "",
+          "load": "HT Outage",
+          "reason": "",
+          "full_desc": ""
+        },
+        {
+          "time": "20:45 - Ramganj 132/33kV S/S Transformer-01 LT Tripped showing over current relay relays Due to",
+          "plant": "",
+          "load": "HT Outage",
+          "reason": "",
+          "full_desc": ""
+        }
+      ],
+      "hourlyLoadData": [
+        {
+          "time": "00:00",
+          "generation": 15822.61,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "01:00",
+          "generation": 15665.14,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "02:00",
+          "generation": 14977.15,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "03:00",
+          "generation": 14595.42,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "04:00",
+          "generation": 14266.3,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "05:00",
+          "generation": 14047.18,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "06:00",
+          "generation": 13657.97,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "07:00",
+          "generation": 13767.53,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "08:00",
+          "generation": 13970.36,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "09:00",
+          "generation": 14075.57,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "10:00",
+          "generation": 14401.19,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "11:00",
+          "generation": 14472.93,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "12:00",
+          "generation": 14920,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "13:00",
+          "generation": 15146.61,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "14:00",
+          "generation": 15049.87,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "15:00",
+          "generation": 15094.48,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "16:00",
+          "generation": 14703.98,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "17:00",
+          "generation": 14424.23,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "18:00",
+          "generation": 14145.65,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "19:00",
+          "generation": 15376.04,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "20:00",
+          "generation": 15914.72,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "21:00",
+          "generation": 15809.17,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "22:00",
+          "generation": 15708.11,
+          "loadShed": null,
+          "demand": null
+        },
+        {
+          "time": "23:00",
+          "generation": 15824.33,
+          "loadShed": null,
+          "demand": null
+        }
+      ],
+      "gasProductionData": [
+        {
+          "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+          "fields": 5,
+          "gas": 478.6,
+          "condensate": 374.3,
+          "share": 17.7
+        },
+        {
+          "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+          "fields": 5,
+          "gas": 139.7,
+          "condensate": 637.5,
+          "share": 5.2
+        },
+        {
+          "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+          "fields": 9,
+          "gas": 91.9,
+          "condensate": 48.2,
+          "share": 3.4
+        },
+        {
+          "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+          "fields": 3,
+          "gas": 896.9,
+          "condensate": 4781.6,
+          "share": 33.1
+        },
+        {
+          "company": "Tullow (Bangora)",
+          "fields": 1,
+          "gas": 31,
+          "condensate": 88,
+          "share": 1.1
+        },
+        {
+          "company": "RPGCL (R-LNG Import / LNG Terminal)",
+          "fields": 0,
+          "gas": 1070.7,
+          "condensate": 27.8,
+          "share": 39.5
+        }
+      ],
+      "gasDistributionData": [
+        {
+          "company": "TGTDCL (Dhaka & Mymensingh)",
+          "power": 268.2,
+          "fertilizer": 73.3,
+          "others": 1093.7,
+          "total": 1435.2
+        },
+        {
+          "company": "BGDCL (Cumilla & Sylhet)",
+          "power": 221.4,
+          "fertilizer": 0,
+          "others": 88.8,
+          "total": 310.2
+        },
+        {
+          "company": "KGDCL (Chattogram)",
+          "power": 38.1,
+          "fertilizer": 38.5,
+          "others": 163.7,
+          "total": 240.3
+        },
+        {
+          "company": "JGTDSL (Sylhet region)",
+          "power": 222,
+          "fertilizer": 40.1,
+          "others": 111,
+          "total": 373
+        },
+        {
+          "company": "PGCL (Rajshahi & Rangpur)",
+          "power": 124.6,
+          "fertilizer": 0,
+          "others": 29.8,
+          "total": 154.4
+        },
+        {
+          "company": "SGCL (Barishal & Khulna)",
+          "power": 55.1,
+          "fertilizer": 0,
+          "others": 4.5,
+          "total": 59.6
         }
       ]
     }

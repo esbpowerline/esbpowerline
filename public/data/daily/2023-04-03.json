@@ -3,14 +3,14 @@
     "date": "03 Apr 2023",
     "dayPeakGen": 10525,
     "eveningPeakGen": 12363,
-    "dayPeakDemand": 10525,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 12363,
-    "minGen": 8871,
-    "maxGen": 14131,
+    "minGen": 8001.0,
+    "maxGen": 12363.0,
     "totalEnergyGen": 252.996936,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 253,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 32.0,
     "totalGasSuppliedPower": 1028.7,
     "avgProductionCost": 3.59,
     "totalDailyCost": 908302952
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 137.98,
-      "cost": 476031120,
-      "unitCost": 3.45,
+      "cost": 146198779,
+      "unitCost": 1.0596,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 48.1,
-      "cost": 318406893,
-      "unitCost": 6.62,
+      "cost": 249210880,
+      "unitCost": 5.1813,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 39.36,
-      "cost": 710899157,
-      "unitCost": 18.06,
+      "cost": 512893293,
+      "unitCost": 13.0298,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 0.28,
-      "cost": 27762,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
       "gen": 3.33,
-      "cost": 52529444,
-      "unitCost": 15.77,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 38.38,
-      "cost": 243331755,
-      "unitCost": 6.34,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [
@@ -144,161 +137,161 @@
   ],
   "dailyOutages": [
     {
-      "time": "09:14:00 - Daudkandi-Sonargaon 132 kV Ckt-1 Tripped from Daudkandi 132/33kV end showing Distance trip relay relays. and from Sonargaon",
+      "time": "09:14 - Daudkandi-Sonargaon 132 kV Ckt-1 Tripped from Daudkandi 132/33kV end showing Distance trip relay relays. and from Sonargaon",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "09:20:00 - Bhulta-Rampura 230 kV Ckt-1 is restored.",
+      "time": "09:20 - Bhulta-Rampura 230 kV Ckt-1 is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "10:13:00 - Chhatak 132/33kV S/S Sunamganj 1 Tripped showing REL 670 relays Due to None.",
+      "time": "10:13 - Chhatak 132/33kV S/S Sunamganj 1 Tripped showing REL 670 relays Due to None.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "10:16:00 - Chattak-Sunamganj 132 kV Ckt-1 Tripped from Sunamganj 132/33kV end showing REL-670 relays Due to Unknown.",
+      "time": "10:16 - Chattak-Sunamganj 132 kV Ckt-1 Tripped from Sunamganj 132/33kV end showing REL-670 relays Due to Unknown.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:02:00 - BIPTC S/S Baharampur-4 Scheduled S/D Due to shutdown is taken from baharampur end.",
+      "time": "20:02 - BIPTC S/S Baharampur-4 Scheduled S/D Due to shutdown is taken from baharampur end.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:26:00 - Sreepur 230/132 KV T1 S/D for C/M.",
+      "time": "12:26 - Sreepur 230/132 KV T1 S/D for C/M.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:29:00 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
+      "time": "16:29 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:29:00 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
+      "time": "16:29 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:29:00 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
+      "time": "16:29 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:26:00 - Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to DS work.",
+      "time": "16:26 - Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to DS work.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:26:00 - Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to DS work.",
+      "time": "16:26 - Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to DS work.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:30:00 - Bheramara 230/132kV S/S Transformer-2 LT is restored.",
+      "time": "12:30 - Bheramara 230/132kV S/S Transformer-2 LT is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:30:00 - Bheramara 230/132kV S/S Transformer-2 HT is restored.",
+      "time": "12:30 - Bheramara 230/132kV S/S Transformer-2 HT is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:00:00 - Sreepur 230/132/33 KV Auxiliary-1(300KVA) was first time switched on.",
+      "time": "13:00 - Sreepur 230/132/33 KV Auxiliary-1(300KVA) was first time switched on.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:25:00 - Savar 132/33kV S/S Capacitor Bank-3 is restored.",
+      "time": "13:25 - Savar 132/33kV S/S Capacitor Bank-3 is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "14:30:00 - Sreepur 230/132KV T2 S/D for C/M.",
+      "time": "14:30 - Sreepur 230/132KV T2 S/D for C/M.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "14:27:00 - Bogura(New)-Naogaon 132 kV Ckt-1 is restored.",
+      "time": "14:27 - Bogura(New)-Naogaon 132 kV Ckt-1 is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "14:27:00 - Bogura(New)-Naogaon 132 kV Ckt-1 is restored.",
+      "time": "14:27 - Bogura(New)-Naogaon 132 kV Ckt-1 is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:40:00 - Rampal 1320 MW (BIFPCL) Unit-1 was sync.",
+      "time": "20:40 - Rampal 1320 MW (BIFPCL) Unit-1 was sync.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "06:15:00 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
+      "time": "06:15 - Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to DS work.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "06:14:00 - Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to DS work",
+      "time": "06:14 - Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to DS work",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "06:15:00 - Kodda 132/33kV S/S Tr-1 (406T) LT is restored.",
+      "time": "06:15 - Kodda 132/33kV S/S Tr-1 (406T) LT is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "07:15:00 - Bogra(o)-Nauga 132 KV Ckt-2 is restored.",
+      "time": "07:15 - Bogra(o)-Nauga 132 KV Ckt-2 is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
@@ -308,147 +301,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 11064,
-      "loadShed": 0,
-      "demand": 11064
+      "generation": 11064.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 9906,
-      "loadShed": 0,
-      "demand": 9906
+      "generation": 9906.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 9548,
-      "loadShed": 0,
-      "demand": 9548
+      "generation": 9548.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 9983,
-      "loadShed": 0,
-      "demand": 9983
+      "generation": 9983.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 9651,
-      "loadShed": 0,
-      "demand": 9651
+      "generation": 9651.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 8676,
-      "loadShed": 0,
-      "demand": 8676
+      "generation": 8676.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 8001,
-      "loadShed": 0,
-      "demand": 8001
+      "generation": 8001.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 8098,
-      "loadShed": 0,
-      "demand": 8098
+      "generation": 8098.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 8709,
-      "loadShed": 0,
-      "demand": 8709
+      "generation": 8709.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 9476,
-      "loadShed": 0,
-      "demand": 9476
+      "generation": 9476.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 9907,
-      "loadShed": 0,
-      "demand": 9907
+      "generation": 9907.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 10201,
-      "loadShed": 0,
-      "demand": 10201
+      "generation": 10201.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
-      "generation": 10525,
-      "loadShed": 0,
-      "demand": 10525
+      "generation": 10525.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 10866,
-      "loadShed": 0,
-      "demand": 10866
+      "generation": 10866.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 11072,
-      "loadShed": 0,
-      "demand": 11072
+      "generation": 11072.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 11183,
-      "loadShed": 0,
-      "demand": 11183
+      "generation": 11183.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 10903,
-      "loadShed": 0,
-      "demand": 10903
+      "generation": 10903.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 10846,
-      "loadShed": 0,
-      "demand": 10846
+      "generation": 10846.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 11077,
-      "loadShed": 0,
-      "demand": 11077
+      "generation": 11077.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 11639,
-      "loadShed": 0,
-      "demand": 11639
+      "generation": 11639.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 12218,
-      "loadShed": 0,
-      "demand": 12218
+      "generation": 12218.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 12363,
-      "loadShed": 0,
-      "demand": 12363
+      "generation": 12363.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 12085,
-      "loadShed": 0,
-      "demand": 12085
+      "generation": 12085.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 11693,
-      "loadShed": 0,
-      "demand": 11693
+      "generation": 11693.0,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

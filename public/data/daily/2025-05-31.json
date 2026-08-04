@@ -6,11 +6,11 @@
     "dayPeakDemand": 13114.05,
     "eveningPeakDemand": 14695.88,
     "minGen": 11378.34,
-    "maxGen": 15100,
+    "maxGen": 14695.88,
     "totalEnergyGen": 306.47319701,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 306.47,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": 0.098,
+    "totalEnergyDemand": 306.571,
+    "maxTemp": 34.2,
     "totalGasSuppliedPower": 819.98,
     "avgProductionCost": 6.656,
     "totalDailyCost": 2039973555
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 117.97,
-      "cost": 407002344,
-      "unitCost": 3.45,
+      "cost": 414723960,
+      "unitCost": 3.5155,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 103.8,
-      "cost": 687187236,
-      "unitCost": 6.62,
+      "cost": 721649803,
+      "unitCost": 6.952,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 33.33,
-      "cost": 601888560,
-      "unitCost": 18.06,
+      "cost": 615530901,
+      "unitCost": 18.4693,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 3.04,
-      "cost": 47935513,
-      "unitCost": 15.77,
+      "cost": 48373483,
+      "unitCost": 15.9141,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 45.64,
-      "cost": 289359990,
-      "unitCost": 6.34,
+      "cost": 227847955,
+      "unitCost": 4.9922,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.8,
+      "cost": 11658124,
+      "unitCost": 14.64,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -460,10 +467,10 @@
     },
     {
       "time": "22:56 - 23:56",
-      "plant": "Panchagar-Thakurgaon  132kV Ckt-1 Tripped from Panchagarh 132/33kV end showing Dist. Relay  <br> MiCom P442 relays. and from Thakurgaon 132/33kV end showing Areva: Micom P442 relays",
+      "plant": "Panchagar-Thakurgaon  132kV Ckt-1 Tripped from Panchagarh 132/33kV end showing Dist. Relay <br> MiCom P442 relays. and from Thakurgaon 132/33kV end showing Areva: Micom P442 relays",
       "load": "HT Outage",
       "reason": "Due to Thundering and Heavy Rain",
-      "full_desc": "Panchagar-Thakurgaon  132kV Ckt-1 Tripped from Panchagarh 132/33kV end showing Dist. Relay  <br> MiCom P442 relays. and from Thakurgaon 132/33kV end showing Areva: Micom P442 relays Due to Thundering and Heavy Rain"
+      "full_desc": "Panchagar-Thakurgaon  132kV Ckt-1 Tripped from Panchagarh 132/33kV end showing Dist. Relay <br> MiCom P442 relays. and from Thakurgaon 132/33kV end showing Areva: Micom P442 relays Due to Thundering and Heavy Rain"
     },
     {
       "time": "23:27",
@@ -539,147 +546,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 13241.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12598.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12211.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11936.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11812.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11567.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11383.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11613.08,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11835.13,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12105.47,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12408.99,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12495.48,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12792.17,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12420.59,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 12536.22,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11610.5,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 11378.34,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 14695.88,
-      "loadShed": 0,
-      "demand": 14695.88
+      "generation": 11961.32,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 14695.88,
-      "loadShed": 0,
-      "demand": 14695.88
+      "generation": 12955.52,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 14695.88,
-      "loadShed": 0,
-      "demand": 14695.88
+      "generation": 14178.85,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
       "generation": 14695.88,
-      "loadShed": 0,
-      "demand": 14695.88
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 14695.88,
-      "loadShed": 0,
-      "demand": 14695.88
+      "generation": 14670.2,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 13114.05,
-      "loadShed": 0,
-      "demand": 13114.05
+      "generation": 14662.2,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

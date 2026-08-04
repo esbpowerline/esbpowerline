@@ -3,14 +3,14 @@
     "date": "14 Sep 2024",
     "dayPeakGen": 10079,
     "eveningPeakGen": 11456,
-    "dayPeakDemand": 10079,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 11456,
-    "minGen": 8695,
-    "maxGen": 16012,
+    "minGen": 7847.0,
+    "maxGen": 11456.0,
     "totalEnergyGen": 245.33207099999998,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 245.33,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 26.4,
     "totalGasSuppliedPower": 868.19,
     "avgProductionCost": 5.162,
     "totalDailyCost": 1266409935
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 117.2,
-      "cost": 404355338,
-      "unitCost": 3.45,
+      "cost": 356518379,
+      "unitCost": 3.0419,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 71.01,
-      "cost": 470069153,
-      "unitCost": 6.62,
+      "cost": 479764576,
+      "unitCost": 6.7565,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 15.19,
-      "cost": 274330189,
-      "unitCost": 18.06,
+      "cost": 283853687,
+      "unitCost": 18.687,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 5.16,
-      "cost": 515840,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
       "gen": 1.52,
-      "cost": 24030704,
-      "unitCost": 15.77,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 34.09,
-      "cost": 216108048,
-      "unitCost": 6.34,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [
@@ -144,238 +137,238 @@
   ],
   "dailyOutages": [
     {
-      "time": "12:59:00 - Narail 132/33kV S/S TR1 (403-T) LT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
+      "time": "12:59 - Narail 132/33kV S/S TR1 (403-T) LT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:00:00 - Narail 132/33kV S/S TR2 (413-T) LT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
+      "time": "13:00 - Narail 132/33kV S/S TR2 (413-T) LT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:57:00 - Narail 132/33kV S/S TR1 (403-T) HT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
+      "time": "12:57 - Narail 132/33kV S/S TR1 (403-T) HT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:58:00 - Narail 132/33kV S/S TR2 (413-T) HT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
+      "time": "12:58 - Narail 132/33kV S/S TR2 (413-T) HT Scheduled S/D Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take load before.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:01:00 - Magura 132/33kV S/S T-1 (405T) LT Scheduled S/D Due to RED HOT MAINTENANCE.",
+      "time": "13:01 - Magura 132/33kV S/S T-1 (405T) LT Scheduled S/D Due to RED HOT MAINTENANCE.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:01:00 - Magura 132/33kV S/S T-3 (425T) LT Scheduled S/D Due to RED HOT MAINTENANCE.",
+      "time": "13:01 - Magura 132/33kV S/S T-3 (425T) LT Scheduled S/D Due to RED HOT MAINTENANCE.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:59:00 - Magura 132/33kV S/S T-1 (405T) HT Scheduled S/D Due to Red Hot Maintenance",
+      "time": "12:59 - Magura 132/33kV S/S T-1 (405T) HT Scheduled S/D Due to Red Hot Maintenance",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:59:00 - Magura 132/33kV S/S T-2 (415T) HT Scheduled S/D Due to Red Hot Maintenance",
+      "time": "12:59 - Magura 132/33kV S/S T-2 (415T) HT Scheduled S/D Due to Red Hot Maintenance",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:00:00 - Magura 132/33kV S/S T-3 (425T) HT Scheduled S/D Due to Red Hot Maintenance",
+      "time": "13:00 - Magura 132/33kV S/S T-3 (425T) HT Scheduled S/D Due to Red Hot Maintenance",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:55:00 - Magura-Narail 132kV Ckt-1 Scheduled S/D from Narail 132/33kV end Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take",
+      "time": "12:55 - Magura-Narail 132kV Ckt-1 Scheduled S/D from Narail 132/33kV end Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:58:00 - Magura-Narail 132kV Ckt-2 Scheduled S/D from Narail 132/33kV end Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take",
+      "time": "12:58 - Magura-Narail 132kV Ckt-2 Scheduled S/D from Narail 132/33kV end Due to Magura bus shutdown. Load shed 00 because all 33 kv Couldn't take",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:50:00 - Jhenaidah-Magura 132 kV Ckt-1 Scheduled S/D from Magura 132/33kV end Due to Red Hot Maintenance",
+      "time": "12:50 - Jhenaidah-Magura 132 kV Ckt-1 Scheduled S/D from Magura 132/33kV end Due to Red Hot Maintenance",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:57:00 - Jhenaidah-Magura 132 kV Ckt-2 Scheduled S/D from Magura 132/33kV end Due to Red Hot Maintenance",
+      "time": "12:57 - Jhenaidah-Magura 132 kV Ckt-2 Scheduled S/D from Magura 132/33kV end Due to Red Hot Maintenance",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "11:32:00 - Shahjibazar 132/33kV S/S TR-02 LT Tripped showing OC/EF. A phase relays.",
+      "time": "11:32 - Shahjibazar 132/33kV S/S TR-02 LT Tripped showing OC/EF. A phase relays.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:23:00 - Mirzapur 132/33kV S/S Transformer-02(E07) LT Scheduled S/D Due to Flashing and Redhot in 33 kv Bushing ( I&U clamp) .",
+      "time": "13:23 - Mirzapur 132/33kV S/S Transformer-02(E07) LT Scheduled S/D Due to Flashing and Redhot in 33 kv Bushing ( I&U clamp) .",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "13:19:00 - Mirzapur 132/33kV S/S Transformer-02(E07) HT Scheduled S/D Due to Flashing and Redhot in 33 kv Bushing ( I&U clamp) .",
+      "time": "13:19 - Mirzapur 132/33kV S/S Transformer-02(E07) HT Scheduled S/D Due to Flashing and Redhot in 33 kv Bushing ( I&U clamp) .",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:12:00 - Bagerhat-Bhandaria 132 kV Ckt-1 is restored.",
+      "time": "12:12 - Bagerhat-Bhandaria 132 kV Ckt-1 is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "14:51:00 - Chowmuhani-Ramganj 132 kV Ckt-2 Scheduled S/D from Ramganj 132/33kV end Due to work at chowmuhani End. and from Chowmuhani 132/33kV",
+      "time": "14:51 - Chowmuhani-Ramganj 132 kV Ckt-2 Scheduled S/D from Ramganj 132/33kV end Due to work at chowmuhani End. and from Chowmuhani 132/33kV",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "12:30:00 - Faridpur 132/33kV S/S Transformer-1 HT is restored.",
+      "time": "12:30 - Faridpur 132/33kV S/S Transformer-1 HT is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:12:00 - Baghabari-Sirajganj 230 kV Ckt-2 Forced S/D from Sirajgonj 230 end Due to Red hot found at Baghabari end and from Baghabari 230/132kV end",
+      "time": "16:12 - Baghabari-Sirajganj 230 kV Ckt-2 Forced S/D from Sirajgonj 230 end Due to Red hot found at Baghabari end and from Baghabari 230/132kV end",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:10:00 - Baghabari-Sirajganj 230 kV Ckt-2 Forced S/D from Baghabari 230/132kV end Due to L1 Isolator Maintenance Work",
+      "time": "16:10 - Baghabari-Sirajganj 230 kV Ckt-2 Forced S/D from Baghabari 230/132kV end Due to L1 Isolator Maintenance Work",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "16:20:00 - Shariatpur 132/33kV S/S T2-416T LT Tripped showing REF 630 relays Due to Due to OC and EF feeder no- 03 Baghia-WZPDCL",
+      "time": "16:20 - Shariatpur 132/33kV S/S T2-416T LT Tripped showing REF 630 relays Due to Due to OC and EF feeder no- 03 Baghia-WZPDCL",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "17:46:00 - Barishal 132/33kV S/S T-1 (405T) LT Tripped showing Instt. o/c, definite o/c, 86x relays Due to Polashpur 33kv feeder fault (wzpdcl)",
+      "time": "17:46 - Barishal 132/33kV S/S T-1 (405T) LT Tripped showing Instt. o/c, definite o/c, 86x relays Due to Polashpur 33kv feeder fault (wzpdcl)",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:06:00 - Barguna 132/33kV S/S Transformer-1 LT Forced S/D Due to 33 kV Bus Section Close.",
+      "time": "20:06 - Barguna 132/33kV S/S Transformer-1 LT Forced S/D Due to 33 kV Bus Section Close.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:06:00 - Barguna 132/33kV S/S Transformer-2 LT Forced S/D Due to 33 kV Bus Section Close.",
+      "time": "20:06 - Barguna 132/33kV S/S Transformer-2 LT Forced S/D Due to 33 kV Bus Section Close.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:55:00 - Goalpara 132/33kV S/S T-6 LT Forced S/D Due to Red Hot Remove",
+      "time": "20:55 - Goalpara 132/33kV S/S T-6 LT Forced S/D Due to Red Hot Remove",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:52:00 - Goalpara 132/33kV S/S T-6 HT Scheduled S/D Due to Removing high temperature",
+      "time": "20:52 - Goalpara 132/33kV S/S T-6 HT Scheduled S/D Due to Removing high temperature",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "20:51:00 - Natore 132/33kV S/S TR-4 (435 T) HT is restored.",
+      "time": "20:51 - Natore 132/33kV S/S TR-4 (435 T) HT is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "22:40:00 - Chowmuhani 132/33kV S/S TR2-425T LT Forced S/D Due to 132/33 KV Tr-03 shutdown for 33 kv Bushing B-Phase Red-HOT maintenance. No",
+      "time": "22:40 - Chowmuhani 132/33kV S/S TR2-425T LT Forced S/D Due to 132/33 KV Tr-03 shutdown for 33 kv Bushing B-Phase Red-HOT maintenance. No",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "22:33:00 - Faridpur 132/33kV S/S Transformer-2 HT is restored.",
+      "time": "22:33 - Faridpur 132/33kV S/S Transformer-2 HT is restored.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "23:30:00 - Chowmuhani 132/33kV S/S TR3-435T HT Forced S/D Due to 132/33 KV Tr-03 shutdown for 33 kv Bushing B-Phase Red-HOT maintenance. No",
+      "time": "23:30 - Chowmuhani 132/33kV S/S TR3-435T HT Forced S/D Due to 132/33 KV Tr-03 shutdown for 33 kv Bushing B-Phase Red-HOT maintenance. No",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "06:18:00 - Barguna 132/33kV S/S Transformer-2 LT Forced S/D Due to 33 kV Incomer-2, Y Phase Bus DS Flashing.",
+      "time": "06:18 - Barguna 132/33kV S/S Transformer-2 LT Forced S/D Due to 33 kV Incomer-2, Y Phase Bus DS Flashing.",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "06:18:00 - Savar 132/33kV S/S T-4 LT Tripped showing F51 relays Due to L-46 & L-39 b feeder fault of PBS-3",
+      "time": "06:18 - Savar 132/33kV S/S T-4 LT Tripped showing F51 relays Due to L-46 & L-39 b feeder fault of PBS-3",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
       "full_desc": ""
     },
     {
-      "time": "06:18:00 - Savar 132/33kV S/S T-3 LT Tripped showing F50/51 relays Due to L-46 & L-39 b feeder fault of PBS-3",
+      "time": "06:18 - Savar 132/33kV S/S T-3 LT Tripped showing F50/51 relays Due to L-46 & L-39 b feeder fault of PBS-3",
       "plant": "",
       "load": "HT Outage",
       "reason": "",
@@ -385,147 +378,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 10802,
-      "loadShed": 0,
-      "demand": 10802
+      "generation": 10802.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 10763,
-      "loadShed": 0,
-      "demand": 10763
+      "generation": 10763.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 10344,
-      "loadShed": 0,
-      "demand": 10344
+      "generation": 10344.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 9930,
-      "loadShed": 0,
-      "demand": 9930
+      "generation": 9930.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 9471,
-      "loadShed": 0,
-      "demand": 9471
+      "generation": 9471.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 8610,
-      "loadShed": 0,
-      "demand": 8610
+      "generation": 8610.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 7847,
-      "loadShed": 0,
-      "demand": 7847
+      "generation": 7847.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 7916,
-      "loadShed": 0,
-      "demand": 7916
+      "generation": 7916.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 8509,
-      "loadShed": 0,
-      "demand": 8509
+      "generation": 8509.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 9188,
-      "loadShed": 0,
-      "demand": 9188
+      "generation": 9188.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 9566,
-      "loadShed": 0,
-      "demand": 9566
+      "generation": 9566.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 9621,
-      "loadShed": 0,
-      "demand": 9621
+      "generation": 9621.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
-      "generation": 10079,
-      "loadShed": 0,
-      "demand": 10079
+      "generation": 10079.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 10543,
-      "loadShed": 0,
-      "demand": 10543
+      "generation": 10543.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 10320,
-      "loadShed": 0,
-      "demand": 10320
+      "generation": 10320.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 10402,
-      "loadShed": 0,
-      "demand": 10402
+      "generation": 10402.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 10299,
-      "loadShed": 0,
-      "demand": 10299
+      "generation": 10299.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 10182,
-      "loadShed": 0,
-      "demand": 10182
+      "generation": 10182.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
-      "generation": 10128,
-      "loadShed": 0,
-      "demand": 10128
+      "generation": 10128.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 11453,
-      "loadShed": 0,
-      "demand": 11453
+      "generation": 11453.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 11456,
-      "loadShed": 0,
-      "demand": 11456
+      "generation": 11456.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 11228,
-      "loadShed": 0,
-      "demand": 11228
+      "generation": 11228.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 10739,
-      "loadShed": 0,
-      "demand": 10739
+      "generation": 10739.0,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 10754,
-      "loadShed": 0,
-      "demand": 10754
+      "generation": 10754.0,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

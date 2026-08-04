@@ -6,11 +6,11 @@
     "dayPeakDemand": 10100.52,
     "eveningPeakDemand": 11203.72,
     "minGen": 7349.11,
-    "maxGen": 11300,
+    "maxGen": 11203.72,
     "totalEnergyGen": 226.94372065,
-    "totalEnergyUnserved": 0,
-    "totalEnergyDemand": 226.94,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": 226.944,
+    "maxTemp": 27.5,
     "totalGasSuppliedPower": 662.34,
     "avgProductionCost": 5.611,
     "totalDailyCost": 1273387559
@@ -19,22 +19,22 @@
     {
       "name": "Gas",
       "gen": 89.21,
-      "cost": 307760268,
-      "unitCost": 3.45,
+      "cost": 311472484,
+      "unitCost": 3.4916,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 80.94,
-      "cost": 535791975,
-      "unitCost": 6.62,
+      "cost": 536266998,
+      "unitCost": 6.6259,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 6.45,
-      "cost": 116397855,
-      "unitCost": 18.06,
+      "cost": 106431671,
+      "unitCost": 16.5137,
       "color": "#f97316"
     },
     {
@@ -47,23 +47,30 @@
     {
       "name": "Solar",
       "gen": 3.08,
-      "cost": 48547959,
-      "unitCost": 15.77,
+      "cost": 48051123,
+      "unitCost": 15.6086,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 46.32,
-      "cost": 293662060,
-      "unitCost": 6.34,
+      "cost": 271069280,
+      "unitCost": 5.8522,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
+      "name": "HSD",
+      "gen": 0.0,
       "cost": 0,
-      "unitCost": 0,
+      "unitCost": null,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -950,10 +957,10 @@
     },
     {
       "time": "04:32 - 04:51",
-      "plant": "Bhandaria 132/33kV S/S Transformer-2 LT Tripped showing Protection  <br> 51N E/F  IDMT trip relays",
+      "plant": "Bhandaria 132/33kV S/S Transformer-2 LT Tripped showing Protection <br> 51N E/F  IDMT trip relays",
       "load": "HT Outage",
       "reason": "Due to Tripped feeder rajapur 33kv pbs trial. Rajapur feeder CB don\u2019t open so T1A is trip.",
-      "full_desc": "Bhandaria 132/33kV S/S Transformer-2 LT Tripped showing Protection  <br> 51N E/F  IDMT trip relays Due to Tripped feeder rajapur 33kv pbs trial. Rajapur feeder CB don\u2019t open so T1A is trip."
+      "full_desc": "Bhandaria 132/33kV S/S Transformer-2 LT Tripped showing Protection <br> 51N E/F  IDMT trip relays Due to Tripped feeder rajapur 33kv pbs trial. Rajapur feeder CB don\u2019t open so T1A is trip."
     },
     {
       "time": "07:17",
@@ -1043,147 +1050,147 @@
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9026.27,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "01:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 8438.82,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "02:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 7948.12,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "03:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 7679.28,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "04:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 7459.12,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "05:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 7349.11,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "06:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 7582.05,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "07:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 8147.87,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "08:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9162.24,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "09:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9560.89,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "10:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9384.48,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "11:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9535.03,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "12:00",
       "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "13:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 10470.54,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "14:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 10069.7,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "15:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9647.77,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "16:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 8757.47,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "17:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9783.12,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "18:00",
       "generation": 11203.72,
-      "loadShed": 0,
-      "demand": 11203.72
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "19:00",
-      "generation": 11203.72,
-      "loadShed": 0,
-      "demand": 11203.72
+      "generation": 11038.11,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "20:00",
-      "generation": 11203.72,
-      "loadShed": 0,
-      "demand": 11203.72
+      "generation": 10679.6,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "21:00",
-      "generation": 11203.72,
-      "loadShed": 0,
-      "demand": 11203.72
+      "generation": 10515.44,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "22:00",
-      "generation": 11203.72,
-      "loadShed": 0,
-      "demand": 11203.72
+      "generation": 10078.26,
+      "loadShed": null,
+      "demand": null
     },
     {
       "time": "23:00",
-      "generation": 10100.52,
-      "loadShed": 0,
-      "demand": 10100.52
+      "generation": 9543.0,
+      "loadShed": null,
+      "demand": null
     }
   ],
   "gasProductionData": [

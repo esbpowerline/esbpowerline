@@ -3,14 +3,14 @@
     "date": "09 Jul 2014",
     "dayPeakGen": 6178,
     "eveningPeakGen": 7215,
-    "dayPeakDemand": 6239,
+    "dayPeakDemand": null,
     "eveningPeakDemand": 7350,
-    "minGen": 5791,
-    "maxGen": 7177,
+    "minGen": 5648.0,
+    "maxGen": 7215.0,
     "totalEnergyGen": 157.058769,
-    "totalEnergyUnserved": 0.49,
-    "totalEnergyDemand": 157.55,
-    "maxTemp": 32.8,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 34.6,
     "totalGasSuppliedPower": 957.22,
     "avgProductionCost": 4.549,
     "totalDailyCost": 714489003
@@ -19,51 +19,44 @@
     {
       "name": "Gas",
       "gen": 95.9,
-      "cost": 330847016,
-      "unitCost": 3.45,
+      "cost": null,
+      "unitCost": null,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 3.67,
-      "cost": 24317305,
-      "unitCost": 6.62,
+      "cost": 14296518,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 45.65,
-      "cost": 824471002,
-      "unitCost": 18.06,
+      "cost": 618054655,
+      "unitCost": 13.5385,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 3.23,
-      "cost": 322582,
-      "unitCost": 0.1,
+      "cost": null,
+      "unitCost": null,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 15.77,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 6.34,
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
       "color": "#a855f7"
-    },
-    {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": 0,
-      "unitCost": 0,
-      "color": "#ef4444"
     }
   ],
   "borderImportsData": [],
@@ -149,13 +142,6 @@
       "reason": "due to auxiliary breaker problem and was synchronized on at"
     },
     {
-      "time": "18:05.",
-      "plant": "",
-      "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
-    },
-    {
       "time": "at 14:56",
       "plant": "Julda 132/33 kV transformer tripped at 14:56 showing earth fault relay and",
       "load": "18 MW",
@@ -180,152 +166,7 @@
       "reason": "After maintenance madanganj summit was synchronized at 00:54 (10/07/2014)."
     }
   ],
-  "hourlyLoadData": [
-    {
-      "time": "00:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "01:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "02:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "03:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "04:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "05:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "06:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "07:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "08:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "09:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "10:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "11:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "12:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "13:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "14:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "15:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "16:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "17:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    },
-    {
-      "time": "18:00",
-      "generation": 7215,
-      "loadShed": 0,
-      "demand": 7215
-    },
-    {
-      "time": "19:00",
-      "generation": 7215,
-      "loadShed": 0,
-      "demand": 7215
-    },
-    {
-      "time": "20:00",
-      "generation": 7215,
-      "loadShed": 0,
-      "demand": 7215
-    },
-    {
-      "time": "21:00",
-      "generation": 7215,
-      "loadShed": 0,
-      "demand": 7215
-    },
-    {
-      "time": "22:00",
-      "generation": 7215,
-      "loadShed": 0,
-      "demand": 7215
-    },
-    {
-      "time": "23:00",
-      "generation": 6178,
-      "loadShed": 0,
-      "demand": 6178
-    }
-  ],
+  "hourlyLoadData": [],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
