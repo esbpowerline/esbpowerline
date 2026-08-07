@@ -1,0 +1,384 @@
+{
+  "systemStats": {
+    "date": "05 Aug 2026",
+    "dayPeakGen": 12931.85,
+    "eveningPeakGen": 14553.75,
+    "dayPeakDemand": 13030.85,
+    "eveningPeakDemand": 14553.75,
+    "minGen": 11967.94,
+    "maxGen": 14580.57,
+    "totalEnergyGen": 317.65413408,
+    "totalEnergyUnserved": 20.648,
+    "totalEnergyDemand": 338.302,
+    "maxTemp": 30.9,
+    "totalGasSuppliedPower": 665.57,
+    "avgProductionCost": 6.902,
+    "totalDailyCost": 2192572953
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 88.72,
+      "cost": 308408350,
+      "unitCost": 3.4762,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 128.3,
+      "cost": 873673128,
+      "unitCost": 6.8095,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 34.81,
+      "cost": 612075376,
+      "unitCost": 17.5854,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 5.3,
+      "cost": 529615,
+      "unitCost": 0.1,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 1.3,
+      "cost": 20123324,
+      "unitCost": 15.4289,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 59.06,
+      "cost": 375397791,
+      "unitCost": 6.3558,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD",
+      "gen": 0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.16,
+      "cost": 2365368,
+      "unitCost": 14.71,
+      "color": "#22c55e"
+    }
+  ],
+  "borderImportsData": [
+    {
+      "source": "HVDC Bheramara (India)",
+      "energy": 21.13,
+      "peakFlow": 874,
+      "type": "C/B Interconnector (West)"
+    },
+    {
+      "source": "Adani Godda (India)",
+      "energy": 33.68,
+      "peakFlow": 1420.53,
+      "type": "C/B Interconnector (North)"
+    },
+    {
+      "source": "Tripura Cumilla (India)",
+      "energy": 3.35,
+      "peakFlow": 158,
+      "type": "C/B Interconnector (East)"
+    }
+  ],
+  "regionalDemandData": [
+    {
+      "zone": "Dhaka",
+      "loadShed": 0,
+      "demand": 4883.37,
+      "pct": 0
+    },
+    {
+      "zone": "Chattogram",
+      "loadShed": 0,
+      "demand": 1374,
+      "pct": 0
+    },
+    {
+      "zone": "Cumilla",
+      "loadShed": 0,
+      "demand": 1448,
+      "pct": 0
+    },
+    {
+      "zone": "Mymensingh",
+      "loadShed": 0,
+      "demand": 1137,
+      "pct": 0
+    },
+    {
+      "zone": "Sylhet",
+      "loadShed": 0,
+      "demand": 652,
+      "pct": 0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 0,
+      "demand": 1736.5,
+      "pct": 0
+    },
+    {
+      "zone": "Barishal",
+      "loadShed": 0,
+      "demand": 478,
+      "pct": 0
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0,
+      "demand": 1515.4,
+      "pct": 0
+    },
+    {
+      "zone": "Rangpur",
+      "loadShed": 0,
+      "demand": 954,
+      "pct": 0
+    }
+  ],
+  "dailyOutages": [
+    {
+      "time": "08:24",
+      "plant": "Bogura 230/132kV S/S T-01 HT",
+      "load": "HT Outage",
+      "reason": "Bogura 230/132kV S/S T-01 HT is restored.",
+      "full_desc": "Bogura 230/132kV S/S T-01 HT is restored."
+    },
+    {
+      "time": "08:24",
+      "plant": "Bogura 230/132kV S/S T-01 LT",
+      "load": "HT Outage",
+      "reason": "Bogura 230/132kV S/S T-01 LT is restored.",
+      "full_desc": "Bogura 230/132kV S/S T-01 LT is restored."
+    },
+    {
+      "time": "08:30 - 17:06",
+      "plant": "Faridpur-Gopalganj(N) 230 kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Faridpur-Gopalganj(N) 230 kV Ckt-1 Scheduled S/D from Faridpur 132/33kV end.",
+      "full_desc": "Faridpur-Gopalganj(N) 230 kV Ckt-1 Scheduled S/D from Faridpur 132/33kV end."
+    },
+    {
+      "time": "08:32 - 17:07",
+      "plant": "Faridpur-Gopalganj(N) 230 kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Faridpur-Gopalganj(N) 230 kV Ckt-2 Scheduled S/D from Faridpur 132/33kV end.",
+      "full_desc": "Faridpur-Gopalganj(N) 230 kV Ckt-2 Scheduled S/D from Faridpur 132/33kV end."
+    },
+    {
+      "time": "08:32 - 17:05",
+      "plant": "Gopalganj 400/132kV S/S 230kV Faridpur CKT-01 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Gopalganj 400/132kV S/S 230kV Faridpur CKT-01 Project Work S/D",
+      "full_desc": "Gopalganj 400/132kV S/S 230kV Faridpur CKT-01 Project Work S/D"
+    },
+    {
+      "time": "08:33 - 17:06",
+      "plant": "Gopalganj 400/132kV S/S 230kV Faridpur CKT-02 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Gopalganj 400/132kV S/S 230kV Faridpur CKT-02 Project Work S/D",
+      "full_desc": "Gopalganj 400/132kV S/S 230kV Faridpur CKT-02 Project Work S/D"
+    },
+    {
+      "time": "05:11",
+      "plant": "Halishahar-Khulshi  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Due to OPGW conductor stringing and fiber splicing in four ckt tower near CEPZ.",
+      "full_desc": "Halishahar-Khulshi  132kV Ckt-1 Scheduled S/D from Halishahar 132/33kV end Due to Due to OPGW conductor stringing and fiber splicing in four ckt tower near CEPZ."
+    },
+    {
+      "time": "05:25",
+      "plant": "Halishahar-Khulshi  132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Due to OPGW conductor stringing and fiber splicing in four ckt tower near CEPZ.",
+      "full_desc": "Halishahar-Khulshi  132kV Ckt-2 Scheduled S/D from Halishahar 132/33kV end Due to Due to OPGW conductor stringing and fiber splicing in four ckt tower near CEPZ."
+    },
+    {
+      "time": "05:32",
+      "plant": "Khulshi 132/33kV S/S Khulshi-Halishahar CKT-3 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Emergency maintenance work",
+      "full_desc": "Khulshi 132/33kV S/S Khulshi-Halishahar CKT-3 Scheduled S/D Due to Emergency maintenance work"
+    },
+    {
+      "time": "05:33",
+      "plant": "Halishahar 132/33kV S/S Halishahar-Khulshi-Ckt.-3 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Due to OPGW conductor stringing and fiber splicing in four ckt tower near CEPZ.",
+      "full_desc": "Halishahar 132/33kV S/S Halishahar-Khulshi-Ckt.-3 Scheduled S/D Due to Due to OPGW conductor stringing and fiber splicing in four ckt tower near CEPZ."
+    },
+    {
+      "time": "07:33 - 07:52",
+      "plant": "Bhaluka 132/33kV S/S 03. Transformer-03 LT Tripped showing 50N/51N,67/67N. relays",
+      "load": "18.0MW",
+      "reason": "Due to 33kV  PBS feeder(No-14) fault .",
+      "full_desc": "Bhaluka 132/33kV S/S 03. Transformer-03 LT Tripped showing 50N/51N,67/67N. relays Due to 33kV  PBS feeder(No-14) fault ."
+    },
+    {
+      "time": "07:52 - 07:52",
+      "plant": "Bhaluka 132/33kV S/S 03. Transformer-03 HT Tripped showing 50N/67N relays",
+      "load": "18.0MW",
+      "reason": "Due to 33 kV PBS feeder fault.",
+      "full_desc": "Bhaluka 132/33kV S/S 03. Transformer-03 HT Tripped showing 50N/67N relays Due to 33 kV PBS feeder fault."
+    }
+  ],
+  "hourlyLoadData": [
+    {
+      "time": "00:00",
+      "generation": 13780.53,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "01:00",
+      "generation": 13334.84,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "02:00",
+      "generation": 13207.65,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "03:00",
+      "generation": 13124.88,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "04:00",
+      "generation": 13017.41,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "05:00",
+      "generation": 12965.44,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "06:00",
+      "generation": 12666.73,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "07:00",
+      "generation": 12791.18,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "08:00",
+      "generation": 12758.17,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "09:00",
+      "generation": 12452.45,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "10:00",
+      "generation": 12385.58,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "11:00",
+      "generation": 12504.57,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "12:00",
+      "generation": 12931.85,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "13:00",
+      "generation": 13160.88,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "14:00",
+      "generation": 12952.6,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "15:00",
+      "generation": 12587.62,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "16:00",
+      "generation": 12211.83,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "17:00",
+      "generation": 11967.94,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "18:00",
+      "generation": 12086.62,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "19:00",
+      "generation": 13673.82,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "20:00",
+      "generation": 14233.23,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "21:00",
+      "generation": 14553.75,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "22:00",
+      "generation": 14531,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "23:00",
+      "generation": 14580.57,
+      "loadShed": null,
+      "demand": null
+    }
+  ]
+}

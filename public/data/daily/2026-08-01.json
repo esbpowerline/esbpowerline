@@ -3,14 +3,14 @@
     "date": "01 Aug 2026",
     "dayPeakGen": 13618.42,
     "eveningPeakGen": 15355.19,
-    "dayPeakDemand": null,
+    "dayPeakDemand": 16388.42,
     "eveningPeakDemand": 17520.19,
-    "minGen": null,
-    "maxGen": null,
+    "minGen": 12771.26,
+    "maxGen": 15355.19,
     "totalEnergyGen": 332.05465695,
-    "totalEnergyUnserved": null,
-    "totalEnergyDemand": null,
-    "maxTemp": null,
+    "totalEnergyUnserved": 52.478,
+    "totalEnergyDemand": 384.533,
+    "maxTemp": 34.5,
     "totalGasSuppliedPower": 670.07,
     "avgProductionCost": 7.708,
     "totalDailyCost": 2559328587
@@ -19,51 +19,58 @@
     {
       "name": "Gas",
       "gen": 92.26,
-      "cost": null,
-      "unitCost": null,
+      "cost": 322985895,
+      "unitCost": 3.501,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
       "gen": 117.68,
-      "cost": null,
-      "unitCost": null,
+      "cost": 798976159,
+      "unitCost": 6.7893,
       "color": "#64748b"
     },
     {
       "name": "HFO",
-      "gen": 52.84,
-      "cost": null,
-      "unitCost": null,
+      "gen": 51.42,
+      "cost": 960046340,
+      "unitCost": 18.6704,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 5.23,
-      "cost": null,
-      "unitCost": null,
+      "cost": 523490,
+      "unitCost": 0.1,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
       "gen": 3.29,
-      "cost": null,
-      "unitCost": null,
+      "cost": 52498676,
+      "unitCost": 15.9381,
       "color": "#eab308"
     },
     {
       "name": "Imports",
       "gen": 60.57,
-      "cost": null,
-      "unitCost": null,
+      "cost": 384837191,
+      "unitCost": 6.3541,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0,
-      "cost": null,
-      "unitCost": null,
+      "name": "HSD",
+      "gen": 1.42,
+      "cost": 36798913,
+      "unitCost": 25.9076,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.18,
+      "cost": 2661921,
+      "unitCost": 14.71,
+      "color": "#22c55e"
     }
   ],
   "borderImportsData": [
@@ -188,7 +195,7 @@
     {
       "time": "09:30 - 10:23",
       "plant": "Chowmuhani 230/132/33kV S/S TR3-435T HT Forced S/D",
-      "load": "HT Outage",
+      "load": "20.0MW",
       "reason": "Due to emergency 33 kv bus maintanence",
       "full_desc": "Chowmuhani 230/132/33kV S/S TR3-435T HT Forced S/D Due to emergency 33 kv bus maintanence"
     },
@@ -202,7 +209,7 @@
     {
       "time": "09:31 - 10:24",
       "plant": "Chowmuhani 230/132/33kV S/S TR3-435T LT Forced S/D",
-      "load": "HT Outage",
+      "load": "20.0MW",
       "reason": "Due to emergency 33 kv bus maintanence",
       "full_desc": "Chowmuhani 230/132/33kV S/S TR3-435T LT Forced S/D Due to emergency 33 kv bus maintanence"
     },
@@ -216,7 +223,7 @@
     {
       "time": "10:08 - 11:40",
       "plant": "Beanibazar 132/33kV S/S 132KV Transformer TR-02 HT Scheduled S/D",
-      "load": "HT Outage",
+      "load": "30.0MW",
       "reason": "Due to Pbs work",
       "full_desc": "Beanibazar 132/33kV S/S 132KV Transformer TR-02 HT Scheduled S/D Due to Pbs work"
     },
@@ -244,14 +251,14 @@
     {
       "time": "16:48 - 17:55",
       "plant": "Dohazari 132/33kV S/S Power Transformer -T-1 HT Scheduled S/D",
-      "load": "HT Outage",
+      "load": "20.0MW",
       "reason": "Due to Banshkhali 33 KV Feeder BUS DS Maintenance.",
       "full_desc": "Dohazari 132/33kV S/S Power Transformer -T-1 HT Scheduled S/D Due to Banshkhali 33 KV Feeder BUS DS Maintenance."
     },
     {
       "time": "16:48 - 17:55",
       "plant": "Dohazari 132/33kV S/S Power Transformer -T-1 LT Scheduled S/D",
-      "load": "HT Outage",
+      "load": "20.0MW",
       "reason": "Due to Banshkhali 33 kv Feeder BUS DS Maintenance.",
       "full_desc": "Dohazari 132/33kV S/S Power Transformer -T-1 LT Scheduled S/D Due to Banshkhali 33 kv Feeder BUS DS Maintenance."
     },
@@ -265,30 +272,23 @@
     {
       "time": "00:59 - 01:08",
       "plant": "Sylhet 132/33kV S/S T1 LT Tripped showing O/C relays",
-      "load": "HT Outage",
+      "load": "30.0MW",
       "reason": "Due to 33kv upashahar feeder trip O/C A phase & E/F.",
       "full_desc": "Sylhet 132/33kV S/S T1 LT Tripped showing O/C relays Due to 33kv upashahar feeder trip O/C A phase & E/F."
     },
     {
       "time": "01:35 - 01:41",
       "plant": "Sylhet 132/33kV S/S T1 LT Tripped showing O/C relays",
-      "load": "HT Outage",
+      "load": "22.0MW",
       "reason": "Due to 33kv MC college feeder trip A,B,C phase O/C & E/F",
       "full_desc": "Sylhet 132/33kV S/S T1 LT Tripped showing O/C relays Due to 33kv MC college feeder trip A,B,C phase O/C & E/F"
     },
     {
       "time": "01:41 - 01:41",
       "plant": "Sylhet 132/33kV S/S T1 LT Forced S/D",
-      "load": "HT Outage",
+      "load": "11.0MW",
       "reason": "Due to Foult Checking & Removing",
       "full_desc": "Sylhet 132/33kV S/S T1 LT Forced S/D Due to Foult Checking & Removing"
-    },
-    {
-      "time": "05:00",
-      "plant": "Minimum Generation: 13063 MW",
-      "load": "13063 MW",
-      "reason": "Minimum Generation: 13063 MW",
-      "full_desc": "Minimum Generation: 13063 MW"
     },
     {
       "time": "08:00",
@@ -435,8 +435,8 @@
     {
       "time": "21:00",
       "generation": 15355.19,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 2072,
+      "demand": 17520.19
     },
     {
       "time": "22:00",
