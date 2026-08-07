@@ -24,8 +24,13 @@ const MONTH_RE = /^(201[1-9]|202[0-9])-(0[1-9]|1[0-2])$/;
 
 type Target = { feed: DataFeed; key: string };
 
-/** Map a mirrored data path to the feed + key that backs it. */
-export function resolveTarget(segments: string[]): Target | null {
+/**
+ * Map a mirrored data path to the feed + key that backs it.
+ *
+ * Deliberately not exported: a route module may only export the handler names
+ * Next recognises, so exporting a helper here fails the generated route type.
+ */
+function resolveTarget(segments: string[]): Target | null {
   const path = segments.join('/');
 
   const daily = /^daily\/(.+)\.json$/.exec(path);
