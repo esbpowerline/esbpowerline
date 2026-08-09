@@ -91,6 +91,12 @@
       "energy": 3.36,
       "peakFlow": 150.0,
       "type": "C/B Interconnector (East)"
+    },
+    {
+      "source": "Nepal (via India)",
+      "energy": 0.89,
+      "peakFlow": 38.0,
+      "type": "C/B Interconnector (Nepal)"
     }
   ],
   "regionalDemandData": [
@@ -364,7 +370,7 @@
       "time": "07:43",
       "plant": "Niamatpur 132/33kV S/S 132kV Rahanpur Ckt-1 Forced",
       "load": "HT Outage",
-      "reason": "due to  Rahanpur Ckt-01 ( DS Nut & Bolt ) Red-hot emergency maintenance.",
+      "reason": "Due to Rahanpur Ckt-01 & Bus-01 required to shutdown due to  Rahanpur Ckt-01 ( DS Nut & Bolt ) Red-hot emergency maintenance.",
       "full_desc": "Niamatpur 132/33kV S/S 132kV Rahanpur Ckt-1 Forced S/D Due to Rahanpur Ckt-01 & Bus-01 required to shutdown due to  Rahanpur Ckt-01 ( DS Nut & Bolt ) Red-hot emergency maintenance."
     },
     {
@@ -379,128 +385,134 @@
     {
       "time": "00:00",
       "generation": 15088.09,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1377.0,
+      "demand": 16527.06
     },
     {
       "time": "01:00",
       "generation": 14645.64,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1523.0,
+      "demand": 16237.64
     },
     {
       "time": "02:00",
       "generation": 14465.19,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1210.0,
+      "demand": 15729.19
     },
     {
       "time": "03:00",
       "generation": 14140.4,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 943.0,
+      "demand": 15125.4
     },
     {
       "time": "04:00",
       "generation": 14039.95,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 889.0,
+      "demand": 14968.95
     },
     {
       "time": "05:00",
       "generation": 13858.45,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 782.0,
+      "demand": 14675.45
     },
     {
       "time": "06:00",
       "generation": 13383.25,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 721.0,
+      "demand": 14136.25
     },
     {
       "time": "07:00",
       "generation": 13422.19,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 660.0,
+      "demand": 14112.19
     },
     {
       "time": "08:00",
       "generation": 13547.25,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 671.0,
+      "demand": 14248.25
     },
     {
       "time": "09:00",
       "generation": 13595.38,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 648.0,
+      "demand": 14272.38
     },
     {
       "time": "10:00",
       "generation": 14014.68,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 717.0,
+      "demand": 14763.68
     },
     {
       "time": "11:00",
       "generation": 14185.69,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 726.0,
+      "demand": 14944.69
     },
     {
       "time": "12:00",
       "generation": 14388.39,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1157.0,
+      "demand": 15597.39
     },
     {
       "time": "13:00",
       "generation": 14500.5,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1166.0,
+      "demand": 15718.5
     },
     {
       "time": "14:00",
       "generation": 14525.54,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1222.0,
+      "demand": 15802.54
     },
     {
       "time": "15:00",
       "generation": 14593.14,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1290.0,
+      "demand": 15941.14
     },
     {
       "time": "16:00",
       "generation": 14351.52,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1208.0,
+      "demand": 15613.52
     },
     {
       "time": "17:00",
       "generation": 14171.89,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1111.0,
+      "demand": 15332.89
     },
     {
       "time": "18:00",
       "generation": 13997.37,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 878.0,
+      "demand": 14914.88
     },
     {
       "time": "19:00",
       "generation": 15039.64,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 749.0,
+      "demand": 15822.64
+    },
+    {
+      "time": "19:30",
+      "generation": 16021.24,
+      "loadShed": 882.0,
+      "demand": 16943.24
     },
     {
       "time": "20:00",
       "generation": 16062.94,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1005.0,
+      "demand": 17112.94
     },
     {
       "time": "21:00",
@@ -511,14 +523,14 @@
     {
       "time": "22:00",
       "generation": 15787.88,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 992.0,
+      "demand": 16824.88
     },
     {
       "time": "23:00",
       "generation": 15933.28,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1121.0,
+      "demand": 17104.28
     }
   ],
   "gasProductionData": [
@@ -539,7 +551,7 @@
     {
       "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
       "fields": 9,
-      "gas": 108.8,
+      "gas": 108.9,
       "condensate": 76.4,
       "share": 5.1
     },
@@ -547,7 +559,7 @@
       "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
       "fields": 3,
       "gas": 890.8,
-      "condensate": 4690.4,
+      "condensate": 4690.3,
       "share": 41.4
     },
     {

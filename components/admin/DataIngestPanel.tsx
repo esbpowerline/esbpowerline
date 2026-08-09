@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Upload, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun } from 'lucide-react';
 import { AdminCard } from '@/components/admin/AdminUI';
 
 type ParseSummary = {
@@ -196,6 +196,39 @@ export function DataIngestPanel({
   const [published, setPublished] = useState<string | null>(null);
   const [steps, setSteps] = useState<Array<{ artifact: string; ok: boolean; detail?: string }>>([]);
   const [error, setError] = useState<string | null>(null);
+  const [collecting, setCollecting] = useState(false);
+
+  // The server already works out which day is missing; reuse it rather than
+  // recomputing the same thing from the latest date and drifting from it.
+  const suggestedNextDay = status.nextGridDay ?? '';
+
+  /**
+   * Collect the day straight from PGCB and Petrobangla instead of hunting the two
+   * files down by hand. It lands in the same review step as an upload — the parse
+   * is identical, only the sourcing differs — so nothing publishes unseen.
+   */
+  async function handleCollect() {
+    const day = dateOverride || suggestedNextDay;
+    if (!day) return;
+    setCollecting(true);
+    setError(null);
+    setResult(null);
+    setPublished(null);
+    try {
+      const body = new FormData();
+      body.append('collect', '1');
+      body.append('date', day);
+
+      const res = await fetch('/api/admin/data/parse', { method: 'POST', body });
+      const json = (await res.json()) as ParseResponse;
+      setResult(json);
+      if (!json.ok) setError(json.error);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setCollecting(false);
+    }
+  }
 
   async function handleParse() {
     if (!pgcb) return;
@@ -272,7 +305,40 @@ export function DataIngestPanel({
 
       <SredaCard latestSredaDate={latestSredaDate} />
 
-      <AdminCard title="1 · Upload the source files" icon={Upload}>
+      <AdminCard title="1 · Collect from the publishers" icon={Download}>
+        <div className="space-y-3">
+          <p className="text-[12px] text-muted-foreground">
+            Downloads the day&apos;s PGCB workbook from its ERP and the matching Petrobangla gas
+            report, then parses them exactly as an upload would. Nothing is taken from EMRD — it
+            republishes nothing, it only links back to Petrobangla.
+          </p>
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label className="mb-1.5 block text-[12px] font-semibold">Energy day</label>
+              <input
+                type="date"
+                value={dateOverride || suggestedNextDay}
+                onChange={(e) => setDateOverride(e.target.value)}
+                className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
+              />
+            </div>
+            <button
+              onClick={handleCollect}
+              disabled={collecting || parsing || !(dateOverride || suggestedNextDay)}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+            >
+              {collecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {collecting ? 'Collecting from source…' : 'Collect & preview'}
+            </button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            A day&apos;s report appears the next morning, so today&apos;s is normally available
+            tomorrow. If PGCB has not posted it yet you will be told, and nothing is written.
+          </p>
+        </div>
+      </AdminCard>
+
+      <AdminCard title="2 · Or upload the files yourself" icon={Upload}>
         <div className="space-y-4">
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-[12px] font-semibold">
@@ -344,7 +410,7 @@ export function DataIngestPanel({
       )}
 
       {summary && (
-        <AdminCard title="2 · Review before publishing" icon={CheckCircle2}>
+        <AdminCard title="3 · Review before publishing" icon={CheckCircle2}>
           <div className="space-y-4">
             {/* Graded, because a note saying "I corrected your data" must not
                 look like a note saying "this is the wrong day's file". Falls

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { auth } from '@/lib/auth';
@@ -93,16 +93,32 @@ export async function POST(request: NextRequest) {
 
     const root = process.cwd();
 
-    // 1 — grid day to disk + released
+    // 1 — grid day to disk + released.
+    //
+    // The half-hourly fuel curve is split out first. It is ~5.7KB a day and the
+    // daily directory is traced wholesale into every function that imports the
+    // server loader, so leaving it inline puts it in bundles that never read it
+    // — the same reason the station detail lives outside. It is fetched over
+    // HTTP by the chart instead. See scripts/split_energy_curve.py.
+    const { energyCurveData, ...gridPayload } = body.grid as Record<string, unknown>;
+    if (energyCurveData) {
+      const curveDir = path.join(root, 'public', 'data', 'curves');
+      await mkdir(curveDir, { recursive: true });
+      await writeFile(
+        path.join(curveDir, `${date}.json`),
+        JSON.stringify({ date, ...(energyCurveData as object) }),
+        'utf8',
+      );
+    }
     await writeFile(
       path.join(root, 'public', 'data', 'daily', `${date}.json`),
-      JSON.stringify(body.grid, null, 2),
+      JSON.stringify(gridPayload, null, 2),
       'utf8',
     );
     const grid = await publishRelease({
       feed: 'GRID_DAILY',
       key: date,
-      payload: body.grid,
+      payload: gridPayload,
       sourceName: body.sourceGrid,
       parserVersion: 'ingest_bridge/1',
     });

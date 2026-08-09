@@ -1,19 +1,19 @@
 {
   "systemStats": {
     "date": "11 Apr 2014",
-    "dayPeakGen": 0,
-    "eveningPeakGen": 0,
+    "dayPeakGen": 5474.0,
+    "eveningPeakGen": 6746.0,
     "dayPeakDemand": null,
-    "eveningPeakDemand": 0,
+    "eveningPeakDemand": 6746.0,
     "minGen": 4743.0,
     "maxGen": 6746.0,
-    "totalEnergyGen": 0,
+    "totalEnergyGen": 134.362951,
     "totalEnergyUnserved": null,
     "totalEnergyDemand": null,
     "maxTemp": 35.4,
     "totalGasSuppliedPower": 950.04,
-    "avgProductionCost": 0,
-    "totalDailyCost": 0
+    "avgProductionCost": 3.338,
+    "totalDailyCost": 448538736
   },
   "generationData": [
     {
@@ -26,15 +26,15 @@
     {
       "name": "Coal",
       "gen": 4.28,
-      "cost": null,
-      "unitCost": null,
+      "cost": 16640207,
+      "unitCost": 3.892,
       "color": "#64748b"
     },
     {
       "name": "HFO",
       "gen": 24.95,
-      "cost": null,
-      "unitCost": null,
+      "cost": 352336525,
+      "unitCost": 14.1233,
       "color": "#f97316"
     },
     {
@@ -63,61 +63,514 @@
   "regionalDemandData": [
     {
       "zone": "Dhaka",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 2399.0,
+      "pct": 0.0
     },
     {
       "zone": "Chattogram",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
-    },
-    {
-      "zone": "Khulna",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
-    },
-    {
-      "zone": "Rajshahi",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 637.0,
+      "pct": 0.0
     },
     {
       "zone": "Cumilla",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 472.0,
+      "pct": 0.0
     },
     {
       "zone": "Mymensingh",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 423.0,
+      "pct": 0.0
     },
     {
       "zone": "Sylhet",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 309.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 0.0,
+      "demand": 693.0,
+      "pct": 0.0
     },
     {
       "zone": "Barishal",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 138.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0.0,
+      "demand": 736.0,
+      "pct": 0.0
     },
     {
       "zone": "Rangpur",
-      "loadShed": 311,
-      "demand": 2380,
-      "pct": 13.07
+      "loadShed": 0.0,
+      "demand": 390.0,
+      "pct": 0.0
     }
   ],
-  "dailyOutages": [],
-  "hourlyLoadData": [],
+  "dailyOutages": [
+    {
+      "time": "from 09:00 to 14:37",
+      "plant": "Munsiganj 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to oil",
+      "full_desc": "Munsiganj 132/33 kV T1 transformer was under shut down from 09:00 to 14:37 due to oil"
+    },
+    {
+      "time": "at 15:41",
+      "plant": "Comilla(S) 132/33 kV T1 transformer",
+      "load": "20 MW",
+      "reason": "due to red hot maintenance and Power interruption occurred (about 20 MW) under Comilla(S) S/S areas",
+      "full_desc": "Comilla(S) 132/33 kV T1 transformer was shut down at 15:41 due to red hot maintenance and Power interruption occurred (about 20 MW) under Comilla(S) S/S areas"
+    },
+    {
+      "time": "at 17:25",
+      "plant": "Fenchuganj GT1",
+      "load": "HT Outage",
+      "reason": "due to radiator problem.",
+      "full_desc": "Fenchuganj GT1 was forced shut down at 17:25 due to radiator problem."
+    },
+    {
+      "time": "at 23:24",
+      "plant": "Ashuganj #1",
+      "load": "HT Outage",
+      "reason": "due to vacuum pump trip.",
+      "full_desc": "Ashuganj #1 was forced shut down at 23:24 due to vacuum pump trip."
+    },
+    {
+      "time": "Outage",
+      "plant": "There",
+      "load": "2 MW",
+      "reason": "There was generation shortage in the evening peak hour yesterday. Power interruption occurred (about 2 MW) under Faridpur S/S areas",
+      "full_desc": "There was generation shortage in the evening peak hour yesterday. Power interruption occurred (about 2 MW) under Faridpur S/S areas"
+    },
+    {
+      "time": "from 11:28 to 12:25",
+      "plant": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW , Megnaghat 450 MW and from 11:28 to 12:25.",
+      "load": "360 MW",
+      "reason": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW , Megnaghat 450 MW and from 11:28 to 12:25.",
+      "full_desc": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW , Megnaghat 450 MW and from 11:28 to 12:25."
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to low gas pressure Raozan 210 MW and RPCL 210 MW  were limited to",
+      "load": "210 MW",
+      "reason": "Due to low gas pressure Raozan 210 MW and RPCL 210 MW  were limited to",
+      "full_desc": "Due to low gas pressure Raozan 210 MW and RPCL 210 MW  were limited to"
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW and RPCL 210 MW whole areas (Except Sylhet, Mymensing & Rangpur) of the national grid .",
+      "load": "360 MW",
+      "reason": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW and RPCL 210 MW whole areas (Except Sylhet, Mymensing & Rangpur) of the national grid .",
+      "full_desc": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW and RPCL 210 MW whole areas (Except Sylhet, Mymensing & Rangpur) of the national grid ."
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to low gas pressure RPCL 210 MW",
+      "load": "210 MW",
+      "reason": "Due to low gas pressure RPCL 210 MW  was limited to 106 MW.",
+      "full_desc": "Due to low gas pressure RPCL 210 MW  was limited to 106 MW."
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to low gas pressure Siddhirganj 210 MW, Raozan 210 MW and RPCL 210 MW  were",
+      "load": "210 MW",
+      "reason": "Due to low gas pressure Siddhirganj 210 MW, Raozan 210 MW and RPCL 210 MW  were",
+      "full_desc": "Due to low gas pressure Siddhirganj 210 MW, Raozan 210 MW and RPCL 210 MW  were"
+    },
+    {
+      "time": "Outage",
+      "plant": "There",
+      "load": "446 MW",
+      "reason": "There was generation shortage in the evening peak hour yesterday. So about 446 MW (19:30) of load shed was imposed over the",
+      "full_desc": "There was generation shortage in the evening peak hour yesterday. So about 446 MW (19:30) of load shed was imposed over the"
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW, Tongi 150 MW were limited to whole areas of the national grid .",
+      "load": "360 MW",
+      "reason": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW, Tongi 150 MW were limited to whole areas of the national grid .",
+      "full_desc": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW, Tongi 150 MW were limited to whole areas of the national grid ."
+    },
+    {
+      "time": "at 05:18",
+      "plant": "Hathazari 132/33 kV T2 transformer",
+      "load": "34 MW",
+      "reason": "due to fire at 33 kV cable Power interruption occurred (about 34 MW) under Maniknagar S/S areas",
+      "full_desc": "Hathazari 132/33 kV T2 transformer tripped at 05:18(9/8/11) due to fire at 33 kV cable Power interruption occurred (about 34 MW) under Maniknagar S/S areas"
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW and Tongi 105 MW were Madanhat-Hathazari line-2 since",
+      "load": "360 MW",
+      "reason": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW and Tongi 105 MW were Madanhat-Hathazari line-2 since",
+      "full_desc": "Due to low gas pressure HPL 360 MW, Siddhirganj 210 MW and Tongi 105 MW were Madanhat-Hathazari line-2 since"
+    },
+    {
+      "time": "Outage",
+      "plant": "Occurance report of 25 February-2012",
+      "load": "HT Outage",
+      "reason": "Occurance report of 25 February-2012 is attached herewith.",
+      "full_desc": "Occurance report of 25 February-2012 is attached herewith."
+    },
+    {
+      "time": "Outage",
+      "plant": "Occurance report of 25 February-2012",
+      "load": "HT Outage",
+      "reason": "Occurance report of 25 February-2012 is attached herewith.",
+      "full_desc": "Occurance report of 25 February-2012 is attached herewith."
+    },
+    {
+      "time": "at 15:05",
+      "plant": "Palashbari-Rangpur 132kV Ckt-1 & 2",
+      "load": "HT Outage",
+      "reason": "Palashbari-Rangpur 132kV Ckt-1 & 2 tripped at 15:05 Ckt-1 from Palashbari end showing 2010-12-23",
+      "full_desc": "Palashbari-Rangpur 132kV Ckt-1 & 2 tripped at 15:05 Ckt-1 from Palashbari end showing 2010-12-23"
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to annual maintenance the following 132/33 kV transformer were under shut down:",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance the following 132/33 kV transformer were under shut down:",
+      "full_desc": "Due to annual maintenance the following 132/33 kV transformer were under shut down:"
+    },
+    {
+      "time": "at 07:18",
+      "plant": "Shajibazar S/S breaker no 152B, 252B, 452B & 552B",
+      "load": "HT Outage",
+      "reason": "due to tripping of 08:27 to 15:15, Faridpur T1 from 08:51 to 16:05, Joydevpur T3 from 09:06 to 13:25.",
+      "full_desc": "Shajibazar S/S breaker no 152B, 252B, 452B & 552B tripped at 07:18 due to tripping of 08:27 to 15:15, Faridpur T1 from 08:51 to 16:05, Joydevpur T3 from 09:06 to 13:25."
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to annual maintenance the following 132kV lines were under shut down :",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance the following 132kV lines were under shut down :",
+      "full_desc": "Due to annual maintenance the following 132kV lines were under shut down :"
+    },
+    {
+      "time": "at 09:19",
+      "plant": "Hathazari - Comilla(N) 230 KV line 1",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance the following 132/33 kV transformer were under shut down:",
+      "full_desc": "Hathazari - Comilla(N) 230 KV line 1 tripped at 09:19 from both side showing E/F,TE.DH, a) Due to annual maintenance the following 132/33 kV transformer were under shut down:"
+    },
+    {
+      "time": "Outage",
+      "plant": "Due to annual maintenance the following 132kV lines were under shut down :",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance the following 132kV lines were under shut down :",
+      "full_desc": "Due to annual maintenance the following 132kV lines were under shut down :"
+    },
+    {
+      "time": "at 11:07",
+      "plant": "Baghabari WMPL #1 tripped at 11:07 without showing any relay and",
+      "load": "HT Outage",
+      "reason": "Baghabari WMPL #1 tripped at 11:07 without showing any relay and was synchronized to 15:57, Ishurdi-Natore Ckt-2 from 08:52 to 15:12 & 230kV Comilla(N)-Hathazari Ckt-2 from",
+      "full_desc": "Baghabari WMPL #1 tripped at 11:07 without showing any relay and was synchronized to 15:57, Ishurdi-Natore Ckt-2 from 08:52 to 15:12 & 230kV Comilla(N)-Hathazari Ckt-2 from"
+    },
+    {
+      "time": "at 12:39",
+      "plant": "Baghabari 100 MW  tripped at 12:39 showing signal exhaust temperature high and",
+      "load": "100 MW",
+      "reason": "Due to annual maintenance the following 132kV lines were under shut down :",
+      "full_desc": "Baghabari 100 MW  tripped at 12:39 showing signal exhaust temperature high and was a) Due to annual maintenance the following 132kV lines were under shut down :"
+    },
+    {
+      "time": "at 13:34",
+      "plant": "KPCL",
+      "load": "HT Outage",
+      "reason": "due to earth fault and was synchronized at 13:37. Mymensing-Kishoreganj Ckt-2 from 09:16 to 15:42, Noapara-Khulna\u00a9 Ckt-1 from 09:10",
+      "full_desc": "KPCL  tripped at 13:34 due to earth fault and was synchronized at 13:37. Mymensing-Kishoreganj Ckt-2 from 09:16 to 15:42, Noapara-Khulna\u00a9 Ckt-1 from 09:10"
+    },
+    {
+      "time": "at 13:45",
+      "plant": "Ashuganj #4",
+      "load": "HT Outage",
+      "reason": "due to boiler tube leakage . 09:32 to 16:36.",
+      "full_desc": "Ashuganj #4  tripped at 13:45 due to boiler tube leakage . 09:32 to 16:36."
+    },
+    {
+      "time": "at 19:45",
+      "plant": "Ghorasal RPP (45 MW )",
+      "load": "45 MW",
+      "reason": "due to 33 KV breaker open and was synchronized a) Due to heavy flashing Ishurdi 132/33kV T2 transformer tripped at 10:43. At the same time",
+      "full_desc": "Ghorasal RPP (45 MW ) tripped at 19:45 due to 33 KV breaker open and was synchronized a) Due to heavy flashing Ishurdi 132/33kV T2 transformer tripped at 10:43. At the same time"
+    },
+    {
+      "time": "at 11:10",
+      "plant": "Ghorasal - Ishurdi 230 KV line -2",
+      "load": "HT Outage",
+      "reason": "Ghorasal - Ishurdi 230 KV line -2 tripped at 11:10 from both end showing PTAW,WH,dist, Ckt-1 & 2 tripped showing CST, Ishurdi-Pabna 132kV CKt-1 & 2 tripped showing CST,",
+      "full_desc": "Ghorasal - Ishurdi 230 KV line -2 tripped at 11:10 from both end showing PTAW,WH,dist, Ckt-1 & 2 tripped showing CST, Ishurdi-Pabna 132kV CKt-1 & 2 tripped showing CST,"
+    },
+    {
+      "time": "at 09:45",
+      "plant": "Barisal - Barisal GT power station 132 KV line",
+      "load": "HT Outage",
+      "reason": "due to PT change was switched on at 13:09, lines were switched on at 11:42, 11:26, 13:14, 11:42, 11:33",
+      "full_desc": "Barisal - Barisal GT power station 132 KV line was shut down at 09:45 due to PT change was switched on at 13:09, lines were switched on at 11:42, 11:26, 13:14, 11:42, 11:33"
+    },
+    {
+      "time": "at 13:34",
+      "plant": "Barisal - Bhandaria 132 KV line",
+      "load": "HT Outage",
+      "reason": "Barisal - Bhandaria 132 KV line tripped at 13:34 showing distance relay Z-2 and",
+      "full_desc": "Barisal - Bhandaria 132 KV line tripped at 13:34 showing distance relay Z-2 and"
+    },
+    {
+      "time": "at 13:34",
+      "plant": "Bhandaria - Bagerhat 132 KV line",
+      "load": "HT Outage",
+      "reason": "Bhandaria - Bagerhat 132 KV line tripped at 13:34 at Bagerhat end showing E/F dis,Z-2 and",
+      "full_desc": "Bhandaria - Bagerhat 132 KV line tripped at 13:34 at Bagerhat end showing E/F dis,Z-2 and"
+    },
+    {
+      "time": "at 13:44",
+      "plant": "Khulna Central 132/33 KV transformer T1,T2 & T3",
+      "load": "HT Outage",
+      "reason": "Khulna Central 132/33 KV transformer T1,T2 & T3 was tripped at 13:44 showing E/F & inst.",
+      "full_desc": "Khulna Central 132/33 KV transformer T1,T2 & T3 was tripped at 13:44 showing E/F & inst."
+    },
+    {
+      "time": "from 08:08 to 12:03",
+      "plant": "Halishahar 33 KV both bus",
+      "load": "HT Outage",
+      "reason": "due to bus",
+      "full_desc": "Halishahar 33 KV both bus was under shut down from 08:08 to 12:03 due to bus"
+    },
+    {
+      "time": "at 19:20",
+      "plant": "After maintenance Barapukuria #1",
+      "load": "HT Outage",
+      "reason": "After maintenance Barapukuria #1  was synchronized at 19:20.It again tripped at 21:15 due to",
+      "full_desc": "After maintenance Barapukuria #1  was synchronized at 19:20.It again tripped at 21:15 due to"
+    },
+    {
+      "time": "at 10:15",
+      "plant": "Kaptai # 2",
+      "load": "HT Outage",
+      "reason": "due to under impedance and was synchronized at 10:42.It again",
+      "full_desc": "Kaptai # 2 tripped at 10:15 due to under impedance and was synchronized at 10:42.It again"
+    },
+    {
+      "time": "at 20:53",
+      "plant": "Ashuganj CCPP GT-1 & St",
+      "load": "HT Outage",
+      "reason": "due to turbine vibration excessive .",
+      "full_desc": "Ashuganj CCPP GT-1 & St tripped at 20:53 due to turbine vibration excessive ."
+    },
+    {
+      "time": "at 18:47",
+      "plant": "Sikalbaha GT(150 MW)",
+      "load": "150 MW",
+      "reason": "Sikalbaha GT(150 MW) was synchronized at 18:47 and was shut down at 20:10.",
+      "full_desc": "Sikalbaha GT(150 MW) was synchronized at 18:47 and was shut down at 20:10."
+    },
+    {
+      "time": "at 11:54",
+      "plant": "Hathajari - Feni 132 KV line 1 & 2",
+      "load": "HT Outage",
+      "reason": "Hathajari - Feni 132 KV line 1 & 2 tripped at 11:54 (line-1 at Hathazari end & line-2 at Feni end)",
+      "full_desc": "Hathajari - Feni 132 KV line 1 & 2 tripped at 11:54 (line-1 at Hathazari end & line-2 at Feni end)"
+    },
+    {
+      "time": "Outage",
+      "plant": "Comilla - Feni 132 KV line-1",
+      "load": "HT Outage",
+      "reason": "Comilla - Feni 132 KV line-1 tripped at both end showing distance protection directional E/F,",
+      "full_desc": "Comilla - Feni 132 KV line-1 tripped at both end showing distance protection directional E/F,"
+    },
+    {
+      "time": "at 11:56",
+      "plant": "Comilla (N) - Comilla (S) 132 KV line",
+      "load": "HT Outage",
+      "reason": "Comilla (N) - Comilla (S) 132 KV line tripped at 11:56 showing distance protection directional",
+      "full_desc": "Comilla (N) - Comilla (S) 132 KV line tripped at 11:56 showing distance protection directional"
+    },
+    {
+      "time": "at 11:55",
+      "plant": "Chandpur - Chowmuhani 132 KV line-1 & 2",
+      "load": "HT Outage",
+      "reason": "Chandpur - Chowmuhani 132 KV line-1 & 2 tripped at 11:55 showing E/F at line-2 (line-1 was",
+      "full_desc": "Chandpur - Chowmuhani 132 KV line-1 & 2 tripped at 11:55 showing E/F at line-2 (line-1 was"
+    },
+    {
+      "time": "at 00:12",
+      "plant": "Ghorasal - Joydevpur 132 KV line-2",
+      "load": "HT Outage",
+      "reason": "Ghorasal - Joydevpur 132 KV line-2 tripped at 00:12(17/9/10) showing remote protection",
+      "full_desc": "Ghorasal - Joydevpur 132 KV line-2 tripped at 00:12(17/9/10) showing remote protection"
+    },
+    {
+      "time": "at 18:50",
+      "plant": "Bheramara - Faridpur 132 KV line-1",
+      "load": "HT Outage",
+      "reason": "due to CT burst from both end . At the",
+      "full_desc": "Bheramara - Faridpur 132 KV line-1 tripped at 18:50 due to CT burst from both end . At the"
+    }
+  ],
+  "hourlyLoadData": [
+    {
+      "time": "01:00",
+      "generation": 6170.0,
+      "loadShed": 0.0,
+      "demand": 6170.0
+    },
+    {
+      "time": "02:00",
+      "generation": 5952.0,
+      "loadShed": 0.0,
+      "demand": 5952.0
+    },
+    {
+      "time": "03:00",
+      "generation": 5746.0,
+      "loadShed": 0.0,
+      "demand": 5746.0
+    },
+    {
+      "time": "04:00",
+      "generation": 5572.0,
+      "loadShed": 0.0,
+      "demand": 5572.0
+    },
+    {
+      "time": "05:00",
+      "generation": 5365.0,
+      "loadShed": 0.0,
+      "demand": 5365.0
+    },
+    {
+      "time": "06:00",
+      "generation": 5100.0,
+      "loadShed": 0.0,
+      "demand": 5100.0
+    },
+    {
+      "time": "07:00",
+      "generation": 4870.0,
+      "loadShed": 0.0,
+      "demand": 4870.0
+    },
+    {
+      "time": "08:00",
+      "generation": 4743.0,
+      "loadShed": 0.0,
+      "demand": 4743.0
+    },
+    {
+      "time": "09:00",
+      "generation": 4898.0,
+      "loadShed": 0.0,
+      "demand": 4898.0
+    },
+    {
+      "time": "10:00",
+      "generation": 5115.0,
+      "loadShed": 0.0,
+      "demand": 5115.0
+    },
+    {
+      "time": "11:00",
+      "generation": 5184.0,
+      "loadShed": 0.0,
+      "demand": 5184.0
+    },
+    {
+      "time": "12:00",
+      "generation": 5474.0,
+      "loadShed": 0.0,
+      "demand": 5474.0
+    },
+    {
+      "time": "13:00",
+      "generation": 5535.0,
+      "loadShed": 0.0,
+      "demand": 5535.0
+    },
+    {
+      "time": "14:00",
+      "generation": 5426.0,
+      "loadShed": 0.0,
+      "demand": 5426.0
+    },
+    {
+      "time": "15:00",
+      "generation": 5578.0,
+      "loadShed": 0.0,
+      "demand": 5578.0
+    },
+    {
+      "time": "16:00",
+      "generation": 5682.0,
+      "loadShed": 0.0,
+      "demand": 5682.0
+    },
+    {
+      "time": "17:00",
+      "generation": 5590.0,
+      "loadShed": 0.0,
+      "demand": 5590.0
+    },
+    {
+      "time": "18:00",
+      "generation": 5453.0,
+      "loadShed": 0.0,
+      "demand": 5453.0
+    },
+    {
+      "time": "18:30",
+      "generation": 6167.0,
+      "loadShed": 0.0,
+      "demand": 6167.0
+    },
+    {
+      "time": "19:00",
+      "generation": 6662.0,
+      "loadShed": 0.0,
+      "demand": 6662.0
+    },
+    {
+      "time": "19:30",
+      "generation": 6715.0,
+      "loadShed": 0.0,
+      "demand": 6715.0
+    },
+    {
+      "time": "20:00",
+      "generation": 6746.0,
+      "loadShed": 0.0,
+      "demand": 6746.0
+    },
+    {
+      "time": "21:00",
+      "generation": 6680.0,
+      "loadShed": 0.0,
+      "demand": 6680.0
+    },
+    {
+      "time": "22:00",
+      "generation": 6659.0,
+      "loadShed": 0.0,
+      "demand": 6659.0
+    },
+    {
+      "time": "23:00",
+      "generation": 6497.0,
+      "loadShed": 0.0,
+      "demand": 6497.0
+    }
+  ],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",

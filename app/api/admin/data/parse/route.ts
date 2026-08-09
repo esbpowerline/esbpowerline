@@ -52,6 +52,8 @@ function resolvePython(): string | null {
   return null;
 }
 
+const ISO_DATE_RE = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
+
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user || !can(session.user.role, 'data.publish')) {
@@ -83,6 +85,39 @@ export async function POST(request: NextRequest) {
     const pgcb = form.get('pgcb');
     const pb = form.get('pb');
     const dateOverride = String(form.get('date') ?? '').trim();
+    // Collect mode: the bridge downloads the day from PGCB and Petrobangla itself
+    // rather than the operator hunting the two files down. Same parser either way,
+    // so the review step below still sees exactly what an upload would produce.
+    const collect = String(form.get('collect') ?? '') === '1';
+
+    if (collect) {
+      if (!ISO_DATE_RE.test(dateOverride)) {
+        return NextResponse.json(
+          { ok: false, error: 'Collecting from source needs the energy day (YYYY-MM-DD).' },
+          { status: 400 },
+        );
+      }
+      const { stdout } = await execFileAsync(
+        python,
+        [path.join(process.cwd(), 'scripts', 'ingest_bridge.py'), '--fetch', '--date', dateOverride],
+        {
+          cwd: process.cwd(),
+          env: { ...process.env, PYTHONUTF8: '1' },
+          maxBuffer: 64 * 1024 * 1024,
+          // Downloads add a network leg on top of parsing; the ERP scan can walk
+          // a stretch of ids when the map is behind.
+          timeout: 480_000,
+        },
+      );
+      const at = stdout.indexOf('{');
+      if (at === -1) {
+        return NextResponse.json(
+          { ok: false, error: `Collector produced no JSON: ${stdout.slice(0, 400)}` },
+          { status: 500 },
+        );
+      }
+      return NextResponse.json(JSON.parse(stdout.slice(at)));
+    }
 
     if (!(pgcb instanceof File)) {
       return NextResponse.json({ ok: false, error: 'A PGCB Excel file is required.' }, { status: 400 });

@@ -77,9 +77,16 @@ Daily Report YYYY-MM-DD/
 ## GridDailyData sections (Pipeline A)
 
 - `systemStats` — required
-- `generationData` — required (7 fuels)
+- `generationData` — required (7 fuels, plus Wind where the report carries it)
 - `regionalDemandData` — 9 zones (from PGCB P1/P3, **not** BPDB area-wise backlog)
-- `hourlyLoadData` — 24 rows from L-Curve TOTAL column (col index 3)
+- `hourlyLoadData` — from **P4** where the workbook has it: 25 rows (the 24 hours plus
+  the evening-peak half hour), each with generation, load shedding *and* demand.
+  Older layouts have no P4 and fall back to 24 rows from the L-Curve TOTAL column,
+  with shedding and demand on the evening peak hour alone. Preferred only after P4's
+  generation column is checked against the L-Curve on the hours they share.
+- `energyCurveData` — optional, from **En-Curve**: half-hourly generation across 15
+  columns (public/private split per fuel, each import named, plus Shortage). Absent on
+  layouts without that sheet.
 - `dailyOutages`, `borderImportsData`
 - `gasProductionData` / `gasDistributionData` — from Petrobangla text (Pipeline A summary)
 

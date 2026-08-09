@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import type { GridDailyData } from '@/lib/data/grid/types';
 import {
+  GENERATION_FUEL_ALIASES,
   REQUIRED_GENERATION_FUELS,
   PETROBANGLA_GAS_DISTRIBUTION_COMPANIES,
   PETROBANGLA_GAS_PRODUCTION_COMPANIES,
@@ -17,7 +18,7 @@ const systemStatsSchema = z.object({
   // an estimate dressed as a measurement.
   minGen: z.number().nullable(),
   maxGen: z.number().nullable(),
-  totalEnergyGen: z.number(),
+  totalEnergyGen: z.number().nullable(),
   totalEnergyUnserved: z.number().nullable(),
   totalEnergyDemand: z.number().nullable(),
   maxTemp: z.number().nullable(),
@@ -79,10 +80,23 @@ export const dailyReportSchema = z.object({
   hourlyLoadData: z.array(z.object({
     time: z.string(),
     generation: z.number(),
-    // Populated on the published evening peak hour only.
+    // Published every hour by the P4 sheet; on the older layouts that carry no
+    // P4, only the evening peak hour has them.
     loadShed: z.number().nullable(),
     demand: z.number().nullable(),
   })).optional(),
+  // Half-hourly fuel split. `mw` is positional against `fuels`, so a row of a
+  // different length would silently re-label every series after the gap.
+  energyCurveData: z.object({
+    fuels: z.array(z.string()).min(1),
+    rows: z.array(z.object({
+      time: z.string(),
+      mw: z.array(z.number().nullable()),
+    })).min(1),
+  }).refine(
+    (c) => c.rows.every((r) => r.mw.length === c.fuels.length),
+    { message: 'every energy-curve row must carry one value per fuel' },
+  ).optional(),
 });
 
 export type DailyReportValidation = z.SafeParseReturnType<GridDailyData, GridDailyData>;
@@ -121,7 +135,8 @@ export function warnIfInvalidDailyReport(data: unknown, isoDate: string): void {
   }
   const fuels = new Set(result.data.generationData.map((g) => g.name));
   for (const expected of REQUIRED_GENERATION_FUELS) {
-    if (!fuels.has(expected) && process.env.NODE_ENV === 'development') {
+    const names = [expected, ...(GENERATION_FUEL_ALIASES[expected] ?? [])];
+    if (!names.some((n) => fuels.has(n)) && process.env.NODE_ENV === 'development') {
       console.warn(`[daily-report] Missing generation fuel "${expected}" on ${isoDate}`);
     }
   }

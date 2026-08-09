@@ -97,7 +97,7 @@ export function buildHomeSnapshotFromDaily(
     { label: 'Peak Today', value: Math.round(peakDemand), unit: POWER_UNIT, icon: 'TrendingUp' },
     {
       label: 'Daily Generation',
-      value: gwhToAvgMw(s.totalEnergyGen),
+      value: s.totalEnergyGen == null ? 0 : gwhToAvgMw(s.totalEnergyGen),
       unit: POWER_UNIT,
       icon: 'TrendingUp',
     },

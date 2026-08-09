@@ -111,7 +111,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
     return rate == null ? '—' : `${rate.toFixed(2)} Tk/KWh`;
   };
 
-  const dailyGenAvgMw = mkwhToAvgMw(systemStats.totalEnergyGen);
+  // Null where P1 leaves the total-generation cell empty. Averaging a null to
+  // zero would print "0 MW" for a day that plainly generated.
+  const dailyGenAvgMw =
+    systemStats.totalEnergyGen == null ? null : mkwhToAvgMw(systemStats.totalEnergyGen);
   const unservedAvgMw =
     systemStats.totalEnergyUnserved == null ? null : mkwhToAvgMw(systemStats.totalEnergyUnserved);
 
@@ -125,7 +128,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <DailyBadge />
           </>
         }
-        value={`${formatNumber(Math.round(dailyGenAvgMw))} MW`}
+        value={dailyGenAvgMw == null ? '— MW' : `${formatNumber(Math.round(dailyGenAvgMw))} MW`}
         active={activeKpiTooltip === 'gen'}
         onToggle={() => toggleKpiTooltip('gen')}
         tooltipTitle="Generation Briefing"
@@ -134,7 +137,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         width="sm"
       >
         <GridKpiTooltipBody>
-          <GridKpiTooltipRow label="Total Energy Gen:" value={`${systemStats.totalEnergyGen.toFixed(2)} MKWh`} />
+          <GridKpiTooltipRow
+            label="Total Energy Gen:"
+            value={systemStats.totalEnergyGen == null ? 'not published for this day' : `${systemStats.totalEnergyGen.toFixed(2)} MKWh`}
+          />
           <GridKpiTooltipRow
             label="Max Peak Gen:"
             value={systemStats.maxGen == null ? '—' : `${formatNumber(Math.round(systemStats.maxGen))} MW`}

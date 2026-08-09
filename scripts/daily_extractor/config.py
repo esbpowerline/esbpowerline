@@ -67,6 +67,12 @@ DAILY_REPORTS_ROOT = Path(os.environ.get("ESB_DAILY_REPORTS_ROOT", str(Path.home
 SCRATCH_DOWNLOADS = ROOT / "scratch" / "downloads"
 
 # Known ERP attachment IDs (energy_day ISO -> file id)
+#
+# The 2026-07-21 entries down are keyed by each workbook's own "Actual Generation on"
+# date, verified against the archive by totalEnergyGen. The entries above them predate
+# that check and follow the older "report D covers D-1" reading, which the workbooks
+# contradict — 5057 is mapped to 2026-07-05 but its figures are archived at 07-06.
+# Left as-is pending a decision on the pre-July archive; do not trust them for refetch.
 ERP_BY_ENERGY: dict[str, int] = {
     "2026-06-25": 5046,
     "2026-06-26": 5047,
@@ -79,6 +85,26 @@ ERP_BY_ENERGY: dict[str, int] = {
     "2026-07-03": 5055,
     "2026-07-04": 5056,
     "2026-07-05": 5057,
+    "2026-07-22": 5075,
+    "2026-07-23": 5076,
+    "2026-07-24": 5077,
+    "2026-07-25": 5078,
+    "2026-07-26": 5079,
+    "2026-07-27": 5080,
+    "2026-07-28": 5081,
+    "2026-07-29": 5083,
+    "2026-07-30": 5084,
+    "2026-07-31": 5085,
+    "2026-08-01": 5086,
+    "2026-08-02": 5087,
+    "2026-08-03": 5088,
+    "2026-08-04": 5089,
+    "2026-08-05": 5090,
+    # Confirmed 2026-08-09 by each workbook's own "Actual Generation on" date,
+    # and again by the P2 sheet reproducing the station peaks exactly.
+    "2026-08-06": 5091,
+    "2026-08-07": 5092,
+    "2026-08-08": 5093,
 }
 
 SITE_FOLDERS = {

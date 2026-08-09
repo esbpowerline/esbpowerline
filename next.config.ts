@@ -4,13 +4,29 @@ import type { NextConfig } from 'next';
 const surface = process.env.APP_SURFACE ?? 'all';
 const distDir = surface === 'all' ? '.next' : `.next-${surface}`;
 
+const isProd = process.env.NODE_ENV === 'production';
+
 // 'unsafe-eval' is only needed by the dev server (React Refresh / HMR). Exclude it in
 // production to tighten the XSS surface — this stack (Recharts, ReactFlow, TipTap, GA/GTM)
 // does not use eval at runtime.
-const scriptSrc =
-  process.env.NODE_ENV === 'production'
-    ? "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com"
-    : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com";
+const scriptSrc = isProd
+  ? "script-src 'self' 'unsafe-inline' https://*.googletagmanager.com https://*.google-analytics.com"
+  : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com";
+
+/**
+ * A year of `immutable`, applied only when built for production.
+ *
+ * Safe there because every one of these URLs changes when its content does —
+ * Next content-hashes chunk filenames at build time, and the images and fonts
+ * under /public are replaced by deploying a new file. In development none of
+ * that holds: chunk names are stable across edits, so the same URL serves
+ * different bytes every time a file is saved, and a browser told to cache it
+ * for a year will not ask again.
+ */
+const immutableAsset = (source: string) =>
+  isProd
+    ? [{ source, headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }] }]
+    : [];
 
 // Host of the Supabase project that serves media, derived from the same env var
 // the app uses. Falls back to null so a missing var drops the pattern entirely
@@ -60,9 +76,12 @@ const nextConfig: NextConfig = {
     ],
     '/admin/**': ['./public/data/**/*', './public/uploads/**/*'],
     '/cms/**': ['./public/data/**/*', './public/uploads/**/*'],
-    // Station detail is fetched over HTTP by the browser and never read from
-    // disk on the server, so it belongs in no function bundle at all.
-    '**': ['./public/data/plants/**/*'],
+    // Station detail and the half-hourly fuel curve are fetched over HTTP by
+    // the browser and never read from disk on the server, so they belong in no
+    // function bundle at all. Both are per-day files large enough to matter:
+    // 19MB and 14MB against a 250MB function limit that a deploy has already
+    // hit once.
+    '**': ['./public/data/plants/**/*', './public/data/curves/**/*'],
   },
 
   // The grid export route reads daily JSON + the logo from disk at runtime; force
@@ -166,20 +185,16 @@ const nextConfig: NextConfig = {
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         ],
       },
-      {
-        // Long-lived cache for immutable static assets
-        source: '/_next/static/(.*)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-      {
-        // Long-lived cache for public images and fonts
-        source: '/images/(.*)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
-      {
-        source: '/fonts/(.*)',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
+      // Long-lived caching for build output and static assets — production
+      // only; see `immutableAsset`. Next warns about the /_next/static rule at
+      // dev startup and the warning is exact: with stable dev chunk names, a
+      // year of `immutable` means saved edits never reach the browser. It does
+      // not present as a caching problem — a hard reload, a server restart,
+      // deleting .next and a fresh tab all still served pre-edit chunks, so it
+      // reads as code that simply does not run.
+      ...immutableAsset('/_next/static/(.*)'),
+      ...immutableAsset('/images/(.*)'),
+      ...immutableAsset('/fonts/(.*)'),
       {
         source: '/data/daily/(.*)',
         headers: [

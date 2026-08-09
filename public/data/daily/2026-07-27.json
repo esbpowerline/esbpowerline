@@ -91,6 +91,12 @@
       "energy": 3.29,
       "peakFlow": 142.0,
       "type": "C/B Interconnector (East)"
+    },
+    {
+      "source": "Nepal (via India)",
+      "energy": 0.89,
+      "peakFlow": 38.0,
+      "type": "C/B Interconnector (Nepal)"
     }
   ],
   "regionalDemandData": [
@@ -203,7 +209,7 @@
       "time": "10:57 - 12:18",
       "plant": "Khulna (C) S/S Tr-2 415 T LT Scheduled",
       "load": "HT Outage",
-      "reason": "for temperature reduce",
+      "reason": "Due to for temperature reduce",
       "full_desc": "Khulna (C) S/S Tr-2 415 T LT Scheduled S/D Due to for temperature reduce"
     },
     {
@@ -217,7 +223,7 @@
       "time": "10:58 - 12:17",
       "plant": "Khulna (C) S/S Tr-2 415 T HT Scheduled",
       "load": "HT Outage",
-      "reason": "for temperature reduce",
+      "reason": "Due to for temperature reduce",
       "full_desc": "Khulna (C) S/S Tr-2 415 T HT Scheduled S/D Due to for temperature reduce"
     },
     {
@@ -294,21 +300,21 @@
       "time": "18:09 - 19:03",
       "plant": "Noapara 132/33kV S/S T-1 LT Forced",
       "load": "HT Outage",
-      "reason": "due to reb-3 jamper loop out.",
+      "reason": "Due to 33kv buss shutdown due to reb-3 jamper loop out.",
       "full_desc": "Noapara 132/33kV S/S T-1 LT Forced S/D Due to 33kv buss shutdown due to reb-3 jamper loop out."
     },
     {
       "time": "18:10 - 19:02",
       "plant": "Noapara 132/33kV S/S T-1 HT Forced",
       "load": "HT Outage",
-      "reason": "due to reb-3 jamper loop out.",
+      "reason": "Due to 33kv buss shutdown due to reb-3 jamper loop out.",
       "full_desc": "Noapara 132/33kV S/S T-1 HT Forced S/D Due to 33kv buss shutdown due to reb-3 jamper loop out."
     },
     {
       "time": "18:17 - 19:01",
       "plant": "Noapara 132/33kV S/S Bus Section-1 Forced",
       "load": "25.0MW",
-      "reason": "due to reb-3 jamper loop out.",
+      "reason": "Due to 33kv buss shutdown due to reb-3 jamper loop out.",
       "full_desc": "Noapara 132/33kV S/S Bus Section-1 Forced S/D Due to 33kv buss shutdown due to reb-3 jamper loop out."
     },
     {
@@ -364,7 +370,7 @@
       "time": "06:59",
       "plant": "Bhaluka 132/33kV S/S Bus B Scheduled",
       "load": "HT Outage",
-      "reason": "for red-hot",
+      "reason": "Due to for red-hot",
       "full_desc": "Bhaluka 132/33kV S/S Bus B Scheduled S/D Due to for red-hot"
     },
     {
@@ -400,128 +406,134 @@
     {
       "time": "00:00",
       "generation": 15275.17,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1669.0,
+      "demand": 17019.28
     },
     {
       "time": "01:00",
       "generation": 14854.29,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1707.0,
+      "demand": 16638.11
     },
     {
       "time": "02:00",
       "generation": 14650.26,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1640.0,
+      "demand": 16364.06
     },
     {
       "time": "03:00",
       "generation": 14465.65,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1297.0,
+      "demand": 15821.02
     },
     {
       "time": "04:00",
       "generation": 14254.56,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 761.0,
+      "demand": 15049.81
     },
     {
       "time": "05:00",
       "generation": 14099.65,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 741.0,
+      "demand": 14874.0
     },
     {
       "time": "06:00",
       "generation": 13654.3,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 690.0,
+      "demand": 14375.35
     },
     {
       "time": "07:00",
       "generation": 13594.49,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 625.0,
+      "demand": 14247.49
     },
     {
       "time": "08:00",
       "generation": 13501.32,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 625.0,
+      "demand": 14154.32
     },
     {
       "time": "09:00",
       "generation": 13453.47,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 650.0,
+      "demand": 14132.47
     },
     {
       "time": "10:00",
       "generation": 13773.57,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 404.0,
+      "demand": 14195.57
     },
     {
       "time": "11:00",
       "generation": 13821.2,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 780.0,
+      "demand": 14636.2
     },
     {
       "time": "12:00",
       "generation": 14259.88,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 783.0,
+      "demand": 15077.88
     },
     {
       "time": "13:00",
       "generation": 14436.4,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 896.0,
+      "demand": 15372.4
     },
     {
       "time": "14:00",
       "generation": 14497.87,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 943.0,
+      "demand": 15482.87
     },
     {
       "time": "15:00",
       "generation": 14478.69,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1149.0,
+      "demand": 15679.69
     },
     {
       "time": "16:00",
       "generation": 14252.21,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 1025.0,
+      "demand": 15323.21
     },
     {
       "time": "17:00",
       "generation": 14038.47,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 999.0,
+      "demand": 15082.47
     },
     {
       "time": "18:00",
       "generation": 13779.61,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 750.0,
+      "demand": 14563.61
     },
     {
       "time": "19:00",
       "generation": 15010.89,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 507.0,
+      "demand": 15540.89
+    },
+    {
+      "time": "19:30",
+      "generation": 15924.01,
+      "loadShed": 676.0,
+      "demand": 16630.01
     },
     {
       "time": "20:00",
       "generation": 15991.57,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 715.0,
+      "demand": 16738.57
     },
     {
       "time": "21:00",
@@ -532,14 +544,14 @@
     {
       "time": "22:00",
       "generation": 15881.76,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 682.0,
+      "demand": 16594.45
     },
     {
       "time": "23:00",
       "generation": 15823.8,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 727.0,
+      "demand": 16583.8
     }
   ],
   "gasProductionData": [
@@ -554,7 +566,7 @@
       "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
       "fields": 5,
       "gas": 139.6,
-      "condensate": 633.7,
+      "condensate": 633.6,
       "share": 6.5
     },
     {
@@ -568,7 +580,7 @@
       "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
       "fields": 3,
       "gas": 890.1,
-      "condensate": 4810.6,
+      "condensate": 4810.5,
       "share": 41.4
     },
     {

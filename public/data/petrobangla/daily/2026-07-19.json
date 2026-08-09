@@ -3,8 +3,8 @@
   "meta": {
     "schema_version": "1.0.0",
     "parser_version": "2.0.0-reconstructed",
-    "source_pdf": "C:/Users/hamim/Desktop/20-07-26.pdf",
-    "source_filename": "C:/Users/hamim/Desktop/20-07-26.pdf",
+    "source_pdf": "C:\\Users\\User\\Desktop\\bd-grid-july-2026\\grid-data\\raw\\2026-07\\petrobangla\\petrobangla_2026-07-19.pdf",
+    "source_filename": "petrobangla_2026-07-19.pdf",
     "parsed_at": null,
     "page_count": 1,
     "parse_status": "ok",
@@ -18,33 +18,7 @@
       "distribution.summary",
       "sgfl.products",
       "entities"
-    ],
-    "enrichment": {
-      "enriched_at": "2026-07-21T20:22:06",
-      "source": "reparse-2026-07",
-      "matched_report": "Daily-Gas-Intake-Offtake-Report (20.07.26).json",
-      "match_mode": "start",
-      "fields_added": [
-        "report.gas_day_start",
-        "report.gas_day_end",
-        "report.gas_window",
-        "sgfl.products.ngl",
-        "sgfl.products.cond",
-        "sgfl.products.lpg",
-        "sgfl.products.ms",
-        "sgfl.products.octane",
-        "sgfl.products.kerosene",
-        "sgfl.products.diesel",
-        "sgfl.pipeline_metrics.AB1",
-        "sgfl.pipeline_metrics.AB2",
-        "sgfl.pipeline_metrics.BB",
-        "sgfl.pipeline_metrics.VS3",
-        "sgfl.pipeline_metrics.AM",
-        "sgfl.pipeline_metrics.BD",
-        "sgfl.pipeline_total",
-        "distribution.diversity"
-      ]
-    }
+    ]
   },
   "report": {
     "reference_no": null,
@@ -95,11 +69,11 @@
       },
       {
         "record_type": "field",
-        "id": "/1-bgfcl-bakhrabad",
+        "id": "/bakhrabad",
         "company": null,
         "company_code": null,
         "operator": null,
-        "field": "1. BGFCL Bakhrabad",
+        "field": "Bakhrabad",
         "producing_wells": 7,
         "capacity_mmcfd": 43.0,
         "gas_mmcfd": 18.2,
@@ -165,11 +139,11 @@
       },
       {
         "record_type": "field",
-        "id": "/2-sgfl-kailashtila-2-mste",
+        "id": "/kailashtila-2-mste",
         "company": null,
         "company_code": null,
         "operator": null,
-        "field": "2. SGFL Kailashtila #2 (MSTE)",
+        "field": "Kailashtila #2 (MSTE)",
         "producing_wells": 4,
         "capacity_mmcfd": 47.0,
         "gas_mmcfd": 42.7,
@@ -263,11 +237,11 @@
       },
       {
         "record_type": "field",
-        "id": "/3-bapex-sundalpur",
+        "id": "/sundalpur",
         "company": null,
         "company_code": null,
         "operator": null,
-        "field": "3. BAPEX Sundalpur",
+        "field": "Sundalpur",
         "producing_wells": 1,
         "capacity_mmcfd": 5.0,
         "gas_mmcfd": 1.1,
@@ -333,11 +307,11 @@
       },
       {
         "record_type": "field",
-        "id": "chevron/chevron-maulavibazar",
+        "id": "chevron/maulavibazar",
         "company": "4. CHEVRON",
         "company_code": "CHEVRON",
         "operator": "CHEVRON",
-        "field": "CHEVRON Maulavibazar",
+        "field": "Maulavibazar",
         "producing_wells": 5,
         "capacity_mmcfd": 42.0,
         "gas_mmcfd": 15.8,
@@ -361,11 +335,11 @@
       },
       {
         "record_type": "field",
-        "id": "chevron/tullow-bangora",
+        "id": "chevron/bangora",
         "company": "4. CHEVRON",
         "company_code": "CHEVRON",
         "operator": "CHEVRON",
-        "field": "TULLOW Bangora",
+        "field": "Bangora",
         "producing_wells": 5,
         "capacity_mmcfd": 103.0,
         "gas_mmcfd": 30.9,
@@ -491,24 +465,9 @@
     "field_count": 23
   },
   "sgfl": {
-    "products": {
-      "ngl": 352.2,
-      "cond": 5780.4,
-      "lpg": 156.45,
-      "ms": 4857.5,
-      "octane": 0.0,
-      "kerosene": 48.8,
-      "diesel": 214.5
-    },
-    "pipeline_metrics": {
-      "AB1": 0.0,
-      "AB2": 0.0,
-      "BB": 63.1,
-      "VS3": 135.4,
-      "AM": 494.2,
-      "BD": 324.6
-    },
-    "pipeline_total": 1017.3
+    "products": {},
+    "pipeline_metrics": {},
+    "pipeline_total": null
   },
   "distribution": {
     "companies": [
@@ -844,12 +803,7 @@
       }
     },
     "non_grid_power": [],
-    "plant_count": 44,
-    "diversity": {
-      "factor": 0.85,
-      "power_demand_adjusted_mmcfd": 2146,
-      "fertilizer_demand_adjusted_mmcfd": 280
-    }
+    "plant_count": 44
   },
   "validation": {
     "field_gas_sum_mmcfd": 2622.3,
@@ -880,8 +834,8 @@
     },
     {
       "type": "gas_field",
-      "id": "/1-bgfcl-bakhrabad",
-      "name": "1. BGFCL Bakhrabad",
+      "id": "/bakhrabad",
+      "name": "Bakhrabad",
       "company_code": null,
       "operator": null,
       "gas_mmcfd": 18.2,
@@ -930,8 +884,8 @@
     },
     {
       "type": "gas_field",
-      "id": "/2-sgfl-kailashtila-2-mste",
-      "name": "2. SGFL Kailashtila #2 (MSTE)",
+      "id": "/kailashtila-2-mste",
+      "name": "Kailashtila #2 (MSTE)",
       "company_code": null,
       "operator": null,
       "gas_mmcfd": 42.7,
@@ -1000,8 +954,8 @@
     },
     {
       "type": "gas_field",
-      "id": "/3-bapex-sundalpur",
-      "name": "3. BAPEX Sundalpur",
+      "id": "/sundalpur",
+      "name": "Sundalpur",
       "company_code": null,
       "operator": null,
       "gas_mmcfd": 1.1,
@@ -1050,8 +1004,8 @@
     },
     {
       "type": "gas_field",
-      "id": "chevron/chevron-maulavibazar",
-      "name": "CHEVRON Maulavibazar",
+      "id": "chevron/maulavibazar",
+      "name": "Maulavibazar",
       "company_code": "CHEVRON",
       "operator": "CHEVRON",
       "gas_mmcfd": 15.8,
@@ -1070,8 +1024,8 @@
     },
     {
       "type": "gas_field",
-      "id": "chevron/tullow-bangora",
-      "name": "TULLOW Bangora",
+      "id": "chevron/bangora",
+      "name": "Bangora",
       "company_code": "CHEVRON",
       "operator": "CHEVRON",
       "gas_mmcfd": 30.9,

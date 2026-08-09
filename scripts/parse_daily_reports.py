@@ -72,17 +72,32 @@ def extract_first_number(val_str):
         return float(nums[0])
     return 0.0
 
+def _sheet_key(name):
+    """A sheet name reduced to what identifies it, ignoring how it is punctuated."""
+    return re.sub(r'[^a-z0-9]', '', str(name).lower())
+
+
 def get_sheet_content(content, sheet_name):
-    pattern = r'## Sheet:\s*' + re.escape(sheet_name) + r'\b'
-    m = re.search(pattern, content, re.IGNORECASE)
-    if not m:
-        return ""
-    start_idx = m.end()
-    rest = content[start_idx:]
-    next_sheet = rest.find('## Sheet:')
-    if next_sheet != -1:
-        return rest[:next_sheet]
-    return rest
+    """The body of one sheet, matched on name however PGCB punctuated it.
+
+    The same sheet is spelled several ways across the archive — "L-Curve" and
+    "L.curve", "En-Curve" and "En.curve" and "En curve", "P1" and "P 1" — and an
+    exact match silently returns nothing for the variants. Two consequences were
+    live: 2014-04-11 published with a zero day peak, zero evening peak and zero
+    energy because its sheet is called "P 1", and the whole 2014-2018 range was
+    recorded as having no energy curve when in fact 414 workbooks carry one
+    under "En.curve".
+
+    Matched on the whole name, not a prefix, so "P1" cannot take "P10".
+    """
+    wanted = _sheet_key(sheet_name)
+    for m in re.finditer(r'## Sheet:\s*(.*)', content):
+        if _sheet_key(m.group(1)) != wanted:
+            continue
+        rest = content[m.end():]
+        nxt = rest.find('## Sheet:')
+        return rest[:nxt] if nxt != -1 else rest
+    return ""
 
 def norm_text(val):
     return ' '.join(str(val).lower().split())
@@ -188,6 +203,272 @@ def lcurve_total_series(content):
         if val > 0.0:
             series[m.group(1)] = val
     return series
+
+def parse_hourly_shed(content):
+    """The P4 sheet: generation, load shedding and demand for every published hour.
+
+    "Hourly Demand, Generation & Load-Shed Report" — the one sheet that states
+    all three together. Nothing in this repo read it before, which is why the
+    archive carries an hourly generation curve with load shedding and demand
+    null on all 24 points: PGCB was assumed to publish that pair for the evening
+    peak alone, and P1 does. P4 publishes it every hour.
+
+    Its row set is PGCB's own choice — the 24 hours plus the evening-peak half
+    hour, 25 rows — so 19:30 arrives with the rest instead of being dropped for
+    not landing on the hour.
+
+    Columns are located from the header row rather than by offset; the blank
+    spacer columns between them are why the raw split is kept positional here
+    instead of going through `split_cells`, which discards empties and would
+    slide every data row one place against its own header.
+
+    Returns [{'time', 'generation', 'loadShed', 'demand'}], or [] when the
+    sheet is absent — true of every workbook before the 2025 layout.
+    """
+    # P4 from 2025; before that the same three columns are on "Daily Gen",
+    # headed "Hourly Generation & Demand". Nothing read either, which is why
+    # every pre-2025 day carries an hourly curve with demand and shedding null.
+    p4 = get_sheet_content(content, 'P4') or get_sheet_content(content, 'Daily Gen')
+    if not p4:
+        return []
+
+    # PGCB has called the unserved column Load-Shed and Shortage in different
+    # years; they are the same measure.
+    want = {'generation': 'generation', 'load-shed': 'loadShed',
+            'loadshed': 'loadShed', 'shortage': 'loadShed', 'demand': 'demand'}
+    col = {}
+    rows = []
+    for line in p4.split('\n'):
+        if '|' not in line:
+            continue
+        parts = [p.strip() for p in line.split('|')]
+        if not col:
+            # "Hour" on the 2025 sheet, "Time" on the older one.
+            hour_idx = next((i for i, p in enumerate(parts) if norm_text(p) in ('hour', 'time')), None)
+            if hour_idx is None:
+                continue
+            for i, p in enumerate(parts[hour_idx + 1:], start=hour_idx + 1):
+                key = want.get(norm_text(p))
+                if key and key not in col:
+                    col[key] = i
+            # A header naming neither of the two figures this exists to recover
+            # is not the header — keep looking rather than reading a title row.
+            if 'loadShed' not in col or 'demand' not in col:
+                col = {}
+                continue
+            col['_hour'] = hour_idx
+            continue
+
+        hour = parts[col['_hour']] if col['_hour'] < len(parts) else ''
+        m = re.match(r'^(\d{1,2}:\d{2})(?::\d{2})?$', hour)
+        # Same convention as the load curve: a closing 24:00 row is the next
+        # day's midnight and belongs to neither day's profile.
+        if not m or m.group(1) == '24:00':
+            continue
+        time_str = m.group(1).zfill(5)
+        gen = clean_float(parts[col['generation']]) if col.get('generation', 99) < len(parts) else 0.0
+        if gen <= 0.0:
+            continue
+        shed = clean_float(parts[col['loadShed']]) if col['loadShed'] < len(parts) else 0.0
+        demand = clean_float(parts[col['demand']]) if col['demand'] < len(parts) else 0.0
+        rows.append({
+            'time': time_str,
+            'generation': gen,
+            # Zero shedding is a measurement, not a gap — PGCB prints 0 on the
+            # hours it served everything, and nulling those would put the chart
+            # back to showing an absence where there is a published figure.
+            'loadShed': round(shed, 2),
+            'demand': round(demand, 2) if demand > 0.0 else None,
+        })
+    return rows
+
+
+def hourly_shed_from_yesterday_gen(content):
+    """The hourly triple for 2018-2024, which publish it on no sheet of its own.
+
+    Those workbooks have neither P4 nor Daily Gen, but the YesterdayGen matrix
+    carries a national "Total (MW)" column and a "Shortage" column beside the
+    stations, which is generation and unserved load at the same hourly stamps.
+
+    Demand stays null. The two sheets that do publish it state demand outright
+    rather than as generation plus shedding, and the difference is real — 15,275
+    against a summed 15,259 on 2026-06-04 — so deriving it here would put a
+    figure in a column that is meant to hold only published ones.
+    """
+    log = parse_yesterday_gen(content)
+    if not log:
+        return []
+    national = (log.get('totals') or {}).get('national') or []
+    shortage = (log.get('totals') or {}).get('shortage') or []
+    if not national:
+        return []
+    return [
+        {
+            'time': hour,
+            'generation': national[i],
+            'loadShed': round(shortage[i], 2) if i < len(shortage) else None,
+            'demand': None,
+        }
+        for i, hour in enumerate(log['hours'])
+        if national[i] > 0
+    ]
+
+# Every series the En-Curve sheet has carried, under one set of names. Held as a
+# list rather than read blindly from the header so a renamed or reordered column
+# is visible as a parse failure instead of silently changing what a series means.
+#
+# `Oil-Public`/`Oil-Pvt` exist only for the 2018-2021 sheets, which report oil as
+# one column instead of splitting HFO from HSD. They are kept separate rather
+# than folded into HFO because the source does not say how much of that oil was
+# which, and filing it all under HFO would invent a split.
+ENERGY_CURVE_FUELS = (
+    'Gas-Public', 'Gas-Pvt', 'HVDC', 'Nepal', 'Tripura', 'Adani', 'Hydro',
+    'Coal', 'Solar', 'HFO-Public', 'HFO-Pvt', 'HSD-Public', 'HSD-Pvt',
+    'Oil-Public', 'Oil-Pvt', 'Wind', 'Shortage',
+)
+
+# What each layout calls those series. PGCB has renamed this sheet's columns
+# three times, and matching only the current names is not a safe failure: the
+# 2022-2024 header shares exactly seven names with the 2025 one — HVDC, Tripura,
+# Hydro, Coal, Solar, Wind, Shortage — so the sheet parsed "successfully" while
+# every gas and oil column was dropped. The chart then stacked about a third of
+# the day's generation and presented it as the whole fuel mix.
+#
+#   2018-2020  GAS HVDC P.GEN(GAS). P.GEN(OIL). COAL HYDRO OIL SHORTAGE TRIPURA
+#   2021       + SOLAR
+#   2022-2024  GAS HVDC P.GEN(GAS). P.GEN(HSD) P.GEN(HFO). COAL HYDRO
+#              G.GEN(HSD) G.GEN(HFO) TRIPURA SOLAR [WIND from 2023] SHORTAGE
+#   2025+      the canonical names above
+#
+# "G.GEN" is government generation and "P.GEN" private, which is the same split
+# the 2025 sheet writes as -Public and -Pvt.
+ENERGY_CURVE_ALIASES = {
+    'gas': 'Gas-Public',
+    'p.gen(gas).': 'Gas-Pvt',
+    'p.gen(gas)': 'Gas-Pvt',
+    'g.gen(hfo)': 'HFO-Public',
+    'p.gen(hfo).': 'HFO-Pvt',
+    'p.gen(hfo)': 'HFO-Pvt',
+    'g.gen(hsd)': 'HSD-Public',
+    'p.gen(hsd)': 'HSD-Pvt',
+    'oil': 'Oil-Public',
+    'p.gen(oil).': 'Oil-Pvt',
+    'p.gen(oil)': 'Oil-Pvt',
+}
+
+# The stack, less Shortage, is the national total the L-Curve sheet also states.
+# Two independently printed sheets agreeing is what makes a partial column match
+# detectable; without it a missing column just looks like a quiet day.
+#
+# Judged on the MEDIAN relative gap, not on how many rows clear a tolerance. The
+# two failure modes look nothing alike: an unmatched column is missing from every
+# row, so the median moves to roughly that fuel's share — tens of percent — while
+# PGCB's own sheets disagreeing on a handful of half hours leaves the median at
+# zero. A count-based rule cannot tell them apart, and set anywhere sensible it
+# separated 2021-01-01 (42 of 48 rows exact) from 2021-01-04 (44 of 48) as though
+# they were different in kind.
+ENERGY_CURVE_MAX_MEDIAN_GAP = 0.05
+ENERGY_CURVE_MIN_CHECKED_ROWS = 12
+
+def parse_energy_curve(content):
+    """The En-Curve sheet: half-hourly generation split by fuel and by importer.
+
+    The daily fuel mix the site already shows is one number per fuel for the
+    whole day. This is the same split every half hour — 48 points across 15
+    columns — so the shape of the day can be read rather than its total: coal
+    flat through the night, solar arriving at 06:00 and gone by 18:00, HFO
+    called up for the evening peak.
+
+    It also names the four imports separately (HVDC Bheramara, Nepal, Tripura,
+    Adani) where `borderImportsData` carries three and no Nepal at all, and it
+    splits public from private generation, which nothing else here does.
+
+    "Shortage" is the same measure P4 calls Load-Shed, at half-hour resolution.
+
+    Columns are matched by name — through ENERGY_CURVE_ALIASES, since PGCB has
+    renamed them three times — and read positionally, so the title block printed
+    to the right of the data (which varies row to row) cannot be mistaken for a
+    series.
+
+    Before returning, the stack is checked against the L-Curve sheet's own
+    national total. A name-based matcher fails quietly when a layout changes:
+    the columns it still recognises parse, the rest come back null, and the
+    result looks like a valid but unusually low day. Only a second sheet stating
+    the same total catches that.
+
+    Returns {'fuels': [...], 'rows': [{'time', 'mw': [...]}]} or None.
+    """
+    curve = get_sheet_content(content, 'En-Curve')
+    if not curve:
+        return None
+
+    def canonical(cell):
+        text = norm_text(cell)
+        if text in ENERGY_CURVE_ALIASES:
+            return ENERGY_CURVE_ALIASES[text]
+        for fuel in ENERGY_CURVE_FUELS:
+            if text == norm_text(fuel):
+                return fuel
+        return None
+
+    idx_of = {}
+    rows = []
+    for line in curve.split('\n'):
+        if '|' not in line:
+            continue
+        parts = [p.strip() for p in line.split('|')]
+        if not idx_of:
+            if not any(norm_text(p) == 'time' for p in parts):
+                continue
+            for i, p in enumerate(parts):
+                fuel = canonical(p)
+                if fuel and fuel not in idx_of:
+                    idx_of[fuel] = i
+            # The thinnest layout still carries nine columns; fewer than that
+            # and this is a title row that happens to say "time".
+            if len(idx_of) < 8:
+                idx_of = {}
+            continue
+
+        m = re.match(r'^(\d{1,2}:\d{2})(?::\d{2})?$', parts[1] if len(parts) > 1 else '')
+        if not m or m.group(1) == '24:00':
+            continue
+        mw = []
+        for fuel in ENERGY_CURVE_FUELS:
+            i = idx_of.get(fuel)
+            # None, not 0: a column this workbook does not carry is unknown,
+            # and charting it as zero output would be a claim the source
+            # never makes.
+            if i is None or i >= len(parts) or parts[i] == '':
+                mw.append(None)
+            else:
+                mw.append(clean_float(parts[i]))
+        if all(v in (None, 0.0) for v in mw):
+            continue
+        rows.append({'time': m.group(1).zfill(5), 'mw': mw})
+
+    if len(rows) < 12:
+        return None
+
+    # The stack must reproduce the load curve. Shortage is unserved load, not
+    # generation, so it is left out of the sum.
+    shortage_at = ENERGY_CURVE_FUELS.index('Shortage')
+    series = lcurve_total_series(content)
+    if series:
+        gaps = []
+        for row in rows:
+            published = series.get(row['time'])
+            if not published:
+                continue
+            stacked = sum(v for i, v in enumerate(row['mw']) if v is not None and i != shortage_at)
+            gaps.append(abs(stacked - published) / published)
+        if len(gaps) >= ENERGY_CURVE_MIN_CHECKED_ROWS:
+            gaps.sort()
+            median = gaps[len(gaps) // 2]
+            if median > ENERGY_CURVE_MAX_MEDIAN_GAP:
+                return None
+
+    return {'fuels': list(ENERGY_CURVE_FUELS), 'rows': rows}
 
 def published_demand_stats(p1, forecast):
     """Figures P1 states outright that the site used to estimate instead.
@@ -396,6 +677,282 @@ def parse_genlog(content):
     }
 
 
+# Rows that close a section rather than describing a station. PGCB prints an
+# area total after each region, and depending on the year also a sector total
+# ("Public Sector Total") and the three grid totals; counting any of them as a
+# plant doubles that section's contribution — matching only "area|zone|grid
+# total" let the 2014 sector rows through and put the day 79% over its own
+# published peak. Any row whose name ends in "total" is a roll-up.
+P2_TOTAL_ROW = re.compile(r'\btotals?\s*[:.]?\s*$|\b(area|zone|grid)\s+total\b', re.I)
+
+
+def _p2_header_columns(lines, name_row):
+    """Column index -> the full header text above it, joined across its rows.
+
+    P2 spells a heading over as many as four physical rows — "Present" /
+    "Capacity" / "MW" sit in three — so a single-line match finds "Present" and
+    "Peak" but never tells them apart from "Installed Capacity". Joining the
+    window per column makes each one a complete phrase.
+    """
+    joined = {}
+    for line in lines[max(0, name_row - 2):name_row + 4]:
+        # The sheet title sits two rows above the header on the 2025 layout and
+        # reads "EVENING PEAK GENERATION AND DAY LONG ENERGY DATA OF POWER
+        # STATIONS" — it contains "peak", "energy" and "power stations", so a
+        # contains-match against it claims all three columns and every figure
+        # comes back 0. Titles and letterheads are dropped by length.
+        if re.search(r'evening peak generation|description of the generation|'
+                     r'power grid|load dispatch', norm_text(line)):
+            continue
+        for i, cell in enumerate(line.split('|')):
+            text = cell.strip()
+            # The pre-converted .txt files carry a markdown rule row.
+            if not text or set(text) <= set(':- '):
+                continue
+            # "Date :", the date beside it and the page number share columns
+            # with real headings. Anchoring the patterns instead would be the
+            # obvious fix and is wrong: "Date :" lands in the same column as
+            # "Name of the Power Stations", so every anchored match failed.
+            if re.match(r'^(date|month|day)\s*:?$|^page\s*-?\s*\d+$|^\d{1,4}[-/]\d{1,2}[-/]\d{1,4}$',
+                        norm_text(text)):
+                continue
+            joined[i] = f"{joined.get(i, '')} {text}".strip()
+    return joined
+
+
+def parse_p2_stations(content):
+    """Per-station evening-peak generation and day-long energy, from the P2 sheet.
+
+    "Evening Peak Generation and Day Long Energy Data of Power Stations", and
+    the one per-station table PGCB has printed continuously — it is in every
+    workbook back to 2014, where the Forecast sheet's actual-generation columns
+    begin in 2025 and the GenLog matrix with them. Nothing here read it, so the
+    Power Stations tab started in 2025 for want of a parser rather than for want
+    of data.
+
+    Energy generated is in this sheet and no other. It is the day's output per
+    station in kWh, which the peak columns cannot express: a plant held at half
+    load all day and one run flat out for an hour can show the same peak.
+
+    Column positions are read from the header, which moves between layouts —
+    2014-2018 prints Unit then Producer and no installed capacity, later sheets
+    print Producer then Installed Capacity. The units row is not trustworthy:
+    from 2019 it labels the energy column MW where the values are plainly kWh.
+
+    Returns {'stations': [...], 'totals': {...}} or None.
+    """
+    p2 = get_sheet_content(content, 'P2')
+    if not p2:
+        return None
+
+    lines = [l for l in p2.split('\n') if l.strip('| ')]
+    # The heading is wrapped in the cell — "Name of the <br> Power Stations" —
+    # and the marker survives the conversion, so it has to come out before the
+    # phrase can be matched at all.
+    name_row = next(
+        (i for i, l in enumerate(lines)
+         if re.search(r'name of (the\s*)?power station', norm_text(l.replace('<br>', ' ')))),
+        None,
+    )
+    if name_row is None:
+        return None
+
+    header = _p2_header_columns(lines, name_row)
+
+    def column(pattern, reject=None):
+        for idx in sorted(header):
+            text = norm_text(header[idx].replace('<br>', ' '))
+            if reject and re.search(reject, text):
+                continue
+            if re.search(pattern, text):
+                return idx
+        return None
+
+    # Anchored at the start of the heading. A bare contains-match is what let
+    # the sheet title claim the peak and energy columns.
+    name_col = column(r'^name of (the\s*)?power station')
+    producer_col = column(r'^producer\b')
+    installed_col = column(r'^installed capacity|^unit no\.? x capacity|^unit\b')
+    present_col = column(r'^present')
+    peak_col = column(r'^peak\b')
+    energy_col = column(r'^energy\b')
+    remarks_col = column(r'^remark')
+    if name_col is None or peak_col is None or energy_col is None:
+        return None
+
+    def cell(cells, idx):
+        return cells[idx].strip() if idx is not None and idx < len(cells) else ''
+
+    units, totals = [], {}
+    for line in lines[name_row + 1:]:
+        cells = line.split('|')
+        name = re.sub(r'\s*<br>\s*', ' ', cell(cells, name_col)).strip()
+
+        peak = clean_float(cell(cells, peak_col))
+        energy = clean_float(cell(cells, energy_col))
+        present = clean_float(cell(cells, present_col))
+        if not any(cell(cells, c) for c in (peak_col, energy_col, present_col)):
+            continue
+
+        # Roll-up rows do not always sit in the station-name column: on the 2025
+        # layout every area and grid total is written one column to its left,
+        # which left the name cell blank and folded all twelve of them into the
+        # last station. Look for the label anywhere on the row.
+        label = next((c.strip() for c in cells if c.strip() and P2_TOTAL_ROW.search(c.strip())), '')
+        if label:
+            key = ('eastern' if 'eastern' in label.lower() else
+                   'western' if 'western' in label.lower() else
+                   'national' if 'national' in label.lower() else None)
+            if key:
+                totals[key] = {'presentCapacityMw': present, 'eveningPeakMw': peak, 'energyKwh': energy}
+            # Area totals are recorded nowhere and simply skipped.
+            continue
+
+        units.append({
+            'name': name if len(name) >= 3 else '',
+            'producer': cell(cells, producer_col),
+            'installedCapacity': cell(cells, installed_col),
+            'presentCapacityMw': present,
+            'eveningPeakMw': peak,
+            'energyKwh': energy,
+            'remarks': cell(cells, remarks_col),
+        })
+
+    stations = _p2_group_units(units)
+    if len(stations) < 20:
+        return None
+    return {'stations': stations, 'totals': totals}
+
+
+def _p2_group_units(units):
+    """Fold each station's unit rows together, by nearest printed name.
+
+    A multi-unit station gets one row per unit and PGCB merges the name cell
+    across the block, so only one of them carries text. An unnamed row joins the
+    named row above it — the ordinary way to read a merged cell that a
+    text conversion has flattened — and the first rows of the sheet, which have
+    no row above, join the first named row below.
+
+    Exact from 2015 on, where the name sits on the block's first row. **The 2014
+    sheet centres it instead**: Ghorasal's six units are named on the second row
+    and Haripur SBU's three on the middle one, so a unit printed above its own
+    station's name is filed under the preceding station. The merge geometry that
+    would settle it does not survive the conversion, and the alternatives are no
+    better — attaching each orphan to its nearest name instead splits Ghorasal's
+    six units three ways, because the blocks around a centred name are not
+    symmetric.
+
+    What this cannot do is lose or double-count a row, so the day's totals are
+    unaffected and the reconciliation against P2's own National Grid Total still
+    tests every figure. On 2014 layouts it decides only which of two adjacent
+    stations a unit is filed under.
+    """
+    named = [i for i, u in enumerate(units) if u['name']]
+    if not named:
+        return []
+
+    groups: dict[int, list[int]] = {i: [] for i in named}
+    for i, unit in enumerate(units):
+        if unit['name']:
+            groups[i].append(i)
+            continue
+        earlier = [j for j in named if j < i]
+        groups[earlier[-1] if earlier else named[0]].append(i)
+
+    stations = []
+    for head in named:
+        rows = [units[i] for i in sorted(groups[head])]
+        capacity = sum(r['presentCapacityMw'] for r in rows)
+        stations.append({
+            'name': units[head]['name'],
+            'producer': next((r['producer'] for r in rows if r['producer']), ''),
+            'installedCapacity': '+'.join(r['installedCapacity'] for r in rows if r['installedCapacity']),
+            'presentCapacityMw': round(capacity, 2) or None,
+            'eveningPeakMw': round(sum(r['eveningPeakMw'] for r in rows), 2),
+            'energyKwh': round(sum(r['energyKwh'] for r in rows), 2),
+            'remarks': next((r['remarks'] for r in rows if r['remarks']), ''),
+        })
+    return stations
+
+
+def parse_yesterday_gen(content):
+    """Hourly output per station from the YesterdayGen sheet — GenLog, transposed.
+
+    The 2018-2024 workbooks carry the same hourly station matrix that GenLog
+    holds from 2025, turned on its side: stations are columns and hours are
+    rows. Nothing read it, so the Power Stations tab's hourly log began in 2025
+    while the data goes back to mid-2018.
+
+    The station columns stop at "Eastern Grid Total". Everything after it is
+    something else — the two grid totals, a national "Total (MW)", the same
+    per-fuel split the En-Curve sheet carries, then Shortage and the Kaptai
+    water level. Summing the row indiscriminately gives about four times the
+    day's generation, because the aggregates are sitting in it.
+
+    Emitted in GenLog's shape so both eras render through one component.
+    `capacityMw` is 0: this sheet states output only, where GenLog prints a
+    capacity row above the matrix.
+    """
+    block = get_sheet_content(content, 'YesterdayGen')
+    if not block:
+        return None
+
+    lines = [l for l in block.split('\n') if l.strip('| ')]
+    header_row = next((i for i, l in enumerate(lines) if re.search(r'plant name', norm_text(l))), None)
+    if header_row is None:
+        return None
+
+    header = [c.strip() for c in lines[header_row].split('|')]
+    # Everything from the first grid roll-up onwards is an aggregate, not a plant.
+    stop = next((i for i, h in enumerate(header)
+                 if re.search(r'(eastern|western)\s+grid\s+total|^total\s*\(', norm_text(h))), len(header))
+    name_col = next((i for i, h in enumerate(header) if re.search(r'plant name', norm_text(h))), 0)
+
+    stations = [{'name': h, 'col': i} for i, h in enumerate(header[:stop])
+                if h and i != name_col and not set(h) <= set(':- ')]
+    aggregates = {}
+    for i, h in enumerate(header):
+        key = ('eastern' if re.search(r'eastern grid total', norm_text(h)) else
+               'western' if re.search(r'western grid total', norm_text(h)) else
+               'national' if re.search(r'^total\s*\(', norm_text(h)) else
+               'shortage' if norm_text(h) == 'shortage' else None)
+        if key and key not in aggregates:
+            aggregates[key] = i
+    if len(stations) < 20:
+        return None
+
+    hours: list[str] = []
+    values: dict[int, list[float]] = {s['col']: [] for s in stations}
+    totals: dict[str, list[float]] = {k: [] for k in aggregates}
+    for line in lines[header_row + 1:]:
+        cells = [c.strip() for c in line.split('|')]
+        stamp = cells[name_col] if name_col < len(cells) else ''
+        m = re.match(r'^(\d{1,2}):(\d{2})(?::\d{2})?$', stamp)
+        if not m:
+            continue
+        hour = f"{int(m.group(1)):02d}:{m.group(2)}"
+        # Same convention as everywhere else here: only whole hours are charted,
+        # and a closing 24:00 is the next day's midnight.
+        if not hour.endswith(':00') or hour == '24:00':
+            continue
+        hours.append(hour)
+        for col in values:
+            values[col].append(clean_float(cells[col]) if col < len(cells) else 0.0)
+        for key, col in aggregates.items():
+            totals[key].append(clean_float(cells[col]) if col < len(cells) else 0.0)
+
+    if len(hours) < 20:
+        return None
+    return {
+        'hours': hours,
+        'stations': [
+            {'name': s['name'], 'capacityMw': 0, 'hourlyMw': values[s['col']]}
+            for s in stations
+        ],
+        'totals': totals,
+    }
+
+
 def parse_plant_actuals(forecast):
     """Per-station figures for the REPORTED day, from the Forecast sheet.
 
@@ -445,6 +1002,16 @@ def parse_plant_actuals(forecast):
             continue
         if re.match(r'^(total|grand total)\b', norm_text(name)):
             break
+        # The sheet repeats its own column heading partway down the table, and
+        # closes with the OIS generation stamp. Both cleared every test above —
+        # they are long enough, and they carry no figures to contradict — so
+        # they were emitted as stations with 0 MW. Harmless to every total and
+        # wrong in the table, where they read as two plants that produced
+        # nothing: 319 of 332 archived days carried both.
+        if re.match(r'^name of the\b', norm_text(name)) or name.lstrip().startswith('***'):
+            continue
+        if re.search(r'report is generated digitally', name, re.I):
+            continue
 
         def cell(i):
             return cells[i] if i is not None and i < len(cells) else ''
@@ -785,7 +1352,23 @@ def parse_pgcb_file(filepath, op_date):
     hourly_load_data = []
     lcurve_series = lcurve_total_series(content)
     peak_hour, peak_shed = evening_peak_hour(p1), sum(regional_loadshed.values())
-    if lcurve_series:
+
+    # P4 states generation, shedding and demand together for every hour it
+    # publishes, so where it exists it is the whole curve and the evening-peak
+    # special case below is not needed. It is preferred only after its
+    # generation column is checked against the L-Curve on the hours they share:
+    # two sheets agreeing is what makes the third and fourth columns safe to
+    # believe, and a disagreement means one of them is not this day's.
+    shed_rows = parse_hourly_shed(content) or hourly_shed_from_yesterday_gen(content)
+    if shed_rows and lcurve_series:
+        shared = [(r['generation'], lcurve_series[r['time']])
+                  for r in shed_rows if r['time'] in lcurve_series]
+        agrees = bool(shared) and all(abs(a - b) <= 1.0 for a, b in shared)
+        if not agrees:
+            shed_rows = []
+    if shed_rows:
+        hourly_load_data = shed_rows
+    elif lcurve_series:
         for time_str, gen_val in sorted(lcurve_series.items()):
             if not time_str.endswith(':00'):
                 continue
@@ -938,6 +1521,24 @@ def parse_pgcb_file(filepath, op_date):
     if total_imports == 0.0:
         total_imports = hvdc_gen + adani_gen + tripura_gen
 
+    # P1 leaves the "Total Gen. (MKWH)" cell empty on some days — the unit sits
+    # where the number should be and there is no number anywhere on the row. It
+    # is a gap in the published sheet, not a parse failure, and it took 65 days
+    # of early 2018 to a headline generation of zero, which in turn zeroed the
+    # average production cost that divides by it.
+    #
+    # P2's National Grid Total is the same measurement, and where P1 does print
+    # its figure the two agree to the digit — 127.67354 against 127.67 on
+    # 2018-01-05. So the day is recovered from the other sheet rather than left
+    # at zero or filled from the fuel mix, which is a different quantity: it is
+    # gross generation at the plant and runs both above and below this.
+    if total_energy_gen <= 0.0:
+        p2 = parse_p2_stations(content)
+        national = ((p2 or {}).get('totals') or {}).get('national') or {}
+        recovered = float(national.get('energyKwh') or 0) / 1e6
+        if recovered > 0:
+            total_energy_gen = round(recovered, 6)
+
     avg_production_cost = 0.0
     if total_energy_gen > 0.0:
         avg_production_cost = total_daily_cost / (total_energy_gen * 1000000.0)
@@ -975,6 +1576,8 @@ def parse_pgcb_file(filepath, op_date):
     total_demand = published['totalEnergyDemand']
     formatted_date = op_date.strftime("%d %b %Y")
 
+    energy_curve = parse_energy_curve(content)
+
     return {
         'systemStats': {
             'date': formatted_date,
@@ -1004,7 +1607,11 @@ def parse_pgcb_file(filepath, op_date):
         'borderImportsData': border_imports_data,
         'regionalDemandData': regional_demand_data,
         'dailyOutages': daily_outages,
-        'hourlyLoadData': hourly_load_data
+        'hourlyLoadData': hourly_load_data,
+        # Omitted rather than empty on the layouts without an En-Curve sheet,
+        # so the site can tell "this day published no fuel curve" from "the
+        # fuel curve was read and every series was flat".
+        **({'energyCurveData': energy_curve} if energy_curve else {}),
     }
 
 def parse_petrobangla_file(filepath):

@@ -108,7 +108,17 @@ def validate_grid_daily(data: dict, iso_date: str) -> ValidationResult:
                 d = row.get("demand")
                 if isinstance(g, (int, float)) and isinstance(s, (int, float)) and isinstance(d, (int, float)):
                     if abs(d - (g + s)) > 0.05:
-                        errors.append(f"hourlyLoadData[{i}]: demand must equal generation + loadShed")
+                        # A warning, not an error: PGCB's own hourly table never satisfies
+                        # this identity — on 2026-07-28 its published demand exceeds
+                        # generation + load-shed by 20-112 MW every hour, most likely
+                        # busbar against substation end. validate-daily-report.ts, which
+                        # this file mirrors, imposes no such rule, and the shipped archive
+                        # already carries non-reconciling rows (2026-07-24, 2026-07-26).
+                        # Refusing the day here discards a report PGCB actually published.
+                        warnings.append(
+                            f"hourlyLoadData[{i}]: demand {d} != generation + loadShed "
+                            f"({g} + {s}); reported as published"
+                        )
             if len(times) != 24:
                 warnings.append("hourlyLoadData times may not cover all 24 hours uniquely")
 

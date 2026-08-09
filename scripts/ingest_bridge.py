@@ -346,17 +346,63 @@ MONTHS = {m: i for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], start=1)}
 
 
+# The two forms Petrobangla uses for its 8am-8am window. Across a month
+# boundary both months are spelled out; within one month the month is written
+# once after the day pair.
+_WINDOW_CROSS_MONTH = re.compile(
+    r"Date\s*:\s*(\d{1,2})\s*([A-Za-z]{3})[A-Za-z]*[^0-9A-Za-z]{0,6}(\d{1,2})\s*([A-Za-z]{3})[A-Za-z]*[,\s]*(\d{4})"
+)
+_WINDOW_SAME_MONTH = re.compile(
+    r"Date\s*:\s*(\d{1,2})\s*[-–]\s*(\d{1,2})\s*([A-Za-z]{3})[A-Za-z]*[,\s]*(\d{4})"
+)
+
+
+def pdf_header_text(pdf: Path) -> str:
+    """The report's top band, read by word coordinates rather than flowed text.
+
+    `pypdf` returns the date digits on these files as unmapped CID glyphs, so the
+    window regex found nothing and the day could not be confirmed from the file
+    itself — leaving the filename as the only authority, which is precisely the
+    assumption that filed nine copies of one report as nine separate days.
+    PyMuPDF decodes the same glyphs correctly.
+
+    Words are ordered by position so "Date :" and the dates that follow it stay
+    adjacent; the flowed extraction interleaves them with the letterhead.
+    """
+    try:
+        import fitz
+    except ImportError:
+        return ""
+    try:
+        with fitz.open(str(pdf)) as doc:
+            words = [w for w in doc[0].get_text("words") if w[1] < 40]
+    except Exception:  # noqa: BLE001
+        return ""
+    words.sort(key=lambda w: (round(w[1] / 4), w[0]))
+    return " ".join(w[4] for w in words)
+
+
 def printed_window_start(pb_text: str) -> datetime.date | None:
     """The date the PDF's own 8am-8am window opens on.
 
-    Petrobangla prints "Date : 31 Jul - 01 Aug 2026". The first date is the gas
-    day the report covers, and it is the only trustworthy statement of which day
-    the file holds — the filename is the publication date, a day later.
+    Petrobangla prints either "Date : 31 Jul - 01 Aug, 2026" or, within a single
+    month, "Date : 05-06 Aug, 2026". The first date is the gas day the report
+    covers, and it is the only trustworthy statement of which day the file
+    holds — the filename is the publication date, a day later.
     """
-    m = re.search(
-        r"Date\s*:\s*(\d{1,2})\s*([A-Za-z]{3})[^0-9]{0,6}(\d{1,2})\s*([A-Za-z]{3})[,\s]*(\d{4})",
-        pb_text[:600],
-    )
+    head = pb_text[:900]
+
+    m = _WINDOW_SAME_MONTH.search(head)
+    if m:
+        day, _d2, mon, year = m.group(1), m.group(2), m.group(3).lower(), m.group(4)
+        if mon not in MONTHS:
+            return None
+        try:
+            return datetime.date(int(year), MONTHS[mon], int(day))
+        except ValueError:
+            return None
+
+    m = _WINDOW_CROSS_MONTH.search(head)
     if not m:
         return None
     day, mon, _d2, mon2, year = m.group(1), m.group(2).lower(), m.group(3), m.group(4).lower(), m.group(5)
@@ -427,13 +473,66 @@ def parse_gas_archive(pdf: Path, op_date: datetime.date, tmpdir: Path):
     return doc, warnings
 
 
+def fetch_sources(iso: str) -> tuple[str, str | None, list[str]]:
+    """Download the day's PGCB workbook and Petrobangla PDF from the publishers.
+
+    Same downloader the CLI extractor uses, so the admin panel and the command
+    line pull identical files: PGCB from its ERP by attachment id, Petrobangla
+    from its own daily-gas listing. Nothing is sourced from EMRD, which only
+    links back to Petrobangla and publishes no report of its own.
+    """
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from daily_extractor.download import download_for_energy_day
+
+    energy = datetime.date.fromisoformat(iso)
+    result = download_for_energy_day(energy)
+    notes = list(result.errors or [])
+
+    if not result.pgcb_xlsx:
+        fail(
+            f"No PGCB report published for energy day {iso}. PGCB posts a day's report the "
+            "following morning, so today's is normally available tomorrow."
+        )
+    if not result.petrobangla_pdf:
+        notes.append(
+            f"Petrobangla has not published the gas report covering {iso} yet, so gas "
+            "sections fall back to the previous day."
+        )
+    return str(result.pgcb_xlsx), (str(result.petrobangla_pdf) if result.petrobangla_pdf else None), notes
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pgcb", required=True)
+    ap.add_argument("--pgcb")
     ap.add_argument("--pb")
     ap.add_argument("--date")
     ap.add_argument("--pgcb-name", default="")
+    ap.add_argument(
+        "--expect-gas-window",
+        help=(
+            "ISO date the gas PDF's letterhead prints, when that is known to be a misprint. "
+            "Accepts the file for --date anyway and records why. 2026-07-10's report is headed "
+            "11 Jul; its figures belong to the 10th. Any other printed window is still rejected."
+        ),
+    )
+    ap.add_argument(
+        "--fetch",
+        action="store_true",
+        help="Download the day's sources from PGCB and Petrobangla instead of taking uploads.",
+    )
     args = ap.parse_args()
+
+    fetch_notes: list[str] = []
+    if args.fetch:
+        if not args.date:
+            fail("--fetch needs --date (the energy day to collect).")
+        args.pgcb, args.pb, fetch_notes = fetch_sources(args.date)
+        # The ERP names its attachments erp_<id>.xlsx, which carries no date for
+        # derive_energy_day to read. The day is already known — it selected the
+        # attachment — so state it rather than letting the filename path guess.
+        args.pgcb_name = ""
+    elif not args.pgcb:
+        fail("--pgcb is required unless --fetch is given.")
 
     try:
         from daily_extractor.convert import pdf_to_text
@@ -449,7 +548,7 @@ def main() -> None:
         except ValueError:
             fail(f"Invalid date: {iso}")
 
-    warnings: list[str] = []
+    warnings: list[str] = list(fetch_notes)
     tmpdir = Path(tempfile.mkdtemp(prefix="esb-ingest-src-"))
 
     # --- PGCB grid -------------------------------------------------------
@@ -568,6 +667,28 @@ def main() -> None:
         # reconciliation checks cannot catch, because the numbers are internally
         # perfect. They are simply the wrong day's numbers.
         printed_start = printed_window_start(pb_text)
+        if printed_start is None:
+            # The flowed text lost the date to a CID font; read the header band
+            # by coordinates instead. This is the guard that decides whether the
+            # PDF is even this day's, so it is worth a second attempt before
+            # falling back to trusting the filename.
+            printed_start = printed_window_start(pdf_header_text(Path(args.pb)))
+        # A letterhead the operator has already adjudicated. Narrow on purpose:
+        # the expected misprint must be stated exactly, so this waives one known
+        # document defect rather than disabling the check.
+        adjudicated = (
+            printed_start is not None
+            and args.expect_gas_window
+            and printed_start.isoformat() == args.expect_gas_window
+        )
+        if adjudicated:
+            warnings.append(
+                f"Gas day taken as {op_date.isoformat()} although the report is headed "
+                f"{printed_start.isoformat()} — accepted because that misprint was stated up front. "
+                "The figures are filed against the adjudicated day, not the printed one."
+            )
+            printed_start = op_date
+
         if printed_start and printed_start != op_date:
             gas_archive = None
             # The six-row summary was scraped from this PDF a moment ago, so it
@@ -691,7 +812,11 @@ def main() -> None:
     if gas_archive:
         scraped = payload.get("gasProductionData") or []
         scraped_total = round(sum(float(r.get("gas") or 0) for r in scraped), 1)
-        archive_total = float((gas_archive.get("production") or {}).get("grand_total", {}).get("gas_mmcfd") or 0)
+        # `grand_total` is present-but-null on the days whose PDF prints no
+        # grand-total row, so the key must be defaulted after the lookup, not
+        # in it — `.get(k, {})` returns the None that is there and the next
+        # `.get` raises, taking the whole ingest down. Four of 32 July days.
+        archive_total = float(((gas_archive.get("production") or {}).get("grand_total") or {}).get("gas_mmcfd") or 0)
 
         # Three possible sources for the six-row summary, in order of trust:
         #

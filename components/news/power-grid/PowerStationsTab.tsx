@@ -133,25 +133,32 @@ export function PowerStationsTab({
                 <th className="text-left">Present (MW)</th>
                 <th className="text-left">Day Peak (MW)</th>
                 <th className="text-left">Evening Peak (MW)</th>
+                <th className="text-left">Day&apos;s Energy (MWh)</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((p) => (
-                <tr key={p.name} className={p.eveningPeakMw === 0 && p.dayPeakMw === 0 ? 'opacity-50' : ''}>
+                <tr key={p.name} className={p.eveningPeakMw === 0 && !p.dayPeakMw && !p.energyKwh ? 'opacity-50' : ''}>
                   <td className="font-semibold">{p.name}</td>
                   <td className="text-muted-foreground">{p.fuel || '—'}</td>
                   <td className="text-muted-foreground">{p.producer || '—'}</td>
                   <td className="text-left tabular-nums">{formatMw(p.installedMw)}</td>
                   <td className="text-left tabular-nums">{formatMw(p.presentCapacityMw)}</td>
+                  {/* Null, not zero, on days sourced from P2 — that sheet
+                      publishes the evening peak and no day peak at all. */}
                   <td className="text-left tabular-nums">{formatMw(p.dayPeakMw)}</td>
                   <td className="text-left tabular-nums font-semibold">{formatMw(p.eveningPeakMw)}</td>
+                  <td className="text-left tabular-nums" title={p.remarks || undefined}>
+                    {p.energyKwh == null ? '—' : formatMw(p.energyKwh / 1000)}
+                  </td>
                 </tr>
               ))}
               {totals && !query && (
                 <tr className="border-t border-border/80 font-bold bg-muted/20">
                   <td colSpan={5}>All stations</td>
-                  <td className="text-left tabular-nums">{formatMw(totals.day)}</td>
+                  <td className="text-left tabular-nums">{totals.day == null ? '—' : formatMw(totals.day)}</td>
                   <td className="text-left tabular-nums">{formatMw(totals.evening)}</td>
+                  <td className="text-left tabular-nums">{totals.energyKwh == null ? '—' : formatMw(totals.energyKwh / 1000)}</td>
                 </tr>
               )}
             </tbody>
@@ -163,10 +170,25 @@ export function PowerStationsTab({
           // both is a check the reader can make rather than take on trust.
           <p className="mt-3 text-[11px] text-muted-foreground">
             Station totals reconcile with the system figures for this day:{' '}
-            <strong className="text-foreground">{formatMw(totals.day)} MW</strong> at day peak against a
-            published {formatMw(systemStats.dayPeakGen)} MW, and{' '}
+            {totals.day != null && (
+              <>
+                <strong className="text-foreground">{formatMw(totals.day)} MW</strong> at day peak against a
+                published {formatMw(systemStats.dayPeakGen)} MW, and{' '}
+              </>
+            )}
             <strong className="text-foreground">{formatMw(totals.evening)} MW</strong> at evening peak
-            against {formatMw(systemStats.eveningPeakGen)} MW.
+            against {formatMw(systemStats.eveningPeakGen)} MW
+            {totals.energyKwh != null && (
+              <>
+                , and <strong className="text-foreground">{formatMw(totals.energyKwh / 1e6)} MKWh</strong>{' '}
+                of energy against a published {formatMw(systemStats.totalEnergyGen)} MKWh
+              </>
+            )}
+            .
+            {totals.day == null && (
+              <> This day&apos;s figures come from the report&apos;s per-station table, which publishes the
+              evening peak and the day&apos;s energy but no day peak.</>
+            )}
           </p>
         )}
 

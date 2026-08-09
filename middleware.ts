@@ -20,6 +20,7 @@ import {
   isDateAllowedForTier,
   resolveGridAccessTier,
 } from '@/lib/data/grid/grid-tier-access';
+import { isPublicSampleDate } from '@/lib/data/grid/public-sample-dates';
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
@@ -243,7 +244,7 @@ export async function middleware(request: NextRequest) {
     const isPublicDate =
       !isoDate ||
       !latestDate ||
-      isoDate === '2024-07-02' ||
+      isPublicSampleDate(isoDate) ||
       isBeyondShippedArchive ||
       inPetrobanglaPublicWindow ||
       isDateAllowedForTier(isoDate, 'visitor', latestDate);

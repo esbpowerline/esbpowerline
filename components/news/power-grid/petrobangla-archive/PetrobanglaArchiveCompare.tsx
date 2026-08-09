@@ -16,6 +16,7 @@ import { loadArchiveDay } from '@/lib/data/petrobangla/loadArchive';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaIndex } from '@/lib/data/petrobangla/types';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
 import { isDateAllowedForTier, type GridAccessTier } from '@/lib/data/grid/grid-tier-access';
+import { COMPARE_FREE_BASELINE_DATE } from '@/lib/data/grid/public-sample-dates';
 import { GridDataLockedGate } from '@/components/news/power-grid/GridDataLockedGate';
 import { CustomDropdown } from '@/components/news/power-grid/shared';
 import { ArchiveBadge, ArchiveDateGridPicker, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
@@ -34,8 +35,6 @@ function shiftIsoYear(iso: string, delta: number): string {
   return `${y + delta}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
-const COMPARE_FREE_BASELINE_DATE = '2024-07-02';
-
 const TIER_RANK: Record<GridAccessTier, number> = {
   visitor: 0,
   member: 1,
@@ -53,14 +52,14 @@ function getRequiredTierForDate(date: string, latestDate: string): GridAccessTie
 
 function resolveMatchingDateForYear(year: string, rightDate: string, okDates: string[]): string {
   const parts = rightDate.split('-');
-  if (parts.length !== 3) return okDates[0] || '2024-07-02';
+  if (parts.length !== 3) return okDates[0] || COMPARE_FREE_BASELINE_DATE;
   const [, m, d] = parts;
 
   const exact = `${year}-${m}-${d}`;
   if (okDates.includes(exact)) return exact;
 
   const datesInYear = okDates.filter((date) => date.startsWith(`${year}-`));
-  if (!datesInYear.length) return okDates[0] || '2024-07-02';
+  if (!datesInYear.length) return okDates[0] || COMPARE_FREE_BASELINE_DATE;
 
   const targetDays = parseInt(m, 10) * 31 + parseInt(d, 10);
   let closestDate = datesInYear[0];

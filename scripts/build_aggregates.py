@@ -4,8 +4,8 @@
   _live_week.json       the last seven days, bundled whole
   timeline-summary.json slim per-day series behind the charts and reserve model
 
-The index is updated *incrementally* — the one new day is upserted and every
-other entry is left byte-identical. A full rebuild would risk silently
+The index is updated *incrementally* — only the days named are upserted and
+every other entry is left byte-identical. A full rebuild would risk silently
 rewriting 2,200 historical entries if this script's derivation differed even
 slightly from whatever produced them years ago.
 
@@ -15,6 +15,7 @@ regenerating it is safe.
 
 Usage:
   python scripts/build_aggregates.py --date 2026-08-01
+  python scripts/build_aggregates.py --date 2026-08-01 2026-08-02 2026-08-03
   python scripts/build_aggregates.py --date 2026-08-01 --dry-run
 """
 from __future__ import annotations
@@ -72,22 +73,32 @@ def index_entry(date: str, doc: dict) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--date", required=True, help="the archive day just written, ISO")
+    ap.add_argument(
+        "--date",
+        required=True,
+        nargs="+",
+        help=(
+            "the archive day(s) just written, ISO. Several may be given: repairing a range "
+            "leaves every one of its index entries stale, and upserting them one process at a "
+            "time rebuilds the whole timeline once per day for no reason."
+        ),
+    )
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    day_path = DAILY / f"{args.date}.json"
-    if not day_path.exists():
-        print(json.dumps({"ok": False, "error": f"No archive file at {day_path}"}))
+    dates = sorted(set(args.date))
+    missing = [d for d in dates if not (DAILY / f"{d}.json").exists()]
+    if missing:
+        print(json.dumps({"ok": False, "error": f"No archive file for {', '.join(missing)}"}))
         return
 
-    doc = json.loads(day_path.read_text(encoding="utf-8"))
-    entry = index_entry(args.date, doc)
+    entries = {d: index_entry(d, json.loads((DAILY / f"{d}.json").read_text(encoding="utf-8")))
+               for d in dates}
 
-    # --- _index.json : upsert one day ------------------------------------
+    # --- _index.json : upsert the given days ------------------------------
     index = json.loads(INDEX.read_text(encoding="utf-8"))
-    days = [d for d in index.get("days", []) if d.get("date") != args.date]
-    existed = len(days) != len(index.get("days", []))
+    days = [d for d in index.get("days", []) if d.get("date") not in entries]
+    existed = len(index.get("days", [])) - len(days)
 
     # Drop entries whose day file no longer exists. Without this a withdrawn day
     # stays in the catalogue pointing at a deleted file, and the live-week bundle
@@ -96,7 +107,7 @@ def main() -> None:
     days = [d for d in days if (DAILY / f"{d.get('date')}.json").exists()]
     pruned = before - len(days)
 
-    days.append(entry)
+    days.extend(entries.values())
     days.sort(key=lambda d: d["date"])
     index["days"] = days
     index["total_days"] = len(days)
@@ -129,7 +140,8 @@ def main() -> None:
         print(json.dumps({
             "ok": True,
             "dryRun": True,
-            "indexAction": "updated" if existed else "added",
+            "indexUpdated": existed,
+            "indexAdded": len(entries) - existed,
             "indexDays": len(days),
             "liveWeekDays": len(week_days),
             "latest": live_week["latest_date"],
@@ -154,7 +166,8 @@ def main() -> None:
 
     print(json.dumps({
         "ok": True,
-        "indexAction": "updated" if existed else "added",
+        "indexUpdated": existed,
+        "indexAdded": len(entries) - existed,
         "indexDays": index["total_days"],
         "prunedMissing": pruned,
         "liveWeekDays": live_week["live_week_count"],

@@ -45,11 +45,25 @@ export async function fetchPlantDetail(isoDate: string): Promise<DailyPlantDetai
   return detail;
 }
 
-/** Day-peak and evening-peak totals, for checking against the headline figures. */
-export function plantTotals(detail: DailyPlantDetail | null): { day: number; evening: number } | null {
+/**
+ * Station totals, for checking against the headline figures.
+ *
+ * `day` is null when the day's source is the P2 sheet, which publishes the
+ * evening peak alone — summing its nulls to 0 would print a day peak of zero
+ * beneath stations that plainly generated.
+ */
+export function plantTotals(
+  detail: DailyPlantDetail | null,
+): { day: number | null; evening: number; energyKwh: number | null } | null {
   if (!detail?.plants?.length) return null;
+  const hasDayPeak = detail.plants.some((p) => p.dayPeakMw != null);
+  const hasEnergy = detail.plants.some((p) => p.energyKwh != null);
   return detail.plants.reduce(
-    (acc, p) => ({ day: acc.day + (p.dayPeakMw || 0), evening: acc.evening + (p.eveningPeakMw || 0) }),
-    { day: 0, evening: 0 },
+    (acc, p) => ({
+      day: acc.day == null ? null : acc.day + (p.dayPeakMw || 0),
+      evening: acc.evening + (p.eveningPeakMw || 0),
+      energyKwh: acc.energyKwh == null ? null : acc.energyKwh + (p.energyKwh || 0),
+    }),
+    { day: hasDayPeak ? 0 : null, evening: 0, energyKwh: hasEnergy ? 0 : null },
   );
 }

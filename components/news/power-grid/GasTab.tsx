@@ -1,9 +1,11 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { ChevronRight, Database, Droplet, Info } from 'lucide-react';
 import type { GasDistributionItem, GasProductionItem } from '@/lib/data/grid/types';
 import { formatNumber } from '@/lib/utils';
+import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
+import { coverageLabel } from '@/lib/data/grid/coverage';
 import { GridLockedContent } from './GridLockedContent';
 import { GridCardFooter } from './GridExplorerUI';
 import { PetrobanglaGasKpiStrip } from './PetrobanglaGasKpiStrip';
@@ -44,6 +46,60 @@ export function GasTab({
   const { day: archiveDay, gasDay } = usePetrobanglaArchiveDay(selectedDate);
   const [expandedProd, setExpandedProd] = useState<string | null>(null);
   const [expandedDist, setExpandedDist] = useState<string | null>(null);
+
+  // The gas report lags the grid report: PGCB publishes a day's grid figures
+  // the next morning, Petrobangla the morning after that. So the newest day on
+  // the site routinely has grid data and no gas, and its gas sections are
+  // written as the six company rows zeroed — the shape the site uses for "not
+  // published yet".
+  //
+  // The rest of this tab already handles that by falling back to the nearest
+  // report: the caption names it, and the per-company detail cards read from
+  // it. The summary tables did not, so they showed zeros beneath a caption
+  // promising a report that has figures — nothing visible until a row was
+  // clicked, which is where the fallback took over. They now read from the same
+  // day the caption names.
+  const [fallback, setFallback] = useState<{
+    production: GasProductionItem[];
+    distribution: GasDistributionItem[];
+  } | null>(null);
+  const selectedDayHasGas = gasProductionData.some((g) => (g.gas ?? 0) > 0);
+
+  useEffect(() => {
+    if (selectedDayHasGas || !gasDay || gasDay === selectedDate) {
+      setFallback(null);
+      return;
+    }
+    let live = true;
+    fetchDailyReport(gasDay).then((res) => {
+      if (!live) return;
+      const gas = res.ok ? res.data.gasProductionData ?? [] : [];
+      setFallback(
+        gas.some((g) => (g.gas ?? 0) > 0)
+          ? { production: gas, distribution: res.ok ? res.data.gasDistributionData ?? [] : [] }
+          : null,
+      );
+    });
+    return () => {
+      live = false;
+    };
+  }, [selectedDayHasGas, gasDay, selectedDate]);
+
+  const productionRows = fallback?.production ?? gasProductionData;
+  const distributionRows = fallback?.distribution ?? gasDistributionData;
+  // Recomputed from the rows actually on screen, so the total cannot describe a
+  // different day from the rows above it.
+  const productionTotalGas = fallback
+    ? fallback.production.reduce((sum, g) => sum + (g.gas ?? 0), 0)
+    : totalGasSupply;
+  const productionTotalCondensate = fallback
+    ? fallback.production.reduce((sum, g) => sum + (g.condensate ?? 0), 0)
+    : totalCondensate;
+  // The grid date would name a day these figures are not from once the
+  // fallback is in effect, and the footer is the line a reader cites.
+  const gasReportDate = fallback && archiveDay
+    ? archiveDay.report.report_date_label
+    : systemStatsDate;
 
   // Rounded list rows need the separate-borders model (collapsed cells can't round).
   const listTable = 'grid-explorer-table border-separate [border-spacing:0_0.375rem]';
@@ -101,11 +157,14 @@ export function GasTab({
     );
   }
 
-  const totalActiveFields = gasProductionData.reduce((sum, item) => sum + (item.fields || 0), 0);
-  const distPowerTotal = gasDistributionData.reduce((sum, item) => sum + item.power, 0);
-  const distFertTotal = gasDistributionData.reduce((sum, item) => sum + item.fertilizer, 0);
-  const distOthersTotal = gasDistributionData.reduce((sum, item) => sum + item.others, 0);
-  const distGrandTotal = gasDistributionData.reduce((sum, item) => sum + item.total, 0);
+  // All five off the rows on screen, for the same reason as the production
+  // totals: a total that sums a different day from the rows above it is worse
+  // than no total.
+  const totalActiveFields = productionRows.reduce((sum, item) => sum + (item.fields || 0), 0);
+  const distPowerTotal = distributionRows.reduce((sum, item) => sum + item.power, 0);
+  const distFertTotal = distributionRows.reduce((sum, item) => sum + item.fertilizer, 0);
+  const distOthersTotal = distributionRows.reduce((sum, item) => sum + item.others, 0);
+  const distGrandTotal = distributionRows.reduce((sum, item) => sum + item.total, 0);
 
   return (
     <div className="grid-explorer-panel space-y-6">
@@ -121,7 +180,7 @@ export function GasTab({
             </h3>
             <p className="grid-explorer-chart-card__sub">
               Petrobangla Production &amp; Marketing Division Report •{' '}
-              <span className="text-sky-500 font-semibold">Tracked since January 12, 2020</span> •{' '}
+              <span className="text-sky-500 font-semibold">{coverageLabel('gasProduction')}</span> •{' '}
               Click a company for per-field detail
             </p>
             {reportCaption}
@@ -149,7 +208,7 @@ export function GasTab({
               </thead>
             )}
             <tbody>
-              {gasProductionData.map((gp, idx) => {
+              {productionRows.map((gp, idx) => {
                 const detailFields = productionFieldsForLabel(archiveDay, gp.company);
                 const expandable = detailFields.length > 0;
                 const expanded = expandable && expandedProd === gp.company;
@@ -228,8 +287,8 @@ export function GasTab({
                 <tr className="font-bold">
                   <td className={`rounded-l-xl pl-3 ${totalTd}`}>Grand Total Production</td>
                   <td className={`text-left ${totalTd}`}>{totalActiveFields} Fields</td>
-                  <td className={`text-left text-primary ${totalTd}`}>{formatNumber(totalGasSupply, 1)}</td>
-                  <td className={`text-left ${totalTd}`}>{formatNumber(totalCondensate, 1)}</td>
+                  <td className={`text-left text-primary ${totalTd}`}>{formatNumber(productionTotalGas, 1)}</td>
+                  <td className={`text-left ${totalTd}`}>{formatNumber(productionTotalCondensate, 1)}</td>
                   <td className={`text-left rounded-r-xl ${totalTd}`}>100.0%</td>
                 </tr>
               )}
@@ -253,7 +312,7 @@ export function GasTab({
             </a>
           </span>
           <span>Audited by: Petrobangla Production &amp; Marketing Division</span>
-          <span className="font-medium">Reporting Period: Daily Field Snapshot (Date: {systemStatsDate})</span>
+          <span className="font-medium">Reporting Period: Daily Field Snapshot (Date: {gasReportDate})</span>
         </GridCardFooter>
       </div>
 
@@ -267,7 +326,7 @@ export function GasTab({
             </h3>
             <p className="grid-explorer-chart-card__sub">
               Allocated supply (MMCFD) across regional gas distributors •{' '}
-              <span className="text-sky-500 font-semibold">Tracked since January 12, 2020</span> •{' '}
+              <span className="text-sky-500 font-semibold">{coverageLabel('gasProduction')}</span> •{' '}
               Click a distributor for per-plant detail
             </p>
             {reportCaption}
@@ -295,7 +354,7 @@ export function GasTab({
               </thead>
             )}
             <tbody>
-              {gasDistributionData.map((gd, idx) => {
+              {distributionRows.map((gd, idx) => {
                 const detailCompany = distributionCompanyForLabel(archiveDay, gd.company);
                 const expandable = detailCompany != null;
                 const expanded = expandable && expandedDist === gd.company;
@@ -429,7 +488,7 @@ export function GasTab({
             </a>
           </span>
           <span>Audited by: Distributor Billing Audits (TGTDCL, KGDCL, JGTDSL)</span>
-          <span className="font-medium">Reporting Period: Daily Distribution Allocation (Date: {systemStatsDate})</span>
+          <span className="font-medium">Reporting Period: Daily Distribution Allocation (Date: {gasReportDate})</span>
         </GridCardFooter>
       </div>
     </div>

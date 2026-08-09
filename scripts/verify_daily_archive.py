@@ -31,8 +31,12 @@ REQUIRED_STATS = (
 )
 # Every figure read straight from the source report, and therefore absent on
 # layouts that do not publish it, rather than estimated.
-NULLABLE = {"minGen", "maxGen", "dayPeakDemand", "totalEnergyUnserved",
-            "totalEnergyDemand", "maxTemp"}
+# `totalEnergyGen` joined these once it was clear PGCB leaves the cell empty on
+# some days — 42 of early 2018 had published "0.0 MKWh" for a day that plainly
+# generated, which is the same defect as an estimate dressed as a measurement,
+# only in the other direction.
+NULLABLE = {"minGen", "maxGen", "dayPeakDemand", "totalEnergyGen",
+            "totalEnergyUnserved", "totalEnergyDemand", "maxTemp"}
 # Never implicated by the maxGen defect, so they must survive the backfill byte
 # for byte. Any drift here means the repair reached further than intended.
 # generationData is deliberately in scope (its cost columns move from a
@@ -101,15 +105,38 @@ def main() -> None:
                 # A report with no load-curve sheet draws no curve at all.
                 stats["curve absent (not published)"] += 1
             elif len(hourly) < 20:
-                errors.append(f"{day}: hourlyLoadData has {len(hourly)} rows, expected 24 or none")
+                errors.append(f"{day}: hourlyLoadData has {len(hourly)} rows, expected 24-25 or none")
             else:
                 distinct = len({round(float(h.get("generation") or 0), 3) for h in hourly})
                 stats["curve real" if distinct > 3 else "curve flat/placeholder"] += 1
+                # Shedding and demand come from one of three places and the
+                # count says which:
+                #
+                #   P4 (2025+) and Daily Gen (2014-2018) state both for every
+                #   hour they publish, so those days carry them on every row.
+                #
+                #   YesterdayGen (2018-2024) states shedding from 01:00 to
+                #   24:00, one hour short of the load curve it is merged into —
+                #   so the day's 00:00 point keeps a null, and 23 of 24 is the
+                #   correct shape there, not a partial fill.
+                #
+                #   Days with none of those sheets have only what P1 prints for
+                #   the evening peak: exactly one hour.
+                #
+                # What stays worth rejecting is the shape in between — a handful
+                # of hours filled and the rest blank, which is what a spread
+                # estimate looks like, and how 18:00-23:00 came to be back-filled
+                # with total shedding x 0.8 and charted as though measured.
                 shed_hours = [h for h in hourly if h.get("loadShed") is not None]
-                if len(shed_hours) > 1:
+                if len(shed_hours) in (0, 1):
+                    stats["shedding: evening peak only"] += 1
+                elif len(shed_hours) >= len(hourly) - 1:
+                    stats["shedding: every published hour"] += 1
+                else:
                     errors.append(
-                        f"{day}: load shedding present on {len(shed_hours)} hours; PGCB publishes it "
-                        "for the evening peak hour only"
+                        f"{day}: load shedding present on {len(shed_hours)} of {len(hourly)} hours. "
+                        "It should be on one hour (from P1), or on every hour the source publishes "
+                        "(all of them, or all but 00:00 where the source starts at 01:00)"
                     )
 
     print(f"{stats['days']} day(s) checked")

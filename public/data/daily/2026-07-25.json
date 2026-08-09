@@ -91,6 +91,12 @@
       "energy": 3.12,
       "peakFlow": 150.0,
       "type": "C/B Interconnector (East)"
+    },
+    {
+      "source": "Nepal (via India)",
+      "energy": 0.89,
+      "peakFlow": 38.0,
+      "type": "C/B Interconnector (Nepal)"
     }
   ],
   "regionalDemandData": [
@@ -196,7 +202,7 @@
       "time": "11:35 - 15:43",
       "plant": "KSRM 132/33kV S/S Transformer-01 HT Scheduled",
       "load": "HT Outage",
-      "reason": "for 33 KV Incoming CT Oil Leakage maintenance",
+      "reason": "Due to for 33 KV Incoming CT Oil Leakage maintenance",
       "full_desc": "KSRM 132/33kV S/S Transformer-01 HT Scheduled S/D Due to for 33 KV Incoming CT Oil Leakage maintenance"
     },
     {
@@ -322,28 +328,28 @@
       "time": "06:20",
       "plant": "Khulna(C )-Noapara  132kV Ckt-1 Scheduled",
       "load": "HT Outage",
-      "reason": "for south ckt-02 bus DS maintenance work.",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
       "full_desc": "Khulna(C )-Noapara  132kV Ckt-1 Scheduled S/D from Noapara 132/33kV end. and from Khulna (C) end Due to S/D for south ckt-02 bus DS maintenance work."
     },
     {
       "time": "06:21",
       "plant": "Khulna(C )-Noapara  132kV Ckt-2 Scheduled",
       "load": "HT Outage",
-      "reason": "for south ckt-02 bus DS maintenance work.",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
       "full_desc": "Khulna(C )-Noapara  132kV Ckt-2 Scheduled S/D from Noapara 132/33kV end. and from Khulna (C) end Due to S/D for south ckt-02 bus DS maintenance work."
     },
     {
       "time": "06:23",
       "plant": "Khulna (C) S/S North-WestCkt-1 Scheduled",
       "load": "HT Outage",
-      "reason": "for south ckt-02 bus DS maintenance work.",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
       "full_desc": "Khulna (C) S/S North-WestCkt-1 Scheduled S/D Due to S/D for south ckt-02 bus DS maintenance work."
     },
     {
       "time": "06:23",
       "plant": "Khulna (C) S/S North- West Ckt-2 Scheduled",
       "load": "HT Outage",
-      "reason": "for south ckt-02 bus DS maintenance work.",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
       "full_desc": "Khulna (C) S/S North- West Ckt-2 Scheduled S/D Due to S/D for south ckt-02 bus DS maintenance work."
     },
     {
@@ -358,122 +364,128 @@
     {
       "time": "00:00",
       "generation": 14481.87,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 454.0,
+      "demand": 14956.3
     },
     {
       "time": "01:00",
       "generation": 14074.72,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 471.0,
+      "demand": 14566.92
     },
     {
       "time": "02:00",
       "generation": 13651.6,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 462.0,
+      "demand": 14134.6
     },
     {
       "time": "03:00",
       "generation": 13171.55,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 452.0,
+      "demand": 13643.55
     },
     {
       "time": "04:00",
       "generation": 12864.8,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 443.0,
+      "demand": 13327.8
     },
     {
       "time": "05:00",
       "generation": 12737.02,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 406.0,
+      "demand": 13161.02
     },
     {
       "time": "06:00",
       "generation": 12274.06,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 417.0,
+      "demand": 12710.06
     },
     {
       "time": "07:00",
       "generation": 12391.41,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 396.0,
+      "demand": 12805.41
     },
     {
       "time": "08:00",
       "generation": 12593.99,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 400.0,
+      "demand": 13011.99
     },
     {
       "time": "09:00",
       "generation": 12917.75,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 448.0,
+      "demand": 13385.75
     },
     {
       "time": "10:00",
       "generation": 13161.8,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 347.0,
+      "demand": 13524.8
     },
     {
       "time": "11:00",
       "generation": 13435.84,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 367.0,
+      "demand": 13819.84
     },
     {
       "time": "12:00",
       "generation": 14007.39,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 483.0,
+      "demand": 14512.39
     },
     {
       "time": "13:00",
       "generation": 14108.06,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 479.0,
+      "demand": 14609.06
     },
     {
       "time": "14:00",
       "generation": 14190.12,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 623.0,
+      "demand": 14841.12
     },
     {
       "time": "15:00",
       "generation": 14198.42,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 796.0,
+      "demand": 15030.42
     },
     {
       "time": "16:00",
       "generation": 14146.68,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 821.0,
+      "demand": 15004.68
     },
     {
       "time": "17:00",
       "generation": 13903.29,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 668.0,
+      "demand": 14601.29
     },
     {
       "time": "18:00",
       "generation": 13676.63,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 550.0,
+      "demand": 14251.63
     },
     {
       "time": "19:00",
       "generation": 14857.59,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 605.0,
+      "demand": 15489.59
+    },
+    {
+      "time": "19:30",
+      "generation": 15732.37,
+      "loadShed": 793.0,
+      "demand": 16561.37
     },
     {
       "time": "20:00",
@@ -484,62 +496,62 @@
     {
       "time": "21:00",
       "generation": 15686.13,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 847.0,
+      "demand": 16571.13
     },
     {
       "time": "22:00",
       "generation": 15326.18,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 958.0,
+      "demand": 16327.18
     },
     {
       "time": "23:00",
       "generation": 15322.74,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 962.0,
+      "demand": 16327.74
     }
   ],
   "gasProductionData": [
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
       "fields": 5,
-      "gas": 480.1,
-      "condensate": 382.5,
+      "gas": 479.8,
+      "condensate": 380.2,
       "share": 22.3
     },
     {
       "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
       "fields": 5,
       "gas": 139.8,
-      "condensate": 642.2,
+      "condensate": 641.6,
       "share": 6.5
     },
     {
       "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
       "fields": 9,
-      "gas": 108.8,
-      "condensate": 76.4,
-      "share": 5.1
+      "gas": 108.6,
+      "condensate": 72.6,
+      "share": 5.0
     },
     {
       "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
       "fields": 3,
-      "gas": 890.8,
-      "condensate": 4690.4,
-      "share": 41.4
+      "gas": 922.5,
+      "condensate": 4844.9,
+      "share": 42.9
     },
     {
       "company": "Tullow (Bangora)",
       "fields": 1,
-      "gas": 30.8,
-      "condensate": 87.0,
-      "share": 1.4
+      "gas": 0.0,
+      "condensate": 0.0,
+      "share": 0.0
     },
     {
       "company": "RPGCL (R-LNG Import / LNG Terminal)",
       "fields": 0,
-      "gas": 500.7,
+      "gas": 501.1,
       "condensate": 0.0,
       "share": 23.3
     }

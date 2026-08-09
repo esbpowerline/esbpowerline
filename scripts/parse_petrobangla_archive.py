@@ -43,11 +43,79 @@ def slug(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
 
 
+def field_name(name, company_code):
+    """A field's own name, without the company heading printed to its left.
+
+    The first field under each company shares a line with that company's
+    heading, so its row reads "1. BGFCL Bakhrabad" where the rows below it read
+    "Narsingdi". Whether the numeral is picked up at all depends on where the
+    page happens to place the heading, which means the same field can be named
+    two ways in two files for no reason in the data.
+
+    Named consistently here so it does not have to be undone downstream —
+    `clean_field_name` in ingest_bridge exists to strip exactly this, and the
+    owner map in the Petrobangla section detail is keyed on the cleaned form.
+    """
+    cleaned = re.sub(r'^\s*\d+\.\s*', '', name)
+    # Any company, not just the one in force: a heading sharing a line with its
+    # first field carries trailing numbers, so the header branch above declines
+    # it and `company_code` is still the PREVIOUS company on exactly the rows
+    # that need stripping — "2. SGFL Kailashtila #2 (MSTE)" arrives while the
+    # code still reads BGFCL. This is also why the owner map downstream is keyed
+    # on field names rather than on `company_code`.
+    codes = '|'.join(re.escape(c) for c in list(COMPANY_HEADERS) + ['IOC'])
+    cleaned = re.sub(rf'^(?:{codes})\b\s*', '', cleaned, flags=re.IGNORECASE)
+    return cleaned.strip() or name
+
+
+# The production block's horizontal extent on the layout these coordinates were
+# measured from, alongside the section headings that bracket it. Section I is the
+# production table; section III starts the right-hand column. Keeping all four
+# numbers together is what lets the band be re-derived for a page printed at a
+# different size instead of being asserted.
+REF_SECTION_I_X = 101.2
+REF_SECTION_III_X = 412.7
+REF_PROD_X0 = 98.0
+REF_PROD_X1 = 390.0
+
+
+def production_band(words):
+    """Left and right edges of the production table on this particular page.
+
+    Petrobangla prints the same report on two page sizes — Letter for most days,
+    A4 for a handful — and the A4 files are not a scaled copy: the table moves
+    left as well, so 'Titas' starts at x=92.6 where the Letter files put it at
+    129.1. Against the fixed 98..390 band those files lost the field-name column
+    outright, every row fell below the six-numeric test, and 20 of 23 fields
+    vanished. What survived was two stragglers and the printed total row, summing
+    to 45.8 MMCFD more than the day actually produced. Four of the 32 July 2026
+    reports are printed this way.
+
+    The band is therefore expressed as a position between the 'I.' and 'III.'
+    section headings, which bracket the table on every layout, and restored at
+    the same relative offsets. On the Letter pages this reproduces 98..390
+    exactly, so the days already in the archive are unaffected.
+
+    Falls back to the measured constants when either heading is missing.
+    """
+    def heading_x(token):
+        hits = [w[0] for w in words if w[4] == token and w[1] < 120]
+        return min(hits) if hits else None
+
+    i_x, iii_x = heading_x('I.'), heading_x('III.')
+    if i_x is None or iii_x is None or iii_x - i_x < 50:
+        return REF_PROD_X0, REF_PROD_X1
+
+    scale = (iii_x - i_x) / (REF_SECTION_III_X - REF_SECTION_I_X)
+    return (i_x + (REF_PROD_X0 - REF_SECTION_I_X) * scale,
+            i_x + (REF_PROD_X1 - REF_SECTION_I_X) * scale)
+
+
 def parse_production(words):
     """Return (fields, subtotals, grand_total). Field rows carry exactly the
     trailing 6 numerics: wells, capacity, gas, condensate, %cap, %prod.
     Layout-independent: anchors on 'Titas' (top) and the production 'Grand' row."""
-    prod_x0, prod_x1 = 98, 390
+    prod_x0, prod_x1 = production_band(words)
     titas_y = min((w[1] for w in words if w[4] == 'Titas' and w[0] < prod_x1), default=50)
     # production grand-total row = 'Grand' word inside the production x-band
     grand_y = min((w[1] for w in words
@@ -84,7 +152,7 @@ def parse_production(words):
                 continue
         nums = [t for t in toks if NUM.match(t)]
         names = [t for t in toks if not NUM.match(t)]
-        name = ' '.join(names).strip()
+        name = field_name(' '.join(names).strip(), company_code)
         is_grand = 'Grand' in names or 'Grand' in toks
         is_sub = name.startswith('Sub-Total') or 'Sub-Total' in names
         # a data row needs >=6 trailing numerics

@@ -14,7 +14,14 @@ export interface GridSystemStats {
    */
   minGen: number | null;
   maxGen: number | null;
-  totalEnergyGen: number;
+  /**
+   * The day's total generation as P1 prints it. Null where that cell is left
+   * empty — PGCB does that, and 42 days of early 2018 published a headline of
+   * "0.0 MKWh" as a result. Recovered from P2's National Grid Total wherever a
+   * source workbook survives; null on the days where none does, because zero
+   * generation is a claim the report never made.
+   */
+  totalEnergyGen: number | null;
   /**
    * All four are read from the source report, never inferred. null on layouts
    * that do not publish them — previously these were an estimate
@@ -80,19 +87,49 @@ export interface DailyOutageItem {
 
 export interface HourlyLoadItem {
   time: string;
-  /** Measured — the L-Curve TOTAL column for this hour. */
+  /** Measured — P4's Generation column, or the L-Curve TOTAL where P4 is absent. */
   generation: number;
   /**
-   * PGCB publishes load shedding at the evening peak hour only, so these are
-   * non-null on exactly that one hour and null everywhere else. They used to
-   * be filled across 18:00-23:00 with total shedding x 0.8 and charted as a
-   * measured profile.
+   * From the P4 sheet, "Hourly Demand, Generation & Load-Shed Report", which
+   * publishes all three every hour. Null only on the older layouts that carry
+   * no P4: there P1 states the pair for the evening peak alone, so exactly one
+   * hour is non-null and the rest are unknown. Zero is a measurement — PGCB
+   * prints 0 on hours it served everything.
+   *
+   * These were once filled across 18:00-23:00 with total shedding x 0.8 and
+   * charted as a measured profile; a null here means unpublished, never that.
    */
   loadShed: number | null;
   demand: number | null;
 }
 
-/** One power station's figures for the reported day, from the Forecast sheet. */
+/**
+ * Half-hourly generation split by fuel and by importer, from the En-Curve
+ * sheet. `mw[i]` corresponds to `fuels[i]`; null where the day's sheet carries
+ * no such column, which is not the same as zero output.
+ *
+ * Present only on the 2025+ layout. The columns separate public from private
+ * generation and name each import (HVDC Bheramara, Nepal, Tripura, Adani)
+ * where `borderImportsData` carries three and no Nepal. The last column,
+ * "Shortage", is load shedding at half-hour resolution.
+ */
+export interface EnergyCurveRow {
+  time: string;
+  mw: (number | null)[];
+}
+
+export interface EnergyCurve {
+  fuels: string[];
+  rows: EnergyCurveRow[];
+}
+
+/**
+ * One power station's figures for the reported day.
+ *
+ * From the Forecast sheet on the 2025+ layout, and from P2 before that —
+ * "Evening Peak Generation and Day Long Energy Data of Power Stations", which
+ * PGCB has printed in every workbook back to 2014.
+ */
 export interface PlantActual {
   name: string;
   fuel: string;
@@ -101,9 +138,22 @@ export interface PlantActual {
   installedCapacity: string;
   installedMw: number | null;
   presentCapacityMw: number | null;
-  /** Output at the day and evening peaks — the reported day, not the forecast. */
-  dayPeakMw: number;
+  /**
+   * Output at the evening peak, and at the day peak where the report states it.
+   * `dayPeakMw` is null on every day sourced from P2, which publishes the
+   * evening peak alone — the day peak is a 2025+ Forecast-sheet column.
+   */
+  dayPeakMw: number | null;
   eveningPeakMw: number;
+  /**
+   * The station's output over the whole day, in kWh. Published by P2 in every
+   * era and read by nothing until now. It says what the peak columns cannot: a
+   * plant held at half load all day and one run flat out for an hour can carry
+   * the same peak.
+   */
+  energyKwh?: number | null;
+  /** PGCB's own note on the row — "Gas shortage", "Under maintenance". */
+  remarks?: string;
 }
 
 /** Hourly output per station, from the GenLog sheet (2025+ reports only). */
@@ -141,6 +191,7 @@ export interface GridDailyData {
   regionalDemandData?: RegionalDemandItem[];
   dailyOutages?: DailyOutageItem[];
   hourlyLoadData?: HourlyLoadItem[];
+  energyCurveData?: EnergyCurve;
 }
 
 /** Known Petrobangla gas production entity names (full company labels). */
@@ -173,6 +224,16 @@ export const REQUIRED_GENERATION_FUELS = [
   'Imports',
   'HSD (Diesel)',
 ] as const;
+
+/**
+ * Spellings the archive uses for the same fuel. PGCB's own label changed with
+ * the 2025 layout and the archive carries both — 'HSD (Diesel)' on the older
+ * days, bare 'HSD' from 2025-01-01 on. Neither is wrong, so the completeness
+ * check treats them as one fuel rather than warning on every recent day.
+ */
+export const GENERATION_FUEL_ALIASES: Record<string, readonly string[]> = {
+  'HSD (Diesel)': ['HSD'],
+};
 
 export const OPTIONAL_GENERATION_FUELS = ['Wind'] as const;
 
