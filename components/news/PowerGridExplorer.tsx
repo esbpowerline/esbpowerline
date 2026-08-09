@@ -775,6 +775,19 @@ export function PowerGridExplorer({
     [hourlyLoadData],
   );
 
+  // Whether shedding is published hourly is a separate question from whether
+  // demand is. PGCB's 2018-2024 YesterdayGen sheet carries a "Shortage" column
+  // at every hourly stamp but no demand column, and the parser leaves demand
+  // null rather than deriving it (scripts/parse_daily_reports.py:290-296).
+  // Gating the shedding panel on `curveIsHourly` therefore hid a full published
+  // shedding series on 1,274 days — 360 of them with load genuinely shed,
+  // including the 2022 and 2023 crises — while the card told the reader the
+  // report published an evening-peak figure only.
+  const sheddingIsHourly = useMemo(
+    () => hourlyLoadData.filter((h) => h.loadShed != null).length > 1,
+    [hourlyLoadData],
+  );
+
   // Shedding runs two orders of magnitude below generation — 30 MW against
   // 15,000 on a good hour — so on a shared axis the series is a flat line on
   // the floor. Its own axis is what makes the shape readable.
@@ -1678,9 +1691,11 @@ export function PowerGridExplorer({
               <p className="grid-explorer-chart-card__sub">
                 {curveIsHourly
                   ? <>Generation, demand and load shedding for every hour PGCB publishes, from the NLDC hourly report (Date: {systemStats.date})</>
-                  : <>Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date})</>}
+                  : sheddingIsHourly
+                    ? <>Hourly generation and load shedding from the NLDC hourly report; demand as published for the evening peak hour (Date: {systemStats.date})</>
+                    : <>Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date})</>}
                 {' • '}<span className="text-primary font-semibold text-xs">
-                  {coverageLabel(curveIsHourly ? 'hourlyShedding' : 'loadCurve')}
+                  {coverageLabel(curveIsHourly || sheddingIsHourly ? 'hourlyShedding' : 'loadCurve')}
                 </span>
               </p>
             </div>
@@ -1766,11 +1781,13 @@ export function PowerGridExplorer({
                     <Line yAxisId="left" type="monotone" dataKey="demand" name="Demand (published hourly)" stroke="#eab308" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
                   ) : (
                     <>
-                      {/* Demand and shedding exist for one hour only, so these render
-                          as a single marked point and bar rather than a continuous
-                          series interpolated across the evening. */}
+                      {/* Demand exists for one hour only, so it renders as a single
+                          marked point rather than a series interpolated across the
+                          evening. Shedding may still be hourly on the same day — the
+                          bars are named for what they actually are, because calling a
+                          23-hour series "Peak" misreads the chart for the reader. */}
                       <Line yAxisId="left" type="monotone" dataKey="demand" name="Peak Demand (published)" stroke="#eab308" strokeWidth={0} connectNulls={false} dot={{ r: 5, fill: '#eab308', stroke: '#eab308' }} activeDot={{ r: 7 }} />
-                      <Bar yAxisId="left" dataKey="loadShed" name="Peak Load Shedding (published)" fill={chartTheme.destructive} fillOpacity={0.2} stroke={chartTheme.destructive} strokeWidth={1} radius={[2, 2, 0, 0]} maxBarSize={15} />
+                      <Bar yAxisId="left" dataKey="loadShed" name={sheddingIsHourly ? 'Load Shedding (published hourly)' : 'Peak Load Shedding (published)'} fill={chartTheme.destructive} fillOpacity={0.2} stroke={chartTheme.destructive} strokeWidth={1} radius={[2, 2, 0, 0]} maxBarSize={15} />
                     </>
                   )}
                 </ComposedChart>
@@ -1787,14 +1804,19 @@ export function PowerGridExplorer({
               giving it a second axis on the same plot would invite the reader
               to compare two scales drawn as one picture. Its own panel, aligned
               to the same hours, is the honest way to show both. */}
-          {curveIsHourly && peakShedOfDay > 0 && chartsReady && (
+          {sheddingIsHourly && peakShedOfDay > 0 && chartsReady && (
             <div className="mt-3">
               <p className="text-[11px] font-semibold text-muted-foreground mb-1">
                 Load shedding by hour <span className="font-normal text-muted-foreground/70">— same hours, MW, own scale</span>
               </p>
-              <div className="h-28">
+              {/* The y-axis slot is narrow enough that "3.4k MW" wraps onto two
+                  lines, and the topmost tick sits exactly at the top of the plot
+                  area — so a 4px top margin cut the value line off. The chart
+                  starts lower and the panel is taller by the same amount, which
+                  keeps the bars their original height. */}
+              <div className="h-32">
                 <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                  <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                     <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'time' })} />
                     <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMw} />
@@ -1809,9 +1831,14 @@ export function PowerGridExplorer({
                             <div className="text-destructive font-semibold">
                               {formatNumber(Math.round(d.loadShed ?? 0))} MW shed
                             </div>
-                            <div className="text-muted-foreground">
-                              of {formatNumber(Math.round(d.demand ?? 0))} MW demand
-                            </div>
+                            {/* The sheet that publishes shedding hourly does not
+                                publish demand, so this line is absent rather than
+                                printing "of 0 MW demand" for an unmeasured figure. */}
+                            {d.demand != null && (
+                              <div className="text-muted-foreground">
+                                of {formatNumber(Math.round(d.demand))} MW demand
+                              </div>
+                            )}
                           </div>
                         );
                       }}
@@ -1831,41 +1858,52 @@ export function PowerGridExplorer({
             // 18:00-23:00.
             const peakRow = hourlyLoadData.find((h) => h.demand != null || h.loadShed != null) ?? null;
 
+            // Whole hours only. PGCB adds the evening-peak half hour (19:30) as
+            // a 25th row — and on the pre-2019 layouts 18:30 as well — so a row
+            // is not the same thing as an hour. Counting rows inflated both the
+            // day's energy total and the hour tally: a 24-hour day with a 19:30
+            // sample reported "shed in 25 of the 25 published hours", which is
+            // one more hour than the day has. Every figure below is measured on
+            // this list so the count, the denominator and the MWh total all
+            // describe the same thing.
+            const wholeHourRows = hourlyLoadData.filter((h) => h.time.endsWith(':00'));
+
             // With an hourly sheet the interesting figures are the day's own
             // extremes, not one nominated hour.
-            const shedHours = hourlyLoadData.filter((h) => (h.loadShed ?? 0) > 0);
+            const shedHours = wholeHourRows.filter((h) => (h.loadShed ?? 0) > 0);
             const worstShed = shedHours.length
               ? [...shedHours].sort((a, b) => (b.loadShed ?? 0) - (a.loadShed ?? 0))[0]
               : null;
-            // Whole hours only. PGCB adds the evening-peak half hour (19:30) as
-            // a 25th row, and counting a half-hour sample as a full hour would
-            // inflate the day's total by that hour's shedding.
-            const shedTotalMwh = curveIsHourly
-              ? hourlyLoadData
-                  .filter((h) => h.time.endsWith(':00'))
-                  .reduce((sum, h) => sum + (h.loadShed ?? 0), 0)
-              : 0;
+            // A day total is only honest where the hours it sums are the day.
+            // 71 archived days publish 23 hourly rows rather than 24, so the
+            // figure is withheld there instead of being presented as the day.
+            const shedTotalMwh =
+              sheddingIsHourly && wholeHourRows.length >= 24
+                ? wholeHourRows.reduce((sum, h) => sum + (h.loadShed ?? 0), 0)
+                : 0;
 
             return (
               <div className="bg-muted/10 p-4 border border-border/40 rounded-xl text-xs text-muted-foreground space-y-2 mt-4">
                 <p><strong>What is being shown?</strong></p>
                 {curveIsHourly ? (
                   <p className="leading-relaxed">The <span className="text-sky-500 font-semibold">Actual Generation</span> and <span className="text-amber-500 font-semibold">Demand</span> curves and the <span className="text-destructive font-semibold">Load Shedding</span> bars are all read from PGCB&apos;s hourly demand, generation and load-shed sheet, which states each one for every hour it publishes. The gap between the two curves is the unserved load; the panel beneath measures it directly, on its own scale, because shedding runs about a hundredth of generation and would be a flat line on the axis above.</p>
+                ) : sheddingIsHourly ? (
+                  <p className="leading-relaxed">The <span className="text-sky-500 font-semibold">Actual Generation</span> curve and the <span className="text-destructive font-semibold">Load Shedding</span> bars are both read from PGCB&apos;s hourly station log, which carries a national total and a shortage figure at every hourly stamp. That sheet publishes no demand column, so <span className="text-amber-500 font-semibold">Demand</span> is the evening-peak figure from the report&apos;s front page and appears as a single marked point rather than a curve.</p>
                 ) : (
                   <p className="leading-relaxed">The hourly <span className="text-sky-500 font-semibold">Actual Generation</span> curve is the NLDC load-curve sheet, logged every half hour. <span className="text-amber-500 font-semibold">Total Demand</span> and the <span className="text-destructive font-semibold">Load Shedding Deficit</span> are published for the evening peak hour only on this report&apos;s layout, so they appear as single marked points rather than a continuous line.</p>
                 )}
                 <p className="leading-relaxed">
                   <strong>Operational Insights:</strong> The load curve illustrates the shape of generation across this day.
-                  {curveIsHourly && worstShed ? (
+                  {(curveIsHourly || sheddingIsHourly) && worstShed ? (
                     <>
-                      {' '}Load was shed in <span className="font-semibold text-primary">{shedHours.length} of the {hourlyLoadData.length} published hours</span>, worst at{' '}
+                      {' '}Load was shed in <span className="font-semibold text-primary">{shedHours.length} of the {wholeHourRows.length} published hours</span>, worst at{' '}
                       <span className="font-semibold text-primary">{worstShed.time} Hr</span> with{' '}
                       <span className="font-bold text-destructive">{formatNumber(Math.round(worstShed.loadShed ?? 0))} MW</span> unserved
                       {shedTotalMwh > 0 && (
                         <> — around <span className="font-bold text-foreground">{formatNumber(Math.round(shedTotalMwh))} MWh</span> across the day, taking each hourly figure as the rate for that hour.</>
                       )}
                     </>
-                  ) : curveIsHourly ? (
+                  ) : curveIsHourly || sheddingIsHourly ? (
                     ' No load shedding was recorded in any published hour of this day.'
                   ) : peakRow && peakRow.demand != null ? (
                     <>
