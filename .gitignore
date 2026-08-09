@@ -37,3 +37,12 @@ scratch/
 # Compiled Python from the ingest scripts
 __pycache__/
 *.pyc
+
+# Perf-audit artifacts. Lighthouse writes these to the repo root and a single
+# run can leave ~40 MB behind, so they are kept out of the tree entirely.
+# .vercelignore carries the same list — a CLI deploy reads that file, not this one.
+lighthouse-report*
+lh-*.json
+*.report.html
+*.report.json
+test-results/
