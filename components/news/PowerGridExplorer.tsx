@@ -6,7 +6,7 @@ import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } f
 import Link from 'next/link';
 import {
   Zap, Activity, Cable, TrendingUp, FileText, BarChart3, MapPin, DollarSign, Database, Droplet, Globe, Sun,
-  Search, ChevronLeft, ChevronRight, ChevronDown, Check, Info, Map, Network, CheckSquare, Calendar, RotateCcw, History, Landmark, Factory
+  Search, ChevronLeft, ChevronRight, ChevronDown, Check, Info, Map, Network, CheckSquare, Calendar, RotateCcw, History, Landmark, Factory, ShieldCheck
 } from 'lucide-react';
 import { substationsData } from '@/lib/data/infrastructure/substations';
 import {
@@ -57,6 +57,8 @@ import {
   usePgcbMonthlySeries,
 } from '@/lib/data/companies/usePgcbMonthly';
 import { PgcbMonthlyDetail } from '@/components/news/power-grid/PgcbMonthlyDetail';
+import { UnitCostBadge } from '@/components/news/power-grid/UnitCostBadge';
+import { useUnitCostAuthentication, type UnitCostFact } from '@/components/news/power-grid/useUnitCostAuthentication';
 import { EnergyCurveChart } from '@/components/news/power-grid/EnergyCurveChart';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
 import { sredaRenewablesData, totalCapacityRenewables, renewableGridSharePct } from '@/lib/data/companies/sreda';
@@ -74,7 +76,7 @@ import { systemLossData } from '@/lib/data/macro/system-loss';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
 import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
 import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
-import { DailyBadge, GridCardFooter, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
+import { DailyBadge, GridCardFooter, GridProvenanceTag, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
 import { GridDataTable, type GridTableDensity } from '@/components/news/power-grid/GridDataTable';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
@@ -101,6 +103,12 @@ const GasReserveDepletionTab = dynamic(
 const LongitudinalStudyCharts = dynamic(
   () => import('@/components/news/power-grid/LongitudinalStudy').then((m) => m.LongitudinalStudyCharts),
   { ssr: false, loading: () => <div className="grid-explorer-skeleton h-80 rounded-2xl" /> },
+);
+// Ships ~5 MB of per-check detail across six months, one month file at a time,
+// so it must not be in the initial bundle.
+const PublishedVsDerivedTab = dynamic(
+  () => import('@/components/news/power-grid/PublishedVsDerivedTab').then((m) => m.PublishedVsDerivedTab),
+  { ssr: false, loading: () => <div className="grid-explorer-skeleton h-96 rounded-2xl" /> },
 );
 
 const sredaRenewablesWithIcons = sredaItemsWithIcons(sredaRenewablesData);
@@ -140,6 +148,38 @@ const TREND_TOGGLE_CLASS = cn(
   TREND_CONTROL_SIZE,
   'flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm',
 );
+
+/**
+ * The 24-Hour System Load Curve's three series, in one place. The legend, the
+ * plotted marks, the hover panel and the prose beneath the card all read these,
+ * so a colour cannot drift between where a series is drawn and where it is
+ * named — which is how the hover panel ended up printing demand in the
+ * foreground colour and the prose in amber while the line itself was yellow.
+ * Shedding is the theme's own destructive colour, so it is resolved from
+ * chartTheme at render time rather than fixed here.
+ */
+const LOAD_CURVE_COLORS = {
+  generation: '#0ea5e9',
+  demand: '#eab308',
+} as const;
+
+/**
+ * The hovered load-shedding bar, marked the way the two curves mark the same
+ * hour: a filled dot with a white ring, sat on top of the bar. Recharts hands
+ * the active shape the bar's own geometry, so the bar is redrawn exactly as it
+ * renders at rest and only the dot is added — hovering marks the hour, it does
+ * not restyle the bar.
+ */
+function ShedActiveBar({ x = 0, y = 0, width = 0, height = 0, fill }: {
+  x?: number; y?: number; width?: number; height?: number; fill?: string;
+}) {
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} rx={2} ry={2} fill={fill} fillOpacity={0.45} stroke={fill} strokeWidth={1} />
+      <circle cx={x + width / 2} cy={y} r={5} fill={fill} stroke="#fff" strokeWidth={2} />
+    </g>
+  );
+}
 
 /**
  * Stands in for the cost chart on days whose report carries no per-fuel
@@ -721,7 +761,7 @@ export function PowerGridExplorer({
     }
   }, [activeTab]);
 
-  const [macroSubTab, setMacroSubTab] = useState<'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'system_loss' | 'insights'>(
+  const [macroSubTab, setMacroSubTab] = useState<'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'system_loss' | 'insights' | 'verification'>(
     urlBoot?.macro ?? 'overview',
   );
   
@@ -795,6 +835,33 @@ export function PowerGridExplorer({
     () => hourlyLoadData.reduce((mx, h) => Math.max(mx, h.loadShed ?? 0), 0),
     [hourlyLoadData],
   );
+
+  // Shedding is drawn on this card's own right-hand axis rather than in a
+  // separate panel below it, so the deficit sits under the hours that produced
+  // it. Sharing the generation axis would flatten it onto the floor, so the
+  // right axis carries its true scale and prints its own ticks in the shedding
+  // colour — the reader can see which axis a mark belongs to and read its
+  // value off it.
+  //
+  // The headroom multiplier keeps the bars inside the bottom third of the plot
+  // so they never climb through the load curves. It changes how tall the bars
+  // are drawn, not what they say: the ticks beside them state the real MW.
+  // Three times the day's worst hour, so the tallest bar reaches a third of the
+  // plot and the load curves keep the rest of it.
+  //
+  // The ticks are placed by hand rather than left to Recharts, which would fill
+  // the whole domain and print a round ceiling — 10.0k MW on a day that shed
+  // 2,958. They stop at the day's own peak instead, so the topmost tick sits
+  // exactly at the top of the tallest bar and every label names a value the
+  // reader can actually find on the chart.
+  const shedAxis = useMemo(() => {
+    if (peakShedOfDay <= 0) return { max: 0, ticks: [0] };
+    return {
+      max: peakShedOfDay * 3,
+      ticks: [0, Math.round(peakShedOfDay / 2), Math.round(peakShedOfDay)],
+    };
+  }, [peakShedOfDay]);
+  const showShedding = peakShedOfDay > 0;
 
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [pricingCompareYear, setPricingCompareYear] = useState<string>('FY 2020');
@@ -1088,6 +1155,9 @@ export function PowerGridExplorer({
   const importsCost = generationData.find((g) => g.name === 'Imports')?.cost ?? null;
   const importsEnergyMkwh = generationData.find((g) => g.name === 'Imports')?.gen ?? null;
   const avgCostPerKwh = totalCostBdt / (totalGenMkwhr * 1000000);
+  // What stands behind each per-fuel unit rate: a second agency's independent
+  // arithmetic, a flat administered tariff, or only the one publisher.
+  const unitCostAuth = useUnitCostAuthentication(selectedDate);
 
   const methodologyBanner = showMethodologyBanner ? (
     <MethodologyReconciliationBanner
@@ -1418,7 +1488,10 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head">
               <div>
                 <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<DailyBadge /></h3>
-                <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
+                {/* The total here is our sum of the fuel rows, not PGCB's own
+                    headline figure — the two are different numbers, which is
+                    what the reconciliation banner above exists to explain. */}
+                <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh <GridProvenanceTag kind="D" />) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
               </div>
               <span className="grid-explorer-chip">Fuel Type</span>
             </div>
@@ -1487,20 +1560,22 @@ export function PowerGridExplorer({
                           </div>
                           <div className="space-y-2 text-[11px] md:text-xs">
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">Energy Output:</span>
+                              <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Energy Output:</span>
                               <span className="font-bold text-foreground">{row.gen.toFixed(2)} MKWh</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">System Share:</span>
+                              <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />System Share:</span>
                               <span className="font-bold text-foreground">{pct}%</span>
                             </div>
                           </div>
+                          {/* The denominator is our sum of the fuel rows, not
+                              PGCB's headline — say which total the share is of. */}
                           <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                            Calculation: Gen Share = (Fuel Gen / Total Gen) * 100
+                            Share = this fuel&apos;s published energy ÷ the sum of the published fuel rows, calculated here.
                           </div>
                           <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                            <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB Daily Operations Report</a></div>
-                            <div><strong>Audited by:</strong> PGCB Network Operation Division</div>
+                            <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB Daily Operations Report</a>, zone-wise generation summary</div>
+                            <div>Reproduced as published. Not audited by ESB PowerLine.</div>
                           </div>
                         </div>
                       );
@@ -1547,8 +1622,9 @@ export function PowerGridExplorer({
                   >
                     <span className="grid-chart-legend__swatch" style={{ backgroundColor: item.color }} />
                     <span className="grid-chart-legend__name">{item.name}</span>
-                    <span className="grid-chart-legend__meta">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}%</span>
-                    <span className="grid-chart-legend__val">{item.gen.toFixed(1)} MKWh</span>
+                    {/* The share is ours; the MKWh beside it is PGCB's own row. */}
+                    <span className="grid-chart-legend__meta">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}% <GridProvenanceTag kind="D" /></span>
+                    <span className="grid-chart-legend__val">{item.gen.toFixed(1)} MKWh <GridProvenanceTag kind="P" /></span>
                   </button>
                 );
               })}
@@ -1556,8 +1632,8 @@ export function PowerGridExplorer({
 
             {/* Card Metadata Footer */}
             <GridCardFooter>
-              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Progress Report</a></span>
-              <span>Audited by: PGCB Network Operations Division</span>
+              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Progress Report</a>, zone-wise generation summary</span>
+              <span>Per-fuel energy as published; total and shares are ours. Not independently audited.</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
             </GridCardFooter>
           </div>
@@ -1567,7 +1643,10 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head">
               <div>
                 <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
-                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type ({hasPublishedFuelCost ? `Total: ${formatBdtAmount(totalCostBdt / 10000000)} Cr Tk.` : 'per-fuel split not published for this day'}) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelCost')}</span></p>
+                {/* The bars are PGCB's published per-fuel costs; this header adds
+                    them up, which is not the same as PGCB's own "Total :" row —
+                    on 08 Aug 2026 the two differ by 3 Tk. */}
+                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type ({hasPublishedFuelCost ? <>Total: {formatBdtAmount(totalCostBdt / 10000000)} Cr Tk. <GridProvenanceTag kind="D" /></> : 'per-fuel split not published for this day'}) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelCost')}</span></p>
               </div>
               <span className="grid-explorer-chip">Cost Analysis</span>
             </div>
@@ -1602,24 +1681,29 @@ export function PowerGridExplorer({
                           <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                             <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                               <span>{row.name} Daily Cost</span>
-                              <span className="text-[9px] md:text-[10px] uppercase font-bold text-emerald-500 tracking-wider">Financial Audit</span>
+                              {/* Was "Financial Audit" — nothing here is audited. */}
+                              <span className="text-[9px] md:text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Published Cost</span>
                             </div>
                             <div className="space-y-2 text-[11px] md:text-xs">
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">Total Daily Cost:</span>
+                                <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Total Daily Cost:</span>
                                 <span className="font-bold text-foreground">{cr} Crore Tk</span>
                               </div>
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground">Average Unit Rate:</span>
+                                <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Average Unit Rate:</span>
                                 <span className="font-bold text-foreground">{formatUnitRate(row.unitCost)} Tk/KWh</span>
                               </div>
                             </div>
+                            {/* The old note stated the calculation backwards — cost
+                                was said to be derived from a unit rate, when the
+                                cost is what PGCB publishes and the rate is what we
+                                divide out of it. */}
                             <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                              Calculation: Daily Cost = Gen (MKWh) * 10^6 * Unit Cost (Tk/KWh)
+                              PGCB publishes this fuel&apos;s cost and its generation. Unit rate = cost ÷ (gen × 10⁶), calculated here.
                             </div>
                             <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                              <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB daily log</a> &amp; BPDB financial audits</div>
-                              <div><strong>Audited by:</strong> SF Ahmed &amp; Co. / CAG Audit team</div>
+                              <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB daily report</a>, &ldquo;Cost of the Consumed Fuel&rdquo; block</div>
+                              <div>Restates BPDB fuel economics. Not audited by ESB PowerLine.</div>
                             </div>
                           </div>
                         );
@@ -1655,17 +1739,20 @@ export function PowerGridExplorer({
 
             <div className="grid grid-cols-2 gap-3 mt-6 pt-4 pb-4 border-t border-border/50">
               <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[5.5rem] text-center">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug">
-                  Avg Production Cost
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1">
+                  Avg Production Cost <GridProvenanceTag kind="D" />
                 </div>
+                {/* Published total cost ÷ published headline generation. Note the
+                    KPI strip's "Average Bulk Cost" divides by the summed fuel
+                    rows instead, so the two rates differ where those disagree. */}
                 <div className="text-2xl font-bold mt-1.5 text-primary tabular-nums leading-none">
                   {formatUnitRate(systemStats.avgProductionCost)}{' '}
                   <span className="text-xs font-medium text-muted-foreground">Tk/KWh</span>
                 </div>
               </div>
               <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[5.5rem] text-center">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug">
-                  Total Gas to Power
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1">
+                  Total Gas to Power <GridProvenanceTag kind="P" />
                 </div>
                 <div className="text-2xl font-bold mt-1.5 text-sky-500 tabular-nums leading-none">
                   {systemStats.totalGasSuppliedPower.toFixed(2)}{' '}
@@ -1676,8 +1763,12 @@ export function PowerGridExplorer({
 
             {/* Card Metadata Footer */}
             <GridCardFooter className="mt-0 pt-4">
-              <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Reports</a> &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Fuel Gazettes</a></span>
-              <span>Audited by: BPDB Audits / CAG Audit Team</span>
+              {/* Every figure on this card is read from PGCB's daily report. The
+                  footer used to credit BPDB's reports and BPC's fuel gazettes,
+                  neither of which this pipeline opens, and name auditors whose
+                  reports it has never seen. */}
+              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — production-cost block and gas-supplied line</span>
+              <span>Restates BPDB fuel economics. Unit rates are ours. Not independently audited.</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
             </GridCardFooter>
           </div>
@@ -1720,7 +1811,32 @@ export function PowerGridExplorer({
                   <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                   <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'time' })} />
                   <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMw} />
+                  {/* The shedding axis is tinted in the shedding colour so it is
+                      obvious which marks it measures — the left axis serves
+                      generation and demand, which are the same measurement in the
+                      same units and share a scale honestly. */}
+                  {showShedding && (
+                    <YAxis
+                      yAxisId="shed"
+                      orientation="right"
+                      width={GRID_Y_AXIS_WIDTH.dual}
+                      tick={{ fontSize: 10, fill: chartTheme.destructive }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickMargin={4}
+                      domain={[0, shedAxis.max]}
+                      ticks={shedAxis.ticks}
+                      allowDecimals={false}
+                      tickFormatter={formatAxisMw}
+                    />
+                  )}
                   <Tooltip
+                    // Recharts draws a band cursor once a Bar is on the chart and a
+                    // vertical rule otherwise, and the two take different props —
+                    // a fill on the rule would leave the hovered hour unmarked.
+                    cursor={showShedding
+                      ? { fill: chartTheme.gridStroke, opacity: 0.2 }
+                      : { stroke: chartTheme.gridStroke, strokeWidth: 1 }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null;
                       const d = payload[0].payload;
@@ -1729,26 +1845,48 @@ export function PowerGridExplorer({
                         <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                           <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                             <span>Grid Profile at {d.time}{peakIndicator}</span>
-                            <span className="text-[9px] md:text-[10px] uppercase font-bold text-amber-500 tracking-wider">NLDC Telemetry</span>
+                            {/* Muted rather than amber: amber is the demand series
+                                now that the panel is colour-matched, and a source
+                                badge in a series colour reads as a fourth reading. */}
+                            <span className="text-[9px] md:text-[10px] uppercase font-bold text-muted-foreground tracking-wider">NLDC Telemetry</span>
                           </div>
+                          {/* Every label and value here is painted from the same
+                              constants the marks and the legend use, so the panel
+                              names a series in the colour the reader just hovered.
+                              An unpublished figure stays muted: colouring the words
+                              "not published" as if they were a reading would give a
+                              measurement the weight of one that exists. */}
                           <div className="space-y-2 text-[11px] md:text-xs">
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground text-sky-500">Actual Gen:</span>
-                              <span className="font-bold text-sky-500">{formatNumber(Math.round(d.generation))} MW</span>
+                              <span className="inline-flex items-center gap-1" style={{ color: LOAD_CURVE_COLORS.generation }}><GridProvenanceTag kind="P" />Actual Gen:</span>
+                              <span className="font-bold" style={{ color: LOAD_CURVE_COLORS.generation }}>{formatNumber(Math.round(d.generation))} MW</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">System Demand:</span>
-                              <span className="font-bold text-foreground">{d.demand == null ? 'not published for this hour' : `${formatNumber(Math.round(d.demand))} MW`}</span>
+                              <span className="inline-flex items-center gap-1" style={{ color: LOAD_CURVE_COLORS.demand }}><GridProvenanceTag kind="P" />System Demand:</span>
+                              {d.demand == null ? (
+                                <span className="font-medium text-muted-foreground">not published for this hour</span>
+                              ) : (
+                                <span className="font-bold" style={{ color: LOAD_CURVE_COLORS.demand }}>{formatNumber(Math.round(d.demand))} MW</span>
+                              )}
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground text-destructive">Load Shedding:</span>
-                              <span className="font-bold text-destructive">{d.loadShed == null ? 'not published for this hour' : `${formatNumber(Math.round(d.loadShed))} MW`}</span>
+                              <span className="inline-flex items-center gap-1" style={{ color: chartTheme.destructive }}><GridProvenanceTag kind="P" />Load Shedding:</span>
+                              {d.loadShed == null ? (
+                                <span className="font-medium text-muted-foreground">not published for this hour</span>
+                              ) : (
+                                <span className="font-bold" style={{ color: chartTheme.destructive }}>{formatNumber(Math.round(d.loadShed))} MW</span>
+                              )}
                             </div>
                           </div>
                           <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
                             {curveIsHourly
                               ? 'All three figures are published for this hour on PGCB’s hourly demand, generation and load-shed sheet.'
-                              : 'Generation is logged hourly. PGCB reports demand and load shedding at the evening peak hour only on this layout.'}
+                              : sheddingIsHourly
+                                ? 'Generation and load shedding are logged hourly on this layout; PGCB publishes demand for the evening peak hour alone.'
+                                : 'Generation is logged hourly. PGCB reports demand and load shedding at the evening peak hour only on this layout.'}
+                            {/* Only where bars were actually drawn — on a day with
+                                nothing shed there is no second axis to point at. */}
+                            {showShedding && ' Shedding is read against the right-hand axis.'}
                           </div>
                           <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                             <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB NLDC Daily Curve Sheet</a></div>
@@ -1764,31 +1902,47 @@ export function PowerGridExplorer({
                     iconSize={8}
                     wrapperStyle={{ fontSize: '11px' }}
                     colorResolver={(value) => {
-                      if (value === 'Actual Generation') return '#0ea5e9';
-                      if (value.startsWith('Demand') || value.startsWith('Peak Demand')) return '#eab308';
+                      if (value === 'Actual Generation') return LOAD_CURVE_COLORS.generation;
+                      if (value.startsWith('Demand') || value.startsWith('Peak Demand')) return LOAD_CURVE_COLORS.demand;
                       if (value.includes('Load Shedding')) return chartTheme.destructive;
                       return 'inherit';
                     }}
                   />
-                  <Area yAxisId="left" type="monotone" dataKey="generation" name="Actual Generation" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.15} strokeWidth={2.5} />
+                  <Area yAxisId="left" type="monotone" dataKey="generation" name="Actual Generation" stroke={LOAD_CURVE_COLORS.generation} fill={LOAD_CURVE_COLORS.generation} fillOpacity={0.15} strokeWidth={2.5} />
+                  {/* Shedding sits on the right-hand axis, under the hours that
+                      produced it, rather than in a panel of its own below the card.
+                      It is drawn after the generation area so the bars stay crisp
+                      instead of showing through it, and before the demand line so
+                      the line — the series the deficit is measured against — is
+                      never occluded by a bar. The legend names the axis, because a
+                      bar and a curve on one plot at different scales is only honest
+                      if the reader is told which scale each one is on. */}
+                  {showShedding && (
+                    <Bar
+                      yAxisId="shed"
+                      dataKey="loadShed"
+                      name={sheddingIsHourly ? 'Load Shedding (hourly, right axis)' : 'Peak Load Shedding (right axis)'}
+                      fill={chartTheme.destructive}
+                      fillOpacity={0.45}
+                      stroke={chartTheme.destructive}
+                      strokeWidth={1}
+                      radius={[2, 2, 0, 0]}
+                      maxBarSize={15}
+                      activeBar={<ShedActiveBar />}
+                    />
+                  )}
                   {curveIsHourly ? (
                     // Every hour carries a figure, so demand is the second
                     // measured curve it is — and the gap between the two lines
-                    // is the deficit, which is the point of the chart.
-                    // Shedding is the same unit but two orders of magnitude
-                    // smaller, so it gets its own panel below rather than a
-                    // second scale on this one.
-                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Demand (published hourly)" stroke="#eab308" strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                    // is the deficit the bars beneath measure directly.
+                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Demand (published hourly)" stroke={LOAD_CURVE_COLORS.demand} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
                   ) : (
-                    <>
-                      {/* Demand exists for one hour only, so it renders as a single
-                          marked point rather than a series interpolated across the
-                          evening. Shedding may still be hourly on the same day — the
-                          bars are named for what they actually are, because calling a
-                          23-hour series "Peak" misreads the chart for the reader. */}
-                      <Line yAxisId="left" type="monotone" dataKey="demand" name="Peak Demand (published)" stroke="#eab308" strokeWidth={0} connectNulls={false} dot={{ r: 5, fill: '#eab308', stroke: '#eab308' }} activeDot={{ r: 7 }} />
-                      <Bar yAxisId="left" dataKey="loadShed" name={sheddingIsHourly ? 'Load Shedding (published hourly)' : 'Peak Load Shedding (published)'} fill={chartTheme.destructive} fillOpacity={0.2} stroke={chartTheme.destructive} strokeWidth={1} radius={[2, 2, 0, 0]} maxBarSize={15} />
-                    </>
+                    // Demand exists for one hour only, so it renders as a single
+                    // marked point rather than a series interpolated across the
+                    // evening. Shedding may still be hourly on the same day — the
+                    // bars are named for what they actually are, because calling a
+                    // 23-hour series "Peak" misreads the chart for the reader.
+                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Peak Demand (published)" stroke={LOAD_CURVE_COLORS.demand} strokeWidth={0} connectNulls={false} dot={{ r: 5, fill: LOAD_CURVE_COLORS.demand, stroke: LOAD_CURVE_COLORS.demand }} activeDot={{ r: 7 }} />
                   )}
                 </ComposedChart>
               </ResponsiveContainer>
@@ -1797,57 +1951,18 @@ export function PowerGridExplorer({
             )}
           </div>
 
-          {/* Load shedding, on its own scale.
-
-              It is the same unit as the curve above and roughly a hundredth of
-              its size, so sharing that axis would flatten it onto the floor and
-              giving it a second axis on the same plot would invite the reader
-              to compare two scales drawn as one picture. Its own panel, aligned
-              to the same hours, is the honest way to show both. */}
-          {sheddingIsHourly && peakShedOfDay > 0 && chartsReady && (
-            <div className="mt-3">
-              <p className="text-[11px] font-semibold text-muted-foreground mb-1">
-                Load shedding by hour <span className="font-normal text-muted-foreground/70">— same hours, MW, own scale</span>
-              </p>
-              {/* The y-axis slot is narrow enough that "3.4k MW" wraps onto two
-                  lines, and the topmost tick sits exactly at the top of the plot
-                  area — so a 4px top margin cut the value line off. The chart
-                  starts lower and the panel is taller by the same amount, which
-                  keeps the bars their original height. */}
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={{ top: 16, right: 8, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-                    <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'time' })} />
-                    <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMw} />
-                    <Tooltip
-                      cursor={{ fill: chartTheme.gridStroke, opacity: 0.2 }}
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const d = payload[0].payload;
-                        return (
-                          <div className="p-3 text-card-foreground border border-border/80 rounded-xl shadow-xl text-xs bg-card">
-                            <div className="font-bold mb-1">{d.time} Hr</div>
-                            <div className="text-destructive font-semibold">
-                              {formatNumber(Math.round(d.loadShed ?? 0))} MW shed
-                            </div>
-                            {/* The sheet that publishes shedding hourly does not
-                                publish demand, so this line is absent rather than
-                                printing "of 0 MW demand" for an unmeasured figure. */}
-                            {d.demand != null && (
-                              <div className="text-muted-foreground">
-                                of {formatNumber(Math.round(d.demand))} MW demand
-                              </div>
-                            )}
-                          </div>
-                        );
-                      }}
-                    />
-                    <Bar dataKey="loadShed" name="Load Shedding" fill={chartTheme.destructive} fillOpacity={0.55} radius={[2, 2, 0, 0]} maxBarSize={18} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          {/* Load shedding used to be drawn here, in a panel of its own beneath
+              the card. It now shares the plot above on a right-hand axis, so the
+              deficit reads against the hour and the curve that produced it
+              instead of against a second copy of the x-axis. The scale argument
+              that put it down here is answered by the axis itself: the ticks on
+              the right state shedding's own MW, tinted in its own colour. */}
+          {showShedding && chartsReady && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load shedding</span>
+              {' '}is read against the right-hand axis — on the generation scale it would be
+              a flat line on the floor.
+            </p>
           )}
 
           {/* Card Explanation Block */}
@@ -1885,15 +2000,31 @@ export function PowerGridExplorer({
             return (
               <div className="bg-muted/10 p-4 border border-border/40 rounded-xl text-xs text-muted-foreground space-y-2 mt-4">
                 <p><strong>What is being shown?</strong></p>
+                {/* The series names here are painted from LOAD_CURVE_COLORS rather
+                    than from Tailwind's palette. text-amber-500 (#f59e0b) is not
+                    the colour the demand line is drawn in (#eab308), so the prose
+                    used to name a series in a shade the chart never uses. */}
+                {/* The right-hand axis and the shedding bars only exist on days
+                    that shed something, so the prose names them only then — a day
+                    PGCB reports as nil is described by its own sentence rather than
+                    pointed at an axis the reader cannot see. */}
                 {curveIsHourly ? (
-                  <p className="leading-relaxed">The <span className="text-sky-500 font-semibold">Actual Generation</span> and <span className="text-amber-500 font-semibold">Demand</span> curves and the <span className="text-destructive font-semibold">Load Shedding</span> bars are all read from PGCB&apos;s hourly demand, generation and load-shed sheet, which states each one for every hour it publishes. The gap between the two curves is the unserved load; the panel beneath measures it directly, on its own scale, because shedding runs about a hundredth of generation and would be a flat line on the axis above.</p>
+                  <p className="leading-relaxed">The <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> and <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> curves are read from PGCB&apos;s hourly demand, generation and load-shed sheet, which states each figure for every hour it publishes. {showShedding
+                    ? <><span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding</span> is PGCB&apos;s own third column on that sheet — the demand the grid could not meet and disconnected — and not this card subtracting one curve from the other. The two are close but not the same measurement: where load is shed, the gap between the curves runs a few per cent above the figure PGCB publishes, so the bars are drawn from the published column, against the right-hand axis.</>
+                    : <>The two curves meet at every hour, because this report states no load shedding in any hour of this day.</>}</p>
                 ) : sheddingIsHourly ? (
-                  <p className="leading-relaxed">The <span className="text-sky-500 font-semibold">Actual Generation</span> curve and the <span className="text-destructive font-semibold">Load Shedding</span> bars are both read from PGCB&apos;s hourly station log, which carries a national total and a shortage figure at every hourly stamp. That sheet publishes no demand column, so <span className="text-amber-500 font-semibold">Demand</span> is the evening-peak figure from the report&apos;s front page and appears as a single marked point rather than a curve.</p>
+                  <p className="leading-relaxed">The <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is read from PGCB&apos;s hourly station log, which carries a national total and a shortage figure at every hourly stamp{showShedding
+                    ? <>; the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding</span> bars are that shortage column, drawn against the right-hand axis on their own scale.</>
+                    : <>, and records no shortage in any hour of this day.</>} That sheet publishes no demand column, so <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is the evening-peak figure from the report&apos;s front page and appears as a single marked point rather than a curve.</p>
                 ) : (
-                  <p className="leading-relaxed">The hourly <span className="text-sky-500 font-semibold">Actual Generation</span> curve is the NLDC load-curve sheet, logged every half hour. <span className="text-amber-500 font-semibold">Total Demand</span> and the <span className="text-destructive font-semibold">Load Shedding Deficit</span> are published for the evening peak hour only on this report&apos;s layout, so they appear as single marked points rather than a continuous line.</p>
+                  <p className="leading-relaxed">The hourly <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is the NLDC load-curve sheet, logged every half hour. <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Total Demand</span>{showShedding
+                    ? <> and the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding Deficit</span> are published for the evening peak hour only on this report&apos;s layout, so they appear as single marks rather than continuous lines — the deficit as a bar against the right-hand axis.</>
+                    : <> is published for the evening peak hour only on this report&apos;s layout, so it appears as a single marked point rather than a continuous line.</>}</p>
                 )}
                 <p className="leading-relaxed">
-                  <strong>Operational Insights:</strong> The load curve illustrates the shape of generation across this day.
+                  {/* Everything in this sentence is counted or summed here — PGCB
+                      states the hourly figures, not the tallies drawn from them. */}
+                  <strong>Operational Insights <GridProvenanceTag kind="D" /></strong>: The load curve illustrates the shape of generation across this day.
                   {(curveIsHourly || sheddingIsHourly) && worstShed ? (
                     <>
                       {' '}Load was shed in <span className="font-semibold text-primary">{shedHours.length} of the {wholeHourRows.length} published hours</span>, worst at{' '}
@@ -1924,8 +2055,8 @@ export function PowerGridExplorer({
 
           {/* Card Metadata Footer */}
           <GridCardFooter>
-            <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB NLDC Operations Sheet</a></span>
-            <span>Audited by: National Load Despatch Centre (NLDC) System Operators</span>
+            <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB NLDC hourly sheet</a> — generation, demand and load-shed columns</span>
+            <span>Hourly figures as published; hour counts and day totals are ours. Not independently audited.</span>
             <span className="font-medium">Reporting Period: 24-Hour SCADA Log (Date: {systemStats.date})</span>
           </GridCardFooter>
         </div>
@@ -1980,11 +2111,16 @@ export function PowerGridExplorer({
                 <thead>
                   <tr>
                     <th>Fuel / Source</th>
-                    <th className="text-left">Generation (MKWh)</th>
-                    <th className="text-left">Generation Share</th>
-                    <th className="text-left">Daily Cost (Crore Tk)</th>
-                    <th className="text-left">Cost Share</th>
-                    <th className="text-left">Unit Cost (Tk/KWh)</th>
+                    {/* Generation and cost are printed by PGCB. The unit rate is
+                        not — no agency publishes a Tk/kWh figure — so it is the
+                        quotient of the two columns to its left and is tagged D,
+                        with a marker saying what independent evidence supports
+                        that particular quotient. */}
+                    <th className="text-left">Generation (MKWh) <GridProvenanceTag kind="P" /></th>
+                    <th className="text-left">Generation Share <GridProvenanceTag kind="D" /></th>
+                    <th className="text-left">Daily Cost (Crore Tk) <GridProvenanceTag kind="P" /></th>
+                    <th className="text-left">Cost Share <GridProvenanceTag kind="D" /></th>
+                    <th className="text-left">Unit Cost (Tk/KWh) <GridProvenanceTag kind="D" /></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2001,7 +2137,10 @@ export function PowerGridExplorer({
                         <td className="text-left tabular-nums text-muted-foreground">{genShare}%</td>
                         <td className="text-left tabular-nums">{g.cost == null ? '—' : formatBdtAmount(g.cost / 10000000)}</td>
                         <td className="text-left tabular-nums text-muted-foreground">{costShare == null ? '—' : `${costShare}%`}</td>
-                        <td className="text-left tabular-nums font-mono text-sm">{g.unitCost == null ? '—' : g.unitCost.toFixed(2)}</td>
+                        <td className="text-left tabular-nums font-mono text-sm">
+                          {g.unitCost == null ? '—' : g.unitCost.toFixed(2)}
+                          <UnitCostBadge fact={unitCostAuth.factFor(g.name, g.unitCost)} />
+                        </td>
                       </tr>
                     );
                   })}
@@ -2016,6 +2155,43 @@ export function PowerGridExplorer({
                 </tbody>
               </table>
             </div>
+            {unitCostAuth.loaded && (
+              <div className="mx-4 mb-4 mt-3 text-[11px] leading-relaxed text-muted-foreground border-t border-border/30 pt-3">
+                <p className="mb-1.5">
+                  <strong className="text-foreground">How the unit cost is arrived at.</strong>{' '}
+                  No agency publishes a Tk/KWh rate. PGCB publishes a production cost in Taka
+                  and an energy total in MKWh for each fuel; the rate here is the first divided
+                  by the second, which is why it is marked{' '}
+                  <GridProvenanceTag kind="D" />. The marker beside each rate says what
+                  independent evidence supports it:
+                </p>
+                <ul className="space-y-0.5 ml-1">
+                  <li>
+                    <UnitCostBadge fact={{ status: 'corroborated' } as UnitCostFact} className="ml-0" />{' '}
+                    BPDB publishes the same cost and the same energy in a separate report with
+                    its own control totals, and the rate derived from those agrees. Across the
+                    first half of 2026 this held for gas and coal on every day both agencies
+                    published, and for imports on all but one.
+                  </li>
+                  <li>
+                    <UnitCostBadge fact={{ status: 'administered' } as UnitCostFact} className="ml-0" />{' '}
+                    a flat rate the publisher applies rather than measures — PGCB prints Wind at
+                    14.7100 Tk/KWh on every day of 2026 and Hydro at 0.1000 on all but one, so
+                    these are tariffs, not daily costs.
+                  </li>
+                  <li>
+                    <UnitCostBadge fact={{ status: 'disagreement' } as UnitCostFact} className="ml-0" />{' '}
+                    both agencies state the inputs and they disagree by more than their printing
+                    precision allows. Neither figure is altered.
+                  </li>
+                  <li>
+                    <UnitCostBadge fact={{ status: 'published-only' } as UnitCostFact} className="ml-0" />{' '}
+                    correctly derived, but only one agency publishes the inputs, so there is no
+                    second witness.
+                  </li>
+                </ul>
+              </div>
+            )}
 
             {/* Card Metadata Footer */}
             <GridCardFooter>
@@ -4725,7 +4901,8 @@ export function PowerGridExplorer({
               { id: 'reports', label: 'Annual Reports', icon: FileText },
               { id: 'reserves', label: 'Gas Reserve Depletion', icon: Database },
               { id: 'system_loss', label: 'Sector Glance & Losses', icon: Activity },
-              { id: 'insights', label: 'Analyst & Investor Insights', icon: DollarSign }
+              { id: 'insights', label: 'Analyst & Investor Insights', icon: DollarSign },
+              { id: 'verification', label: 'Published vs Derived', icon: ShieldCheck }
             ].map((t) => {
               const SubIcon = t.icon;
               const active = macroSubTab === t.id;
@@ -7103,6 +7280,8 @@ export function PowerGridExplorer({
               </div>
             </div>
           )}
+
+          {macroSubTab === 'verification' && <PublishedVsDerivedTab />}
 
           {macroSubTab === 'insights' && (
             <div className="space-y-6 grid-explorer-subpanel">
