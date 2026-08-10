@@ -7580,6 +7580,41 @@ button.grid-explorer-link {
   @apply mt-2 text-sm text-muted-foreground leading-relaxed;
 }
 
+/* Provenance tags — P (published by the source) / D (derived by us).
+   Deliberately quiet: they sit beside almost every figure on the Overview, so
+   they have to be legible without competing with the number they qualify. */
+.grid-provenance-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.95rem;
+  height: 0.95rem;
+  padding: 0 0.2rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  /* Fixed rather than em-relative: the tag appears in label rows, legends and
+     hover panels at three different text sizes, and a mark that shrinks with
+     its context stops being readable in the smallest of them. */
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  cursor: help;
+  flex: none;
+}
+
+.grid-provenance-tag--p {
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.08);
+}
+
+.grid-provenance-tag--d {
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted-foreground) / 0.08);
+  border-style: dashed;
+}
+
 /* Recharts hover cursor â€” theme-friendly */
 .grid-explorer .recharts-tooltip-wrapper {
   outline: none !important;
@@ -7627,6 +7662,19 @@ button.grid-explorer-link {
 .grid-explorer .recharts-tooltip-cursor,
 .grid-explorer .recharts-active-bar,
 .grid-explorer .recharts-active-shape {
+  outline: none !important;
+}
+
+/* Recharts v3 wraps each z-index band in <g class="recharts-zIndex-layer_N"
+   tabindex="-1">. Clicking anywhere inside a chart focuses that <g>, and Chrome
+   paints its default focus ring around the band's bounding box — a stray white
+   rectangle across the plot, on every chart, most visible in the dark theme.
+   The rules above name .recharts-layer, which is a different class and never
+   matched it. Unscoped on purpose: the same <g> is focusable in every chart in
+   the app, not only the grid explorer. A tabindex of -1 is not keyboard
+   reachable, so this removes no focus ring a keyboard user could arrive at. */
+.recharts-wrapper [tabindex='-1']:focus,
+.recharts-wrapper [tabindex='-1']:focus-visible {
   outline: none !important;
 }
 

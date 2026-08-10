@@ -130,6 +130,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         }
         value={dailyGenAvgMw == null ? '— MW' : `${formatNumber(Math.round(dailyGenAvgMw))} MW`}
         active={activeKpiTooltip === 'gen'}
+        // PGCB publishes the day's energy in MKWh; the MW on the face of this
+        // tile is that energy averaged across 24 hours, which is ours.
+        provenance="D"
         onToggle={() => toggleKpiTooltip('gen')}
         tooltipTitle="Generation Briefing"
         tooltipIcon={Zap}
@@ -138,18 +141,22 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       >
         <GridKpiTooltipBody>
           <GridKpiTooltipRow
+            provenance="P"
             label="Total Energy Gen:"
             value={systemStats.totalEnergyGen == null ? 'not published for this day' : `${systemStats.totalEnergyGen.toFixed(2)} MKWh`}
           />
           <GridKpiTooltipRow
+            provenance="P"
             label="Max Peak Gen:"
             value={systemStats.maxGen == null ? '—' : `${formatNumber(Math.round(systemStats.maxGen))} MW`}
           />
           <GridKpiTooltipRow
+            provenance="P"
             label="Min Base Gen:"
             value={systemStats.minGen == null ? '—' : `${formatNumber(Math.round(systemStats.minGen))} MW`}
           />
           <GridKpiTooltipRow
+            provenance="P"
             label="Unserved (Load Shed):"
             value={
               systemStats.totalEnergyUnserved == null || unservedAvgMw == null
@@ -158,7 +165,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             }
             valueClass="text-destructive"
           />
-          <GridKpiTooltipAudit>Figures as published by PGCB</GridKpiTooltipAudit>
+          <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB Daily Log"
             refHref="https://www.pgcb.gov.bd/"
@@ -179,6 +186,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
         active={activeKpiTooltip === 'demand'}
         align="right"
+        provenance="P"
         onToggle={() => toggleKpiTooltip('demand')}
         tooltipTitle="Demand Briefing"
         tooltipIcon={Activity}
@@ -187,10 +195,12 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       >
         <GridKpiTooltipBody>
           <GridKpiTooltipRow
+            provenance="P"
             label="Evening Peak Demand:"
             value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
           />
           <GridKpiTooltipRow
+            provenance="P"
             label="Day Peak Demand:"
             value={
               systemStats.dayPeakDemand == null
@@ -198,12 +208,13 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
                 : `${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`
             }
           />
-          <GridKpiTooltipRow label="Peak Deficit Shedding:" value={`${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW`} valueClass="text-destructive" />
+          <GridKpiTooltipRow provenance="D" label="Peak Deficit Shedding:" value={`${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW`} valueClass="text-destructive" />
           <GridKpiTooltipRow
+            provenance="P"
             label="Max System Temp:"
             value={systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
           />
-          <GridKpiTooltipAudit>Audited by: NLDC System Operations</GridKpiTooltipAudit>
+          <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB/NLDC SCADA"
             refHref="https://www.pgcb.gov.bd/"
@@ -223,6 +234,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         }
         value={hasGasProductionData ? `${formatNumber(totalGasSupply, 1)} MMCFD` : '— MMCFD'}
         active={activeKpiTooltip === 'gas'}
+        // Petrobangla publishes a row per company; the national total is our sum
+        // of them, so the headline is ours even though every input is theirs.
+        provenance="D"
         onToggle={() => toggleKpiTooltip('gas')}
         tooltipTitle="Gas Supply Briefing"
         tooltipIcon={Droplet}
@@ -232,27 +246,33 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         <GridKpiTooltipBody>
           {hasGasProductionData ? (
             <>
-              <GridKpiTooltipRow label="Total Gas Supply:" value={`${formatNumber(totalGasSupply, 1)} MMCFD`} />
+              <GridKpiTooltipRow provenance="D" label="Total Gas Supply:" value={`${formatNumber(totalGasSupply, 1)} MMCFD`} />
               <GridKpiTooltipRow
+                provenance="P"
                 label="Imported LNG:"
                 value={`${formatNumber(importedLngGas, 1)} MMCFD (${importedLngPct.toFixed(1)}%)`}
               />
               <GridKpiTooltipRow
+                provenance="P"
                 label="Chevron IOC Supply:"
                 value={`${formatNumber(chevronGas, 1)} MMCFD (${chevronPct.toFixed(1)}%)`}
               />
               {tullowGas > 0 && (
                 <GridKpiTooltipRow
+                  provenance="P"
                   label="Tullow IOC Supply:"
                   value={`${formatNumber(tullowGas, 1)} MMCFD (${tullowPct.toFixed(1)}%)`}
                 />
               )}
+              {/* BGFCL + SGFL + BAPEX added together — Petrobangla lists them
+                  separately and states no "state fields" line. */}
               <GridKpiTooltipRow
+                provenance="D"
                 label="State Field Output:"
                 value={`${formatNumber(stateFieldsGas, 1)} MMCFD (${stateFieldsPct.toFixed(1)}%)`}
               />
-              <GridKpiTooltipRow label="Total Condensate:" value={`${formatNumber(totalCondensate, 1)} BBL`} />
-              <GridKpiTooltipAudit>Audited by: MABS &amp; J Partners / CAG</GridKpiTooltipAudit>
+              <GridKpiTooltipRow provenance="D" label="Total Condensate:" value={`${formatNumber(totalCondensate, 1)} BBL`} />
+              <GridKpiTooltipAudit>As published by Petrobangla. Not audited.</GridKpiTooltipAudit>
             </>
           ) : (
             <p className="text-xs text-muted-foreground">
@@ -280,21 +300,22 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         value={`${totalCapacityRenewables.toFixed(1)} MW`}
         active={activeKpiTooltip === 'renew'}
         align="right"
+        provenance="P"
         onToggle={() => toggleKpiTooltip('renew')}
         tooltipTitle="Clean Energy Briefing"
         tooltipIcon={Sun}
         tooltipAccent="text-yellow-500"
       >
         <GridKpiTooltipBody>
-          <GridKpiTooltipRow label="Solar Capacity:" value={`${fmtMw(SOLAR_CAPACITY)} MW`} />
-          <GridKpiTooltipRow label="Hydro Capacity:" value={`${fmtMw(HYDRO_CAPACITY)} MW`} />
-          <GridKpiTooltipRow label="Wind Capacity:" value={`${fmtMw(WIND_CAPACITY)} MW`} />
-          <GridKpiTooltipRow label="Biogas & Biomass:" value={`${fmtMw(BIO_CAPACITY)} MW`} />
-          <div className="flex justify-between border-t border-border/20 pt-1">
-            <span className="text-muted-foreground">Renewable Share:</span>
-            <span className="font-bold text-primary">~{renewableGridSharePct.toFixed(1)}% of Installed</span>
-          </div>
-          <GridKpiTooltipAudit>Audited by: SREDA Policy Division</GridKpiTooltipAudit>
+          <GridKpiTooltipRow provenance="P" label="Solar Capacity:" value={`${fmtMw(SOLAR_CAPACITY)} MW`} />
+          <GridKpiTooltipRow provenance="P" label="Hydro Capacity:" value={`${fmtMw(HYDRO_CAPACITY)} MW`} />
+          <GridKpiTooltipRow provenance="P" label="Wind Capacity:" value={`${fmtMw(WIND_CAPACITY)} MW`} />
+          {/* Biogas and Biomass are two SREDA lines added together. */}
+          <GridKpiTooltipRow provenance="D" label="Biogas & Biomass:" value={`${fmtMw(BIO_CAPACITY)} MW`} />
+          <GridKpiTooltipRow provenance="D" label="Renewable Share:" value={`~${renewableGridSharePct.toFixed(1)}% of Installed`} valueClass="text-primary" />
+          {/* The registry does not move with the date picker, so the tooltip
+              says so once rather than letting a daily-looking tile imply it. */}
+          <GridKpiTooltipAudit>As listed by SREDA — a standing registry, not a daily reading. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="SREDA Database"
             refHref="http://www.renewableenergy.gov.bd/"
@@ -314,6 +335,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         }
         value={`${(systemStats.totalDailyCost / 10000000).toFixed(1)} Cr Tk.`}
         active={activeKpiTooltip === 'cost'}
+        provenance="P"
         onToggle={() => toggleKpiTooltip('cost')}
         tooltipTitle="Fuel & Import Bills"
         tooltipIcon={TakaIcon}
@@ -322,21 +344,23 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       >
         <GridKpiTooltipBody>
           <GridKpiTooltipRow
+            provenance="P"
             label="Total Daily Cost:"
             value={`${(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT`}
           />
           {/* A day whose report carries no production-cost block has no unit
               rate to show. "0.00 Tk/KWh" would read as free electricity. */}
           <GridKpiTooltipRow
+            provenance="D"
             label="Average Bulk Cost:"
             value={hasPublishedFuelCost ? `${avgCostPerKwh.toFixed(3)} Tk/KWh` : '—'}
             valueClass="text-primary"
           />
-          <GridKpiTooltipRow label="HFO Generation Cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
-          <GridKpiTooltipRow label="Hydro Generation Cost:" value={fuelUnitRate('Hydro')} valueClass="text-emerald-500" />
-          <GridKpiTooltipRow label="Cross-Border Imports:" value={fuelUnitRate('Imports')} />
-          <GridKpiTooltipAudit>Audited by: BPDB Audit Team &amp; CAG</GridKpiTooltipAudit>
-          <GridKpiTooltipRef refLabel="BPC Gazettes" refHref="https://bpc.gov.bd/" dateLabel={`Date: ${systemStats.date}`} />
+          <GridKpiTooltipRow provenance="D" label="HFO Generation Cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
+          <GridKpiTooltipRow provenance="D" label="Hydro Generation Cost:" value={fuelUnitRate('Hydro')} valueClass="text-emerald-500" />
+          <GridKpiTooltipRow provenance="D" label="Cross-Border Imports:" value={fuelUnitRate('Imports')} />
+          <GridKpiTooltipAudit>As published by PGCB, restating BPDB fuel economics. Not audited.</GridKpiTooltipAudit>
+          <GridKpiTooltipRef refLabel="PGCB Daily Report (P1)" refHref="https://www.pgcb.gov.bd/" dateLabel={`Date: ${systemStats.date}`} />
         </GridKpiTooltipBody>
       </GridKpiCell>
     </GridKpiStrip>

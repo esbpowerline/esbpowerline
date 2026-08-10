@@ -57,6 +57,37 @@ export function GridCardFooter({ children, className }: { children: ReactNode; c
   return <div className={cn('grid-explorer-card-footer', className)}>{children}</div>;
 }
 
+/**
+ * Where a figure on the page came from.
+ *
+ * `P` — the source publication states this number and we reproduce it. It is
+ * not a number we have checked, corrected or audited; it is theirs.
+ * `D` — we calculated it from published figures. The source never states it.
+ *
+ * The distinction is the whole point: a reader looking at "7.63 Tk/kWh" cannot
+ * otherwise tell that PGCB published the cost and the energy but never that
+ * rate, and the page used to make that worse by crediting auditors — BPC, CAG,
+ * SF Ahmed & Co. — whose reports nothing in this pipeline has ever opened.
+ */
+export type GridProvenance = 'P' | 'D';
+
+export const GRID_PROVENANCE_TITLE: Record<GridProvenance, string> = {
+  P: 'Published — stated by the source publication and reproduced here unchanged. Not audited or verified by ESB PowerLine.',
+  D: 'Derived — calculated by ESB PowerLine from published figures. The source does not state this number.',
+};
+
+export function GridProvenanceTag({ kind, className }: { kind: GridProvenance; className?: string }) {
+  return (
+    <span
+      className={cn('grid-provenance-tag', `grid-provenance-tag--${kind.toLowerCase()}`, className)}
+      title={GRID_PROVENANCE_TITLE[kind]}
+      aria-label={kind === 'P' ? 'Published figure' : 'Derived figure'}
+    >
+      {kind}
+    </span>
+  );
+}
+
 export interface GridSourceLink {
   label: string;
   href: string;
@@ -182,6 +213,7 @@ export function GridKpiCell({
   width = 'md',
   widthClass,
   onToggle,
+  provenance,
   tooltipTitle,
   tooltipIcon: TooltipIcon,
   tooltipAccent,
@@ -197,6 +229,8 @@ export function GridKpiCell({
   width?: 'sm' | 'md' | 'lg';
   widthClass?: string;
   onToggle?: () => void;
+  /** Whether the headline value is the source's number or one of ours. */
+  provenance?: GridProvenance;
   tooltipTitle?: string;
   tooltipIcon?: GridIcon;
   tooltipAccent?: string;
@@ -234,7 +268,12 @@ export function GridKpiCell({
     >
       <Icon className={cn('grid-explorer-kpi__icon shrink-0', iconClassName)} />
       <div className="min-w-0">
-        <GridKpiLabel>{label}</GridKpiLabel>
+        {/* The mark sits with the cadence badge, not against the number: both
+            say what kind of figure this is rather than what it reads. */}
+        <GridKpiLabel>
+          {label}
+          {provenance && <GridProvenanceTag kind={provenance} className="ml-2" />}
+        </GridKpiLabel>
         <div className="grid-explorer-kpi__value">{value}</div>
         {hint && <p className="text-[9px] text-muted-foreground mt-1 leading-snug">{hint}</p>}
       </div>
@@ -309,15 +348,34 @@ export function GridKpiTooltipBody({ children }: { children: ReactNode }) {
   return <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">{children}</div>;
 }
 
-export function GridKpiTooltipRow({ label, value, valueClass }: { label: string; value: ReactNode; valueClass?: string }) {
+export function GridKpiTooltipRow({
+  label,
+  value,
+  valueClass,
+  provenance,
+}: {
+  label: string;
+  value: ReactNode;
+  valueClass?: string;
+  provenance?: GridProvenance;
+}) {
   return (
     <div className="flex justify-between gap-4">
-      <span className="text-muted-foreground">{label}</span>
+      <span className="text-muted-foreground inline-flex items-center gap-1">
+        {provenance && <GridProvenanceTag kind={provenance} />}
+        {label}
+      </span>
       <span className={cn('font-bold text-foreground text-right', valueClass)}>{value}</span>
     </div>
   );
 }
 
+/**
+ * The provenance line at the foot of a KPI tooltip. It replaced a row that
+ * printed "Audited by: <firm>" on figures no auditor's report reaches this
+ * codebase — state who published a number, and say plainly that we did not
+ * verify it.
+ */
 export function GridKpiTooltipAudit({ children, className }: { children: ReactNode; className?: string }) {
   return (
     <div className={cn('pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold', className)}>
