@@ -92,8 +92,16 @@ def validate_grid_daily(data: dict, iso_date: str) -> ValidationResult:
     if hourly is not None:
         if not isinstance(hourly, list):
             errors.append("hourlyLoadData must be an array when present")
-        elif len(hourly) != 24:
-            errors.append(f"hourlyLoadData must have 24 rows (got {len(hourly)})")
+        elif len(hourly) not in (24, 25):
+            # 25 is PGCB's own row set, not a defect: the 24 hours plus the
+            # evening-peak half hour (19:30 on 2026-08-07 through 08-10), which
+            # parse_daily_reports keeps deliberately rather than dropping the
+            # instant PGCB stamps the peak on. The shipped archive carries 25 rows
+            # for those days, and validate-daily-report.ts imposes no count rule at
+            # all — so a flat `!= 24` rejected days PGCB published normally. Worse,
+            # it sat on an `else` that skipped every per-row check below, leaving
+            # exactly those days unvalidated.
+            errors.append(f"hourlyLoadData must have 24 or 25 rows (got {len(hourly)})")
         else:
             times = set()
             for i, row in enumerate(hourly):
@@ -119,8 +127,10 @@ def validate_grid_daily(data: dict, iso_date: str) -> ValidationResult:
                             f"hourlyLoadData[{i}]: demand {d} != generation + loadShed "
                             f"({g} + {s}); reported as published"
                         )
-            if len(times) != 24:
-                warnings.append("hourlyLoadData times may not cover all 24 hours uniquely")
+            if len(times) != len(hourly):
+                warnings.append("hourlyLoadData has duplicate timestamps")
+            if not {f"{h:02d}:00" for h in range(24)} <= times:
+                warnings.append("hourlyLoadData does not cover all 24 hours")
 
     for section, keys in (
         ("regionalDemandData", ("zone", "loadShed", "demand", "pct")),

@@ -105,6 +105,11 @@ ERP_BY_ENERGY: dict[str, int] = {
     "2026-08-06": 5091,
     "2026-08-07": 5092,
     "2026-08-08": 5093,
+    # Confirmed 2026-08-11 the same two ways, plus a third for 5093: re-parsing
+    # it reproduced the stored public/data/curves/2026-08-08.json byte for byte,
+    # so the id really is that energy day's workbook and the parse is unchanged.
+    "2026-08-09": 5094,
+    "2026-08-10": 5095,
 }
 
 SITE_FOLDERS = {

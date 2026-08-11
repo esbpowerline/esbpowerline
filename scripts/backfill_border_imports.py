@@ -76,9 +76,15 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
+    # Same flag as backfill_energy_curve.py, for the same reason: a daily ingest
+    # wants to fill the day it just added without also rewriting the 2018 rows
+    # this script still has outstanding.
+    ap.add_argument("--from", dest="start", default="")
     args = ap.parse_args()
 
     days = sorted(p.stem for p in CURVES.glob("*.json") if len(p.stem) == 10)
+    if args.start:
+        days = [d for d in days if d >= args.start]
     if args.limit:
         days = days[: args.limit]
     print(f"{len(days)} day(s) with a fuel curve")

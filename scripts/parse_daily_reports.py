@@ -42,24 +42,41 @@ def parse_date_from_filename(f):
     except Exception:
         return None
 
+NUMERIC_CELL = re.compile(r'^-?\d+(?:\.\d+)?$')
+
+
 def extract_production_values(line, field_name):
+    """Gas and condensate for one production row: (gas_mmcfd, condensate_bbld).
+
+    Petrobangla qualifies some field names after the part matched here —
+    "Kailashtila #1 (Silicagel)", "Kailashtila #2 (MSTE)" — and the old reader
+    collected numbers from the first token onward, stopping at the first one
+    with no digits. On those rows that meant "#1" then "(Silicagel)", which
+    ended the scan with a single number, so both Kailashtila fields returned
+    zero and SGFL was published 45.3 MMCFD short every day (94.1 against
+    Petrobangla's own 139.5 on 2026-08-08). It is why the company rows failed to
+    reproduce Petrobangla's printed grand total on most days.
+
+    So the remainder of the label is skipped rather than parsed: tokens are
+    ignored until the first purely numeric cell, and collected from there until
+    a non-numeric one — which also stops cleanly at trailing remarks such as
+    "Delivered from N-S pipeline". "#1" is not a numeric cell, because a cell is
+    digits only.
+    """
     idx = line.lower().find(field_name.lower())
     if idx == -1:
         return 0.0, 0.0
-    rest = line[idx + len(field_name):].strip()
-    words = rest.split()
     nums = []
-    for w in words:
-        w_clean = re.sub(r'[^\d\-.]', '', w)
-        if not w_clean:
-            break
-        try:
-            nums.append(float(w_clean))
-        except ValueError:
+    started = False
+    for w in line[idx + len(field_name):].split():
+        if NUMERIC_CELL.match(w):
+            started = True
+            nums.append(float(w))
+        elif started:
             break
     if len(nums) >= 4:
         return nums[2], nums[3]
-    elif len(nums) >= 3:
+    if len(nums) >= 3:
         return nums[2], 0.0
     return 0.0, 0.0
 
