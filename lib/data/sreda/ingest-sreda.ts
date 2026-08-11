@@ -1,15 +1,70 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {
+  buildSredaProjectRegister,
+  buildSredaReconciliation,
   mergeSredaSnapshots,
+  parseSredaCarbonHtml,
   parseSredaGenerationMixHtml,
   parseSredaHomepageHtml,
+  parseSredaOrganisationHtml,
+  parseSredaTechnologyHtml,
+  parseSredaYearWiseHtml,
+  sredaRegisterHasNextPage,
 } from '@/lib/data/sreda/parse-sreda-html';
-import type { SredaDailyData } from '@/lib/data/sreda/types';
+import type {
+  SredaDailyData,
+  SredaOrganisationTable,
+  SredaProjectRegister,
+  SredaYearTable,
+} from '@/lib/data/sreda/types';
 
 const SREDA_BASE_URL = 'https://ndre.sreda.gov.bd';
 const SREDA_HOME_URL = 'https://ndre.sreda.gov.bd/';
 const SREDA_MIX_URL = 'https://ndre.sreda.gov.bd/index.php?id=7';
+const SREDA_TECH_URL = 'https://ndre.sreda.gov.bd/index.php?id=8';
+const SREDA_CARBON_URL = 'https://ndre.sreda.gov.bd/index.php?id=21';
+
+/**
+ * The organisation-wise statistics pages. These are where SREDA names the other
+ * agencies — BPDB, NWPGCL, EGCB, BREB, DESCO, DPDC, NESCO, WZPDCL, IDCOL, BADC,
+ * BMDA — so they are the only published route from a national capacity figure
+ * to who actually owns it.
+ */
+const SREDA_ORG_PAGES: { id: number; category: string }[] = [
+  { id: 16, category: 'Solar Parks' },
+  { id: 17, category: 'Net Metered Rooftop Solar' },
+  { id: 15, category: 'Solar Irrigation Pumps' },
+  { id: 18, category: 'Solar Charging Stations' },
+  // id=19 (Telecom BTS) publishes a Total of 0 with no organisation rows and
+  // id=20 (Drinking Water) returns HTTP 500, so neither is requested. The
+  // technology-wise page still carries both, and that is where they appear.
+];
+
+/** Year-wise commissioning tables. */
+const SREDA_YEAR_PAGES: { id: number; category: string }[] = [
+  { id: 11, category: 'Large Projects' },
+  { id: 12, category: 'Small Projects' },
+];
+
+/**
+ * Project-register views, one per electricity-generating technology.
+ *
+ * `technology` matches the name on the technology-wise page exactly, which is
+ * what lets the register's running projects be reconciled against the capacity
+ * that page states. Views SREDA offers for non-generating categories are left
+ * out rather than listed with nothing to check them against.
+ */
+/** Backstop on the pagination walk. Solar Park, the largest, is three pages. */
+const SREDA_REGISTER_MAX_PAGES = 12;
+
+const SREDA_REGISTER_PAGES: { i: number; technology: string }[] = [
+  { i: 1, technology: 'Solar Park' },
+  { i: 11, technology: 'All Wind Projects' },
+  { i: 12, technology: 'All Hydro Projects' },
+  { i: 14, technology: 'Biogas to Electricity' },
+  { i: 16, technology: 'Biomass to Electricity' },
+];
 
 function getSredaDailyDir(): string {
   return path.join(process.cwd(), 'public', 'data', 'sreda', 'daily');
@@ -97,6 +152,67 @@ export async function scrapeSredaDailySnapshot(): Promise<SredaDailyData | null>
     return null;
   }
 
+  // The detail pages are additive. A page that fails to fetch or parse leaves
+  // its section absent, which the tab renders as an empty state — it must never
+  // fall back to the previous snapshot's numbers under today's timestamp.
+  const [techHtml, carbonHtml] = await Promise.all([
+    fetchSredaPage(SREDA_TECH_URL),
+    fetchSredaPage(SREDA_CARBON_URL),
+  ]);
+
+  if (techHtml) {
+    const { technologyBreakdown, technologyTotals } = parseSredaTechnologyHtml(techHtml);
+    if (technologyBreakdown.length > 0) {
+      merged.technologyBreakdown = technologyBreakdown;
+      merged.technologyTotals = technologyTotals;
+    }
+  }
+  if (carbonHtml) {
+    const carbon = parseSredaCarbonHtml(carbonHtml);
+    if (carbon.length > 0) merged.carbonEstimates = carbon;
+  }
+
+  const organisationTables: SredaOrganisationTable[] = [];
+  for (const page of SREDA_ORG_PAGES) {
+    const url = `${SREDA_BASE_URL}/index.php?id=${page.id}`;
+    const html = await fetchSredaPage(url);
+    if (!html) continue;
+    const table = parseSredaOrganisationHtml(html, page.category, url);
+    if (table) organisationTables.push(table);
+  }
+  if (organisationTables.length > 0) merged.organisationTables = organisationTables;
+
+  const yearWiseTables: SredaYearTable[] = [];
+  for (const page of SREDA_YEAR_PAGES) {
+    const url = `${SREDA_BASE_URL}/index.php?id=${page.id}`;
+    const html = await fetchSredaPage(url);
+    if (!html) continue;
+    const table = parseSredaYearWiseHtml(html, page.category, url);
+    if (table) yearWiseTables.push(table);
+  }
+  if (yearWiseTables.length > 0) merged.yearWiseTables = yearWiseTables;
+
+  // The register is paginated at 30 rows a page, not capped at 30: Solar Park
+  // runs to 76 projects over three pages. Following "Next Page" is what makes
+  // the view's own "System: N, Capacity: X" headline verifiable, and stopping
+  // at page one silently published 30 of 76.
+  const projectRegisters: SredaProjectRegister[] = [];
+  for (const page of SREDA_REGISTER_PAGES) {
+    const url = `${SREDA_BASE_URL}/index.php?id=1&i=${page.i}`;
+    const pages: string[] = [];
+    for (let pg = 1; pg <= SREDA_REGISTER_MAX_PAGES; pg += 1) {
+      const html = await fetchSredaPage(pg === 1 ? url : `${url}&pg=${pg}`);
+      if (!html) break;
+      pages.push(html);
+      if (!sredaRegisterHasNextPage(html, pg + 1)) break;
+    }
+    if (pages.length === 0) continue;
+    const register = buildSredaProjectRegister(page.technology, url, pages);
+    if (register) projectRegisters.push(register);
+  }
+  if (projectRegisters.length > 0) merged.projectRegisters = projectRegisters;
+
+  merged.reconciliation = buildSredaReconciliation(merged);
   return merged;
 }
 
