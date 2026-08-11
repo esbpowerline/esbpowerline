@@ -21,19 +21,19 @@ export { ArchiveBadge, DailyBadge, LiveBadge };
 /** Gas tab panels — thin alias preserving `reportingPeriod` prop name */
 export function GasSourceFooter({
   source,
-  auditedBy,
+  attribution,
   reportingPeriod,
   className,
 }: {
   source: React.ReactNode;
-  auditedBy: string;
+  attribution: string;
   reportingPeriod: string;
   className?: string;
 }) {
   return (
     <GridSourceFooter
       source={source}
-      auditedBy={auditedBy}
+      attribution={attribution}
       reporting={reportingPeriod}
       className={className}
     />

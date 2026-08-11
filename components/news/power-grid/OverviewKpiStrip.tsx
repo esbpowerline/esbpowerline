@@ -5,7 +5,6 @@ import { Activity, Droplet, Sun, Zap } from 'lucide-react';
 import { TakaIcon } from '@/components/news/power-grid/shared';
 import {
   DailyBadge,
-  GridDataBadge,
   GridKpiCell,
   GridKpiStrip,
   GridKpiTooltipAudit,
@@ -26,11 +25,14 @@ const fmtMw = (n: number) =>
 const renewableCapacity = (tech: string) =>
   sredaRenewablesData.find((r) => r.tech === tech)?.capacity ?? 0;
 
-// SREDA registry is static module data; derive the breakdown so it reconciles with the headline total.
-const SOLAR_CAPACITY = renewableCapacity('Solar PV');
-const HYDRO_CAPACITY = renewableCapacity('Hydroelectric');
-const WIND_CAPACITY = renewableCapacity('Wind Energy');
-const BIO_CAPACITY = renewableCapacity('Biogas Power') + renewableCapacity('Biomass Energy');
+// SREDA registry is static module data; derive the breakdown so it reconciles with the headline
+// total. Keys are SREDA's own source names — they were renamed from "Solar PV"/"Hydroelectric"/
+// "Wind Energy" when the constants were refreshed against the published table, and a lookup that
+// misses returns 0, which would read as "no capacity" rather than as a broken key.
+const SOLAR_CAPACITY = renewableCapacity('Solar');
+const HYDRO_CAPACITY = renewableCapacity('Hydro');
+const WIND_CAPACITY = renewableCapacity('Wind');
+const BIO_CAPACITY = renewableCapacity('Biogas') + renewableCapacity('Biomass');
 
 export interface OverviewKpiStripProps {
   systemStats: GridSystemStats;
@@ -118,8 +120,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   const unservedAvgMw =
     systemStats.totalEnergyUnserved == null ? null : mkwhToAvgMw(systemStats.totalEnergyUnserved);
 
+  // The page-level strip: its briefings drop over the tab content below, so it
+  // must sit above any KPI strip rendered inside a tab.
   return (
-    <GridKpiStrip stripRef={kpiStripRef}>
+    <GridKpiStrip stripRef={kpiStripRef} layer="page">
       <GridKpiCell
         icon={Zap}
         label={
@@ -291,12 +295,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       <GridKpiCell
         icon={Sun}
         iconClassName="text-yellow-500"
-        label={
-          <>
-            Renewables Online
-            <GridDataBadge cadence="monthly" />
-          </>
-        }
+        // The cadence badge is gone: SREDA's register is not published on a
+        // monthly cycle, it is restated whenever a project registers, and the
+        // tooltip already says it is a standing registry rather than a reading.
+        label="Renewables Online"
         value={`${totalCapacityRenewables.toFixed(1)} MW`}
         active={activeKpiTooltip === 'renew'}
         align="right"

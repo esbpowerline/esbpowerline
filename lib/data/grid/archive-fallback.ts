@@ -391,128 +391,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 13623,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 67,
+          "demand": 13693.02
         },
         {
           "time": "01:00",
           "generation": 13300,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 35,
+          "demand": 13337
         },
         {
           "time": "02:00",
           "generation": 12999,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 35,
+          "demand": 13036
         },
         {
           "time": "03:00",
           "generation": 12641,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 25,
+          "demand": 12667
         },
         {
           "time": "04:00",
           "generation": 12408,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 12424
         },
         {
           "time": "05:00",
           "generation": 12128,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 5,
+          "demand": 12133
         },
         {
           "time": "06:00",
           "generation": 11426.78,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11426.78
         },
         {
           "time": "07:00",
           "generation": 11391.23,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11391.23
         },
         {
           "time": "08:00",
           "generation": 11325.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11325.2
         },
         {
           "time": "09:00",
           "generation": 11255.85,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11255.85
         },
         {
           "time": "10:00",
           "generation": 11105.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11105.13
         },
         {
           "time": "11:00",
           "generation": 11225.75,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11225.75
         },
         {
           "time": "12:00",
           "generation": 11716.03,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11716.03
         },
         {
           "time": "13:00",
           "generation": 12280.1,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12280.1
         },
         {
           "time": "14:00",
           "generation": 12533.63,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12533.63
         },
         {
           "time": "15:00",
           "generation": 12473.11,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12473.11
         },
         {
           "time": "16:00",
           "generation": 12207.3,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12207.3
         },
         {
           "time": "17:00",
           "generation": 11776.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11776.76
         },
         {
           "time": "18:00",
           "generation": 11450.79,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11450.79
         },
         {
           "time": "19:00",
           "generation": 13112.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13112.5
+        },
+        {
+          "time": "19:30",
+          "generation": 13427.5,
+          "loadShed": 191,
+          "demand": 13627.5
         },
         {
           "time": "20:00",
           "generation": 13830.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 92,
+          "demand": 13926.5
         },
         {
           "time": "21:00",
@@ -523,14 +529,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14450.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 163,
+          "demand": 14620.5
         },
         {
           "time": "23:00",
           "generation": 14513.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 157,
+          "demand": 14677.5
         }
       ],
       "gasProductionData": [
@@ -961,128 +967,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14464,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 75,
+          "demand": 14542.38
         },
         {
           "time": "01:00",
           "generation": 14277,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 60,
+          "demand": 14340
         },
         {
           "time": "02:00",
           "generation": 13657,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 65,
+          "demand": 13725
         },
         {
           "time": "03:00",
           "generation": 13303,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 45,
+          "demand": 13350
         },
         {
           "time": "04:00",
           "generation": 12965,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 40,
+          "demand": 13007
         },
         {
           "time": "05:00",
           "generation": 12690,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 40,
+          "demand": 12732
         },
         {
           "time": "06:00",
           "generation": 12313.71,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 45,
+          "demand": 12360.71
         },
         {
           "time": "07:00",
           "generation": 12250.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 40,
+          "demand": 12292.89
         },
         {
           "time": "08:00",
           "generation": 12304.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 30,
+          "demand": 12335.7
         },
         {
           "time": "09:00",
           "generation": 12604.87,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 12620.87
         },
         {
           "time": "10:00",
           "generation": 12695.71,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 12711.39
         },
         {
           "time": "11:00",
           "generation": 12840.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 12856.58
         },
         {
           "time": "12:00",
           "generation": 13150.4,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 13166.08
         },
         {
           "time": "13:00",
           "generation": 13567.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 13583.38
         },
         {
           "time": "14:00",
           "generation": 13558.28,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 15,
+          "demand": 13574.28
         },
         {
           "time": "15:00",
           "generation": 13572.02,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 17,
+          "demand": 13589.79
         },
         {
           "time": "16:00",
           "generation": 13484.4,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 20,
+          "demand": 13505.3
         },
         {
           "time": "17:00",
           "generation": 13217.78,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13217.78
         },
         {
           "time": "18:00",
           "generation": 12547.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12547.89
         },
         {
           "time": "19:00",
           "generation": 14261.94,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 55,
+          "demand": 14318.94
+        },
+        {
+          "time": "19:30",
+          "generation": 14892.7,
+          "loadShed": 70,
+          "demand": 14965.7
         },
         {
           "time": "20:00",
           "generation": 14951.57,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 90,
+          "demand": 15045.57
         },
         {
           "time": "21:00",
@@ -1093,14 +1105,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 15141.49,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 85,
+          "demand": 15230.49
         },
         {
           "time": "23:00",
           "generation": 15178.71,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 142,
+          "demand": 15326.71
         }
       ],
       "gasProductionData": [
@@ -2061,128 +2073,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 15810.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 391,
+          "demand": 16219.36
         },
         {
           "time": "01:00",
           "generation": 15520.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 252,
+          "demand": 15783.76
         },
         {
           "time": "02:00",
           "generation": 15162.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 255,
+          "demand": 15428.76
         },
         {
           "time": "03:00",
           "generation": 14807.56,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 245,
+          "demand": 15063.56
         },
         {
           "time": "04:00",
           "generation": 14478,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 220,
+          "demand": 14708
         },
         {
           "time": "05:00",
           "generation": 14319,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 210,
+          "demand": 14538
         },
         {
           "time": "06:00",
           "generation": 13612.84,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 224,
+          "demand": 13846.84
         },
         {
           "time": "07:00",
           "generation": 13434.78,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 236,
+          "demand": 13681.78
         },
         {
           "time": "08:00",
           "generation": 13295.83,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 135,
+          "demand": 13436.83
         },
         {
           "time": "09:00",
           "generation": 13504.65,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 145,
+          "demand": 13656.65
         },
         {
           "time": "10:00",
           "generation": 13941.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 80,
+          "demand": 14025.13
         },
         {
           "time": "11:00",
           "generation": 14063.45,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 191,
+          "demand": 14263.45
         },
         {
           "time": "12:00",
           "generation": 14553.08,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 304,
+          "demand": 14871.08
         },
         {
           "time": "13:00",
           "generation": 15039.49,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 196,
+          "demand": 15244.49
         },
         {
           "time": "14:00",
           "generation": 15193.19,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 186,
+          "demand": 15387.56
         },
         {
           "time": "15:00",
           "generation": 15189.41,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 374,
+          "demand": 15580.41
         },
         {
           "time": "16:00",
           "generation": 15153.1,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 208,
+          "demand": 15370.1
         },
         {
           "time": "17:00",
           "generation": 14375.03,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 208,
+          "demand": 14592.03
         },
         {
           "time": "18:00",
           "generation": 13447.48,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 188,
+          "demand": 13643.48
         },
         {
           "time": "19:00",
           "generation": 14922.67,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 233,
+          "demand": 15165.67
+        },
+        {
+          "time": "19:30",
+          "generation": 15660.3,
+          "loadShed": 251,
+          "demand": 15922.3
         },
         {
           "time": "20:00",
           "generation": 15506.46,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 207,
+          "demand": 15722.46
         },
         {
           "time": "21:00",
@@ -2193,14 +2211,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 15806.4,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 434,
+          "demand": 16260.4
         },
         {
           "time": "23:00",
           "generation": 15979.83,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 362,
+          "demand": 16357.83
         }
       ],
       "gasProductionData": [
@@ -2806,128 +2824,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 16015.91,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 552,
+          "demand": 16592.75
         },
         {
           "time": "01:00",
           "generation": 15752.02,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 349,
+          "demand": 16116.73
         },
         {
           "time": "02:00",
           "generation": 15243.67,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 330,
+          "demand": 15588.67
         },
         {
           "time": "03:00",
           "generation": 14912.88,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 308,
+          "demand": 15234.88
         },
         {
           "time": "04:00",
           "generation": 14547.56,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 283,
+          "demand": 14843.56
         },
         {
           "time": "05:00",
           "generation": 14183.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 278,
+          "demand": 14474.44
         },
         {
           "time": "06:00",
           "generation": 13711.62,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 257,
+          "demand": 13980.62
         },
         {
           "time": "07:00",
           "generation": 13596.27,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 235,
+          "demand": 13842.27
         },
         {
           "time": "08:00",
           "generation": 13452.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 200,
+          "demand": 13661.95
         },
         {
           "time": "09:00",
           "generation": 13680.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 243,
+          "demand": 13934.7
         },
         {
           "time": "10:00",
           "generation": 13944.79,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 186,
+          "demand": 14138.79
         },
         {
           "time": "11:00",
           "generation": 14305.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 136,
+          "demand": 14447.44
         },
         {
           "time": "12:00",
           "generation": 14743.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 218,
+          "demand": 14971.95
         },
         {
           "time": "13:00",
           "generation": 14997.22,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 77,
+          "demand": 15077.22
         },
         {
           "time": "14:00",
           "generation": 15001.97,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 64,
+          "demand": 15068.97
         },
         {
           "time": "15:00",
           "generation": 15147.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 86,
+          "demand": 15237.89
         },
         {
           "time": "16:00",
           "generation": 14652.61,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 256,
+          "demand": 14920.13
         },
         {
           "time": "17:00",
           "generation": 13970.71,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 206,
+          "demand": 14185.71
         },
         {
           "time": "18:00",
           "generation": 12975.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 116,
+          "demand": 13096.2
         },
         {
           "time": "19:00",
           "generation": 14245.04,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 242,
+          "demand": 14497.93
+        },
+        {
+          "time": "19:30",
+          "generation": 14759.99,
+          "loadShed": 210,
+          "demand": 14978.99
         },
         {
           "time": "20:00",
           "generation": 14881.17,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 187,
+          "demand": 15076.17
         },
         {
           "time": "21:00",
@@ -2938,14 +2962,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14858.25,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 186,
+          "demand": 15052.25
         },
         {
           "time": "23:00",
           "generation": 15048.56,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 175,
+          "demand": 15231.44
         }
       ],
       "gasProductionData": [
@@ -3446,128 +3470,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 15282.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 360,
+          "demand": 15659.09
         },
         {
           "time": "01:00",
           "generation": 15224.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 192,
+          "demand": 15425.08
         },
         {
           "time": "02:00",
           "generation": 15176.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 182,
+          "demand": 15366.63
         },
         {
           "time": "03:00",
           "generation": 14691.22,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 162,
+          "demand": 14860.51
         },
         {
           "time": "04:00",
           "generation": 14244.09,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 157,
+          "demand": 14408.16
         },
         {
           "time": "05:00",
           "generation": 13895.82,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 152,
+          "demand": 14054.66
         },
         {
           "time": "06:00",
           "generation": 13225.46,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 217,
+          "demand": 13452.23
         },
         {
           "time": "07:00",
           "generation": 12743.65,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 185,
+          "demand": 12936.65
         },
         {
           "time": "08:00",
           "generation": 12531.77,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 204,
+          "demand": 12744.95
         },
         {
           "time": "09:00",
           "generation": 12461.11,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 201,
+          "demand": 12671.11
         },
         {
           "time": "10:00",
           "generation": 12361.4,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 193,
+          "demand": 12563.4
         },
         {
           "time": "11:00",
           "generation": 12239.01,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 90,
+          "demand": 12333.01
         },
         {
           "time": "12:00",
           "generation": 12340.06,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 168,
+          "demand": 12516.06
         },
         {
           "time": "13:00",
           "generation": 12671.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 92,
+          "demand": 12767.5
         },
         {
           "time": "14:00",
           "generation": 12196.14,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 65,
+          "demand": 12264.14
         },
         {
           "time": "15:00",
           "generation": 12055.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 135,
+          "demand": 12196.95
         },
         {
           "time": "16:00",
           "generation": 11929.52,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11929.52
         },
         {
           "time": "17:00",
           "generation": 11765.1,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11765.1
         },
         {
           "time": "18:00",
           "generation": 11710.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 20,
+          "demand": 11731.95
         },
         {
           "time": "19:00",
           "generation": 13240.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 119,
+          "demand": 13364.5
+        },
+        {
+          "time": "19:30",
+          "generation": 13938,
+          "loadShed": 205,
+          "demand": 14152.23
         },
         {
           "time": "20:00",
           "generation": 13914,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 203,
+          "demand": 14126.14
         },
         {
           "time": "21:00",
@@ -3578,14 +3608,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14536.6,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 180,
+          "demand": 14724.6
         },
         {
           "time": "23:00",
           "generation": 14669.6,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 162,
+          "demand": 14838.6
         }
       ],
       "gasProductionData": [
@@ -7259,128 +7289,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14654.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 525,
+          "demand": 15203.39
         },
         {
           "time": "01:00",
           "generation": 14393.26,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 385,
+          "demand": 14795.59
         },
         {
           "time": "02:00",
           "generation": 14212.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 279,
+          "demand": 14504.46
         },
         {
           "time": "03:00",
           "generation": 13729.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 188,
+          "demand": 13925.66
         },
         {
           "time": "04:00",
           "generation": 13341.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 183,
+          "demand": 13532.44
         },
         {
           "time": "05:00",
           "generation": 12971,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 148,
+          "demand": 13125.66
         },
         {
           "time": "06:00",
           "generation": 12449.01,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 191,
+          "demand": 12648.61
         },
         {
           "time": "07:00",
           "generation": 12403.85,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 146,
+          "demand": 12556.85
         },
         {
           "time": "08:00",
           "generation": 12248.97,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 131,
+          "demand": 12385.97
         },
         {
           "time": "09:00",
           "generation": 12407.35,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 121,
+          "demand": 12533.8
         },
         {
           "time": "10:00",
           "generation": 12540.05,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 141,
+          "demand": 12687.05
         },
         {
           "time": "11:00",
           "generation": 12684.35,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 156,
+          "demand": 12847.35
         },
         {
           "time": "12:00",
           "generation": 13213.87,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 144,
+          "demand": 13363.87
         },
         {
           "time": "13:00",
           "generation": 14069.32,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 25,
+          "demand": 14095.32
         },
         {
           "time": "14:00",
           "generation": 13329.25,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 60,
+          "demand": 13392.25
         },
         {
           "time": "15:00",
           "generation": 13361.59,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 101,
+          "demand": 13467.59
         },
         {
           "time": "16:00",
           "generation": 12917.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 102,
+          "demand": 13024.76
         },
         {
           "time": "17:00",
           "generation": 12341.82,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 107,
+          "demand": 12453.82
         },
         {
           "time": "18:00",
           "generation": 12146.92,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 112,
+          "demand": 12263.92
         },
         {
           "time": "19:00",
           "generation": 13279,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 168,
+          "demand": 13455
+        },
+        {
+          "time": "19:30",
+          "generation": 14426.9,
+          "loadShed": 175,
+          "demand": 14609.9
         },
         {
           "time": "20:00",
           "generation": 14504.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 392,
+          "demand": 14914.9
         },
         {
           "time": "21:00",
@@ -7391,14 +7427,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14770.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 845,
+          "demand": 15653.9
         },
         {
           "time": "23:00",
           "generation": 14619.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 938,
+          "demand": 15599.9
         }
       ],
       "gasProductionData": [
@@ -7878,128 +7914,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14462.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1347,
+          "demand": 15870.52
         },
         {
           "time": "01:00",
           "generation": 14259.32,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1056,
+          "demand": 15362.84
         },
         {
           "time": "02:00",
           "generation": 14113.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1012,
+          "demand": 15171.9
         },
         {
           "time": "03:00",
           "generation": 13884.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 929,
+          "demand": 14855.9
         },
         {
           "time": "04:00",
           "generation": 13670.4,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 508,
+          "demand": 14201.4
         },
         {
           "time": "05:00",
           "generation": 13345.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 152,
+          "demand": 13504.2
         },
         {
           "time": "06:00",
           "generation": 12690.61,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 143,
+          "demand": 12839.61
         },
         {
           "time": "07:00",
           "generation": 12871.54,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 188,
+          "demand": 13067.54
         },
         {
           "time": "08:00",
           "generation": 12741.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 178,
+          "demand": 12927.2
         },
         {
           "time": "09:00",
           "generation": 12947.14,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 142,
+          "demand": 13095.14
         },
         {
           "time": "10:00",
           "generation": 13109.92,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 73,
+          "demand": 13185.92
         },
         {
           "time": "11:00",
           "generation": 13388.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 134,
+          "demand": 13528.92
         },
         {
           "time": "12:00",
           "generation": 13863.2,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 289,
+          "demand": 14165.2
         },
         {
           "time": "13:00",
           "generation": 14164.45,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 401,
+          "demand": 14583.45
         },
         {
           "time": "14:00",
           "generation": 14146.6,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 425,
+          "demand": 14590.6
         },
         {
           "time": "15:00",
           "generation": 14161.97,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 463,
+          "demand": 14645.97
         },
         {
           "time": "16:00",
           "generation": 13987.02,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 372,
+          "demand": 14376.02
         },
         {
           "time": "17:00",
           "generation": 13711.05,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 175,
+          "demand": 13894.05
         },
         {
           "time": "18:00",
           "generation": 13585.18,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 126,
+          "demand": 13716.85
         },
         {
           "time": "19:00",
           "generation": 14520.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1053,
+          "demand": 15620.7
+        },
+        {
+          "time": "19:30",
+          "generation": 14727.7,
+          "loadShed": 1249,
+          "demand": 16032.7
         },
         {
           "time": "20:00",
           "generation": 14914.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1175,
+          "demand": 16142.7
         },
         {
           "time": "21:00",
@@ -8010,14 +8052,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14888.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1221,
+          "demand": 16164.7
         },
         {
           "time": "23:00",
           "generation": 14829.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1672,
+          "demand": 16576.7
         }
       ],
       "gasProductionData": [
@@ -9909,6 +9951,12 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "energy": 3.78,
           "peakFlow": 170,
           "type": "C/B Interconnector (East)"
+        },
+        {
+          "source": "Nepal (via India)",
+          "energy": 0.89,
+          "peakFlow": 38,
+          "type": "C/B Interconnector (Nepal)"
         }
       ],
       "regionalDemandData": [
@@ -10232,146 +10280,152 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14607.18,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2152,
+          "demand": 16856.18
         },
         {
           "time": "01:00",
           "generation": 14238.5,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2116,
+          "demand": 16449.72
         },
         {
           "time": "02:00",
           "generation": 13969.84,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2027,
+          "demand": 16088.06
         },
         {
           "time": "03:00",
           "generation": 13874.8,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1931,
+          "demand": 15892.7
         },
         {
           "time": "04:00",
           "generation": 13747.18,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 446,
+          "demand": 14213.18
         },
         {
           "time": "05:00",
           "generation": 13577.87,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 167,
+          "demand": 13752.39
         },
         {
           "time": "06:00",
           "generation": 13277.6,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 166,
+          "demand": 13450.6
         },
         {
           "time": "07:00",
           "generation": 13272.28,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 113,
+          "demand": 13390.28
         },
         {
           "time": "08:00",
           "generation": 13413.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13413.13
         },
         {
           "time": "09:00",
           "generation": 13642.12,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13642.12
         },
         {
           "time": "10:00",
           "generation": 13850.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13850.7
         },
         {
           "time": "11:00",
           "generation": 14101.96,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 24,
+          "demand": 14126.96
         },
         {
           "time": "12:00",
           "generation": 13886.27,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 445,
+          "demand": 14351.27
         },
         {
           "time": "13:00",
           "generation": 13689.86,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 13,
+          "demand": 13703.86
         },
         {
           "time": "14:00",
           "generation": 13406.58,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 35,
+          "demand": 13443.58
         },
         {
           "time": "15:00",
           "generation": 13035.05,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 73,
+          "demand": 13111.05
         },
         {
           "time": "16:00",
           "generation": 13026.29,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 55,
+          "demand": 13083.29
         },
         {
           "time": "17:00",
           "generation": 12801.92,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 45,
+          "demand": 12848.92
         },
         {
           "time": "18:00",
           "generation": 12913.09,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 30,
+          "demand": 12944.09
         },
         {
           "time": "19:00",
           "generation": 14226.28,
+          "loadShed": 60,
+          "demand": 14289.28
+        },
+        {
+          "time": "19:30",
+          "generation": 14783.7,
           "loadShed": 66,
           "demand": 14852.7
         },
         {
           "time": "20:00",
           "generation": 14680.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 80,
+          "demand": 14764.89
         },
         {
           "time": "21:00",
           "generation": 14749.79,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 72,
+          "demand": 14824.79
         },
         {
           "time": "22:00",
           "generation": 14548.07,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 74,
+          "demand": 14625.07
         },
         {
           "time": "23:00",
           "generation": 14444.58,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 75,
+          "demand": 14522.96
         }
       ],
       "gasProductionData": [
@@ -10556,6 +10610,12 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "energy": 3.52,
           "peakFlow": 158,
           "type": "C/B Interconnector (East)"
+        },
+        {
+          "source": "Nepal (via India)",
+          "energy": 0.89,
+          "peakFlow": 38,
+          "type": "C/B Interconnector (Nepal)"
         }
       ],
       "regionalDemandData": [
@@ -10816,128 +10876,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14449.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 150,
+          "demand": 14605.88
         },
         {
           "time": "01:00",
           "generation": 14306.23,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 131,
+          "demand": 14443.13
         },
         {
           "time": "02:00",
           "generation": 13626.6,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 127,
+          "demand": 13759.32
         },
         {
           "time": "03:00",
           "generation": 13183.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 113,
+          "demand": 13301.98
         },
         {
           "time": "04:00",
           "generation": 12846.92,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 92,
+          "demand": 12943.06
         },
         {
           "time": "05:00",
           "generation": 12641.58,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 88,
+          "demand": 12733.54
         },
         {
           "time": "06:00",
           "generation": 11960.31,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 79,
+          "demand": 12042.87
         },
         {
           "time": "07:00",
           "generation": 11954.63,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 47,
+          "demand": 12003.75
         },
         {
           "time": "08:00",
           "generation": 12034.57,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 30,
+          "demand": 12065.57
         },
         {
           "time": "09:00",
           "generation": 11911.85,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 30,
+          "demand": 11942.85
         },
         {
           "time": "10:00",
           "generation": 11665.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11665.13
         },
         {
           "time": "11:00",
           "generation": 12035.93,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12035.93
         },
         {
           "time": "12:00",
           "generation": 12701.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12701.44
         },
         {
           "time": "13:00",
           "generation": 13448.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13448.7
         },
         {
           "time": "14:00",
           "generation": 13018.56,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13018.56
         },
         {
           "time": "15:00",
           "generation": 12930.12,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12930.12
         },
         {
           "time": "16:00",
           "generation": 12576.99,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12576.99
         },
         {
           "time": "17:00",
           "generation": 12164.86,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 12164.86
         },
         {
           "time": "18:00",
           "generation": 11961.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 11961.95
         },
         {
           "time": "19:00",
           "generation": 13225.01,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 13225.01
+        },
+        {
+          "time": "19:30",
+          "generation": 14492.37,
+          "loadShed": 45,
+          "demand": 14539.4
         },
         {
           "time": "20:00",
           "generation": 14431.75,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 50,
+          "demand": 14483.75
         },
         {
           "time": "21:00",
@@ -10948,14 +11014,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14932.57,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 80,
+          "demand": 15016.17
         },
         {
           "time": "23:00",
           "generation": 14998.98,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 90,
+          "demand": 15093.03
         }
       ],
       "gasProductionData": [
@@ -11565,6 +11631,12 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "energy": 3.62,
           "peakFlow": 122,
           "type": "C/B Interconnector (East)"
+        },
+        {
+          "source": "Nepal (via India)",
+          "energy": 0.89,
+          "peakFlow": 38,
+          "type": "C/B Interconnector (Nepal)"
         }
       ],
       "regionalDemandData": [
@@ -11944,128 +12016,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14280.08,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2709,
+          "demand": 17110.99
         },
         {
           "time": "01:00",
           "generation": 14158.12,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2519,
+          "demand": 16790.48
         },
         {
           "time": "02:00",
           "generation": 13964.28,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2445,
+          "demand": 16519.31
         },
         {
           "time": "03:00",
           "generation": 14008.76,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2261,
+          "demand": 16371.51
         },
         {
           "time": "04:00",
           "generation": 13946.97,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2141,
+          "demand": 16184.32
         },
         {
           "time": "05:00",
           "generation": 13910.21,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1948,
+          "demand": 15945.87
         },
         {
           "time": "06:00",
           "generation": 13628.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 751,
+          "demand": 14413.13
         },
         {
           "time": "07:00",
           "generation": 13877.08,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 390,
+          "demand": 14285.08
         },
         {
           "time": "08:00",
           "generation": 13937.51,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 319,
+          "demand": 14270.51
         },
         {
           "time": "09:00",
           "generation": 14066.19,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 560,
+          "demand": 14651.19
         },
         {
           "time": "10:00",
           "generation": 14052.81,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1072,
+          "demand": 15172.81
         },
         {
           "time": "11:00",
           "generation": 14040.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1355,
+          "demand": 15456.95
         },
         {
           "time": "12:00",
           "generation": 13951.43,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1894,
+          "demand": 15930.43
         },
         {
           "time": "13:00",
           "generation": 14202.66,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1858,
+          "demand": 16144.66
         },
         {
           "time": "14:00",
           "generation": 14035.34,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1905,
+          "demand": 16026.34
         },
         {
           "time": "15:00",
           "generation": 13597,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1901,
+          "demand": 15584
         },
         {
           "time": "16:00",
           "generation": 13366.17,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1343,
+          "demand": 14769.17
         },
         {
           "time": "17:00",
           "generation": 12844.11,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 358,
+          "demand": 13218.11
         },
         {
           "time": "18:00",
           "generation": 12671.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 100,
+          "demand": 12775.44
         },
         {
           "time": "19:00",
           "generation": 13613.41,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 10,
+          "demand": 13623.41
+        },
+        {
+          "time": "19:30",
+          "generation": 14170,
+          "loadShed": 47,
+          "demand": 14219
         },
         {
           "time": "20:00",
           "generation": 14170.96,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 45,
+          "demand": 14217.96
         },
         {
           "time": "21:00",
@@ -12076,14 +12154,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 14933.73,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 27,
+          "demand": 14961.73
         },
         {
           "time": "23:00",
           "generation": 15034.74,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 133,
+          "demand": 15173.74
         }
       ],
       "gasProductionData": [
@@ -12268,6 +12346,12 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "energy": 3.58,
           "peakFlow": 168,
           "type": "C/B Interconnector (East)"
+        },
+        {
+          "source": "Nepal (via India)",
+          "energy": 0.89,
+          "peakFlow": 38,
+          "type": "C/B Interconnector (Nepal)"
         }
       ],
       "regionalDemandData": [
@@ -12514,146 +12598,152 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14867.66,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 174,
+          "demand": 15049.49
         },
         {
           "time": "01:00",
           "generation": 14369.99,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 197,
+          "demand": 14575.86
         },
         {
           "time": "02:00",
           "generation": 13886.39,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 213,
+          "demand": 14108.98
         },
         {
           "time": "03:00",
           "generation": 13620.49,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 192,
+          "demand": 13821.13
         },
         {
           "time": "04:00",
           "generation": 13114.79,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 186,
+          "demand": 13309.16
         },
         {
           "time": "05:00",
           "generation": 12781.57,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 176,
+          "demand": 12965.49
         },
         {
           "time": "06:00",
           "generation": 12623.38,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 171,
+          "demand": 12802.08
         },
         {
           "time": "07:00",
           "generation": 12774.42,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 223,
+          "demand": 13007.42
         },
         {
           "time": "08:00",
           "generation": 12806.47,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 197,
+          "demand": 13012.47
         },
         {
           "time": "09:00",
           "generation": 13134.56,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 201,
+          "demand": 13344.56
         },
         {
           "time": "10:00",
           "generation": 13367.8,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 278,
+          "demand": 13658.8
         },
         {
           "time": "11:00",
           "generation": 13676.68,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 346,
+          "demand": 14038.68
         },
         {
           "time": "12:00",
           "generation": 14171.86,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 420,
+          "demand": 14610.86
         },
         {
           "time": "13:00",
           "generation": 14415.72,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 405,
+          "demand": 14838.72
         },
         {
           "time": "14:00",
           "generation": 14587.64,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 236,
+          "demand": 14834.64
         },
         {
           "time": "15:00",
           "generation": 14723.27,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 221,
+          "demand": 14954.27
         },
         {
           "time": "16:00",
           "generation": 14579.4,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 148,
+          "demand": 14734.4
         },
         {
           "time": "17:00",
           "generation": 14220.97,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 138,
+          "demand": 14364.97
         },
         {
           "time": "18:00",
           "generation": 14179.01,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 140,
+          "demand": 14325.01
         },
         {
           "time": "19:00",
           "generation": 15354.07,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 213,
+          "demand": 15577.07
+        },
+        {
+          "time": "19:30",
+          "generation": 15723.11,
+          "loadShed": 1082,
+          "demand": 16854.11
         },
         {
           "time": "20:00",
           "generation": 15846.44,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 414,
+          "demand": 16279.44
         },
         {
           "time": "21:00",
           "generation": 16154.41,
           "loadShed": 496,
-          "demand": 16854.11
+          "demand": 16672.41
         },
         {
           "time": "22:00",
           "generation": 15718.99,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 636,
+          "demand": 16383.61
         },
         {
           "time": "23:00",
           "generation": 15554.84,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1236,
+          "demand": 16846.46
         }
       ],
       "gasProductionData": [
@@ -12838,6 +12928,12 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "energy": 4.08,
           "peakFlow": 174,
           "type": "C/B Interconnector (East)"
+        },
+        {
+          "source": "Nepal (via India)",
+          "energy": 0.89,
+          "peakFlow": 38,
+          "type": "C/B Interconnector (Nepal)"
         }
       ],
       "regionalDemandData": [
@@ -13042,128 +13138,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 15758.04,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 642,
+          "demand": 16428.93
         },
         {
           "time": "01:00",
           "generation": 15664.66,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 332,
+          "demand": 16011.6
         },
         {
           "time": "02:00",
           "generation": 14663.77,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 948,
+          "demand": 15654.43
         },
         {
           "time": "03:00",
           "generation": 14351.22,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 914,
+          "demand": 15306.22
         },
         {
           "time": "04:00",
           "generation": 14243.64,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 767,
+          "demand": 15045.64
         },
         {
           "time": "05:00",
           "generation": 14038.13,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 635,
+          "demand": 14702.13
         },
         {
           "time": "06:00",
           "generation": 13675.92,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 305,
+          "demand": 13994.92
         },
         {
           "time": "07:00",
           "generation": 13639.05,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 315,
+          "demand": 13968.05
         },
         {
           "time": "08:00",
           "generation": 13769.66,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 285,
+          "demand": 14067.66
         },
         {
           "time": "09:00",
           "generation": 13870.65,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 260,
+          "demand": 14142.65
         },
         {
           "time": "10:00",
           "generation": 14345.21,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 317,
+          "demand": 14676.21
         },
         {
           "time": "11:00",
           "generation": 14567.22,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 468,
+          "demand": 15056.22
         },
         {
           "time": "12:00",
           "generation": 14580.7,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 972,
+          "demand": 15596.7
         },
         {
           "time": "13:00",
           "generation": 14430.69,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1324,
+          "demand": 15814.69
         },
         {
           "time": "14:00",
           "generation": 14211.43,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1397,
+          "demand": 15671.43
         },
         {
           "time": "15:00",
           "generation": 14213.96,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1821,
+          "demand": 16116.96
         },
         {
           "time": "16:00",
           "generation": 14138.56,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1400,
+          "demand": 15601.56
         },
         {
           "time": "17:00",
           "generation": 13981.11,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1161,
+          "demand": 15194.11
         },
         {
           "time": "18:00",
           "generation": 13949.3,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 982,
+          "demand": 14975.3
         },
         {
           "time": "19:00",
           "generation": 15175.9,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1321,
+          "demand": 16555.9
+        },
+        {
+          "time": "19:30",
+          "generation": 15380.6,
+          "loadShed": 1534,
+          "demand": 16983.6
         },
         {
           "time": "20:00",
           "generation": 15272.66,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1516,
+          "demand": 16856.66
         },
         {
           "time": "21:00",
@@ -13174,14 +13276,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 15498.15,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1481,
+          "demand": 17046.15
         },
         {
           "time": "23:00",
           "generation": 15359.75,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1631,
+          "demand": 17063.75
         }
       ],
       "gasProductionData": [
@@ -13366,6 +13468,12 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "energy": 3.94,
           "peakFlow": 166,
           "type": "C/B Interconnector (East)"
+        },
+        {
+          "source": "Nepal (via India)",
+          "energy": 0.89,
+          "peakFlow": 38,
+          "type": "C/B Interconnector (Nepal)"
         }
       ],
       "regionalDemandData": [
@@ -13612,128 +13720,134 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "00:00",
           "generation": 14548.3,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2529,
+          "demand": 17191.3
         },
         {
           "time": "01:00",
           "generation": 14128.64,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2461,
+          "demand": 16700.64
         },
         {
           "time": "02:00",
           "generation": 13941.78,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2296,
+          "demand": 16340.78
         },
         {
           "time": "03:00",
           "generation": 13839.06,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 2182,
+          "demand": 16119.06
         },
         {
           "time": "04:00",
           "generation": 13773.64,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1910,
+          "demand": 15769.64
         },
         {
           "time": "05:00",
           "generation": 13773.77,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1115,
+          "demand": 14938.95
         },
         {
           "time": "06:00",
           "generation": 13478.64,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 443,
+          "demand": 13941.64
         },
         {
           "time": "07:00",
           "generation": 13753.59,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 295,
+          "demand": 14061.59
         },
         {
           "time": "08:00",
           "generation": 13820.09,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 272,
+          "demand": 14104.09
         },
         {
           "time": "09:00",
           "generation": 14049.82,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 339,
+          "demand": 14403.82
         },
         {
           "time": "10:00",
           "generation": 14215.82,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 381,
+          "demand": 14613.82
         },
         {
           "time": "11:00",
           "generation": 14350.49,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 545,
+          "demand": 14920.49
         },
         {
           "time": "12:00",
           "generation": 14441.07,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1107,
+          "demand": 15598.07
         },
         {
           "time": "13:00",
           "generation": 14542.36,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1214,
+          "demand": 15811.36
         },
         {
           "time": "14:00",
           "generation": 14315.95,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1540,
+          "demand": 15924.95
         },
         {
           "time": "15:00",
           "generation": 14524.73,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 0,
+          "demand": 14524.73
         },
         {
           "time": "16:00",
           "generation": 14453.52,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1477,
+          "demand": 15996.52
         },
         {
           "time": "17:00",
           "generation": 14197.74,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1486,
+          "demand": 15750.74
         },
         {
           "time": "18:00",
           "generation": 14234.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 698,
+          "demand": 14963.89
         },
         {
           "time": "19:00",
           "generation": 15178.43,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1381,
+          "demand": 16621.43
+        },
+        {
+          "time": "19:30",
+          "generation": 15177.96,
+          "loadShed": 1725,
+          "demand": 16980.96
         },
         {
           "time": "20:00",
           "generation": 15342.89,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1405,
+          "demand": 16810.89
         },
         {
           "time": "21:00",
@@ -13744,14 +13858,14 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "time": "22:00",
           "generation": 15762.39,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1171,
+          "demand": 16986.39
         },
         {
           "time": "23:00",
           "generation": 15615.83,
-          "loadShed": null,
-          "demand": null
+          "loadShed": 1549,
+          "demand": 17234.83
         }
       ],
       "gasProductionData": [

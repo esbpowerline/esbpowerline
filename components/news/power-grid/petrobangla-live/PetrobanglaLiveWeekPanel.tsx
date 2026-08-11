@@ -343,7 +343,7 @@ export function PetrobanglaLiveWeekPanel({
                 <PetrobanglaOfficialSourceLink /> · daily gas intake/offtake reports
               </>
             }
-            auditedBy="Petrobangla Production &amp; Marketing Division"
+            attribution="As published. Not independently audited."
             reportingPeriod={`${rangePeriodLabel} ${kpis.latestDate} · gas-day 8:00 AM → 8:00 AM`}
           />
         </>

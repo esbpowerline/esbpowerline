@@ -255,7 +255,7 @@ export function GasReserveScenarioRail({ activeScenario, onScenarioHover, embedd
           </div>
           <GridCardFooter>
             <span>Source: MPEMR multi-scenario audit</span>
-            <span>Audited by: MPEMR · CAG Bangladesh</span>
+            <span>As published. Not independently audited.</span>
             <span className="font-medium">Forked {FORECAST_START}–2038</span>
           </GridCardFooter>
         </div>

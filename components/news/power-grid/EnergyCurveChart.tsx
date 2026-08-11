@@ -246,7 +246,7 @@ export function EnergyCurveChart({
 
       <GridCardFooter>
         <span>Source: <span className="text-primary font-semibold">PGCB NLDC Daily Energy Curve (En-Curve)</span></span>
-        <span>Audited by: National Load Despatch Centre (NLDC) System Operators</span>
+        <span>As published. Not independently audited.</span>
         <span className="font-medium">Reporting Date: {reportDate}</span>
       </GridCardFooter>
     </div>

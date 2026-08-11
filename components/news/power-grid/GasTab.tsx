@@ -7,7 +7,7 @@ import { formatNumber } from '@/lib/utils';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { coverageLabel } from '@/lib/data/grid/coverage';
 import { GridLockedContent } from './GridLockedContent';
-import { GridCardFooter } from './GridExplorerUI';
+import { GridCardFooter, GridProvenanceTag } from './GridExplorerUI';
 import { PetrobanglaGasKpiStrip } from './PetrobanglaGasKpiStrip';
 import {
   DISTRIBUTOR_COLORS,
@@ -160,7 +160,12 @@ export function GasTab({
   // All five off the rows on screen, for the same reason as the production
   // totals: a total that sums a different day from the rows above it is worse
   // than no total.
-  const totalActiveFields = productionRows.reduce((sum, item) => sum + (item.fields || 0), 0);
+  // Petrobangla's own printed grand total for the day these rows describe,
+  // from the validated archive parse. It is the control total this table's
+  // company rows should reproduce.
+  const petrobanglaGrandTotal =
+    archiveDay?.production?.grand_total?.gas_mmcfd ?? null;
+
   const distPowerTotal = distributionRows.reduce((sum, item) => sum + item.power, 0);
   const distFertTotal = distributionRows.reduce((sum, item) => sum + item.fertilizer, 0);
   const distOthersTotal = distributionRows.reduce((sum, item) => sum + item.others, 0);
@@ -198,12 +203,42 @@ export function GasTab({
           <table className={listTable}>
             {!prodFocused && (
               <thead>
+                {/*
+                  "Active Fields/Wells" was removed. It was six constants baked
+                  into parse_daily_reports — 5, 5, 9, 3, 1, 0 — that never moved
+                  across 4,171 days despite a header promising a daily count, and
+                  two of them disagree with Petrobangla's own field list (BAPEX
+                  operates 8, not 9; RPGCL's R-LNG Terminal is 1, not 0). They
+                  did not even match the parser's own field-name lists. Nothing
+                  replaces it: Petrobangla does publish producing wells per
+                  field, but this tab's data does not carry them.
+                */}
+                {/*
+                  P, not D. Petrobangla prints a Sub-Total row per company
+                  carrying gas, condensate and "% of Total Production", and
+                  these columns reproduce those three. They were briefly marked
+                  D on the reasoning that the parser sums per-field lines rather
+                  than reading the printed subtotal — but the figures it is
+                  reproducing are published ones, and once the extractor bug
+                  below was fixed they match to the digit: 479.9 / 139.5 / 91.9 /
+                  912.1 / 729.5 MMCFD and 20.4 / 5.9 / 3.9 / 38.8 / 31.0 % on
+                  2026-08-08, against Petrobangla's own subtotals. The strip
+                  under the table proves it for whichever day is on screen.
+                */}
                 <tr>
                   <th>Field / Company Operator</th>
-                  <th className="text-left">Active Fields/Wells</th>
-                  <th className="text-left">Gas Produced (MMCFD)</th>
-                  <th className="text-left">Condensate Produced (BBL)</th>
-                  <th className="text-left">National Gas Share</th>
+                  <th className="text-left">
+                    Gas Produced (MMCFD)
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
+                  <th className="text-left">
+                    Condensate Produced (BBL)
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
+                  <th className="text-left">
+                    National Gas Share
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
                 </tr>
               </thead>
             )}
@@ -221,7 +256,7 @@ export function GasTab({
                         className={`group ${expandable ? 'cursor-pointer' : ''}`}
                         onClick={expandable ? () => setExpandedProd(gp.company) : undefined}
                       >
-                        <td colSpan={5} className={`rounded-xl pl-3 !py-2 font-semibold ${rowTd}`}>
+                        <td colSpan={4} className={`rounded-xl pl-3 !py-2 font-semibold ${rowTd}`}>
                           <span className="inline-flex items-center gap-2 text-muted-foreground">
                             {expandable && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
                             {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
@@ -245,7 +280,6 @@ export function GasTab({
                             {gp.company}
                           </span>
                         </td>
-                        <td className={`text-left tabular-nums text-muted-foreground ${rowTd}`}>{gp.fields || '—'}</td>
                         <td className={`text-left tabular-nums font-medium ${rowTd}`}>{gp.gas ? gp.gas.toFixed(1) : '-'}</td>
                         <td className={`text-left tabular-nums ${rowTd}`}>{gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '-'}</td>
                         <td className={`text-left rounded-r-xl ${rowTd}`}>
@@ -267,7 +301,7 @@ export function GasTab({
                     )}
                     {expanded && (
                       <tr>
-                        <td colSpan={5} className="!p-0">
+                        <td colSpan={4} className="!p-0">
                           <div className="py-2">
                             <ProductionCompanyDetail
                               fields={detailFields}
@@ -285,8 +319,10 @@ export function GasTab({
               })}
               {!prodFocused && (
                 <tr className="font-bold">
-                  <td className={`rounded-l-xl pl-3 ${totalTd}`}>Grand Total Production</td>
-                  <td className={`text-left ${totalTd}`}>{totalActiveFields} Fields</td>
+                  <td className={`rounded-l-xl pl-3 ${totalTd}`}>
+                    Grand Total Production
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </td>
                   <td className={`text-left text-primary ${totalTd}`}>{formatNumber(productionTotalGas, 1)}</td>
                   <td className={`text-left ${totalTd}`}>{formatNumber(productionTotalCondensate, 1)}</td>
                   <td className={`text-left rounded-r-xl ${totalTd}`}>100.0%</td>
@@ -296,6 +332,53 @@ export function GasTab({
           </table>
           </GridLockedContent>
         </div>
+
+        {/*
+          The company rows are rebuilt from the report's per-field lines, so
+          they are checked against the grand total the same report prints rather
+          than assumed to match it.
+
+          This is what caught the extract_production_values bug: a field name
+          qualified after the matched part — "Kailashtila #1 (Silicagel)" — ended
+          the number scan early and returned zero, so SGFL published 45.3 MMCFD
+          short every day. Days re-ingested since the fix reconcile to 0.1;
+          days still carrying figures parsed before it will read "differs by N"
+          here until they are re-ingested, which is the honest signal to give.
+        */}
+        {petrobanglaGrandTotal != null && productionTotalGas > 0 && (() => {
+          const delta = productionTotalGas - petrobanglaGrandTotal;
+          const ok = Math.abs(delta) <= 0.5;
+          return (
+            <div className="mx-4 mt-3 p-3 rounded-lg border border-border/50 bg-muted/15 text-[11px]">
+              <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 tabular-nums">
+                <span className="text-muted-foreground">
+                  Company rows sum
+                  <GridProvenanceTag kind="D" className="ml-1" />
+                </span>
+                <span>
+                  {`${formatNumber(productionTotalGas, 1)} vs ${formatNumber(petrobanglaGrandTotal, 1)} MMCFD published by Petrobangla`}
+                  <GridProvenanceTag kind="P" className="ml-1" />
+                  <span
+                    className={
+                      ok
+                        ? 'text-emerald-600 dark:text-emerald-400 font-bold ml-2'
+                        : 'text-amber-600 dark:text-amber-400 font-bold ml-2'
+                    }
+                  >
+                    {ok ? 'agrees' : `differs by ${delta > 0 ? '+' : ''}${delta.toFixed(1)}`}
+                  </span>
+                </span>
+              </div>
+              {!ok && (
+                <p className="mt-1.5 text-[10px] text-muted-foreground leading-relaxed">
+                  Petrobangla&rsquo;s own grand total is the figure to trust here. The company rows
+                  above are summed from the report&rsquo;s per-field lines by the grid parser, and on
+                  this day that sum does not reproduce the total the same report prints.
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
           <p><strong>What is being shown?</strong></p>
@@ -311,7 +394,7 @@ export function GasTab({
               Petrobangla Production Reports
             </a>
           </span>
-          <span>Audited by: Petrobangla Production &amp; Marketing Division</span>
+          <span>As published. Not independently audited.</span>
           <span className="font-medium">Reporting Period: Daily Field Snapshot (Date: {gasReportDate})</span>
         </GridCardFooter>
       </div>
@@ -344,12 +427,26 @@ export function GasTab({
           <table className={listTable}>
             {!distFocused && (
               <thead>
+                {/* Sector splits are read per distributor from the report's
+                    distribution table; the row total is our sum of the three. */}
                 <tr>
                   <th>Distributor</th>
-                  <th className="text-left">Power Grid Supply</th>
-                  <th className="text-left">Fertilizer Supply</th>
-                  <th className="text-left">Industrial / Others</th>
-                  <th className="text-left">Total Gas Distributed</th>
+                  <th className="text-left">
+                    Power Grid Supply
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
+                  <th className="text-left">
+                    Fertilizer Supply
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
+                  <th className="text-left">
+                    Industrial / Others
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
+                  <th className="text-left">
+                    Total Gas Distributed
+                    <GridProvenanceTag kind="P" className="ml-1" />
+                  </th>
                 </tr>
               </thead>
             )}
@@ -487,7 +584,7 @@ export function GasTab({
               Petrobangla Distribution Reports
             </a>
           </span>
-          <span>Audited by: Distributor Billing Audits (TGTDCL, KGDCL, JGTDSL)</span>
+          <span>As published. Not independently audited.</span>
           <span className="font-medium">Reporting Period: Daily Distribution Allocation (Date: {gasReportDate})</span>
         </GridCardFooter>
       </div>

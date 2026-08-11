@@ -93,21 +93,32 @@ export interface GridSourceLink {
   href: string;
 }
 
+/**
+ * The footer under a data card: who published the figures, and what standing
+ * that gives them.
+ *
+ * The middle slot used to be an `auditedBy` prop rendered as "Audited by: X",
+ * and callers filled it with auditors — CAG, IMED, SF Ahmed & Co., MABS & J
+ * Partners, even the OPEC Secretariat — none of whose reports anything in this
+ * codebase has opened. The prop is now `attribution` and is rendered verbatim,
+ * so the component cannot assert an audit on a caller's behalf; a caller that
+ * wants to claim one has to write the words itself, and should not.
+ */
 export function GridSourceFooter({
   source,
-  auditedBy,
+  attribution,
   reporting,
   className,
 }: {
   source: ReactNode;
-  auditedBy: ReactNode;
+  attribution: ReactNode;
   reporting: ReactNode;
   className?: string;
 }) {
   return (
     <GridCardFooter className={className}>
       <span>Source: {source}</span>
-      <span>Audited by: {auditedBy}</span>
+      <span>{attribution}</span>
       <span className="font-medium">{reporting}</span>
     </GridCardFooter>
   );
@@ -116,12 +127,12 @@ export function GridSourceFooter({
 /** Structured footer with typed source links — for programmatic tab panels */
 export function GridSourceFooterLinks({
   sources,
-  auditedBy,
+  attribution,
   reportingDate,
   className,
 }: {
   sources: GridSourceLink[];
-  auditedBy: string;
+  attribution: string;
   reportingDate: string;
   className?: string;
 }) {
@@ -145,7 +156,7 @@ export function GridSourceFooterLinks({
           ))}
         </>
       }
-      auditedBy={auditedBy}
+      attribution={attribution}
       reporting={<>Reporting Date: {reportingDate}</>}
     />
   );
@@ -182,17 +193,46 @@ export function GridExplanationBlock({
 
 /* ── KPI strip primitives ── */
 
+/**
+ * Where a KPI strip sits in the page's stacking order.
+ *
+ * `relative z-*` makes each strip its own stacking context, so a tooltip inside
+ * one — z-110 though it is — can never paint above a *sibling* strip with an
+ * equal z-index that comes later in the document. Two strips at the same layer
+ * therefore means the upper one's tooltips open underneath the lower one's
+ * tiles, which is how the Overview briefings ended up rendering behind the
+ * Renewables KPI cells.
+ *
+ * `page`  the strip at the top of the explorer, whose tooltips drop over the
+ *         tab content below it.
+ * `panel` a strip inside tab content, which must stay below the page strip.
+ *
+ * `panel` is the default deliberately: a new strip is nearly always inside a
+ * tab, and defaulting to the lower layer makes the safe case the automatic one.
+ */
+export type GridKpiStripLayer = 'page' | 'panel';
+
+const GRID_KPI_STRIP_LAYER: Record<GridKpiStripLayer, string> = {
+  page: 'z-30',
+  panel: 'z-20',
+};
+
 export function GridKpiStrip({
   children,
   className,
   stripRef,
+  layer = 'panel',
 }: {
   children: ReactNode;
   className?: string;
   stripRef?: React.RefObject<HTMLDivElement | null>;
+  layer?: GridKpiStripLayer;
 }) {
   return (
-    <div ref={stripRef} className={cn('grid-explorer-kpi-strip relative z-30', className)}>
+    <div
+      ref={stripRef}
+      className={cn('grid-explorer-kpi-strip relative', GRID_KPI_STRIP_LAYER[layer], className)}
+    >
       {children}
     </div>
   );

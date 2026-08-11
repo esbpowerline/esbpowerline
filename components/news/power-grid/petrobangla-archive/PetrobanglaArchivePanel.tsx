@@ -383,7 +383,7 @@ export function PetrobanglaArchivePanel({
                   <PetrobanglaOfficialSourceLink /> · {ARCHIVE_INSIGHTS.coverageDays.toLocaleString()} verified gas-days
                 </>
               }
-              auditedBy="Petrobangla Production &amp; Marketing Division"
+              attribution="As published. Not independently audited."
               reportingPeriod={`Archive gas-day ${archiveDate} · through ${latestArchiveDate}`}
             />
           </>

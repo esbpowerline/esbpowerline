@@ -106,7 +106,6 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
     unit,
     calculation,
     source,
-    auditor
   }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -134,8 +133,14 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
           )}
           {source && (
             <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
+              {/*
+                An `auditor` prop used to sit here, filled with CAG, IMED and
+                PGCB committees on figures no audit report in this codebase
+                covers. Removed rather than re-labelled: naming who published a
+                figure is a claim we can support, naming who audited it is not.
+              */}
               <div><strong>Source:</strong> {source}</div>
-              {auditor && <div><strong>Audited by:</strong> {auditor}</div>}
+              <div>As published. Not independently audited.</div>
             </div>
           )}
         </div>
@@ -176,7 +181,6 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   title="Voltage Evolution" 
                   unit="ckm" 
                   source={<a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Statistics Division</a>}
-                  auditor="PGCB Engineering & Projects Committee"
                 />
               } />
               <Line type="monotone" dataKey="Transmission_400kV_ckm" name="400kV Ultra-High" stroke="#8b5cf6" strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
@@ -236,7 +240,6 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   unit="ckm" 
                   calculation="Stack: 132kV + 230kV + 400kV total circuit kilometers"
                   source={<a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Planning Maps</a>}
-                  auditor="NLDC Grid Operations Centre"
                 />
               } />
               <Area type="monotone" dataKey="Transmission_132kV_ckm" name="132kV Base" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.3} isAnimationActive={false} />
@@ -295,7 +298,6 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   title="Annual Physical Additions" 
                   calculation="Transmission Added = Total ckm (Current Year) - Total ckm (Previous Year) | Gen Capacity Added = Installed MW (Current) - Installed MW (Previous)"
                   source={<a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB &amp; BPDB Progress Reports</a>}
-                  auditor="PGCB Audit &amp; BPDB Planning Divisions"
                 />
               } cursor={{ fill: chartTheme.gridStroke, opacity: 0.1 }} />
               <Bar yAxisId="left" dataKey="Transmission_Added_ckm" name="Grid Lines Added" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
@@ -354,7 +356,6 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   unit="%" 
                   calculation="Index = (Current Value / FY2011 Value) * 100"
                   source="Ministry of Finance Budget Briefs & PGCB / BPDB Reports"
-                  auditor="Office of the Comptroller & Auditor General (CAG) / IMED"
                 />
               } />
               <Line type="monotone" dataKey="Budget_Index" name="Budget Index" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
@@ -384,7 +385,7 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         {/* Card Metadata Footer */}
         <GridCardFooter>
           <span>Source: <a href="https://www.mof.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">MOF Budget Briefs</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB/PGCB Statistics</a></span>
-          <span>Audited by: Comptroller &amp; Auditor General (CAG) &amp; IMED, Bangladesh</span>
+          <span>As published. Not independently audited.</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025 Baseline Study</span>
         </GridCardFooter>
       </div>

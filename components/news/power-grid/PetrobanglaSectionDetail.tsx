@@ -10,6 +10,7 @@ import type {
 import { loadArchiveDay, loadArchiveIndex } from '@/lib/data/petrobangla/loadArchive';
 import { resolveArchiveGasDay } from '@/lib/data/petrobangla/compute';
 import { formatNumber } from '@/lib/utils';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 
 /** Loads the archive day backing a grid date — same resolution as PetrobanglaGasKpiStrip. */
 export function usePetrobanglaArchiveDay(selectedDate: string): {
@@ -44,9 +45,27 @@ export function usePetrobanglaArchiveDay(selectedDate: string): {
   return { day, gasDay };
 }
 
-/** Collapse doubled glyphs from overlapping-text parse artifacts ("SSuubb--TToottaall"). */
+/**
+ * Collapse doubled glyphs from overlapping-text parse artifacts
+ * ("SSuubb--TToottaall" -> "Sub-Total", "SSyyllhheett" -> "Sylhet").
+ *
+ * Only when the *whole* string is pairwise doubled. A blunt `(.)\1 -> $1`
+ * would also rewrite any legitimate name containing a double letter — none of
+ * Petrobangla's field names do today, but this cannot damage one that arrives
+ * tomorrow, and the same guard is used by the Python repair script.
+ */
 function collapseDoubles(s: string): string {
+  if (s.length < 2 || s.length % 2) return s;
+  for (let i = 0; i < s.length; i += 2) {
+    if (s[i] !== s[i + 1]) return s;
+  }
   return s.replace(/(.)\1/g, '$1');
+}
+
+/** "Sylhet Sylhet" -> "Sylhet". A separate artifact from the glyph doubling. */
+function collapseDoubledWords(s: string): string {
+  const parts = s.split(/\s+/);
+  return parts.length === 2 && parts[0].toLowerCase() === parts[1].toLowerCase() ? parts[0] : s;
 }
 
 function isRealFieldRow(f: ProductionField): boolean {
@@ -71,10 +90,16 @@ const FIELD_OWNER: Record<string, string> = {
 
 /** Strip leaked "N. COMPANY" prefixes so "1. BGFCL Bakhrabad" reads "Bakhrabad". */
 export function cleanFieldName(raw: string | null | undefined): string {
-  return (raw || '')
-    .replace(/^\s*\d+\.\s*/, '')
-    .replace(/\b(BGFCL|SGFL|BAPEX|CHEVRON|TULLOW|IOCS?)\b\s*/gi, '')
-    .trim();
+  // The doubling artifacts are undone here rather than only in the subtotal
+  // test: 46 days rendered the field as "SSyyllhheett" and 10 more as
+  // "Sylhet Sylhet" in the drill-down, which readers saw.
+  const collapsed = collapseDoubles((raw || '').trim());
+  return collapseDoubledWords(
+    collapsed
+      .replace(/^\s*\d+\.\s*/, '')
+      .replace(/\b(BGFCL|SGFL|BAPEX|CHEVRON|TULLOW|IOCS?)\b\s*/gi, '')
+      .trim(),
+  );
 }
 
 function fieldOwner(f: ProductionField): string | null {
@@ -236,6 +261,10 @@ export function ProductionCompanyDetail({
   // The PDF's per-field % columns are rounded (and occasionally wrong in the
   // source), so summing them drifts from Petrobangla's own subtotal line.
   // Match the PDF by recomputing from volumes over the day's grand totals.
+  //
+  // This is why the two % columns are marked P on the field rows and D on the
+  // Sub-Total row: the per-field figures are Petrobangla's printed ones, the
+  // subtotal beneath them is deliberately not their sum.
   const gasSum = sum((f) => f.gas_mmcfd);
   const subPctCap =
     typeof grandTotal?.capacity_mmcfd === 'number' && grandTotal.capacity_mmcfd > 0
@@ -266,19 +295,19 @@ export function ProductionCompanyDetail({
             <tr>
               <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40`}>Gas Field</th>
               {hasOperator && (
-                <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40`}>Operator</th>
+                <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40`}>Operator<GridProvenanceTag kind="P" className="ml-1" /></th>
               )}
-              <th rowSpan={2} className={`${THC} align-bottom border-b border-border/40 ${SEP}`}>Prod. Wells</th>
-              <th rowSpan={2} className={`${THC} align-bottom border-b border-border/40 ${SEP}`}>Capacity (MMCFD)</th>
+              <th rowSpan={2} className={`${THC} align-bottom border-b border-border/40 ${SEP}`}>Prod. Wells<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th rowSpan={2} className={`${THC} align-bottom border-b border-border/40 ${SEP}`}>Capacity (MMCFD)<GridProvenanceTag kind="P" className="ml-1" /></th>
               <th colSpan={2} className={`${GROUP_TH} ${SEP}`}>Daily Production</th>
-              <th rowSpan={2} className={`${THC} align-bottom border-b border-border/40 ${SEP}`}>Utilization</th>
+              <th rowSpan={2} className={`${THC} align-bottom border-b border-border/40 ${SEP}`}>Utilization<GridProvenanceTag kind="D" className="ml-1" /></th>
               <th colSpan={2} className={`${GROUP_TH} ${SEP}`}>% of Grand Total</th>
             </tr>
             <tr className="border-b border-border/40">
-              <th className={`${THC} ${SEP}`}>Gas (MMCFD)</th>
-              <th className={`${THC} ${SEP}`}>Condensate (BBLD)</th>
-              <th className={`${THC} ${SEP}`}>Total Capacity</th>
-              <th className={`${THC} ${SEP}`}>Total Production</th>
+              <th className={`${THC} ${SEP}`}>Gas (MMCFD)<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className={`${THC} ${SEP}`}>Condensate (BBLD)<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className={`${THC} ${SEP}`}>Total Capacity<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className={`${THC} ${SEP}`}>Total Production<GridProvenanceTag kind="P" className="ml-1" /></th>
             </tr>
           </thead>
           <tbody>
@@ -313,7 +342,7 @@ export function ProductionCompanyDetail({
               );
             })}
             <tr className="border-t border-border/60 bg-muted/20 font-bold">
-              <td className={TD}>Sub-Total</td>
+              <td className={TD}>Sub-Total<GridProvenanceTag kind="D" className="ml-1" /></td>
               {hasOperator && <td className={TD} />}
               <td className={`${TDC} ${SEP}`}>{formatNumber(sum((f) => f.producing_wells), 0)}</td>
               <td className={`${TDC} ${SEP}`}>{formatNumber(capSum, 0)}</td>
@@ -376,11 +405,11 @@ export function DistributionCompanyDetail({
           <tr>
             <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40`}>Power Plant</th>
             <th colSpan={2} className={`${GROUP_TH} ${SEP}`}>Gas (MMCFD)</th>
-            <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40 ${SEP}`}>Status</th>
+            <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40 ${SEP}`}>Status<GridProvenanceTag kind="D" className="ml-1" /></th>
           </tr>
           <tr className="border-b border-border/40">
-            <th className={`${THC} ${SEP}`}>Demand</th>
-            <th className={`${THC} ${SEP}`}>Supply</th>
+            <th className={`${THC} ${SEP}`}>Demand<GridProvenanceTag kind="P" className="ml-1" /></th>
+            <th className={`${THC} ${SEP}`}>Supply<GridProvenanceTag kind="P" className="ml-1" /></th>
           </tr>
         </thead>
         <tbody>
@@ -419,7 +448,7 @@ export function DistributionCompanyDetail({
             );
           })}
           <tr className="border-t border-border/60 bg-muted/20 font-bold">
-            <td className={TD}>Power Sub-Total</td>
+            <td className={TD}>Power Sub-Total<GridProvenanceTag kind="D" className="ml-1" /></td>
             <td className={`${TDC} ${SEP}`}>{num(company.power_demand_mmcfd)}</td>
             <td className={`${TDC} ${SEP} text-primary`}>{num(company.power_supply_mmcfd)}</td>
             <td className={`${TD} ${SEP}`}>

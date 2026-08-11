@@ -423,7 +423,7 @@ function GasReserveDepletionContent({
             {' · '}
             {live ? 'Daily gas reports 2020–present' : 'MPEMR scenario audit'}
           </span>
-          <span>Audited by: MPEMR · CAG Bangladesh</span>
+          <span>As published. Not independently audited.</span>
           <span className="font-medium">
             {live
               ? `2020–${forkYear} extraction-derived · forks to ${lastChartYear}`

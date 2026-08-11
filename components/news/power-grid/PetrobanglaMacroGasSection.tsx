@@ -140,7 +140,7 @@ export function PetrobanglaMacroGasSection({
           />
           <GasSourceFooter
             source={<PetrobanglaOfficialSourceLink />}
-            auditedBy="Petrobangla Production &amp; Marketing Division"
+            attribution="As published. Not independently audited."
             reportingPeriod={`Field archive · grid date ${selectedDate}`}
           />
         </div>

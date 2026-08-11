@@ -61,7 +61,7 @@ import { UnitCostBadge } from '@/components/news/power-grid/UnitCostBadge';
 import { useUnitCostAuthentication, type UnitCostFact } from '@/components/news/power-grid/useUnitCostAuthentication';
 import { EnergyCurveChart } from '@/components/news/power-grid/EnergyCurveChart';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
-import { sredaRenewablesData, totalCapacityRenewables, renewableGridSharePct } from '@/lib/data/companies/sreda';
+import { totalCapacityRenewables } from '@/lib/data/companies/sreda';
 import { ongoingProjectsData } from '@/lib/data/infrastructure/projects-ongoing';
 import { upcomingProjectsData } from '@/lib/data/infrastructure/projects-upcoming';
 import { completedProjectsData } from '@/lib/data/infrastructure/projects-completed';
@@ -90,7 +90,6 @@ const GridTopologyMap = dynamic(
   { ssr: false, loading: () => <div className="grid-explorer-skeleton h-[500px] rounded-2xl flex items-center justify-center border border-dashed"><span className="text-muted-foreground text-sm font-medium">Loading Network Map...</span></div> }
 );
 import { isDateAllowedForTier, subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
-import { sredaItemsWithIcons } from '@/components/news/power-grid/sreda-icons';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
 const GasTab = dynamic(
   () => import('@/components/news/power-grid/GasTab').then((m) => m.GasTab),
@@ -111,7 +110,10 @@ const PublishedVsDerivedTab = dynamic(
   { ssr: false, loading: () => <div className="grid-explorer-skeleton h-96 rounded-2xl" /> },
 );
 
-const sredaRenewablesWithIcons = sredaItemsWithIcons(sredaRenewablesData);
+const RenewablesTab = dynamic(
+  () => import('@/components/news/power-grid/RenewablesTab').then((m) => m.RenewablesTab),
+  { ssr: false, loading: () => <div className="grid-explorer-skeleton h-96 rounded-2xl" /> },
+);
 
 interface GridLineItem {
   name: string;
@@ -1094,7 +1096,12 @@ export function PowerGridExplorer({
     { id: 'gas', label: 'Gas & LNG Supply', icon: Droplet },
     { id: 'imports', label: 'C/B Imports', icon: Globe },
     { id: 'regional', label: 'Regional Grid', icon: Cable },
-    { id: 'renewables', label: 'Renewables (SREDA)', icon: Sun },
+    // Named for the subject, not the publisher, like every other tab here. The
+    // source is still SREDA alone — the agencies its tables name (BPDB, NWPGCL,
+    // EGCB, BREB, IDCOL…) are the owners SREDA attributes capacity to, not
+    // second publishers — so attribution stays on each card, where a reader
+    // checking a figure looks, rather than in the tab bar.
+    { id: 'renewables', label: 'Renewables', icon: Sun },
     { id: 'plants', label: 'Power Stations', icon: Factory },
     { id: 'transmission', label: 'Technical Information', icon: Activity },
     { id: 'macro', label: 'Macro Trends', icon: TrendingUp },
@@ -1149,9 +1156,10 @@ export function PowerGridExplorer({
   // generate" rather than "the report carries no production-cost block".
   const hasPublishedFuelCost = generationData.some((item) => item.cost != null);
   // PGCB prices imports as a single line in its production-cost table — one
-  // figure covering every interconnector — so this rate is national and blended,
-  // not any one line's tariff. It belongs on the total row and nowhere else.
-  const importsUnitCost = generationData.find((g) => g.name === 'Imports')?.unitCost ?? null;
+  // figure covering every interconnector. The cost is published and shown; the
+  // Tk/KWh it implies is not, and no longer derived here: one average across
+  // three separate commercial agreements reads as a price Bangladesh pays, or
+  // as one supplier's tariff, and the report supports neither.
   const importsCost = generationData.find((g) => g.name === 'Imports')?.cost ?? null;
   const importsEnergyMkwh = generationData.find((g) => g.name === 'Imports')?.gen ?? null;
   const avgCostPerKwh = totalCostBdt / (totalGenMkwhr * 1000000);
@@ -1400,9 +1408,15 @@ export function PowerGridExplorer({
               onClick={() => handleTabClick(t.id)}
               className={cn('explorer-tab', active && 'active')}
             >
+              {/*
+                The Renewables tab carried a "Monthly" badge from when it showed
+                only SREDA's capacity register. It now leads with PGCB's daily
+                per-fuel output and per-station table for the selected date, so
+                the badge described the wrong cadence — and no other tab labels
+                its cadence here.
+              */}
               <TabIcon className="h-4 w-4 shrink-0" />
               <span>{t.label}</span>
-              {t.id === 'renewables' && <MonthlyBadge />}
             </button>
           );
         })}
@@ -2144,8 +2158,16 @@ export function PowerGridExplorer({
                       </tr>
                     );
                   })}
+                  {/*
+                    Every cell in this row is ours: the two totals are sums of
+                    the rows above, the shares are those sums against
+                    themselves, and the average is their quotient. PGCB does
+                    publish its own energy total, so leaving the row unmarked
+                    invited a reader to take our sum for theirs. The note below
+                    the table reports how the two compare.
+                  */}
                   <tr className="border-t border-border/80 font-bold bg-muted/20">
-                    <td>Total System / Average</td>
+                    <td>Total System / Average<GridProvenanceTag kind="D" className="ml-1" /></td>
                     <td className="text-left tabular-nums">{totalGenMkwhr.toFixed(2)}</td>
                     <td className="text-left tabular-nums">100.00%</td>
                     <td className="text-left tabular-nums">{hasPublishedFuelCost ? (totalCostBdt / 10000000).toFixed(2) : '—'}</td>
@@ -2155,6 +2177,41 @@ export function PowerGridExplorer({
                 </tbody>
               </table>
             </div>
+            {/*
+              The fuel rows and PGCB's own headline total are different cells of
+              the same report, so they should agree. The band is half of the last
+              digit PGCB prints, once per figure summed — taken from how the
+              source states its numbers, not chosen.
+            */}
+            {systemStats.totalEnergyGen != null && (() => {
+              const band = 0.005 * (generationData.length + 1);
+              const delta = totalGenMkwhr - systemStats.totalEnergyGen;
+              const ok = Math.abs(delta) <= band;
+              return (
+                <div className="mx-4 mt-3 p-3 rounded-lg border border-border/50 bg-muted/15 text-[11px]">
+                  <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 tabular-nums">
+                    <span className="text-muted-foreground">
+                      {`Fuel rows sum${' '}`}
+                      <GridProvenanceTag kind="D" />
+                    </span>
+                    <span>
+                      {`${totalGenMkwhr.toFixed(2)} vs ${systemStats.totalEnergyGen.toFixed(2)} MKWh published by PGCB`}
+                      <GridProvenanceTag kind="P" className="ml-1" />
+                      <span
+                        className={
+                          ok
+                            ? 'text-emerald-600 dark:text-emerald-400 font-bold ml-2'
+                            : 'text-amber-600 dark:text-amber-400 font-bold ml-2'
+                        }
+                      >
+                        {ok ? 'agrees' : `differs by ${delta.toFixed(3)}`}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {unitCostAuth.loaded && (
               <div className="mx-4 mb-4 mt-3 text-[11px] leading-relaxed text-muted-foreground border-t border-border/30 pt-3">
                 <p className="mb-1.5">
@@ -2164,6 +2221,22 @@ export function PowerGridExplorer({
                   by the second, which is why it is marked{' '}
                   <GridProvenanceTag kind="D" />. The marker beside each rate says what
                   independent evidence supports it:
+                </p>
+                {/*
+                  Said plainly because a reader who checks the arithmetic will
+                  otherwise think the rate is wrong: the Generation column is
+                  rounded to two decimals for display, while the rate is computed
+                  from the unrounded energy. Wind is the visible case — 0.31 MKWh
+                  shown against 0.30624 actual, so dividing the two printed
+                  columns gives 14.53 rather than the 14.71 stated.
+                */}
+                <p className="mb-1.5">
+                  <strong className="text-foreground">Why the columns may not divide exactly.</strong>{' '}
+                  The rate is computed from the energy PGCB publishes at full precision, while the
+                  Generation column is rounded to two decimals to read cleanly. On small fuels the
+                  two printed columns therefore divide to something slightly different — Wind shows
+                  0.31 MKWh against an actual 0.30624 — so the rate shown is the more precise one,
+                  not the one the visible columns produce.
                 </p>
                 <ul className="space-y-0.5 ml-1">
                   <li>
@@ -2194,9 +2267,18 @@ export function PowerGridExplorer({
             )}
 
             {/* Card Metadata Footer */}
+            {/*
+              Two corrections here. The generation and cost figures come from
+              PGCB's daily report alone — BPDB is not a source for them, it is
+              the second publisher whose independent figures corroborate the
+              derived rate, which is a different claim. And the "Audited by BPDB
+              Finance / CAG Audit Team" credit was removed: no audit report has
+              been opened by anything in this pipeline, the same false crediting
+              already stripped from the macro cards (see GridProvenanceTag).
+            */}
             <GridCardFooter>
-              <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Reports</a> &amp; <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Logs</a></span>
-              <span>Audited by: BPDB Finance &amp; Commercial Operations / CAG Audit Team</span>
+              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — generation and production cost as published</span>
+              <span>Unit rate corroborated against <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Reports</a>. Not audited.</span>
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
             </GridCardFooter>
           </div>
@@ -2213,12 +2295,13 @@ export function PowerGridExplorer({
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Load-Shedding &amp; Demand</div>
+                {/* All three are printed by PGCB's P1 sheet. */}
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
-                  <span>Peak Demand:</span>
+                  <span>Peak Demand:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left">{systemStats.eveningPeakDemand.toFixed(1)} MW</span>
-                  <span>Peak Generation:</span>
+                  <span>Peak Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left">{systemStats.eveningPeakGen.toFixed(1)} MW</span>
-                  <span>Unserved Energy:</span>
+                  <span>Unserved Energy:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-semibold text-destructive text-left">
                     {systemStats.totalEnergyUnserved == null ? '—' : `${systemStats.totalEnergyUnserved.toFixed(2)} MKWh`}
                   </span>
@@ -2227,16 +2310,23 @@ export function PowerGridExplorer({
 
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Daily System Margins</div>
+                {/*
+                  All three are printed. Max and min generation are PGCB's own
+                  stated extremes for the day, not the load curve's — its stated
+                  minimum is the 08:00 reading, which is not always the curve's
+                  trough — and the temperature comes from the reported-day block,
+                  never the "probable" forecast beside it.
+                */}
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
-                  <span>Max Generation:</span>
+                  <span>Max Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left">
                     {systemStats.maxGen == null ? '—' : `${systemStats.maxGen.toFixed(1)} MW`}
                   </span>
-                  <span>Min Generation:</span>
+                  <span>Min Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left">
                     {systemStats.minGen == null ? '—' : `${systemStats.minGen.toFixed(1)} MW`}
                   </span>
-                  <span>Max Temp:</span>
+                  <span>Max Temp:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-semibold text-foreground text-left">
                     {systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
                   </span>
@@ -2245,17 +2335,24 @@ export function PowerGridExplorer({
 
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gas-to-Power</div>
+                {/*
+                  Gas supplied and gas cost are printed by PGCB — the MMCFD
+                  figure is PGCB's own "Total Gas Supplied", not Petrobangla's
+                  production total, which is a different measure of a different
+                  thing. The unit rate is the quotient of the two, which no
+                  agency prints.
+                */}
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
-                  <span>Gas Supplied:</span>
+                  <span>Gas Supplied:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left">{systemStats.totalGasSuppliedPower.toFixed(1)} MMCFD</span>
-                  <span>Gas Cost:</span>
+                  <span>Gas Cost:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left">
                     {(() => {
                       const c = generationData.find(g => g.name === 'Gas')?.cost;
                       return c == null ? '—' : `${(c / 10000000).toFixed(2)} Crore Tk`;
                     })()}
                   </span>
-                  <span>Gas Unit Cost:</span>
+                  <span>Gas Unit Cost:<GridProvenanceTag kind="D" className="ml-1" /></span>
                   <span className="font-semibold text-primary text-left">
                     {(() => {
                       const u = generationData.find(g => g.name === 'Gas')?.unitCost;
@@ -2267,9 +2364,16 @@ export function PowerGridExplorer({
             </div>
 
             {/* Card Metadata Footer */}
+            {/*
+              Every figure on this card is parsed from PGCB's P1 and reported-day
+              Forecast block — including "Total Gas Supplied", which is PGCB's
+              number rather than Petrobangla's, so the Petrobangla credit was
+              wrong. The "Audited by NLDC Operators & Petrobangla Billing" line
+              went with it: nothing here has opened an audit.
+            */}
             <GridCardFooter>
-              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Operations</a> &amp; <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Production Division</a></span>
-              <span>Audited by: NLDC Operators &amp; Petrobangla Billing</span>
+              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 and the reported-day Forecast block</span>
+              <span>As published by PGCB. Not audited.</span>
               <span className="font-medium">Reporting Period: System Summary (Date: {systemStats.date})</span>
             </GridCardFooter>
           </div>
@@ -2329,11 +2433,26 @@ export function PowerGridExplorer({
                 <thead>
                   <tr>
                     <th>Import Source / Line</th>
-                    <th>Type</th>
-                    <th className="text-left">Daily Energy Imported (MKWh)</th>
-                    <th className="text-left">Peak Capacity Served (MW)</th>
-                    <th className="text-left">Cost (Cr Tk)<span className="font-normal text-muted-foreground"> — all lines</span></th>
-                    <th className="text-left">Blended Rate (Tk/KWh)<span className="font-normal text-muted-foreground"> — all lines</span></th>
+                    {/* "C/B Interconnector (West)" and the rest are our own
+                        labels for the lines, not a classification PGCB prints. */}
+                    <th>Type<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    {/* Energy and peak are published per line in P1 — except
+                        Nepal, whose row is derived from the half-hourly curve
+                        and is marked on the row itself. */}
+                    <th className="text-left">Daily Energy Imported (MKWh)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                    <th className="text-left">Peak Capacity Served (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                    {/*
+                      The blended-rate column is deliberately not here. PGCB
+                      prices imports as one line covering Bheramara, Adani and
+                      Tripura together, so any Tk/KWh from it is a single average
+                      over three separate commercial agreements at different
+                      prices. Published as a rate it reads as "what Bangladesh
+                      pays for imported power", or worse as one supplier's
+                      tariff, and neither is something the report supports. The
+                      cost PGCB does publish stays; the average it implies does
+                      not.
+                    */}
+                    <th className="text-left">Cost (Cr Tk)<GridProvenanceTag kind="P" className="ml-1" /><span className="font-normal text-muted-foreground"> — all lines</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2350,16 +2469,40 @@ export function PowerGridExplorer({
                       energy, so it carried nothing the energy column did not
                       already say while implying a per-line bill that PGCB has
                       never published. */}
-                  {borderImportsData.map((bi, idx) => (
+                  {borderImportsData.map((bi, idx) => {
+                    // PGCB's P1 interconnector block names three lines and not
+                    // Nepal — parse_daily_reports says so in its own docstring —
+                    // so the Nepal row's energy and peak come from the En-Curve's
+                    // Nepal column instead: summed and halved for the day, and
+                    // its maximum for the peak. Published and derived rows sit in
+                    // the same columns, so the difference is marked on the row.
+                    const derivedRow = /nepal/i.test(bi.source);
+                    return (
                     <tr key={idx}>
-                      <td className="font-semibold">{bi.source}</td>
+                      <td className="font-semibold">
+                        {bi.source}
+                        {derivedRow && (
+                          <span
+                            className="ml-1.5 inline-block px-1.5 py-px rounded border text-[9px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                            title="PGCB does not list this line in its production-cost interconnector block. Its energy and peak are computed here from the half-hourly generation curve PGCB publishes — the day's samples summed and halved, and their maximum."
+                          >
+                            from curve
+                          </span>
+                        )}
+                      </td>
                       <td className="text-muted-foreground">{bi.type}</td>
-                      <td className="text-left tabular-nums font-semibold">{bi.energy.toFixed(2)}</td>
-                      <td className="text-left tabular-nums">{formatNumber(Math.round(bi.peakFlow))}</td>
+                      <td className="text-left tabular-nums font-semibold">
+                        {bi.energy.toFixed(2)}
+                        <GridProvenanceTag kind={derivedRow ? 'D' : 'P'} className="ml-1" />
+                      </td>
+                      <td className="text-left tabular-nums">
+                        {formatNumber(Math.round(bi.peakFlow))}
+                        <GridProvenanceTag kind={derivedRow ? 'D' : 'P'} className="ml-1" />
+                      </td>
                       <td className="text-left tabular-nums text-muted-foreground" title="PGCB publishes one import cost covering all interconnectors, not a figure per line">—</td>
-                      <td className="text-left tabular-nums font-mono text-muted-foreground" title="PGCB publishes one blended import rate, not a tariff per line">—</td>
                     </tr>
-                  ))}
+                    );
+                  })}
                   <tr className="border-t border-border/80 font-bold bg-muted/20">
                     <td>Total Grid Imports</td>
                     <td className="text-muted-foreground">National aggregate</td>
@@ -2373,8 +2516,10 @@ export function PowerGridExplorer({
                         neither figure. A day whose report carries no
                         production-cost block still shows "—": a 0.00 total
                         reads as "imports were free". */}
-                    <td className="text-left tabular-nums">{importsCost == null ? '—' : `${(importsCost / 10000000).toFixed(2)} Cr`}</td>
-                    <td className="text-left tabular-nums font-mono text-primary">{importsUnitCost == null ? '—' : importsUnitCost.toFixed(2)}</td>
+                    <td className="text-left tabular-nums">
+                      {importsCost == null ? '—' : `${(importsCost / 10000000).toFixed(2)} Cr`}
+                      <GridProvenanceTag kind="P" className="ml-1" />
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -2382,20 +2527,20 @@ export function PowerGridExplorer({
 
             <div className="p-4 bg-muted/20 border border-border/40 rounded-xl mt-5 text-xs text-muted-foreground leading-relaxed space-y-2">
               <p>
-                <strong>Why cost and rate are shown once:</strong> PGCB reports energy and peak flow for each
-                interconnector, but prices imports as a single line in its production-cost table — one figure
-                covering all of them. The rate on the total row is therefore a blended average across the three
-                agreements, not the tariff of any one. Bheramara, Adani Godda and Tripura are separate contracts
-                at different prices, and the report does not say what those prices are.
+                <strong>Why cost is shown once, and no rate at all:</strong> PGCB reports energy and peak
+                flow for each interconnector, but prices imports as a single line in its production-cost
+                table — one figure covering all of them. Bheramara, Adani Godda and Tripura are separate
+                contracts at different prices, and the report does not say what those prices are. Dividing
+                the one cost by the one energy would give a single average across all three, which is not
+                the tariff of any of them, so no per-unit rate is published here.
                 {importsEnergyMkwh != null && borderImportsData.length > 0 && (() => {
                   const lineSum = borderImportsData.reduce((sum, i) => sum + i.energy, 0);
-                  // PGCB's two blocks disagree slightly on total import energy;
-                  // the rate is struck on the fuel table's figure, so say so
-                  // rather than letting the arithmetic look wrong.
+                  // PGCB states import energy in two places and they disagree,
+                  // which matters for reading the cost against the line total.
                   return Math.abs(lineSum - importsEnergyMkwh) > 0.05 ? (
-                    <> The rate is struck on the {importsEnergyMkwh.toFixed(2)} MKWh the fuel table reports,
-                    which differs from the {lineSum.toFixed(2)} MKWh these lines add up to — PGCB states import
-                    energy in two places and they do not always agree.</>
+                    <> The cost above covers the {importsEnergyMkwh.toFixed(2)} MKWh the fuel table
+                    reports, which differs from the {lineSum.toFixed(2)} MKWh these lines add up to — PGCB
+                    states import energy in two places and they do not always agree.</>
                   ) : null;
                 })()}
               </p>
@@ -2409,7 +2554,7 @@ export function PowerGridExplorer({
             {/* Card Metadata Footer */}
             <GridCardFooter>
               <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations Division</a></span>
-              <span>Audited by: HVDC Bheramara &amp; Cumilla Substations</span>
+              <span>As published. Not independently audited.</span>
               <span className="font-medium">Reporting Period: Daily Interconnector Flow (Date: {systemStats.date})</span>
             </GridCardFooter>
           </div>
@@ -2419,114 +2564,11 @@ export function PowerGridExplorer({
 
       {!isDataMissing && activeTab === 'renewables' && (
         <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}>
-        <div className="grid-explorer-panel grid lg:grid-cols-2 gap-6">
-          {/* Renewables Table */}
-          <div className="grid-explorer-chart-card card">
-            <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
-              <Sun className="h-5 w-5 text-yellow-500 shrink-0" />
-              <div>
-                <h3 className="grid-explorer-chart-card__title">Renewable Installed Capacity<MonthlyBadge /></h3>
-                <p className="grid-explorer-chart-card__sub">Source: SREDA National Database of Renewable Energy</p>
-              </div>
-            </div>
-
-            <div className="grid-explorer-table-wrap">
-              <table className="grid-explorer-table">
-                <thead>
-                  <tr>
-                    <th>Technology</th>
-                    <th className="text-left">Installed Capacity (MW)</th>
-                    <th className="text-left">Clean Energy Share</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sredaRenewablesWithIcons.map((sr, idx) => (
-                    <tr key={idx}>
-                      <td className="font-semibold flex items-center gap-2">
-                        <sr.icon className="h-4 w-4 text-primary shrink-0" />
-                        {sr.tech}
-                      </td>
-                      <td className="text-left tabular-nums font-medium">{sr.capacity.toFixed(2)}</td>
-                      <td className="text-left tabular-nums text-muted-foreground">{sr.share.toFixed(2)}%</td>
-                    </tr>
-                  ))}
-                  <tr className="border-t border-border/80 font-bold bg-muted/20">
-                    <td>SREDA Aggregate Capacity</td>
-                    <td className="text-left tabular-nums text-primary">{totalCapacityRenewables.toFixed(2)}</td>
-                    <td className="text-left tabular-nums">100.00%</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Card Metadata Footer */}
-            <GridCardFooter>
-              <span>Source: <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">SREDA Renewable Database</a></span>
-              <span>Audited by: SREDA Monitoring &amp; Policy Division</span>
-              <span className="font-medium">Reporting Period: Clean Energy Inventory (Date: Jun 2026)</span>
-            </GridCardFooter>
-          </div>
-
-          {/* SREDA Strategy Progress */}
-          <div className="grid-explorer-chart-card card flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="grid-explorer-chart-card__head">
-                <div>
-                  <h3 className="grid-explorer-chart-card__title">SREDA Renewable Target Progress<MonthlyBadge /></h3>
-                  <p className="grid-explorer-chart-card__sub">Tracking towards Sustainable Development Goals (SDG 7)</p>
-                </div>
-              </div>
-
-              <div className="space-y-5 py-4">
-                {/* 2030 Target */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-muted-foreground">Current Renewable Grid Share</span>
-                    <span className="text-foreground">~{renewableGridSharePct.toFixed(1)}% of Total Installed</span>
-                  </div>
-                  <div className="h-3 rounded-full bg-muted border border-border/40 overflow-hidden relative">
-                    <div className="h-full bg-yellow-500 rounded-full" style={{ width: `${renewableGridSharePct}%` }} />
-                  </div>
-                </div>
-
-                {/* target 20% by 2030 */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-muted-foreground">2030 Government SDG Target</span>
-                    <span className="text-primary font-bold">20.0% Renewables</span>
-                  </div>
-                  <div className="h-3 rounded-full bg-muted border border-border/40 overflow-hidden relative">
-                    <div className="h-full bg-primary/40 rounded-full" style={{ width: '20%' }} />
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-yellow-500" style={{ left: `${renewableGridSharePct}%` }} title="Current Status" />
-                  </div>
-                </div>
-
-                {/* target 30% by 2040 */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold">
-                    <span className="text-muted-foreground">2040 Vision Target</span>
-                    <span className="text-emerald-500 font-bold">30.0% Renewables</span>
-                  </div>
-                  <div className="h-3 rounded-full bg-muted border border-border/40 overflow-hidden relative">
-                    <div className="h-full bg-emerald-500/40 rounded-full" style={{ width: '30%' }} />
-                    <div className="absolute top-0 bottom-0 w-0.5 bg-yellow-500" style={{ left: `${renewableGridSharePct}%` }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-muted/20 border border-border/40 rounded-xl text-xs text-muted-foreground leading-relaxed mt-4">
-              To meet SDG 7 targets, SREDA and BPDB are deploying 1,800 MW of utility-scale solar parks and off-grid solar home systems (SHS). Off-grid installations represent a significant portion of current rural electricity access.
-            </div>
-
-            {/* Card Metadata Footer */}
-            <GridCardFooter>
-              <span>Source: <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">SREDA Target Sheets</a></span>
-              <span>Audited by: Ministry of Power, Energy &amp; Mineral Resources (MPEMR)</span>
-              <span className="font-medium">Reporting Period: Vision 2030/2040 Targets</span>
-            </GridCardFooter>
-          </div>
-        </div>
+          <RenewablesTab
+            isoDate={selectedDate}
+            generationData={generationData}
+            systemStats={systemStats}
+          />
         </GridLockedContent>
       )}
 
@@ -4609,7 +4651,7 @@ export function PowerGridExplorer({
               {/* Card Metadata Footer */}
               <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations Log</a></span>
-                <span>Audited by: National Load Despatch Centre (NLDC) Operators</span>
+                <span>As published. Not independently audited.</span>
                 <span className="font-medium">Reporting Period: Evening Peak Load (Date: {systemStats.date})</span>
               </GridCardFooter>
             </div>
@@ -4642,7 +4684,7 @@ export function PowerGridExplorer({
               {/* Card Metadata Footer */}
               <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Outage Log</a></span>
-                <span>Audited by: PGCB Network Protection &amp; NLDC Control Room</span>
+                <span>As published. Not independently audited.</span>
                 <span className="font-medium">Reporting Period: 24-Hour Logs (Date: {systemStats.date})</span>
               </GridCardFooter>
             </div>
@@ -4669,12 +4711,8 @@ export function PowerGridExplorer({
                     </tr>
                   </thead>
                   <tbody>
-                    {(initialLines && initialLines.length > 0 ? initialLines : [
-                      { name: '400 kV Patuakhali–Gopalganj', status: 'Commissioned', capacity: '1800 MW', owner: 'PGCB', load: 74 },
-                      { name: '400 kV Rooppur–Baghabari', status: 'Under Construction', capacity: '2400 MW', owner: 'PGCB', load: 0 },
-                      { name: '230 kV Barisal–Khulna', status: 'Commissioned', capacity: '650 MW', owner: 'PGCB', load: 82 },
-                      { name: '400 kV Bheramara HVDC (India)', status: 'Operational', capacity: '1000 MW', owner: 'PGCB/POWERGRID', load: 90 },
-                    ]).map((line: any, idx: number) => (
+                    {/* Same invented fallback as the print report; see the note there. */}
+                    {(initialLines ?? []).map((line: any, idx: number) => (
                       <tr key={idx}>
                         <td className="font-semibold">
                           <div className="flex flex-col">
@@ -4693,6 +4731,13 @@ export function PowerGridExplorer({
                         </td>
                       </tr>
                     ))}
+                    {(initialLines ?? []).length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-6 text-center text-xs text-muted-foreground">
+                          No transmission line records are loaded.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -4700,8 +4745,7 @@ export function PowerGridExplorer({
               {/* Card Metadata Footer */}
               <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations &amp; NLDC Grid Map</a></span>
-                <span>Audited by: National Load Despatch Centre (NLDC)</span>
-                <span className="font-medium">Status: Indicative Operating Capacity &amp; Load</span>
+                <span className="font-medium">Line records as supplied to this page</span>
               </GridCardFooter>
             </div>
           </div>
@@ -5050,7 +5094,7 @@ export function PowerGridExplorer({
                 {/* Card Metadata Footer */}
                 <GridCardFooter>
                   <span>Source: <a href="https://www.mof.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Ministry of Finance</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Reports</a></span>
-                  <span>Audited by: Ministry of Finance Budget Audits &amp; CAG</span>
+                  <span>As published. Not independently audited.</span>
                   <span className="font-medium">Data compiled from FY 2010-11 to FY 2026-27</span>
                 </GridCardFooter>
               </div>
@@ -5211,7 +5255,7 @@ export function PowerGridExplorer({
                 {/* Card Metadata Footer */}
                 <GridCardFooter>
                   <span>Source: <a href="https://www.berc.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BERC Tariff Orders</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Reports</a></span>
-                  <span>Audited by: Office of the Comptroller &amp; Auditor General (CAG)</span>
+                  <span>As published. Not independently audited.</span>
                   <span className="font-medium">Reporting Period: FY 2010 - FY 2024</span>
                 </GridCardFooter>
               </div>
@@ -5274,7 +5318,7 @@ export function PowerGridExplorer({
                                   </div>
                                   <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                     <div><strong>Source:</strong> <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPDB Annual Audits</a> &amp; BERC Notifications</div>
-                                    <div><strong>Audited by:</strong> Hoda Vasi Chowdhury &amp; Co. / Office of CAG</div>
+                                    <div>As published. Not independently audited.</div>
                                   </div>
                                 </div>
                               );
@@ -5305,7 +5349,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Accounts &amp; Audit Reports</a></span>
-                    <span>Audited by: Hoda Vasi Chowdhury &amp; Co. / Office of the Comptroller &amp; Auditor General (CAG)</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: FY 2020 - FY 2026 Financial Audits</span>
                   </GridCardFooter>
                 </div>
@@ -5370,7 +5414,7 @@ export function PowerGridExplorer({
                                   </div>
                                   <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                     <div><strong>Source:</strong> <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Petrobangla Annual Reports</a></div>
-                                    <div><strong>Audited by:</strong> Petrobangla Finance Division &amp; CAG</div>
+                                    <div>As published. Not independently audited.</div>
                                   </div>
                                 </div>
                               );
@@ -5396,7 +5440,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Balance Sheets &amp; Daily MIS Reports</a></span>
-                    <span>Audited by: MABS &amp; J Partners Chartered Accountants / CAG Bangladesh</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: Historical Reserves Log (2018 - 2026)</span>
                   </GridCardFooter>
                 </div>
@@ -5438,7 +5482,7 @@ export function PowerGridExplorer({
               {/* Section Metadata Footer */}
               <GridCardFooter>
                 <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Petrobangla Hydrocarbon Unit</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">BPDB Annual Financials</a></span>
-                <span>Audited by: CAG Audit Reports &amp; Ministry of Finance (MoF) Gazettes</span>
+                <span>As published. Not independently audited.</span>
                 <span>Reporting Period: Macro Analysis (2026 Audit Reports)</span>
               </GridCardFooter>
             </div>
@@ -6306,7 +6350,7 @@ export function PowerGridExplorer({
                                   </div>
                                   <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                     <div><strong>Source:</strong> <a href="https://www.bb.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Bangladesh Bank</a> &amp; BBS Databases</div>
-                                    <div><strong>Audited by:</strong> BBS Statistics Division / Bangladesh Bank Audit</div>
+                                    <div>As published. Not independently audited.</div>
                                   </div>
                                 </div>
                               );
@@ -6332,7 +6376,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: <a href="https://www.bb.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Bangladesh Bank Interbank Weighted Average Statistics</a> &amp; <a href="http://bbs.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BBS Inflation Database</a></span>
-                    <span>Audited by: Bangladesh Bank Monetary Policy Division / BBS Census Bureau</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: Macro-Economic Tracker (2010 - 2026)</span>
                   </GridCardFooter>
                 </div>
@@ -6380,7 +6424,7 @@ export function PowerGridExplorer({
                                   </div>
                                   <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                     <div><strong>Source:</strong> Petrobangla LNG Division / BPDB Coal Purchase audits</div>
-                                    <div><strong>Audited by:</strong> RPGCL / Bangladesh Coal Power Generation Company</div>
+                                    <div>As published. Not independently audited.</div>
                                   </div>
                                 </div>
                               );
@@ -6406,7 +6450,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: <a href="https://www.opec.org/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">OPEC Bulletin Daily Spot Prices</a> &amp; <a href="https://www.spglobal.com/commodityinsights/en" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Platts JKM LNG Assessments</a> / BPC Accounts</span>
-                    <span>Audited by: World Bank Commodity Division / BPC Price Auditing Committee</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: Global Indexes (2010 - 2026)</span>
                   </GridCardFooter>
                 </div>
@@ -6454,7 +6498,7 @@ export function PowerGridExplorer({
                 {/* Card Metadata Footer */}
                 <GridCardFooter>
                   <span>Source: <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Retail Gazettes</a> &amp; <a href="https://www.bb.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Bangladesh Bank Databases</a></span>
-                  <span>Audited by: BPC Accounts Division &amp; World Bank commodity research division</span>
+                  <span>As published. Not independently audited.</span>
                   <span className="font-medium">Reporting Period: Historical Macro Pricing Benchmarks (2010 - 2026)</span>
                 </GridCardFooter>
               </div>
@@ -6545,7 +6589,7 @@ export function PowerGridExplorer({
                                     </div>
                                     <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                       <div><strong>Source:</strong> <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPDB Annual Financial Report</a></div>
-                                      <div><strong>Audited by:</strong> SF Ahmed &amp; Co. Chartered Accountants / CAG Bangladesh</div>
+                                      <div>As published. Not independently audited.</div>
                                     </div>
                                   </div>
                                 );
@@ -6566,7 +6610,7 @@ export function PowerGridExplorer({
                     {/* Card Metadata Footer */}
                     <GridCardFooter>
                       <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financial Reports</a></span>
-                      <span>Audited by: SF Ahmed &amp; Co. Chartered Accountants / Office of the CAG Bangladesh</span>
+                      <span>As published. Not independently audited.</span>
                       <span className="font-medium">Reporting Period: Audited Accounts (FY 2010 - FY 2026)</span>
                     </GridCardFooter>
                   </div>
@@ -6601,7 +6645,7 @@ export function PowerGridExplorer({
                     {/* Card Metadata Footer */}
                     <GridCardFooter>
                       <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financial Reports</a></span>
-                      <span>Audited by: SF Ahmed &amp; Co. Chartered Accountants / Office of the CAG Bangladesh</span>
+                      <span>As published. Not independently audited.</span>
                       <span className="font-medium">Reporting Period: Audited Financial Statements (FY 2010 - FY 2026)</span>
                     </GridCardFooter>
                   </div>
@@ -6655,7 +6699,7 @@ export function PowerGridExplorer({
                                     </div>
                                     <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                       <div><strong>Source:</strong> <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Petrobangla Audited Balance Sheets</a></div>
-                                      <div><strong>Audited by:</strong> MABS &amp; J Partners Chartered Accountants / CAG Bangladesh</div>
+                                      <div>As published. Not independently audited.</div>
                                     </div>
                                   </div>
                                 );
@@ -6675,7 +6719,7 @@ export function PowerGridExplorer({
                     {/* Card Metadata Footer */}
                     <GridCardFooter>
                       <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Financial Accounts</a></span>
-                      <span>Audited by: MABS &amp; J Partners Chartered Accountants / Office of the CAG Bangladesh</span>
+                      <span>As published. Not independently audited.</span>
                       <span className="font-medium">Reporting Period: Audited Balance Sheets (FY 2010 - FY 2026)</span>
                     </GridCardFooter>
                   </div>
@@ -6721,7 +6765,7 @@ export function PowerGridExplorer({
                     {/* Card Metadata Footer */}
                     <GridCardFooter>
                       <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Financial Accounts</a></span>
-                      <span>Audited by: MABS &amp; J Partners Chartered Accountants / Office of the CAG Bangladesh</span>
+                      <span>As published. Not independently audited.</span>
                       <span className="font-medium">Reporting Period: Audited Accounts Summary (FY 2010 - FY 2026)</span>
                     </GridCardFooter>
                   </div>
@@ -6823,7 +6867,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: OPEC Bulletin Historical Spot Prices &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Official Pricing Gazettes</a></span>
-                    <span>Audited by: BPC Pricing Committee &amp; OPEC Secretariat</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: Global Comparison (1975 - 2026)</span>
                   </GridCardFooter>
                 </div>
@@ -6908,7 +6952,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: World Bank Pink Sheets &amp; <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Annual Reports</a></span>
-                    <span>Audited by: BERC Tariff Division &amp; World Bank Commodity Markets Group</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: Global Comparison (2010 - 2026)</span>
                   </GridCardFooter>
                 </div>
@@ -6993,7 +7037,7 @@ export function PowerGridExplorer({
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
                     <span>Source: IRENA Renewable Cost Databases &amp; BPDB Power Purchase Agreements (PPAs)</span>
-                    <span>Audited by: SREDA Solar Registry &amp; BPDB Planning &amp; Design Division</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Period: Global Cost Comparison (2015 - 2026)</span>
                   </GridCardFooter>
                 </div>
@@ -7319,7 +7363,7 @@ export function PowerGridExplorer({
                   </div>
                   <div className="pt-2.5 border-t border-border/20 text-[10px] text-muted-foreground/80 flex flex-wrap justify-between gap-x-2 gap-y-1">
                     <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Finance Reports</a></span>
-                    <span>Audited by: SF Ahmed &amp; Co / CAG Bangladesh</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Date: Jun 2026</span>
                   </div>
                 </div>
@@ -7383,7 +7427,7 @@ export function PowerGridExplorer({
                   </div>
                   <div className="pt-2.5 border-t border-border/20 text-[10px] text-muted-foreground/80 flex flex-wrap justify-between gap-x-2 gap-y-1">
                     <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Bulletins</a></span>
-                    <span>Audited by: BBS Industry Census Division</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Date: Jun 2026</span>
                   </div>
                 </div>
@@ -7415,7 +7459,7 @@ export function PowerGridExplorer({
                   </div>
                   <div className="pt-2.5 border-t border-border/20 text-[10px] text-muted-foreground/80 flex flex-wrap justify-between gap-x-2 gap-y-1">
                     <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financials</a></span>
-                    <span>Audited by: CAG Bangladesh Audit Teams</span>
+                    <span>As published. Not independently audited.</span>
                     <span className="font-medium">Reporting Date: Jun 2026</span>
                   </div>
                 </div>
@@ -7678,12 +7722,15 @@ export function PowerGridExplorer({
                 </tr>
               </thead>
               <tbody>
-                {(initialLines && initialLines.length > 0 ? initialLines : [
-                  { name: '400 kV Patuakhali–Gopalganj', status: 'Commissioned', capacity: '1800 MW', owner: 'PGCB', load: 74 },
-                  { name: '400 kV Rooppur–Baghabari', status: 'Under Construction', capacity: '2400 MW', owner: 'PGCB', load: 0 },
-                  { name: '230 kV Barisal–Khulna', status: 'Commissioned', capacity: '650 MW', owner: 'PGCB', load: 82 },
-                  { name: '400 kV Bheramara HVDC (India)', status: 'Operational', capacity: '1000 MW', owner: 'PGCB/POWERGRID', load: 90 },
-                ]).map((line: any, idx: number) => (
+                {/*
+                  No hardcoded fallback. This used to fall back to four invented
+                  lines — including load factors of 74%, 82% and 90% that no
+                  source publishes — beneath a "PGCB System Operations & NLDC"
+                  attribution, so an empty dataset produced a sourced-looking
+                  table of figures nobody had measured. An empty tracker is a
+                  true statement about what we hold; that was not.
+                */}
+                {(initialLines ?? []).map((line: any, idx: number) => (
                   <tr key={idx} className="border-b border-border/40">
                     <td className="py-1 px-2 font-medium">
                       <div className="flex flex-col">
@@ -7698,41 +7745,26 @@ export function PowerGridExplorer({
                 ))}
               </tbody>
             </table>
+            {(initialLines ?? []).length === 0 && (
+              <div className="text-[9px] text-muted-foreground mt-1 px-1 italic">
+                No transmission asset records are loaded for this report.
+              </div>
+            )}
             <div className="text-[8px] text-muted-foreground mt-1 px-1">
               Source: PGCB System Operations &amp; NLDC National Grid Map
             </div>
           </div>
 
-          <div>
-            <h3 className="text-xs font-bold text-muted-foreground uppercase mb-2">Upcoming Generation Projects</h3>
-            <table className="print-report-table w-full text-[10px]">
-              <thead>
-                <tr className="border-b border-border bg-muted/10">
-                  <th className="text-left py-1.5 px-2">Project Name</th>
-                  <th className="text-left py-1.5 px-2">Status</th>
-                  <th className="text-right py-1.5 px-2">Capacity / Cost</th>
-                  <th className="text-right py-1.5 px-2">Expected Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { name: 'SREDA 1800 MW Solar+Wind', status: 'Tender', mw: '1800', date: 'Q3 2026' },
-                  { name: 'Matarbari Phase-2 Coal', status: 'Construction', mw: '1200', date: '2027' },
-                  { name: 'Payra 1320 MW Expansion', status: 'Planned', mw: '1320', date: '2028' },
-                  { name: 'BREB 500k SHS + Mini-grid', status: 'Ongoing', mw: '—', date: '2026-27' }
-                ].map((proj: any, idx: number) => (
-                  <tr key={idx} className="border-b border-border/40">
-                    <td className="py-1 px-2 font-medium">{proj.name}</td>
-                    <td className="py-1 px-2">
-                      <span className="font-semibold">{proj.status}</span>
-                    </td>
-                    <td className="py-1 px-2 tabular-nums">{proj.mw === '—' ? '—' : `${proj.mw} MW`}</td>
-                    <td className="py-1 px-2 text-muted-foreground">{proj.date}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/*
+            "Upcoming Generation Projects" removed 2026-08-11. It listed four
+            projects — "SREDA 1800 MW Solar+Wind (Tender, Q3 2026)", Matarbari
+            Phase-2, a Payra expansion and a BREB programme — with statuses and
+            dates hardcoded in this file, carrying no source line and traceable
+            to no publication. SREDA's own database publishes 14 solar parks
+            totalling 745.25 MWp, so the headline figure contradicted the agency
+            it named. A project pipeline belongs here only once it is read from
+            something a reader can check.
+          */}
         </div>
       </div>
 
