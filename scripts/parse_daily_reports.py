@@ -1216,12 +1216,21 @@ def parse_pgcb_file(filepath, op_date):
     if evening_peak_demand == 0.0:
         evening_peak_demand = evening_peak_gen
 
-    # Regional loadshedding
+    # Regional loadshedding — and the demand PGCB prints beside it.
+    #
+    # P1's zone table publishes Demand directly, in two layouts:
+    #   modern (2015+):  Zone | Load-Shed | Demand           -> 2 numerics
+    #   2014-era:        Area | Demand | Supply | Loadshed   -> 3+ numerics
+    # The old code took the FIRST numeric as shed (wrong for the 2014 era)
+    # and threw the printed Demand away, deriving demand later as P3 area
+    # served + shed — a D figure silently standing in for a published one
+    # (2026-07-25 Chattogram: derived 1649.9 where PGCB prints 1595).
     regional_loadshed = {
         'Dhaka': 0.0, 'Chattogram': 0.0, 'Cumilla': 0.0, 'Mymensingh': 0.0,
         'Sylhet': 0.0, 'Khulna': 0.0, 'Barishal': 0.0, 'Rajshahi': 0.0, 'Rangpur': 0.0
     }
-    
+    regional_demand_printed = {}
+
     in_loadshed_section = False
     for line in p1.split('\n'):
         line_lower = line.lower()
@@ -1243,13 +1252,25 @@ def parse_pgcb_file(filepath, op_date):
                     elif 'barisal' in cell_lower or 'barishal' in cell_lower: matched_zone = 'Barishal'
                     elif 'rajshahi' in cell_lower: matched_zone = 'Rajshahi'
                     elif 'rangpur' in cell_lower: matched_zone = 'Rangpur'
-                    
+
                     if matched_zone:
                         right_cells = [c.strip() for c in parts[idx+1:] if c.strip()]
-                        val = 0.0
-                        if right_cells:
-                            val = clean_float(right_cells[0])
-                        regional_loadshed[matched_zone] = val
+                        nums = []
+                        for c in right_cells:
+                            try:
+                                nums.append(float(c.replace(',', '')))
+                            except ValueError:
+                                break   # duration strings etc. end the numeric run
+                        if len(nums) >= 3:
+                            # 2014-era: Demand, Supply, Loadshed
+                            regional_demand_printed[matched_zone] = nums[0]
+                            regional_loadshed[matched_zone] = nums[2]
+                        elif len(nums) == 2:
+                            # modern: Load-Shed, Demand
+                            regional_loadshed[matched_zone] = nums[0]
+                            regional_demand_printed[matched_zone] = nums[1]
+                        elif len(nums) == 1:
+                            regional_loadshed[matched_zone] = nums[0]
                         break
                     elif 'total' in cell_lower:
                         in_loadshed_section = False
@@ -1343,12 +1364,20 @@ def parse_pgcb_file(filepath, op_date):
                             val = clean_float(cells[idx+1])
                         regional_served[matched_zone] = val
 
-    # Combine load shedding and served to get regional demand
+    # Regional demand: PGCB's own printed figure wherever P1 published one (P);
+    # the P3 area-served + shed reconstruction only stands in where it did not
+    # (D). The day records which path fed it, so the UI can say so.
     regional_demand_data = []
+    printed_zones = 0
     for zone in ['Dhaka', 'Chattogram', 'Cumilla', 'Mymensingh', 'Sylhet', 'Khulna', 'Barishal', 'Rajshahi', 'Rangpur']:
         shed = regional_loadshed[zone]
         served = regional_served[zone]
-        demand = served + shed
+        printed = regional_demand_printed.get(zone)
+        if printed is not None:
+            demand = printed
+            printed_zones += 1
+        else:
+            demand = served + shed
         pct = (shed / demand * 100.0) if demand > 0.0 else 0.0
         regional_demand_data.append({
             'zone': zone,
@@ -1356,6 +1385,8 @@ def parse_pgcb_file(filepath, op_date):
             'demand': round(demand, 2),
             'pct': round(pct, 1)
         })
+    regional_demand_source = ('p1-published' if printed_zones == len(regional_demand_data)
+                              else 'derived-served-plus-shed' if regional_demand_data else None)
 
     # Hourly load from the L-Curve TOTAL column, located by header (see
     # lcurve_total_series). The curve is half-hourly; the on-the-hour points
@@ -1414,9 +1445,24 @@ def parse_pgcb_file(filepath, op_date):
     parsed_via_table = False
     fuel_gen = {}
 
-    # Look for Zone-wise Generation Summary (MKWHr.) table in P1
-    header_idx = -1
+    # Look for the Zone-wise Generation Summary table in P1.
+    #
+    # Its caption states its own unit and PGCB has printed BOTH: "(MWHr.)" on
+    # the older sheets and "(MKWHr.)" on the newer ones. Taking the Total row
+    # at face value published 23 days (2024-12-31..2025-01-22) at a thousand
+    # times their real energy — 219,337 MKWh against a true 219 — which in
+    # turn drove every per-fuel unit cost to ~0.005 Tk/kWh. Read the unit,
+    # never assume it.
     lines = p1.split('\n')
+    energy_div = 1.0
+    for line in lines:
+        m = re.search(r'zone-?wise\s+generation\s+summary\s*\(\s*(M?K?WH)r?\.?\s*\)',
+                      line, re.I)
+        if m:
+            energy_div = 1.0 if m.group(1).upper() == 'MKWH' else 1000.0
+            break
+
+    header_idx = -1
     for idx, line in enumerate(lines):
         if '|' in line:
             parts = [p.strip().lower() for p in line.split('|') if p.strip()]
@@ -1436,6 +1482,9 @@ def parse_pgcb_file(filepath, op_date):
                         if h_idx < len(cells) - 1:
                             val_map[h] = clean_float(cells[h_idx + 1])
                     
+                    # Normalise to MKWh using the unit the caption states.
+                    val_map = {k: (v / energy_div if isinstance(v, (int, float)) else v)
+                               for k, v in val_map.items()}
                     gas_gen = val_map.get('gas', 0.0)
                     coal_gen = val_map.get('coal', 0.0)
                     oil_gen = val_map.get('hfo', 0.0) + val_map.get('hsd', 0.0)
@@ -1623,6 +1672,7 @@ def parse_pgcb_file(filepath, op_date):
         'generationData': generation_data,
         'borderImportsData': border_imports_data,
         'regionalDemandData': regional_demand_data,
+        'regionalDemandSource': regional_demand_source,
         'dailyOutages': daily_outages,
         'hourlyLoadData': hourly_load_data,
         # Omitted rather than empty on the layouts without an En-Curve sheet,
