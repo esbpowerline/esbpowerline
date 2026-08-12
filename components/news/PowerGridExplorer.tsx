@@ -6,7 +6,8 @@ import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } f
 import Link from 'next/link';
 import {
   Zap, Activity, Cable, TrendingUp, FileText, BarChart3, MapPin, DollarSign, Database, Droplet, Globe, Sun,
-  Search, ChevronLeft, ChevronRight, ChevronDown, Check, Info, Map, Network, CheckSquare, Calendar, RotateCcw, History, Landmark, Factory, ShieldCheck
+  Search, ChevronLeft, ChevronRight, ChevronDown, Check, Info, Map, Network, CheckSquare, Calendar, RotateCcw, History, Landmark, Factory, ShieldCheck,
+  AlertTriangle
 } from 'lucide-react';
 import { substationsData } from '@/lib/data/infrastructure/substations';
 import {
@@ -250,6 +251,11 @@ export function PowerGridExplorer({
     [latestDate, selectedDate, activeData],
   );
   const [isDataMissing, setIsDataMissing] = useState<boolean>(false);
+  // Days for which no published source has been found — see
+  // public/data/grid-verification/no-source-days.json. A day PGCB indexes but
+  // that has not been downloaded is NOT in that file; this is only the days
+  // nothing published can be located for.
+  const [noSourceDays, setNoSourceDays] = useState<Set<string>>(new Set());
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
   const [showMethodologyBanner, setShowMethodologyBanner] = useState(true);
   const [activeReconciliationTopic, setActiveReconciliationTopic] = useState<'gen' | 'cost' | null>(null);
@@ -340,6 +346,21 @@ export function PowerGridExplorer({
     setTierLockRequired(gridAccess.requiredTierForDate(isoDate));
     setSelectedDate(isoDate);
   }, [gridAccess]);
+
+  useEffect(() => {
+    let alive = true;
+    fetch('/data/grid-verification/no-source-days.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (alive && j?.days) setNoSourceDays(new Set<string>(j.days));
+      })
+      .catch(() => {
+        /* the notice simply does not appear if the index cannot be read */
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (gridAccess.loading) {
@@ -552,6 +573,7 @@ export function PowerGridExplorer({
     gasDistributionData = [],
     borderImportsData = [],
     regionalDemandData = [],
+    regionalDemandSource,
     dailyOutages = [],
     hourlyLoadData = [],
     // Undefined, not [], on the layouts whose workbook carries no En-Curve
@@ -1250,6 +1272,30 @@ export function PowerGridExplorer({
         totalArchiveDays={availableDatesList.length}
         className="mb-4 relative z-50"
       />
+
+      {/*
+        Stated, not implied: on these days no published source has been found
+        at all — nothing held here and nothing in PGCB's own archive index —
+        so the figures below are shown as they stand, uncorroborated. Days the
+        agency publishes but we have not yet downloaded are deliberately NOT
+        in this set; that gap is ours, and calling it an absence of publication
+        would be an assumption.
+      */}
+      {noSourceDays.has(selectedDate) && (
+        <div className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 relative z-50">
+          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+            No published source has been found for {selectedDate}
+          </p>
+          <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+            No daily report for this date is held here, and PGCB&rsquo;s published
+            archive index carries no entry for it. Everything shown below is
+            reproduced as it stands and has not been checked against a source
+            document. Nothing has been assumed, reconstructed or carried over
+            from a neighbouring day to fill the gap.
+          </p>
+        </div>
+      )}
 
       {/* Date Selector Header */}
       {/* z-[60] beats the locked-panel overlay's z-[55]. This row is the stacking context
@@ -4599,7 +4645,10 @@ export function PowerGridExplorer({
                 <Cable className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <h3 className="grid-explorer-chart-card__title">Zone-wise Demand &amp; Load-Shedding<DailyBadge /></h3>
-                  <p className="grid-explorer-chart-card__sub">SCADA readings recorded at evening peak hour (21:00 Hr.) • <span className="text-primary font-semibold text-xs">{coverageLabel('regionalDemand')}</span></p>
+                  {/* No fixed clock time: PGCB's printed evening-peak hour varies
+                      (18:00–21:00 across verified 2025–26 days), so naming one
+                      here was wrong on most days. */}
+                  <p className="grid-explorer-chart-card__sub">SCADA readings at the evening peak hour {regionalDemandSource === 'bpdb-published' ? 'BPDB' : 'PGCB'} reports for the day • <span className="text-primary font-semibold text-xs">{coverageLabel('regionalDemand')}</span></p>
                 </div>
               </div>
 
@@ -4608,9 +4657,9 @@ export function PowerGridExplorer({
                   <thead>
                     <tr>
                       <th>Grid Zone</th>
-                      <th className="text-left">Evening Demand (MW)</th>
-                      <th className="text-left">Load-Shedding (MW)</th>
-                      <th className="text-left">Shedding Severity</th>
+                      <th className="text-left">Evening Demand (MW)<GridProvenanceTag kind={regionalDemandSource === 'derived-served-plus-shed' ? 'D' : 'P'} className="ml-1" /></th>
+                      <th className="text-left">Load-Shedding (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                      <th className="text-left">Shedding Severity<GridProvenanceTag kind="D" className="ml-1" /></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -4626,9 +4675,14 @@ export function PowerGridExplorer({
                             <div className="flex items-center justify-start gap-1.5">
                               <span className="font-mono font-bold text-xs text-amber-500">{rd.pct}%</span>
                               <div className="w-12 h-2 rounded bg-muted overflow-hidden">
+                                {/* Linear. This bar used to be drawn at pct x 4,
+                                    so every zone at or above 25% shed painted
+                                    full and the bar contradicted the number
+                                    printed beside it. The footer states the
+                                    method, so the drawing has to match it. */}
                                 <div
                                   className="h-full bg-amber-500 rounded"
-                                  style={{ width: `${Math.min(rd.pct * 4, 100)}%` }}
+                                  style={{ width: `${Math.min(rd.pct, 100)}%` }}
                                 />
                               </div>
                             </div>
@@ -4639,18 +4693,64 @@ export function PowerGridExplorer({
                       </tr>
                     ))}
                     <tr className="border-t border-border/80 font-bold bg-muted/20">
-                      <td>Entire Grid Total</td>
+                      <td>Entire Grid Total<GridProvenanceTag kind="D" className="ml-1" /></td>
                       <td className="text-left tabular-nums text-primary">{formatNumber(totalRegionalDemand)}</td>
                       <td className="text-left tabular-nums text-destructive">{formatNumber(totalRegionalLoadShed)}</td>
-                      <td className="text-left tabular-nums text-primary">{avgRegionalPct}% avg</td>
+                      {/* Not the mean of the nine zone percentages — the
+                          demand-weighted grid ratio. Labelled accordingly. */}
+                      <td className="text-left tabular-nums text-primary">{avgRegionalPct}% grid-wide</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
+              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                {regionalDemandSource === 'bpdb-published' ? (
+                  <>
+                    <strong className="text-foreground">This day is BPDB&rsquo;s table, not PGCB&rsquo;s.</strong>{' '}
+                    No PGCB report for this date is held, so the figures come from BPDB&rsquo;s own
+                    published zone Demand / Supply / Load-shed table for the same evening peak —
+                    a second publisher of the same reading, checked against BPDB&rsquo;s printed
+                    total. Severity and the totals row are computed here.
+                  </>
+                ) : regionalDemandSource === 'derived-served-plus-shed' ? (
+                  <>
+                    On this day the demand figure is reconstructed as area served + load-shed
+                    (no local copy of PGCB&rsquo;s printed Demand column yet) — a derived stand-in,
+                    not the published cell. Load-shed is PGCB&rsquo;s own figure; severity and the
+                    totals row are computed here.
+                  </>
+                ) : (
+                  <>
+                    Demand and load-shed are PGCB&rsquo;s own zone table, verified cell-for-cell
+                    against the source workbooks across 2025 and 2026. Severity and the totals row
+                    are computed here.
+                  </>
+                )}
+              </div>
+
               {/* Card Metadata Footer */}
+              {/* The method behind the only computed column on this card,
+                  stated rather than left to be inferred from the D tag. */}
+              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">How severity is calculated</span>
+                <GridProvenanceTag kind="D" className="ml-1.5" />
+                <span className="mx-1.5 text-muted-foreground/50">·</span>
+                Shedding severity = that zone&rsquo;s load-shed ÷ its demand × 100, to one decimal.
+                Demand is the full figure including the shed portion, so severity is the share of
+                demand that went unserved; the bar is drawn to the same percentage. The final row
+                divides the summed shed by the summed demand — a grid-wide ratio, which is not the
+                same as averaging the nine zone percentages and will read lower when shedding
+                falls on the smaller zones. Both inputs are published; neither publisher states a
+                severity figure.
+              </div>
+
               <GridCardFooter>
-                <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations Log</a></span>
+                {regionalDemandSource === 'bpdb-published' ? (
+                  <span>Source: <a href="https://misc.bpdb.gov.bd/daily-generation-archive" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Daily Generation Report — zone table</a></span>
+                ) : (
+                  <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Operations Log</a></span>
+                )}
                 <span>As published. Not independently audited.</span>
                 <span className="font-medium">Reporting Period: Evening Peak Load (Date: {systemStats.date})</span>
               </GridCardFooter>
@@ -4663,6 +4763,16 @@ export function PowerGridExplorer({
                 <div>
                   <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<DailyBadge /></h3>
                   <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold text-xs">{coverageLabel('outages')}</span></p>
+                  {/* Not uniformly P: PGCB prints ONE free-text description per
+                      event, and the asset/cause split shown below is ours. */}
+                  <p className="mt-1.5 text-[10px] text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="inline-flex items-center gap-1">
+                      <GridProvenanceTag kind="P" /> time, description, lost load
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <GridProvenanceTag kind="D" /> split into asset and cause
+                    </span>
+                  </p>
                 </div>
               </div>
 
@@ -4673,9 +4783,22 @@ export function PowerGridExplorer({
                       <span>{o.plant}</span>
                       <span className="text-muted-foreground font-mono font-normal">{o.time}</span>
                     </div>
-                    <div className="flex justify-between text-muted-foreground">
+                    <div className="flex justify-between gap-3 text-muted-foreground">
                       <span>{o.reason}</span>
-                      <span className="font-semibold text-destructive">{o.load}</span>
+                      {/* `load` holds a published MW figure only when the report
+                          prints one; otherwise the parser stores the literal
+                          "HT Outage", which is a category, not a measurement,
+                          and must not be styled like one. */}
+                      {/\d/.test(o.load) ? (
+                        <span className="font-semibold text-destructive whitespace-nowrap">
+                          {o.load}
+                          <GridProvenanceTag kind="P" className="ml-1" />
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/70 whitespace-nowrap italic">
+                          no load stated
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -4684,7 +4807,7 @@ export function PowerGridExplorer({
               {/* Card Metadata Footer */}
               <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Outage Log</a></span>
-                <span>As published. Not independently audited.</span>
+                <span>Asset and cause are cut from PGCB&rsquo;s single event description; the wording is theirs.</span>
                 <span className="font-medium">Reporting Period: 24-Hour Logs (Date: {systemStats.date})</span>
               </GridCardFooter>
             </div>
@@ -4707,28 +4830,21 @@ export function PowerGridExplorer({
                       <th>Line Asset</th>
                       <th>Owner</th>
                       <th>Capacity</th>
-                      <th>Load Status</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Same invented fallback as the print report; see the note there. */}
+                    {/*
+                      The "Load Status" column is gone: its 74/82/90% figures
+                      were seeded, not published — no agency reports per-line
+                      loading, so this table no longer shows any.
+                    */}
                     {(initialLines ?? []).map((line: any, idx: number) => (
                       <tr key={idx}>
-                        <td className="font-semibold">
-                          <div className="flex flex-col">
-                            <span>{line.name}</span>
-                            <span className="text-[10px] text-muted-foreground font-normal">{line.status}</span>
-                          </div>
-                        </td>
+                        <td className="font-semibold">{line.name}</td>
                         <td>{line.owner}</td>
                         <td className="tabular-nums font-medium">{line.capacity}</td>
-                        <td className="tabular-nums">
-                          {line.load > 0 ? (
-                            <span className="font-bold text-primary">{line.load}% load</span>
-                          ) : (
-                            <span className="text-muted-foreground text-xs">Idle / Offline</span>
-                          )}
-                        </td>
+                        <td className="text-xs text-muted-foreground">{line.status}</td>
                       </tr>
                     ))}
                     {(initialLines ?? []).length === 0 && (
@@ -4740,6 +4856,9 @@ export function PowerGridExplorer({
                     )}
                   </tbody>
                 </table>
+              </div>
+              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                PGCB publishes no per-line load telemetry, so none is shown here.
               </div>
 
               {/* Card Metadata Footer */}
@@ -7663,7 +7782,15 @@ export function PowerGridExplorer({
         </h2>
         <div className="grid grid-cols-5 gap-6">
           <div className="col-span-3">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase mb-2">Zone-wise Demand & Load-Shedding</h3>
+            <h3 className="text-xs font-bold text-muted-foreground uppercase mb-2">
+              Zone-wise Demand &amp; Load-Shedding
+              {/* The printed report must name the publisher too: on days with no
+                  PGCB copy these are BPDB's figures. */}
+              <span className="normal-case font-normal text-muted-foreground/80">
+                {' '}— {regionalDemandSource === 'bpdb-published' ? 'BPDB' : 'PGCB'} published
+                {regionalDemandSource === 'derived-served-plus-shed' ? ' (demand derived)' : ''}
+              </span>
+            </h3>
             <table className="print-report-table w-full text-[10px]">
               <thead>
                 <tr className="border-b border-border bg-muted/10">
@@ -7718,7 +7845,7 @@ export function PowerGridExplorer({
                   <th className="text-left py-1.5 px-2">Line Asset</th>
                   <th className="text-left py-1.5 px-2">Owner</th>
                   <th className="text-right py-1.5 px-2">Capacity</th>
-                  <th className="text-right py-1.5 px-2">Load</th>
+                  <th className="text-right py-1.5 px-2">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -7728,19 +7855,17 @@ export function PowerGridExplorer({
                   source publishes — beneath a "PGCB System Operations & NLDC"
                   attribution, so an empty dataset produced a sourced-looking
                   table of figures nobody had measured. An empty tracker is a
-                  true statement about what we hold; that was not.
+                  true statement about what we hold; that was not. The same
+                  three percentages then resurfaced from the DB seed, so the
+                  Load column itself is now gone: no agency publishes per-line
+                  loading, and this table no longer shows any.
                 */}
                 {(initialLines ?? []).map((line: any, idx: number) => (
                   <tr key={idx} className="border-b border-border/40">
-                    <td className="py-1 px-2 font-medium">
-                      <div className="flex flex-col">
-                        <span>{line.name}</span>
-                        <span className="text-[8px] text-muted-foreground font-normal">{line.status}</span>
-                      </div>
-                    </td>
+                    <td className="py-1 px-2 font-medium">{line.name}</td>
                     <td className="py-1 px-2">{line.owner}</td>
                     <td className="text-right py-1 px-2 tabular-nums">{line.capacity}</td>
-                    <td className="text-right py-1 px-2 tabular-nums font-semibold">{line.load > 0 ? `${line.load}%` : 'Offline'}</td>
+                    <td className="text-right py-1 px-2 text-muted-foreground">{line.status}</td>
                   </tr>
                 ))}
               </tbody>

@@ -62,6 +62,12 @@ interface DayDetail {
   date: string;
   agencies: Record<string, { label: string; checks: number; exact: number; rounding: number; failures: number }>;
   checks: CheckRow[];
+  /** Every pair recomputed for the day, including those not itemised below. */
+  checks_total?: number;
+  /** Pairs that agree to the last printed digit and are not
+   *  geometry-independent. They are counted but not listed — itemising all of
+   *  them across thirteen years is 1.1 million rows. */
+  checks_omitted_exact?: number;
   defects: Defect[];
   sources: Record<string, string>;
   headline: {
@@ -75,10 +81,17 @@ interface DayDetail {
   coverage: { pb_words: number | null; pb_words_unassigned: number | null };
 }
 
+interface WithheldDay {
+  date: string;
+  sources: string[];
+  disagreements: { source: string; figure: string; a: number | string | null; b: number | string | null; why: string }[];
+}
+
 interface MonthFile {
   month: string;
   days: Record<string, DayDetail>;
   totals: Totals;
+  dual?: { gated: boolean; note: string; withheld: WithheldDay[] };
 }
 
 interface Totals {
@@ -90,16 +103,20 @@ interface Totals {
   defects: number;
   cross_agency_ok: number;
   cross_agency_days: number;
+  dual_confirmed_days?: number;
+  dual_withheld_days?: number;
 }
 
 interface IndexFile {
   generated_at: string;
   provenance: Record<string, string>;
   method: string;
+  dual_method?: string;
   months: {
     month: string;
     totals: Totals;
     days: Record<string, { checks: number; failures: number; defects: number; agencies: string[]; cross_agency_ok: boolean | null }>;
+    dual?: { gated: boolean; withheld: number };
   }[];
   totals: Totals;
   defect_kinds: Record<string, number>;
@@ -242,6 +259,16 @@ export function PublishedVsDerivedTab() {
           provenance="D"
           hint="two agencies, two formats, same day"
         />
+        {(t.dual_confirmed_days ?? 0) + (t.dual_withheld_days ?? 0) > 0 && (
+          <GridKpiCell
+            icon={ShieldCheck}
+            iconClassName="text-emerald-500"
+            label="Read twice, agreed"
+            value={String(t.dual_confirmed_days ?? 0)}
+            provenance="D"
+            hint={`days confirmed by two independent engines · ${t.dual_withheld_days ?? 0} withheld`}
+          />
+        )}
       </GridKpiStrip>
 
       {/* ── what P and D mean here ───────────────────────────────── */}
@@ -258,33 +285,51 @@ export function PublishedVsDerivedTab() {
           </span>
         </div>
         <p>{index.method}</p>
+        {index.dual_method && <p className="mt-2">{index.dual_method}</p>}
       </div>
 
-      {/* ── month picker ─────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-1.5">
-        {index.months.map((m) => {
-          const active = m.month === month;
-          const bad = m.totals.defects > 0;
-          return (
-            <button
-              key={m.month}
-              type="button"
-              onClick={() => handleMonth(m.month)}
-              className={cn(
-                'px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all duration-150',
-                active
-                  ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
-                  : 'bg-transparent text-muted-foreground border-border/40 hover:text-foreground',
-              )}
-            >
-              {m.month}
-              <span className="ml-1.5 opacity-70">
-                {m.totals.checks.toLocaleString('en-US')}
+      {/* ── month picker, one row per year ───────────────────────── */}
+      <div className="space-y-1.5">
+        {Array.from(new Set(index.months.map((m) => m.month.slice(0, 4))))
+          .sort()
+          .map((year) => (
+            <div key={year} className="flex flex-wrap items-center gap-1.5">
+              <span className="w-9 shrink-0 text-[11px] font-bold text-muted-foreground tabular-nums">
+                {year}
               </span>
-              {bad && <span className="ml-1 text-amber-500">•</span>}
-            </button>
-          );
-        })}
+              {index.months
+                .filter((m) => m.month.startsWith(year))
+                .map((m) => {
+                  const active = m.month === month;
+                  const bad = m.totals.defects > 0;
+                  return (
+                    <button
+                      key={m.month}
+                      type="button"
+                      onClick={() => handleMonth(m.month)}
+                      title={m.dual?.gated
+                        ? `Dual-parse gated: every day read twice by independent engines${m.dual.withheld ? `, ${m.dual.withheld} day${m.dual.withheld === 1 ? '' : 's'} withheld` : ''}`
+                        : undefined}
+                      className={cn(
+                        'px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all duration-150',
+                        active
+                          ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
+                          : 'bg-transparent text-muted-foreground border-border/40 hover:text-foreground',
+                      )}
+                    >
+                      {m.month.slice(5)}
+                      {m.dual?.gated && (
+                        <ShieldCheck className="inline-block h-3 w-3 ml-1 -mt-0.5 text-emerald-500" />
+                      )}
+                      <span className="ml-1.5 opacity-70">
+                        {m.totals.checks.toLocaleString('en-US')}
+                      </span>
+                      {bad && <span className="ml-1 text-amber-500">•</span>}
+                    </button>
+                  );
+                })}
+            </div>
+          ))}
       </div>
 
       {/* ── day strip ────────────────────────────────────────────── */}
@@ -324,6 +369,37 @@ export function PublishedVsDerivedTab() {
                 );
               })}
           </div>
+
+          {/* dual-parse gate: what this month's figures were read by, and
+              which days did not clear it */}
+          {monthData.dual?.gated && (
+            <div className="px-4 py-3 border-t border-border/40 bg-emerald-500/5 text-[11px] leading-relaxed">
+              <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
+                <ShieldCheck className="h-3.5 w-3.5" /> Dual-parse gated
+              </span>{' '}
+              <span className="text-muted-foreground">{monthData.dual.note}</span>
+              {monthData.dual.withheld.length > 0 && (
+                <div className="mt-2 space-y-2">
+                  {monthData.dual.withheld.map((w) => (
+                    <div key={w.date} className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
+                      <span className="font-semibold text-amber-700 dark:text-amber-400">
+                        {w.date} withheld
+                      </span>{' '}
+                      <span className="text-muted-foreground">
+                        — engines disagreed on {w.disagreements.length}{' '}
+                        figure{w.disagreements.length === 1 ? '' : 's'} ({w.sources.join(', ')})
+                      </span>
+                      {w.disagreements.slice(0, 4).map((g, i) => (
+                        <p key={i} className="text-muted-foreground mt-0.5 tabular-nums">
+                          {g.source} · {g.figure}: {String(g.a ?? '—')} vs {String(g.b ?? '—')} — {g.why}
+                        </p>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -401,6 +477,15 @@ export function PublishedVsDerivedTab() {
               Hide pairs that agree exactly
             </label>
           </div>
+          {!onlyInteresting && (detail.checks_omitted_exact ?? 0) > 0 && (
+            <p className="px-4 pb-2 text-[11px] text-muted-foreground">
+              {detail.checks_omitted_exact!.toLocaleString('en-US')} of this
+              day&rsquo;s {detail.checks_total!.toLocaleString('en-US')} pairs agree to the
+              last printed digit and are counted but not listed individually — the
+              itemised rows below are every disagreement, every pair inside the rounding
+              band, and every geometry-independent check.
+            </p>
+          )}
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs">

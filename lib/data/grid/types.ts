@@ -189,6 +189,21 @@ export interface GridDailyData {
   gasDistributionData?: GasDistributionItem[];
   borderImportsData?: BorderImportItem[];
   regionalDemandData?: RegionalDemandItem[];
+  /** Where the zone Demand figures came from — the section is PGCB-attributed
+   *  by default, so anything else has to say so:
+   *    'p1-published'             PGCB's own printed P1 Demand column (P)
+   *    'derived-served-plus-shed' reconstructed from P3 area served + P1 shed
+   *                               on days whose printed column is not held (D)
+   *    'bpdb-published'           BPDB's published zone table, used on days no
+   *                               PGCB copy is held. A different publisher of
+   *                               the same evening-peak table, so still P —
+   *                               but credited to BPDB, never to PGCB.
+   *  Absent on files written before this field existed. */
+  regionalDemandSource?:
+    | 'p1-published'
+    | 'derived-served-plus-shed'
+    | 'bpdb-published'
+    | null;
   dailyOutages?: DailyOutageItem[];
   hourlyLoadData?: HourlyLoadItem[];
   energyCurveData?: EnergyCurve;

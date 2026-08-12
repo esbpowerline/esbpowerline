@@ -46,6 +46,7 @@ import {
   Building2,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Droplet,
   Factory,
@@ -189,6 +190,7 @@ export function RenewablesTab({
   const [monthly, setMonthly] = useState<MonthlyRow[] | null>(null);
   const [openKpi, setOpenKpi] = useState<string | null>(null);
   const [showAllChecks, setShowAllChecks] = useState(false);
+  const [openTech, setOpenTech] = useState<Set<string>>(new Set());
   const chartTheme = useChartTheme();
 
   useEffect(() => {
@@ -388,6 +390,14 @@ export function RenewablesTab({
   }, [sreda]);
 
   const toggle = (id: string) => setOpenKpi((cur) => (cur === id ? null : id));
+
+  const toggleTech = (source: string) =>
+    setOpenTech((cur) => {
+      const next = new Set(cur);
+      if (next.has(source)) next.delete(source);
+      else next.add(source);
+      return next;
+    });
 
   return (
     <div className="grid-explorer-panel space-y-6">
@@ -1028,17 +1038,47 @@ export function RenewablesTab({
                   <tbody>
                     {grouped.map(({ source, rows }) => {
                       const Icon = FUEL_ICON[source] ?? Sun;
+                      const open = openTech.has(source);
+                      const sums = rows.reduce(
+                        (acc, r) => {
+                          acc.quantity += r.quantity;
+                          acc.offGridMwp += r.offGridMwp;
+                          acc.onGridMwp += r.onGridMwp;
+                          acc.totalMwp += r.totalMwp;
+                          return acc;
+                        },
+                        { quantity: 0, offGridMwp: 0, onGridMwp: 0, totalMwp: 0 },
+                      );
                       return (
                         <Fragment key={source}>
-                          <tr className="bg-muted/20">
-                            <td colSpan={5} className="font-bold text-xs uppercase tracking-wide">
+                          <tr
+                            className="bg-muted/20 cursor-pointer hover:bg-muted/30"
+                            aria-expanded={open}
+                            onClick={() => toggleTech(source)}
+                          >
+                            <td className="font-bold text-xs uppercase tracking-wide">
                               <span className="flex items-center gap-2">
+                                {open ? (
+                                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                ) : (
+                                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                )}
                                 <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
                                 {source}
+                                <GridProvenanceTag kind="D" />
+                                <span className="text-muted-foreground font-normal normal-case tracking-normal">
+                                  {rows.length} {rows.length === 1 ? 'technology' : 'technologies'}
+                                </span>
                               </span>
                             </td>
+                            <td className="text-right tabular-nums text-muted-foreground">
+                              {sums.quantity.toLocaleString('en-US')}
+                            </td>
+                            <td className="text-right tabular-nums">{fmt(sums.offGridMwp)}</td>
+                            <td className="text-right tabular-nums">{fmt(sums.onGridMwp)}</td>
+                            <td className="text-right tabular-nums font-medium">{fmt(sums.totalMwp)}</td>
                           </tr>
-                          {rows.map((r) => (
+                          {open && rows.map((r) => (
                             <tr key={`${source}-${r.technology}`}>
                               <td className="pl-6">{r.technology}</td>
                               <td className="text-right tabular-nums text-muted-foreground">
@@ -1078,7 +1118,8 @@ export function RenewablesTab({
               sit beside 14 solar parks, so the columns cannot be ranked against each other.
               <strong> MWp</strong>{' '}
               is peak DC capacity as SREDA reports it — not the MW used above
-              for grid capacity and output.
+              for grid capacity and output. Each source row sums the SREDA-published
+              technology rows beneath it — click a source to expand or collapse them.
             </div>
 
             <GridCardFooter>
