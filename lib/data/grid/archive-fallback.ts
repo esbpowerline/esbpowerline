@@ -1295,57 +1295,57 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 0,
-          "demand": 5885.23,
-          "pct": 0
+          "loadShed": 14,
+          "demand": 4787,
+          "pct": 0.3
         },
         {
           "zone": "Chattogram",
-          "loadShed": 7.84,
-          "demand": 1475.36,
-          "pct": 0.53
+          "loadShed": 0,
+          "demand": 1501,
+          "pct": 0
         },
         {
           "zone": "Cumilla",
-          "loadShed": 117.6,
-          "demand": 1686.13,
-          "pct": 6.97
+          "loadShed": 23,
+          "demand": 1679,
+          "pct": 1.4
         },
         {
           "zone": "Mymensingh",
-          "loadShed": 156.8,
-          "demand": 1361.87,
-          "pct": 11.51
+          "loadShed": 319,
+          "demand": 1473,
+          "pct": 21.7
         },
         {
           "zone": "Sylhet",
-          "loadShed": 11.76,
-          "demand": 697.15,
-          "pct": 1.69
+          "loadShed": 11,
+          "demand": 700,
+          "pct": 1.6
         },
         {
           "zone": "Khulna",
-          "loadShed": 39.2,
-          "demand": 1945.53,
-          "pct": 2.01
+          "loadShed": 0,
+          "demand": 2124,
+          "pct": 0
         },
         {
           "zone": "Barishal",
-          "loadShed": 19.6,
-          "demand": 535.02,
-          "pct": 3.66
+          "loadShed": 0,
+          "demand": 462,
+          "pct": 0
         },
         {
           "zone": "Rajshahi",
-          "loadShed": 19.6,
-          "demand": 1702.34,
-          "pct": 1.15
+          "loadShed": 0,
+          "demand": 1771,
+          "pct": 0
         },
         {
           "zone": "Rangpur",
-          "loadShed": 19.6,
-          "demand": 924.13,
-          "pct": 2.12
+          "loadShed": 8,
+          "demand": 1084,
+          "pct": 0.7
         }
       ],
       "dailyOutages": [
@@ -1697,7 +1697,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.9,
           "total": 115.1
         }
-      ]
+      ],
+      "regionalDemandSource": "bpdb-published"
     },
   "2026-06-03": {
       "systemStats": {
@@ -12752,28 +12753,28 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 478.7,
           "condensate": 371.8,
-          "share": 18.4
+          "share": 18.1
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.9,
-          "condensate": 334.2,
-          "share": 3.6
+          "gas": 139.9,
+          "condensate": 638,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 92.4,
           "condensate": 59.3,
-          "share": 3.6
+          "share": 3.5
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 897.4,
           "condensate": 4702.6,
-          "share": 34.5
+          "share": 33.9
         },
         {
           "company": "Tullow (Bangora)",
@@ -12786,8 +12787,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1008,
-          "condensate": 0,
-          "share": 38.7
+          "condensate": 26.2,
+          "share": 38.1
         }
       ],
       "gasDistributionData": [
@@ -14048,56 +14049,56 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "regionalDemandData": [
         {
           "zone": "Dhaka",
-          "loadShed": 77,
-          "demand": 5521.23,
-          "pct": 1.4
+          "loadShed": 124,
+          "demand": 5959,
+          "pct": 2.1
         },
         {
           "zone": "Chattogram",
           "loadShed": 0,
-          "demand": 1482,
+          "demand": 1469,
           "pct": 0
         },
         {
           "zone": "Cumilla",
-          "loadShed": 30,
-          "demand": 1571,
-          "pct": 1.9
+          "loadShed": 111,
+          "demand": 1666,
+          "pct": 6.7
         },
         {
           "zone": "Mymensingh",
-          "loadShed": 468,
-          "demand": 1441,
-          "pct": 32.5
+          "loadShed": 282,
+          "demand": 1434,
+          "pct": 19.7
         },
         {
           "zone": "Sylhet",
-          "loadShed": 0,
-          "demand": 644,
-          "pct": 0
+          "loadShed": 19,
+          "demand": 654,
+          "pct": 2.9
         },
         {
           "zone": "Khulna",
-          "loadShed": 77,
-          "demand": 1949.8,
-          "pct": 3.9
+          "loadShed": 0,
+          "demand": 1788,
+          "pct": 0
         },
         {
           "zone": "Barishal",
           "loadShed": 0,
-          "demand": 518.2,
+          "demand": 488,
           "pct": 0
         },
         {
           "zone": "Rajshahi",
-          "loadShed": 15,
-          "demand": 1657.6,
-          "pct": 0.9
+          "loadShed": 0,
+          "demand": 1606,
+          "pct": 0
         },
         {
           "zone": "Rangpur",
           "loadShed": 0,
-          "demand": 1053,
+          "demand": 1063,
           "pct": 0
         }
       ],
@@ -14171,44 +14172,44 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
-          "gas": 481.4,
-          "condensate": 372.8,
+          "gas": 479.9,
+          "condensate": 372,
           "share": 18.4
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.5,
-          "condensate": 362.6,
-          "share": 3.6
+          "gas": 137.6,
+          "condensate": 613.9,
+          "share": 5.3
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
-          "gas": 94.2,
-          "condensate": 69.6,
-          "share": 3.6
+          "gas": 92.4,
+          "condensate": 65.2,
+          "share": 3.5
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
-          "gas": 902.8,
-          "condensate": 4813.5,
-          "share": 34.5
+          "gas": 897.4,
+          "condensate": 4650.5,
+          "share": 34.4
         },
         {
           "company": "Tullow (Bangora)",
           "fields": 1,
-          "gas": 31.7,
-          "condensate": 93.8,
+          "gas": 31.4,
+          "condensate": 93,
           "share": 1.2
         },
         {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
-          "gas": 1010.5,
-          "condensate": 0,
-          "share": 38.7
+          "gas": 970.6,
+          "condensate": 25.2,
+          "share": 37.2
         }
       ],
       "gasDistributionData": [
@@ -14254,7 +14255,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.6,
           "total": 59.2
         }
-      ]
+      ],
+      "regionalDemandSource": "p1-published"
     },
   "2026-06-26": {
       "systemStats": {
@@ -14484,44 +14486,44 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
-          "gas": 480.9,
-          "condensate": 372.4,
-          "share": 18.4
+          "gas": 480,
+          "condensate": 375.1,
+          "share": 17.8
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.4,
-          "condensate": 362.2,
-          "share": 3.6
+          "gas": 139.6,
+          "condensate": 629.6,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
-          "gas": 94.1,
-          "condensate": 69.5,
-          "share": 3.6
+          "gas": 91.2,
+          "condensate": 52.9,
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
-          "gas": 901.7,
-          "condensate": 4807.9,
-          "share": 34.5
+          "gas": 895.4,
+          "condensate": 4834.2,
+          "share": 33.1
         },
         {
           "company": "Tullow (Bangora)",
           "fields": 1,
-          "gas": 31.6,
-          "condensate": 93.7,
+          "gas": 31.7,
+          "condensate": 85,
           "share": 1.2
         },
         {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
-          "gas": 1009.3,
-          "condensate": 0,
-          "share": 38.7
+          "gas": 1066.2,
+          "condensate": 27.7,
+          "share": 39.4
         }
       ],
       "gasDistributionData": [
@@ -14734,44 +14736,44 @@ export const powerGridArchive: Record<string, GridDailyData> = {
         {
           "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
           "fields": 5,
-          "gas": 471.4,
-          "condensate": 365.1,
-          "share": 18.4
+          "gas": 478.6,
+          "condensate": 374.3,
+          "share": 17.7
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 91.5,
-          "condensate": 355.1,
-          "share": 3.6
+          "gas": 139.7,
+          "condensate": 637.5,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
-          "gas": 92.2,
-          "condensate": 68.2,
-          "share": 3.6
+          "gas": 91.9,
+          "condensate": 48.2,
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
-          "gas": 884,
-          "condensate": 4713.6,
-          "share": 34.5
+          "gas": 896.9,
+          "condensate": 4781.6,
+          "share": 33.1
         },
         {
           "company": "Tullow (Bangora)",
           "fields": 1,
           "gas": 31,
-          "condensate": 91.8,
-          "share": 1.2
+          "condensate": 88,
+          "share": 1.1
         },
         {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
-          "gas": 989.5,
-          "condensate": 0,
-          "share": 38.7
+          "gas": 1070.7,
+          "condensate": 27.8,
+          "share": 39.5
         }
       ],
       "gasDistributionData": [
@@ -15173,42 +15175,42 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "fields": 5,
           "gas": 478.6,
           "condensate": 374.3,
-          "share": 18
+          "share": 17.7
         },
         {
           "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
           "fields": 5,
-          "gas": 93.7,
-          "condensate": 329.1,
-          "share": 3.5
+          "gas": 139.7,
+          "condensate": 637.5,
+          "share": 5.2
         },
         {
           "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
           "fields": 9,
           "gas": 91.9,
           "condensate": 48.2,
-          "share": 3.5
+          "share": 3.4
         },
         {
           "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
           "fields": 3,
           "gas": 896.9,
           "condensate": 4781.6,
-          "share": 33.7
+          "share": 33.1
         },
         {
           "company": "Tullow (Bangora)",
           "fields": 1,
           "gas": 31,
           "condensate": 88,
-          "share": 1.2
+          "share": 1.1
         },
         {
           "company": "RPGCL (R-LNG Import / LNG Terminal)",
           "fields": 0,
           "gas": 1070.7,
-          "condensate": 0,
-          "share": 40.2
+          "condensate": 27.8,
+          "share": 39.5
         }
       ],
       "gasDistributionData": [
@@ -15344,62 +15346,7 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "type": "C/B Interconnector (East)"
         }
       ],
-      "regionalDemandData": [
-        {
-          "zone": "Dhaka",
-          "loadShed": 77,
-          "demand": 5962.14,
-          "pct": 1.3
-        },
-        {
-          "zone": "Chattogram",
-          "loadShed": 0,
-          "demand": 1568.7,
-          "pct": 0
-        },
-        {
-          "zone": "Cumilla",
-          "loadShed": 96,
-          "demand": 1557,
-          "pct": 6.2
-        },
-        {
-          "zone": "Mymensingh",
-          "loadShed": 308,
-          "demand": 1378,
-          "pct": 22.4
-        },
-        {
-          "zone": "Sylhet",
-          "loadShed": 14,
-          "demand": 679,
-          "pct": 2.1
-        },
-        {
-          "zone": "Khulna",
-          "loadShed": 51,
-          "demand": 1917,
-          "pct": 2.7
-        },
-        {
-          "zone": "Barishal",
-          "loadShed": 3,
-          "demand": 467,
-          "pct": 0.6
-        },
-        {
-          "zone": "Rajshahi",
-          "loadShed": 0,
-          "demand": 1640.8,
-          "pct": 0
-        },
-        {
-          "zone": "Rangpur",
-          "loadShed": 0,
-          "demand": 1052,
-          "pct": 0
-        }
-      ],
+      "regionalDemandData": [],
       "dailyOutages": [
         {
           "time": "19:40 - Barishal-Bhandaria 132 kV Ckt-1 Tripped from Barishal 132/33kV end showing Instt. R",
@@ -15656,7 +15603,8 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.5,
           "total": 59.6
         }
-      ]
+      ],
+      "regionalDemandSource": null
     }
 };
 
