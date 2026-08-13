@@ -11,7 +11,7 @@ import {
   YAxis,
 } from 'recharts';
 import { formatNumber } from '@/lib/utils';
-import { GridCardFooter } from '@/components/news/power-grid/GridExplorerUI';
+import { GridCardFooter, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
 import { buildEnergyCurveSeries } from '@/lib/data/grid/energy-curve';
 import { fetchEnergyCurve } from '@/lib/data/grid/energy-curve.client';
 import type { ChartTheme } from '@/hooks/useChartTheme';
@@ -39,11 +39,14 @@ export function EnergyCurveChart({
   reportDate,
   chartTheme,
   ready = true,
+  sourceFile,
 }: {
   isoDate: string;
   reportDate: string;
   chartTheme: ChartTheme;
   ready?: boolean;
+  /** The workbook whose En-Curve sheet produced this stack. */
+  sourceFile?: string | null;
 }) {
   const [showTable, setShowTable] = useState(false);
   const [curve, setCurve] = useState<EnergyCurve | null>(null);
@@ -245,7 +248,8 @@ export function EnergyCurveChart({
       </div>
 
       <GridCardFooter>
-        <span>Source: <span className="text-primary font-semibold">PGCB NLDC Daily Energy Curve (En-Curve)</span></span>
+        <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — En-Curve sheet, half-hourly generation by fuel</span>
+        {sourceFile ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFile }]} /> : null}
         <span>As published. Not independently audited.</span>
         <span className="font-medium">Reporting Date: {reportDate}</span>
       </GridCardFooter>

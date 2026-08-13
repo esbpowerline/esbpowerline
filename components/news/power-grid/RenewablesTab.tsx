@@ -179,10 +179,13 @@ export function RenewablesTab({
   isoDate,
   generationData = [],
   systemStats,
+  sourceFiles,
 }: {
   isoDate: string;
   generationData?: GridDailyData['generationData'];
   systemStats?: GridSystemStats;
+  /** Named on each KPI so a reader can request the same workbook. */
+  sourceFiles?: GridDailyData['sourceFiles'];
 }) {
   const [sreda, setSreda] = useState<SredaDailyData | null>(null);
   const [sredaState, setSredaState] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -440,7 +443,7 @@ export function RenewablesTab({
               PGCB publishes each fuel&rsquo;s energy; the renewable total is our sum of Solar, Hydro
               and Wind. Not audited.
             </GridKpiTooltipAudit>
-            <GridKpiTooltipRef refLabel="PGCB Daily Report" refHref={PGCB} dateLabel={`Date: ${isoDate}`} />
+            <GridKpiTooltipRef refLabel="PGCB Daily Report" part="En-Curve sheet — per-fuel hourly energy" refHref={PGCB} dateLabel={`Date: ${isoDate}`} sourceFile={sourceFiles?.pgcb} />
           </GridKpiTooltipBody>
         </GridKpiCell>
 
@@ -468,7 +471,7 @@ export function RenewablesTab({
             <GridKpiTooltipAudit>
               A quotient of two figures PGCB publishes. PGCB does not state this percentage.
             </GridKpiTooltipAudit>
-            <GridKpiTooltipRef refLabel="PGCB Daily Report" refHref={PGCB} dateLabel={`Date: ${isoDate}`} />
+            <GridKpiTooltipRef refLabel="PGCB Daily Report" part="En-Curve sheet — per-fuel hourly energy" refHref={PGCB} dateLabel={`Date: ${isoDate}`} sourceFile={sourceFiles?.pgcb} />
           </GridKpiTooltipBody>
         </GridKpiCell>
 
@@ -514,7 +517,7 @@ export function RenewablesTab({
             <GridKpiTooltipAudit>
               Station rows as PGCB publishes them. Totals are our sums of those rows.
             </GridKpiTooltipAudit>
-            <GridKpiTooltipRef refLabel="PGCB Daily Report" refHref={PGCB} dateLabel={`Date: ${isoDate}`} />
+            <GridKpiTooltipRef refLabel="PGCB Daily Report" part="En-Curve sheet — per-fuel hourly energy" refHref={PGCB} dateLabel={`Date: ${isoDate}`} sourceFile={sourceFiles?.pgcb} />
           </GridKpiTooltipBody>
         </GridKpiCell>
 

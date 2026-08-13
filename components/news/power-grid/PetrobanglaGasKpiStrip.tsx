@@ -129,6 +129,9 @@ export function PetrobanglaGasKpiStrip({ selectedDate }: Props) {
   if (!hasDiversity && !hasProducts && !hasPipeline) return null;
 
   const dateLabel = `Gas-day: ${gasDay}`;
+  // The archive day already carries the PDF it was parsed from, so each gas KPI
+  // can name the exact report rather than the agency in general.
+  const gasSourceFile = day?.meta?.source_filename ?? null;
 
   return (
     <GridKpiStrip stripRef={stripRef}>
@@ -172,9 +175,11 @@ export function PetrobanglaGasKpiStrip({ selectedDate }: Props) {
               Petrobangla&apos;s own diversity factor discounts simultaneous peak demand
             </GridKpiTooltipAudit>
             <GridKpiTooltipRef
-              refLabel="Petrobangla Daily Report"
+              refLabel="Petrobangla Daily Gas Intake/Offtake Report"
+              part="I. Production"
               refHref="https://www.petrobangla.org.bd/"
               dateLabel={dateLabel}
+              sourceFile={gasSourceFile}
             />
           </GridKpiTooltipBody>
         </GridKpiCell>
@@ -216,9 +221,11 @@ export function PetrobanglaGasKpiStrip({ selectedDate }: Props) {
               Condensate &amp; NGL fractionated into liquid fuels at RPGCL/SGFL plants
             </GridKpiTooltipAudit>
             <GridKpiTooltipRef
-              refLabel="Petrobangla Daily Report"
+              refLabel="Petrobangla Daily Gas Intake/Offtake Report"
+              part="I. Production"
               refHref="https://www.petrobangla.org.bd/"
               dateLabel={dateLabel}
+              sourceFile={gasSourceFile}
             />
           </GridKpiTooltipBody>
         </GridKpiCell>
@@ -255,9 +262,11 @@ export function PetrobanglaGasKpiStrip({ selectedDate }: Props) {
               GTCL trunkline segment deliveries from the NS-RA metering section
             </GridKpiTooltipAudit>
             <GridKpiTooltipRef
-              refLabel="Petrobangla Daily Report"
+              refLabel="Petrobangla Daily Gas Intake/Offtake Report"
+              part="I. Production"
               refHref="https://www.petrobangla.org.bd/"
               dateLabel={dateLabel}
+              sourceFile={gasSourceFile}
             />
           </GridKpiTooltipBody>
         </GridKpiCell>

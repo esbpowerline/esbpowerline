@@ -626,7 +626,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.6,
           "total": 135.4
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 01-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (31.05.26).pdf"
+      }
     },
   "2026-06-01": {
       "systemStats": {
@@ -1202,7 +1206,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.9,
           "total": 133.7
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 02-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (01.06.26).pdf"
+      }
     },
   "2026-06-02": {
       "systemStats": {
@@ -1698,7 +1706,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "total": 115.1
         }
       ],
-      "regionalDemandSource": "bpdb-published"
+      "regionalDemandSource": "bpdb-published",
+      "sourceFiles": {
+        "pgcb": "Daily Report 03-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (02.06.26).pdf"
+      }
     },
   "2026-06-03": {
       "systemStats": {
@@ -2309,7 +2321,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.3,
           "total": 107.3
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 04-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (03.06.26).pdf"
+      }
     },
   "2026-06-04": {
       "systemStats": {
@@ -3060,7 +3076,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.3,
           "total": 107.3
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 05-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (04.06.26).pdf"
+      }
     },
   "2026-06-05": {
       "systemStats": {
@@ -3706,7 +3726,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.9,
           "total": 77.8
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 06-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (05.06.26).pdf"
+      }
     },
   "2026-06-06": {
       "systemStats": {
@@ -4257,7 +4281,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.9,
           "total": 76.5
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 07-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (06.06.26).pdf"
+      }
     },
   "2026-06-07": {
       "systemStats": {
@@ -4752,7 +4780,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.4,
           "total": 101.7
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 08-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (07.06.26).pdf"
+      }
     },
   "2026-06-08": {
       "systemStats": {
@@ -5254,7 +5286,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4,
           "total": 103.2
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 09-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (08.06.26).pdf"
+      }
     },
   "2026-06-09": {
       "systemStats": {
@@ -5875,7 +5911,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.6,
           "total": 105.1
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 10-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (09.06.26).pdf"
+      }
     },
   "2026-06-10": {
       "systemStats": {
@@ -6342,7 +6382,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.4,
           "total": 66
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 11-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (10.06.26).pdf"
+      }
     },
   "2026-06-11": {
       "systemStats": {
@@ -6865,7 +6909,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.3,
           "total": 52.5
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 12-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (11.06.26).pdf"
+      }
     },
   "2026-06-12": {
       "systemStats": {
@@ -7525,7 +7573,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.8,
           "total": 53.3
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 13-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (12.06.26).pdf"
+      }
     },
   "2026-06-13": {
       "systemStats": {
@@ -8150,7 +8202,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.3,
           "total": 58.4
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 14-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (13.06.26).pdf"
+      }
     },
   "2026-06-14": {
       "systemStats": {
@@ -8638,7 +8694,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.1,
           "total": 58.4
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 15-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (14.06.26).pdf"
+      }
     },
   "2026-06-15": {
       "systemStats": {
@@ -9042,7 +9102,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.9,
           "total": 57.7
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report-16-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (15.06.26).pdf"
+      }
     },
   "2026-06-16": {
       "systemStats": {
@@ -9404,7 +9468,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.9,
           "total": 57.7
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 17-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (16.06.26).pdf"
+      }
     },
   "2026-06-17": {
       "systemStats": {
@@ -9857,7 +9925,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4,
           "total": 58
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 18-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (17.06.26).pdf"
+      }
     },
   "2026-06-18": {
       "systemStats": {
@@ -10516,7 +10588,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 3.4,
           "total": 57.6
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 19-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (18.06.26).pdf"
+      }
     },
   "2026-06-19": {
       "systemStats": {
@@ -11112,7 +11188,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.1,
           "total": 58.4
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 20-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (19.06.26).pdf"
+      }
     },
   "2026-06-20": {
       "systemStats": {
@@ -11537,7 +11617,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.4,
           "total": 58.5
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 21-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (20.06.26).pdf"
+      }
     },
   "2026-06-21": {
       "systemStats": {
@@ -12252,7 +12336,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.6,
           "total": 58.8
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 22-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (21.06.26).pdf"
+      }
     },
   "2026-06-22": {
       "systemStats": {
@@ -12834,7 +12922,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.3,
           "total": 58.5
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 23-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (23.06.26).pdf"
+      }
     },
   "2026-06-23": {
       "systemStats": {
@@ -13374,7 +13466,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.5,
           "total": 58.6
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 24-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (24.06.26).pdf"
+      }
     },
   "2026-06-24": {
       "systemStats": {
@@ -13956,7 +14052,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.6,
           "total": 58.8
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 25-06-2026.xlsx",
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (25.06.26).pdf"
+      }
     },
   "2026-06-25": {
       "systemStats": {
@@ -14256,7 +14356,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "total": 59.2
         }
       ],
-      "regionalDemandSource": "p1-published"
+      "regionalDemandSource": "p1-published",
+      "sourceFiles": {
+        "pgcb": "Daily Report 26-06-2026.xlsx",
+        "petrobangla": "d1c8bca0-72a7-4aed-ba0e-9b8570d7a501.pdf"
+      }
     },
   "2026-06-26": {
       "systemStats": {
@@ -14569,7 +14673,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.6,
           "total": 59.1
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 27-06-2026.xlsx",
+        "petrobangla": "a627934c-a98a-4f72-bc9a-c9fc4fbd767f.pdf"
+      }
     },
   "2026-06-27": {
       "systemStats": {
@@ -14819,7 +14927,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.5,
           "total": 58
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 28-06-2026.xlsx",
+        "petrobangla": "974ce969-8c1e-4b9c-b9b4-281255abe33e.pdf"
+      }
     },
   "2026-06-28": {
       "systemStats": {
@@ -15256,7 +15368,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "others": 4.5,
           "total": 59.6
         }
-      ]
+      ],
+      "sourceFiles": {
+        "pgcb": "Daily Report 29-06-2026.xlsx",
+        "petrobangla": "Petrobangla_f1f50a29-46df-49eb-a841-b4f4801f023c.pdf"
+      }
     },
   "2026-06-29": {
       "systemStats": {
@@ -15604,7 +15720,11 @@ export const powerGridArchive: Record<string, GridDailyData> = {
           "total": 59.6
         }
       ],
-      "regionalDemandSource": null
+      "regionalDemandSource": null,
+      "sourceFiles": {
+        "pgcb": "Daily Report 30-06-2026.xlsx",
+        "petrobangla": "Petrobangla_f1f50a29-46df-49eb-a841-b4f4801f023c.pdf"
+      }
     }
 };
 

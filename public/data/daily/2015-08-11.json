@@ -1,1 +1,238 @@
-{"systemStats": {"date": "11 Aug 2015", "dayPeakGen": 6781, "eveningPeakGen": 8126, "dayPeakDemand": null, "eveningPeakDemand": 8126, "minGen": null, "maxGen": null, "totalEnergyGen": 166.57982, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 1084.73, "avgProductionCost": 3.253, "totalDailyCost": 541837877}, "generationData": [{"name": "Gas", "gen": 109.58, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 2.84, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 38.15, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 5.62, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "at 09:54", "plant": "Korda 150 MW", "load": "150 MW", "reason": "due to fuel system problem and was synchronized at 11:39."}, {"time": "at 09:54", "plant": "Barapukuria ST: Unit-1", "load": "HT Outage", "reason": "due to boiler tube leakage."}, {"time": "from 10:44 to 12:39", "plant": "Natore-Bogra 132 kV Ckt-2", "load": "HT Outage", "reason": "due to new circuit breaker testing."}, {"time": "from 11:02 to 11:35", "plant": "Shahjadpur 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to red hot maintenance."}, {"time": "at 17:37", "plant": "After maintenance Ashuganj-Sirajganj 230 kV Ckt-1 & 2 were switched on at 17:37 & 17:38 respectively.", "load": "HT Outage", "reason": "After maintenance Ashuganj-Sirajganj 230 kV Ckt-1 & 2 were switched on at 17:37 & 17:38 respectively."}, {"time": "at 15:26", "plant": "After maintenance Hasnabad-Kamrangirchar 132 kV Ckt", "load": "HT Outage", "reason": "After maintenance Hasnabad-Kamrangirchar 132 kV Ckt was switched on at 15:26."}, {"time": "from 15:23 to 16:46", "plant": "Kamrangirchar-Lalbagh 132 kV Ckt-1", "load": "HT Outage", "reason": "due to red hot maintenance at"}, {"time": "at 20:51", "plant": "Hathazari-Baraulia 132 kV Ckt-1", "load": "HT Outage", "reason": "Hathazari-Baraulia 132 kV Ckt-1 tripped at 20:51 from both end showing distance & Earth fault relay and was"}, {"time": "at 22:32", "plant": "Ashuganj Unit-5", "load": "HT Outage", "reason": "due to maintenance work."}, {"time": "at 00:06", "plant": "Siddhirganj GT-2", "load": "HT Outage", "reason": "due to maintenance work."}, {"time": "at 01:10", "plant": "Saidpur 132/33 kV T2 transformer", "load": "30 MW", "reason": "Saidpur 132/33 kV T2 transformer tripped at 01:10 (12/08/2015) showing O/C & E/F relay at 33 kV end. About 30 MW power interruption occurred under Saidpur S/S area"}, {"time": "from 06:33", "plant": "Kishoreganj 33 kV bus", "load": "49 MW", "reason": "due to isolation About 49 MW power interruption occurred under Kishoreganj S/S area"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "11 Aug 2015",
+    "dayPeakGen": 6781,
+    "eveningPeakGen": 8126,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 8126,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 166.57982,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 1084.73,
+    "avgProductionCost": 3.253,
+    "totalDailyCost": 541837877
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 109.58,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 2.84,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 38.15,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 5.62,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "at 09:54",
+      "plant": "Korda 150 MW",
+      "load": "150 MW",
+      "reason": "due to fuel system problem and was synchronized at 11:39."
+    },
+    {
+      "time": "at 09:54",
+      "plant": "Barapukuria ST: Unit-1",
+      "load": "HT Outage",
+      "reason": "due to boiler tube leakage."
+    },
+    {
+      "time": "from 10:44 to 12:39",
+      "plant": "Natore-Bogra 132 kV Ckt-2",
+      "load": "HT Outage",
+      "reason": "due to new circuit breaker testing."
+    },
+    {
+      "time": "from 11:02 to 11:35",
+      "plant": "Shahjadpur 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance."
+    },
+    {
+      "time": "at 17:37",
+      "plant": "After maintenance Ashuganj-Sirajganj 230 kV Ckt-1 & 2 were switched on at 17:37 & 17:38 respectively.",
+      "load": "HT Outage",
+      "reason": "After maintenance Ashuganj-Sirajganj 230 kV Ckt-1 & 2 were switched on at 17:37 & 17:38 respectively."
+    },
+    {
+      "time": "at 15:26",
+      "plant": "After maintenance Hasnabad-Kamrangirchar 132 kV Ckt",
+      "load": "HT Outage",
+      "reason": "After maintenance Hasnabad-Kamrangirchar 132 kV Ckt was switched on at 15:26."
+    },
+    {
+      "time": "from 15:23 to 16:46",
+      "plant": "Kamrangirchar-Lalbagh 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance at"
+    },
+    {
+      "time": "at 20:51",
+      "plant": "Hathazari-Baraulia 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Hathazari-Baraulia 132 kV Ckt-1 tripped at 20:51 from both end showing distance & Earth fault relay and was"
+    },
+    {
+      "time": "at 22:32",
+      "plant": "Ashuganj Unit-5",
+      "load": "HT Outage",
+      "reason": "due to maintenance work."
+    },
+    {
+      "time": "at 00:06",
+      "plant": "Siddhirganj GT-2",
+      "load": "HT Outage",
+      "reason": "due to maintenance work."
+    },
+    {
+      "time": "at 01:10",
+      "plant": "Saidpur 132/33 kV T2 transformer",
+      "load": "30 MW",
+      "reason": "Saidpur 132/33 kV T2 transformer tripped at 01:10 (12/08/2015) showing O/C & E/F relay at 33 kV end. About 30 MW power interruption occurred under Saidpur S/S area"
+    },
+    {
+      "time": "from 06:33",
+      "plant": "Kishoreganj 33 kV bus",
+      "load": "49 MW",
+      "reason": "due to isolation About 49 MW power interruption occurred under Kishoreganj S/S area"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily Report12-08-15.xls"
+  }
+}

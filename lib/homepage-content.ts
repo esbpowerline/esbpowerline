@@ -49,13 +49,29 @@ function mapCarouselArticle(
     author?: { name: string } | null;
     titleBn?: string | null;
     excerptBn?: string | null;
+    publishedAt?: Date | null;
+    createdAt?: Date | null;
   },
   locale?: string,
 ): CarouselItem {
   const displayTitle = locale === 'bn' && a.titleBn ? a.titleBn : a.title;
   const displayExcerpt = locale === 'bn' && a.excerptBn ? a.excerptBn : (a.excerpt ?? '');
 
+  // Publication time, matching every other card in the app
+  // (`lib/category-content.ts` maps `publishedAt ?? createdAt`).
+  //
+  // NOT `updatedAt`, despite it sounding like the right column. Prisma's
+  // `@updatedAt` fires on any write, so it tracks database maintenance rather
+  // than journalism: measured 2026-08-13, all 130 hero-eligible articles had
+  // an `updatedAt` past publication, 124 of them by over a day, median gap 37
+  // days, and 60 shared two adjacent minutes on 2026-06-26 — one bulk write.
+  // Rendering that as "Updated" would tell readers the newsroom revised
+  // stories it never touched. Real revision stamps need a separate column the
+  // CMS sets on actual content edits.
+  const published = a.publishedAt ?? a.createdAt ?? null;
+
   return {
+    date: published ? published.toISOString() : undefined,
     slug: a.slug,
     title: displayTitle,
     excerpt: displayExcerpt,
@@ -71,11 +87,14 @@ function mapCarouselArticle(
 
 async function fetchManagedCarouselItems(locale?: string): Promise<CarouselItem[]> {
   const articles = await prisma.article.findMany({
+    // The hero carries the latest published news, not only the breaking items.
+    // Pinned and trending stories stay excluded because they each render in
+    // their own row further down the homepage, and the hero repeating them
+    // would spend its slots on stories the reader has already been shown.
     where: {
       status: 'PUBLISHED',
       isPinned: false,
       isTrending: false,
-      isBreaking: true,
     },
     select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },

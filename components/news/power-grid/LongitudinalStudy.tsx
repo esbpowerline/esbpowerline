@@ -205,7 +205,7 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         {/* Card Metadata Footer */}
         <GridCardFooter>
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Annual Progress Reports</a></span>
-          <span>Verified by: PGCB System Planning &amp; Project Management Departments</span>
+          <span>As published by PGCB. Not independently verified.</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025</span>
         </GridCardFooter>
       </div>
@@ -264,7 +264,7 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         {/* Card Metadata Footer */}
         <GridCardFooter>
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Transmission System Studies</a></span>
-          <span>Verified by: NLDC (National Load Despatch Centre) System Map</span>
+          <span>As published by PGCB. Not independently verified.</span>
           <span className="font-medium">Reporting Period: FY 2011 - FY 2025</span>
         </GridCardFooter>
       </div>
@@ -320,7 +320,7 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         {/* Card Metadata Footer */}
         <GridCardFooter>
           <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Project Audit Summaries</a></span>
-          <span>Verified by: Ministry of Power, Energy and Mineral Resources (MPEMR)</span>
+          <span>As published by PGCB. Not independently verified.</span>
           <span className="font-medium">Reporting Period: FY 2012 - FY 2025</span>
         </GridCardFooter>
       </div>

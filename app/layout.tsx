@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { safeJsonLd } from '@/lib/json-ld';
 import Script from 'next/script';
 
 import { Inter, Noto_Sans_Bengali, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
@@ -87,10 +88,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         {process.env.NEXT_PUBLIC_SUPABASE_URL && <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />}
-        {/* Site-level entities. Article pages add their own NewsArticle block. */}
+        {/* Site-level entities. Article pages add their own NewsArticle block.
+            Escaped with safeJsonLd rather than raw JSON.stringify — every other
+            JSON-LD block here does, and a `</script>` in any future dynamic field
+            would otherwise break out of the tag. */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(SITE_JSON_LD) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(SITE_JSON_LD) }}
         />
         {/* Critical theme CSS injected before paint to avoid flash */}
         <style dangerouslySetInnerHTML={{ __html: SITE_THEME_CRITICAL_CSS }} suppressHydrationWarning />

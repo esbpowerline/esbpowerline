@@ -29,6 +29,7 @@ interface FeaturedItem {
   isFeatured?: boolean;
   isPinned?: boolean;
   heroMeta?: any;
+  date?: string;
 }
 
 export function FeaturedCarousel({
@@ -218,6 +219,7 @@ export function FeaturedCarousel({
 
                 <FeaturedCarouselFooter
                   slug={currentItem.slug}
+                  date={currentItem.date}
                   labels={{
                     readStory: footerLabels?.readStory ?? t('carousel.readStory'),
                     browseAll: footerLabels?.browseAll ?? t('carousel.browseAll'),

@@ -1,1 +1,564 @@
-{"systemStats": {"date": "31 Dec 2024", "dayPeakGen": 9916.58, "eveningPeakGen": 10380.5, "dayPeakDemand": null, "eveningPeakDemand": 10380.5, "minGen": null, "maxGen": null, "totalEnergyGen": 219.33766138000001, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 841.32, "avgProductionCost": 5.16, "totalDailyCost": 1131735356}, "generationData": [{"name": "Gas", "gen": 114.93376, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 63.15831, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 3.00399, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 0.76284, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 2.18764, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 34.73384, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0.0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [{"zone": "Dhaka", "loadShed": 0, "demand": 3985, "pct": 0}, {"zone": "Chattogram", "loadShed": 0, "demand": 1002, "pct": 0}, {"zone": "Khulna", "loadShed": 0, "demand": 1174, "pct": 0}, {"zone": "Rajshahi", "loadShed": 0, "demand": 941, "pct": 0}, {"zone": "Cumilla", "loadShed": 0, "demand": 869, "pct": 0}, {"zone": "Mymensingh", "loadShed": 0, "demand": 869, "pct": 0}, {"zone": "Sylhet", "loadShed": 0, "demand": 360, "pct": 0}, {"zone": "Barishal", "loadShed": 0, "demand": 291, "pct": 0}, {"zone": "Rangpur", "loadShed": 0, "demand": 691, "pct": 0}], "dailyOutages": [{"time": "08:00 - 16:30", "plant": "BSRM-Cumilla(N) 230 kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "for maintenance purpose", "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-2 Scheduled S/D from BSRM 230/33kV end Due to S/D taken by Feni S/S for maintenance purpose"}, {"time": "08:02 - 16:07", "plant": "Candpur- Kachua 132kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Dead line Check at annual maintenance work. and from Kachua 132/33kV end Due to Annual mainteance", "full_desc": "Candpur- Kachua 132kV Ckt-1 Scheduled S/D from Chandpur 132/33kV end Due to Dead line Check at annual maintenance work. and from Kachua 132/33kV end Due to Annual mainteance"}, {"time": "08:11 - 16:13", "plant": "Bagerhat-Bhandaria 132 kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Annual maintenance work. and from Bhandaria 132/33kV end Due to Annual maintenance", "full_desc": "Bagerhat-Bhandaria 132 kV Ckt-1 Scheduled S/D from Bagerhat 132/33kV end Due to Annual maintenance work. and from Bhandaria 132/33kV end Due to Annual maintenance"}, {"time": "08:15 - 16:57", "plant": "Faridpur 132/33kV S/S 132 KV Rajbari ckt-1 Scheduled S/D", "load": "HT Outage", "reason": "Faridpur 132/33kV S/S 132 KV Rajbari ckt-1 Scheduled S/D", "full_desc": "Faridpur 132/33kV S/S 132 KV Rajbari ckt-1 Scheduled S/D"}, {"time": "08:21 - 18:07", "plant": "Barishal 230/132kV S/S Gopalgonj CKT-1 Scheduled S/D", "load": "HT Outage", "reason": "Barishal 230/132kV S/S Gopalgonj CKT-1 Scheduled S/D", "full_desc": "Barishal 230/132kV S/S Gopalgonj CKT-1 Scheduled S/D"}, {"time": "08:28 - 16:58", "plant": "Rajbari 132/33kV S/S Faridpur -1 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Rajbari 132/33kV S/S Faridpur -1 Scheduled S/D Due to Annual Maintenance"}, {"time": "08:39 - 15:00", "plant": "Baroirhat-Feni 132 kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to annual maintenance of barayarhat s/s. and from Baroirhat 132/33kVend.", "full_desc": "Baroirhat-Feni 132 kV Ckt-2 Scheduled S/D from Feni 132/33kV end Due to annual maintenance of barayarhat s/s. and from Baroirhat 132/33kVend."}, {"time": "08:41 - 18:08", "plant": "Gopalganj 400/132kV S/S 230kV Barisal CKT-01 Scheduled S/D", "load": "HT Outage", "reason": "Gopalganj 400/132kV S/S 230kV Barisal CKT-01 Scheduled S/D", "full_desc": "Gopalganj 400/132kV S/S 230kV Barisal CKT-01 Scheduled S/D"}, {"time": "08:47 - 16:06", "plant": "Bakulia-MSML 132 kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Bakulia-MSML 132 kV Ckt-2 Scheduled S/D from Bakulia 132/33kV end Due to Annual Maintenance"}, {"time": "08:48 - 16:22", "plant": "Sylhet (South) S/S Trafo-2 LT Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance works", "full_desc": "Sylhet (South) S/S Trafo-2 LT Scheduled S/D Due to Annual Maintenance works"}, {"time": "08:49 - 16:21", "plant": "Sylhet (South) S/S Trafo-2 HT Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maitnenance works", "full_desc": "Sylhet (South) S/S Trafo-2 HT Scheduled S/D Due to Annual Maitnenance works"}, {"time": "08:51 - 16:06", "plant": "Kallyanpur 132/33kV S/S GT-1 (132kV) HT Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Kallyanpur 132/33kV S/S GT-1 (132kV) HT Scheduled S/D Due to Annual Maintenance"}, {"time": "08:51 - 16:08", "plant": "Kallyanpur 132/33kV S/S GT-1 (132kV) LT Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Kallyanpur 132/33kV S/S GT-1 (132kV) LT Scheduled S/D Due to Annual Maintenance"}, {"time": "08:52 - 16:38", "plant": "Brahmanbaria-Shahjibazar 132 kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Brahmanbaria-Shahjibazar 132 kV Ckt-1 Scheduled S/D from Brahmanbaria 132/33kV end. and from Shahjibazar 132/33kV end Due to Annual Maintenance"}, {"time": "08:53 - 17:38", "plant": "Barapukuria-Bogura 230 kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Maintenance work and from Bogura 400/230kVend.", "full_desc": "Barapukuria-Bogura 230 kV Ckt-1 Scheduled S/D from Barapukuria 230/132/33kV end Due to Maintenance work and from Bogura 400/230kVend."}, {"time": "08:57 - 16:05", "plant": "Rangpur-Saidpur  132kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to For Annual maintenance and from Rangpur 132/33kV end Due to Annual Maintenance", "full_desc": "Rangpur-Saidpur  132kV Ckt-1 Scheduled S/D from Saidpur 132/33kV end Due to For Annual maintenance and from Rangpur 132/33kV end Due to Annual Maintenance"}, {"time": "09:01 - 17:14", "plant": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual maintenance", "full_desc": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Scheduled S/D Due to Annual maintenance"}, {"time": "09:08 - 17:19", "plant": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Forced", "load": "100MW", "reason": "Due to According to order of ALDC Bogura", "full_desc": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Forced S/D from Mithapukur 132/33kV end Due to According to order of ALDC Bogura"}, {"time": "09:08 - 17:20", "plant": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-2 Forced", "load": "100MW", "reason": "Due to According to order of ALDC Bogura", "full_desc": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-2 Forced S/D from Mithapukur 132/33kV end Due to According to order of ALDC Bogura"}, {"time": "09:09 - 17:16", "plant": "Mahasthangar-Palashbari  132kV Ckt-2 Project Work", "load": "HT Outage", "reason": "Due to Palashbari Grid G2G Project Work and from Palashbari 132/33kVend.", "full_desc": "Mahasthangar-Palashbari  132kV Ckt-2 Project Work S/D from Mahasthangarh 132/33kV end Due to Palashbari Grid G2G Project Work and from Palashbari 132/33kVend."}, {"time": "09:27", "plant": "Madunaghat 400/230kV S/S Madunaghat-Shikalbaha 230kV Ckt.-2 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Madunaghat 400/230kV S/S Madunaghat-Shikalbaha 230kV Ckt.-2 Scheduled S/D Due to Annual Maintenance"}, {"time": "09:29 - 15:27", "plant": "Shikalbaha 230/132kV S/S Hathazari-02 Scheduled S/D", "load": "HT Outage", "reason": "Shikalbaha 230/132kV S/S Hathazari-02 Scheduled S/D", "full_desc": "Shikalbaha 230/132kV S/S Hathazari-02 Scheduled S/D"}, {"time": "09:32 - 12:07", "plant": "Bogura 132/33kV S/S Transformer-4 LT Forced S/D", "load": "HT Outage", "reason": "Due to T-4 SPRING CHARGE NOT WORKING", "full_desc": "Bogura 132/33kV S/S Transformer-4 LT Forced S/D Due to T-4 SPRING CHARGE NOT WORKING"}, {"time": "09:32 - 12:07", "plant": "Bogura 132/33kV S/S Transformer-4 HT Forced S/D", "load": "HT Outage", "reason": "Due to T-4 SPRING CHARGE NOT WORKING", "full_desc": "Bogura 132/33kV S/S Transformer-4 HT Forced S/D Due to T-4 SPRING CHARGE NOT WORKING"}, {"time": "09:35 - 17:25", "plant": "Beanibazar 132/33kV S/S 132 KV BUS-1 Scheduled S/D", "load": "HT Outage", "reason": "Due to Maintenance work", "full_desc": "Beanibazar 132/33kV S/S 132 KV BUS-1 Scheduled S/D Due to Maintenance work"}, {"time": "09:47", "plant": "Kishoreganj-Mymensingh  132kV Ckt-2 Project Work", "load": "HT Outage", "reason": "Kishoreganj-Mymensingh  132kV Ckt-2 Project Work S/D from Kishoreganj 132/33kV end.", "full_desc": "Kishoreganj-Mymensingh  132kV Ckt-2 Project Work S/D from Kishoreganj 132/33kV end."}, {"time": "09:50 - 13:12", "plant": "Kabirpur -Tongi   132kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Bay upgrading work", "full_desc": "Kabirpur -Tongi   132kV Ckt-1 Scheduled S/D from Tongi 230/132/33kV end Due to Bay upgrading work"}, {"time": "10:12 - 17:56", "plant": "Aminbazar-Kallyanpur 132kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Aminbazar-Kallyanpur 132kV Ckt-2 Scheduled S/D from Aminbazar 400/230/132kV end Due to Annual Maintenance"}, {"time": "10:13 - 18:14", "plant": "Aminbazar 400/230/132kV S/S 132 kv Bus 01 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Aminbazar 400/230/132kV S/S 132 kv Bus 01 Scheduled S/D Due to Annual Maintenance"}, {"time": "10:43", "plant": "Khulshi-MSML  132kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to Maintenance work", "full_desc": "Khulshi-MSML  132kV Ckt-2 Scheduled S/D from Khulshi 132/33kV end Due to Maintenance work"}, {"time": "10:56 - 14:54", "plant": "Ishurdi 132/33kV S/S 132 kV Baghabari Line Project Work S/D", "load": "HT Outage", "reason": "Due to project work", "full_desc": "Ishurdi 132/33kV S/S 132 kV Baghabari Line Project Work S/D Due to project work"}, {"time": "10:56 - 15:09", "plant": "Jamalpur 132/33kV S/S Bus-B Scheduled S/D", "load": "HT Outage", "reason": "Due to Bus-cpupler bay(B-bus) annual maintenance work.", "full_desc": "Jamalpur 132/33kV S/S Bus-B Scheduled S/D Due to Bus-cpupler bay(B-bus) annual maintenance work."}, {"time": "11:08 - 17:28", "plant": "Madunaghat-TKCL  132kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to CT maintenance at Tk end", "full_desc": "Madunaghat-TKCL  132kV Ckt-1 Scheduled S/D from Madunaghat 132/33kV end Due to CT maintenance at Tk end"}, {"time": "12:00", "plant": "Day peak Generation", "load": "9913 MW", "reason": "Day peak Generation is 9913 MW", "full_desc": "Day peak Generation is 9913 MW"}, {"time": "12:23", "plant": "Sirajganj-Ullahpara 132KV Ckt-2", "load": "HT Outage", "reason": "Sirajganj-Ullahpara 132KV Ckt-2 is restored.", "full_desc": "Sirajganj-Ullahpara 132KV Ckt-2 is restored."}, {"time": "12:23", "plant": "Sirajganj-Ullahpara 132KV Ckt-1", "load": "HT Outage", "reason": "Sirajganj-Ullahpara 132KV Ckt-1 is restored.", "full_desc": "Sirajganj-Ullahpara 132KV Ckt-1 is restored."}, {"time": "13:13 - 14:02", "plant": "Kabirpur -Tongi   132kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to Bay upgrading work", "full_desc": "Kabirpur -Tongi   132kV Ckt-2 Scheduled S/D from Tongi 230/132/33kV end Due to Bay upgrading work"}, {"time": "15:52", "plant": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) HT", "load": "HT Outage", "reason": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) HT is restored.", "full_desc": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) HT is restored."}, {"time": "15:53", "plant": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) LT", "load": "HT Outage", "reason": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) LT is restored.", "full_desc": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) LT is restored."}, {"time": "16:52", "plant": "Magura-Narail   132kV Ckt-1", "load": "HT Outage", "reason": "Magura-Narail   132kV Ckt-1 is restored.", "full_desc": "Magura-Narail   132kV Ckt-1 is restored."}, {"time": "17:37", "plant": "Gopalganj 400/132kV S/S 400kV Amtoli Ckt-2", "load": "HT Outage", "reason": "Gopalganj 400/132kV S/S 400kV Amtoli Ckt-2 is restored.", "full_desc": "Gopalganj 400/132kV S/S 400kV Amtoli Ckt-2 is restored."}, {"time": "17:39", "plant": "Amtoli-Gopalganj Ckt-2 is energized", "load": "HT Outage", "reason": "for the first time.", "full_desc": "Amtoli-Gopalganj Ckt-2 is energized for the first time."}, {"time": "18:00", "plant": "Evening Peak Gen. 10380 MW", "load": "10380 MW", "reason": "Evening Peak Gen. 10380 MW", "full_desc": "Evening Peak Gen. 10380 MW"}, {"time": "05:00", "plant": "Minimum Generation = 6,952MW", "load": "952MW", "reason": "Minimum Generation = 6,952MW", "full_desc": "Minimum Generation = 6,952MW"}, {"time": "07:36", "plant": "Bhulta-Haripur 230 kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Re-arrangement of 230kV Haripur-Bhulta Circuit-01", "full_desc": "Bhulta-Haripur 230 kV Ckt-1 Scheduled S/D from Bhulta 400/230kV end Due to Re-arrangement of 230kV Haripur-Bhulta Circuit-01"}, {"time": "07:37", "plant": "Bhulta-Haripur 230 kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to Re-arrangeHaripur-Bhulta Circuit-01.", "full_desc": "Bhulta-Haripur 230 kV Ckt-2 Scheduled S/D from Bhulta 400/230kV end Due to Re-arrangeHaripur-Bhulta Circuit-01."}, {"time": "07:47", "plant": "Hasnabad 230/132kV S/S Bus-2 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance.", "full_desc": "Hasnabad 230/132kV S/S Bus-2 Scheduled S/D Due to Annual Maintenance."}, {"time": "07:50", "plant": "Gopalganj 400/132kV S/S 230kV Barisal CKT-02 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual Maintenance", "full_desc": "Gopalganj 400/132kV S/S 230kV Barisal CKT-02 Scheduled S/D Due to Annual Maintenance"}, {"time": "07:50", "plant": "Barishal 230/132kV S/S Gopalgonj CKT-2 Scheduled S/D", "load": "HT Outage", "reason": "Due to Annual maintenance", "full_desc": "Barishal 230/132kV S/S Gopalgonj CKT-2 Scheduled S/D Due to Annual maintenance"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 510.1, "condensate": 462.0, "share": 18.6}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 137.3, "condensate": 643.4, "share": 5.0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 116.6, "condensate": 105.6, "share": 4.3}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 1134.5, "condensate": 6095.4, "share": 41.4}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 36.7, "condensate": 113.0, "share": 1.3}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 802.2, "condensate": 21.0, "share": 29.3}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 215.1, "fertilizer": 69.3, "others": 1214.3, "total": 1498.7}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 143.3, "fertilizer": 0, "others": 106.9, "total": 250.2}, {"company": "KGDCL (Chattogram)", "power": 37.8, "fertilizer": 93.3, "others": 185.5, "total": 316.7}, {"company": "JGTDSL (Sylhet region)", "power": 244.8, "fertilizer": 39.9, "others": 111.1, "total": 395.8}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 91.9, "fertilizer": 0, "others": 30.3, "total": 122.2}, {"company": "SGCL (Barishal & Khulna)", "power": 115.2, "fertilizer": 0, "others": 5.3, "total": 120.5}]}
+{
+  "systemStats": {
+    "date": "31 Dec 2024",
+    "dayPeakGen": 9916.58,
+    "eveningPeakGen": 10380.5,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 10380.5,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 219.33766138000001,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 841.32,
+    "avgProductionCost": 5.16,
+    "totalDailyCost": 1131735356
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 114.93376,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 63.15831,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 3.00399,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 0.76284,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 2.18764,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 34.73384,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0.0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [
+    {
+      "zone": "Dhaka",
+      "loadShed": 0,
+      "demand": 3985,
+      "pct": 0
+    },
+    {
+      "zone": "Chattogram",
+      "loadShed": 0,
+      "demand": 1002,
+      "pct": 0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 0,
+      "demand": 1174,
+      "pct": 0
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0,
+      "demand": 941,
+      "pct": 0
+    },
+    {
+      "zone": "Cumilla",
+      "loadShed": 0,
+      "demand": 869,
+      "pct": 0
+    },
+    {
+      "zone": "Mymensingh",
+      "loadShed": 0,
+      "demand": 869,
+      "pct": 0
+    },
+    {
+      "zone": "Sylhet",
+      "loadShed": 0,
+      "demand": 360,
+      "pct": 0
+    },
+    {
+      "zone": "Barishal",
+      "loadShed": 0,
+      "demand": 291,
+      "pct": 0
+    },
+    {
+      "zone": "Rangpur",
+      "loadShed": 0,
+      "demand": 691,
+      "pct": 0
+    }
+  ],
+  "dailyOutages": [
+    {
+      "time": "08:00 - 16:30",
+      "plant": "BSRM-Cumilla(N) 230 kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "for maintenance purpose",
+      "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-2 Scheduled S/D from BSRM 230/33kV end Due to S/D taken by Feni S/S for maintenance purpose"
+    },
+    {
+      "time": "08:02 - 16:07",
+      "plant": "Candpur- Kachua 132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Dead line Check at annual maintenance work. and from Kachua 132/33kV end Due to Annual mainteance",
+      "full_desc": "Candpur- Kachua 132kV Ckt-1 Scheduled S/D from Chandpur 132/33kV end Due to Dead line Check at annual maintenance work. and from Kachua 132/33kV end Due to Annual mainteance"
+    },
+    {
+      "time": "08:11 - 16:13",
+      "plant": "Bagerhat-Bhandaria 132 kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance work. and from Bhandaria 132/33kV end Due to Annual maintenance",
+      "full_desc": "Bagerhat-Bhandaria 132 kV Ckt-1 Scheduled S/D from Bagerhat 132/33kV end Due to Annual maintenance work. and from Bhandaria 132/33kV end Due to Annual maintenance"
+    },
+    {
+      "time": "08:15 - 16:57",
+      "plant": "Faridpur 132/33kV S/S 132 KV Rajbari ckt-1 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Faridpur 132/33kV S/S 132 KV Rajbari ckt-1 Scheduled S/D",
+      "full_desc": "Faridpur 132/33kV S/S 132 KV Rajbari ckt-1 Scheduled S/D"
+    },
+    {
+      "time": "08:21 - 18:07",
+      "plant": "Barishal 230/132kV S/S Gopalgonj CKT-1 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Barishal 230/132kV S/S Gopalgonj CKT-1 Scheduled S/D",
+      "full_desc": "Barishal 230/132kV S/S Gopalgonj CKT-1 Scheduled S/D"
+    },
+    {
+      "time": "08:28 - 16:58",
+      "plant": "Rajbari 132/33kV S/S Faridpur -1 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Rajbari 132/33kV S/S Faridpur -1 Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:39 - 15:00",
+      "plant": "Baroirhat-Feni 132 kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance of barayarhat s/s. and from Baroirhat 132/33kVend.",
+      "full_desc": "Baroirhat-Feni 132 kV Ckt-2 Scheduled S/D from Feni 132/33kV end Due to annual maintenance of barayarhat s/s. and from Baroirhat 132/33kVend."
+    },
+    {
+      "time": "08:41 - 18:08",
+      "plant": "Gopalganj 400/132kV S/S 230kV Barisal CKT-01 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Gopalganj 400/132kV S/S 230kV Barisal CKT-01 Scheduled S/D",
+      "full_desc": "Gopalganj 400/132kV S/S 230kV Barisal CKT-01 Scheduled S/D"
+    },
+    {
+      "time": "08:47 - 16:06",
+      "plant": "Bakulia-MSML 132 kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Bakulia-MSML 132 kV Ckt-2 Scheduled S/D from Bakulia 132/33kV end Due to Annual Maintenance"
+    },
+    {
+      "time": "08:48 - 16:22",
+      "plant": "Sylhet (South) S/S Trafo-2 LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance works",
+      "full_desc": "Sylhet (South) S/S Trafo-2 LT Scheduled S/D Due to Annual Maintenance works"
+    },
+    {
+      "time": "08:49 - 16:21",
+      "plant": "Sylhet (South) S/S Trafo-2 HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maitnenance works",
+      "full_desc": "Sylhet (South) S/S Trafo-2 HT Scheduled S/D Due to Annual Maitnenance works"
+    },
+    {
+      "time": "08:51 - 16:06",
+      "plant": "Kallyanpur 132/33kV S/S GT-1 (132kV) HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Kallyanpur 132/33kV S/S GT-1 (132kV) HT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:51 - 16:08",
+      "plant": "Kallyanpur 132/33kV S/S GT-1 (132kV) LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Kallyanpur 132/33kV S/S GT-1 (132kV) LT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:52 - 16:38",
+      "plant": "Brahmanbaria-Shahjibazar 132 kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Brahmanbaria-Shahjibazar 132 kV Ckt-1 Scheduled S/D from Brahmanbaria 132/33kV end. and from Shahjibazar 132/33kV end Due to Annual Maintenance"
+    },
+    {
+      "time": "08:53 - 17:38",
+      "plant": "Barapukuria-Bogura 230 kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance work and from Bogura 400/230kVend.",
+      "full_desc": "Barapukuria-Bogura 230 kV Ckt-1 Scheduled S/D from Barapukuria 230/132/33kV end Due to Maintenance work and from Bogura 400/230kVend."
+    },
+    {
+      "time": "08:57 - 16:05",
+      "plant": "Rangpur-Saidpur  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to For Annual maintenance and from Rangpur 132/33kV end Due to Annual Maintenance",
+      "full_desc": "Rangpur-Saidpur  132kV Ckt-1 Scheduled S/D from Saidpur 132/33kV end Due to For Annual maintenance and from Rangpur 132/33kV end Due to Annual Maintenance"
+    },
+    {
+      "time": "09:01 - 17:14",
+      "plant": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Niamatpur 132/33kV S/S 132 kV Rahanpur Ckt-2 Scheduled S/D Due to Annual maintenance"
+    },
+    {
+      "time": "09:08 - 17:19",
+      "plant": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Forced",
+      "load": "100MW",
+      "reason": "Due to According to order of ALDC Bogura",
+      "full_desc": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Forced S/D from Mithapukur 132/33kV end Due to According to order of ALDC Bogura"
+    },
+    {
+      "time": "09:08 - 17:20",
+      "plant": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-2 Forced",
+      "load": "100MW",
+      "reason": "Due to According to order of ALDC Bogura",
+      "full_desc": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-2 Forced S/D from Mithapukur 132/33kV end Due to According to order of ALDC Bogura"
+    },
+    {
+      "time": "09:09 - 17:16",
+      "plant": "Mahasthangar-Palashbari  132kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Palashbari Grid G2G Project Work and from Palashbari 132/33kVend.",
+      "full_desc": "Mahasthangar-Palashbari  132kV Ckt-2 Project Work S/D from Mahasthangarh 132/33kV end Due to Palashbari Grid G2G Project Work and from Palashbari 132/33kVend."
+    },
+    {
+      "time": "09:27",
+      "plant": "Madunaghat 400/230kV S/S Madunaghat-Shikalbaha 230kV Ckt.-2 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Madunaghat 400/230kV S/S Madunaghat-Shikalbaha 230kV Ckt.-2 Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "09:29 - 15:27",
+      "plant": "Shikalbaha 230/132kV S/S Hathazari-02 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Shikalbaha 230/132kV S/S Hathazari-02 Scheduled S/D",
+      "full_desc": "Shikalbaha 230/132kV S/S Hathazari-02 Scheduled S/D"
+    },
+    {
+      "time": "09:32 - 12:07",
+      "plant": "Bogura 132/33kV S/S Transformer-4 LT Forced S/D",
+      "load": "HT Outage",
+      "reason": "Due to T-4 SPRING CHARGE NOT WORKING",
+      "full_desc": "Bogura 132/33kV S/S Transformer-4 LT Forced S/D Due to T-4 SPRING CHARGE NOT WORKING"
+    },
+    {
+      "time": "09:32 - 12:07",
+      "plant": "Bogura 132/33kV S/S Transformer-4 HT Forced S/D",
+      "load": "HT Outage",
+      "reason": "Due to T-4 SPRING CHARGE NOT WORKING",
+      "full_desc": "Bogura 132/33kV S/S Transformer-4 HT Forced S/D Due to T-4 SPRING CHARGE NOT WORKING"
+    },
+    {
+      "time": "09:35 - 17:25",
+      "plant": "Beanibazar 132/33kV S/S 132 KV BUS-1 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance work",
+      "full_desc": "Beanibazar 132/33kV S/S 132 KV BUS-1 Scheduled S/D Due to Maintenance work"
+    },
+    {
+      "time": "09:47",
+      "plant": "Kishoreganj-Mymensingh  132kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Kishoreganj-Mymensingh  132kV Ckt-2 Project Work S/D from Kishoreganj 132/33kV end.",
+      "full_desc": "Kishoreganj-Mymensingh  132kV Ckt-2 Project Work S/D from Kishoreganj 132/33kV end."
+    },
+    {
+      "time": "09:50 - 13:12",
+      "plant": "Kabirpur -Tongi   132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Bay upgrading work",
+      "full_desc": "Kabirpur -Tongi   132kV Ckt-1 Scheduled S/D from Tongi 230/132/33kV end Due to Bay upgrading work"
+    },
+    {
+      "time": "10:12 - 17:56",
+      "plant": "Aminbazar-Kallyanpur 132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Aminbazar-Kallyanpur 132kV Ckt-2 Scheduled S/D from Aminbazar 400/230/132kV end Due to Annual Maintenance"
+    },
+    {
+      "time": "10:13 - 18:14",
+      "plant": "Aminbazar 400/230/132kV S/S 132 kv Bus 01 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Aminbazar 400/230/132kV S/S 132 kv Bus 01 Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "10:43",
+      "plant": "Khulshi-MSML  132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance work",
+      "full_desc": "Khulshi-MSML  132kV Ckt-2 Scheduled S/D from Khulshi 132/33kV end Due to Maintenance work"
+    },
+    {
+      "time": "10:56 - 14:54",
+      "plant": "Ishurdi 132/33kV S/S 132 kV Baghabari Line Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to project work",
+      "full_desc": "Ishurdi 132/33kV S/S 132 kV Baghabari Line Project Work S/D Due to project work"
+    },
+    {
+      "time": "10:56 - 15:09",
+      "plant": "Jamalpur 132/33kV S/S Bus-B Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Bus-cpupler bay(B-bus) annual maintenance work.",
+      "full_desc": "Jamalpur 132/33kV S/S Bus-B Scheduled S/D Due to Bus-cpupler bay(B-bus) annual maintenance work."
+    },
+    {
+      "time": "11:08 - 17:28",
+      "plant": "Madunaghat-TKCL  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to CT maintenance at Tk end",
+      "full_desc": "Madunaghat-TKCL  132kV Ckt-1 Scheduled S/D from Madunaghat 132/33kV end Due to CT maintenance at Tk end"
+    },
+    {
+      "time": "12:00",
+      "plant": "Day peak Generation",
+      "load": "9913 MW",
+      "reason": "Day peak Generation is 9913 MW",
+      "full_desc": "Day peak Generation is 9913 MW"
+    },
+    {
+      "time": "12:23",
+      "plant": "Sirajganj-Ullahpara 132KV Ckt-2",
+      "load": "HT Outage",
+      "reason": "Sirajganj-Ullahpara 132KV Ckt-2 is restored.",
+      "full_desc": "Sirajganj-Ullahpara 132KV Ckt-2 is restored."
+    },
+    {
+      "time": "12:23",
+      "plant": "Sirajganj-Ullahpara 132KV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Sirajganj-Ullahpara 132KV Ckt-1 is restored.",
+      "full_desc": "Sirajganj-Ullahpara 132KV Ckt-1 is restored."
+    },
+    {
+      "time": "13:13 - 14:02",
+      "plant": "Kabirpur -Tongi   132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Bay upgrading work",
+      "full_desc": "Kabirpur -Tongi   132kV Ckt-2 Scheduled S/D from Tongi 230/132/33kV end Due to Bay upgrading work"
+    },
+    {
+      "time": "15:52",
+      "plant": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) HT",
+      "load": "HT Outage",
+      "reason": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) HT is restored.",
+      "full_desc": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) HT is restored."
+    },
+    {
+      "time": "15:53",
+      "plant": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) LT",
+      "load": "HT Outage",
+      "reason": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) LT is restored.",
+      "full_desc": "Bog-Sherpur 132/33kV S/S Transformer-2 (414T) LT is restored."
+    },
+    {
+      "time": "16:52",
+      "plant": "Magura-Narail   132kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Magura-Narail   132kV Ckt-1 is restored.",
+      "full_desc": "Magura-Narail   132kV Ckt-1 is restored."
+    },
+    {
+      "time": "17:37",
+      "plant": "Gopalganj 400/132kV S/S 400kV Amtoli Ckt-2",
+      "load": "HT Outage",
+      "reason": "Gopalganj 400/132kV S/S 400kV Amtoli Ckt-2 is restored.",
+      "full_desc": "Gopalganj 400/132kV S/S 400kV Amtoli Ckt-2 is restored."
+    },
+    {
+      "time": "17:39",
+      "plant": "Amtoli-Gopalganj Ckt-2\u00a0is\u00a0energized",
+      "load": "HT Outage",
+      "reason": "for the first time.",
+      "full_desc": "Amtoli-Gopalganj Ckt-2\u00a0is\u00a0energized for the first time."
+    },
+    {
+      "time": "18:00",
+      "plant": "Evening Peak Gen. 10380 MW",
+      "load": "10380 MW",
+      "reason": "Evening Peak Gen. 10380 MW",
+      "full_desc": "Evening Peak Gen. 10380 MW"
+    },
+    {
+      "time": "05:00",
+      "plant": "Minimum Generation = 6,952MW",
+      "load": "952MW",
+      "reason": "Minimum Generation = 6,952MW",
+      "full_desc": "Minimum Generation = 6,952MW"
+    },
+    {
+      "time": "07:36",
+      "plant": "Bhulta-Haripur 230 kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Re-arrangement of 230kV Haripur-Bhulta Circuit-01",
+      "full_desc": "Bhulta-Haripur 230 kV Ckt-1 Scheduled S/D from Bhulta 400/230kV end Due to Re-arrangement of 230kV Haripur-Bhulta Circuit-01"
+    },
+    {
+      "time": "07:37",
+      "plant": "Bhulta-Haripur 230 kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Re-arrangeHaripur-Bhulta Circuit-01.",
+      "full_desc": "Bhulta-Haripur 230 kV Ckt-2 Scheduled S/D from Bhulta 400/230kV end Due to Re-arrangeHaripur-Bhulta Circuit-01."
+    },
+    {
+      "time": "07:47",
+      "plant": "Hasnabad 230/132kV S/S Bus-2 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance.",
+      "full_desc": "Hasnabad 230/132kV S/S Bus-2 Scheduled S/D Due to Annual Maintenance."
+    },
+    {
+      "time": "07:50",
+      "plant": "Gopalganj 400/132kV S/S 230kV Barisal CKT-02 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Gopalganj 400/132kV S/S 230kV Barisal CKT-02 Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "07:50",
+      "plant": "Barishal 230/132kV S/S Gopalgonj CKT-2 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Barishal 230/132kV S/S Gopalgonj CKT-2 Scheduled S/D Due to Annual maintenance"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 510.1,
+      "condensate": 462.0,
+      "share": 18.6
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 137.3,
+      "condensate": 643.4,
+      "share": 5.0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 116.6,
+      "condensate": 105.6,
+      "share": 4.3
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 1134.5,
+      "condensate": 6095.4,
+      "share": 41.4
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 36.7,
+      "condensate": 113.0,
+      "share": 1.3
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 802.2,
+      "condensate": 21.0,
+      "share": 29.3
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 215.1,
+      "fertilizer": 69.3,
+      "others": 1214.3,
+      "total": 1498.7
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 143.3,
+      "fertilizer": 0,
+      "others": 106.9,
+      "total": 250.2
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 37.8,
+      "fertilizer": 93.3,
+      "others": 185.5,
+      "total": 316.7
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 244.8,
+      "fertilizer": 39.9,
+      "others": 111.1,
+      "total": 395.8
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 91.9,
+      "fertilizer": 0,
+      "others": 30.3,
+      "total": 122.2
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 115.2,
+      "fertilizer": 0,
+      "others": 5.3,
+      "total": 120.5
+    }
+  ],
+  "sourceFiles": {
+    "pgcb": "Daily Report 01-01-2025.xlsx",
+    "petrobangla": "Daily-Gas-Intake-Offtake-Report (31.12.24).pdf"
+  }
+}

@@ -1,1 +1,629 @@
-{"systemStats": {"date": "06 Jul 2026", "dayPeakGen": 14493.61, "eveningPeakGen": 15631.39, "dayPeakDemand": 14493.61, "eveningPeakDemand": 15839.39, "minGen": 13449.87, "maxGen": 15631.39, "totalEnergyGen": 350.13340266, "totalEnergyUnserved": 3.206, "totalEnergyDemand": 353.339, "maxTemp": 31.7, "totalGasSuppliedPower": 934.46, "avgProductionCost": 6.283, "totalDailyCost": 2199917293}, "generationData": [{"name": "Gas", "gen": 130.45, "cost": 437761351, "unitCost": 3.3557, "color": "#0ea5e9"}, {"name": "Coal", "gen": 126.71, "cost": 845012569, "unitCost": 6.6687, "color": "#64748b"}, {"name": "HFO", "gen": 28.44, "cost": 495125618, "unitCost": 17.4085, "color": "#f97316"}, {"name": "Hydro", "gen": 2.61, "cost": 9931908, "unitCost": 3.81, "color": "#06b6d4"}, {"name": "Solar", "gen": 3.21, "cost": 54277213, "unitCost": 16.9003, "color": "#eab308"}, {"name": "Imports", "gen": 57.8, "cost": 344541389, "unitCost": 5.9604, "color": "#a855f7"}, {"name": "HSD", "gen": 0.0, "cost": 0, "unitCost": null, "color": "#ef4444"}, {"name": "Wind", "gen": 0.9, "cost": 13267243, "unitCost": 14.71, "color": "#22c55e"}], "borderImportsData": [{"source": "HVDC Bheramara (India)", "energy": 21.59, "peakFlow": 893.0, "type": "C/B Interconnector (West)"}, {"source": "Adani Godda (India)", "energy": 32.2, "peakFlow": 1483.03, "type": "C/B Interconnector (North)"}, {"source": "Tripura Cumilla (India)", "energy": 3.1, "peakFlow": 134.0, "type": "C/B Interconnector (East)"}, {"source": "Nepal (via India)", "energy": 0.89, "peakFlow": 38.0, "type": "C/B Interconnector (Nepal)"}], "regionalDemandData": [{"zone": "Dhaka", "loadShed": 59.0, "demand": 5769.0, "pct": 1.0}, {"zone": "Chattogram", "loadShed": 0.0, "demand": 1318.0, "pct": 0.0}, {"zone": "Cumilla", "loadShed": 29.0, "demand": 1389.0, "pct": 2.1}, {"zone": "Mymensingh", "loadShed": 111.0, "demand": 1266.0, "pct": 8.8}, {"zone": "Sylhet", "loadShed": 0.0, "demand": 668.0, "pct": 0.0}, {"zone": "Khulna", "loadShed": 0.0, "demand": 1798.0, "pct": 0.0}, {"zone": "Barishal", "loadShed": 0.0, "demand": 465.0, "pct": 0.0}, {"zone": "Rajshahi", "loadShed": 0.0, "demand": 1517.0, "pct": 0.0}, {"zone": "Rangpur", "loadShed": 0.0, "demand": 1114.0, "pct": 0.0}], "dailyOutages": [{"time": "08:25 - 11:43", "plant": "BIPTC S/S 20D09C 20MVA HT Scheduled S/D", "load": "HT Outage", "reason": "Due to For corrective maintenance. 230/33kV Aux. Trafo-01", "full_desc": "BIPTC S/S 20D09C 20MVA HT Scheduled S/D Due to For corrective maintenance. 230/33kV Aux. Trafo-01"}, {"time": "08:32 - 11:57", "plant": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "08:32 - 11:57", "plant": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "08:40", "plant": "Palashbari 132/33kV S/S TR2-404T HT", "load": "HT Outage", "reason": "Palashbari 132/33kV S/S TR2-404T HT is restored.", "full_desc": "Palashbari 132/33kV S/S TR2-404T HT is restored."}, {"time": "08:41", "plant": "Palashbari 132/33kV S/S TR2-404T LT", "load": "HT Outage", "reason": "Palashbari 132/33kV S/S TR2-404T LT is restored.", "full_desc": "Palashbari 132/33kV S/S TR2-404T LT is restored."}, {"time": "08:57 - 12:11", "plant": "Korerhat 400/230/132kV S/S Feni -2 Project Work S/D", "load": "HT Outage", "reason": "Due to Project work on feni side", "full_desc": "Korerhat 400/230/132kV S/S Feni -2 Project Work S/D Due to Project work on feni side"}, {"time": "09:42", "plant": "Rangpur 132/33kV S/S T-2 (404T) HT", "load": "HT Outage", "reason": "Rangpur 132/33kV S/S T-2 (404T) HT is restored.", "full_desc": "Rangpur 132/33kV S/S T-2 (404T) HT is restored."}, {"time": "09:43", "plant": "Rangpur 132/33kV S/S T-2 (404T) LT", "load": "HT Outage", "reason": "Rangpur 132/33kV S/S T-2 (404T) LT is restored.", "full_desc": "Rangpur 132/33kV S/S T-2 (404T) LT is restored."}, {"time": "10:09 - 16:46", "plant": "Sreepur 230/132/33kV S/S 132 kV BUS-1 Scheduled S/D", "load": "HT Outage", "reason": "Due to Project Work (PSDC), jack bus Loop connection", "full_desc": "Sreepur 230/132/33kV S/S 132 kV BUS-1 Scheduled S/D Due to Project Work (PSDC), jack bus Loop connection"}, {"time": "12:03", "plant": "Kachua 230/132/33kV S/S Laksam CKT-1 Project Work S/D", "load": "HT Outage", "reason": "Due to SAS signal test", "full_desc": "Kachua 230/132/33kV S/S Laksam CKT-1 Project Work S/D Due to SAS signal test"}, {"time": "12:17 - 16:18", "plant": "Lakshmipur 132/33kV S/S Lakshmipur-Chowmuhani Circuit 2 Project Work", "load": "HT Outage", "reason": "Due to Chowmuhani-Lakshmipur Ckt-02 Shutdown taken for project work.", "full_desc": "Lakshmipur 132/33kV S/S Lakshmipur-Chowmuhani Circuit 2 Project Work S/D Due to Chowmuhani-Lakshmipur Ckt-02 Shutdown taken for project work."}, {"time": "16:11", "plant": "Bhandaria- Barisal (North) 132 kV circuit-2", "load": "HT Outage", "reason": "for the first time", "full_desc": "Bhandaria- Barisal (North) 132 kV circuit-2 was switched on for the first time"}, {"time": "12:21 - 15:08", "plant": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "12:21 - 15:14", "plant": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "12:44 - 15:12", "plant": "Korerhat 400/230/132kV S/S Feni -1 Project Work S/D", "load": "HT Outage", "reason": "Due to Project work feni end", "full_desc": "Korerhat 400/230/132kV S/S Feni -1 Project Work S/D Due to Project work feni end"}, {"time": "13:11 - 14:21", "plant": "Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D", "load": "HT Outage", "reason": "Due to Red hot maintenance", "full_desc": "Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to Red hot maintenance"}, {"time": "13:11 - 14:19", "plant": "Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D", "load": "HT Outage", "reason": "Due to Red hot maintenance", "full_desc": "Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to Red hot maintenance"}, {"time": "13:11 - 17:19", "plant": "Kishoreganj-Mymensingh  132kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to By instruction NLDC and from Shomvuganj 400/132kVend.", "full_desc": "Kishoreganj-Mymensingh  132kV Ckt-2 Scheduled S/D from Kishoreganj 132/33kV end Due to By instruction NLDC and from Shomvuganj 400/132kVend."}, {"time": "13:31 - 17:03", "plant": "Fatullah-Shyampur(New) 132 kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to Maintenance work at 132/33kV Fatullah Grid Sub-station (DPDC)", "full_desc": "Fatullah-Shyampur(New) 132 kV Ckt-2 Scheduled S/D from Shyampur 230/132kV end Due to Maintenance work at 132/33kV Fatullah Grid Sub-station (DPDC)"}, {"time": "13:54", "plant": "Ruppur Grid 400/230 kV T1 and T2 transformer", "load": "HT Outage", "reason": "Ruppur Grid 400/230 kV T1 and T2 transformer tripped  showing overvoltage signal (false signal).", "full_desc": "Ruppur Grid 400/230 kV T1 and T2 transformer tripped  showing overvoltage signal (false signal)."}, {"time": "14:21", "plant": "Kodda 132/33kV S/S Tr-1 (406T) LT", "load": "HT Outage", "reason": "Kodda 132/33kV S/S Tr-1 (406T) LT is restored.", "full_desc": "Kodda 132/33kV S/S Tr-1 (406T) LT is restored."}, {"time": "15:36 - 17:30", "plant": "Chauddagram-Feni 132 kV Ckt-1 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "Chauddagram-Feni 132 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "15:41 - 17:39", "plant": "Chauddagram-Feni 132 kV Ckt-2 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "Chauddagram-Feni 132 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "17:05", "plant": "SS Power Bashkhali Unit-2 shut down.", "load": "HT Outage", "reason": "SS Power Bashkhali Unit-2 shut down.", "full_desc": "SS Power Bashkhali Unit-2 shut down."}, {"time": "17:32", "plant": "Ashuganj-Ghorashal 132kV ckt-1", "load": "HT Outage", "reason": "Ashuganj-Ghorashal 132kV ckt-1 was switched ON", "full_desc": "Ashuganj-Ghorashal 132kV ckt-1 was switched ON"}, {"time": "17:41 - 19:23", "plant": "Chauddagram-Feni 132 kV Ckt-2 Project Work", "load": "HT Outage", "reason": "Due to Shield wire instillation", "full_desc": "Chauddagram-Feni 132 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"}, {"time": "17:44 - 19:42", "plant": "Chauddagram-Feni 132 kV Ckt-1 Project Work", "load": "HT Outage", "reason": "Due to After work clearance given", "full_desc": "Chauddagram-Feni 132 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to After work clearance given"}, {"time": "23:41 - 06:48", "plant": "Natore 132/33kV S/S TR-2 (415 T) HT Tripped showing Lockout Relay relays.", "load": "HT Outage", "reason": "Natore 132/33kV S/S TR-2 (415 T) HT Tripped showing Lockout Relay relays.", "full_desc": "Natore 132/33kV S/S TR-2 (415 T) HT Tripped showing Lockout Relay relays."}, {"time": "23:41", "plant": "Natore 132/33kV S/S TR-1 (405 T) HT Tripped showing over current relay( 50) phase B, over current relay (51N) t relays.", "load": "HT Outage", "reason": "Natore 132/33kV S/S TR-1 (405 T) HT Tripped showing over current relay( 50) phase B, over current relay (51N) t relays.", "full_desc": "Natore 132/33kV S/S TR-1 (405 T) HT Tripped showing over current relay( 50) phase B, over current relay (51N) t relays."}, {"time": "00:28 - 01:28", "plant": "Hasnabad 132/33kV S/S Fatulla (Pre-Brahmongaon) Tripped showing 86T, main protection trip relays", "load": "40.0MW", "reason": "Due to None", "full_desc": "Hasnabad 132/33kV S/S Fatulla (Pre-Brahmongaon) Tripped showing 86T, main protection trip relays Due to None"}, {"time": "07:16 - 07:26", "plant": "Cumilla(S) 132/33kV S/S TR-3 LT Tripped showing REF615 relays", "load": "30.0MW", "reason": "Due to 33Kv feeder fault", "full_desc": "Cumilla(S) 132/33kV S/S TR-3 LT Tripped showing REF615 relays Due to 33Kv feeder fault"}, {"time": "07:16 - 07:26", "plant": "Cumilla(S) 132/33kV S/S TR-4 LT Tripped showing REF615 relays", "load": "30.0MW", "reason": "Due to 33Kv Feeder Fault", "full_desc": "Cumilla(S) 132/33kV S/S TR-4 LT Tripped showing REF615 relays Due to 33Kv Feeder Fault"}], "hourlyLoadData": [{"time": "00:00", "generation": 15451.07, "loadShed": 523.0, "demand": 15997.61}, {"time": "01:00", "generation": 15228.02, "loadShed": 191.0, "demand": 15428.02}, {"time": "02:00", "generation": 14946.29, "loadShed": 207.0, "demand": 15162.61}, {"time": "03:00", "generation": 14501.42, "loadShed": 213.0, "demand": 14724.42}, {"time": "04:00", "generation": 14198.52, "loadShed": 191.0, "demand": 14398.52}, {"time": "05:00", "generation": 13847.8, "loadShed": 167.0, "demand": 14022.8}, {"time": "06:00", "generation": 13527.85, "loadShed": 115.0, "demand": 13648.03}, {"time": "07:00", "generation": 13452.62, "loadShed": 117.0, "demand": 13574.62}, {"time": "08:00", "generation": 13449.87, "loadShed": 117.0, "demand": 13571.87}, {"time": "09:00", "generation": 13543.61, "loadShed": 170.0, "demand": 13721.61}, {"time": "10:00", "generation": 13821.17, "loadShed": 116.0, "demand": 13942.17}, {"time": "11:00", "generation": 14102.65, "loadShed": 40.0, "demand": 14144.65}, {"time": "12:00", "generation": 14493.61, "loadShed": 0.0, "demand": 14493.61}, {"time": "13:00", "generation": 14695.45, "loadShed": 0.0, "demand": 14695.45}, {"time": "14:00", "generation": 14338.41, "loadShed": 25.0, "demand": 14364.54}, {"time": "15:00", "generation": 14204.73, "loadShed": 88.0, "demand": 14296.69}, {"time": "16:00", "generation": 14085.94, "loadShed": 59.0, "demand": 14147.6}, {"time": "17:00", "generation": 13670.11, "loadShed": 64.0, "demand": 13736.99}, {"time": "18:00", "generation": 13441.38, "loadShed": 30.0, "demand": 13472.73}, {"time": "19:00", "generation": 14557.53, "loadShed": 0.0, "demand": 14557.53}, {"time": "19:30", "generation": 15496.86, "loadShed": 62.0, "demand": 15561.65}, {"time": "20:00", "generation": 15631.39, "loadShed": 199.0, "demand": 15839.39}, {"time": "21:00", "generation": 15626.06, "loadShed": 159.0, "demand": 15792.06}, {"time": "22:00", "generation": 15579.51, "loadShed": 159.0, "demand": 15745.67}, {"time": "23:00", "generation": 15472.91, "loadShed": 256.0, "demand": 15740.43}], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 477.4, "condensate": 363.2, "share": 18.8}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 140.0, "condensate": 627.6, "share": 5.5}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 91.9, "condensate": 57.1, "share": 3.6}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 886.6, "condensate": 4789.7, "share": 35.0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 31.0, "condensate": 88.0, "share": 1.2}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 907.1, "condensate": 0.0, "share": 35.8}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 300.4, "fertilizer": 70.8, "others": 1051.9, "total": 1423.1}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 211.0, "fertilizer": 0.0, "others": 87.7, "total": 298.7}, {"company": "KGDCL (Chattogram)", "power": 27.5, "fertilizer": 7.0, "others": 164.5, "total": 198.9}, {"company": "JGTDSL (Sylhet region)", "power": 218.7, "fertilizer": 40.0, "others": 111.6, "total": 370.3}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 135.1, "fertilizer": 0.0, "others": 30.1, "total": 165.3}, {"company": "SGCL (Barishal & Khulna)", "power": 54.3, "fertilizer": 0.0, "others": 5.7, "total": 60.0}], "regionalDemandSource": "p1-published"}
+{
+  "systemStats": {
+    "date": "06 Jul 2026",
+    "dayPeakGen": 14493.61,
+    "eveningPeakGen": 15631.39,
+    "dayPeakDemand": 14493.61,
+    "eveningPeakDemand": 15839.39,
+    "minGen": 13449.87,
+    "maxGen": 15631.39,
+    "totalEnergyGen": 350.13340266,
+    "totalEnergyUnserved": 3.206,
+    "totalEnergyDemand": 353.339,
+    "maxTemp": 31.7,
+    "totalGasSuppliedPower": 934.46,
+    "avgProductionCost": 6.283,
+    "totalDailyCost": 2199917293
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 130.45,
+      "cost": 437761351,
+      "unitCost": 3.3557,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 126.71,
+      "cost": 845012569,
+      "unitCost": 6.6687,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 28.44,
+      "cost": 495125618,
+      "unitCost": 17.4085,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 2.61,
+      "cost": 9931908,
+      "unitCost": 3.81,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 3.21,
+      "cost": 54277213,
+      "unitCost": 16.9003,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 57.8,
+      "cost": 344541389,
+      "unitCost": 5.9604,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.9,
+      "cost": 13267243,
+      "unitCost": 14.71,
+      "color": "#22c55e"
+    }
+  ],
+  "borderImportsData": [
+    {
+      "source": "HVDC Bheramara (India)",
+      "energy": 21.59,
+      "peakFlow": 893.0,
+      "type": "C/B Interconnector (West)"
+    },
+    {
+      "source": "Adani Godda (India)",
+      "energy": 32.2,
+      "peakFlow": 1483.03,
+      "type": "C/B Interconnector (North)"
+    },
+    {
+      "source": "Tripura Cumilla (India)",
+      "energy": 3.1,
+      "peakFlow": 134.0,
+      "type": "C/B Interconnector (East)"
+    },
+    {
+      "source": "Nepal (via India)",
+      "energy": 0.89,
+      "peakFlow": 38.0,
+      "type": "C/B Interconnector (Nepal)"
+    }
+  ],
+  "regionalDemandData": [
+    {
+      "zone": "Dhaka",
+      "loadShed": 59.0,
+      "demand": 5769.0,
+      "pct": 1.0
+    },
+    {
+      "zone": "Chattogram",
+      "loadShed": 0.0,
+      "demand": 1318.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Cumilla",
+      "loadShed": 29.0,
+      "demand": 1389.0,
+      "pct": 2.1
+    },
+    {
+      "zone": "Mymensingh",
+      "loadShed": 111.0,
+      "demand": 1266.0,
+      "pct": 8.8
+    },
+    {
+      "zone": "Sylhet",
+      "loadShed": 0.0,
+      "demand": 668.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 0.0,
+      "demand": 1798.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Barishal",
+      "loadShed": 0.0,
+      "demand": 465.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0.0,
+      "demand": 1517.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Rangpur",
+      "loadShed": 0.0,
+      "demand": 1114.0,
+      "pct": 0.0
+    }
+  ],
+  "dailyOutages": [
+    {
+      "time": "08:25 - 11:43",
+      "plant": "BIPTC S/S 20D09C 20MVA HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to For corrective maintenance. 230/33kV Aux. Trafo-01",
+      "full_desc": "BIPTC S/S 20D09C 20MVA HT Scheduled S/D Due to For corrective maintenance. 230/33kV Aux. Trafo-01"
+    },
+    {
+      "time": "08:32 - 11:57",
+      "plant": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "08:32 - 11:57",
+      "plant": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "08:40",
+      "plant": "Palashbari 132/33kV S/S TR2-404T HT",
+      "load": "HT Outage",
+      "reason": "Palashbari 132/33kV S/S TR2-404T HT is restored.",
+      "full_desc": "Palashbari 132/33kV S/S TR2-404T HT is restored."
+    },
+    {
+      "time": "08:41",
+      "plant": "Palashbari 132/33kV S/S TR2-404T LT",
+      "load": "HT Outage",
+      "reason": "Palashbari 132/33kV S/S TR2-404T LT is restored.",
+      "full_desc": "Palashbari 132/33kV S/S TR2-404T LT is restored."
+    },
+    {
+      "time": "08:57 - 12:11",
+      "plant": "Korerhat 400/230/132kV S/S Feni -2 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to Project work on feni side",
+      "full_desc": "Korerhat 400/230/132kV S/S Feni -2 Project Work S/D Due to Project work on feni side"
+    },
+    {
+      "time": "09:42",
+      "plant": "Rangpur 132/33kV S/S T-2 (404T) HT",
+      "load": "HT Outage",
+      "reason": "Rangpur 132/33kV S/S T-2 (404T) HT is restored.",
+      "full_desc": "Rangpur 132/33kV S/S T-2 (404T) HT is restored."
+    },
+    {
+      "time": "09:43",
+      "plant": "Rangpur 132/33kV S/S T-2 (404T) LT",
+      "load": "HT Outage",
+      "reason": "Rangpur 132/33kV S/S T-2 (404T) LT is restored.",
+      "full_desc": "Rangpur 132/33kV S/S T-2 (404T) LT is restored."
+    },
+    {
+      "time": "10:09 - 16:46",
+      "plant": "Sreepur 230/132/33kV S/S 132 kV BUS-1 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Project Work (PSDC), jack bus Loop connection",
+      "full_desc": "Sreepur 230/132/33kV S/S 132 kV BUS-1 Scheduled S/D Due to Project Work (PSDC), jack bus Loop connection"
+    },
+    {
+      "time": "12:03",
+      "plant": "Kachua 230/132/33kV S/S Laksam CKT-1 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to SAS signal test",
+      "full_desc": "Kachua 230/132/33kV S/S Laksam CKT-1 Project Work S/D Due to SAS signal test"
+    },
+    {
+      "time": "12:17 - 16:18",
+      "plant": "Lakshmipur 132/33kV S/S Lakshmipur-Chowmuhani Circuit 2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Chowmuhani-Lakshmipur Ckt-02 Shutdown taken for project work.",
+      "full_desc": "Lakshmipur 132/33kV S/S Lakshmipur-Chowmuhani Circuit 2 Project Work S/D Due to Chowmuhani-Lakshmipur Ckt-02 Shutdown taken for project work."
+    },
+    {
+      "time": "16:11",
+      "plant": "Bhandaria- Barisal (North) 132 kV circuit-2",
+      "load": "HT Outage",
+      "reason": "for the first time",
+      "full_desc": "Bhandaria- Barisal (North) 132 kV circuit-2 was switched on for the first time"
+    },
+    {
+      "time": "12:21 - 15:08",
+      "plant": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "12:21 - 15:14",
+      "plant": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "BSRM-Cumilla(N) 230 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "12:44 - 15:12",
+      "plant": "Korerhat 400/230/132kV S/S Feni -1 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to Project work feni end",
+      "full_desc": "Korerhat 400/230/132kV S/S Feni -1 Project Work S/D Due to Project work feni end"
+    },
+    {
+      "time": "13:11 - 14:21",
+      "plant": "Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Red hot maintenance",
+      "full_desc": "Kodda 132/33kV S/S Tr-1 (406T) LT Scheduled S/D Due to Red hot maintenance"
+    },
+    {
+      "time": "13:11 - 14:19",
+      "plant": "Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Red hot maintenance",
+      "full_desc": "Kodda 132/33kV S/S Tr-1 (406T) HT Scheduled S/D Due to Red hot maintenance"
+    },
+    {
+      "time": "13:11 - 17:19",
+      "plant": "Kishoreganj-Mymensingh  132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to By instruction NLDC and from Shomvuganj 400/132kVend.",
+      "full_desc": "Kishoreganj-Mymensingh  132kV Ckt-2 Scheduled S/D from Kishoreganj 132/33kV end Due to By instruction NLDC and from Shomvuganj 400/132kVend."
+    },
+    {
+      "time": "13:31 - 17:03",
+      "plant": "Fatullah-Shyampur(New) 132 kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance work at 132/33kV Fatullah Grid Sub-station (DPDC)",
+      "full_desc": "Fatullah-Shyampur(New) 132 kV Ckt-2 Scheduled S/D from Shyampur 230/132kV end Due to Maintenance work at 132/33kV Fatullah Grid Sub-station (DPDC)"
+    },
+    {
+      "time": "13:54",
+      "plant": "Ruppur Grid 400/230 kV T1 and T2 transformer",
+      "load": "HT Outage",
+      "reason": "Ruppur Grid 400/230 kV T1 and T2 transformer tripped  showing overvoltage signal (false signal).",
+      "full_desc": "Ruppur Grid 400/230 kV T1 and T2 transformer tripped  showing overvoltage signal (false signal)."
+    },
+    {
+      "time": "14:21",
+      "plant": "Kodda 132/33kV S/S Tr-1 (406T) LT",
+      "load": "HT Outage",
+      "reason": "Kodda 132/33kV S/S Tr-1 (406T) LT is restored.",
+      "full_desc": "Kodda 132/33kV S/S Tr-1 (406T) LT is restored."
+    },
+    {
+      "time": "15:36 - 17:30",
+      "plant": "Chauddagram-Feni 132 kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "Chauddagram-Feni 132 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "15:41 - 17:39",
+      "plant": "Chauddagram-Feni 132 kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "Chauddagram-Feni 132 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "17:05",
+      "plant": "SS Power Bashkhali Unit-2 shut down.",
+      "load": "HT Outage",
+      "reason": "SS Power Bashkhali Unit-2 shut down.",
+      "full_desc": "SS Power Bashkhali Unit-2 shut down."
+    },
+    {
+      "time": "17:32",
+      "plant": "Ashuganj-Ghorashal 132kV ckt-1",
+      "load": "HT Outage",
+      "reason": "Ashuganj-Ghorashal 132kV ckt-1 was switched ON",
+      "full_desc": "Ashuganj-Ghorashal 132kV ckt-1 was switched ON"
+    },
+    {
+      "time": "17:41 - 19:23",
+      "plant": "Chauddagram-Feni 132 kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Shield wire instillation",
+      "full_desc": "Chauddagram-Feni 132 kV Ckt-2 Project Work S/D from Feni 230/132kV end Due to Shield wire instillation"
+    },
+    {
+      "time": "17:44 - 19:42",
+      "plant": "Chauddagram-Feni 132 kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to After work clearance given",
+      "full_desc": "Chauddagram-Feni 132 kV Ckt-1 Project Work S/D from Feni 230/132kV end Due to After work clearance given"
+    },
+    {
+      "time": "23:41 - 06:48",
+      "plant": "Natore 132/33kV S/S TR-2 (415 T) HT Tripped showing Lockout Relay relays.",
+      "load": "HT Outage",
+      "reason": "Natore 132/33kV S/S TR-2 (415 T) HT Tripped showing Lockout Relay relays.",
+      "full_desc": "Natore 132/33kV S/S TR-2 (415 T) HT Tripped showing Lockout Relay relays."
+    },
+    {
+      "time": "23:41",
+      "plant": "Natore 132/33kV S/S TR-1 (405 T) HT Tripped showing over current relay( 50) phase B, over current relay (51N) t relays.",
+      "load": "HT Outage",
+      "reason": "Natore 132/33kV S/S TR-1 (405 T) HT Tripped showing over current relay( 50) phase B, over current relay (51N) t relays.",
+      "full_desc": "Natore 132/33kV S/S TR-1 (405 T) HT Tripped showing over current relay( 50) phase B, over current relay (51N) t relays."
+    },
+    {
+      "time": "00:28 - 01:28",
+      "plant": "Hasnabad 132/33kV S/S Fatulla (Pre-Brahmongaon) Tripped showing 86T, main protection trip relays",
+      "load": "40.0MW",
+      "reason": "Due to None",
+      "full_desc": "Hasnabad 132/33kV S/S Fatulla (Pre-Brahmongaon) Tripped showing 86T, main protection trip relays Due to None"
+    },
+    {
+      "time": "07:16 - 07:26",
+      "plant": "Cumilla(S) 132/33kV S/S TR-3 LT Tripped showing REF615 relays",
+      "load": "30.0MW",
+      "reason": "Due to 33Kv feeder fault",
+      "full_desc": "Cumilla(S) 132/33kV S/S TR-3 LT Tripped showing REF615 relays Due to 33Kv feeder fault"
+    },
+    {
+      "time": "07:16 - 07:26",
+      "plant": "Cumilla(S) 132/33kV S/S TR-4 LT Tripped showing REF615 relays",
+      "load": "30.0MW",
+      "reason": "Due to 33Kv Feeder Fault",
+      "full_desc": "Cumilla(S) 132/33kV S/S TR-4 LT Tripped showing REF615 relays Due to 33Kv Feeder Fault"
+    }
+  ],
+  "hourlyLoadData": [
+    {
+      "time": "00:00",
+      "generation": 15451.07,
+      "loadShed": 523.0,
+      "demand": 15997.61
+    },
+    {
+      "time": "01:00",
+      "generation": 15228.02,
+      "loadShed": 191.0,
+      "demand": 15428.02
+    },
+    {
+      "time": "02:00",
+      "generation": 14946.29,
+      "loadShed": 207.0,
+      "demand": 15162.61
+    },
+    {
+      "time": "03:00",
+      "generation": 14501.42,
+      "loadShed": 213.0,
+      "demand": 14724.42
+    },
+    {
+      "time": "04:00",
+      "generation": 14198.52,
+      "loadShed": 191.0,
+      "demand": 14398.52
+    },
+    {
+      "time": "05:00",
+      "generation": 13847.8,
+      "loadShed": 167.0,
+      "demand": 14022.8
+    },
+    {
+      "time": "06:00",
+      "generation": 13527.85,
+      "loadShed": 115.0,
+      "demand": 13648.03
+    },
+    {
+      "time": "07:00",
+      "generation": 13452.62,
+      "loadShed": 117.0,
+      "demand": 13574.62
+    },
+    {
+      "time": "08:00",
+      "generation": 13449.87,
+      "loadShed": 117.0,
+      "demand": 13571.87
+    },
+    {
+      "time": "09:00",
+      "generation": 13543.61,
+      "loadShed": 170.0,
+      "demand": 13721.61
+    },
+    {
+      "time": "10:00",
+      "generation": 13821.17,
+      "loadShed": 116.0,
+      "demand": 13942.17
+    },
+    {
+      "time": "11:00",
+      "generation": 14102.65,
+      "loadShed": 40.0,
+      "demand": 14144.65
+    },
+    {
+      "time": "12:00",
+      "generation": 14493.61,
+      "loadShed": 0.0,
+      "demand": 14493.61
+    },
+    {
+      "time": "13:00",
+      "generation": 14695.45,
+      "loadShed": 0.0,
+      "demand": 14695.45
+    },
+    {
+      "time": "14:00",
+      "generation": 14338.41,
+      "loadShed": 25.0,
+      "demand": 14364.54
+    },
+    {
+      "time": "15:00",
+      "generation": 14204.73,
+      "loadShed": 88.0,
+      "demand": 14296.69
+    },
+    {
+      "time": "16:00",
+      "generation": 14085.94,
+      "loadShed": 59.0,
+      "demand": 14147.6
+    },
+    {
+      "time": "17:00",
+      "generation": 13670.11,
+      "loadShed": 64.0,
+      "demand": 13736.99
+    },
+    {
+      "time": "18:00",
+      "generation": 13441.38,
+      "loadShed": 30.0,
+      "demand": 13472.73
+    },
+    {
+      "time": "19:00",
+      "generation": 14557.53,
+      "loadShed": 0.0,
+      "demand": 14557.53
+    },
+    {
+      "time": "19:30",
+      "generation": 15496.86,
+      "loadShed": 62.0,
+      "demand": 15561.65
+    },
+    {
+      "time": "20:00",
+      "generation": 15631.39,
+      "loadShed": 199.0,
+      "demand": 15839.39
+    },
+    {
+      "time": "21:00",
+      "generation": 15626.06,
+      "loadShed": 159.0,
+      "demand": 15792.06
+    },
+    {
+      "time": "22:00",
+      "generation": 15579.51,
+      "loadShed": 159.0,
+      "demand": 15745.67
+    },
+    {
+      "time": "23:00",
+      "generation": 15472.91,
+      "loadShed": 256.0,
+      "demand": 15740.43
+    }
+  ],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 477.4,
+      "condensate": 363.2,
+      "share": 18.8
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 140.0,
+      "condensate": 627.6,
+      "share": 5.5
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 91.9,
+      "condensate": 57.1,
+      "share": 3.6
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 886.6,
+      "condensate": 4789.7,
+      "share": 35.0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 31.0,
+      "condensate": 88.0,
+      "share": 1.2
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 907.1,
+      "condensate": 0.0,
+      "share": 35.8
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 300.4,
+      "fertilizer": 70.8,
+      "others": 1051.9,
+      "total": 1423.1
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 211.0,
+      "fertilizer": 0.0,
+      "others": 87.7,
+      "total": 298.7
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 27.5,
+      "fertilizer": 7.0,
+      "others": 164.5,
+      "total": 198.9
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 218.7,
+      "fertilizer": 40.0,
+      "others": 111.6,
+      "total": 370.3
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 135.1,
+      "fertilizer": 0.0,
+      "others": 30.1,
+      "total": 165.3
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 54.3,
+      "fertilizer": 0.0,
+      "others": 5.7,
+      "total": 60.0
+    }
+  ],
+  "regionalDemandSource": "p1-published",
+  "sourceFiles": {
+    "pgcb": "Daily Report 07-07-2026.xlsx",
+    "petrobangla": "petrobangla_2026-07-06.pdf"
+  }
+}

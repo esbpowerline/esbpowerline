@@ -293,6 +293,12 @@ export async function getArticles(opts?: { authorId?: string; status?: string; l
           : { status: { not: 'TRASH' } }),
     },
     include: { author: { select: { id: true, name: true, email: true } } },
+    // `include` alone pulls Article.*, which means both full HTML bodies come
+    // back on every call. No caller of this function renders them — these are
+    // list views — and at 134 articles that was 583 kB of markup per page load,
+    // growing with the archive. Omitting the two body columns keeps every other
+    // field exactly as callers expect.
+    omit: { content: true, contentBn: true },
     orderBy: { updatedAt: 'desc' },
     take: opts?.limit,
   });

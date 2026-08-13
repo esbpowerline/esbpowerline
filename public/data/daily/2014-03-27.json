@@ -1,1 +1,226 @@
-{"systemStats": {"date": "27 Mar 2014", "dayPeakGen": 5761, "eveningPeakGen": 7032, "dayPeakDemand": null, "eveningPeakDemand": 7032, "minGen": null, "maxGen": null, "totalEnergyGen": 135.673743, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 977.45, "avgProductionCost": 3.202, "totalDailyCost": 434401604}, "generationData": [{"name": "Gas", "gen": 98.39, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 2.1, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 23.26, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 1.28, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "at 08:52", "plant": "Siddirganj GT-1 peaking", "load": "HT Outage", "reason": "Siddirganj GT-1 peaking was synchronized at 08:52."}, {"time": "at 09:47", "plant": "Ashuganj CC GT-1", "load": "HT Outage", "reason": "Ashuganj CC GT-1 was synchronized at 09:47."}, {"time": "from 10:03", "plant": "Hasnabad230/132 kV TR-1", "load": "HT Outage", "reason": "due to 16:16 bus bar protection."}, {"time": "from 10:10 to 11:05", "plant": "Barisal 132 kV capacitor bank 1 & 2 were shut down from 10:10 to 11:05", "load": "HT Outage", "reason": "due to cleaning"}, {"time": "at 13:45", "plant": "Dohazari-Sikalbaha Ckt-1 & 2", "load": "40 MW", "reason": "Dohazari-Sikalbaha Ckt-1 & 2 tripped at 13:45 from Dohazari end showing Dist.R Y-phase Power interruption occurred (about 40 MW) under Dohazari  S/S areas"}, {"time": "at 13:45", "plant": "Dohazari-Cox's Bazar Ckt-1", "load": "30 MW", "reason": "Dohazari-Cox's Bazar Ckt-1  tripped at 13:45 from Dohazari end showing Dist.R Y-phase Power interruption occurred (about 30 MW) under Cox's Bazar S/S areas"}, {"time": "at 00:15", "plant": "Serajganj 150 MW", "load": "150 MW", "reason": "due to broke of filter."}, {"time": "at 00:05", "plant": "Ashuganj united RPP", "load": "HT Outage", "reason": "due to project work."}, {"time": "at 07:15", "plant": "Maniknagar-Bangabhaban 132 kV Ckt-2", "load": "HT Outage", "reason": "due to 132 kV"}, {"time": "at 07:25", "plant": "Maniknagar-Bangabhaban 132 kV Ckt-1", "load": "HT Outage", "reason": "Maniknagar-Bangabhaban 132 kV Ckt-1 was shut down at 07:25(28/03/2014) due to"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "27 Mar 2014",
+    "dayPeakGen": 5761,
+    "eveningPeakGen": 7032,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 7032,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 135.673743,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 977.45,
+    "avgProductionCost": 3.202,
+    "totalDailyCost": 434401604
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 98.39,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 2.1,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 23.26,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 1.28,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "at 08:52",
+      "plant": "Siddirganj GT-1 peaking",
+      "load": "HT Outage",
+      "reason": "Siddirganj GT-1 peaking was synchronized at 08:52."
+    },
+    {
+      "time": "at 09:47",
+      "plant": "Ashuganj CC GT-1",
+      "load": "HT Outage",
+      "reason": "Ashuganj CC GT-1 was synchronized at 09:47."
+    },
+    {
+      "time": "from 10:03",
+      "plant": "Hasnabad230/132 kV TR-1",
+      "load": "HT Outage",
+      "reason": "due to 16:16 bus bar protection."
+    },
+    {
+      "time": "from 10:10 to 11:05",
+      "plant": "Barisal 132 kV capacitor bank 1 & 2 were shut down from 10:10 to 11:05",
+      "load": "HT Outage",
+      "reason": "due to cleaning"
+    },
+    {
+      "time": "at 13:45",
+      "plant": "Dohazari-Sikalbaha Ckt-1 & 2",
+      "load": "40 MW",
+      "reason": "Dohazari-Sikalbaha Ckt-1 & 2 tripped at 13:45 from Dohazari end showing Dist.R Y-phase Power interruption occurred (about 40 MW) under Dohazari  S/S areas"
+    },
+    {
+      "time": "at 13:45",
+      "plant": "Dohazari-Cox's Bazar Ckt-1",
+      "load": "30 MW",
+      "reason": "Dohazari-Cox's Bazar Ckt-1  tripped at 13:45 from Dohazari end showing Dist.R Y-phase Power interruption occurred (about 30 MW) under Cox's Bazar S/S areas"
+    },
+    {
+      "time": "at 00:15",
+      "plant": "Serajganj 150 MW",
+      "load": "150 MW",
+      "reason": "due to broke of filter."
+    },
+    {
+      "time": "at 00:05",
+      "plant": "Ashuganj united RPP",
+      "load": "HT Outage",
+      "reason": "due to project work."
+    },
+    {
+      "time": "at 07:15",
+      "plant": "Maniknagar-Bangabhaban 132 kV Ckt-2",
+      "load": "HT Outage",
+      "reason": "due to 132 kV"
+    },
+    {
+      "time": "at 07:25",
+      "plant": "Maniknagar-Bangabhaban 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Maniknagar-Bangabhaban 132 kV Ckt-1 was shut down at 07:25(28/03/2014) due to"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report28-03-14.xls"
+  }
+}

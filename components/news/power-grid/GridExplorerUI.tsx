@@ -71,8 +71,15 @@ export function GridCardFooter({ children, className }: { children: ReactNode; c
  */
 export type GridProvenance = 'P' | 'D';
 
+/**
+ * "Published" means any official publication states the figure — any government
+ * body, not only PGCB/Petrobangla/BPDB. A Ministry of Finance budget line, a
+ * Power Cell loss percentage, a BERC tariff order and a Bangladesh Bank exchange
+ * rate are all equally P. What makes a figure P is that someone else printed it
+ * and we reproduced it; what makes it D is that we worked it out.
+ */
 export const GRID_PROVENANCE_TITLE: Record<GridProvenance, string> = {
-  P: 'Published — stated by the source publication and reproduced here unchanged. Not audited or verified by ESB PowerLine.',
+  P: 'Published — stated in an official publication (any government body or agency) and reproduced here unchanged. Not audited or verified by ESB PowerLine.',
   D: 'Derived — calculated by ESB PowerLine from published figures. The source does not state this number.',
 };
 
@@ -424,24 +431,75 @@ export function GridKpiTooltipAudit({ children, className }: { children: ReactNo
   );
 }
 
+/**
+ * An academic-style citation for one figure: the document, the part of it the
+ * number sits in, and the exact file for this date.
+ *
+ * The site used to print invented department names — "PGCB System Statistics
+ * Division", "Petrobangla Well Status" — which read as separate publications
+ * but were all one workbook and one PDF page. Naming the real document and its
+ * sheet or section is both honest and more precise: a reader can open the same
+ * file and turn to the same sheet.
+ */
 export function GridKpiTooltipRef({
   refLabel,
   refHref,
   dateLabel,
+  sourceFile,
+  part,
 }: {
   refLabel: string;
   refHref: string;
   dateLabel: string;
+  /** Sheet, section or block the figure sits in — "P1 sheet", "II. Distribution". */
+  part?: string | null;
+  /**
+   * The exact document this KPI was read from, for this specific day or month.
+   *
+   * "Ref: PGCB Daily Log" tells a reader which organisation to trust; the
+   * filename tells them which document to ask for. Only the second is checkable,
+   * which is the whole point of showing it on the figure itself rather than once
+   * at the foot of the page.
+   *
+   * Omitted rather than guessed when no file is held for that date.
+   */
+  sourceFile?: string | null;
 }) {
+  let host = refHref;
+  try {
+    host = new URL(refHref).host.replace(/^www\./, '');
+  } catch {
+    /* non-absolute href — show it as given */
+  }
   return (
-    <div className="pt-1 flex justify-between text-[9px] text-muted-foreground border-t border-border/20">
-      <span>
-        Ref:{' '}
-        <a href={refHref} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+    <div className="grid-kpi-cite">
+      <div className="grid-kpi-cite__head">
+        <span className="grid-kpi-cite__doc">
           {refLabel}
+          {part ? <span className="grid-kpi-cite__part"> · {part}</span> : null}
+        </span>
+        <span className="grid-kpi-cite__date">{dateLabel}</span>
+      </div>
+      {sourceFile ? (
+        <div className="grid-kpi-cite__row">
+          <span className="grid-kpi-cite__key">File</span>
+          <code className="grid-kpi-source-file" title={sourceFile}>{sourceFile}</code>
+        </div>
+      ) : null}
+      <div className="grid-kpi-cite__row">
+        <span className="grid-kpi-cite__key">From</span>
+        {/* Host is shown, full URL on hover — the address bar's worth of
+            information without the tooltip wrapping onto three lines. */}
+        <a
+          href={refHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={refHref}
+          className="grid-kpi-cite__host"
+        >
+          {host}
         </a>
-      </span>
-      <span>{dateLabel}</span>
+      </div>
     </div>
   );
 }
@@ -483,12 +541,56 @@ export function GridKpiTooltipGrid({ children }: { children: ReactNode }) {
 }
 
 /** Petrobangla gas-day ref line */
-export function GridKpiTooltipGasRef({ refLabel, gasDay }: { refLabel: string; gasDay: string }) {
+export function GridKpiTooltipGasRef({
+  refLabel,
+  gasDay,
+  sourceFile,
+  part,
+}: {
+  refLabel: string;
+  gasDay: string;
+  sourceFile?: string | null;
+  part?: string | null;
+}) {
   return (
     <GridKpiTooltipRef
       refLabel={refLabel}
+      part={part}
       refHref="https://www.petrobangla.org.bd/"
       dateLabel={`Gas-day ${gasDay}`}
+      sourceFile={sourceFile}
     />
+  );
+}
+/**
+ * Names the exact documents a figure came from.
+ *
+ * "Source: PGCB Daily Report" is an attribution; a filename is a receipt. A
+ * reader who wants to check a number can ask the agency for that exact file,
+ * and anyone auditing the site can tell at a glance whether a day was built
+ * from the agency's own workbook or from a text conversion of it.
+ *
+ * Renders nothing when no filename is held, rather than inventing one.
+ */
+export function GridSourceFiles({
+  files,
+  className,
+}: {
+  files?: Array<{ label: string; name?: string | null }>;
+  className?: string;
+}) {
+  const named = (files ?? []).filter((f): f is { label: string; name: string } => Boolean(f.name));
+  if (!named.length) return null;
+  return (
+    <span className={cn('grid-source-files', className)}>
+      <span className="grid-source-files__lead">Read from:</span>
+      {named.map((f, i) => (
+        <span key={f.label + f.name} className="grid-source-files__item">
+          <span className="grid-source-files__agency">{f.label}</span>
+          <code className="grid-source-files__name" title={f.name}>{f.name}</code>
+          {i < named.length - 1 ? <span className="grid-source-files__sep">·</span> : null}
+        </span>
+      ))}
+    </span>
   );
 }

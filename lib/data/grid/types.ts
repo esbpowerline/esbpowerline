@@ -207,6 +207,20 @@ export interface GridDailyData {
   dailyOutages?: DailyOutageItem[];
   hourlyLoadData?: HourlyLoadItem[];
   energyCurveData?: EnergyCurve;
+  /**
+   * The documents this day was actually built from, named exactly as the files
+   * are held — so a reader can ask either agency for the same file rather than
+   * take "PGCB Daily Report" on trust.
+   *
+   * `pgcb` is the workbook, named by PGCB for the report date (energy day + 1).
+   * `petrobangla` is the gas PDF whose 8am–8am window STARTS on this energy
+   * day, and is absent on days whose gas was never published or not held.
+   * Absent entirely on files written before this field existed.
+   */
+  sourceFiles?: {
+    pgcb?: string;
+    petrobangla?: string;
+  };
 }
 
 /** Known Petrobangla gas production entity names (full company labels). */

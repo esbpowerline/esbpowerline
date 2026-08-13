@@ -98,17 +98,27 @@ def production_band(words):
 
     Falls back to the measured constants when either heading is missing.
     """
+    return map_ref_x(words, REF_PROD_X0), map_ref_x(words, REF_PROD_X1)
+
+
+def map_ref_x(words, ref_x):
+    """Map an x measured on the reference (Letter) layout onto this file's layout.
+
+    Every fixed x in this parser was measured on a Letter page, so every one of
+    them is wrong on the A4 files by the same left shift. Expressing them as a
+    position between the 'I.' and 'III.' headings — which bracket the table on
+    both layouts — makes them portable, and reproduces the original constants
+    exactly on Letter pages, so archived days are unaffected.
+    """
     def heading_x(token):
         hits = [w[0] for w in words if w[4] == token and w[1] < 120]
         return min(hits) if hits else None
 
     i_x, iii_x = heading_x('I.'), heading_x('III.')
     if i_x is None or iii_x is None or iii_x - i_x < 50:
-        return REF_PROD_X0, REF_PROD_X1
-
+        return ref_x
     scale = (iii_x - i_x) / (REF_SECTION_III_X - REF_SECTION_I_X)
-    return (i_x + (REF_PROD_X0 - REF_SECTION_I_X) * scale,
-            i_x + (REF_PROD_X1 - REF_SECTION_I_X) * scale)
+    return i_x + (ref_x - REF_SECTION_I_X) * scale
 
 
 def parse_production(words):
@@ -196,8 +206,17 @@ def parse_dist_summary(words):
     #
     # So anchor on the last 'Grand' that sits below the production section, and
     # when there is none, anchor on the distribution "Total :" row instead.
+    #
+    # The production 'Grand' must be located with production_band(), not a fixed
+    # 98..390: Petrobangla issues these on two page sizes, and on the A4 files
+    # the whole production column shifts left — 'Grand' lands at x=92 on the
+    # 11-12 Aug 2026 report. A fixed band simply misses it, prod_grand_y falls
+    # back to 0, and the production row is then taken as the distribution one,
+    # which is the very failure the paragraph above describes. It reappeared
+    # verbatim (119.0 / 3854.0 against a true 2524.9 / 783.5).
+    prod_x0, prod_x1 = production_band(words)
     prod_grand_y = min((w[1] for w in words
-                        if w[4] == 'Grand' and 98 <= w[0] <= 390), default=0)
+                        if w[4] == 'Grand' and prod_x0 <= w[0] <= prod_x1), default=0)
     dist_grands = [w[1] for w in words if w[4] == 'Grand' and w[1] > prod_grand_y + 50]
     if dist_grands:
         dist_grand_y = max(dist_grands)
@@ -205,7 +224,13 @@ def parse_dist_summary(words):
         totals = [w[1] for w in words if w[4] == 'Total' and w[1] > prod_grand_y + 50]
         dist_grand_y = max(totals) if totals else 720
 
-    for y, ws in rows_in(words, 98, 520, dist_grand_y - 45, dist_grand_y + 18):
+    # Same shift applies to the row scan. Clipped at a fixed 98 it drops the
+    # 'Grand' token itself on A4 pages (x=93), so the Grand Total row fails the
+    # "'Grand' in toks" test, matches nothing, and the parser silently falls
+    # back to the "Total :" row — which excludes Non-Grid Power and understates
+    # supply by exactly that block (860.1 against a printed 969.0 on 2026-03-01).
+    scan_x0, scan_x1 = map_ref_x(words, 98.0), map_ref_x(words, 520.0)
+    for y, ws in rows_in(words, scan_x0, scan_x1, dist_grand_y - 45, dist_grand_y + 18):
         toks = [w[4] for w in ws]
         joined = ' '.join(toks)
         nums = [float(t.rstrip('%')) for t in toks if NUM.match(t.rstrip('%'))]

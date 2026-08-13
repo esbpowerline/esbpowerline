@@ -36,6 +36,8 @@ const BIO_CAPACITY = renewableCapacity('Biogas') + renewableCapacity('Biomass');
 
 export interface OverviewKpiStripProps {
   systemStats: GridSystemStats;
+  /** The documents this day was built from — named on each KPI it produced. */
+  sourceFiles?: { pgcb?: string; petrobangla?: string };
   generationData: GridDailyData['generationData'];
   totalGasSupply: number;
   /** False when the day's Petrobangla tables are absent, so 0 means "no report" not "no gas". */
@@ -56,6 +58,7 @@ export interface OverviewKpiStripProps {
 
 export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   systemStats,
+  sourceFiles,
   generationData,
   totalGasSupply,
   hasGasProductionData,
@@ -171,7 +174,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           />
           <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
-            refLabel="PGCB Daily Log"
+            refLabel="PGCB Daily Report"
+            part="P1 sheet"
+            sourceFile={sourceFiles?.pgcb}
             refHref="https://www.pgcb.gov.bd/"
             dateLabel={`Date: ${systemStats.date}`}
           />
@@ -220,7 +225,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           />
           <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
-            refLabel="PGCB/NLDC SCADA"
+            refLabel="PGCB Daily Report"
+            part="P1 sheet"
+            sourceFile={sourceFiles?.pgcb}
             refHref="https://www.pgcb.gov.bd/"
             dateLabel={`Date: ${systemStats.date}`}
           />
@@ -285,7 +292,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             </p>
           )}
           <GridKpiTooltipRef
-            refLabel="Petrobangla Report"
+            refLabel="Petrobangla Daily Gas Intake/Offtake Report"
+            part="I. Production"
+            sourceFile={sourceFiles?.petrobangla}
             refHref="https://www.petrobangla.org.bd/"
             dateLabel={`Date: ${tooltipDate}`}
           />
@@ -319,7 +328,8 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
               says so once rather than letting a daily-looking tile imply it. */}
           <GridKpiTooltipAudit>As listed by SREDA — a standing registry, not a daily reading. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
-            refLabel="SREDA Database"
+            refLabel="SREDA NDRE registry"
+            part="Installed capacity register"
             refHref="http://www.renewableenergy.gov.bd/"
             dateLabel="Date: Jun 2026"
           />
@@ -362,7 +372,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           <GridKpiTooltipRow provenance="D" label="Hydro Generation Cost:" value={fuelUnitRate('Hydro')} valueClass="text-emerald-500" />
           <GridKpiTooltipRow provenance="D" label="Cross-Border Imports:" value={fuelUnitRate('Imports')} />
           <GridKpiTooltipAudit>As published by PGCB, restating BPDB fuel economics. Not audited.</GridKpiTooltipAudit>
-          <GridKpiTooltipRef refLabel="PGCB Daily Report (P1)" refHref="https://www.pgcb.gov.bd/" dateLabel={`Date: ${systemStats.date}`} />
+          <GridKpiTooltipRef refLabel="PGCB Daily Report" part="P1 sheet — production-cost block" refHref="https://www.pgcb.gov.bd/" dateLabel={`Date: ${systemStats.date}`} sourceFile={sourceFiles?.pgcb} />
         </GridKpiTooltipBody>
       </GridKpiCell>
     </GridKpiStrip>

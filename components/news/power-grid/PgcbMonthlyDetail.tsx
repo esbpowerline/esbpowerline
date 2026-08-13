@@ -21,6 +21,7 @@
 import { useMemo, useState } from 'react';
 
 import { cn } from '@/lib/utils';
+import { GridProvenanceTag } from './GridExplorerUI';
 import type {
   PgcbCircleRow,
   PgcbDailyShedRow,
@@ -107,6 +108,13 @@ interface TipContent {
   value: string;
   meta?: string | null;
   tone?: 'good' | 'alert';
+  /**
+   * Provenance of the hovered figure. Carried in the tooltip because most of
+   * this panel's numbers are only ever read on hover — a tag on the column
+   * header does not tell you whether the cell under the cursor is PGCB's or a
+   * total of ours.
+   */
+  kind?: 'P' | 'D';
 }
 interface TipState extends TipContent {
   x: number;
@@ -131,12 +139,13 @@ function ChartTooltip({ tip }: { tip: TipState | null }) {
         <div className="text-[10px] font-bold whitespace-nowrap">{tip.heading}</div>
         <div
           className={cn(
-            'text-sm font-bold tabular-nums whitespace-nowrap',
+            'text-sm font-bold tabular-nums whitespace-nowrap inline-flex items-center gap-1.5',
             tip.tone === 'good' && 'text-emerald-600 dark:text-emerald-500',
             tip.tone === 'alert' && 'text-rose-600 dark:text-rose-500',
           )}
         >
           {tip.value}
+          {tip.kind ? <GridProvenanceTag kind={tip.kind} /> : null}
         </div>
         {tip.meta && (
           <div className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{tip.meta}</div>
@@ -226,6 +235,7 @@ function StatTile({
   goodWhen,
   compareLabel,
   tone = 'default',
+  kind,
 }: {
   label: string;
   value: string;
@@ -235,10 +245,15 @@ function StatTile({
   goodWhen?: 'up' | 'down';
   compareLabel?: string;
   tone?: 'default' | 'alert';
+  /** P when PGCB prints this line in the report, D when we work it out. */
+  kind?: 'P' | 'D';
 }) {
   return (
     <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center text-center gap-1">
-      <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">{label}</div>
+      <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider inline-flex items-center gap-1">
+        {label}
+        {kind ? <GridProvenanceTag kind={kind} /> : null}
+      </div>
       <div
         className={cn(
           'text-2xl font-bold tabular-nums',
@@ -323,8 +338,14 @@ function TableShell({ head, children }: { head: React.ReactNode; children: React
   );
 }
 
-const Th = ({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) => (
-  <th className={cn('py-2 px-3 font-bold whitespace-nowrap', align === 'right' && 'text-right')}>{children}</th>
+const Th = ({ children, align = 'left', kind }: {
+  children: React.ReactNode;
+  align?: 'left' | 'right';
+  kind?: 'P' | 'D';
+}) => (
+  <th className={cn('py-2 px-3 font-bold whitespace-nowrap', align === 'right' && 'text-right')}>
+    <span className="inline-flex items-center gap-1">{children}{kind ? <GridProvenanceTag kind={kind} /> : null}</span>
+  </th>
 );
 const Td = ({
   children,
@@ -350,6 +371,7 @@ function ReliabilityStrip({ keyed, prevLabel }: { keyed: Record<string, PgcbSyst
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <StatTile
+        kind="P"
         label="Days with load shed"
         value={daysEvening ? fmt(daysEvening.value) : '—'}
         unit="evening peaks"
@@ -360,6 +382,7 @@ function ReliabilityStrip({ keyed, prevLabel }: { keyed: Record<string, PgcbSyst
         tone="alert"
       />
       <StatTile
+        kind="P"
         label="Max load shed"
         value={maxShed ? fmt(maxShed.value) : '—'}
         unit="MW"
@@ -370,6 +393,7 @@ function ReliabilityStrip({ keyed, prevLabel }: { keyed: Record<string, PgcbSyst
         tone="alert"
       />
       <StatTile
+        kind="P"
         label="Min load shed"
         value={minShed ? fmt(minShed.value) : '—'}
         unit="MW"
@@ -379,6 +403,7 @@ function ReliabilityStrip({ keyed, prevLabel }: { keyed: Record<string, PgcbSyst
         compareLabel={prevLabel}
       />
       <StatTile
+        kind="P"
         label="Monthly load factor"
         value={loadFactor ? loadFactor.value.toFixed(2) : '—'}
         unit="%"
@@ -466,7 +491,17 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
       )}
       <div className="grid-explorer-table-wrap overflow-x-auto">
         {/* Full width so the grid fills the card instead of leaving the right third empty. */}
-        <table className="w-full min-w-[46rem] text-[10px] border-separate table-fixed" style={{ borderSpacing: '2px' }}>
+        {/*
+          `border-spacing` sits outside the width `w-full` resolves to, so a
+          32-column grid overflowed its wrapper by ~3px and raised a full
+          horizontal scrollbar for a table that visually fits. The negative
+          inline margin reclaims the two outer gaps, which were only padding at
+          the table's edges anyway.
+        */}
+        <table
+          className="min-w-[46rem] text-[10px] border-separate table-fixed"
+          style={{ borderSpacing: '2px', width: 'calc(100% - 6px)' }}
+        >
           <colgroup>
             <col style={{ width: '5.5rem' }} />
             {rows.map((r) => (
@@ -476,13 +511,17 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
           </colgroup>
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-card text-left font-bold text-muted-foreground px-1">Zone</th>
+              <th className="sticky left-0 z-10 bg-card text-left font-bold text-muted-foreground px-1">
+                <span className="inline-flex items-center gap-1">Zone<GridProvenanceTag kind="P" /></span>
+              </th>
               {rows.map((r) => (
                 <th key={r.date} className="font-semibold text-muted-foreground text-center">
                   {Number(r.date.slice(8, 10))}
                 </th>
               ))}
-              <th className="font-bold text-muted-foreground px-2 text-right">Total</th>
+              <th className="font-bold text-muted-foreground px-2 text-right">
+                <span className="inline-flex items-center gap-1">Total<GridProvenanceTag kind="D" /></span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -501,6 +540,9 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                     heading: `${z.label} · ${r.date}`,
                     value: raw == null ? 'Not reported' : raw > 0 ? `${fmt(raw)} MW shed` : 'No load shedding',
                     meta: raw == null ? 'No zone breakdown in this report' : `${peakLabel}${raw > 0 && r.time ? ` · ${r.time}` : ''}`,
+                    // Null is a gap in PGCB's reporting, so it is neither published
+                    // nor derived — leave it untagged rather than assert either.
+                    ...(raw == null ? {} : { kind: 'P' as const }),
                     ...(raw == null ? {} : { tone: (raw > 0 ? 'alert' : 'good') as 'alert' | 'good' }),
                   };
                   return (
@@ -525,6 +567,7 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                       heading: `${z.label} · month total`,
                       value: `${fmt(z.total)} MW shed`,
                       meta: `Summed across every ${peakLabel.toLowerCase()} this month`,
+                      kind: 'D' as const,
                       tone: z.total > 0 ? 'alert' : 'good',
                     })
                   }
@@ -535,7 +578,9 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
               </tr>
             ))}
             <tr>
-              <th className="sticky left-0 z-10 bg-card text-left font-bold text-foreground px-1">All zones</th>
+              <th className="sticky left-0 z-10 bg-card text-left font-bold text-foreground px-1">
+                <span className="inline-flex items-center gap-1">All zones<GridProvenanceTag kind="P" /></span>
+              </th>
               {rows.map((r) => (
                 <td
                   key={r.date}
@@ -544,6 +589,7 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                     show(e, {
                       heading: `All zones · ${r.date}`,
                       value: r.load_shed_mw ? `${fmt(r.load_shed_mw)} MW shed` : 'No load shedding',
+                      kind: 'P' as const,
                       meta:
                         r.generation_mw && r.demand_mw
                           ? `${fmt(r.generation_mw)} MW generated of ${fmt(r.demand_mw)} MW demanded`
@@ -556,7 +602,9 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
                   {r.load_shed_mw ? Math.round(r.load_shed_mw) : ''}
                 </td>
               ))}
-              <td className="px-2 text-right font-bold tabular-nums text-foreground">{fmt(monthTotal)}</td>
+              <td className="px-2 text-right font-bold tabular-nums text-foreground">
+                <span className="inline-flex items-center gap-1 justify-end">{fmt(monthTotal)}<GridProvenanceTag kind="D" /></span>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -602,6 +650,28 @@ function LoadShedHeatmap({ rows, peakLabel }: { rows: PgcbDailyShedRow[]; peakLa
         not how deep the worst cut was.
       </Explainer>
 
+      {/*
+        The two totals on this grid come from different places and can legitimately
+        disagree, which is worth saying rather than leaving a reader to assume the
+        row is the column summed.
+      */}
+      <p className="text-[10px] text-muted-foreground leading-relaxed inline-flex items-start gap-1.5 flex-wrap">
+        <GridProvenanceTag kind="P" />
+        <span>
+          Every zone cell, and the <strong className="text-foreground">All zones</strong> row,
+          is PGCB&apos;s own published figure — that row is the system-wide load shed
+          the report states for each day, not the zone cells added up.
+        </span>
+        <GridProvenanceTag kind="D" />
+        <span>
+          The <strong className="text-foreground">Total</strong> column and the figure in the
+          bottom corner are ours, summed across the month. Because the row and the
+          column are measured separately, they need not agree: a month where PGCB
+          reports system-wide shedding but no zone breakdown will show a populated
+          row above empty cells.
+        </span>
+      </p>
+
       <ChartTooltip tip={tip} />
     </div>
   );
@@ -633,6 +703,7 @@ function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> })
             show(e, {
               heading: o.label,
               value: `${fmt(o.stat.value, 1)} MKWh`,
+              kind: 'P' as const,
               meta: `${((o.stat.value / total) * 100).toFixed(1)}% of net generation${
                 o.stat.prev_month ? ` · ${fmt(o.stat.prev_month, 1)} last month` : ''
               }`,
@@ -645,7 +716,7 @@ function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> })
             value={o.stat.value}
             max={max}
             unit="MKWh"
-            sub={`${((o.stat.value / total) * 100).toFixed(1)}%`}
+            sub={`${((o.stat.value / total) * 100).toFixed(1)}% D`}
           />
         </div>
       ))}
@@ -666,6 +737,17 @@ function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> })
       <p className="mt-2 text-[10px] text-muted-foreground leading-relaxed">
         {stationUse && `BPDB station use of ${fmt(stationUse.value, 1)} MKWh is already deducted. `}
         Electricity imported from India is reported separately and is not counted in these shares.
+      </p>
+      <p className="mt-1.5 text-[10px] text-muted-foreground leading-relaxed inline-flex items-start gap-1.5 flex-wrap">
+        <GridProvenanceTag kind="P" />
+        <span>
+          Each owner&apos;s MKWh is PGCB&apos;s own published figure.
+        </span>
+        <GridProvenanceTag kind="D" />
+        <span>
+          The percentage shares and the {fmt(total, 1)} MKWh they are taken against are
+          ours — PGCB lists the owners separately and prints no combined line.
+        </span>
       </p>
     </div>
   );
@@ -692,12 +774,12 @@ function CircleTable({
       head={
         <>
           <Th>Grid circle</Th>
-          <Th align="right">Tripping</Th>
-          <Th align="right">Emergency</Th>
-          <Th align="right">Scheduled</Th>
-          <Th align="right">Total ({unit})</Th>
+          <Th align="right" kind="P">Tripping</Th>
+          <Th align="right" kind="P">Emergency</Th>
+          <Th align="right" kind="P">Scheduled</Th>
+          <Th align="right" kind="P">Total ({unit})</Th>
           <Th align="right">{prevLabel}</Th>
-          <Th align="right">Change</Th>
+          <Th align="right" kind="D">Change</Th>
         </>
       }
     >
@@ -776,20 +858,22 @@ function AreaPeakComparison({
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border border-border/50 bg-muted/15 p-3 text-center">
           <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
-            Sum at system peak
+            Sum at system peak<GridProvenanceTag kind="D" className="ml-1" />
           </div>
           <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{fmt(totalCoincident)}</div>
           <div className="text-[9px] text-muted-foreground">MW, all at once</div>
         </div>
         <div className="rounded-xl border border-border/50 bg-muted/15 p-3 text-center">
           <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
-            Sum of area peaks
+            Sum of area peaks<GridProvenanceTag kind="D" className="ml-1" />
           </div>
           <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{fmt(totalOwn)}</div>
           <div className="text-[9px] text-muted-foreground">MW, each at its own hour</div>
         </div>
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-center">
-          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">Diversity</div>
+          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+            Diversity<GridProvenanceTag kind="D" className="ml-1" />
+          </div>
           <div className="text-lg font-bold tabular-nums text-amber-600 dark:text-amber-500 mt-0.5">
             {fmt(totalGap)}
           </div>
@@ -823,18 +907,20 @@ function AreaPeakComparison({
                 show(e, {
                   heading: r.area,
                   value: `${fmt(own)} MW own peak`,
+                  kind: 'P' as const,
                   meta: `${fmt(r.coincident)} MW at the national peak · ${fmt(r.gap)} MW more at its own${
                     r.when ? ` (${r.when})` : ''
-                  }`,
+                  } · gap is ours (D)`,
                 })
               }
               onMouseMove={(e) =>
                 show(e, {
                   heading: r.area,
                   value: `${fmt(own)} MW own peak`,
+                  kind: 'P' as const,
                   meta: `${fmt(r.coincident)} MW at the national peak · ${fmt(r.gap)} MW more at its own${
                     r.when ? ` (${r.when})` : ''
-                  }`,
+                  } · gap is ours (D)`,
                 })
               }
               onMouseLeave={hide}
@@ -895,6 +981,26 @@ function AreaPeakComparison({
           </>
         ) : null}
       </Explainer>
+
+      {/*
+        This panel is the clearest case on the tab of P and D sitting side by
+        side: PGCB publishes both peak readings per area, and every number the
+        panel is actually about — the two sums, their difference, the share —
+        exists only because we subtract one from the other.
+      */}
+      <p className="text-[10px] text-muted-foreground leading-relaxed inline-flex items-start gap-1.5 flex-wrap">
+        <GridProvenanceTag kind="P" />
+        <span>
+          Both readings per area — what it drew at the national peak, and its own
+          maximum with the date and hour it happened — are PGCB&apos;s published figures.
+        </span>
+        <GridProvenanceTag kind="D" />
+        <span>
+          The two totals, the diversity between them and its percentage are ours. PGCB
+          prints no combined figure for either column, and none for the gap; the whole
+          comparison is arithmetic on their numbers.
+        </span>
+      </p>
 
       <ChartTooltip tip={tip} />
     </div>
@@ -977,9 +1083,9 @@ function OutageEventsPanel({
             <Th>Substation</Th>
             <Th>Equipment</Th>
             <Th>Start</Th>
-            <Th align="right">Duration</Th>
+            <Th align="right" kind="P">Duration</Th>
             <Th>Cause</Th>
-            <Th align="right">Unserved (MWh)</Th>
+            <Th align="right" kind="P">Unserved (MWh)</Th>
           </>
         }
       >
@@ -1293,7 +1399,7 @@ export function PgcbMonthlyDetail({
                 head={
                   <>
                     <Th>Substation</Th>
-                    <Th align="right">Peak load (MW)</Th>
+                    <Th align="right" kind="P">Peak load (MW)</Th>
                     <Th>Recorded at</Th>
                   </>
                 }
@@ -1323,10 +1429,10 @@ export function PgcbMonthlyDetail({
                   <>
                     <Th>Substation</Th>
                     <Th>Class</Th>
-                    <Th align="right">Rated</Th>
-                    <Th align="right">Max</Th>
-                    <Th align="right">Min</Th>
-                    <Th align="right">Min vs rated</Th>
+                    <Th align="right" kind="P">Rated</Th>
+                    <Th align="right" kind="P">Max</Th>
+                    <Th align="right" kind="P">Min</Th>
+                    <Th align="right" kind="D">Min vs rated</Th>
                   </>
                 }
               >
@@ -1377,9 +1483,9 @@ export function PgcbMonthlyDetail({
                   <>
                     <Th>Substation</Th>
                     <Th>Transformer</Th>
-                    <Th align="right">Capacity (MVA)</Th>
-                    <Th align="right">Peak MW</Th>
-                    <Th align="right">Loading</Th>
+                    <Th align="right" kind="P">Capacity (MVA)</Th>
+                    <Th align="right" kind="P">Peak MW</Th>
+                    <Th align="right" kind="D">Loading</Th>
                   </>
                 }
               >
@@ -1418,9 +1524,9 @@ export function PgcbMonthlyDetail({
                 head={
                   <>
                     <Th>Substation</Th>
-                    <Th align="right">Interruptions</Th>
-                    <Th align="right">Duration</Th>
-                    <Th align="right">Unserved (MWh)</Th>
+                    <Th align="right" kind="P">Interruptions</Th>
+                    <Th align="right" kind="P">Duration</Th>
+                    <Th align="right" kind="P">Unserved (MWh)</Th>
                   </>
                 }
               >
@@ -1484,10 +1590,11 @@ export function PgcbMonthlyDetail({
           subtitle="Plants able to respond automatically to frequency deviation — the grid's first line of defence"
         >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <StatTile label="Plants listed" value={fmt(fgmo.length)} />
-            <StatTile label="Active at least one day" value={fmt(fgmoActive.length)} />
-            <StatTile label="Capacity on FGMO" value={fmt(fgmoCapacity)} unit="MW" />
+            <StatTile kind="D" label="Plants listed" value={fmt(fgmo.length)} />
+            <StatTile kind="D" label="Active at least one day" value={fmt(fgmoActive.length)} />
+            <StatTile kind="D" label="Capacity on FGMO" value={fmt(fgmoCapacity)} unit="MW" />
             <StatTile
+              kind="D"
               label="Full-month participation"
               value={fmt(fgmo.filter((p) => p.days_active >= 28).length)}
               unit="plants"
@@ -1499,8 +1606,8 @@ export function PgcbMonthlyDetail({
                 <Th>Plant</Th>
                 <Th>Owner</Th>
                 <Th>Fuel</Th>
-                <Th align="right">Capacity (MW)</Th>
-                <Th align="right">Days on FGMO</Th>
+                <Th align="right" kind="P">Capacity (MW)</Th>
+                <Th align="right" kind="P">Days on FGMO</Th>
               </>
             }
           >

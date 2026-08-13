@@ -1,1 +1,232 @@
-{"systemStats": {"date": "18 Sep 2014", "dayPeakGen": 5613, "eveningPeakGen": 6416, "dayPeakDemand": null, "eveningPeakDemand": 7000, "minGen": null, "maxGen": null, "totalEnergyGen": 141.101049, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 813.04, "avgProductionCost": 4.142, "totalDailyCost": 584379227}, "generationData": [{"name": "Gas", "gen": 87.33, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 2.1, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 38.75, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 4.28, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "Outage", "plant": "There", "load": "532 MW", "reason": "There was generation shortage in the evening peak hour yesterday. So about 532 MW (21:00) of load shed was imposed over the whole areas"}, {"time": "at 09:33", "plant": "Rampura-Basundhara 132 kV Ckt-1 tripped at 09:33 from both end showing dist.prot., Z1 relays and", "load": "HT Outage", "reason": "Rampura-Basundhara 132 kV Ckt-1 tripped at 09:33 from both end showing dist.prot., Z1 relays and was switched"}, {"time": "from 09:46 to 11:45", "plant": "Madaripur 132 kV T3 transformer", "load": "HT Outage", "reason": "due to red hot maintenance at 33 kV end."}, {"time": "from 11:00 to 12:00", "plant": "Munshiganj 33 kV bus", "load": "HT Outage", "reason": "due to red hot maintenance at B-phase isolator."}, {"time": "at 13:12", "plant": "Ishurdi-Ghorashal 230 kV Ckt-1", "load": "HT Outage", "reason": "Ishurdi-Ghorashal 230 kV Ckt-1 tripped at 13:12 from showing Dist. Prot, PD-3, PTAW, D&T at Ishurdi end and was"}, {"time": "at 12:45", "plant": "Joydabpur 132/33 kV T4 transformer tripped at 12:45 from both showing E/F,L/S relay and", "load": "HT Outage", "reason": "Joydabpur 132/33 kV T4 transformer tripped at 12:45 from both showing E/F,L/S relay and was switched on at 12:53."}, {"time": "from 16:40 to 16:55", "plant": "Ghorashal 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to CB air leakage."}, {"time": "at 23:40", "plant": "Khulna 150 MW", "load": "150 MW", "reason": "due to problem at control system."}, {"time": "at 02:30", "plant": "Bogra-Barapukuria 132 kV Ckt-1", "load": "HT Outage", "reason": "Bogra-Barapukuria 132 kV Ckt-1 tripped at 02:30(19/09/2014)  from showing Z1, Dist. L1,E/F, A/R relay at Barapukuria"}, {"time": "at 03:05", "plant": "Sylhet 50 MW", "load": "50 MW", "reason": "due to auxiliary transformer fail"}, {"time": "at 00:50", "plant": "Sylhet 132/33 kV T4 transformer", "load": "35 MW", "reason": "due to tripped of 33 kV sgekghat feeder. And was switched on at 01:18. Power interruption occurred (about 35 MW) under Sylhet S/S areas"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "18 Sep 2014",
+    "dayPeakGen": 5613,
+    "eveningPeakGen": 6416,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 7000,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 141.101049,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 813.04,
+    "avgProductionCost": 4.142,
+    "totalDailyCost": 584379227
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 87.33,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 2.1,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 38.75,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 4.28,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "Outage",
+      "plant": "There",
+      "load": "532 MW",
+      "reason": "There was generation shortage in the evening peak hour yesterday. So about 532 MW (21:00) of load shed was imposed over the whole areas"
+    },
+    {
+      "time": "at 09:33",
+      "plant": "Rampura-Basundhara 132 kV Ckt-1 tripped at 09:33 from both end showing dist.prot., Z1 relays and",
+      "load": "HT Outage",
+      "reason": "Rampura-Basundhara 132 kV Ckt-1 tripped at 09:33 from both end showing dist.prot., Z1 relays and was switched"
+    },
+    {
+      "time": "from 09:46 to 11:45",
+      "plant": "Madaripur 132 kV T3 transformer",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance at 33 kV end."
+    },
+    {
+      "time": "from 11:00 to 12:00",
+      "plant": "Munshiganj 33 kV bus",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance at B-phase isolator."
+    },
+    {
+      "time": "at 13:12",
+      "plant": "Ishurdi-Ghorashal 230 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Ishurdi-Ghorashal 230 kV Ckt-1 tripped at 13:12 from showing Dist. Prot, PD-3, PTAW, D&T at Ishurdi end and was"
+    },
+    {
+      "time": "at 12:45",
+      "plant": "Joydabpur 132/33 kV T4 transformer tripped at 12:45 from both showing E/F,L/S relay and",
+      "load": "HT Outage",
+      "reason": "Joydabpur 132/33 kV T4 transformer tripped at 12:45 from both showing E/F,L/S relay and was switched on at 12:53."
+    },
+    {
+      "time": "from 16:40 to 16:55",
+      "plant": "Ghorashal 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to CB air leakage."
+    },
+    {
+      "time": "at 23:40",
+      "plant": "Khulna 150 MW",
+      "load": "150 MW",
+      "reason": "due to problem at control system."
+    },
+    {
+      "time": "at 02:30",
+      "plant": "Bogra-Barapukuria 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Bogra-Barapukuria 132 kV Ckt-1 tripped at 02:30(19/09/2014)  from showing Z1, Dist. L1,E/F, A/R relay at Barapukuria"
+    },
+    {
+      "time": "at 03:05",
+      "plant": "Sylhet 50 MW",
+      "load": "50 MW",
+      "reason": "due to auxiliary transformer fail"
+    },
+    {
+      "time": "at 00:50",
+      "plant": "Sylhet 132/33 kV T4 transformer",
+      "load": "35 MW",
+      "reason": "due to tripped of 33 kV sgekghat feeder. And was switched on at 01:18. Power interruption occurred (about 35 MW) under Sylhet S/S areas"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report19-09-14.xls"
+  }
+}

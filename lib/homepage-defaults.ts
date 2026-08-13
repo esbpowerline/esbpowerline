@@ -28,4 +28,6 @@ export type CarouselItem = {
   isFeatured?: boolean;
   isPinned?: boolean;
   heroMeta?: any;
+  /** Publication time, ISO. Same field every other article card renders. */
+  date?: string;
 };

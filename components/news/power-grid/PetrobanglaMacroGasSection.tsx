@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Database } from 'lucide-react';
 import type { AudienceMode } from '@/lib/data/petrobangla/types';
 import { ARCHIVE_INSIGHTS } from '@/lib/data/petrobangla/constants';
 import { PetrobanglaArchivePanel } from './petrobangla-archive/PetrobanglaArchivePanel';
 import { PetrobanglaLiveWeekPanel, LiveWeekRangeToolbar } from './petrobangla-live/PetrobanglaLiveWeekPanel';
-import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
+import { PetrobanglaBootstrapProvider, usePetrobanglaBootstrap } from './PetrobanglaBootstrap';
 import { AudienceModeToggle, PetrobanglaOfficialSourceLink } from './petrobangla-archive/PetrobanglaArchiveShared';
 import { GasExplanationBlock, GasSourceFooter, LiveBadge } from './GasTabShared';
 import { MacroGasInnerSection } from './MacroGasSectionChrome';
@@ -134,10 +134,7 @@ export function PetrobanglaMacroGasSection({
         />
 
         <div className="gas-reserve-evidence__notes">
-          <GasExplanationBlock
-            what={<>Seven-day live window plus full archive from January 2020. Use the date selector above to inspect any gas-day — field output, plant allocation, and sector splits. • <span className="text-primary font-semibold text-xs">Tracked since Jan 2020</span></>}
-            insight="Domestic output is declining, LNG is filling the gap, and power plants receive roughly 40% of requested gas — the pattern the reserve depletion curve projects forward."
-          />
+          <MacroGasFieldEvidenceNote />
           <GasSourceFooter
             source={<PetrobanglaOfficialSourceLink />}
             attribution="As published. Not independently audited."
@@ -147,5 +144,33 @@ export function PetrobanglaMacroGasSection({
       </div>
       </PetrobanglaBootstrapProvider>
     </section>
+  );
+}
+
+/**
+ * The fulfilment share used to be the fixed phrase "roughly 40%". Measured over
+ * the archive it is 38.0% across the last year but 33.0% across the last 30
+ * days, so the fixed wording quietly overstated a falling number. Read live.
+ *
+ * Must sit inside PetrobanglaBootstrapProvider — the hook throws without it.
+ */
+function MacroGasFieldEvidenceNote() {
+  const { timeline } = usePetrobanglaBootstrap();
+  const pct = useMemo(() => {
+    const rows = (timeline?.days ?? []).filter(
+      (d) => d.parse_status === 'ok' && !d.quarantined && d.power_fulfillment_pct,
+    );
+    if (rows.length < 30) return null;
+    const last30 = rows.slice(-30);
+    return last30.reduce((sum, d) => sum + (d.power_fulfillment_pct ?? 0), 0) / last30.length;
+  }, [timeline]);
+
+  return (
+    <GasExplanationBlock
+      what={<>Seven-day live window plus full archive from January 2020. Use the date selector above to inspect any gas-day — field output, plant allocation, and sector splits. • <span className="text-primary font-semibold text-xs">Tracked since Jan 2020</span></>}
+      insight={`Domestic output is declining, LNG is filling the gap, and power plants receive ${
+        pct != null ? `about ${pct.toFixed(0)}%` : 'well under half'
+      } of the gas they ask for, averaged over the last 30 gas-days — the pattern the reserve depletion curve projects forward.`}
+    />
   );
 }

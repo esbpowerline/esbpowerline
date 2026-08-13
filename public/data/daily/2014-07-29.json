@@ -1,1 +1,208 @@
-{"systemStats": {"date": "29 Jul 2014", "dayPeakGen": 4304, "eveningPeakGen": 6229, "dayPeakDemand": null, "eveningPeakDemand": 6229, "minGen": null, "maxGen": null, "totalEnergyGen": 118.750177, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 894.53, "avgProductionCost": 2.145, "totalDailyCost": 254764687}, "generationData": [{"name": "Gas", "gen": 92.24, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 4.26, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 12.17, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 0.85, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "at 09:49", "plant": "Magla 132/33 kV T1 &T2 transformer tripped at 09:49 showing earth fault at shanakunja feeder and", "load": "4 MW", "reason": "Magla 132/33 kV T1 &T2 transformer tripped at 09:49 showing earth fault at shanakunja feeder and was About 4 MW power interruption occurred under Mangle S/S areas"}, {"time": "at 10:23", "plant": "After maintenance Serajganj ST 210 MW", "load": "210 MW", "reason": "After maintenance Serajganj ST 210 MW was synchronized at 10:23."}, {"time": "at 11:24", "plant": "Siddhirganj-Maniknagar 230 kV Ckt-1 & 2", "load": "HT Outage", "reason": "Siddhirganj-Maniknagar 230 kV Ckt-1 & 2 tripped at 11:24 showing dist SOTF, main part-2 at Siddhirganj end"}, {"time": "at 11:24", "plant": "Maniknagar 230/123 kV GT-1,2", "load": "HT Outage", "reason": "Maniknagar 230/123 kV GT-1,2 tripped at 11:24 from 230 kV end showing R phase general distance Y phase"}, {"time": "at 13:47", "plant": "Hasnabad 132/33 kV T2 transformer", "load": "HT Outage", "reason": "Hasnabad 132/33 kV T2 transformer tripped at 13:47 showing directional over current at 33 kV zinnia feeder"}, {"time": "at15:36", "plant": "Kishoreganj-Mymensing 132 kV Ckt-1 tripped at15:36 showing dist A phase from both end and", "load": "HT Outage", "reason": "Kishoreganj-Mymensing 132 kV Ckt-1 tripped at15:36 showing dist A phase from both end and was switched"}, {"time": "at 07:22", "plant": "Haripur-Shaympur 132 kV Ckt", "load": "40 MW", "reason": "Haripur-Shaympur 132 kV Ckt tripped at 07:22(30/07/14)  showing dist Z2 at Haripur end. About 40 MW power interruption occurred under Shaympur S/S areas"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "29 Jul 2014",
+    "dayPeakGen": 4304,
+    "eveningPeakGen": 6229,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 6229,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 118.750177,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 894.53,
+    "avgProductionCost": 2.145,
+    "totalDailyCost": 254764687
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 92.24,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 4.26,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 12.17,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 0.85,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "at 09:49",
+      "plant": "Magla 132/33 kV T1 &T2 transformer tripped at 09:49 showing earth fault at shanakunja feeder and",
+      "load": "4 MW",
+      "reason": "Magla 132/33 kV T1 &T2 transformer tripped at 09:49 showing earth fault at shanakunja feeder and was About 4 MW power interruption occurred under Mangle S/S areas"
+    },
+    {
+      "time": "at 10:23",
+      "plant": "After maintenance Serajganj ST 210 MW",
+      "load": "210 MW",
+      "reason": "After maintenance Serajganj ST 210 MW was synchronized at 10:23."
+    },
+    {
+      "time": "at 11:24",
+      "plant": "Siddhirganj-Maniknagar 230 kV Ckt-1 & 2",
+      "load": "HT Outage",
+      "reason": "Siddhirganj-Maniknagar 230 kV Ckt-1 & 2 tripped at 11:24 showing dist SOTF, main part-2 at Siddhirganj end"
+    },
+    {
+      "time": "at 11:24",
+      "plant": "Maniknagar 230/123 kV GT-1,2",
+      "load": "HT Outage",
+      "reason": "Maniknagar 230/123 kV GT-1,2 tripped at 11:24 from 230 kV end showing R phase general distance Y phase"
+    },
+    {
+      "time": "at 13:47",
+      "plant": "Hasnabad 132/33 kV T2 transformer",
+      "load": "HT Outage",
+      "reason": "Hasnabad 132/33 kV T2 transformer tripped at 13:47 showing directional over current at 33 kV zinnia feeder"
+    },
+    {
+      "time": "at15:36",
+      "plant": "Kishoreganj-Mymensing 132 kV Ckt-1 tripped at15:36 showing dist A phase from both end and",
+      "load": "HT Outage",
+      "reason": "Kishoreganj-Mymensing 132 kV Ckt-1 tripped at15:36 showing dist A phase from both end and was switched"
+    },
+    {
+      "time": "at 07:22",
+      "plant": "Haripur-Shaympur 132 kV Ckt",
+      "load": "40 MW",
+      "reason": "Haripur-Shaympur 132 kV Ckt tripped at 07:22(30/07/14)  showing dist Z2 at Haripur end. About 40 MW power interruption occurred under Shaympur S/S areas"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report30-07-14.xls"
+  }
+}

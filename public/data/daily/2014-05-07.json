@@ -1,1 +1,227 @@
-{"systemStats": {"date": "07 May 2014", "dayPeakGen": 5678, "eveningPeakGen": 6010, "dayPeakDemand": null, "eveningPeakDemand": 6010, "minGen": null, "maxGen": null, "totalEnergyGen": 129.60368, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 899.9, "avgProductionCost": 3.199, "totalDailyCost": 414597913}, "generationData": [{"name": "Gas", "gen": 93.76, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 2.17, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 23.72, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 0.88, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "at 10:45", "plant": "Siddirganj ST", "load": "HT Outage", "reason": "due to feed pump trip."}, {"time": "at 09:16", "plant": "Kabirpur 132/33 kV T3 transformer", "load": "25 MW", "reason": "due to red hot at 33 kV feeder and was About 25 MW power interruption occurred under Kabirpur (S) S/S areas"}, {"time": "at 10:50", "plant": "Ishurdi 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to red hot maintenance at C-phase of CB"}, {"time": "at 11:20", "plant": "B.Pukuria 132/33 kV T4 transformer", "load": "5 MW", "reason": "due to red hot maintenance at Y-phase About 5 MW power interruption occurred under B.Pukuria S/S area from 11:20 to 13:21."}, {"time": "at 13:50", "plant": "Tangail-Kabirpur 132 kV Ckt-1 & 2", "load": "HT Outage", "reason": "Tangail-Kabirpur 132 kV Ckt-1 & 2 tripped at 13:50 showing dist.R-phase and were switched on at 13:57"}, {"time": "at 14:29", "plant": "Tongi-Kabirpur 132 kV Ckt-1 & 2", "load": "HT Outage", "reason": "Tongi-Kabirpur 132 kV Ckt-1 & 2 tripped at 14:29 showing DTEW relay and were switched on at 14:55"}, {"time": "at 21:41", "plant": "Bheramara-Baharampur 400 kV Ckt", "load": "HT Outage", "reason": "due to bad weather and was switched on at 22:12."}, {"time": "at 02:49", "plant": "Sreemongal-Shahjibazar 132 kV Ckt-1 tripped at 02:49(8/5/14) showing dist.Z1 and", "load": "HT Outage", "reason": "Sreemongal-Shahjibazar 132 kV Ckt-1 tripped at 02:49(8/5/14) showing dist.Z1 and was switched on at"}, {"time": "03:53(8/5/14).", "plant": "", "load": "HT Outage", "reason": "", "full_desc": ""}, {"time": "at 03:25", "plant": "Hasnabad-Kamrangirchar 132 kV Ckt", "load": "HT Outage", "reason": "Hasnabad-Kamrangirchar 132 kV Ckt tripped at 03:25(8/5/14) showing MVAj & MPT at Hasnabad end"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "07 May 2014",
+    "dayPeakGen": 5678,
+    "eveningPeakGen": 6010,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 6010,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 129.60368,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 899.9,
+    "avgProductionCost": 3.199,
+    "totalDailyCost": 414597913
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 93.76,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 2.17,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 23.72,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 0.88,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "at 10:45",
+      "plant": "Siddirganj ST",
+      "load": "HT Outage",
+      "reason": "due to feed pump trip."
+    },
+    {
+      "time": "at 09:16",
+      "plant": "Kabirpur 132/33 kV T3 transformer",
+      "load": "25 MW",
+      "reason": "due to red hot at 33 kV feeder and was About 25 MW power interruption occurred under Kabirpur (S) S/S areas"
+    },
+    {
+      "time": "at 10:50",
+      "plant": "Ishurdi 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance at C-phase of CB"
+    },
+    {
+      "time": "at 11:20",
+      "plant": "B.Pukuria 132/33 kV T4 transformer",
+      "load": "5 MW",
+      "reason": "due to red hot maintenance at Y-phase About 5 MW power interruption occurred under B.Pukuria S/S area from 11:20 to 13:21."
+    },
+    {
+      "time": "at 13:50",
+      "plant": "Tangail-Kabirpur 132 kV Ckt-1 & 2",
+      "load": "HT Outage",
+      "reason": "Tangail-Kabirpur 132 kV Ckt-1 & 2 tripped at 13:50 showing dist.R-phase and were switched on at 13:57"
+    },
+    {
+      "time": "at 14:29",
+      "plant": "Tongi-Kabirpur 132 kV Ckt-1 & 2",
+      "load": "HT Outage",
+      "reason": "Tongi-Kabirpur 132 kV Ckt-1 & 2 tripped at 14:29 showing DTEW relay and were switched on at 14:55"
+    },
+    {
+      "time": "at 21:41",
+      "plant": "Bheramara-Baharampur 400 kV Ckt",
+      "load": "HT Outage",
+      "reason": "due to bad weather and was switched on at 22:12."
+    },
+    {
+      "time": "at 02:49",
+      "plant": "Sreemongal-Shahjibazar 132 kV Ckt-1 tripped at 02:49(8/5/14) showing dist.Z1 and",
+      "load": "HT Outage",
+      "reason": "Sreemongal-Shahjibazar 132 kV Ckt-1 tripped at 02:49(8/5/14) showing dist.Z1 and was switched on at"
+    },
+    {
+      "time": "03:53(8/5/14).",
+      "plant": "",
+      "load": "HT Outage",
+      "reason": "",
+      "full_desc": ""
+    },
+    {
+      "time": "at 03:25",
+      "plant": "Hasnabad-Kamrangirchar 132 kV Ckt",
+      "load": "HT Outage",
+      "reason": "Hasnabad-Kamrangirchar 132 kV Ckt tripped at 03:25(8/5/14) showing MVAj & MPT at Hasnabad end"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report08-05-14.xls"
+  }
+}

@@ -1,1 +1,196 @@
-{"systemStats": {"date": "29 Apr 2014", "dayPeakGen": 6060, "eveningPeakGen": 6627, "dayPeakDemand": null, "eveningPeakDemand": 6627, "minGen": null, "maxGen": null, "totalEnergyGen": 138.523477, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 873.13, "avgProductionCost": 3.921, "totalDailyCost": 543093545}, "generationData": [{"name": "Gas", "gen": 91.76, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 4.2, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 33.33, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 0.98, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "at 09:40", "plant": "Haripur-Bhulta & Haripur-Norsingdi 132 kV Ckts were shut down at 09:40 & 11:58", "load": "HT Outage", "reason": "due to project work"}, {"time": "at 12:28", "plant": "Baghabari-100 MW", "load": "100 MW", "reason": "due to gas control valve problem and was synchronized at 15:01."}, {"time": "at 17:50", "plant": "Ullon-Dhanmondi 132 kV Ckt", "load": "HT Outage", "reason": "Ullon-Dhanmondi 132 kV Ckt tripped at 17:50 showing differential relay."}, {"time": "at 22:12", "plant": "Joydevpur-Kabirpur 132 kV Ckt-1 & 2", "load": "HT Outage", "reason": "Joydevpur-Kabirpur 132 kV Ckt-1 & 2 tripped at 22:12 showing dist protection & E/F relays and was"}, {"time": "at 00:47", "plant": "Comilla(N)-Feni 132 kV Ckt tripped at 00:47(30/4/14) showing dist.Z2 and", "load": "HT Outage", "reason": "Comilla(N)-Feni 132 kV Ckt tripped at 00:47(30/4/14) showing dist.Z2 and was switched on at 01:24(30/4/14)."}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "29 Apr 2014",
+    "dayPeakGen": 6060,
+    "eveningPeakGen": 6627,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 6627,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 138.523477,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 873.13,
+    "avgProductionCost": 3.921,
+    "totalDailyCost": 543093545
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 91.76,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 4.2,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 33.33,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 0.98,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "at 09:40",
+      "plant": "Haripur-Bhulta & Haripur-Norsingdi 132 kV Ckts were shut down at 09:40 & 11:58",
+      "load": "HT Outage",
+      "reason": "due to project work"
+    },
+    {
+      "time": "at 12:28",
+      "plant": "Baghabari-100 MW",
+      "load": "100 MW",
+      "reason": "due to gas control valve problem and was synchronized at 15:01."
+    },
+    {
+      "time": "at 17:50",
+      "plant": "Ullon-Dhanmondi 132 kV Ckt",
+      "load": "HT Outage",
+      "reason": "Ullon-Dhanmondi 132 kV Ckt tripped at 17:50 showing differential relay."
+    },
+    {
+      "time": "at 22:12",
+      "plant": "Joydevpur-Kabirpur 132 kV Ckt-1 & 2",
+      "load": "HT Outage",
+      "reason": "Joydevpur-Kabirpur 132 kV Ckt-1 & 2 tripped at 22:12 showing dist protection & E/F relays and was"
+    },
+    {
+      "time": "at 00:47",
+      "plant": "Comilla(N)-Feni 132 kV Ckt tripped at 00:47(30/4/14) showing dist.Z2 and",
+      "load": "HT Outage",
+      "reason": "Comilla(N)-Feni 132 kV Ckt tripped at 00:47(30/4/14) showing dist.Z2 and was switched on at 01:24(30/4/14)."
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report30-04-14.xls"
+  }
+}

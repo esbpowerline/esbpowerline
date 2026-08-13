@@ -147,7 +147,7 @@ function StatusPill({ status }: { status: Status }) {
   );
 }
 
-export function PublishedVsDerivedTab() {
+export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: string }) {
   const [index, setIndex] = useState<IndexFile | null>(null);
   const [month, setMonth] = useState<string | null>(null);
   const [monthData, setMonthData] = useState<MonthFile | null>(null);
@@ -225,8 +225,43 @@ export function PublishedVsDerivedTab() {
   const agree = t.exact + t.rounding;
   const agreePct = t.checks ? (agree / t.checks) * 100 : 0;
 
+  // This page went two months stale once without saying so: it claimed coverage
+  // to June while the explorer served August. Coverage is therefore stated
+  // against the newest day the site actually has, so a gap is visible here
+  // rather than inferred by a reader comparing two tabs.
+  const coveredThrough = index.months[index.months.length - 1]?.month ?? null;
+  const gridMonth = latestGridDay?.slice(0, 7) ?? null;
+  const behind = Boolean(coveredThrough && gridMonth && gridMonth > coveredThrough);
+
   return (
     <div className="space-y-6 grid-explorer-subpanel">
+      <div
+        className={cn(
+          'flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border px-3.5 py-2.5 text-[11px] leading-relaxed',
+          behind
+            ? 'border-amber-500/30 bg-amber-500/[0.07]'
+            : 'border-border/40 bg-muted/[0.06]',
+        )}
+      >
+        {behind ? (
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+        ) : (
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+        )}
+        <span className="text-muted-foreground">
+          <strong className="text-foreground">Checked through {coveredThrough ?? '—'}.</strong>{' '}
+          {behind ? (
+            <>
+              The explorer now carries data to {latestGridDay}, which is past that — so the
+              most recent days on this site have <strong className="text-foreground">not
+              been through these checks yet</strong>.
+            </>
+          ) : (
+            <>Current with the newest day the explorer carries{latestGridDay ? ` (${latestGridDay})` : ''}.</>
+          )}{' '}
+          Last run {index.generated_at?.slice(0, 10)}.
+        </span>
+      </div>
       {/* ── headline ─────────────────────────────────────────────── */}
       <GridKpiStrip>
         <GridKpiCell

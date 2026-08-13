@@ -1,1 +1,215 @@
-{"systemStats": {"date": "12 Sep 2014", "dayPeakGen": 5419, "eveningPeakGen": 6306, "dayPeakDemand": null, "eveningPeakDemand": 6600, "minGen": null, "maxGen": null, "totalEnergyGen": 135.543223, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 765.72, "avgProductionCost": 4.42, "totalDailyCost": 599099833}, "generationData": [{"name": "Gas", "gen": 82.8, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 3.13, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 37.87, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 2.9, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "Outage", "plant": "There", "load": "265 MW", "reason": "There was generation shortage in the evening peak hour yesterday. So about 265 MW (20:00) of load shed was imposed over the whole areas"}, {"time": "at 11:05", "plant": "Comilla-Chandpur 132 kV Ckt tripped at 11:05 from both end showing Dist. C,O/C, E/F relays and", "load": "HT Outage", "reason": "Comilla-Chandpur 132 kV Ckt tripped at 11:05 from both end showing Dist. C,O/C, E/F relays and was switched on at"}, {"time": "11:20.", "plant": "", "load": "HT Outage", "reason": "", "full_desc": ""}, {"time": "from 10:25 to 12:44", "plant": "Aminbazar 132 kV Capacitor bank", "load": "HT Outage", "reason": "due to replacement of R-phase lightning arrester."}, {"time": "at 13:21", "plant": "Comilla(N)-Chandpur 132 kV Ckt tripped at 13:21 from both end showing Dist. C,O/C, E/F relays and", "load": "HT Outage", "reason": "Comilla(N)-Chandpur 132 kV Ckt tripped at 13:21 from both end showing Dist. C,O/C, E/F relays and was switched on at 15:56."}, {"time": "at 05:30", "plant": "Madanganj Summit", "load": "HT Outage", "reason": "due to cable pot replacement."}, {"time": "from 07:05 to 10:55", "plant": "Khulshi 132 kV bus", "load": "60 MW", "reason": "due to removing optical fiber. Power interruption occurred (about 60 MW) under Khulshi S/S areas"}, {"time": "at 06:38", "plant": "Comilla(N)-Feni 132 kV Ckt-2 tripped at 06:38 from showing O/C relay at Comilla(N) end and", "load": "HT Outage", "reason": "Comilla(N)-Feni 132 kV Ckt-2 tripped at 06:38 from showing O/C relay at Comilla(N) end and was switched on at 06:59. from 07:05 to 10:55."}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "12 Sep 2014",
+    "dayPeakGen": 5419,
+    "eveningPeakGen": 6306,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 6600,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 135.543223,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 765.72,
+    "avgProductionCost": 4.42,
+    "totalDailyCost": 599099833
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 82.8,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 3.13,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 37.87,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 2.9,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "Outage",
+      "plant": "There",
+      "load": "265 MW",
+      "reason": "There was generation shortage in the evening peak hour yesterday. So about 265 MW (20:00) of load shed was imposed over the whole areas"
+    },
+    {
+      "time": "at 11:05",
+      "plant": "Comilla-Chandpur 132 kV Ckt tripped at 11:05 from both end showing Dist. C,O/C, E/F relays and",
+      "load": "HT Outage",
+      "reason": "Comilla-Chandpur 132 kV Ckt tripped at 11:05 from both end showing Dist. C,O/C, E/F relays and was switched on at"
+    },
+    {
+      "time": "11:20.",
+      "plant": "",
+      "load": "HT Outage",
+      "reason": "",
+      "full_desc": ""
+    },
+    {
+      "time": "from 10:25 to 12:44",
+      "plant": "Aminbazar 132 kV Capacitor bank",
+      "load": "HT Outage",
+      "reason": "due to replacement of R-phase lightning arrester."
+    },
+    {
+      "time": "at 13:21",
+      "plant": "Comilla(N)-Chandpur 132 kV Ckt tripped at 13:21 from both end showing Dist. C,O/C, E/F relays and",
+      "load": "HT Outage",
+      "reason": "Comilla(N)-Chandpur 132 kV Ckt tripped at 13:21 from both end showing Dist. C,O/C, E/F relays and was switched on at 15:56."
+    },
+    {
+      "time": "at 05:30",
+      "plant": "Madanganj Summit",
+      "load": "HT Outage",
+      "reason": "due to cable pot replacement."
+    },
+    {
+      "time": "from 07:05 to 10:55",
+      "plant": "Khulshi 132 kV bus",
+      "load": "60 MW",
+      "reason": "due to removing optical fiber. Power interruption occurred (about 60 MW) under Khulshi S/S areas"
+    },
+    {
+      "time": "at 06:38",
+      "plant": "Comilla(N)-Feni 132 kV Ckt-2 tripped at 06:38 from showing O/C relay at Comilla(N) end and",
+      "load": "HT Outage",
+      "reason": "Comilla(N)-Feni 132 kV Ckt-2 tripped at 06:38 from showing O/C relay at Comilla(N) end and was switched on at 06:59. from 07:05 to 10:55."
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report13-09-14.xls"
+  }
+}

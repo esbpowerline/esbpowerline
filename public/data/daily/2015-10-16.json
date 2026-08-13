@@ -1,1 +1,250 @@
-{"systemStats": {"date": "16 Oct 2015", "dayPeakGen": 5384, "eveningPeakGen": 7293, "dayPeakDemand": null, "eveningPeakDemand": 7293, "minGen": null, "maxGen": null, "totalEnergyGen": 136.634078, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 979.71, "avgProductionCost": 2.084, "totalDailyCost": 284729041}, "generationData": [{"name": "Gas", "gen": 96.7, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 3.38, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 20.53, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 5.12, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "from 08:20 to 10:52", "plant": "Kaptai # 5", "load": "HT Outage", "reason": "due to thrust bearing oil filling."}, {"time": "at 08:54", "plant": "After maintenance Barapukuria # 2", "load": "HT Outage", "reason": "After maintenance Barapukuria # 2 was synchronized at 08:54."}, {"time": "since 09:45", "plant": "Khulna 150 MW GT", "load": "150 MW", "reason": "due to ST operation."}, {"time": "from 10:06 to 14:36", "plant": "Haripur S/S -Haripur P/S 132 kV Ckt-1,2 were shut down from 10:06 to 14:36", "load": "HT Outage", "reason": "due to red hot maintenance of isolator ."}, {"time": "at 11:10", "plant": "Aminbazar-Mirpur 132 kV Ckt-1,2 tripped at 11:10 from Aminbazar end showing dist RST,Z2 on both and", "load": "62 MW", "reason": "Aminbazar-Mirpur 132 kV Ckt-1,2 tripped at 11:10 from Aminbazar end showing dist RST,Z2 on both and was About 62 MW power interruption occurred under Mirpur S/S area ."}, {"time": "from 10:05 to 11:55", "plant": "Patuakhali 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to red hot maintenance."}, {"time": "from 12:16 to 12:34", "plant": "Jhenaidah-Bottail 132 kV Ckt-1", "load": "HT Outage", "reason": "due to replacement of PT MCB."}, {"time": "since 13:23", "plant": "Aminbazar-Mirpur 132 kV Ckt-1was under shut down since 13:23 to", "load": "HT Outage", "reason": "due to CT strand damage between tower # 21"}, {"time": "at 16:45", "plant": "Hasnabad 230/132 kV T2 transformer tripped at 16:45 from both side showing differential relay it", "load": "HT Outage", "reason": "Hasnabad 230/132 kV T2 transformer tripped at 16:45 from both side showing differential relay it is still under maint."}, {"time": "at 20:41", "plant": "After maintenance Bibiyana Summit- 2", "load": "HT Outage", "reason": "After maintenance Bibiyana Summit- 2 was synchronized at 20:41."}, {"time": "since 22:15", "plant": "Sylhet 150 MW GT", "load": "150 MW", "reason": "due to chimney maintenance."}, {"time": "since 06:15", "plant": "Naogaon 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to project work."}, {"time": "since 07:40", "plant": "Lalbagh 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to A/M."}, {"time": "since 07:55", "plant": "Ishurdi-Bheramara 132 kV Ckt-1", "load": "HT Outage", "reason": "due to A/M."}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "16 Oct 2015",
+    "dayPeakGen": 5384,
+    "eveningPeakGen": 7293,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 7293,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 136.634078,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 979.71,
+    "avgProductionCost": 2.084,
+    "totalDailyCost": 284729041
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 96.7,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 3.38,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 20.53,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 5.12,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "from 08:20 to 10:52",
+      "plant": "Kaptai # 5",
+      "load": "HT Outage",
+      "reason": "due to thrust bearing oil filling."
+    },
+    {
+      "time": "at 08:54",
+      "plant": "After maintenance Barapukuria # 2",
+      "load": "HT Outage",
+      "reason": "After maintenance Barapukuria # 2 was synchronized at 08:54."
+    },
+    {
+      "time": "since 09:45",
+      "plant": "Khulna 150 MW GT",
+      "load": "150 MW",
+      "reason": "due to ST operation."
+    },
+    {
+      "time": "from 10:06 to 14:36",
+      "plant": "Haripur S/S -Haripur P/S 132 kV Ckt-1,2 were shut down from 10:06 to 14:36",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance of isolator ."
+    },
+    {
+      "time": "at 11:10",
+      "plant": "Aminbazar-Mirpur 132 kV Ckt-1,2 tripped at 11:10 from Aminbazar end showing dist RST,Z2 on both and",
+      "load": "62 MW",
+      "reason": "Aminbazar-Mirpur 132 kV Ckt-1,2 tripped at 11:10 from Aminbazar end showing dist RST,Z2 on both and was About 62 MW power interruption occurred under Mirpur S/S area ."
+    },
+    {
+      "time": "from 10:05 to 11:55",
+      "plant": "Patuakhali 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to red hot maintenance."
+    },
+    {
+      "time": "from 12:16 to 12:34",
+      "plant": "Jhenaidah-Bottail 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "due to replacement of PT MCB."
+    },
+    {
+      "time": "since 13:23",
+      "plant": "Aminbazar-Mirpur 132 kV Ckt-1was under shut down since 13:23 to",
+      "load": "HT Outage",
+      "reason": "due to CT strand damage between tower # 21"
+    },
+    {
+      "time": "at 16:45",
+      "plant": "Hasnabad 230/132 kV T2 transformer tripped at 16:45 from both side showing differential relay it",
+      "load": "HT Outage",
+      "reason": "Hasnabad 230/132 kV T2 transformer tripped at 16:45 from both side showing differential relay it is still under maint."
+    },
+    {
+      "time": "at 20:41",
+      "plant": "After maintenance Bibiyana Summit- 2",
+      "load": "HT Outage",
+      "reason": "After maintenance Bibiyana Summit- 2 was synchronized at 20:41."
+    },
+    {
+      "time": "since 22:15",
+      "plant": "Sylhet 150 MW GT",
+      "load": "150 MW",
+      "reason": "due to chimney maintenance."
+    },
+    {
+      "time": "since 06:15",
+      "plant": "Naogaon 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to project work."
+    },
+    {
+      "time": "since 07:40",
+      "plant": "Lalbagh 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to A/M."
+    },
+    {
+      "time": "since 07:55",
+      "plant": "Ishurdi-Bheramara 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "due to A/M."
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily Report17-10-15.xls"
+  }
+}

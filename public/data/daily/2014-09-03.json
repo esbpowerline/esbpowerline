@@ -1,1 +1,202 @@
-{"systemStats": {"date": "03 Sep 2014", "dayPeakGen": 5799, "eveningPeakGen": 6630, "dayPeakDemand": null, "eveningPeakDemand": 6950, "minGen": null, "maxGen": null, "totalEnergyGen": 139.530783, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 840.33, "avgProductionCost": 3.936, "totalDailyCost": 549164919}, "generationData": [{"name": "Gas", "gen": 91.08, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 3.32, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 32.84, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 2.94, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "Outage", "plant": "There", "load": "288 MW", "reason": "There was generation shortage in the evening peak hour yesterday. So about 288 MW (19:30) of load shed was imposed over the"}, {"time": "from 12:01 to 17:34", "plant": "Megnaghat-Aminbazar 230 kV Ckt-2", "load": "HT Outage", "reason": "due to project work."}, {"time": "at 13:55", "plant": "Ashuganj ST: Unit-2", "load": "HT Outage", "reason": "due to vacuum failure."}, {"time": "from 15:18 to 16:28", "plant": "Bogra 132/33 kV T3 transformer", "load": "HT Outage", "reason": "due to isolator replacement work at 33 kV end."}, {"time": "from 15:55 to 17:09", "plant": "Kabirpur 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to maintenance work at 33 kV Manikganj"}, {"time": "at 16:15", "plant": "Rampura-Ullon 132 kV Ckt-1 & 2 tripped at 16:15 showing distance relay from Rampura end and Ckt-1", "load": "216 MW", "reason": "Rampura-Ullon 132 kV Ckt-1 & 2 tripped at 16:15 showing distance relay from Rampura end and Ckt-1 was switched About 216 MW power interruption occurred under Dhanmondi & Ullon"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "03 Sep 2014",
+    "dayPeakGen": 5799,
+    "eveningPeakGen": 6630,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 6950,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 139.530783,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 840.33,
+    "avgProductionCost": 3.936,
+    "totalDailyCost": 549164919
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 91.08,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 3.32,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 32.84,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 2.94,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "Outage",
+      "plant": "There",
+      "load": "288 MW",
+      "reason": "There was generation shortage in the evening peak hour yesterday. So about 288 MW (19:30) of load shed was imposed over the"
+    },
+    {
+      "time": "from 12:01 to 17:34",
+      "plant": "Megnaghat-Aminbazar 230 kV Ckt-2",
+      "load": "HT Outage",
+      "reason": "due to project work."
+    },
+    {
+      "time": "at 13:55",
+      "plant": "Ashuganj ST: Unit-2",
+      "load": "HT Outage",
+      "reason": "due to vacuum failure."
+    },
+    {
+      "time": "from 15:18 to 16:28",
+      "plant": "Bogra 132/33 kV T3 transformer",
+      "load": "HT Outage",
+      "reason": "due to isolator replacement work at 33 kV end."
+    },
+    {
+      "time": "from 15:55 to 17:09",
+      "plant": "Kabirpur 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to maintenance work at 33 kV Manikganj"
+    },
+    {
+      "time": "at 16:15",
+      "plant": "Rampura-Ullon 132 kV Ckt-1 & 2 tripped at 16:15 showing distance relay from Rampura end and Ckt-1",
+      "load": "216 MW",
+      "reason": "Rampura-Ullon 132 kV Ckt-1 & 2 tripped at 16:15 showing distance relay from Rampura end and Ckt-1 was switched About 216 MW power interruption occurred under Dhanmondi & Ullon"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report04-09-14.xls"
+  }
+}

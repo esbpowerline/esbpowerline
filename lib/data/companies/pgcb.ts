@@ -28,6 +28,8 @@ export interface PgcbMonthlyFuelMix {
 
 /** The fields the trend charts, KPI tiles, fuel mix and period pickers read. */
 export interface PgcbMonthlySeriesRecord {
+  /** The PGCB monthly report this record was read from, named as held. */
+  filename?: string;
   date_key: string;
   month: string;
   year: number;

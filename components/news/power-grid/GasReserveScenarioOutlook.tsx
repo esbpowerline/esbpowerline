@@ -14,6 +14,7 @@ import {
   reserveScenarioVsBauYears,
   type ReserveScenarioId,
 } from '@/lib/data/macro/reserves';
+import { GridProvenanceTag } from './GridExplorerUI';
 import {
   liveTcfAt,
   scenarioById,
@@ -142,7 +143,7 @@ export function GasReserveScenarioOutlook({
       <div className="gas-reserve-scenario-compare">
         <div className="gas-reserve-scenario-compare__head">
           <span>Scenario</span>
-          <span>Growth</span>
+          <span>Demand picture</span>
           <span>2030</span>
           <span>Empty</span>
         </div>
@@ -164,6 +165,24 @@ export function GasReserveScenarioOutlook({
           </div>
         ))}
       </div>
+
+      {/*
+        The dry years are NOT computed from the percentages in the column above.
+        They are the measured-rate year shifted by a fixed editorial band
+        (+2 / 0 / −5 years). Compounding the stated rates would in fact give
+        2037 and 2036, and "low growth" would come out *shorter* than flat,
+        since any growth in extraction empties the fields sooner. Saying so is
+        better than printing a rate that quietly implies arithmetic nobody did.
+      */}
+      <p className="text-[10px] leading-relaxed text-muted-foreground">
+        <strong className="text-foreground">How to read these three years.</strong>{' '}
+        Only the middle one is measured: it is today&apos;s extraction rate carried
+        forward. The other two are an editorial band of{' '}
+        <strong className="text-foreground">+2 and −5 years</strong> either side of
+        it — a judgement about how demand might move, not a calculation from the
+        percentages shown. Treat them as the width of the uncertainty, not as
+        forecasts in their own right.
+      </p>
 
       <div
         className="gas-reserve-scenario-detail"
@@ -188,19 +207,19 @@ export function GasReserveScenarioOutlook({
 
         <div className="gas-reserve-scenario-detail__stats">
           <div className="gas-reserve-scenario-detail__stat">
-            <span className="gas-reserve-scenario-detail__stat-label">Demand growth</span>
+            <span className="gas-reserve-scenario-detail__stat-label inline-flex items-center gap-1">Scenario assumption<GridProvenanceTag kind="D" /></span>
             <span className="gas-reserve-scenario-detail__stat-value">{active.demandGrowth}</span>
           </div>
           <div className="gas-reserve-scenario-detail__stat">
-            <span className="gas-reserve-scenario-detail__stat-label">Runway</span>
+            <span className="gas-reserve-scenario-detail__stat-label inline-flex items-center gap-1">Runway<GridProvenanceTag kind="D" /></span>
             <span className="gas-reserve-scenario-detail__stat-value">{runwayYears} yrs</span>
           </div>
           <div className="gas-reserve-scenario-detail__stat">
-            <span className="gas-reserve-scenario-detail__stat-label">Avg annual draw</span>
+            <span className="gas-reserve-scenario-detail__stat-label inline-flex items-center gap-1">Avg annual draw<GridProvenanceTag kind="D" /></span>
             <span className="gas-reserve-scenario-detail__stat-value">{annualDraw.toFixed(2)} Tcf</span>
           </div>
           <div className="gas-reserve-scenario-detail__stat">
-            <span className="gas-reserve-scenario-detail__stat-label">vs Current rate</span>
+            <span className="gas-reserve-scenario-detail__stat-label inline-flex items-center gap-1">vs Current rate<GridProvenanceTag kind="D" /></span>
             <span
               className="gas-reserve-scenario-detail__stat-value"
               style={{
@@ -219,8 +238,8 @@ export function GasReserveScenarioOutlook({
 
         <div className="gas-reserve-scenario-detail__milestones">
           <div className="gas-reserve-scenario-detail__milestones-head">
-            <span>Tcf remaining</span>
-            <span>{depletionRate.toFixed(0)}% drawn by 2030</span>
+            <span className="inline-flex items-center gap-1">Tcf remaining<GridProvenanceTag kind="D" /></span>
+            <span>{depletionRate.toFixed(0)}% of today&apos;s balance gone by 2030</span>
           </div>
           <div className="gas-reserve-scenario-detail__milestones-grid">
             {RESERVE_FORECAST_MILESTONES.map((year) => {
@@ -240,7 +259,7 @@ export function GasReserveScenarioOutlook({
             </div>
           </div>
           <p className="gas-reserve-scenario-detail__endowment-note">
-            Only {endowmentLeft2030.toFixed(1)}% of {RESERVES_AUDITED_META.initialRecoverableTcf} Tcf endowment left by 2030
+            By 2030 just {endowmentLeft2030.toFixed(1)}% of the original {RESERVES_AUDITED_META.initialRecoverableTcf} Tcf endowment is still in the ground
           </p>
         </div>
 
@@ -250,7 +269,11 @@ export function GasReserveScenarioOutlook({
           ))}
         </ul>
 
-        <p className="gas-reserve-scenario-detail__implication">{active.implication}</p>
+        <p className="gas-reserve-scenario-detail__implication">
+          {live
+            ? active.implication.replace(/~?20\d{2}/, String(activeExhaustion))
+            : active.implication}
+        </p>
 
         <div className="gas-reserve-scenario-detail__runway-wrap">
           <div className="flex justify-between text-[9px] text-muted-foreground mb-1">

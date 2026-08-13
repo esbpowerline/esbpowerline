@@ -1,1 +1,608 @@
-{"systemStats": {"date": "25 Jul 2026", "dayPeakGen": 14007.39, "eveningPeakGen": 15784.71, "dayPeakDemand": 14512.39, "eveningPeakDemand": 16692.71, "minGen": 12274.06, "maxGen": 15784.71, "totalEnergyGen": 336.99019058, "totalEnergyUnserved": 13.724, "totalEnergyDemand": 350.714, "maxTemp": 34.5, "totalGasSuppliedPower": 698.92, "avgProductionCost": 7.086, "totalDailyCost": 2387798687}, "generationData": [{"name": "Gas", "gen": 93.98, "cost": 327707390, "unitCost": 3.4868, "color": "#0ea5e9"}, {"name": "Coal", "gen": 138.64, "cost": 934451097, "unitCost": 6.7403, "color": "#64748b"}, {"name": "HFO", "gen": 38.75, "cost": 694987396, "unitCost": 17.9369, "color": "#f97316"}, {"name": "Hydro", "gen": 5.36, "cost": 535937, "unitCost": 0.1, "color": "#06b6d4"}, {"name": "Solar", "gen": 5.08, "cost": 82233818, "unitCost": 16.1795, "color": "#eab308"}, {"name": "Imports", "gen": 54.65, "cost": 340066742, "unitCost": 6.2227, "color": "#a855f7"}, {"name": "HSD", "gen": 0.0, "cost": 0, "unitCost": null, "color": "#ef4444"}, {"name": "Wind", "gen": 0.53, "cost": 7816305, "unitCost": 14.71, "color": "#22c55e"}], "borderImportsData": [{"source": "HVDC Bheramara (India)", "energy": 21.47, "peakFlow": 896.0, "type": "C/B Interconnector (West)"}, {"source": "Adani Godda (India)", "energy": 29.15, "peakFlow": 1405.23, "type": "C/B Interconnector (North)"}, {"source": "Tripura Cumilla (India)", "energy": 3.12, "peakFlow": 150.0, "type": "C/B Interconnector (East)"}, {"source": "Nepal (via India)", "energy": 0.89, "peakFlow": 38.0, "type": "C/B Interconnector (Nepal)"}], "regionalDemandData": [{"zone": "Dhaka", "loadShed": 161.0, "demand": 5705.0, "pct": 2.8}, {"zone": "Chattogram", "loadShed": 0.0, "demand": 1595.0, "pct": 0.0}, {"zone": "Cumilla", "loadShed": 8.0, "demand": 1428.0, "pct": 0.6}, {"zone": "Mymensingh", "loadShed": 353.0, "demand": 1483.0, "pct": 23.8}, {"zone": "Sylhet", "loadShed": 207.0, "demand": 768.0, "pct": 27.0}, {"zone": "Khulna", "loadShed": 101.0, "demand": 1869.0, "pct": 5.4}, {"zone": "Barishal", "loadShed": 2.0, "demand": 464.0, "pct": 0.4}, {"zone": "Rajshahi", "loadShed": 0.0, "demand": 1617.0, "pct": 0.0}, {"zone": "Rangpur", "loadShed": 37.0, "demand": 1144.0, "pct": 3.2}], "dailyOutages": [{"time": "09:24 - 10:51", "plant": "Kasba 132/33kV S/S TR-2 HT Scheduled S/D", "load": "HT Outage", "reason": "Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS", "full_desc": "Kasba 132/33kV S/S TR-2 HT Scheduled S/D Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS"}, {"time": "09:24 - 10:51", "plant": "Kasba 132/33kV S/S TR-2 LT Scheduled S/D", "load": "HT Outage", "reason": "Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS", "full_desc": "Kasba 132/33kV S/S TR-2 LT Scheduled S/D Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS"}, {"time": "10:00", "plant": "Kaliakoir 400/230/132kV S/S 400kV Bus 1 Project Work S/D", "load": "HT Outage", "reason": "Due to CCC PROJECT WORK ( ds clamp and loop measurements)", "full_desc": "Kaliakoir 400/230/132kV S/S 400kV Bus 1 Project Work S/D Due to CCC PROJECT WORK ( ds clamp and loop measurements)"}, {"time": "10:01 - 19:47", "plant": "Korerhat 400/230/132kV S/S ATR-3(7103T) LT Project Work S/D", "load": "HT Outage", "reason": "Due to DFDR work", "full_desc": "Korerhat 400/230/132kV S/S ATR-3(7103T) LT Project Work S/D Due to DFDR work"}, {"time": "10:04 - 19:46", "plant": "Korerhat 400/230/132kV S/S ATR-3(7103T) HT Project Work S/D", "load": "HT Outage", "reason": "Due to DFDR work", "full_desc": "Korerhat 400/230/132kV S/S ATR-3(7103T) HT Project Work S/D Due to DFDR work"}, {"time": "10:58 - 21:46", "plant": "Joydebpur 132/33kV S/S GT-4 HT Forced S/D", "load": "20.0MW", "reason": "Due to Oil Leakage Maintenance", "full_desc": "Joydebpur 132/33kV S/S GT-4 HT Forced S/D Due to Oil Leakage Maintenance"}, {"time": "11:35 - 15:43", "plant": "KSRM 132/33kV S/S Transformer-01 HT Scheduled", "load": "HT Outage", "reason": "Due to for 33 KV Incoming CT Oil Leakage maintenance", "full_desc": "KSRM 132/33kV S/S Transformer-01 HT Scheduled S/D Due to for 33 KV Incoming CT Oil Leakage maintenance"}, {"time": "12:01 - 13:43", "plant": "Halishahar 132/33kV S/S Halishahar-Khulshi-Ckt.-3 Tripped showing Lock out relay Differential relay relays", "load": "HT Outage", "reason": "Due to Transient fault", "full_desc": "Halishahar 132/33kV S/S Halishahar-Khulshi-Ckt.-3 Tripped showing Lock out relay Differential relay relays Due to Transient fault"}, {"time": "12:27 - 13:13", "plant": "Kabirpur 132/33kV S/S XFR, T-I HT Tripped showing Micom relays", "load": "HT Outage", "reason": "Due to 33kV Boroibari feeder earth fault.", "full_desc": "Kabirpur 132/33kV S/S XFR, T-I HT Tripped showing Micom relays Due to 33kV Boroibari feeder earth fault."}, {"time": "12:27 - 13:13", "plant": "Kabirpur 132/33kV S/S XFR, T-I LT Tripped showing Micom relays", "load": "HT Outage", "reason": "Due to 33kV Boroibari Feeder Earth Fault.", "full_desc": "Kabirpur 132/33kV S/S XFR, T-I LT Tripped showing Micom relays Due to 33kV Boroibari Feeder Earth Fault."}, {"time": "12:49", "plant": "Sirajgonj 400 MW CCPP Unit-4 Synchronized with remarks:- GT", "load": "400 MW", "reason": "Sirajgonj 400 MW CCPP Unit-4 Synchronized with remarks:- GT", "full_desc": "Sirajgonj 400 MW CCPP Unit-4 Synchronized with remarks:- GT"}, {"time": "13:48 - 16:35", "plant": "Mithapukur 132/33kV S/S TR-2 (414T) LT Scheduled S/D", "load": "16.0MW", "reason": "Due to incomer -2 DS maintenance", "full_desc": "Mithapukur 132/33kV S/S TR-2 (414T) LT Scheduled S/D Due to incomer -2 DS maintenance"}, {"time": "13:48 - 16:34", "plant": "Mithapukur 132/33kV S/S TR-2 (414T) HT Scheduled S/D", "load": "16.0MW", "reason": "Due to incomer -2 DS maintenance", "full_desc": "Mithapukur 132/33kV S/S TR-2 (414T) HT Scheduled S/D Due to incomer -2 DS maintenance"}, {"time": "14:39 - 21:44", "plant": "Madanganj 132/33kV S/S GT-1 LT Forced S/D", "load": "HT Outage", "reason": "Due to 33kv busbar faulty sound occuring", "full_desc": "Madanganj 132/33kV S/S GT-1 LT Forced S/D Due to 33kv busbar faulty sound occuring"}, {"time": "14:40 - 21:42", "plant": "Madanganj 132/33kV S/S GT-1 HT Forced S/D", "load": "HT Outage", "reason": "Due to 33kv busbar faulty sound occuring", "full_desc": "Madanganj 132/33kV S/S GT-1 HT Forced S/D Due to 33kv busbar faulty sound occuring"}, {"time": "15:23 - 18:00", "plant": "Barishal 230/132kV S/S ATR-1 LT Scheduled S/D", "load": "HT Outage", "reason": "Due to Maintenance of tap changer motor", "full_desc": "Barishal 230/132kV S/S ATR-1 LT Scheduled S/D Due to Maintenance of tap changer motor"}, {"time": "15:24 - 18:04", "plant": "Barishal 230/132kV S/S ATR-1 HT Scheduled S/D", "load": "HT Outage", "reason": "Due to Maintenance of tap changer motor", "full_desc": "Barishal 230/132kV S/S ATR-1 HT Scheduled S/D Due to Maintenance of tap changer motor"}, {"time": "18:01 - 01:21", "plant": "Bibiyana-Fenchuganj 230 kV Ckt-2 Forced", "load": "HT Outage", "reason": "Due to Disconnected Switch Flashing and from Fenchuganj 230/132/33kV end Due to Bibiyana SS end work.", "full_desc": "Bibiyana-Fenchuganj 230 kV Ckt-2 Forced S/D from Bibiana 400/230kV end Due to Disconnected Switch Flashing and from Fenchuganj 230/132/33kV end Due to Bibiyana SS end work."}, {"time": "20:20 - 22:26", "plant": "Srinagar 132/33kV S/S Tr-02 LT Scheduled S/D", "load": "15.0MW", "reason": "Due to Red hot maintenance at Tr-02 LT side Y-phase.", "full_desc": "Srinagar 132/33kV S/S Tr-02 LT Scheduled S/D Due to Red hot maintenance at Tr-02 LT side Y-phase."}, {"time": "20:27 - 22:24", "plant": "Srinagar 132/33kV S/S Tr-02 HT Scheduled S/D", "load": "15.0MW", "reason": "Due to Red hot maintenance at Tr-02 LT side Y-phase.", "full_desc": "Srinagar 132/33kV S/S Tr-02 HT Scheduled S/D Due to Red hot maintenance at Tr-02 LT side Y-phase."}, {"time": "22:45 - 23:39", "plant": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D", "load": "20.0MW", "reason": "Due to Red hot maintenance by Pbs.", "full_desc": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D Due to Red hot maintenance by Pbs."}, {"time": "22:46 - 23:37", "plant": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D", "load": "20.0MW", "reason": "Due to Red hot maintenance by Pbs.", "full_desc": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D Due to Red hot maintenance by Pbs."}, {"time": "06:15", "plant": "Khulna (C) S/S TR-1 425T LT Scheduled S/D", "load": "HT Outage", "reason": "Due to Maint. Work of South ckt-2  main bus DS", "full_desc": "Khulna (C) S/S TR-1 425T LT Scheduled S/D Due to Maint. Work of South ckt-2  main bus DS"}, {"time": "06:15", "plant": "Khulna (C) S/S TR-1 425T HT Scheduled S/D", "load": "HT Outage", "reason": "Due to Maint. Work of south ckt-2 main bus DS.", "full_desc": "Khulna (C) S/S TR-1 425T HT Scheduled S/D Due to Maint. Work of south ckt-2 main bus DS."}, {"time": "06:20", "plant": "Khulna(C )-Noapara  132kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to S/D for south ckt-02 bus DS maintenance work.", "full_desc": "Khulna(C )-Noapara  132kV Ckt-1 Scheduled S/D from Noapara 132/33kV end. and from Khulna (C) end Due to S/D for south ckt-02 bus DS maintenance work."}, {"time": "06:21", "plant": "Khulna(C )-Noapara  132kV Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to S/D for south ckt-02 bus DS maintenance work.", "full_desc": "Khulna(C )-Noapara  132kV Ckt-2 Scheduled S/D from Noapara 132/33kV end. and from Khulna (C) end Due to S/D for south ckt-02 bus DS maintenance work."}, {"time": "06:23", "plant": "Khulna (C) S/S North-WestCkt-1 Scheduled", "load": "HT Outage", "reason": "Due to S/D for south ckt-02 bus DS maintenance work.", "full_desc": "Khulna (C) S/S North-WestCkt-1 Scheduled S/D Due to S/D for south ckt-02 bus DS maintenance work."}, {"time": "06:23", "plant": "Khulna (C) S/S North- West Ckt-2 Scheduled", "load": "HT Outage", "reason": "Due to S/D for south ckt-02 bus DS maintenance work.", "full_desc": "Khulna (C) S/S North- West Ckt-2 Scheduled S/D Due to S/D for south ckt-02 bus DS maintenance work."}, {"time": "06:24", "plant": "Khulna(C )-Khulna (S)  132kV Ckt-1 Scheduled", "load": "HT Outage", "reason": "Due to Maint. Work of South ckt-2  main bus DS and from Khulna(S) 230/132kV end Due to Project Work at Central SS end.", "full_desc": "Khulna(C )-Khulna (S)  132kV Ckt-1 Scheduled S/D from Khulna (C) end Due to Maint. Work of South ckt-2  main bus DS and from Khulna(S) 230/132kV end Due to Project Work at Central SS end."}], "hourlyLoadData": [{"time": "00:00", "generation": 14481.87, "loadShed": 454.0, "demand": 14956.3}, {"time": "01:00", "generation": 14074.72, "loadShed": 471.0, "demand": 14566.92}, {"time": "02:00", "generation": 13651.6, "loadShed": 462.0, "demand": 14134.6}, {"time": "03:00", "generation": 13171.55, "loadShed": 452.0, "demand": 13643.55}, {"time": "04:00", "generation": 12864.8, "loadShed": 443.0, "demand": 13327.8}, {"time": "05:00", "generation": 12737.02, "loadShed": 406.0, "demand": 13161.02}, {"time": "06:00", "generation": 12274.06, "loadShed": 417.0, "demand": 12710.06}, {"time": "07:00", "generation": 12391.41, "loadShed": 396.0, "demand": 12805.41}, {"time": "08:00", "generation": 12593.99, "loadShed": 400.0, "demand": 13011.99}, {"time": "09:00", "generation": 12917.75, "loadShed": 448.0, "demand": 13385.75}, {"time": "10:00", "generation": 13161.8, "loadShed": 347.0, "demand": 13524.8}, {"time": "11:00", "generation": 13435.84, "loadShed": 367.0, "demand": 13819.84}, {"time": "12:00", "generation": 14007.39, "loadShed": 483.0, "demand": 14512.39}, {"time": "13:00", "generation": 14108.06, "loadShed": 479.0, "demand": 14609.06}, {"time": "14:00", "generation": 14190.12, "loadShed": 623.0, "demand": 14841.12}, {"time": "15:00", "generation": 14198.42, "loadShed": 796.0, "demand": 15030.42}, {"time": "16:00", "generation": 14146.68, "loadShed": 821.0, "demand": 15004.68}, {"time": "17:00", "generation": 13903.29, "loadShed": 668.0, "demand": 14601.29}, {"time": "18:00", "generation": 13676.63, "loadShed": 550.0, "demand": 14251.63}, {"time": "19:00", "generation": 14857.59, "loadShed": 605.0, "demand": 15489.59}, {"time": "19:30", "generation": 15732.37, "loadShed": 793.0, "demand": 16561.37}, {"time": "20:00", "generation": 15784.71, "loadShed": 869.0, "demand": 16692.71}, {"time": "21:00", "generation": 15686.13, "loadShed": 847.0, "demand": 16571.13}, {"time": "22:00", "generation": 15326.18, "loadShed": 958.0, "demand": 16327.18}, {"time": "23:00", "generation": 15322.74, "loadShed": 962.0, "demand": 16327.74}], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 479.7, "condensate": 380.2, "share": 22.3}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 139.7, "condensate": 641.5, "share": 6.5}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 108.6, "condensate": 72.6, "share": 5.0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 891.5, "condensate": 4756.9, "share": 41.4}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 30.9, "condensate": 88.0, "share": 1.4}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 501.1, "condensate": 0.0, "share": 23.3}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 189.3, "fertilizer": 67.6, "others": 874.7, "total": 1131.6}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 160.7, "fertilizer": 0.0, "others": 85.6, "total": 246.3}, {"company": "KGDCL (Chattogram)", "power": 36.1, "fertilizer": 45.1, "others": 141.9, "total": 223.2}, {"company": "JGTDSL (Sylhet region)", "power": 182.9, "fertilizer": 4.9, "others": 102.8, "total": 290.6}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 68.9, "fertilizer": 0.0, "others": 29.1, "total": 98.0}, {"company": "SGCL (Barishal & Khulna)", "power": 68.3, "fertilizer": 0.0, "others": 4.6, "total": 72.9}], "regionalDemandSource": "p1-published"}
+{
+  "systemStats": {
+    "date": "25 Jul 2026",
+    "dayPeakGen": 14007.39,
+    "eveningPeakGen": 15784.71,
+    "dayPeakDemand": 14512.39,
+    "eveningPeakDemand": 16692.71,
+    "minGen": 12274.06,
+    "maxGen": 15784.71,
+    "totalEnergyGen": 336.99019058,
+    "totalEnergyUnserved": 13.724,
+    "totalEnergyDemand": 350.714,
+    "maxTemp": 34.5,
+    "totalGasSuppliedPower": 698.92,
+    "avgProductionCost": 7.086,
+    "totalDailyCost": 2387798687
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 93.98,
+      "cost": 327707390,
+      "unitCost": 3.4868,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 138.64,
+      "cost": 934451097,
+      "unitCost": 6.7403,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 38.75,
+      "cost": 694987396,
+      "unitCost": 17.9369,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 5.36,
+      "cost": 535937,
+      "unitCost": 0.1,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 5.08,
+      "cost": 82233818,
+      "unitCost": 16.1795,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 54.65,
+      "cost": 340066742,
+      "unitCost": 6.2227,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.53,
+      "cost": 7816305,
+      "unitCost": 14.71,
+      "color": "#22c55e"
+    }
+  ],
+  "borderImportsData": [
+    {
+      "source": "HVDC Bheramara (India)",
+      "energy": 21.47,
+      "peakFlow": 896.0,
+      "type": "C/B Interconnector (West)"
+    },
+    {
+      "source": "Adani Godda (India)",
+      "energy": 29.15,
+      "peakFlow": 1405.23,
+      "type": "C/B Interconnector (North)"
+    },
+    {
+      "source": "Tripura Cumilla (India)",
+      "energy": 3.12,
+      "peakFlow": 150.0,
+      "type": "C/B Interconnector (East)"
+    },
+    {
+      "source": "Nepal (via India)",
+      "energy": 0.89,
+      "peakFlow": 38.0,
+      "type": "C/B Interconnector (Nepal)"
+    }
+  ],
+  "regionalDemandData": [
+    {
+      "zone": "Dhaka",
+      "loadShed": 161.0,
+      "demand": 5705.0,
+      "pct": 2.8
+    },
+    {
+      "zone": "Chattogram",
+      "loadShed": 0.0,
+      "demand": 1595.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Cumilla",
+      "loadShed": 8.0,
+      "demand": 1428.0,
+      "pct": 0.6
+    },
+    {
+      "zone": "Mymensingh",
+      "loadShed": 353.0,
+      "demand": 1483.0,
+      "pct": 23.8
+    },
+    {
+      "zone": "Sylhet",
+      "loadShed": 207.0,
+      "demand": 768.0,
+      "pct": 27.0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 101.0,
+      "demand": 1869.0,
+      "pct": 5.4
+    },
+    {
+      "zone": "Barishal",
+      "loadShed": 2.0,
+      "demand": 464.0,
+      "pct": 0.4
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0.0,
+      "demand": 1617.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Rangpur",
+      "loadShed": 37.0,
+      "demand": 1144.0,
+      "pct": 3.2
+    }
+  ],
+  "dailyOutages": [
+    {
+      "time": "09:24 - 10:51",
+      "plant": "Kasba 132/33kV S/S TR-2 HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS",
+      "full_desc": "Kasba 132/33kV S/S TR-2 HT Scheduled S/D Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS"
+    },
+    {
+      "time": "09:24 - 10:51",
+      "plant": "Kasba 132/33kV S/S TR-2 LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS",
+      "full_desc": "Kasba 132/33kV S/S TR-2 LT Scheduled S/D Due to Kasba-2 feeder 33kV side DS isolator maintenace by PBS"
+    },
+    {
+      "time": "10:00",
+      "plant": "Kaliakoir 400/230/132kV S/S 400kV Bus 1 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to CCC PROJECT WORK ( ds clamp and loop measurements)",
+      "full_desc": "Kaliakoir 400/230/132kV S/S 400kV Bus 1 Project Work S/D Due to CCC PROJECT WORK ( ds clamp and loop measurements)"
+    },
+    {
+      "time": "10:01 - 19:47",
+      "plant": "Korerhat 400/230/132kV S/S ATR-3(7103T) LT Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to DFDR work",
+      "full_desc": "Korerhat 400/230/132kV S/S ATR-3(7103T) LT Project Work S/D Due to DFDR work"
+    },
+    {
+      "time": "10:04 - 19:46",
+      "plant": "Korerhat 400/230/132kV S/S ATR-3(7103T) HT Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to DFDR work",
+      "full_desc": "Korerhat 400/230/132kV S/S ATR-3(7103T) HT Project Work S/D Due to DFDR work"
+    },
+    {
+      "time": "10:58 - 21:46",
+      "plant": "Joydebpur 132/33kV S/S GT-4 HT Forced S/D",
+      "load": "20.0MW",
+      "reason": "Due to Oil Leakage Maintenance",
+      "full_desc": "Joydebpur 132/33kV S/S GT-4 HT Forced S/D Due to Oil Leakage Maintenance"
+    },
+    {
+      "time": "11:35 - 15:43",
+      "plant": "KSRM 132/33kV S/S Transformer-01 HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to for 33 KV Incoming CT Oil Leakage maintenance",
+      "full_desc": "KSRM 132/33kV S/S Transformer-01 HT Scheduled S/D Due to for 33 KV Incoming CT Oil Leakage maintenance"
+    },
+    {
+      "time": "12:01 - 13:43",
+      "plant": "Halishahar 132/33kV S/S Halishahar-Khulshi-Ckt.-3 Tripped showing Lock out relay Differential relay relays",
+      "load": "HT Outage",
+      "reason": "Due to Transient fault",
+      "full_desc": "Halishahar 132/33kV S/S Halishahar-Khulshi-Ckt.-3 Tripped showing Lock out relay Differential relay relays Due to Transient fault"
+    },
+    {
+      "time": "12:27 - 13:13",
+      "plant": "Kabirpur 132/33kV S/S XFR, T-I HT Tripped showing Micom relays",
+      "load": "HT Outage",
+      "reason": "Due to 33kV Boroibari feeder earth fault.",
+      "full_desc": "Kabirpur 132/33kV S/S XFR, T-I HT Tripped showing Micom relays Due to 33kV Boroibari feeder earth fault."
+    },
+    {
+      "time": "12:27 - 13:13",
+      "plant": "Kabirpur 132/33kV S/S XFR, T-I LT Tripped showing Micom relays",
+      "load": "HT Outage",
+      "reason": "Due to 33kV Boroibari Feeder Earth Fault.",
+      "full_desc": "Kabirpur 132/33kV S/S XFR, T-I LT Tripped showing Micom relays Due to 33kV Boroibari Feeder Earth Fault."
+    },
+    {
+      "time": "12:49",
+      "plant": "Sirajgonj 400 MW CCPP Unit-4 Synchronized with remarks:- GT",
+      "load": "400 MW",
+      "reason": "Sirajgonj 400 MW CCPP Unit-4 Synchronized with remarks:- GT",
+      "full_desc": "Sirajgonj 400 MW CCPP Unit-4 Synchronized with remarks:- GT"
+    },
+    {
+      "time": "13:48 - 16:35",
+      "plant": "Mithapukur 132/33kV S/S TR-2 (414T) LT Scheduled S/D",
+      "load": "16.0MW",
+      "reason": "Due to incomer -2 DS maintenance",
+      "full_desc": "Mithapukur 132/33kV S/S TR-2 (414T) LT Scheduled S/D Due to incomer -2 DS maintenance"
+    },
+    {
+      "time": "13:48 - 16:34",
+      "plant": "Mithapukur 132/33kV S/S TR-2 (414T) HT Scheduled S/D",
+      "load": "16.0MW",
+      "reason": "Due to incomer -2 DS maintenance",
+      "full_desc": "Mithapukur 132/33kV S/S TR-2 (414T) HT Scheduled S/D Due to incomer -2 DS maintenance"
+    },
+    {
+      "time": "14:39 - 21:44",
+      "plant": "Madanganj 132/33kV S/S GT-1 LT Forced S/D",
+      "load": "HT Outage",
+      "reason": "Due to 33kv busbar faulty sound occuring",
+      "full_desc": "Madanganj 132/33kV S/S GT-1 LT Forced S/D Due to 33kv busbar faulty sound occuring"
+    },
+    {
+      "time": "14:40 - 21:42",
+      "plant": "Madanganj 132/33kV S/S GT-1 HT Forced S/D",
+      "load": "HT Outage",
+      "reason": "Due to 33kv busbar faulty sound occuring",
+      "full_desc": "Madanganj 132/33kV S/S GT-1 HT Forced S/D Due to 33kv busbar faulty sound occuring"
+    },
+    {
+      "time": "15:23 - 18:00",
+      "plant": "Barishal 230/132kV S/S ATR-1 LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance of tap changer motor",
+      "full_desc": "Barishal 230/132kV S/S ATR-1 LT Scheduled S/D Due to Maintenance of tap changer motor"
+    },
+    {
+      "time": "15:24 - 18:04",
+      "plant": "Barishal 230/132kV S/S ATR-1 HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance of tap changer motor",
+      "full_desc": "Barishal 230/132kV S/S ATR-1 HT Scheduled S/D Due to Maintenance of tap changer motor"
+    },
+    {
+      "time": "18:01 - 01:21",
+      "plant": "Bibiyana-Fenchuganj 230 kV Ckt-2 Forced",
+      "load": "HT Outage",
+      "reason": "Due to Disconnected Switch Flashing and from Fenchuganj 230/132/33kV end Due to Bibiyana SS end work.",
+      "full_desc": "Bibiyana-Fenchuganj 230 kV Ckt-2 Forced S/D from Bibiana 400/230kV end Due to Disconnected Switch Flashing and from Fenchuganj 230/132/33kV end Due to Bibiyana SS end work."
+    },
+    {
+      "time": "20:20 - 22:26",
+      "plant": "Srinagar 132/33kV S/S Tr-02 LT Scheduled S/D",
+      "load": "15.0MW",
+      "reason": "Due to Red hot maintenance at Tr-02 LT side Y-phase.",
+      "full_desc": "Srinagar 132/33kV S/S Tr-02 LT Scheduled S/D Due to Red hot maintenance at Tr-02 LT side Y-phase."
+    },
+    {
+      "time": "20:27 - 22:24",
+      "plant": "Srinagar 132/33kV S/S Tr-02 HT Scheduled S/D",
+      "load": "15.0MW",
+      "reason": "Due to Red hot maintenance at Tr-02 LT side Y-phase.",
+      "full_desc": "Srinagar 132/33kV S/S Tr-02 HT Scheduled S/D Due to Red hot maintenance at Tr-02 LT side Y-phase."
+    },
+    {
+      "time": "22:45 - 23:39",
+      "plant": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D",
+      "load": "20.0MW",
+      "reason": "Due to Red hot maintenance by Pbs.",
+      "full_desc": "Srinagar 132/33kV S/S Tr-01 LT Scheduled S/D Due to Red hot maintenance by Pbs."
+    },
+    {
+      "time": "22:46 - 23:37",
+      "plant": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D",
+      "load": "20.0MW",
+      "reason": "Due to Red hot maintenance by Pbs.",
+      "full_desc": "Srinagar 132/33kV S/S Tr-01 HT Scheduled S/D Due to Red hot maintenance by Pbs."
+    },
+    {
+      "time": "06:15",
+      "plant": "Khulna (C) S/S TR-1 425T LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Maint. Work of South ckt-2  main bus DS",
+      "full_desc": "Khulna (C) S/S TR-1 425T LT Scheduled S/D Due to Maint. Work of South ckt-2  main bus DS"
+    },
+    {
+      "time": "06:15",
+      "plant": "Khulna (C) S/S TR-1 425T HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Maint. Work of south ckt-2 main bus DS.",
+      "full_desc": "Khulna (C) S/S TR-1 425T HT Scheduled S/D Due to Maint. Work of south ckt-2 main bus DS."
+    },
+    {
+      "time": "06:20",
+      "plant": "Khulna(C )-Noapara  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
+      "full_desc": "Khulna(C )-Noapara  132kV Ckt-1 Scheduled S/D from Noapara 132/33kV end. and from Khulna (C) end Due to S/D for south ckt-02 bus DS maintenance work."
+    },
+    {
+      "time": "06:21",
+      "plant": "Khulna(C )-Noapara  132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
+      "full_desc": "Khulna(C )-Noapara  132kV Ckt-2 Scheduled S/D from Noapara 132/33kV end. and from Khulna (C) end Due to S/D for south ckt-02 bus DS maintenance work."
+    },
+    {
+      "time": "06:23",
+      "plant": "Khulna (C) S/S North-WestCkt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
+      "full_desc": "Khulna (C) S/S North-WestCkt-1 Scheduled S/D Due to S/D for south ckt-02 bus DS maintenance work."
+    },
+    {
+      "time": "06:23",
+      "plant": "Khulna (C) S/S North- West Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to S/D for south ckt-02 bus DS maintenance work.",
+      "full_desc": "Khulna (C) S/S North- West Ckt-2 Scheduled S/D Due to S/D for south ckt-02 bus DS maintenance work."
+    },
+    {
+      "time": "06:24",
+      "plant": "Khulna(C )-Khulna (S)  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Maint. Work of South ckt-2  main bus DS and from Khulna(S) 230/132kV end Due to Project Work at Central SS end.",
+      "full_desc": "Khulna(C )-Khulna (S)  132kV Ckt-1 Scheduled S/D from Khulna (C) end Due to Maint. Work of South ckt-2  main bus DS and from Khulna(S) 230/132kV end Due to Project Work at Central SS end."
+    }
+  ],
+  "hourlyLoadData": [
+    {
+      "time": "00:00",
+      "generation": 14481.87,
+      "loadShed": 454.0,
+      "demand": 14956.3
+    },
+    {
+      "time": "01:00",
+      "generation": 14074.72,
+      "loadShed": 471.0,
+      "demand": 14566.92
+    },
+    {
+      "time": "02:00",
+      "generation": 13651.6,
+      "loadShed": 462.0,
+      "demand": 14134.6
+    },
+    {
+      "time": "03:00",
+      "generation": 13171.55,
+      "loadShed": 452.0,
+      "demand": 13643.55
+    },
+    {
+      "time": "04:00",
+      "generation": 12864.8,
+      "loadShed": 443.0,
+      "demand": 13327.8
+    },
+    {
+      "time": "05:00",
+      "generation": 12737.02,
+      "loadShed": 406.0,
+      "demand": 13161.02
+    },
+    {
+      "time": "06:00",
+      "generation": 12274.06,
+      "loadShed": 417.0,
+      "demand": 12710.06
+    },
+    {
+      "time": "07:00",
+      "generation": 12391.41,
+      "loadShed": 396.0,
+      "demand": 12805.41
+    },
+    {
+      "time": "08:00",
+      "generation": 12593.99,
+      "loadShed": 400.0,
+      "demand": 13011.99
+    },
+    {
+      "time": "09:00",
+      "generation": 12917.75,
+      "loadShed": 448.0,
+      "demand": 13385.75
+    },
+    {
+      "time": "10:00",
+      "generation": 13161.8,
+      "loadShed": 347.0,
+      "demand": 13524.8
+    },
+    {
+      "time": "11:00",
+      "generation": 13435.84,
+      "loadShed": 367.0,
+      "demand": 13819.84
+    },
+    {
+      "time": "12:00",
+      "generation": 14007.39,
+      "loadShed": 483.0,
+      "demand": 14512.39
+    },
+    {
+      "time": "13:00",
+      "generation": 14108.06,
+      "loadShed": 479.0,
+      "demand": 14609.06
+    },
+    {
+      "time": "14:00",
+      "generation": 14190.12,
+      "loadShed": 623.0,
+      "demand": 14841.12
+    },
+    {
+      "time": "15:00",
+      "generation": 14198.42,
+      "loadShed": 796.0,
+      "demand": 15030.42
+    },
+    {
+      "time": "16:00",
+      "generation": 14146.68,
+      "loadShed": 821.0,
+      "demand": 15004.68
+    },
+    {
+      "time": "17:00",
+      "generation": 13903.29,
+      "loadShed": 668.0,
+      "demand": 14601.29
+    },
+    {
+      "time": "18:00",
+      "generation": 13676.63,
+      "loadShed": 550.0,
+      "demand": 14251.63
+    },
+    {
+      "time": "19:00",
+      "generation": 14857.59,
+      "loadShed": 605.0,
+      "demand": 15489.59
+    },
+    {
+      "time": "19:30",
+      "generation": 15732.37,
+      "loadShed": 793.0,
+      "demand": 16561.37
+    },
+    {
+      "time": "20:00",
+      "generation": 15784.71,
+      "loadShed": 869.0,
+      "demand": 16692.71
+    },
+    {
+      "time": "21:00",
+      "generation": 15686.13,
+      "loadShed": 847.0,
+      "demand": 16571.13
+    },
+    {
+      "time": "22:00",
+      "generation": 15326.18,
+      "loadShed": 958.0,
+      "demand": 16327.18
+    },
+    {
+      "time": "23:00",
+      "generation": 15322.74,
+      "loadShed": 962.0,
+      "demand": 16327.74
+    }
+  ],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 479.7,
+      "condensate": 380.2,
+      "share": 22.3
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 139.7,
+      "condensate": 641.5,
+      "share": 6.5
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 108.6,
+      "condensate": 72.6,
+      "share": 5.0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 891.5,
+      "condensate": 4756.9,
+      "share": 41.4
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 30.9,
+      "condensate": 88.0,
+      "share": 1.4
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 501.1,
+      "condensate": 0.0,
+      "share": 23.3
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 189.3,
+      "fertilizer": 67.6,
+      "others": 874.7,
+      "total": 1131.6
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 160.7,
+      "fertilizer": 0.0,
+      "others": 85.6,
+      "total": 246.3
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 36.1,
+      "fertilizer": 45.1,
+      "others": 141.9,
+      "total": 223.2
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 182.9,
+      "fertilizer": 4.9,
+      "others": 102.8,
+      "total": 290.6
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 68.9,
+      "fertilizer": 0.0,
+      "others": 29.1,
+      "total": 98.0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 68.3,
+      "fertilizer": 0.0,
+      "others": 4.6,
+      "total": 72.9
+    }
+  ],
+  "regionalDemandSource": "p1-published",
+  "sourceFiles": {
+    "pgcb": "Daily Report 26-07-2026.xlsx",
+    "petrobangla": "petrobangla_2026-07-25.pdf"
+  }
+}

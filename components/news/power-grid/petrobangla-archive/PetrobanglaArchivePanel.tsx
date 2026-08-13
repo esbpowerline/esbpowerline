@@ -229,6 +229,7 @@ export function PetrobanglaArchivePanel({
                 peakGas={peakAnchor.gas}
                 peakDate={peakAnchor.date}
                 preview={kpisPreview}
+                sourceFile={selectedDay?.meta?.source_filename ?? null}
               />
             </div>
           ) : (

@@ -1,1 +1,583 @@
-{"systemStats": {"date": "04 Oct 2021", "dayPeakGen": 10354.0, "eveningPeakGen": 12425.0, "dayPeakDemand": null, "eveningPeakDemand": 12425, "minGen": 8660.0, "maxGen": 12425.0, "totalEnergyGen": 254.87989800000003, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": 33.4, "totalGasSuppliedPower": 1143.89, "avgProductionCost": 2.931, "totalDailyCost": 746998589, "peakSource": "pgcb-monthly-report"}, "generationData": [{"name": "Gas", "gen": 151.39, "cost": 156906128, "unitCost": 1.0364, "color": "#0ea5e9"}, {"name": "Coal", "gen": 13.34, "cost": 61661120, "unitCost": 4.6219, "color": "#64748b"}, {"name": "HFO", "gen": 65.87, "cost": 528431340, "unitCost": 8.0226, "color": "#f97316"}, {"name": "Hydro", "gen": 3.78, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0.59, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 19.91, "cost": null, "unitCost": null, "color": "#a855f7"}], "borderImportsData": [{"source": "HVDC Bheramara (India)", "energy": 17.08, "peakFlow": 711.0, "type": "C/B Interconnector (West)"}, {"source": "Tripura Cumilla (India)", "energy": 2.83, "peakFlow": 142.0, "type": "C/B Interconnector (East)"}], "regionalDemandData": [{"zone": "Dhaka", "loadShed": 0, "demand": 4550, "pct": 0}, {"zone": "Chattogram", "loadShed": 0, "demand": 1203, "pct": 0}, {"zone": "Khulna", "loadShed": 0, "demand": 1499, "pct": 0}, {"zone": "Rajshahi", "loadShed": 0, "demand": 1253, "pct": 0}, {"zone": "Cumilla", "loadShed": 0, "demand": 1182, "pct": 0}, {"zone": "Mymensingh", "loadShed": 0, "demand": 724, "pct": 0}, {"zone": "Sylhet", "loadShed": 0, "demand": 461, "pct": 0}, {"zone": "Barishal", "loadShed": 0, "demand": 358, "pct": 0}, {"zone": "Rangpur", "loadShed": 0, "demand": 607, "pct": 0}], "dailyOutages": [{"time": "from 09:09 to 16:54", "plant": "Kodda 300 MW P/P-Tongi 230 kV Ckt", "load": "300 MW", "reason": "for A/M.", "full_desc": "Kodda 300 MW P/P-Tongi 230 kV Ckt was under shut down from 09:09 to 16:54 for A/M."}, {"time": "from 09:35 to 15:55", "plant": "Aminbazar-Kaliakoir 230 kV Ckt-1", "load": "HT Outage", "reason": "for A/M.", "full_desc": "Aminbazar-Kaliakoir 230 kV Ckt-1 was under shut down from 09:35 to 15:55 for A/M."}, {"time": "from 08:25 to 15:55", "plant": "Bogura 230/132 kV T-1 transformer", "load": "HT Outage", "reason": "for A/M.", "full_desc": "Bogura 230/132 kV T-1 transformer was under shut down from 08:25 to 15:55 for A/M."}, {"time": "from 09:37 to 10:52", "plant": "Bhaluka 132/33 kV T-1 transformers", "load": "HT Outage", "reason": "for D/W.", "full_desc": "Bhaluka 132/33 kV T-1 transformers was under shut down from 09:37 to 10:52 for D/W."}, {"time": "from 10:56 to 12:00", "plant": "Bhaluka 132/33 kV T-2 transformers", "load": "HT Outage", "reason": "for D/W.", "full_desc": "Bhaluka 132/33 kV T-2 transformers was under shut down from 10:56 to 12:00 for D/W."}, {"time": "from 09:45 to 12:45", "plant": "Ishwardi 132/33 kV T-1 transformers", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Ishwardi 132/33 kV T-1 transformers was under shut down from 09:45 to 12:45 for C/M."}, {"time": "from 12:45 to 17:47", "plant": "Kabirpur 132/33 kV T-2 transformer", "load": "10 MW", "reason": "for A/M. About 10 MW power interruption occurred under Kabirpur S/S area", "full_desc": "Kabirpur 132/33 kV T-2 transformer was under shut down from 12:45 to 17:47 for A/M. About 10 MW power interruption occurred under Kabirpur S/S area"}, {"time": "from 08:46 to 14:38", "plant": "Manikganj 132 kV main bus-1", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Manikganj 132 kV main bus-1 was under shut down from 08:46 to 14:38 for C/M."}, {"time": "from 08:29 to 10:43", "plant": "Mirpur 132/33 kV T-3 transformers", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Mirpur 132/33 kV T-3 transformers was under shut down from 08:29 to 10:43 for C/M."}, {"time": "from 10:56 to 16:29", "plant": "Mirpur-Uttara 3rd phase 132 kV Ckt", "load": "HT Outage", "reason": "for A/M.", "full_desc": "Mirpur-Uttara 3rd phase 132 kV Ckt was under shut down from 10:56 to 16:29 for A/M."}, {"time": "from 10:17 to 15:02", "plant": "Mymensing 132/33 kV T-1 transformers", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Mymensing 132/33 kV T-1 transformers was under shut down from 10:17 to 15:02 for C/M."}, {"time": "from 10:17 to 15:35", "plant": "Mymensing 132 kV Bus A", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Mymensing 132 kV Bus A was under shut down from 10:17 to 15:35 for C/M."}, {"time": "from 08:52 to 15:43", "plant": "Rangamati-Khagrachari 132 kV Ckt-1", "load": "42 MW", "reason": "for A/M. About 42 MW power interruption occurred under Sherpur S/S area", "full_desc": "Rangamati-Khagrachari 132 kV Ckt-1 was under shut down from 08:52 to 15:43 for A/M. About 42 MW power interruption occurred under Sherpur S/S area"}, {"time": "at 08:28", "plant": "Sherpur(Bogura)-Bogura (Old) 132 kV Ckt-1", "load": "HT Outage", "reason": "due to PT burst at Sherpur end and from 08:328 to 09:08.", "full_desc": "Sherpur(Bogura)-Bogura (Old) 132 kV Ckt-1 tripped at 08:28 due to PT burst at Sherpur end and from 08:328 to 09:08."}, {"time": "from 08:27 to 09:54", "plant": "Shyampur 132/33 kV T-1 transformers", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Shyampur 132/33 kV T-1 transformers was under shut down from 08:27 to 09:54 for C/M."}, {"time": "from 12:04 to 12:50", "plant": "Bhaluka-Mymensing 132 kV Ckt-1", "load": "HT Outage", "reason": "for D/W.", "full_desc": "Bhaluka-Mymensing 132 kV Ckt-1 was under shut down from 12:04 to 12:50 for D/W."}, {"time": "from 12:58 to 13:25", "plant": "Bhaluka-Mymensing 132 kV Ckt-2", "load": "HT Outage", "reason": "for D/W.", "full_desc": "Bhaluka-Mymensing 132 kV Ckt-2 was under shut down from 12:58 to 13:25 for D/W."}, {"time": "from 13:32 to 14:26", "plant": "Kulaura 132/33 kV T-1 transformers", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Kulaura 132/33 kV T-1 transformers was under shut down from 13:32 to 14:26 for C/M."}, {"time": "at 13:10", "plant": "Ashuganj 225 MW CCPP GT", "load": "225 MW", "reason": "Ashuganj 225 MW CCPP GT was synchronized at 13:10.", "full_desc": "Ashuganj 225 MW CCPP GT was synchronized at 13:10."}, {"time": "at 08:18", "plant": "Siddhirganj 335 MW EGCB GT", "load": "335 MW", "reason": "Siddhirganj 335 MW EGCB GT was synchronized at 08:18 and STG was synchronized at 12:11", "full_desc": "Siddhirganj 335 MW EGCB GT was synchronized at 08:18 and STG was synchronized at 12:11"}, {"time": "from 16:18 to 16:31", "plant": "Kabirpur-Manikganj 132 kV Ckt-2", "load": "HT Outage", "reason": "due to Manikganj", "full_desc": "Kabirpur-Manikganj 132 kV Ckt-2 was under shut down from 16:18 to 16:31 due to Manikganj"}, {"time": "at 14:53", "plant": "Naogaon 132/33 kV T-3 transformers", "load": "HT Outage", "reason": "Naogaon 132/33 kV T-3 transformers was switched on at 14:53.", "full_desc": "Naogaon 132/33 kV T-3 transformers was switched on at 14:53."}, {"time": "at 15:10", "plant": "Naogaon 132/33 kV T-1 transformers", "load": "HT Outage", "reason": "due to 132 kV end CT change.", "full_desc": "Naogaon 132/33 kV T-1 transformers was shut down at 15:10 due to 132 kV end CT change."}, {"time": "from 16:16 to 17:50", "plant": "Palashbari 132/33 kV T-2 transformers", "load": "HT Outage", "reason": "for C/M.", "full_desc": "Palashbari 132/33 kV T-2 transformers was under shut down from 16:16 to 17:50 for C/M."}, {"time": "at 15:30", "plant": "Bakulia 132/33 kV T-3 transformers", "load": "HT Outage", "reason": "Bakulia 132/33 kV T-3 transformers was switched on at 15:30.", "full_desc": "Bakulia 132/33 kV T-3 transformers was switched on at 15:30."}, {"time": "at 17:42", "plant": "Siddhirganj 335 MW EGCB", "load": "335 MW", "reason": "due to machine problem.", "full_desc": "Siddhirganj 335 MW EGCB  was force shut down at 17:42 due to machine problem."}, {"time": "at 23:11", "plant": "Siddhirganj 335 MW EGCB GT", "load": "335 MW", "reason": "Siddhirganj 335 MW EGCB GT was synchronized at 23:11 and STG was synchronized at 22:16.", "full_desc": "Siddhirganj 335 MW EGCB GT was synchronized at 23:11 and STG was synchronized at 22:16."}, {"time": "at 23:44", "plant": "Siddhirganj 210 MW GT", "load": "210 MW", "reason": "for gas shortage.", "full_desc": "Siddhirganj 210 MW GT was shut down at 23:44 for gas shortage."}, {"time": "at 00:30", "plant": "Tangail-Kaliakoir 132 kV Ckt-1", "load": "HT Outage", "reason": "Tangail-Kaliakoir 132 kV Ckt-1 tripped at 00:30(05-10-2021) showing Dist. R-phase gen trip at", "full_desc": "Tangail-Kaliakoir 132 kV Ckt-1 tripped at 00:30(05-10-2021) showing Dist. R-phase gen trip at"}, {"time": "at 07:33", "plant": "Chandpur DESH P/P-Chandpur S/S 132 kV Ckt-1 & 2 were shut down at 07:33(05-10-2021)", "load": "HT Outage", "reason": "Chandpur DESH P/P-Chandpur S/S 132 kV Ckt-1 & 2 were shut down at 07:33(05-10-2021)", "full_desc": "Chandpur DESH P/P-Chandpur S/S 132 kV Ckt-1 & 2 were shut down at 07:33(05-10-2021)"}], "hourlyLoadData": [{"time": "00:00", "generation": 11515.0, "loadShed": null, "demand": null}, {"time": "01:00", "generation": 10166.0, "loadShed": 0.0, "demand": null}, {"time": "02:00", "generation": 9874.0, "loadShed": 0.0, "demand": null}, {"time": "03:00", "generation": 9738.0, "loadShed": 0.0, "demand": null}, {"time": "04:00", "generation": 9432.0, "loadShed": 0.0, "demand": null}, {"time": "05:00", "generation": 9309.0, "loadShed": 0.0, "demand": null}, {"time": "06:00", "generation": 8754.0, "loadShed": 0.0, "demand": null}, {"time": "07:00", "generation": 8660.0, "loadShed": 0.0, "demand": null}, {"time": "08:00", "generation": 8766.0, "loadShed": 0.0, "demand": null}, {"time": "09:00", "generation": 9033.0, "loadShed": 0.0, "demand": null}, {"time": "10:00", "generation": 9554.0, "loadShed": 0.0, "demand": null}, {"time": "11:00", "generation": 9990.0, "loadShed": 0.0, "demand": null}, {"time": "12:00", "generation": 10354.0, "loadShed": 0.0, "demand": null}, {"time": "13:00", "generation": 10705.0, "loadShed": 0.0, "demand": null}, {"time": "14:00", "generation": 10648.0, "loadShed": 0.0, "demand": null}, {"time": "15:00", "generation": 10863.0, "loadShed": 0.0, "demand": null}, {"time": "16:00", "generation": 10652.0, "loadShed": 0.0, "demand": null}, {"time": "17:00", "generation": 10303.0, "loadShed": 0.0, "demand": null}, {"time": "18:00", "generation": 11257.0, "loadShed": 0.0, "demand": null}, {"time": "19:00", "generation": 12195.0, "loadShed": 0.0, "demand": null}, {"time": "20:00", "generation": 12378.0, "loadShed": 0.0, "demand": null}, {"time": "21:00", "generation": 12170.0, "loadShed": 0.0, "demand": null}, {"time": "22:00", "generation": 12050.0, "loadShed": 0.0, "demand": null}, {"time": "23:00", "generation": 11762.0, "loadShed": 0.0, "demand": null}], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 635.6, "condensate": 397.0, "share": 20.0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 81.0, "condensate": 493.6, "share": 2.6}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 137.3, "condensate": 184.1, "share": 4.3}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 1516.3, "condensate": 6145.7, "share": 47.8}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 70.1, "condensate": 210.0, "share": 2.2}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 731.1, "condensate": 19.4, "share": 23.1}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 348.1, "fertilizer": 0.7, "others": 1368.2, "total": 1717}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 212.4, "fertilizer": 0, "others": 84.3, "total": 296.7}, {"company": "KGDCL (Chattogram)", "power": 37.3, "fertilizer": 88.9, "others": 171.9, "total": 298}, {"company": "JGTDSL (Sylhet region)", "power": 308.7, "fertilizer": 40.6, "others": 97.8, "total": 447.1}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 124.3, "fertilizer": 0, "others": 28.8, "total": 153.1}, {"company": "SGCL (Barishal & Khulna)", "power": 109.5, "fertilizer": 0, "others": 2.2, "total": 111.8}]}
+{
+  "systemStats": {
+    "date": "04 Oct 2021",
+    "dayPeakGen": 10354.0,
+    "eveningPeakGen": 12425.0,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 12425,
+    "minGen": 8660.0,
+    "maxGen": 12425.0,
+    "totalEnergyGen": 254.87989800000003,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": 33.4,
+    "totalGasSuppliedPower": 1143.89,
+    "avgProductionCost": 2.931,
+    "totalDailyCost": 746998589,
+    "peakSource": "pgcb-monthly-report"
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 151.39,
+      "cost": 156906128,
+      "unitCost": 1.0364,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 13.34,
+      "cost": 61661120,
+      "unitCost": 4.6219,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 65.87,
+      "cost": 528431340,
+      "unitCost": 8.0226,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 3.78,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0.59,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 19.91,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    }
+  ],
+  "borderImportsData": [
+    {
+      "source": "HVDC Bheramara (India)",
+      "energy": 17.08,
+      "peakFlow": 711.0,
+      "type": "C/B Interconnector (West)"
+    },
+    {
+      "source": "Tripura Cumilla (India)",
+      "energy": 2.83,
+      "peakFlow": 142.0,
+      "type": "C/B Interconnector (East)"
+    }
+  ],
+  "regionalDemandData": [
+    {
+      "zone": "Dhaka",
+      "loadShed": 0,
+      "demand": 4550,
+      "pct": 0
+    },
+    {
+      "zone": "Chattogram",
+      "loadShed": 0,
+      "demand": 1203,
+      "pct": 0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 0,
+      "demand": 1499,
+      "pct": 0
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0,
+      "demand": 1253,
+      "pct": 0
+    },
+    {
+      "zone": "Cumilla",
+      "loadShed": 0,
+      "demand": 1182,
+      "pct": 0
+    },
+    {
+      "zone": "Mymensingh",
+      "loadShed": 0,
+      "demand": 724,
+      "pct": 0
+    },
+    {
+      "zone": "Sylhet",
+      "loadShed": 0,
+      "demand": 461,
+      "pct": 0
+    },
+    {
+      "zone": "Barishal",
+      "loadShed": 0,
+      "demand": 358,
+      "pct": 0
+    },
+    {
+      "zone": "Rangpur",
+      "loadShed": 0,
+      "demand": 607,
+      "pct": 0
+    }
+  ],
+  "dailyOutages": [
+    {
+      "time": "from 09:09 to 16:54",
+      "plant": "Kodda 300 MW P/P-Tongi 230 kV Ckt",
+      "load": "300 MW",
+      "reason": "for A/M.",
+      "full_desc": "Kodda 300 MW P/P-Tongi 230 kV Ckt was under shut down from 09:09 to 16:54 for A/M."
+    },
+    {
+      "time": "from 09:35 to 15:55",
+      "plant": "Aminbazar-Kaliakoir 230 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "for A/M.",
+      "full_desc": "Aminbazar-Kaliakoir 230 kV Ckt-1 was under shut down from 09:35 to 15:55 for A/M."
+    },
+    {
+      "time": "from 08:25 to 15:55",
+      "plant": "Bogura 230/132 kV T-1 transformer",
+      "load": "HT Outage",
+      "reason": "for A/M.",
+      "full_desc": "Bogura 230/132 kV T-1 transformer was under shut down from 08:25 to 15:55 for A/M."
+    },
+    {
+      "time": "from 09:37 to 10:52",
+      "plant": "Bhaluka 132/33 kV T-1 transformers",
+      "load": "HT Outage",
+      "reason": "for D/W.",
+      "full_desc": "Bhaluka 132/33 kV T-1 transformers was under shut down from 09:37 to 10:52 for D/W."
+    },
+    {
+      "time": "from 10:56 to 12:00",
+      "plant": "Bhaluka 132/33 kV T-2 transformers",
+      "load": "HT Outage",
+      "reason": "for D/W.",
+      "full_desc": "Bhaluka 132/33 kV T-2 transformers was under shut down from 10:56 to 12:00 for D/W."
+    },
+    {
+      "time": "from 09:45 to 12:45",
+      "plant": "Ishwardi 132/33 kV T-1 transformers",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Ishwardi 132/33 kV T-1 transformers was under shut down from 09:45 to 12:45 for C/M."
+    },
+    {
+      "time": "from 12:45 to 17:47",
+      "plant": "Kabirpur 132/33 kV T-2 transformer",
+      "load": "10 MW",
+      "reason": "for A/M. About 10 MW power interruption occurred under Kabirpur S/S area",
+      "full_desc": "Kabirpur 132/33 kV T-2 transformer was under shut down from 12:45 to 17:47 for A/M. About 10 MW power interruption occurred under Kabirpur S/S area"
+    },
+    {
+      "time": "from 08:46 to 14:38",
+      "plant": "Manikganj 132 kV main bus-1",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Manikganj 132 kV main bus-1 was under shut down from 08:46 to 14:38 for C/M."
+    },
+    {
+      "time": "from 08:29 to 10:43",
+      "plant": "Mirpur 132/33 kV T-3 transformers",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Mirpur 132/33 kV T-3 transformers was under shut down from 08:29 to 10:43 for C/M."
+    },
+    {
+      "time": "from 10:56 to 16:29",
+      "plant": "Mirpur-Uttara 3rd phase 132 kV Ckt",
+      "load": "HT Outage",
+      "reason": "for A/M.",
+      "full_desc": "Mirpur-Uttara 3rd phase 132 kV Ckt was under shut down from 10:56 to 16:29 for A/M."
+    },
+    {
+      "time": "from 10:17 to 15:02",
+      "plant": "Mymensing 132/33 kV T-1 transformers",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Mymensing 132/33 kV T-1 transformers was under shut down from 10:17 to 15:02 for C/M."
+    },
+    {
+      "time": "from 10:17 to 15:35",
+      "plant": "Mymensing 132 kV Bus A",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Mymensing 132 kV Bus A was under shut down from 10:17 to 15:35 for C/M."
+    },
+    {
+      "time": "from 08:52 to 15:43",
+      "plant": "Rangamati-Khagrachari 132 kV Ckt-1",
+      "load": "42 MW",
+      "reason": "for A/M. About 42 MW power interruption occurred under Sherpur S/S area",
+      "full_desc": "Rangamati-Khagrachari 132 kV Ckt-1 was under shut down from 08:52 to 15:43 for A/M. About 42 MW power interruption occurred under Sherpur S/S area"
+    },
+    {
+      "time": "at 08:28",
+      "plant": "Sherpur(Bogura)-Bogura (Old) 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "due to PT burst at Sherpur end and from 08:328 to 09:08.",
+      "full_desc": "Sherpur(Bogura)-Bogura (Old) 132 kV Ckt-1 tripped at 08:28 due to PT burst at Sherpur end and from 08:328 to 09:08."
+    },
+    {
+      "time": "from 08:27 to 09:54",
+      "plant": "Shyampur 132/33 kV T-1 transformers",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Shyampur 132/33 kV T-1 transformers was under shut down from 08:27 to 09:54 for C/M."
+    },
+    {
+      "time": "from 12:04 to 12:50",
+      "plant": "Bhaluka-Mymensing 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "for D/W.",
+      "full_desc": "Bhaluka-Mymensing 132 kV Ckt-1 was under shut down from 12:04 to 12:50 for D/W."
+    },
+    {
+      "time": "from 12:58 to 13:25",
+      "plant": "Bhaluka-Mymensing 132 kV Ckt-2",
+      "load": "HT Outage",
+      "reason": "for D/W.",
+      "full_desc": "Bhaluka-Mymensing 132 kV Ckt-2 was under shut down from 12:58 to 13:25 for D/W."
+    },
+    {
+      "time": "from 13:32 to 14:26",
+      "plant": "Kulaura 132/33 kV T-1 transformers",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Kulaura 132/33 kV T-1 transformers was under shut down from 13:32 to 14:26 for C/M."
+    },
+    {
+      "time": "at 13:10",
+      "plant": "Ashuganj 225 MW CCPP GT",
+      "load": "225 MW",
+      "reason": "Ashuganj 225 MW CCPP GT was synchronized at 13:10.",
+      "full_desc": "Ashuganj 225 MW CCPP GT was synchronized at 13:10."
+    },
+    {
+      "time": "at 08:18",
+      "plant": "Siddhirganj 335 MW EGCB GT",
+      "load": "335 MW",
+      "reason": "Siddhirganj 335 MW EGCB GT was synchronized at 08:18 and STG was synchronized at 12:11",
+      "full_desc": "Siddhirganj 335 MW EGCB GT was synchronized at 08:18 and STG was synchronized at 12:11"
+    },
+    {
+      "time": "from 16:18 to 16:31",
+      "plant": "Kabirpur-Manikganj 132 kV Ckt-2",
+      "load": "HT Outage",
+      "reason": "due to Manikganj",
+      "full_desc": "Kabirpur-Manikganj 132 kV Ckt-2 was under shut down from 16:18 to 16:31 due to Manikganj"
+    },
+    {
+      "time": "at 14:53",
+      "plant": "Naogaon 132/33 kV T-3 transformers",
+      "load": "HT Outage",
+      "reason": "Naogaon 132/33 kV T-3 transformers was switched on at 14:53.",
+      "full_desc": "Naogaon 132/33 kV T-3 transformers was switched on at 14:53."
+    },
+    {
+      "time": "at 15:10",
+      "plant": "Naogaon 132/33 kV T-1 transformers",
+      "load": "HT Outage",
+      "reason": "due to 132 kV end CT change.",
+      "full_desc": "Naogaon 132/33 kV T-1 transformers was shut down at 15:10 due to 132 kV end CT change."
+    },
+    {
+      "time": "from 16:16 to 17:50",
+      "plant": "Palashbari 132/33 kV T-2 transformers",
+      "load": "HT Outage",
+      "reason": "for C/M.",
+      "full_desc": "Palashbari 132/33 kV T-2 transformers was under shut down from 16:16 to 17:50 for C/M."
+    },
+    {
+      "time": "at 15:30",
+      "plant": "Bakulia 132/33 kV T-3 transformers",
+      "load": "HT Outage",
+      "reason": "Bakulia 132/33 kV T-3 transformers was switched on at 15:30.",
+      "full_desc": "Bakulia 132/33 kV T-3 transformers was switched on at 15:30."
+    },
+    {
+      "time": "at 17:42",
+      "plant": "Siddhirganj 335 MW EGCB",
+      "load": "335 MW",
+      "reason": "due to machine problem.",
+      "full_desc": "Siddhirganj 335 MW EGCB  was force shut down at 17:42 due to machine problem."
+    },
+    {
+      "time": "at 23:11",
+      "plant": "Siddhirganj 335 MW EGCB GT",
+      "load": "335 MW",
+      "reason": "Siddhirganj 335 MW EGCB GT was synchronized at 23:11 and STG was synchronized at 22:16.",
+      "full_desc": "Siddhirganj 335 MW EGCB GT was synchronized at 23:11 and STG was synchronized at 22:16."
+    },
+    {
+      "time": "at 23:44",
+      "plant": "Siddhirganj 210 MW GT",
+      "load": "210 MW",
+      "reason": "for gas shortage.",
+      "full_desc": "Siddhirganj 210 MW GT was shut down at 23:44 for gas shortage."
+    },
+    {
+      "time": "at 00:30",
+      "plant": "Tangail-Kaliakoir 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Tangail-Kaliakoir 132 kV Ckt-1 tripped at 00:30(05-10-2021) showing Dist. R-phase gen trip at",
+      "full_desc": "Tangail-Kaliakoir 132 kV Ckt-1 tripped at 00:30(05-10-2021) showing Dist. R-phase gen trip at"
+    },
+    {
+      "time": "at 07:33",
+      "plant": "Chandpur DESH P/P-Chandpur S/S 132 kV Ckt-1 & 2 were shut down at 07:33(05-10-2021)",
+      "load": "HT Outage",
+      "reason": "Chandpur DESH P/P-Chandpur S/S 132 kV Ckt-1 & 2 were shut down at 07:33(05-10-2021)",
+      "full_desc": "Chandpur DESH P/P-Chandpur S/S 132 kV Ckt-1 & 2 were shut down at 07:33(05-10-2021)"
+    }
+  ],
+  "hourlyLoadData": [
+    {
+      "time": "00:00",
+      "generation": 11515.0,
+      "loadShed": null,
+      "demand": null
+    },
+    {
+      "time": "01:00",
+      "generation": 10166.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "02:00",
+      "generation": 9874.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "03:00",
+      "generation": 9738.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "04:00",
+      "generation": 9432.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "05:00",
+      "generation": 9309.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "06:00",
+      "generation": 8754.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "07:00",
+      "generation": 8660.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "08:00",
+      "generation": 8766.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "09:00",
+      "generation": 9033.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "10:00",
+      "generation": 9554.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "11:00",
+      "generation": 9990.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "12:00",
+      "generation": 10354.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "13:00",
+      "generation": 10705.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "14:00",
+      "generation": 10648.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "15:00",
+      "generation": 10863.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "16:00",
+      "generation": 10652.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "17:00",
+      "generation": 10303.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "18:00",
+      "generation": 11257.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "19:00",
+      "generation": 12195.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "20:00",
+      "generation": 12378.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "21:00",
+      "generation": 12170.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "22:00",
+      "generation": 12050.0,
+      "loadShed": 0.0,
+      "demand": null
+    },
+    {
+      "time": "23:00",
+      "generation": 11762.0,
+      "loadShed": 0.0,
+      "demand": null
+    }
+  ],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 635.6,
+      "condensate": 397.0,
+      "share": 20.0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 81.0,
+      "condensate": 493.6,
+      "share": 2.6
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 137.3,
+      "condensate": 184.1,
+      "share": 4.3
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 1516.3,
+      "condensate": 6145.7,
+      "share": 47.8
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 70.1,
+      "condensate": 210.0,
+      "share": 2.2
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 731.1,
+      "condensate": 19.4,
+      "share": 23.1
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 348.1,
+      "fertilizer": 0.7,
+      "others": 1368.2,
+      "total": 1717
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 212.4,
+      "fertilizer": 0,
+      "others": 84.3,
+      "total": 296.7
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 37.3,
+      "fertilizer": 88.9,
+      "others": 171.9,
+      "total": 298
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 308.7,
+      "fertilizer": 40.6,
+      "others": 97.8,
+      "total": 447.1
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 124.3,
+      "fertilizer": 0,
+      "others": 28.8,
+      "total": 153.1
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 109.5,
+      "fertilizer": 0,
+      "others": 2.2,
+      "total": 111.8
+    }
+  ],
+  "sourceFiles": {
+    "pgcb": "Daily Report  05-10-2021.xlsm",
+    "petrobangla": "Daily-Gas-Intake-Offtake-Report (04.10.21).pdf"
+  }
+}

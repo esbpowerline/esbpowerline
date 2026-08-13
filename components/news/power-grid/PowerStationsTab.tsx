@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Building2, Check, ChevronDown, Clock3, Factory, Gauge, Search } from 'lucide-react';
-import { GridCardFooter, GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
+import { GridCardFooter, GridProvenanceTag, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
 import { CountChip } from '@/components/news/power-grid/renewables/shared';
 import { fetchPlantDetail, plantTotals } from '@/lib/data/grid/plant-detail.client';
 import { cn } from '@/lib/utils';
@@ -220,7 +220,16 @@ function MiniBar({ pct, className = 'bg-primary/70' }: { pct: number | null; cla
   );
 }
 
-function StationSourceFooter({ label, isoDate }: { label: string; isoDate: string }) {
+function StationSourceFooter({
+  label,
+  isoDate,
+  sourceFile,
+}: {
+  label: string;
+  isoDate: string;
+  /** The workbook this day's stations were read from, named exactly. */
+  sourceFile?: string | null;
+}) {
   return (
     <GridCardFooter>
       <span>
@@ -231,9 +240,11 @@ function StationSourceFooter({ label, isoDate }: { label: string; isoDate: strin
           rel="noopener noreferrer"
           className="text-primary hover:underline font-semibold"
         >
-          {label}
-        </a>
+          PGCB Daily Report
+        </a>{' '}
+        — {label}
       </span>
+      {sourceFile ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFile }]} /> : null}
       <span className="font-medium">Reported day: {isoDate || '—'}</span>
     </GridCardFooter>
   );
@@ -256,9 +267,11 @@ function StationSourceFooter({ label, isoDate }: { label: string; isoDate: strin
 export function PowerStationsTab({
   isoDate,
   systemStats,
+  sourceFiles,
 }: {
   isoDate: string;
   systemStats: GridSystemStats;
+  sourceFiles?: { pgcb?: string; petrobangla?: string };
 }) {
   const [detail, setDetail] = useState<DailyPlantDetail | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'absent'>('loading');
@@ -480,7 +493,7 @@ export function PowerStationsTab({
           </div>
         )}
 
-        <StationSourceFooter label="PGCB Daily Report — station table" isoDate={isoDate} />
+        <StationSourceFooter label="P2 sheet, per-station and per-unit table" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
       </div>
 
       {/* ── Fleet roll-ups derived from the same rows ── */}
@@ -569,7 +582,7 @@ export function PowerStationsTab({
               a real reading, not a gap, so Solar carries no evening-peak utilisation.
             </div>
 
-            <StationSourceFooter label="PGCB Daily Report — station table" isoDate={isoDate} />
+            <StationSourceFooter label="P2 sheet, per-station and per-unit table" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
           </div>
 
           {/* Producer split */}
@@ -653,7 +666,7 @@ export function PowerStationsTab({
               producer-wise total.
             </div>
 
-            <StationSourceFooter label="PGCB Daily Report — station table" isoDate={isoDate} />
+            <StationSourceFooter label="P2 sheet, per-station and per-unit table" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
           </div>
         </div>
       )}
@@ -717,7 +730,7 @@ export function PowerStationsTab({
               </tbody>
             </table>
           </div>
-          <StationSourceFooter label="PGCB Daily Report — generation log" isoDate={isoDate} />
+          <StationSourceFooter label="GenLog sheet, per-station generation log" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
         </div>
       )}
     </div>

@@ -1,1 +1,208 @@
-{"systemStats": {"date": "01 Feb 2014", "dayPeakGen": 4562, "eveningPeakGen": 5810, "dayPeakDemand": null, "eveningPeakDemand": 5810, "minGen": null, "maxGen": null, "totalEnergyGen": 100.505243, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 767.24, "avgProductionCost": 1.567, "totalDailyCost": 157508846}, "generationData": [{"name": "Gas", "gen": 77.05, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 0, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 11.32, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 0.91, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "from 08:04 to 16:25", "plant": "Dohazari-Cox'sbazar 132 kV Ckt-1", "load": "HT Outage", "reason": "due to A/M."}, {"time": "from 09:25 to 12:14", "plant": "Shyampur 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to A/M."}, {"time": "from 09:40 to 15:45", "plant": "Megnaghat 230 kV bus-1", "load": "HT Outage", "reason": "due to project work."}, {"time": "from 10:26 to 18:21", "plant": "Haripur-Shyampur 132kV Ckt", "load": "HT Outage", "reason": "due to changing lightning"}, {"time": "from 11:30 to 16:02", "plant": "Mymensingh 33 kV bus", "load": "100 MW", "reason": "due to replacing 33 kV bus About 100 MW power interruption occurred under Mymensingh"}, {"time": "at 22:33", "plant": "After maintenance Chowmohani 132/33 kV T1 transformer", "load": "HT Outage", "reason": "After maintenance Chowmohani 132/33 kV T1 transformer was switched at 22:33."}, {"time": "at 06:20", "plant": "Feni 132/33 kV T1 & T2 transformers were", "load": "26 MW", "reason": "due to tripping of About 26 MW power interruption occurred under Feni"}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "01 Feb 2014",
+    "dayPeakGen": 4562,
+    "eveningPeakGen": 5810,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 5810,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 100.505243,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 767.24,
+    "avgProductionCost": 1.567,
+    "totalDailyCost": 157508846
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 77.05,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 11.32,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 0.91,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "from 08:04 to 16:25",
+      "plant": "Dohazari-Cox'sbazar 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "due to A/M."
+    },
+    {
+      "time": "from 09:25 to 12:14",
+      "plant": "Shyampur 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to A/M."
+    },
+    {
+      "time": "from 09:40 to 15:45",
+      "plant": "Megnaghat 230 kV bus-1",
+      "load": "HT Outage",
+      "reason": "due to project work."
+    },
+    {
+      "time": "from 10:26 to 18:21",
+      "plant": "Haripur-Shyampur 132kV Ckt",
+      "load": "HT Outage",
+      "reason": "due to changing lightning"
+    },
+    {
+      "time": "from 11:30 to 16:02",
+      "plant": "Mymensingh 33 kV bus",
+      "load": "100 MW",
+      "reason": "due to replacing 33 kV bus About 100 MW power interruption occurred under Mymensingh"
+    },
+    {
+      "time": "at 22:33",
+      "plant": "After maintenance Chowmohani 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "After maintenance Chowmohani 132/33 kV T1 transformer was switched at 22:33."
+    },
+    {
+      "time": "at 06:20",
+      "plant": "Feni 132/33 kV T1 & T2 transformers were",
+      "load": "26 MW",
+      "reason": "due to tripping of About 26 MW power interruption occurred under Feni"
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report02-02-14.xls"
+  }
+}

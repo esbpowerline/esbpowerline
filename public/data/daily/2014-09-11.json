@@ -1,1 +1,214 @@
-{"systemStats": {"date": "11 Sep 2014", "dayPeakGen": 5386, "eveningPeakGen": 6313, "dayPeakDemand": null, "eveningPeakDemand": 7000, "minGen": null, "maxGen": null, "totalEnergyGen": 134.311376, "totalEnergyUnserved": null, "totalEnergyDemand": null, "maxTemp": null, "totalGasSuppliedPower": 778.99, "avgProductionCost": 4.427, "totalDailyCost": 594565199}, "generationData": [{"name": "Gas", "gen": 81.69, "cost": null, "unitCost": null, "color": "#0ea5e9"}, {"name": "Coal", "gen": 3.13, "cost": null, "unitCost": null, "color": "#64748b"}, {"name": "HFO", "gen": 36.86, "cost": null, "unitCost": null, "color": "#f97316"}, {"name": "Hydro", "gen": 3.57, "cost": null, "unitCost": null, "color": "#06b6d4"}, {"name": "Solar", "gen": 0, "cost": null, "unitCost": null, "color": "#eab308"}, {"name": "Imports", "gen": 0, "cost": null, "unitCost": null, "color": "#a855f7"}, {"name": "HSD (Diesel)", "gen": 0, "cost": null, "unitCost": null, "color": "#ef4444"}], "borderImportsData": [], "regionalDemandData": [], "dailyOutages": [{"time": "Outage", "plant": "There", "load": "625 MW", "reason": "There was generation shortage in the evening peak hour yesterday. So about 625 MW (21:00) of load shed was imposed over the whole areas"}, {"time": "from 09:39 to 02:36", "plant": "Rajshahi-Chapai Nawabganj 132 kV Ckt-2", "load": "HT Outage", "reason": "due to tower replacement work."}, {"time": "at 21:30", "plant": "Baghabari 100 MW", "load": "100 MW", "reason": "due to gas supply problem."}, {"time": "at 14:27", "plant": "After maintenance Haripur 412 MW ST", "load": "412 MW", "reason": "After maintenance Haripur 412 MW ST was synchronized at 14:27."}, {"time": "at 17:35", "plant": "Ghorashal #1", "load": "HT Outage", "reason": "due to gas shortage."}, {"time": "at 22:25", "plant": "Baghabari 71 MW", "load": "71 MW", "reason": "Baghabari 71 MW was synchronized at 22:25."}, {"time": "at 23:24", "plant": "Ashuganj unit-3", "load": "HT Outage", "reason": "due to condenser tube leakage."}, {"time": "at 06:30", "plant": "Jamalpur 132/33 kV T1 transformer", "load": "HT Outage", "reason": "due to project work."}], "hourlyLoadData": [], "gasProductionData": [{"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0, "condensate": 0, "share": 0}, {"company": "BAPEX (Shahbazpur, Srikail, Begumganj)", "fields": 9, "gas": 0, "condensate": 0, "share": 0}, {"company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)", "fields": 3, "gas": 0, "condensate": 0, "share": 0}, {"company": "Tullow (Bangora)", "fields": 1, "gas": 0, "condensate": 0, "share": 0}, {"company": "RPGCL (R-LNG Import / LNG Terminal)", "fields": 0, "gas": 0, "condensate": 0, "share": 0}], "gasDistributionData": [{"company": "TGTDCL (Dhaka & Mymensingh)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "BGDCL (Cumilla & Sylhet)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "KGDCL (Chattogram)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "JGTDSL (Sylhet region)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "PGCL (Rajshahi & Rangpur)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}, {"company": "SGCL (Barishal & Khulna)", "power": 0, "fertilizer": 0, "others": 0, "total": 0}], "regionalDemandSource": null}
+{
+  "systemStats": {
+    "date": "11 Sep 2014",
+    "dayPeakGen": 5386,
+    "eveningPeakGen": 6313,
+    "dayPeakDemand": null,
+    "eveningPeakDemand": 7000,
+    "minGen": null,
+    "maxGen": null,
+    "totalEnergyGen": 134.311376,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": null,
+    "maxTemp": null,
+    "totalGasSuppliedPower": 778.99,
+    "avgProductionCost": 4.427,
+    "totalDailyCost": 594565199
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 81.69,
+      "cost": null,
+      "unitCost": null,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 3.13,
+      "cost": null,
+      "unitCost": null,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 36.86,
+      "cost": null,
+      "unitCost": null,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 3.57,
+      "cost": null,
+      "unitCost": null,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD (Diesel)",
+      "gen": 0,
+      "cost": null,
+      "unitCost": null,
+      "color": "#ef4444"
+    }
+  ],
+  "borderImportsData": [],
+  "regionalDemandData": [],
+  "dailyOutages": [
+    {
+      "time": "Outage",
+      "plant": "There",
+      "load": "625 MW",
+      "reason": "There was generation shortage in the evening peak hour yesterday. So about 625 MW (21:00) of load shed was imposed over the whole areas"
+    },
+    {
+      "time": "from 09:39 to 02:36",
+      "plant": "Rajshahi-Chapai Nawabganj 132 kV Ckt-2",
+      "load": "HT Outage",
+      "reason": "due to tower replacement work."
+    },
+    {
+      "time": "at 21:30",
+      "plant": "Baghabari 100 MW",
+      "load": "100 MW",
+      "reason": "due to gas supply problem."
+    },
+    {
+      "time": "at 14:27",
+      "plant": "After maintenance Haripur 412 MW ST",
+      "load": "412 MW",
+      "reason": "After maintenance Haripur 412 MW ST was synchronized at 14:27."
+    },
+    {
+      "time": "at 17:35",
+      "plant": "Ghorashal #1",
+      "load": "HT Outage",
+      "reason": "due to gas shortage."
+    },
+    {
+      "time": "at 22:25",
+      "plant": "Baghabari 71 MW",
+      "load": "71 MW",
+      "reason": "Baghabari 71 MW was synchronized at 22:25."
+    },
+    {
+      "time": "at 23:24",
+      "plant": "Ashuganj unit-3",
+      "load": "HT Outage",
+      "reason": "due to condenser tube leakage."
+    },
+    {
+      "time": "at 06:30",
+      "plant": "Jamalpur 132/33 kV T1 transformer",
+      "load": "HT Outage",
+      "reason": "due to project work."
+    }
+  ],
+  "hourlyLoadData": [],
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "regionalDemandSource": null,
+  "sourceFiles": {
+    "pgcb": "Daily_Report12-09-14.xls"
+  }
+}

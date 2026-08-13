@@ -35,6 +35,9 @@ OUT = ROOT / "public" / "data" / "pgcb-monthly"
 
 # Fields the charts/KPIs/pickers need. Anything not listed stays per-month only.
 SERIES_FIELDS = (
+    # The report each month was read from — small, and it lets the explorer
+    # footer name the source file for any month in the picker.
+    "filename",
     "date_key",
     "month",
     "year",

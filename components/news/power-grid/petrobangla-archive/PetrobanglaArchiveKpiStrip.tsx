@@ -30,6 +30,8 @@ interface Props {
   peakDate?: string;
   /** Index-only values while daily JSON loads */
   preview?: boolean;
+  /** The PDF this gas-day was parsed from, named on each KPI it produced. */
+  sourceFile?: string | null;
 }
 
 type KpiTooltipId = 'stress' | 'total' | 'power' | 'lng' | 'domestic' | 'wells';
@@ -43,6 +45,7 @@ export function PetrobanglaArchiveKpiStrip({
   peakGas,
   peakDate,
   preview = false,
+  sourceFile,
 }: Props) {
   const [activeTooltip, setActiveTooltip] = useState<KpiTooltipId | null>(null);
   const pending = <span className="text-muted-foreground/60 animate-pulse">…</span>;
@@ -104,7 +107,7 @@ export function PetrobanglaArchiveKpiStrip({
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             Weights: power gap 30% · domestic 25% · LNG 20% · Bibiyana 30% · vs peak 10%
           </div>
-          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Report" gasDay={archiveDate} />
+          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Gas Intake/Offtake Report" part="I. Production — grand total" gasDay={archiveDate} sourceFile={sourceFile} />
         </GridKpiTooltipPanel>
       </div>
 
@@ -149,7 +152,7 @@ export function PetrobanglaArchiveKpiStrip({
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             {exactMatch ? `Synced to grid date ${gridDate}` : `Nearest gas-day to ${gridDate}`}
           </div>
-          <GridKpiTooltipGasRef refLabel="Petrobangla Production Division" gasDay={archiveDate} />
+          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Gas Intake/Offtake Report" part="I. Production" gasDay={archiveDate} sourceFile={sourceFile} />
         </GridKpiTooltipPanel>
       </div>
 
@@ -190,7 +193,7 @@ export function PetrobanglaArchiveKpiStrip({
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             Sector allocation from Petrobangla distribution summary
           </div>
-          <GridKpiTooltipGasRef refLabel="Petrobangla Sector Report" gasDay={archiveDate} />
+          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Gas Intake/Offtake Report" part="II. Distribution" gasDay={archiveDate} sourceFile={sourceFile} />
         </GridKpiTooltipPanel>
       </div>
 
@@ -222,7 +225,7 @@ export function PetrobanglaArchiveKpiStrip({
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             RPGCL terminals · regasified LNG counted separately from own-field gas
           </div>
-          <GridKpiTooltipGasRef refLabel="Petrobangla RPGCL" gasDay={archiveDate} />
+          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Gas Intake/Offtake Report" part="I. Production — RPGCL (R-LNG) rows" gasDay={archiveDate} sourceFile={sourceFile} />
         </GridKpiTooltipPanel>
       </div>
 
@@ -258,7 +261,7 @@ export function PetrobanglaArchiveKpiStrip({
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             All fields except RPGCL/LNG import terminals
           </div>
-          <GridKpiTooltipGasRef refLabel="Petrobangla Field Report" gasDay={archiveDate} />
+          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Gas Intake/Offtake Report" part="I. Production — field rows" gasDay={archiveDate} sourceFile={sourceFile} />
         </GridKpiTooltipPanel>
       </div>
 
@@ -300,7 +303,7 @@ export function PetrobanglaArchiveKpiStrip({
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             Fewer producing wells + falling field rates = structural depletion pressure
           </div>
-          <GridKpiTooltipGasRef refLabel="Petrobangla Well Status" gasDay={archiveDate} />
+          <GridKpiTooltipGasRef refLabel="Petrobangla Daily Gas Intake/Offtake Report" part="I. Production — producing-wells column" gasDay={archiveDate} sourceFile={sourceFile} />
         </GridKpiTooltipPanel>
       </div>
     </>
