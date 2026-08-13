@@ -10,7 +10,7 @@
     "parse_status": "ok",
     "warnings": [],
     "content_sha256": "379a013f982dfc8e34853bcfa1d8c9b5e3422bfa49ef7f09b5952aa5c8066c5c",
-    "agent_summary": "Petrobangla daily gas report for 11-12 Aug, 2026. 23 producing fields, 14 power plants tracked. Grand total gas production 2109.6 MMCFD.",
+    "agent_summary": "Petrobangla daily gas report for 11-12 Aug, 2026. 23 producing fields, 70 power plants tracked. Grand total gas production 2109.6 MMCFD.",
     "queryable_collections": [
       "production.fields",
       "production.subtotals",
@@ -476,56 +476,120 @@
         "company_code": "TGTDCL",
         "power_plants": [
           {
-            "name": "Total (1+2+3+4+5):",
-            "demand_mmcfd": 3854.0,
+            "name": "Ghorashal (1315 MW)",
+            "demand_mmcfd": 148.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "MW",
-            "demand_mmcfd": 61.0,
+            "name": "SUMMIT MEGHT-2 (583)",
+            "demand_mmcfd": 96.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "Meghn. MW",
-            "demand_mmcfd": 52.3,
+            "name": "Aggreeko (GSL)-145 MW Ren",
+            "demand_mmcfd": 38.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "Meghnaghat (718MW)",
-            "demand_mmcfd": 50.2,
+            "name": "UNIQUE MEGHT. (584 MW)",
+            "demand_mmcfd": 96.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "Shiddhirgonj MW",
-            "demand_mmcfd": 49.9,
-            "supply_mmcfd": 0.0
-          },
-          {
-            "name": "MW",
-            "demand_mmcfd": 15.3,
-            "supply_mmcfd": 0.0
-          },
-          {
-            "name": "MW",
-            "demand_mmcfd": 50.3,
-            "supply_mmcfd": 0.0
-          },
-          {
-            "name": "MW",
+            "name": "Siddhirganj (2x120 MW)",
             "demand_mmcfd": 52.0,
+            "supply_mmcfd": 6.8
+          },
+          {
+            "name": "HPS (100 MW)",
+            "demand_mmcfd": 16.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "MW",
-            "demand_mmcfd": 26.3,
+            "name": "HPS(EGCB) 412 MW",
+            "demand_mmcfd": 68.0,
+            "supply_mmcfd": 61.0
+          },
+          {
+            "name": "Meghnaghat IPP 450 MW",
+            "demand_mmcfd": 75.0,
             "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Summit Meghn. 335 MW",
+            "demand_mmcfd": 55.0,
+            "supply_mmcfd": 52.3
+          },
+          {
+            "name": "JERA Meghnaghat (718MW)",
+            "demand_mmcfd": 130.0,
+            "supply_mmcfd": 50.2
+          },
+          {
+            "name": "RPCL (210 MW)",
+            "demand_mmcfd": 40.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Madhabdi (27+10 MW) REB",
+            "demand_mmcfd": 9.0,
+            "supply_mmcfd": 4.8
+          },
+          {
+            "name": "Ashulia (24+10 MW) REB",
+            "demand_mmcfd": 10.0,
+            "supply_mmcfd": 3.0
+          },
+          {
+            "name": "Doreen Tangail 22 MW SIPP",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Doreen Narsingdi 22 MW SIPP",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Maona 33 MW SIPP",
+            "demand_mmcfd": 8.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Rupganj 33 MW SIPP",
+            "demand_mmcfd": 8.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "EGCB Shiddhirgonj 335 MW",
+            "demand_mmcfd": 55.0,
+            "supply_mmcfd": 49.9
+          },
+          {
+            "name": "HPL ( 360 MW )",
+            "demand_mmcfd": 55.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Regent 108 MW",
+            "demand_mmcfd": 27.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "UPGD (grid Part) 81.62 MW",
+            "demand_mmcfd": null,
+            "supply_mmcfd": 1.2
           }
         ],
-        "power_demand_mmcfd": null,
-        "power_supply_mmcfd": null,
-        "fertilizer": null,
-        "others_supplementary_mmcfd": null,
-        "total_mmcfd": null,
+        "power_demand_mmcfd": 996.0,
+        "power_supply_mmcfd": 229.1,
+        "fertilizer": {
+          "company": null,
+          "demand_mmcfd": 117.0,
+          "supply_mmcfd": 64.3
+        },
+        "others_supplementary_mmcfd": 902.4,
+        "total_mmcfd": 1195.8,
         "remarks_shutdown_plants": []
       },
       {
@@ -533,26 +597,80 @@
         "company_code": "BGDCL",
         "power_plants": [
           {
-            "name": "MW rental",
-            "demand_mmcfd": 11.1,
+            "name": "Ashuganj 55 MW rental",
+            "demand_mmcfd": 71.0,
+            "supply_mmcfd": 11.1
+          },
+          {
+            "name": "Ashuganj -80 MW Rent",
+            "demand_mmcfd": 0.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "MW Modular",
-            "demand_mmcfd": 11.8,
+            "name": "Ashuganj 225MW",
+            "demand_mmcfd": 40.0,
+            "supply_mmcfd": 35.8
+          },
+          {
+            "name": "United. 200 MW Modular",
+            "demand_mmcfd": 40.0,
+            "supply_mmcfd": 11.8
+          },
+          {
+            "name": "APS 450 MW CCPP S",
+            "demand_mmcfd": 65.0,
+            "supply_mmcfd": 22.3
+          },
+          {
+            "name": "APS 450 MW CCPP N",
+            "demand_mmcfd": 65.0,
+            "supply_mmcfd": 54.7
+          },
+          {
+            "name": "APS 450 MW CCPP E",
+            "demand_mmcfd": 75.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "MW CCPP S",
-            "demand_mmcfd": 22.3,
+            "name": "Feni-22 MW SIPP",
+            "demand_mmcfd": 5.2,
             "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Mohipal-11 MW SIPP",
+            "demand_mmcfd": 2.7,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Jangalia-33 MW SIPP",
+            "demand_mmcfd": 7.8,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Chandpur 150 MW CCPP",
+            "demand_mmcfd": 34.0,
+            "supply_mmcfd": 21.9
+          },
+          {
+            "name": "Comilla REB 24 MW",
+            "demand_mmcfd": 6.2,
+            "supply_mmcfd": 4.0
+          },
+          {
+            "name": "Midland Power 51 MW",
+            "demand_mmcfd": 12.0,
+            "supply_mmcfd": 9.9
           }
         ],
-        "power_demand_mmcfd": null,
-        "power_supply_mmcfd": null,
-        "fertilizer": null,
-        "others_supplementary_mmcfd": null,
-        "total_mmcfd": null,
+        "power_demand_mmcfd": 423.9,
+        "power_supply_mmcfd": 171.6,
+        "fertilizer": {
+          "company": null,
+          "demand_mmcfd": 52.0,
+          "supply_mmcfd": 0.0
+        },
+        "others_supplementary_mmcfd": 83.8,
+        "total_mmcfd": 255.5,
         "remarks_shutdown_plants": []
       },
       {
@@ -560,20 +678,242 @@
         "company_code": "KGDCL",
         "power_plants": [
           {
-            "name": "(225+150+65) MW",
-            "demand_mmcfd": 32.7,
+            "name": "Raozan (2x210) MW",
+            "demand_mmcfd": 95.0,
             "supply_mmcfd": 0.0
           },
           {
-            "name": "MW CCPP",
-            "demand_mmcfd": 24.2,
+            "name": "Sikalbaha (40 MW)",
+            "demand_mmcfd": 12.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Sikalbaha (225+150+65) MW",
+            "demand_mmcfd": 73.0,
+            "supply_mmcfd": 32.7
+          },
+          {
+            "name": "Barabkunda 22 MW SIPP",
+            "demand_mmcfd": 5.0,
             "supply_mmcfd": 0.0
           }
         ],
-        "power_demand_mmcfd": null,
-        "power_supply_mmcfd": null,
-        "fertilizer": null,
-        "others_supplementary_mmcfd": null,
+        "power_demand_mmcfd": 185.0,
+        "power_supply_mmcfd": 32.7,
+        "fertilizer": {
+          "company": null,
+          "demand_mmcfd": 115.0,
+          "supply_mmcfd": 49.2
+        },
+        "others_supplementary_mmcfd": 139.0,
+        "total_mmcfd": 220.9,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "JGTDSL",
+        "company_code": "JGTDSL",
+        "power_plants": [
+          {
+            "name": "Shahjibazar 2x30 MW",
+            "demand_mmcfd": 18.0,
+            "supply_mmcfd": 9.1
+          },
+          {
+            "name": "S.Bazar 3 yrs rental 50 MW",
+            "demand_mmcfd": 12.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "S.Bazar 15 yrs rent 86 MW",
+            "demand_mmcfd": 20.0,
+            "supply_mmcfd": 17.1
+          },
+          {
+            "name": "S.Bazar 330 MW",
+            "demand_mmcfd": 47.0,
+            "supply_mmcfd": 15.3
+          },
+          {
+            "name": "S.Bazar 100 MW",
+            "demand_mmcfd": 18.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Fenchuganj CC1 90 MW",
+            "demand_mmcfd": 17.0,
+            "supply_mmcfd": 9.2
+          },
+          {
+            "name": "Fenchuganj CC2 105 MW",
+            "demand_mmcfd": 18.0,
+            "supply_mmcfd": 9.1
+          },
+          {
+            "name": "Kumargaon 20 MW",
+            "demand_mmcfd": 2.0,
+            "supply_mmcfd": 0.6
+          },
+          {
+            "name": "K.gaon 3 yrs rent 50 MW",
+            "demand_mmcfd": 12.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "K.gaon 15 yrs rent 10 MW",
+            "demand_mmcfd": 3.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "K gaon 142 MW CCPP",
+            "demand_mmcfd": 36.0,
+            "supply_mmcfd": 24.2
+          },
+          {
+            "name": "Habiganj 11 MW SIPP",
+            "demand_mmcfd": 3.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "F.ganj 15 yrs rent 51 MW",
+            "demand_mmcfd": 13.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "F.ganj 3 yrs rent 50 MW",
+            "demand_mmcfd": 10.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Shahjahanullah pgcl Rent",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 1.5
+          },
+          {
+            "name": "Bibiyana-2 341 MW",
+            "demand_mmcfd": 50.0,
+            "supply_mmcfd": 50.3
+          },
+          {
+            "name": "Bibiyana-3 400 MW",
+            "demand_mmcfd": 40.0,
+            "supply_mmcfd": 52.0
+          },
+          {
+            "name": "Bibiyana-S,400 MW,PDB",
+            "demand_mmcfd": 43.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Khushiyara 163 MW",
+            "demand_mmcfd": 28.0,
+            "supply_mmcfd": 26.3
+          }
+        ],
+        "power_demand_mmcfd": 395.0,
+        "power_supply_mmcfd": 214.6,
+        "fertilizer": {
+          "company": null,
+          "demand_mmcfd": 45.0,
+          "supply_mmcfd": 7.4
+        },
+        "others_supplementary_mmcfd": 98.0,
+        "total_mmcfd": 319.9,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "PGCL",
+        "company_code": "PGCL",
+        "power_plants": [
+          {
+            "name": "Baghabari (100+71 MW)",
+            "demand_mmcfd": 50.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Bogra 15 yrs rent (20 MW)",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Ullapara 11 MW SIPP",
+            "demand_mmcfd": 3.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Bogra 3 yrs rent (20 MW)",
+            "demand_mmcfd": 5.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NWPGCL Unit -1",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 28.1
+          },
+          {
+            "name": "NWPGCL Unit -2",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NWPGCL Unit -3",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NWPGCL Unit -4",
+            "demand_mmcfd": 70.0,
+            "supply_mmcfd": 40.4
+          }
+        ],
+        "power_demand_mmcfd": 247.0,
+        "power_supply_mmcfd": 68.5,
+        "fertilizer": {
+          "company": null,
+          "demand_mmcfd": 0.0,
+          "supply_mmcfd": 31.1
+        },
+        "others_supplementary_mmcfd": 99.6,
+        "total_mmcfd": null,
+        "remarks_shutdown_plants": []
+      },
+      {
+        "company": "SGCL",
+        "company_code": "SGCL",
+        "power_plants": [
+          {
+            "name": "Bhola 3 yrs rent 34.5 MW",
+            "demand_mmcfd": 10.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Bhola 225 MW",
+            "demand_mmcfd": 35.0,
+            "supply_mmcfd": 30.3
+          },
+          {
+            "name": "Bheramara 360MW",
+            "demand_mmcfd": 65.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "Rupsha 800 MW",
+            "demand_mmcfd": 130.0,
+            "supply_mmcfd": 0.0
+          },
+          {
+            "name": "NBBL220MW",
+            "demand_mmcfd": 38.0,
+            "supply_mmcfd": 36.6
+          }
+        ],
+        "power_demand_mmcfd": 278.0,
+        "power_supply_mmcfd": 66.9,
+        "fertilizer": {
+          "company": null,
+          "demand_mmcfd": 0.0,
+          "supply_mmcfd": 6.3
+        },
+        "others_supplementary_mmcfd": 73.2,
         "total_mmcfd": null,
         "remarks_shutdown_plants": []
       }
@@ -617,13 +957,14 @@
       }
     },
     "non_grid_power": [],
-    "plant_count": 14
+    "plant_count": 70
   },
   "validation": {
     "field_gas_sum_mmcfd": 2109.7,
     "grand_total_gas_mmcfd": 2109.6,
     "variance_mmcfd": 0.1,
-    "reconciled": true
+    "reconciled": true,
+    "distribution_reconciled": true
   },
   "entities": [
     {
@@ -858,101 +1199,493 @@
     },
     {
       "type": "power_plant",
-      "name": "Total (1+2+3+4+5):",
+      "name": "Ghorashal (1315 MW)",
       "distribution_company": "TGTDCL",
-      "demand_mmcfd": 3854.0,
+      "demand_mmcfd": 148.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "MW",
+      "name": "SUMMIT MEGHT-2 (583)",
       "distribution_company": "TGTDCL",
-      "demand_mmcfd": 61.0,
+      "demand_mmcfd": 96.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "Meghn. MW",
+      "name": "Aggreeko (GSL)-145 MW Ren",
       "distribution_company": "TGTDCL",
-      "demand_mmcfd": 52.3,
+      "demand_mmcfd": 38.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "Meghnaghat (718MW)",
+      "name": "UNIQUE MEGHT. (584 MW)",
       "distribution_company": "TGTDCL",
-      "demand_mmcfd": 50.2,
+      "demand_mmcfd": 96.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "Shiddhirgonj MW",
-      "distribution_company": "TGTDCL",
-      "demand_mmcfd": 49.9,
-      "supply_mmcfd": 0.0
-    },
-    {
-      "type": "power_plant",
-      "name": "MW",
-      "distribution_company": "TGTDCL",
-      "demand_mmcfd": 15.3,
-      "supply_mmcfd": 0.0
-    },
-    {
-      "type": "power_plant",
-      "name": "MW",
-      "distribution_company": "TGTDCL",
-      "demand_mmcfd": 50.3,
-      "supply_mmcfd": 0.0
-    },
-    {
-      "type": "power_plant",
-      "name": "MW",
+      "name": "Siddhirganj (2x120 MW)",
       "distribution_company": "TGTDCL",
       "demand_mmcfd": 52.0,
-      "supply_mmcfd": 0.0
+      "supply_mmcfd": 6.8
     },
     {
       "type": "power_plant",
-      "name": "MW",
+      "name": "HPS (100 MW)",
       "distribution_company": "TGTDCL",
-      "demand_mmcfd": 26.3,
+      "demand_mmcfd": 16.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "MW rental",
+      "name": "HPS(EGCB) 412 MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 68.0,
+      "supply_mmcfd": 61.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Meghnaghat IPP 450 MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 75.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Summit Meghn. 335 MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 55.0,
+      "supply_mmcfd": 52.3
+    },
+    {
+      "type": "power_plant",
+      "name": "JERA Meghnaghat (718MW)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 130.0,
+      "supply_mmcfd": 50.2
+    },
+    {
+      "type": "power_plant",
+      "name": "RPCL (210 MW)",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 40.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Madhabdi (27+10 MW) REB",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 9.0,
+      "supply_mmcfd": 4.8
+    },
+    {
+      "type": "power_plant",
+      "name": "Ashulia (24+10 MW) REB",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 10.0,
+      "supply_mmcfd": 3.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Doreen Tangail 22 MW SIPP",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Doreen Narsingdi 22 MW SIPP",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Maona 33 MW SIPP",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 8.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Rupganj 33 MW SIPP",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 8.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "EGCB Shiddhirgonj 335 MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 55.0,
+      "supply_mmcfd": 49.9
+    },
+    {
+      "type": "power_plant",
+      "name": "HPL ( 360 MW )",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 55.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Regent 108 MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": 27.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "UPGD (grid Part) 81.62 MW",
+      "distribution_company": "TGTDCL",
+      "demand_mmcfd": null,
+      "supply_mmcfd": 1.2
+    },
+    {
+      "type": "power_plant",
+      "name": "Ashuganj 55 MW rental",
       "distribution_company": "BGDCL",
-      "demand_mmcfd": 11.1,
-      "supply_mmcfd": 0.0
+      "demand_mmcfd": 71.0,
+      "supply_mmcfd": 11.1
     },
     {
       "type": "power_plant",
-      "name": "MW Modular",
+      "name": "Ashuganj -80 MW Rent",
       "distribution_company": "BGDCL",
-      "demand_mmcfd": 11.8,
+      "demand_mmcfd": 0.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "MW CCPP S",
+      "name": "Ashuganj 225MW",
       "distribution_company": "BGDCL",
-      "demand_mmcfd": 22.3,
+      "demand_mmcfd": 40.0,
+      "supply_mmcfd": 35.8
+    },
+    {
+      "type": "power_plant",
+      "name": "United. 200 MW Modular",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 40.0,
+      "supply_mmcfd": 11.8
+    },
+    {
+      "type": "power_plant",
+      "name": "APS 450 MW CCPP S",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 65.0,
+      "supply_mmcfd": 22.3
+    },
+    {
+      "type": "power_plant",
+      "name": "APS 450 MW CCPP N",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 65.0,
+      "supply_mmcfd": 54.7
+    },
+    {
+      "type": "power_plant",
+      "name": "APS 450 MW CCPP E",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 75.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "(225+150+65) MW",
+      "name": "Feni-22 MW SIPP",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 5.2,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Mohipal-11 MW SIPP",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 2.7,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Jangalia-33 MW SIPP",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 7.8,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Chandpur 150 MW CCPP",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 34.0,
+      "supply_mmcfd": 21.9
+    },
+    {
+      "type": "power_plant",
+      "name": "Comilla REB 24 MW",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 6.2,
+      "supply_mmcfd": 4.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Midland Power 51 MW",
+      "distribution_company": "BGDCL",
+      "demand_mmcfd": 12.0,
+      "supply_mmcfd": 9.9
+    },
+    {
+      "type": "power_plant",
+      "name": "Raozan (2x210) MW",
       "distribution_company": "KGDCL",
-      "demand_mmcfd": 32.7,
+      "demand_mmcfd": 95.0,
       "supply_mmcfd": 0.0
     },
     {
       "type": "power_plant",
-      "name": "MW CCPP",
+      "name": "Sikalbaha (40 MW)",
       "distribution_company": "KGDCL",
-      "demand_mmcfd": 24.2,
+      "demand_mmcfd": 12.0,
       "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Sikalbaha (225+150+65) MW",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 73.0,
+      "supply_mmcfd": 32.7
+    },
+    {
+      "type": "power_plant",
+      "name": "Barabkunda 22 MW SIPP",
+      "distribution_company": "KGDCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Shahjibazar 2x30 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 18.0,
+      "supply_mmcfd": 9.1
+    },
+    {
+      "type": "power_plant",
+      "name": "S.Bazar 3 yrs rental 50 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 12.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "S.Bazar 15 yrs rent 86 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 20.0,
+      "supply_mmcfd": 17.1
+    },
+    {
+      "type": "power_plant",
+      "name": "S.Bazar 330 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 47.0,
+      "supply_mmcfd": 15.3
+    },
+    {
+      "type": "power_plant",
+      "name": "S.Bazar 100 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 18.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Fenchuganj CC1 90 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 17.0,
+      "supply_mmcfd": 9.2
+    },
+    {
+      "type": "power_plant",
+      "name": "Fenchuganj CC2 105 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 18.0,
+      "supply_mmcfd": 9.1
+    },
+    {
+      "type": "power_plant",
+      "name": "Kumargaon 20 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 2.0,
+      "supply_mmcfd": 0.6
+    },
+    {
+      "type": "power_plant",
+      "name": "K.gaon 3 yrs rent 50 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 12.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "K.gaon 15 yrs rent 10 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 3.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "K gaon 142 MW CCPP",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 36.0,
+      "supply_mmcfd": 24.2
+    },
+    {
+      "type": "power_plant",
+      "name": "Habiganj 11 MW SIPP",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 3.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "F.ganj 15 yrs rent 51 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 13.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "F.ganj 3 yrs rent 50 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 10.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Shahjahanullah pgcl Rent",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 1.5
+    },
+    {
+      "type": "power_plant",
+      "name": "Bibiyana-2 341 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 50.0,
+      "supply_mmcfd": 50.3
+    },
+    {
+      "type": "power_plant",
+      "name": "Bibiyana-3 400 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 40.0,
+      "supply_mmcfd": 52.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Bibiyana-S,400 MW,PDB",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 43.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Khushiyara 163 MW",
+      "distribution_company": "JGTDSL",
+      "demand_mmcfd": 28.0,
+      "supply_mmcfd": 26.3
+    },
+    {
+      "type": "power_plant",
+      "name": "Baghabari (100+71 MW)",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 50.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Bogra 15 yrs rent (20 MW)",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Ullapara 11 MW SIPP",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 3.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Bogra 3 yrs rent (20 MW)",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 5.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NWPGCL Unit -1",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 28.1
+    },
+    {
+      "type": "power_plant",
+      "name": "NWPGCL Unit -2",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NWPGCL Unit -3",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NWPGCL Unit -4",
+      "distribution_company": "PGCL",
+      "demand_mmcfd": 70.0,
+      "supply_mmcfd": 40.4
+    },
+    {
+      "type": "power_plant",
+      "name": "Bhola 3 yrs rent 34.5 MW",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 10.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Bhola 225 MW",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 35.0,
+      "supply_mmcfd": 30.3
+    },
+    {
+      "type": "power_plant",
+      "name": "Bheramara 360MW",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 65.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "Rupsha 800 MW",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 130.0,
+      "supply_mmcfd": 0.0
+    },
+    {
+      "type": "power_plant",
+      "name": "NBBL220MW",
+      "distribution_company": "SGCL",
+      "demand_mmcfd": 38.0,
+      "supply_mmcfd": 36.6
     }
   ]
 }

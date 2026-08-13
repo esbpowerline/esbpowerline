@@ -261,36 +261,97 @@ def parse_dist_summary(words):
             'grand_total': grand_total or total_ or empty, 'pct_of_total_distribution': pct or empty}
 
 
+def dist_region(words):
+    """(top, bottom) y of the II. Distribution table, read off its own landmarks.
+
+    Fixed y bounds do not survive the archive: the reports ship on both Letter
+    (612x792) and A4 (595x842) pages, which move the table by 20-45px.
+    """
+    tops = [w[1] for w in words if w[4].startswith('Distribution') and w[1] > 120]
+    if not tops:
+        return None, None
+    top = min(tops)
+    # the table closes on a left-hand "Total :" row below every Sub-Total; the
+    # right-hand "Total" belongs to the SGFL panel, so keep to the left columns.
+    left = map_ref_x(words, 300.0)
+    bots = [w[1] for w in words if w[4] == 'Total' and w[1] > top and w[0] < left]
+    return top, (max(bots) if bots else max(w[1] for w in words))
+
+
 def parse_dist_plants(words):
-    """Left plant column: name + demand (x~198-216) + supply (x~216-236).
-    Supply frequently wraps to the next y; pair by nearest y within 8px."""
-    demands, supplies, names = {}, {}, {}
-    for w in words:
-        x, y, txt = w[0], round(w[1]), w[4]
-        if 240 <= y <= 700:
-            if 98 <= x <= 196 and not NUM.match(txt):
-                names.setdefault(y, []).append((x, txt))
-            elif 196 < x <= 216 and NUM.match(txt):
-                demands[y] = float(txt)
-            elif 216 < x <= 240 and NUM.match(txt):
-                supplies[y] = float(txt)
-    plants = []
-    for y in sorted(names):
-        nm = ' '.join(t for _, t in sorted(names[y]))
-        nm = nm.strip()
-        if not nm or nm.startswith('Sub-Total') or 'Company' in nm or 'Power' in nm.split()[:1]:
-            continue
-        dem = demands.get(y)
-        # supply: same row, else nearest within +/-8px
-        sup = supplies.get(y)
-        if sup is None:
-            for dy in (3, -3, 5, -5, 8, -8):
-                if y + dy in supplies and (y + dy) not in names:
-                    sup = supplies[y + dy]; break
-        if dem is None:
-            continue
-        plants.append(dict(name=nm, demand_mmcfd=dem, supply_mmcfd=sup if sup is not None else 0.0))
-    return plants
+    """Plant rows of the II. Distribution table, plus each company's Sub-Total.
+
+    Returns (plants, blocks). Every plant carries the company_code of the block it
+    sits in; blocks maps that code to the six figures the report prints on the
+    company's Sub-Total row.
+
+    The demand/supply columns are located from those Sub-Total rows rather than
+    pinned to absolute x. The previous fixed bands were measured on a Letter page
+    (demand x 196-216), so on an A4 file — where demand sits at x~179 — every row
+    missed the band and was dropped by the `dem is None` guard: 2026-08-11 kept 14
+    plants of 69 and lost three of six companies, while still reporting status
+    'ok'. Anchoring on the row that closes each block makes the columns
+    self-locating on both page sizes, and gives the totals to reconcile against.
+    """
+    top, bot = dist_region(words)
+    if top is None:
+        return [], {}
+
+    rows = rows_in(words, 0.0, map_ref_x(words, 420.0), top, bot)
+    bounds = []
+    for y, ws in rows:
+        if ' '.join(w[4] for w in ws).lstrip().startswith('Sub-Total'):
+            nums = [v for _, v in sorted((w[0], float(w[4])) for w in ws if NUM.match(w[4]))]
+            xs = sorted(w[0] for w in ws if NUM.match(w[4]))
+            bounds.append((y, nums, xs))
+    anchored = [b for b in bounds if len(b[2]) >= 2]
+    if not anchored:
+        return [], {}
+
+    def median(vals):
+        s = sorted(vals)
+        return s[len(s) // 2]
+
+    dem_x = median([b[2][0] for b in anchored])
+    sup_x = median([b[2][1] for b in anchored])
+    tol = max(6.0, (sup_x - dem_x) / 2.0 - 2.0)
+
+    # a company label sits in the gutter left of the plant names; the lowercase
+    # "pgcl" inside "Shahjahanullah pgcl Rent" is a plant name, so match case.
+    labels = [(w[1], w[4]) for w in words if w[4] in DIST_CODES]
+
+    def code_for(y0, y1):
+        hit = [c for ly, c in labels if y0 < ly <= y1]
+        return hit[0] if hit else None
+
+    blocks, plants = {}, []
+    prev = top
+    for y, nums, _xs in bounds:
+        code = code_for(prev, y)
+        if code:
+            blocks[code] = nums
+        for ry, ws in rows:
+            if not (prev < ry <= y):
+                continue
+            name = ' '.join(w[4] for w in ws
+                            if w[0] < dem_x - tol and w[4] not in DIST_CODES).strip()
+            if not name or name.startswith(('Sub-Total', 'Total', 'Company')):
+                continue
+            dem = sup = None
+            for w in ws:
+                if not NUM.match(w[4]):
+                    continue
+                if abs(w[0] - dem_x) <= tol and dem is None:
+                    dem = float(w[4])
+                elif abs(w[0] - sup_x) <= tol and sup is None:
+                    sup = float(w[4])
+            # a row with neither figure is a wrapped label, not a plant
+            if dem is None and sup is None:
+                continue
+            plants.append(dict(name=name, demand_mmcfd=dem, supply_mmcfd=sup or 0.0,
+                               company_code=code))
+        prev = y
+    return plants, blocks
 
 
 def main():
@@ -308,49 +369,38 @@ def main():
     reconciled = variance <= 5.0
 
     summary = parse_dist_summary(words)
-    plants = parse_dist_plants(words)
+    plants, blocks = parse_dist_plants(words)
 
-    # group plants under distribution companies by y-order of DIST_CODES labels
-    label_y = {}
-    for w in words:
-        u = w[4].upper()
-        if u in DIST_CODES and w[0] < 200:
-            label_y.setdefault(u, w[1])
-    # assign each plant to the company whose label-y is closest-below its first plant;
-    # simpler: split plant list into 6 groups by the label y boundaries
-    companies = []
-    # Fallback: keep all plants but tag by nearest company code above
-    # Build companies list preserving DIST_CODES order
+    # Each plant already carries the code of the Sub-Total block it sits in, and
+    # that Sub-Total is what the rows are checked against below.
+    companies, dist_warnings = [], []
     for code in DIST_CODES:
-        companies.append(dict(company=code, company_code=code, power_plants=[],
-                              power_demand_mmcfd=None, power_supply_mmcfd=None,
-                              fertilizer=None, others_supplementary_mmcfd=None,
-                              total_mmcfd=None, remarks_shutdown_plants=[]))
-    # distribute plants: pymupdf gives them top-to-bottom; use label ys to bucket
-    ordered = sorted(label_y.items(), key=lambda kv: kv[1]) if label_y else []
-    def code_for_y(py):
-        best = DIST_CODES[0]
-        for code, ly in ordered:
-            if py >= ly - 60:  # label sits within the company's block
-                best = code
-        return best
-    # re-run plant extraction carrying y
-    plant_y = {}
-    tmpnames = defaultdict(list)
-    for w in words:
-        if 240 <= round(w[1]) <= 700 and 98 <= w[0] <= 196 and not NUM.match(w[4]):
-            tmpnames[round(w[1])].append((w[0], w[4]))
-    for p in plants:
-        # find its y by name match
-        for y, toks in tmpnames.items():
-            if ' '.join(t for _, t in sorted(toks)).strip() == p['name']:
-                plant_y[p['name']] = y; break
-    cmap = {c['company_code']: c for c in companies}
-    for p in plants:
-        code = code_for_y(plant_y.get(p['name'], 999))
-        cmap[code]['power_plants'].append(p)
-    companies = [c for c in companies if c['power_plants']]
+        mine = [dict(name=p['name'], demand_mmcfd=p['demand_mmcfd'],
+                     supply_mmcfd=p['supply_mmcfd'])
+                for p in plants if p['company_code'] == code]
+        if not mine:
+            continue
+        n = (blocks.get(code, []) + [None] * 6)[:6]
+        companies.append(dict(company=code, company_code=code, power_plants=mine,
+                              power_demand_mmcfd=n[0], power_supply_mmcfd=n[1],
+                              fertilizer=dict(company=None, demand_mmcfd=n[2],
+                                              supply_mmcfd=n[3]),
+                              others_supplementary_mmcfd=n[4], total_mmcfd=n[5],
+                              remarks_shutdown_plants=[]))
+        # the report prints each block's totals; rows that silently go missing
+        # show up here as a gap rather than as a plausible smaller number.
+        for key, idx in (('demand', 0), ('supply', 1)):
+            printed = n[idx]
+            if printed is None:
+                continue
+            got = round(sum((p['%s_mmcfd' % key] or 0.0) for p in mine), 1)
+            if abs(got - printed) > 0.5:
+                dist_warnings.append(
+                    f"{code} {key} {got} != printed Sub-Total {printed}")
     plant_count = sum(len(c['power_plants']) for c in companies)
+    if len(companies) < len(DIST_CODES):
+        missing = [c for c in DIST_CODES if c not in {x['company_code'] for x in companies}]
+        dist_warnings.append('no plant rows for ' + ', '.join(missing))
 
     entities = [dict(type='gas_field', id=f['id'], name=f['field'], company_code=f['company_code'],
                      operator=f['operator'], gas_mmcfd=f['gas_mmcfd'],
@@ -368,7 +418,9 @@ def main():
         '$schema': 'petrobangla-daily/v1',
         'meta': dict(schema_version='1.0.0', parser_version='2.0.0-reconstructed',
                      source_pdf=pdf, source_filename=pdf.split('\\')[-1],
-                     parsed_at=None, page_count=doc.page_count, parse_status='ok', warnings=[],
+                     parsed_at=None, page_count=doc.page_count,
+                     parse_status=('ok' if not dist_warnings else 'partial'),
+                     warnings=dist_warnings,
                      content_sha256=hashlib.sha256(raw).hexdigest(),
                      agent_summary=f"Petrobangla daily gas report for {label}. {len(fields)} producing fields, {plant_count} power plants tracked. Grand total gas production {grand_gas} MMCFD.",
                      queryable_collections=['production.fields', 'production.subtotals',
@@ -382,10 +434,12 @@ def main():
         'sgfl': dict(products={}, pipeline_metrics={}, pipeline_total=None),
         'distribution': dict(companies=companies, summary=summary, non_grid_power=[], plant_count=plant_count),
         'validation': dict(field_gas_sum_mmcfd=field_gas_sum, grand_total_gas_mmcfd=grand_gas,
-                           variance_mmcfd=variance, reconciled=reconciled),
+                           variance_mmcfd=variance, reconciled=reconciled,
+                           distribution_reconciled=not dist_warnings),
         'entities': entities,
     }
     result = json.dumps(dict(ok=reconciled, energy=energy_iso, fields=len(fields), plants=plant_count,
+                             companies=len(companies), dist_warnings=dist_warnings,
                              field_gas_sum=field_gas_sum, grand=grand_gas, variance=variance,
                              power_demand=summary['grand_total']['power_demand_mmcfd'],
                              power_supply=summary['grand_total']['power_supply_mmcfd']))
