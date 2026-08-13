@@ -81,6 +81,12 @@ import {
 } from '@/lib/data/pgcb-monthly-verification';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
 import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
+import {
+  GenerationKpiStrip,
+  ImportsKpiStrip,
+  RegionalKpiStrip,
+  StationsKpiStrip,
+} from '@/components/news/power-grid/TabKpiStrips';
 import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
 import { BpdbAccountsPanel } from '@/components/news/power-grid/BpdbAccountsPanel';
 import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
@@ -1446,6 +1452,7 @@ export function PowerGridExplorer({
         tooltipDate={tooltipDate}
         avgCostPerKwh={avgCostPerKwh}
         totalCapacityRenewables={totalCapacityRenewables}
+        isoDate={selectedDate}
       />
 </GridLockedContent>
 
@@ -2153,6 +2160,12 @@ export function PowerGridExplorer({
             </div>
           </div>
         ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
+          <GenerationKpiStrip
+            systemStats={systemStats}
+            generationData={generationData}
+            sourceFiles={sourceFiles}
+          />
+
           {methodologyBanner}
 
           {/* The day's fuel mix as a shape rather than a total. Fetches its own
@@ -2638,6 +2651,13 @@ export function PowerGridExplorer({
             </div>
           </div>
         ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
+          <ImportsKpiStrip
+            systemStats={systemStats}
+            generationData={generationData}
+            borderImportsData={borderImportsData}
+            sourceFiles={sourceFiles}
+          />
+
           {methodologyBanner}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
@@ -2798,7 +2818,10 @@ export function PowerGridExplorer({
       )}
 
       {!isDataMissing && activeTab === 'plants' && (
-        <PowerStationsTab isoDate={selectedDate} systemStats={systemStats} sourceFiles={sourceFiles} />
+        <div className="space-y-6">
+          <StationsKpiStrip isoDate={selectedDate} systemStats={systemStats} sourceFiles={sourceFiles} />
+          <PowerStationsTab isoDate={selectedDate} systemStats={systemStats} sourceFiles={sourceFiles} />
+        </div>
       )}
 
       {!isDataMissing && activeTab === 'transmission' && (
@@ -4994,6 +5017,19 @@ export function PowerGridExplorer({
             </div>
           </div>
         ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
+          {/* The zone table is BPDB's on the days PGCB published none, so the
+              strip names whichever sheet this day's rows actually came from. */}
+          <RegionalKpiStrip
+            systemStats={systemStats}
+            regionalDemandData={regionalDemandData}
+            sourceFiles={sourceFiles}
+            sourceLabel={
+              regionalDemandSource === 'bpdb-published'
+                ? 'BPDB daily generation report — zone table'
+                : 'P1 sheet — zone-wise demand and load-shed table'
+            }
+          />
+
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Regional Table */}
             <div className="grid-explorer-chart-card card lg:col-span-2">
@@ -5137,7 +5173,13 @@ export function PowerGridExplorer({
                 </div>
               </div>
 
-              <div className="space-y-4 max-h-[31.5rem] overflow-y-auto pr-1">
+              {/* Grows into whatever height the zone table beside it sets, rather
+                  than stopping at a fixed 31.5rem and leaving the footer stranded
+                  at the bottom of the stretched card. The basis keeps that height
+                  when the card stands alone (one column on small screens), and
+                  min-h-0 lets the scroll container shrink instead of forcing the
+                  full list height. */}
+              <div className="space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
                 {dailyOutages.map((o, idx) => (
                   <div key={idx} className="p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
                     <div className="flex justify-between font-bold text-foreground">

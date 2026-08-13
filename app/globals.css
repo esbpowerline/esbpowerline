@@ -5556,8 +5556,51 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply grid grid-cols-2 md:grid-cols-5 gap-3;
 }
 
+/* The Overview strip carries six tiles, which on the five-column default left a
+   single orphan on a second row: two-up on phones, three-up on tablet, one row
+   on desktop.
+
+   Written as plain media queries rather than `@apply md:grid-cols-3`, and keyed
+   on the class twice so it outranks the generic `.grid.grid-explorer-kpi-strip`
+   overrides further down this file whatever order they end up in. Applying the
+   Tailwind utility instead makes the mobile-override block adopt this class into
+   its own selector list, which forced the strip to a single column on phones. */
+@media (max-width: 767px) {
+  .grid-explorer-kpi-strip.grid-explorer-kpi-strip--six {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .grid-explorer-kpi-strip.grid-explorer-kpi-strip--six {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .grid-explorer-kpi-strip.grid-explorer-kpi-strip--six {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* Tab strips carry four tiles. On the five-column default the fifth column sat
+   empty and the row read as though a figure had failed to load. */
+@media (max-width: 767px) {
+  .grid-explorer-kpi-strip.grid-explorer-kpi-strip--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 768px) {
+  .grid-explorer-kpi-strip.grid-explorer-kpi-strip--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Content starts at the padding edge rather than being centred inside the tile.
+   Centring let every tile place its icon wherever its own text width happened to
+   put it — across the six Overview tiles the icons landed between 27.4px and
+   38px from their left edges, so no icon, label or number shared a vertical rule
+   with its neighbour. Left-aligned, all three line up down the row. */
 .grid-explorer-kpi {
-  @apply flex items-center justify-center gap-3.5 relative overflow-visible transition-all duration-300;
+  @apply flex items-center justify-start gap-3.5 relative overflow-visible transition-all duration-300;
   padding: 0.875rem 1rem !important;
   background-color: color-mix(in srgb, hsl(var(--card)) 92%, transparent) !important;
   border: 1px solid hsl(var(--border) / 0.55) !important;
@@ -7691,9 +7734,13 @@ button.grid-explorer-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 0.95rem;
+  /* A fixed square, not min-width plus padding. The old rule sized itself from
+     the glyph advance, so a P box measured 14.43px against a D box at 15.02px —
+     two marks that sit directly above one another in the hover panels and read
+     as misaligned at that difference. */
+  width: 0.95rem;
   height: 0.95rem;
-  padding: 0 0.2rem;
+  padding: 0;
   border: 1px solid currentColor;
   border-radius: 3px;
   /* Fixed rather than em-relative: the tag appears in label rows, legends and
@@ -7702,7 +7749,10 @@ button.grid-explorer-link {
   font-size: 0.625rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: 0.02em;
+  /* No letter-spacing: the content is always one character, so it added a
+     trailing gap inside the box and pushed the glyph left of centre. */
+  letter-spacing: 0;
+  font-variant-numeric: normal;
   vertical-align: middle;
   cursor: help;
   flex: none;

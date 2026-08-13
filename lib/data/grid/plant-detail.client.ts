@@ -52,6 +52,33 @@ export async function fetchPlantDetail(isoDate: string): Promise<DailyPlantDetai
  * evening peak alone — summing its nulls to 0 would print a day peak of zero
  * beneath stations that plainly generated.
  */
+/**
+ * Installed capacity of the stations this day's sheet lists, for measuring how
+ * much of the fleet the evening peak actually used.
+ *
+ * The same sheet's `eveningPeakMw` sums to PGCB's published evening-peak
+ * generation (16,093 MW against a printed 16,092.99 on 2026-08-12), so the two
+ * sides of that ratio come off one document and share a basis. A national
+ * installed-capacity figure from elsewhere would not: those include captive and
+ * off-grid plant this sheet never dispatches, and dividing one by the other
+ * would overstate idle capacity by whatever the difference happens to be.
+ *
+ * `stationsMissingCapacity` is reported rather than hidden — the total is a
+ * floor when any station omits its rating, and a ratio built on it reads high.
+ */
+export function plantCapacityTotals(
+  detail: DailyPlantDetail | null,
+): { installedMw: number; stations: number; stationsMissingCapacity: number } | null {
+  if (!detail?.plants?.length) return null;
+  const rated = detail.plants.filter((p) => p.installedMw != null);
+  if (!rated.length) return null;
+  return {
+    installedMw: rated.reduce((sum, p) => sum + (p.installedMw || 0), 0),
+    stations: detail.plants.length,
+    stationsMissingCapacity: detail.plants.length - rated.length,
+  };
+}
+
 export function plantTotals(
   detail: DailyPlantDetail | null,
 ): { day: number | null; evening: number; energyKwh: number | null } | null {

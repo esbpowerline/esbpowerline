@@ -1,7 +1,7 @@
 'use client';
 
 import { memo, useEffect, useRef, useState } from 'react';
-import { Activity, Droplet, Sun, Zap } from 'lucide-react';
+import { Activity, Droplet, Factory, TrendingDown, Zap } from 'lucide-react';
 import { TakaIcon } from '@/components/news/power-grid/shared';
 import {
   DailyBadge,
@@ -11,28 +11,14 @@ import {
   GridKpiTooltipBody,
   GridKpiTooltipRef,
   GridKpiTooltipRow,
+  GridKpiTrend,
 } from '@/components/news/power-grid/GridExplorerUI';
 import { formatNumber } from '@/lib/utils';
-import { sredaRenewablesData, renewableGridSharePct } from '@/lib/data/companies/sreda';
+import { renewableGridSharePct } from '@/lib/data/companies/sreda';
+import { useGridOverviewContext } from '@/hooks/useGridOverviewContext';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
 
-type KpiId = 'gen' | 'demand' | 'gas' | 'renew' | 'cost';
-
-/** MW with fixed 2-decimal en-IN grouping (e.g. 1,512.75) */
-const fmtMw = (n: number) =>
-  n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-const renewableCapacity = (tech: string) =>
-  sredaRenewablesData.find((r) => r.tech === tech)?.capacity ?? 0;
-
-// SREDA registry is static module data; derive the breakdown so it reconciles with the headline
-// total. Keys are SREDA's own source names — they were renamed from "Solar PV"/"Hydroelectric"/
-// "Wind Energy" when the constants were refreshed against the published table, and a lookup that
-// misses returns 0, which would read as "no capacity" rather than as a broken key.
-const SOLAR_CAPACITY = renewableCapacity('Solar');
-const HYDRO_CAPACITY = renewableCapacity('Hydro');
-const WIND_CAPACITY = renewableCapacity('Wind');
-const BIO_CAPACITY = renewableCapacity('Biogas') + renewableCapacity('Biomass');
+type KpiId = 'gen' | 'demand' | 'gas' | 'shed' | 'capacity' | 'cost';
 
 export interface OverviewKpiStripProps {
   systemStats: GridSystemStats;
@@ -54,6 +40,8 @@ export interface OverviewKpiStripProps {
   tooltipDate: string;
   avgCostPerKwh: number;
   totalCapacityRenewables: number;
+  /** Drives the capacity and trend lookups, which are keyed by day. */
+  isoDate: string;
 }
 
 export const OverviewKpiStrip = memo(function OverviewKpiStrip({
@@ -74,6 +62,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   tooltipDate,
   avgCostPerKwh,
   totalCapacityRenewables,
+  isoDate,
 }: OverviewKpiStripProps) {
   const [activeKpiTooltip, setActiveKpiTooltip] = useState<KpiId | null>(null);
   const kpiStripRef = useRef<HTMLDivElement>(null);
@@ -123,30 +112,88 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   const unservedAvgMw =
     systemStats.totalEnergyUnserved == null ? null : mkwhToAvgMw(systemStats.totalEnergyUnserved);
 
+  const { capacity, baseline } = useGridOverviewContext(isoDate, systemStats);
+
+  // Demand and supply at the same instant, so the difference is the shortfall at
+  // the moment the grid was most stretched. The strip used to headline the day's
+  // energy averaged over 24 hours next to this peak; the two are not comparable,
+  // and readers subtracted them anyway. The average now sits in the supply
+  // briefing, named as an average.
+  const peakDeficitMw = Math.max(
+    0,
+    Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen),
+  );
+  const shedSharePct =
+    systemStats.eveningPeakDemand > 0
+      ? (peakDeficitMw / systemStats.eveningPeakDemand) * 100
+      : null;
+
+  // Idle capacity is measured against the plant sheet's own installed ratings,
+  // whose evening-peak column sums to the published peak generation above.
+  const installedMw = capacity?.installedMw ?? null;
+  const idleMw = installedMw == null ? null : Math.max(0, installedMw - systemStats.eveningPeakGen);
+  const idlePct = installedMw && installedMw > 0 ? ((idleMw ?? 0) / installedMw) * 100 : null;
+
+  // PGCB states an average production cost of its own; prefer it to dividing the
+  // bill by the generation, which rests on per-fuel rates that are themselves
+  // quotients rather than published prices.
+  const publishedUnitCost =
+    typeof systemStats.avgProductionCost === 'number' && systemStats.avgProductionCost > 0
+      ? systemStats.avgProductionCost
+      : null;
+  const unitCostGap =
+    publishedUnitCost != null && hasPublishedFuelCost
+      ? Math.abs(publishedUnitCost - avgCostPerKwh)
+      : null;
+
   // The page-level strip: its briefings drop over the tab content below, so it
   // must sit above any KPI strip rendered inside a tab.
   return (
-    <GridKpiStrip stripRef={kpiStripRef} layer="page">
+    <GridKpiStrip stripRef={kpiStripRef} layer="page" className="grid-explorer-kpi-strip--six">
       <GridKpiCell
         icon={Zap}
         label={
           <>
-            Daily Generation
+            Peak Supply
             <DailyBadge />
           </>
         }
-        value={dailyGenAvgMw == null ? '— MW' : `${formatNumber(Math.round(dailyGenAvgMw))} MW`}
+        value={`${formatNumber(Math.round(systemStats.eveningPeakGen))} MW`}
+        hint={
+          <GridKpiTrend
+            current={systemStats.eveningPeakGen}
+            baseline={baseline?.peakSupply}
+            days={baseline?.days ?? 0}
+            polarity="up-good"
+          />
+        }
         active={activeKpiTooltip === 'gen'}
-        // PGCB publishes the day's energy in MKWh; the MW on the face of this
-        // tile is that energy averaged across 24 hours, which is ours.
-        provenance="D"
+        // The evening peak as PGCB prints it, so it stands against the demand
+        // tile at the same instant rather than across a different window.
+        provenance="P"
         onToggle={() => toggleKpiTooltip('gen')}
-        tooltipTitle="Generation Briefing"
+        tooltipTitle="Supply Briefing"
         tooltipIcon={Zap}
         tooltipAccent="text-primary"
         width="sm"
       >
         <GridKpiTooltipBody>
+          <GridKpiTooltipRow
+            provenance="P"
+            label="Evening Peak Gen:"
+            value={`${formatNumber(Math.round(systemStats.eveningPeakGen))} MW`}
+          />
+          <GridKpiTooltipRow
+            provenance="P"
+            label="Day Peak Gen:"
+            value={systemStats.dayPeakGen == null ? '—' : `${formatNumber(Math.round(systemStats.dayPeakGen))} MW`}
+          />
+          {/* The old headline. Kept, but named as the 24-hour average it is. */}
+          <GridKpiTooltipRow
+            provenance="D"
+            label="24-Hour Average:"
+            value={dailyGenAvgMw == null ? '—' : `${formatNumber(Math.round(dailyGenAvgMw))} MW`}
+          />
           <GridKpiTooltipRow
             provenance="P"
             label="Total Energy Gen:"
@@ -162,16 +209,8 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             label="Min Base Gen:"
             value={systemStats.minGen == null ? '—' : `${formatNumber(Math.round(systemStats.minGen))} MW`}
           />
-          <GridKpiTooltipRow
-            provenance="P"
-            label="Unserved (Load Shed):"
-            value={
-              systemStats.totalEnergyUnserved == null || unservedAvgMw == null
-                ? '—'
-                : `${systemStats.totalEnergyUnserved.toFixed(2)} MKWh · ${formatNumber(Math.round(unservedAvgMw))} MW`
-            }
-            valueClass="text-destructive"
-          />
+          {/* What went unserved has its own tile; repeating it here would put the
+              same figure in two briefings a thumb apart. */}
           <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB Daily Report"
@@ -193,6 +232,13 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           </>
         }
         value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
+        hint={
+          <GridKpiTrend
+            current={systemStats.eveningPeakDemand}
+            baseline={baseline?.peakDemand}
+            days={baseline?.days ?? 0}
+          />
+        }
         active={activeKpiTooltip === 'demand'}
         align="right"
         provenance="P"
@@ -217,7 +263,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
                 : `${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`
             }
           />
-          <GridKpiTooltipRow provenance="D" label="Peak Deficit Shedding:" value={`${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW`} valueClass="text-destructive" />
+          {/* The deficit this demand implies is the Load Shedding tile's headline. */}
           <GridKpiTooltipRow
             provenance="P"
             label="Max System Temp:"
@@ -231,6 +277,161 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             refHref="https://www.pgcb.gov.bd/"
             dateLabel={`Date: ${systemStats.date}`}
           />
+        </GridKpiTooltipBody>
+      </GridKpiCell>
+
+      <GridKpiCell
+        icon={TrendingDown}
+        iconClassName="text-destructive"
+        label={
+          <>
+            Load Shedding
+            <DailyBadge />
+          </>
+        }
+        value={`${formatNumber(peakDeficitMw)} MW`}
+        hint={
+          <GridKpiTrend
+            current={peakDeficitMw}
+            baseline={baseline?.peakDeficit}
+            days={baseline?.days ?? 0}
+            polarity="down-good"
+          />
+        }
+        active={activeKpiTooltip === 'shed'}
+        // PGCB prints the demand and the generation; the shortfall between them
+        // at the evening peak is our subtraction, not a figure they state.
+        provenance="D"
+        onToggle={() => toggleKpiTooltip('shed')}
+        tooltipTitle="Shortfall Briefing"
+        tooltipIcon={TrendingDown}
+        tooltipAccent="text-destructive"
+        widthClass="w-[19rem] md:w-[21rem]"
+      >
+        <GridKpiTooltipBody>
+          <GridKpiTooltipRow
+            provenance="D"
+            label="At the evening peak:"
+            value={`${formatNumber(peakDeficitMw)} MW`}
+            valueClass="text-destructive"
+          />
+          <GridKpiTooltipRow
+            provenance="D"
+            label="Share of peak demand:"
+            value={shedSharePct == null ? '—' : `${shedSharePct.toFixed(1)}%`}
+          />
+          <GridKpiTooltipRow
+            provenance="P"
+            label="Energy unserved (day):"
+            value={
+              systemStats.totalEnergyUnserved == null
+                ? 'not published for this day'
+                : `${systemStats.totalEnergyUnserved.toFixed(2)} MKWh`
+            }
+          />
+          <GridKpiTooltipRow
+            provenance="D"
+            label="That, averaged over 24h:"
+            value={unservedAvgMw == null ? '—' : `${formatNumber(Math.round(unservedAvgMw))} MW`}
+          />
+          <GridKpiTooltipAudit>
+            The headline is peak demand less peak generation at the same hour. PGCB&rsquo;s own
+            unserved-energy figure is the day&rsquo;s total and is listed above beside it —
+            the two measure different things and are not expected to match.
+          </GridKpiTooltipAudit>
+          <GridKpiTooltipRef
+            refLabel="PGCB Daily Report"
+            part="P1 sheet — demand, generation and unserved energy"
+            sourceFile={sourceFiles?.pgcb}
+            refHref="https://www.pgcb.gov.bd/"
+            dateLabel={`Date: ${systemStats.date}`}
+          />
+        </GridKpiTooltipBody>
+      </GridKpiCell>
+
+      <GridKpiCell
+        icon={Factory}
+        iconClassName="text-violet-500"
+        label={
+          <>
+            Capacity Idle
+            <DailyBadge />
+          </>
+        }
+        value={idlePct == null ? '—' : `${idlePct.toFixed(1)}%`}
+        hint={
+          idleMw == null ? null : (
+            <span className="text-muted-foreground">
+              {formatNumber(Math.round(idleMw))} MW unused at peak
+            </span>
+          )
+        }
+        active={activeKpiTooltip === 'capacity'}
+        // Installed ratings and the evening-peak column come off the same plant
+        // sheet; the ratio between them is ours.
+        provenance="D"
+        onToggle={() => toggleKpiTooltip('capacity')}
+        tooltipTitle="Fleet Utilisation"
+        tooltipIcon={Factory}
+        tooltipAccent="text-violet-500"
+        widthClass="w-[19.5rem] md:w-[22rem]"
+      >
+        <GridKpiTooltipBody>
+          {capacity ? (
+            <>
+              <GridKpiTooltipRow
+                provenance="P"
+                label="Installed (stations listed):"
+                value={`${formatNumber(Math.round(capacity.installedMw))} MW`}
+              />
+              <GridKpiTooltipRow
+                provenance="P"
+                label="Running at evening peak:"
+                value={`${formatNumber(Math.round(systemStats.eveningPeakGen))} MW`}
+              />
+              <GridKpiTooltipRow
+                provenance="D"
+                label="Idle at that moment:"
+                value={idleMw == null ? '—' : `${formatNumber(Math.round(idleMw))} MW`}
+                valueClass="text-destructive"
+              />
+              <GridKpiTooltipRow provenance="P" label="Stations counted:" value={`${capacity.stations}`} />
+              {capacity.stationsMissingCapacity > 0 && (
+                <GridKpiTooltipRow
+                  provenance="P"
+                  label="Without a stated rating:"
+                  value={`${capacity.stationsMissingCapacity} station${capacity.stationsMissingCapacity === 1 ? '' : 's'}`}
+                />
+              )}
+              {/* SREDA's register, not PGCB's sheet: a different publisher on a
+                  different basis (MWp peak DC), so it is named as its own line
+                  rather than folded into the total above. */}
+              <GridKpiTooltipRow
+                provenance="P"
+                label="Renewables registered:"
+                value={`${totalCapacityRenewables.toFixed(1)} MWp · ~${renewableGridSharePct.toFixed(1)}% of national`}
+              />
+              <GridKpiTooltipAudit>
+                Both sides of this ratio are the plant sheet&rsquo;s own columns — its evening-peak
+                figures sum to the peak generation PGCB prints on P1. Capacity that is derated,
+                under maintenance or short of fuel is counted as installed, so this is idle
+                capacity, not spare capacity that could have run.
+              </GridKpiTooltipAudit>
+              <GridKpiTooltipRef
+                refLabel="PGCB Daily Report"
+                part="Station-wise generation sheet"
+                sourceFile={sourceFiles?.pgcb}
+                refHref="https://www.pgcb.gov.bd/"
+                dateLabel={`Date: ${systemStats.date}`}
+              />
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              This day&rsquo;s report carries no station-wise sheet, so there is no installed
+              rating to measure the peak against. The demand, supply and shedding figures
+              beside it are unaffected.
+            </p>
+          )}
         </GridKpiTooltipBody>
       </GridKpiCell>
 
@@ -301,51 +502,38 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         </GridKpiTooltipBody>
       </GridKpiCell>
 
-      <GridKpiCell
-        icon={Sun}
-        iconClassName="text-yellow-500"
-        // The cadence badge is gone: SREDA's register is not published on a
-        // monthly cycle, it is restated whenever a project registers, and the
-        // tooltip already says it is a standing registry rather than a reading.
-        label="Renewables Online"
-        value={`${totalCapacityRenewables.toFixed(1)} MW`}
-        active={activeKpiTooltip === 'renew'}
-        align="right"
-        provenance="P"
-        onToggle={() => toggleKpiTooltip('renew')}
-        tooltipTitle="Clean Energy Briefing"
-        tooltipIcon={Sun}
-        tooltipAccent="text-yellow-500"
-      >
-        <GridKpiTooltipBody>
-          <GridKpiTooltipRow provenance="P" label="Solar Capacity:" value={`${fmtMw(SOLAR_CAPACITY)} MW`} />
-          <GridKpiTooltipRow provenance="P" label="Hydro Capacity:" value={`${fmtMw(HYDRO_CAPACITY)} MW`} />
-          <GridKpiTooltipRow provenance="P" label="Wind Capacity:" value={`${fmtMw(WIND_CAPACITY)} MW`} />
-          {/* Biogas and Biomass are two SREDA lines added together. */}
-          <GridKpiTooltipRow provenance="D" label="Biogas & Biomass:" value={`${fmtMw(BIO_CAPACITY)} MW`} />
-          <GridKpiTooltipRow provenance="D" label="Renewable Share:" value={`~${renewableGridSharePct.toFixed(1)}% of Installed`} valueClass="text-primary" />
-          {/* The registry does not move with the date picker, so the tooltip
-              says so once rather than letting a daily-looking tile imply it. */}
-          <GridKpiTooltipAudit>As listed by SREDA — a standing registry, not a daily reading. Not audited.</GridKpiTooltipAudit>
-          <GridKpiTooltipRef
-            refLabel="SREDA NDRE registry"
-            part="Installed capacity register"
-            refHref="http://www.renewableenergy.gov.bd/"
-            dateLabel="Date: Jun 2026"
-          />
-        </GridKpiTooltipBody>
-      </GridKpiCell>
+      {/* Renewables no longer take a slot of their own. SREDA's register is a
+          standing figure that does not move with the date picker, so on a strip
+          that reads as "this day" it was the one tile that never changed; its
+          capacity now sits with the other capacity figures, under Capacity Idle. */}
 
       <GridKpiCell
         icon={TakaIcon}
         iconClassName="text-emerald-500"
         label={
           <>
-            Est. Fuel Cost
+            Cost of Power
             <DailyBadge />
           </>
         }
-        value={`${(systemStats.totalDailyCost / 10000000).toFixed(1)} Cr Tk.`}
+        // Per unit rather than the day's total: a crore figure means little
+        // without the energy it bought, and the rate is what moves.
+        //
+        // PGCB's own average production cost, not our total-over-total. The two
+        // land within 0.0003 Tk on 2026-08-12, but only one of them is a figure
+        // the report actually states, and the per-fuel rates the division rests
+        // on are cost over generation — the import rate especially is not a
+        // published tariff. Where the report omits the cost block there is no
+        // published rate, and the tile says so rather than dividing anyway.
+        value={publishedUnitCost == null ? '—' : `${publishedUnitCost.toFixed(2)} Tk/kWh`}
+        hint={
+          <GridKpiTrend
+            current={publishedUnitCost}
+            baseline={baseline?.costPerKwh}
+            days={baseline?.days ?? 0}
+            polarity="down-good"
+          />
+        }
         active={activeKpiTooltip === 'cost'}
         provenance="P"
         onToggle={() => toggleKpiTooltip('cost')}
@@ -355,23 +543,41 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         widthClass="w-[18.5rem] md:w-[21rem]"
       >
         <GridKpiTooltipBody>
-          <GridKpiTooltipRow
-            provenance="P"
-            label="Total Daily Cost:"
-            value={`${(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT`}
-          />
           {/* A day whose report carries no production-cost block has no unit
               rate to show. "0.00 Tk/KWh" would read as free electricity. */}
           <GridKpiTooltipRow
-            provenance="D"
-            label="Average Bulk Cost:"
-            value={hasPublishedFuelCost ? `${avgCostPerKwh.toFixed(3)} Tk/KWh` : '—'}
+            provenance="P"
+            label="Avg production cost:"
+            value={publishedUnitCost == null ? 'not published for this day' : `${publishedUnitCost.toFixed(3)} Tk/kWh`}
             valueClass="text-primary"
           />
-          <GridKpiTooltipRow provenance="D" label="HFO Generation Cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
-          <GridKpiTooltipRow provenance="D" label="Hydro Generation Cost:" value={fuelUnitRate('Hydro')} valueClass="text-emerald-500" />
-          <GridKpiTooltipRow provenance="D" label="Cross-Border Imports:" value={fuelUnitRate('Imports')} />
-          <GridKpiTooltipAudit>As published by PGCB, restating BPDB fuel economics. Not audited.</GridKpiTooltipAudit>
+          <GridKpiTooltipRow
+            provenance="P"
+            label="Fuel bill for the day:"
+            value={`${(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT`}
+          />
+          {/* Shown only when it disagrees with the published rate. Agreement is
+              the normal case and a second identical number teaches nothing. */}
+          {unitCostGap != null && unitCostGap >= 0.005 && (
+            <GridKpiTooltipRow
+              provenance="D"
+              label="Bill ÷ generation:"
+              value={`${avgCostPerKwh.toFixed(3)} Tk/kWh`}
+            />
+          )}
+          <GridKpiTooltipRow provenance="D" label="Gas generation cost:" value={fuelUnitRate('Gas')} />
+          <GridKpiTooltipRow provenance="D" label="HFO generation cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
+          <GridKpiTooltipRow provenance="D" label="Cross-border imports:" value={fuelUnitRate('Imports')} />
+          <GridKpiTooltipAudit>
+            The headline is the average production cost PGCB prints. The per-fuel rates below
+            it are not published tariffs — each is that fuel&rsquo;s cost divided by its
+            generation, and the import rate in particular is a blended settlement figure
+            rather than a contracted price, so read it as an indication.
+            <br />
+            Fuel and import bills only: capacity payments, debt service and O&amp;M appear
+            nowhere on this report, so the true cost of running the grid is higher than any
+            rate here. Restates BPDB fuel economics. Not audited.
+          </GridKpiTooltipAudit>
           <GridKpiTooltipRef refLabel="PGCB Daily Report" part="P1 sheet — production-cost block" refHref="https://www.pgcb.gov.bd/" dateLabel={`Date: ${systemStats.date}`} sourceFile={sourceFiles?.pgcb} />
         </GridKpiTooltipBody>
       </GridKpiCell>

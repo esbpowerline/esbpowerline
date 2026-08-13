@@ -249,6 +249,48 @@ export function GridKpiLabel({ children }: { children: ReactNode }) {
   return <div className="grid-explorer-kpi__label">{children}</div>;
 }
 
+/**
+ * Movement against the mean of the days before this one.
+ *
+ * Direction is stated, never coloured by direction alone: on this strip a fall
+ * in demand and a fall in shedding are opposite kinds of news, so `polarity`
+ * says which way is good and green/red follow that rather than the arrow.
+ * `neutral` leaves it grey for figures that are not better or worse either way.
+ */
+export function GridKpiTrend({
+  current,
+  baseline,
+  days,
+  unit = '',
+  polarity = 'neutral',
+}: {
+  current: number | null | undefined;
+  baseline: number | null | undefined;
+  days: number;
+  unit?: string;
+  polarity?: 'up-good' | 'down-good' | 'neutral';
+}) {
+  if (current == null || baseline == null || !Number.isFinite(current) || !Number.isFinite(baseline) || baseline === 0) {
+    return null;
+  }
+  const diff = current - baseline;
+  const pct = (diff / Math.abs(baseline)) * 100;
+  // Under half a percent the arrow would be noise dressed as a signal.
+  const flat = Math.abs(pct) < 0.5;
+  const good = polarity === 'neutral' ? null : (diff > 0) === (polarity === 'up-good');
+  const tone = flat || good == null ? 'text-muted-foreground' : good ? 'text-emerald-500' : 'text-destructive';
+  const arrow = flat ? '→' : diff > 0 ? '▲' : '▼';
+  return (
+    <span className={cn('inline-flex items-center gap-1 font-semibold', tone)}>
+      <span aria-hidden>{arrow}</span>
+      {flat ? 'level' : `${Math.abs(pct).toFixed(1)}%`}
+      <span className="font-normal text-muted-foreground">
+        vs {days}-day avg{unit ? ` (${Math.round(baseline).toLocaleString('en-IN')}${unit})` : ''}
+      </span>
+    </span>
+  );
+}
+
 export function GridKpiCell({
   icon: Icon,
   iconClassName,
