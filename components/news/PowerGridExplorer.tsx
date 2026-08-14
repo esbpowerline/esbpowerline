@@ -5360,8 +5360,12 @@ export function PowerGridExplorer({
                   <span className="grid-explorer-chip">P1</span>
                 </div>
 
+                {/* Nine zones by eight fuels. Stacked whole that is 72
+                    label/value pairs on a phone, half of them zero, so the
+                    zeros drop out of the list and are named together on the
+                    "No output" line below each zone — moved, not discarded. */}
                 <div className="grid-explorer-table-wrap">
-                  <table className="grid-explorer-table">
+                  <table className="grid-explorer-table grid-explorer-table--stack">
                     <thead>
                       <tr>
                         <th>Grid Zone</th>
@@ -5391,25 +5395,44 @@ export function PowerGridExplorer({
                           {zoneGenFuels.map((fuel) => (
                             <td
                               key={fuel}
+                              data-label={fuel}
                               className={cn(
                                 'text-left tabular-nums',
-                                zg.fuels[fuel] ? 'font-medium' : 'text-muted-foreground/60',
+                                zg.fuels[fuel]
+                                  ? 'font-medium'
+                                  : 'is-zero text-muted-foreground/60',
                               )}
                             >
                               {formatZoneEnergy(zg.fuels[fuel])}
                             </td>
                           ))}
-                          <td className="text-left tabular-nums font-semibold text-primary">{zg.total.toFixed(2)}</td>
+                          <td data-label="Zone total" className="text-left tabular-nums font-semibold text-primary">{zg.total.toFixed(2)}</td>
+                          {/* Phone only. Named rather than counted: "5 fuels at
+                              zero" would be a summary, and this is the reading
+                              PGCB published for each of them. */}
+                          <td data-label="No output" className="grid-explorer-table__zeros">
+                            {zoneGenFuels.filter((f) => !zg.fuels[f]).join(', ') || '—'}
+                          </td>
                         </tr>
                       ))}
-                      <tr className="border-t border-border/80 font-bold bg-muted/20">
+                      <tr className="is-total border-t border-border/80 font-bold bg-muted/20">
                         <td>National Total</td>
                         {zoneGenFuels.map((fuel) => (
-                          <td key={fuel} className="text-left tabular-nums">
+                          <td
+                            key={fuel}
+                            data-label={fuel}
+                            className={cn(
+                              'text-left tabular-nums',
+                              zoneGenPublishedTotals[fuel] ? '' : 'is-zero',
+                            )}
+                          >
                             {formatZoneEnergy(zoneGenPublishedTotals[fuel])}
                           </td>
                         ))}
-                        <td className="text-left tabular-nums text-primary">{zoneGenNationalTotal.toFixed(2)}</td>
+                        <td data-label="Zone total" className="text-left tabular-nums text-primary">{zoneGenNationalTotal.toFixed(2)}</td>
+                        <td data-label="No output" className="grid-explorer-table__zeros">
+                          {zoneGenFuels.filter((f) => !zoneGenPublishedTotals[f]).join(', ') || '—'}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -5574,7 +5597,7 @@ export function PowerGridExplorer({
                 </div>
               </div>
               <div className="grid-explorer-table-wrap">
-                <table className="grid-explorer-table">
+                <table className="grid-explorer-table grid-explorer-table--stack">
                   <thead>
                     <tr>
                       <th>Line Asset</th>
@@ -5592,9 +5615,9 @@ export function PowerGridExplorer({
                     {(initialLines ?? []).map((line: any, idx: number) => (
                       <tr key={idx}>
                         <td className="font-semibold">{line.name}</td>
-                        <td>{line.owner}</td>
-                        <td className="tabular-nums font-medium">{line.capacity}</td>
-                        <td className="text-xs text-muted-foreground">{line.status}</td>
+                        <td data-label="Owner">{line.owner}</td>
+                        <td data-label="Capacity" className="tabular-nums font-medium">{line.capacity}</td>
+                        <td data-label="Status" className="text-xs text-muted-foreground">{line.status}</td>
                       </tr>
                     ))}
                     {(initialLines ?? []).length === 0 && (

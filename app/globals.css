@@ -7842,6 +7842,27 @@ button.grid-explorer-link {
   .grid-explorer-table--stack tbody tr:hover {
     background: transparent;
   }
+
+  /* A wide matrix stacks badly on its own: nine zones by eight fuels is 72
+     label/value pairs, most of them zero. The zeros are dropped from the list
+     and named together on one line instead — see `__zeros` below. A published
+     zero is a measurement, so it is moved, never discarded. */
+  .grid-explorer-table--stack td.is-zero {
+    display: none;
+  }
+
+  .grid-explorer-table--stack td.grid-explorer-table__zeros {
+    display: flex;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.6875rem;
+    text-align: right;
+  }
+}
+
+/* Only ever shown once the table has stopped being a table: on desktop every
+   fuel has its own column and the zeros are visible in place. */
+.grid-explorer-table td.grid-explorer-table__zeros {
+  display: none;
 }
 
 .grid-explorer-table .grid-explorer-table__truncate {
