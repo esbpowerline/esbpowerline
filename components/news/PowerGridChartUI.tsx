@@ -27,7 +27,7 @@ export const GRID_CHART_MARGIN = {
      legend and only 81 the plot. The blank band between a card's subtitle and
      its legend was exactly this. 8 is breathing room above the legend; the
      legend still reserves its own height and the plot keeps the rest. */
-  topLegend: { top: 8, right: 12, left: 4, bottom: 18 },
+  topLegend: { top: 8, right: 4, left: 4, bottom: 18 },
 } as const;
 
 /** Default margin for inline Grid Explorer charts (non-frame) */
@@ -40,12 +40,18 @@ export const GRID_EXPLORER_CHART_MARGIN = {
      legend and only 81 the plot. The blank band between a card's subtitle and
      its legend was exactly this. 8 is breathing room above the legend; the
      legend still reserves its own height and the plot keeps the rest. */
-  topLegend: { top: 8, right: 12, left: 4, bottom: 18 },
+  topLegend: { top: 8, right: 4, left: 4, bottom: 18 },
   dualAxis: { top: 14, right: 8, left: 4, bottom: 18 },
 } as const;
 
-/** Symmetric category padding so first/last marks breathe equally */
-export const GRID_X_AXIS_PADDING = { left: 16, right: 16 } as const;
+/**
+ * Symmetric category padding so first and last marks breathe equally.
+ *
+ * 16 each side is generous on a 1400px plot and costs a seventh of a 214px
+ * one: on a 393px screen the plotted data was 175px of a 326px box, and 40 of
+ * the missing 151 was this. 8 still clears a half-width bar at either end.
+ */
+export const GRID_X_AXIS_PADDING = { left: 8, right: 8 } as const;
 
 const X_TICK_STYLE = { fontSize: 10, dy: 4 } as const;
 const Y_TICK_STYLE = { fontSize: 10, dx: -2 } as const;

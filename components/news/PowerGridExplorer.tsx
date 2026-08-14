@@ -2033,8 +2033,11 @@ export function PowerGridExplorer({
                 <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                   <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                   <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'time' })} />
-                  <YAxis yAxisId="left" width={40} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMwCompact}
-                    label={{ value: 'MW', angle: -90, position: 'insideLeft', offset: 8, style: { fontSize: 10, fill: chartTheme.axisTick } }} />
+                  <YAxis yAxisId="left" width={34} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMwCompact}
+                    /* Above the axis, not rotated inside it: turned on its side the unit
+                       costs horizontal width the plot needs, and height is the one
+                       thing a phone chart has to spare. */
+                    label={{ value: 'MW', position: 'top', offset: 6, style: { fontSize: 9, fill: chartTheme.axisTick, textAnchor: 'start' } }} />
                   {/* The shedding axis is tinted in the shedding colour so it is
                       obvious which marks it measures — the left axis serves
                       generation and demand, which are the same measurement in the
@@ -2043,7 +2046,7 @@ export function PowerGridExplorer({
                     <YAxis
                       yAxisId="shed"
                       orientation="right"
-                      width={GRID_Y_AXIS_WIDTH.dual}
+                      width={38}
                       tick={{ fontSize: 10, fill: chartTheme.destructive }}
                       axisLine={false}
                       tickLine={false}
