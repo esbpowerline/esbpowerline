@@ -5625,14 +5625,39 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply font-bold tabular-nums text-lg tracking-tight text-foreground leading-none mt-1;
 }
 
+/* Nine tabs in a scroller with the scrollbar suppressed and no other cue: on a
+   phone about three are visible and nothing says the other six exist. The mask
+   fades the trailing edge so the row reads as continuing past the screen, and
+   snapping stops a swipe leaving a tab half cut off.
+
+   Masked on the right only. Both edges would be more symmetrical and would also
+   be wrong at rest, where the row starts hard against its left edge with
+   nothing hidden behind it. */
 .grid-explorer-tabs {
   @apply flex flex-nowrap overflow-x-auto gap-1.5 pb-1;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 0.75rem;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
+  mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent 100%);
 }
 .grid-explorer-tabs::-webkit-scrollbar {
   display: none;
 }
+.grid-explorer-tabs .explorer-tab {
+  scroll-snap-align: start;
+}
+
+/* The mask is a cue for a row that overflows. Once every tab fits there is
+   nothing past the edge, and fading the last one is just wrong. */
+@media (min-width: 1280px) {
+  .grid-explorer-tabs {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 
 .grid-explorer-panel {
   animation: grid-panel-in 180ms ease;
@@ -7212,9 +7237,42 @@ html.theme-dark .locale-toggle__btn--active:hover {
   }
 }
 
+/* ── Chart heights that answer to the viewport ─────────────────────────────
+   Every chart area carried a floor of 18rem, and `--lg` pinned both height and
+   min-height at 20rem, on every screen. A 24-hour load curve 320px tall inside
+   a 340px-wide phone is close enough to square that the shape of the day —
+   which is the entire reason the curve is drawn — is squeezed out of it.
+
+   The floor is now proportional to the viewport and only reaches its old value
+   once there is width to justify it. Desktop is unchanged: every clamp lands on
+   the height it had before at the top of its range. */
 .grid-explorer-chart-area {
-  @apply w-full min-h-[18rem] -mx-1;
+  @apply w-full -mx-1;
+  min-height: clamp(11rem, 46vw, 18rem);
   overflow: visible;
+}
+
+/* Height overrides for the areas that set their own. Named for what they are
+   rather than for their pixel value, and each keeps that area's desktop height
+   exactly — the change is entirely below the top of the clamp.
+
+   `min-height: 0` is deliberate: without it the base floor above would fight
+   the height set here, and the taller of the two would win on a phone. */
+.grid-explorer-chart-area--h-compact {
+  height: clamp(10.5rem, 44vw, 17.5rem);
+  min-height: 0;
+}
+.grid-explorer-chart-area--h-standard {
+  height: clamp(12.5rem, 55vw, 22rem);
+  min-height: 0;
+}
+.grid-explorer-chart-area--h-tall {
+  height: clamp(13rem, 58vw, 24rem);
+  min-height: 0;
+}
+.grid-explorer-chart-area--h-taller {
+  height: clamp(13.5rem, 60vw, 26rem);
+  min-height: 0;
 }
 
 .grid-explorer-chart-area--md {
@@ -7223,8 +7281,8 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 .grid-explorer-chart-area--lg {
-  min-height: 20rem;
-  height: 20rem;
+  min-height: clamp(12rem, 52vw, 20rem);
+  height: clamp(12rem, 52vw, 20rem);
 }
 
 .grid-explorer-chart-area--split {
@@ -7674,6 +7732,116 @@ button.grid-explorer-link {
 
 .grid-explorer-table td {
   @apply py-3.5 pr-4 align-middle;
+}
+
+/* ── Tables that stop being tables on a phone ──────────────────────────────
+   Every table on the explorer sits in `.grid-explorer-table-wrap`, which is
+   `overflow: auto`. On a 360px screen that makes horizontal dragging the way
+   you read a ten-column table, inside a page that is already scrolling
+   vertically — the worst interaction on the site.
+
+   Adding `--stack` re-lays the rows as labelled blocks below 40rem: one row
+   per record, the first cell as its heading, every other cell as a
+   label/value pair reading left to right. No horizontal scroll, no pinch.
+
+   The label comes from `data-label` on each `<td>`, because the `<thead>` is
+   hidden and a value with no name is worse than a scrollbar. A cell with no
+   `data-label` still renders — it just gets no label — so a partially
+   converted table degrades rather than breaking.
+
+   Opt-in, not automatic: a few tables here are genuinely matrices (zone x
+   fuel) where the grid itself is the information, and those want the scroll. */
+.grid-explorer-table--stack td[data-label]::before {
+  content: attr(data-label);
+  display: none;
+}
+
+@media (max-width: 40rem) {
+  .grid-explorer-table--stack,
+  .grid-explorer-table--stack tbody,
+  .grid-explorer-table--stack tr,
+  .grid-explorer-table--stack td {
+    display: block;
+    width: 100%;
+  }
+
+  .grid-explorer-table--stack thead {
+    /* Hidden from sight, kept for screen readers and for `data-label`. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .grid-explorer-table--stack tbody {
+    border-top: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .grid-explorer-table--stack tr {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .grid-explorer-table--stack td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.1875rem 0;
+    text-align: right;
+    border: 0;
+  }
+
+  .grid-explorer-table--stack td[data-label]::before {
+    display: block;
+    flex: 0 1 auto;
+    text-align: left;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    /* The label must not squeeze the value it names. */
+    min-width: 0;
+  }
+
+  /* The first cell is the record's name, so it reads as the block's heading
+     rather than as another label/value pair. */
+  .grid-explorer-table--stack td:first-child {
+    justify-content: flex-start;
+    text-align: left;
+    padding-bottom: 0.375rem;
+    font-weight: 700;
+    font-size: 0.8125rem;
+  }
+
+  .grid-explorer-table--stack td:first-child::before {
+    display: none;
+  }
+
+  /* A totals row is a record too, but it is the one that should still look
+     like a total once the table has stopped being a table. */
+  .grid-explorer-table--stack tbody tr:last-child:has(td:first-child b),
+  .grid-explorer-table--stack tbody tr.is-total {
+    background: hsl(var(--muted) / 0.25);
+    padding-inline: 0.625rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Truncation is a desktop affordance — here the cell has the full width. */
+  .grid-explorer-table--stack .grid-explorer-table__truncate {
+    max-width: none;
+    white-space: normal;
+  }
+
+  /* Hover tinting a full-width block reads as a selected state. */
+  .grid-explorer-table--stack tbody tr:hover {
+    background: transparent;
+  }
 }
 
 .grid-explorer-table .grid-explorer-table__truncate {

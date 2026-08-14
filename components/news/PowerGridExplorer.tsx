@@ -1976,7 +1976,7 @@ export function PowerGridExplorer({
             <span className="grid-explorer-chip bg-destructive/10 text-destructive border-destructive/20">NLDC SCADA Curve</span>
           </div>
 
-          <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[24rem]">
+          <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-tall">
             {hourlyLoadData.length === 0 ? (
               // Reports before 2018 carry no load-curve sheet. Drawing empty
               // axes would imply a flat or missing grid rather than an
@@ -5164,8 +5164,11 @@ export function PowerGridExplorer({
                 </div>
               </div>
 
+              {/* Four columns, and the first is the zone name — so below 40rem
+                  each zone becomes a labelled block instead of something to be
+                  dragged sideways. */}
               <div className="grid-explorer-table-wrap">
-                <table className="grid-explorer-table">
+                <table className="grid-explorer-table grid-explorer-table--stack">
                   <thead>
                     <tr>
                       <th>Grid Zone</th>
@@ -5178,11 +5181,11 @@ export function PowerGridExplorer({
                     {regionalDemandData.map((rd, idx) => (
                       <tr key={idx}>
                         <td className="font-semibold">{rd.zone}</td>
-                        <td className="text-left tabular-nums font-medium">{formatNumber(rd.demand)}</td>
-                        <td className="text-left tabular-nums text-destructive font-semibold">
+                        <td data-label="Evening demand" className="text-left tabular-nums font-medium">{formatNumber(rd.demand)}</td>
+                        <td data-label="Load-shedding" className="text-left tabular-nums text-destructive font-semibold">
                           {rd.loadShed > 0 ? `${rd.loadShed} MW` : '0 MW'}
                         </td>
-                        <td className="text-left tabular-nums">
+                        <td data-label="Severity" className="text-left tabular-nums">
                           {rd.loadShed > 0 ? (
                             <div className="flex items-center justify-start gap-1.5">
                               <span className="font-mono font-bold text-xs text-amber-500">{rd.pct}%</span>
@@ -5204,13 +5207,13 @@ export function PowerGridExplorer({
                         </td>
                       </tr>
                     ))}
-                    <tr className="border-t border-border/80 font-bold bg-muted/20">
+                    <tr className="is-total border-t border-border/80 font-bold bg-muted/20">
                       <td>Entire Grid Total<GridProvenanceTag kind="D" className="ml-1" /></td>
-                      <td className="text-left tabular-nums text-primary">{formatNumber(totalRegionalDemand)}</td>
-                      <td className="text-left tabular-nums text-destructive">{formatNumber(totalRegionalLoadShed)}</td>
+                      <td data-label="Evening demand" className="text-left tabular-nums text-primary">{formatNumber(totalRegionalDemand)}</td>
+                      <td data-label="Load-shedding" className="text-left tabular-nums text-destructive">{formatNumber(totalRegionalLoadShed)}</td>
                       {/* Not the mean of the nine zone percentages — the
                           demand-weighted grid ratio. Labelled accordingly. */}
-                      <td className="text-left tabular-nums text-primary">{avgRegionalPct}% grid-wide</td>
+                      <td data-label="Severity" className="text-left tabular-nums text-primary">{avgRegionalPct}% grid-wide</td>
                     </tr>
                   </tbody>
                 </table>
@@ -6956,7 +6959,7 @@ export function PowerGridExplorer({
                   </div>
                 </div>
 
-                <div className="grid-explorer-chart-area mt-4 !h-[26rem]">
+                <div className="grid-explorer-chart-area mt-4 grid-explorer-chart-area--h-taller">
                   {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       {monthlyTrendMetric === 'peaks' ? (
@@ -7584,7 +7587,7 @@ export function PowerGridExplorer({
                       </div>
                     </div>
 
-                    <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
+                    <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                       {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart accessibilityLayer={false} data={localBpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -7704,7 +7707,7 @@ export function PowerGridExplorer({
                       </div>
                     </div>
 
-                    <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
+                    <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                       {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart accessibilityLayer={false} data={localPetrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -7846,7 +7849,7 @@ export function PowerGridExplorer({
                     <span className="grid-explorer-chip bg-blue-500/5 text-blue-500 border-blue-500/10">Petroleum</span>
                   </div>
 
-                  <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
+                  <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -7931,7 +7934,7 @@ export function PowerGridExplorer({
                     <span className="grid-explorer-chip bg-violet-500/5 text-violet-500 border-violet-500/10">Natural Gas</span>
                   </div>
 
-                  <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
+                  <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2010)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -8017,7 +8020,7 @@ export function PowerGridExplorer({
                   <span className="grid-explorer-chip bg-teal-500/5 text-teal-500 border-teal-500/10">Solar Energy</span>
                 </div>
 
-                <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[22rem]">
+                <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                   {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>

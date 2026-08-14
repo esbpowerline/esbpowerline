@@ -125,7 +125,7 @@ export function EnergyCurveChart({
           </table>
         </div>
       ) : (
-        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 !h-[24rem]">
+        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-tall">
           {ready ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart accessibilityLayer={false} data={points} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>

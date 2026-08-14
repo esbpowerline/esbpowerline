@@ -354,7 +354,7 @@ export function BpdbAccountsPanel({
         </div>
 
         <div className="grid-explorer-table-wrap grid-explorer-table-wrap--compact">
-          <table className="grid-explorer-table">
+          <table className="grid-explorer-table grid-explorer-table--stack">
             <thead>
               <tr>
                 <th>Cost head</th>
@@ -375,7 +375,7 @@ export function BpdbAccountsPanel({
               {heads.map((h) => (
                 <tr key={h.key}>
                   <td className="font-semibold text-foreground">{h.label}</td>
-                  <td className="text-left">
+                  <td data-label="Group" className="text-left">
                     <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                       <span
                         className="h-2 w-2 shrink-0 rounded-sm"
@@ -389,7 +389,7 @@ export function BpdbAccountsPanel({
                       against BPDB's own printed total. Still published — but it
                       was not read cleanly twice, and saying so is the point of
                       marking anything at all. */}
-                  <td className="text-right tabular-nums">
+                  <td data-label="Crore BDT" className="text-right tabular-nums">
                     {h.resolvedBy && (
                       <span
                         className="mr-1 cursor-help font-bold text-amber-500"
@@ -401,16 +401,16 @@ export function BpdbAccountsPanel({
                     )}
                     {fmtCrore(h.crore)}
                   </td>
-                  <td className="text-right tabular-nums text-muted-foreground">
+                  <td data-label="Share" className="text-right tabular-nums text-muted-foreground">
                     {((h.crore / headsTotal) * 100).toFixed(1)}%
                   </td>
                 </tr>
               ))}
-              <tr className="border-t border-border/80 bg-muted/20 font-bold">
+              <tr className="is-total border-t border-border/80 bg-muted/20 font-bold">
                 <td>Total operating expenses</td>
                 <td />
-                <td className="text-right tabular-nums text-primary">{fmtCrore(printedTotal)}</td>
-                <td className="text-right tabular-nums text-primary">100.0%</td>
+                <td data-label="Crore BDT" className="text-right tabular-nums text-primary">{fmtCrore(printedTotal)}</td>
+                <td data-label="Share" className="text-right tabular-nums text-primary">100.0%</td>
               </tr>
             </tbody>
           </table>
