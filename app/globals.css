@@ -7204,6 +7204,78 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2.5 py-1 rounded-full bg-muted border border-border/50 shrink-0;
 }
 
+/* ── Card proportions on a phone ───────────────────────────────────────────
+   Measured on a 393px screen: 24px of padding on every side leaves 345px of
+   content, and the head and the footer come to 109px each — around a plot
+   that is roughly 204px tall. The chrome was bigger than the chart it framed,
+   which is what makes a card feel overwhelmed by everything except its data.
+
+   Nothing here is hidden. The padding tightens, the head and footer stop
+   spending a line on air, and the plot keeps the width and height it gains. */
+@media (max-width: 40rem) {
+  .grid-explorer-chart-card {
+    @apply p-4 gap-1.5;
+  }
+
+  .grid-explorer-chart-card__head {
+    @apply mb-1.5 gap-2;
+  }
+
+  .grid-explorer-chart-card__head--border {
+    @apply pb-3 mb-2.5;
+  }
+
+  .grid-explorer-chart-card__title {
+    @apply text-[0.9375rem] leading-snug;
+  }
+
+  .grid-explorer-chart-card__sub {
+    @apply text-[11px] leading-snug;
+  }
+
+  /* The footer is four provenance statements. Stacked they read as a list
+     rather than as a paragraph broken across a row. */
+  .grid-explorer-card-footer {
+    @apply flex-col items-start gap-1 pt-2;
+  }
+
+  /* The negative inset exists to let a plot bleed into desktop padding there
+     is no longer enough of. */
+  .grid-explorer-chart-area {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* The prose closes behind its own heading. Open, it reads exactly as it
+     does on a desktop; closed, the card is its chart again. */
+  .grid-explorer-explain__heading {
+    display: none;
+  }
+
+  .grid-explorer-explain__toggle {
+    @apply flex w-full items-center justify-between gap-3 text-left;
+    @apply min-h-11 text-xs text-muted-foreground;
+  }
+
+  .grid-explorer-explain__chevron {
+    transition: transform 200ms ease;
+  }
+
+  .grid-explorer-explain.is-open .grid-explorer-explain__chevron {
+    transform: rotate(180deg);
+  }
+
+  .grid-explorer-explain:not(.is-open) .grid-explorer-explain__body {
+    display: none;
+  }
+}
+
+/* On a desktop the prose is simply there — the heading is a heading and the
+   control does not exist. */
+.grid-explorer-explain__toggle {
+  display: none;
+}
+
 .grid-explorer-mix-stack {
   @apply flex w-full h-2 rounded-full overflow-hidden mb-4;
   background: hsl(var(--muted) / 0.4);
@@ -7413,12 +7485,32 @@ html.theme-dark .locale-toggle__btn--active:hover {
   overflow: visible;
 }
 
+.grid-explorer-chart-area--md {
+  min-height: 16rem;
+  height: 16rem;
+}
+
+.grid-explorer-chart-area--lg {
+  min-height: clamp(12rem, 52vw, 20rem);
+  height: clamp(12rem, 52vw, 20rem);
+}
+
+.grid-explorer-chart-area--split {
+  margin-left: 0;
+  margin-right: 0;
+}
+
 /* Height overrides for the areas that set their own. Named for what they are
    rather than for their pixel value, and each keeps that area's desktop height
    exactly — the change is entirely below the top of the clamp.
 
-   `min-height: 0` is deliberate: without it the base floor above would fight
-   the height set here, and the taller of the two would win on a phone. */
+   These MUST stay below `--lg`. Every site that uses one also carries `--lg`,
+   which sets height at equal specificity; declared above it these lost the
+   cascade and did nothing at all, which is how the tall charts kept rendering
+   at the `--lg` height on a phone after they were supposedly made responsive.
+
+   `min-height: 0` is deliberate too: without it the base floor would fight the
+   height set here, and the taller of the two would win on a phone. */
 .grid-explorer-chart-area--h-compact {
   height: clamp(10.5rem, 44vw, 17.5rem);
   min-height: 0;
@@ -7434,21 +7526,6 @@ html.theme-dark .locale-toggle__btn--active:hover {
 .grid-explorer-chart-area--h-taller {
   height: clamp(13.5rem, 60vw, 26rem);
   min-height: 0;
-}
-
-.grid-explorer-chart-area--md {
-  min-height: 16rem;
-  height: 16rem;
-}
-
-.grid-explorer-chart-area--lg {
-  min-height: clamp(12rem, 52vw, 20rem);
-  height: clamp(12rem, 52vw, 20rem);
-}
-
-.grid-explorer-chart-area--split {
-  margin-left: 0;
-  margin-right: 0;
 }
 
 .grid-chart-tooltip {

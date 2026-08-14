@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ChevronDown } from 'lucide-react';
 import { Children, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentType, ReactNode } from 'react';
@@ -170,31 +171,62 @@ export function GridSourceFooterLinks({
   );
 }
 
+/**
+ * The prose under a chart: what it shows, and what to read from it.
+ *
+ * Measured on a 393px screen, this block came to 281px against a plot of
+ * roughly 228px — the explanation was taller than the thing it explained, and
+ * a reader scrolling a phone met more words than data on every card.
+ *
+ * So on a phone the heading becomes the control and the body is closed until
+ * asked for. It is not removed and not shortened: this is the layer that makes
+ * the figures legible to someone who does not already know the sector, and
+ * cutting it would trade the product's whole purpose for a shorter page.
+ * Above 40rem nothing changes and the prose is simply open.
+ */
 export function GridExplanationBlock({
   what,
   insight,
+  insightLabel = 'Analytical Insight:',
   className,
 }: {
   what: ReactNode;
   insight?: ReactNode;
+  /** Some cards read their second paragraph as instruction rather than
+   *  analysis; those say so instead of being reworded to fit the default. */
+  insightLabel?: string;
   className?: string;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
     <div
       className={cn(
-        'bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2',
+        'grid-explorer-explain bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2',
+        open && 'is-open',
         className,
       )}
     >
-      <p>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="grid-explorer-explain__toggle"
+        aria-expanded={open}
+      >
+        <strong>What is being shown?</strong>
+        <ChevronDown className="grid-explorer-explain__chevron h-3.5 w-3.5 shrink-0" />
+      </button>
+      <p className="grid-explorer-explain__heading">
         <strong>What is being shown?</strong>
       </p>
-      <div className="leading-relaxed">{what}</div>
-      {insight && (
-        <p className="leading-relaxed">
-          <strong>Analytical Insight:</strong> {insight}
-        </p>
-      )}
+      <div className="grid-explorer-explain__body space-y-2">
+        <div className="leading-relaxed">{what}</div>
+        {insight && (
+          <p className="leading-relaxed">
+            <strong>{insightLabel}</strong> {insight}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

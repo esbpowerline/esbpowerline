@@ -11,7 +11,11 @@ import {
   YAxis,
 } from 'recharts';
 import { formatNumber } from '@/lib/utils';
-import { GridCardFooter, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
+import {
+  GridCardFooter,
+  GridExplanationBlock,
+  GridSourceFiles,
+} from '@/components/news/power-grid/GridExplorerUI';
 import { buildEnergyCurveSeries } from '@/lib/data/grid/energy-curve';
 import { TIME_AXIS_PROPS, axisTickStyle, wholeHourTicks } from '@/lib/data/grid/chart-axis';
 import { fetchEnergyCurve } from '@/lib/data/grid/energy-curve.client';
@@ -220,32 +224,51 @@ export function EnergyCurveChart({
 
       {/* Legend, always present and in stack order (top band first), so identity
           never rests on colour alone. */}
-      <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5">
+      {/* Eight fuels wrap to two rows on a phone. Tighter gaps and a smaller
+          swatch keep it to two and stop the key competing with the plot it
+          explains — it names the bands, it is not the point of the card. */}
+      <div className="mt-2.5 flex flex-wrap justify-center gap-x-2.5 gap-y-1 sm:mt-3 sm:gap-x-4 sm:gap-y-1.5">
         {[...active].reverse().map((g) => (
-          <span key={g.name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: chartTheme.fuel(g.name) }} />
+          <span
+            key={g.name}
+            className="flex items-center gap-1 text-[10px] text-muted-foreground sm:gap-1.5 sm:text-[11px]"
+          >
+            <span
+              className="h-2 w-2 rounded-sm shrink-0 sm:h-2.5 sm:w-2.5"
+              style={{ background: chartTheme.fuel(g.name) }}
+            />
             {g.name}
           </span>
         ))}
       </div>
 
-      <div className="bg-muted/10 p-4 border border-border/40 rounded-xl text-xs text-muted-foreground space-y-2 mt-4">
-        <p><strong>What is being shown?</strong></p>
-        <p className="leading-relaxed">
-          PGCB logs national generation every half hour and splits it by fuel. The bands stack to the
-          system total, so the height of the whole is the load curve and the height of each band is
-          what that fuel was carrying at that moment. The report separates public from private plant
-          and names each import line individually; those are grouped here into the same eight fuels
-          used elsewhere on this page, and the underlying split is in the tooltip.
-        </p>
-        <p className="leading-relaxed">
-          <strong>Reading it:</strong> generation peaked at{' '}
-          <span className="font-semibold text-primary">{peak.time} Hr</span> with{' '}
-          <span className="font-bold text-foreground">{formatNumber(Math.round(peak.total))} MW</span>{' '}
-          across {active.length} fuel{active.length === 1 ? '' : 's'}. Bands that carried nothing all
-          day are left out rather than drawn flat.
-        </p>
-      </div>
+      {/* The shared block rather than a private copy of it: on a phone this
+          prose came to 281px against a plot of about 228px, and the shared one
+          knows how to close itself there. */}
+      <GridExplanationBlock
+        className="mt-4 rounded-xl border border-border/40"
+        insightLabel="Reading it:"
+        what={
+          <>
+            PGCB logs national generation every half hour and splits it by fuel. The bands stack to
+            the system total, so the height of the whole is the load curve and the height of each
+            band is what that fuel was carrying at that moment. The report separates public from
+            private plant and names each import line individually; those are grouped here into the
+            same eight fuels used elsewhere on this page, and the underlying split is in the tooltip.
+          </>
+        }
+        insight={
+          <>
+            generation peaked at <span className="font-semibold text-primary">{peak.time} Hr</span>{' '}
+            with{' '}
+            <span className="font-bold text-foreground">
+              {formatNumber(Math.round(peak.total))} MW
+            </span>{' '}
+            across {active.length} fuel{active.length === 1 ? '' : 's'}. Bands that carried nothing
+            all day are left out rather than drawn flat.
+          </>
+        }
+      />
 
       <GridCardFooter>
         <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — En-Curve sheet, half-hourly generation by fuel</span>

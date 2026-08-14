@@ -61,10 +61,17 @@ export function MethodologyReconciliationBanner({
       >
         <div className="flex items-center gap-2">
           <Info className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span className="text-[11px] font-semibold text-muted-foreground hover:text-primary transition-colors leading-none">
-            {expanded
-              ? 'Where each figure comes from, and why two totals on this page can differ. Click to collapse.'
-              : 'Where each figure comes from, and why two totals on this page can differ. Click to drop down.'}
+          {/* The full sentence wraps to three lines on a phone, which is most
+              of what the collapsed state was meant to save. The short form says
+              the same thing; the instruction to tap is dropped because the row
+              is a button and already looks like one. */}
+          <span className="text-[11px] font-semibold text-muted-foreground hover:text-primary transition-colors leading-snug">
+            <span className="sm:hidden">Where each figure comes from</span>
+            <span className="hidden sm:inline">
+              {expanded
+                ? 'Where each figure comes from, and why two totals on this page can differ. Click to collapse.'
+                : 'Where each figure comes from, and why two totals on this page can differ. Click to drop down.'}
+            </span>
           </span>
         </div>
         <ChevronDown
