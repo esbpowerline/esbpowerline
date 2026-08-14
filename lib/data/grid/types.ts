@@ -123,6 +123,41 @@ export interface EnergyCurve {
   rows: EnergyCurveRow[];
 }
 
+/** One timestamp on the interconnector, indexed to match `EwicData.corridors`. */
+export interface EwicRow {
+  time: string;
+  /** Positive is West to East, the direction the sheet's own footnote defines. */
+  mw: (number | null)[];
+  mvar: (number | null)[];
+}
+
+/** A circuit's metered energy for the day. Two circuits per corridor. */
+export interface EwicCircuit {
+  circuit: string;
+  direction: 'Export' | 'Import';
+  /**
+   * Kilowatt-hours. The sheet heads this column "Energy (MkWHr)" and prints
+   * kWh — 42.8 million of them on 2026-08-13, against a national 361.36 MKWh.
+   * The unit is corrected at parse; the figure is untouched.
+   */
+  energyKwh: number | null;
+}
+
+/** A reconciliation the parser ran and wants the reader to see. */
+export interface EwicCheck {
+  scope: string;
+  message: string;
+}
+
+export interface EwicData {
+  corridors: string[];
+  rows: EwicRow[];
+  circuits: EwicCircuit[];
+  totals: { export?: number | null; import?: number | null };
+  /** Empty when everything reconciled. Never suppressed. */
+  checks: EwicCheck[];
+}
+
 /**
  * One power station's figures for the reported day.
  *
@@ -207,6 +242,8 @@ export interface GridDailyData {
   dailyOutages?: DailyOutageItem[];
   hourlyLoadData?: HourlyLoadItem[];
   energyCurveData?: EnergyCurve;
+  /** East-West Interconnector flow. Absent on the layouts with no EWIC sheet. */
+  ewicData?: EwicData;
   /**
    * The documents this day was actually built from, named exactly as the files
    * are held — so a reader can ask either agency for the same file rather than

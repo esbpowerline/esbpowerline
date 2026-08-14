@@ -487,6 +487,145 @@ def parse_energy_curve(content):
 
     return {'fuels': list(ENERGY_CURVE_FUELS), 'rows': rows}
 
+
+# The three corridors the East-West Interconnector runs over. Named here rather
+# than read blind from the header so a renamed or reordered column is a
+# mismatch that shows up, not a silently relabelled series.
+EWIC_CORRIDORS = ('Ishurdi-Ghorashal', 'Sirajganj-Sreepur', 'Gopalganj-Aminbazar')
+
+# How far a corridor's own MW curve may sit from the circuit energies printed
+# beside it before the row is called out. Integrating an hourly curve against a
+# metered total will not agree exactly; a factor of two is not rounding.
+EWIC_ENERGY_TOLERANCE = 0.08
+
+
+def parse_ewic(content):
+    """The EWIC sheet: flow across the East-West Interconnector.
+
+    Bangladesh's grid is two halves joined by three corridors, and this sheet is
+    the only place the report says how much power crossed between them. The
+    zone-wise demand table shows the imbalance; this shows the wire that carries
+    it. On 2026-08-13 that was 42.8 GWh, all of it westward-to-eastward — about
+    an eighth of national generation, largely the southwestern coal plants
+    feeding Dhaka.
+
+    Two shapes share the sheet. On the left, MW and MVAR per corridor at each
+    hour (plus 18:30 and 19:30, the evening-peak half hours). On the right, a
+    per-circuit daily energy block: Ckt-1 and Ckt-2 for each corridor, each with
+    an Export and an Import figure, closed by Total Export and Total Import.
+
+    **The energy column is mislabelled.** Its header reads "Energy (MkWHr)" and
+    its values are plain kWh — 42,800,672.72 for the day against a national
+    total of 361.36 MKWh. Trusting the header would put the figure out by 10^6,
+    so the unit is fixed here and the published number kept as-is.
+
+    Two checks run before the data is returned, because a name-matched parser
+    fails quietly:
+
+      * the six circuit figures must sum to the printed Total Export
+      * each corridor's MW curve, integrated over the day, should land near the
+        energy printed for its own circuits
+
+    The second is the one that earns its keep. On 2026-08-13 two corridors agree
+    to within a rounding error and Sirajganj-Sreepur comes out at exactly 2.00 —
+    its circuit energies are half what its own MW column integrates to. That is
+    reported rather than corrected: which side is wrong is PGCB's to say.
+
+    Returns {'corridors', 'rows', 'circuits', 'totals', 'checks'} or None.
+    """
+    sheet = get_sheet_content(content, 'EWIC')
+    if not sheet:
+        return None
+
+    rows = []
+    circuits = []
+    totals = {}
+    for line in sheet.split('\n'):
+        if '|' not in line:
+            continue
+        parts = [c.strip() for c in line.split('|')]
+
+        # --- left block: the hourly curve ---------------------------------
+        if len(parts) > 7 and re.match(r'^\d{1,2}:\d{2}(?::\d{2})?$', parts[1] or ''):
+            hh, mm = parts[1].split(':')[:2]
+            point = {'time': f'{int(hh):02d}:{int(mm):02d}', 'mw': [], 'mvar': []}
+            for i in range(len(EWIC_CORRIDORS)):
+                mw, mvar = parts[2 + i * 2], parts[3 + i * 2]
+                point['mw'].append(_ewic_num(mw))
+                point['mvar'].append(_ewic_num(mvar))
+            rows.append(point)
+
+        # --- right block: per-circuit energy ------------------------------
+        if len(parts) > 12:
+            label, kind, value = parts[8], parts[10], parts[12]
+            if kind in ('Export', 'Import') and label and 'Ckt' in label:
+                circuits.append({'circuit': label, 'direction': kind, 'energyKwh': _ewic_num(value)})
+            elif kind in ('Export', 'Import') and not label and circuits:
+                # An Import row prints under the circuit it belongs to and
+                # repeats no name; it continues the block above it.
+                circuits.append({'circuit': circuits[-1]['circuit'], 'direction': kind,
+                                 'energyKwh': _ewic_num(value)})
+            elif kind in ('Total Export', 'Total Import'):
+                totals[kind.split()[1].lower()] = _ewic_num(value)
+
+    if not rows or not circuits:
+        return None
+
+    checks = []
+    export_sum = sum(c['energyKwh'] or 0 for c in circuits if c['direction'] == 'Export')
+    printed = totals.get('export')
+    if printed and abs(export_sum - printed) > 1.0:
+        checks.append({
+            'scope': 'totals',
+            'message': (f'Circuit exports sum to {export_sum:,.2f} kWh, but the sheet prints a '
+                        f'Total Export of {printed:,.2f} kWh.'),
+        })
+
+    for i, corridor in enumerate(EWIC_CORRIDORS):
+        pts = [(_hhmm(r['time']), r['mw'][i]) for r in rows if r['mw'][i] is not None]
+        if len(pts) < 2:
+            continue
+        integral = 0.0
+        for (t1, v1), (t2, v2) in zip(pts, pts[1:]):
+            integral += (v1 + v2) / 2 * (t2 - t1)
+        integral += pts[-1][1] * (24 - pts[-1][0])   # the last stamp holds to midnight
+        integral *= 1000                              # MWh -> kWh
+        metered = sum(c['energyKwh'] or 0 for c in circuits
+                      if c['circuit'].startswith(corridor) and c['direction'] == 'Export')
+        if metered and abs(integral - metered) / metered > EWIC_ENERGY_TOLERANCE:
+            checks.append({
+                'scope': corridor,
+                'message': (f'{corridor}: the MW curve integrates to {integral:,.0f} kWh but its '
+                            f'circuits are metered at {metered:,.0f} kWh '
+                            f'({integral / metered:.2f}x). Both are reproduced as published.'),
+            })
+
+    return {
+        'corridors': list(EWIC_CORRIDORS),
+        'rows': rows,
+        'circuits': circuits,
+        'totals': totals,
+        'checks': checks,
+    }
+
+
+def _ewic_num(cell):
+    """A number from an EWIC cell, or None where the sheet prints nothing."""
+    text = (cell or '').replace(',', '').strip()
+    if not text:
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        return None
+
+
+def _hhmm(text):
+    """'18:30' as hours since midnight, so the half hours integrate correctly."""
+    hh, mm = text.split(':')[:2]
+    return int(hh) + int(mm) / 60
+
+
 def published_demand_stats(p1, forecast):
     """Figures P1 states outright that the site used to estimate instead.
 
@@ -1643,6 +1782,7 @@ def parse_pgcb_file(filepath, op_date):
     formatted_date = op_date.strftime("%d %b %Y")
 
     energy_curve = parse_energy_curve(content)
+    ewic = parse_ewic(content)
 
     return {
         'systemStats': {
@@ -1679,6 +1819,9 @@ def parse_pgcb_file(filepath, op_date):
         # so the site can tell "this day published no fuel curve" from "the
         # fuel curve was read and every series was flat".
         **({'energyCurveData': energy_curve} if energy_curve else {}),
+        # Same rule for the interconnector: the older layouts carry no EWIC
+        # sheet at all, and an empty section would claim no power crossed.
+        **({'ewicData': ewic} if ewic else {}),
     }
 
 def parse_petrobangla_file(filepath):

@@ -17,6 +17,11 @@ import {
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import {
+  LOAD_CURVE_COLORS as LOAD_CURVE_PALETTE,
+  pick,
+  type ChartMode,
+} from '@/lib/data/grid/chart-palette';
+import {
   GridLiveBadge,
   GridStatusBadge,
   GridChartFrame,
@@ -172,11 +177,17 @@ const TREND_TOGGLE_CLASS = cn(
  * foreground colour and the prose in amber while the line itself was yellow.
  * Shedding is the theme's own destructive colour, so it is resolved from
  * chartTheme at render time rather than fixed here.
+ *
+ * The two steps per series now come from `chart-palette`, which picks the one
+ * that suits the surface being drawn on — the previous pair was fixed for the
+ * dark card and carried onto the white one unchanged.
  */
-const LOAD_CURVE_COLORS = {
-  generation: '#0ea5e9',
-  demand: '#eab308',
-} as const;
+function loadCurveColorsFor(mode: ChartMode) {
+  return {
+    generation: pick(LOAD_CURVE_PALETTE.generation, mode),
+    demand: pick(LOAD_CURVE_PALETTE.demand, mode),
+  } as const;
+}
 
 /**
  * The hovered load-shedding bar, marked the way the two curves mark the same
@@ -226,6 +237,12 @@ export function PowerGridExplorer({
   runtimeDates,
 }: PowerGridExplorerProps = {}) {
   const chartTheme = useChartTheme();
+  // Resolved once per theme change so every reference below — marks, legend,
+  // hover panel, prose — reads the same two strings.
+  const LOAD_CURVE_COLORS = useMemo(
+    () => loadCurveColorsFor(chartTheme.mode),
+    [chartTheme.mode],
+  );
   // The server knows the true newest day (bundled catalog ∪ runtime releases);
   // the hook's own bundled value would gate a freshly published day as locked.
   const gridAccess = useGridTierAccess(
@@ -593,6 +610,8 @@ export function PowerGridExplorer({
     // Undefined, not [], on the layouts whose workbook carries no En-Curve
     // sheet — the chart renders nothing rather than an empty frame.
     energyCurveData,
+    // Same for the interconnector: absent before the EWIC sheet existed.
+    ewicData,
   } = activeData ?? {
     systemStats: {
       date: '',
@@ -953,18 +972,24 @@ export function PowerGridExplorer({
   const monthDropdownRef = useRef<HTMLDivElement>(null);
   const fuelDropdownRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * The fuel-trend selector uses its own short keys ('import', 'diesel') rather
+   * than the names PGCB publishes, so they are folded onto the canonical name
+   * before lookup. Colours themselves come from `chart-palette` — this used to
+   * be a second, independently drifting copy of the fuel palette.
+   */
   const getFuelColor = (fuel: string) => {
-    const mapping: Record<string, string> = {
-      gas: '#0ea5e9',
-      coal: '#64748b',
-      hfo: '#f97316',
-      diesel: '#ef4444',
-      hydro: '#06b6d4',
-      solar: '#eab308',
-      wind: '#10b981',
-      import: '#a855f7',
+    const TREND_KEY_TO_FUEL: Record<string, string> = {
+      import: 'Imports',
+      imports: 'Imports',
+      diesel: 'HSD (Diesel)',
+      hsd: 'HSD (Diesel)',
     };
-    return mapping[fuel.toLowerCase()] || '#94a3b8';
+    const key = fuel.toLowerCase();
+    const canonical =
+      TREND_KEY_TO_FUEL[key] ?? fuel.charAt(0).toUpperCase() + fuel.slice(1).toLowerCase();
+    // HFO is an initialism, so title-casing it would miss the map.
+    return chartTheme.fuel(key === 'hfo' ? 'HFO' : canonical);
   };
 
   const getFuelLabel = (fuel: string) => {
@@ -1188,6 +1213,39 @@ export function PowerGridExplorer({
   // Overview calculations
   const totalGenMkwhr = generationData.reduce((sum, item) => sum + item.gen, 0);
   const totalCostBdt = generationData.reduce((sum, item) => sum + (item.cost ?? 0), 0);
+
+  // --- East-West Interconnector -------------------------------------------
+  // Absent on every layout before the EWIC sheet existed, so every consumer
+  // below is written to fall away rather than render an empty frame.
+  const ewic = ewicData ?? null;
+  const ewicChartData = useMemo(
+    () =>
+      (ewic?.rows ?? []).map((r) => {
+        const point: Record<string, string | number | null> = { time: r.time };
+        r.mw.forEach((v, i) => { point[`c${i}`] = v; });
+        return point;
+      }),
+    [ewic],
+  );
+  // Exports only: the day's transfer is what crossed, and pairing it with a
+  // zero import line would imply the two net off.
+  const ewicTotalMkwh = ewic?.totals?.export != null ? ewic.totals.export / 1e6 : null;
+  const ewicShareOfGen =
+    ewicTotalMkwh != null && totalGenMkwhr > 0 ? (ewicTotalMkwh / totalGenMkwhr) * 100 : null;
+  const ewicCircuitBars = useMemo(() => {
+    const rows = (ewic?.circuits ?? []).filter((c) => c.direction === 'Export' && (c.energyKwh ?? 0) > 0);
+    const max = Math.max(...rows.map((c) => c.energyKwh ?? 0), 0);
+    return rows
+      .map((c) => ({
+        circuit: c.circuit,
+        energyKwh: c.energyKwh ?? 0,
+        pct: max > 0 ? ((c.energyKwh ?? 0) / max) * 100 : 0,
+        // Both circuits of a corridor take that corridor's line colour, so the
+        // bars and the curve above them name the same thing the same way.
+        corridorIndex: Math.max(0, (ewic?.corridors ?? []).findIndex((n) => c.circuit.startsWith(n))),
+      }))
+      .sort((a, b) => b.energyKwh - a.energyKwh);
+  }, [ewic]);
   // Summing nulls yields 0, which would read as "this day cost nothing to
   // generate" rather than "the report carries no production-cost block".
   const hasPublishedFuelCost = generationData.some((item) => item.cost != null);
@@ -1580,7 +1638,7 @@ export function PowerGridExplorer({
                   <div
                     key={item.name}
                     className={cn('grid-explorer-mix-stack__seg', dimmed && 'grid-explorer-mix-stack__seg--dim')}
-                    style={{ width: `${width}%`, backgroundColor: item.color }}
+                    style={{ width: `${width}%`, backgroundColor: chartTheme.fuel(item.name) }}
                   />
                 );
               })}
@@ -1616,7 +1674,7 @@ export function PowerGridExplorer({
                       return (
                         <Cell
                           key={idx}
-                          fill={entry.color}
+                          fill={chartTheme.fuel(entry.name)}
                           fillOpacity={dimmed ? 0.3 : 1}
                           style={{ transition: 'fill-opacity 200ms ease' }}
                         />
@@ -1696,7 +1754,7 @@ export function PowerGridExplorer({
                     onMouseEnter={() => setHoveredIndex(i)}
                     onMouseLeave={() => setHoveredIndex(null)}
                   >
-                    <span className="grid-chart-legend__swatch" style={{ backgroundColor: item.color }} />
+                    <span className="grid-chart-legend__swatch" style={{ backgroundColor: chartTheme.fuel(item.name) }} />
                     <span className="grid-chart-legend__name">{item.name}</span>
                     {/* The share is ours; the MKWh beside it is PGCB's own row. */}
                     <span className="grid-chart-legend__meta">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}% <GridProvenanceTag kind="D" /></span>
@@ -1798,7 +1856,7 @@ export function PowerGridExplorer({
                         return (
                           <Cell
                             key={idx}
-                            fill={entry.color}
+                            fill={chartTheme.fuel(entry.name)}
                             fillOpacity={isDimmed ? 0.35 : 1}
                             style={{ transition: 'fill-opacity 200ms ease', cursor: 'pointer' }}
                             onMouseEnter={() => setHoveredCostIndex(idx)}
@@ -5152,6 +5210,129 @@ export function PowerGridExplorer({
                 <span className="font-medium">Reporting Period: Evening Peak Load (Date: {systemStats.date})</span>
               </GridCardFooter>
             </div>
+
+            {/* East-West Interconnector. Sits beside the zone table on purpose:
+                that card shows the imbalance between the country's two halves,
+                this one shows the wire that carries it. */}
+            {ewic ? (
+              <div className="grid-explorer-chart-card card lg:col-span-2">
+                <div className="grid-explorer-chart-card__head">
+                  <div>
+                    <h3 className="grid-explorer-chart-card__title">East-West Interconnector Transfer<DailyBadge /></h3>
+                    <p className="grid-explorer-chart-card__sub">
+                      Hourly flow across the three corridors joining the western and eastern grids
+                      {ewicTotalMkwh != null ? (
+                        <> • {ewicTotalMkwh.toFixed(2)} MKWh transferred <GridProvenanceTag kind="P" />
+                          {ewicShareOfGen != null ? <> · {ewicShareOfGen.toFixed(1)}% of national generation <GridProvenanceTag kind="D" /></> : null}
+                        </>
+                      ) : null}
+                    </p>
+                  </div>
+                  <span className="grid-explorer-chip">EWIC</span>
+                </div>
+
+                {/* The sheet's own footnote defines the sign, and the whole card
+                    is unreadable without it — so it is stated, not buried. */}
+                <p className="text-[11px] text-muted-foreground mb-3">
+                  Positive MW is flow from <strong>West to East</strong>; negative is East to West.
+                </p>
+
+                <div className="h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={ewicChartData} margin={{ top: 8, right: 16, bottom: 4, left: 4 }}>
+                      <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                      <XAxis dataKey="time" tick={{ fontSize: 11, fill: chartTheme.axisTick }} interval="preserveStartEnd" minTickGap={24} />
+                      <YAxis tick={{ fontSize: 11, fill: chartTheme.axisTick }} width={52} label={{ value: 'MW', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: chartTheme.axisTick } }} />
+                      <GridRechartsTooltip
+                        content={({ active, payload, label }) => {
+                          if (!active || !payload?.length) return null;
+                          return (
+                            <div className="p-4 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs w-72 max-w-[calc(100vw-2rem)] select-none bg-card">
+                              <div className="font-bold border-b border-border/40 pb-1.5 mb-2">{label}</div>
+                              <div className="space-y-1.5">
+                                {payload.map((s: { dataKey?: unknown; color?: string; name?: string; value?: number }) => (
+                                  <div key={String(s.dataKey)} className="flex justify-between gap-3">
+                                    <span className="text-muted-foreground inline-flex items-center gap-1.5">
+                                      <span className="h-2 w-2 rounded-sm shrink-0" style={{ background: s.color }} />
+                                      {s.name}
+                                    </span>
+                                    <span className="font-bold tabular-nums">{formatNumber(Math.round(Number(s.value)))} MW</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="mt-2 pt-2 border-t border-border/30 text-[9px] text-muted-foreground italic">
+                                Read from the report&apos;s EWIC sheet as published.
+                              </div>
+                            </div>
+                          );
+                        }}
+                      />
+                      {ewic.corridors.map((name, i) => (
+                        <Line
+                          key={name}
+                          type="monotone"
+                          dataKey={`c${i}`}
+                          name={name}
+                          stroke={chartTheme.categorical(i)}
+                          strokeWidth={2}
+                          dot={false}
+                          activeDot={{ r: 5 }}
+                          isAnimationActive={false}
+                        />
+                      ))}
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Legend always present, in the same order as the lines, so a
+                    corridor is never identified by colour alone. */}
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+                  {ewic.corridors.map((name, i) => (
+                    <span key={name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: chartTheme.categorical(i) }} />
+                      {name}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Per-circuit metered energy. Ranked, and labelled in place —
+                    six bars do not need a second colour scale to be read. */}
+                <div className="mt-5 pt-4 border-t border-border/30">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                    Metered energy by circuit <GridProvenanceTag kind="P" />
+                  </h4>
+                  <div className="space-y-1.5">
+                    {ewicCircuitBars.map((c) => (
+                      <div key={c.circuit} className="flex items-center gap-3 text-[11px]">
+                        <span className="w-44 shrink-0 text-muted-foreground truncate">{c.circuit}</span>
+                        <span className="flex-1 h-3 rounded-sm bg-muted/30 overflow-hidden">
+                          <span className="block h-full rounded-sm" style={{ width: `${c.pct}%`, background: chartTheme.categorical(c.corridorIndex) }} />
+                        </span>
+                        <span className="w-24 shrink-0 text-right font-semibold tabular-nums">{(c.energyKwh / 1e6).toFixed(2)} MKWh</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* A failed reconciliation is shown to the reader, not swallowed
+                    — the same rule the gas Sub-Total gate follows. */}
+                {ewic.checks.length > 0 ? (
+                  <div className="mt-4 rounded-xl border border-amber-500/40 bg-amber-500/5 p-3">
+                    <div className="text-[11px] font-bold text-amber-500 mb-1">Reconciliation note</div>
+                    {ewic.checks.map((c) => (
+                      <p key={c.scope} className="text-[11px] text-muted-foreground leading-relaxed">{c.message}</p>
+                    ))}
+                  </div>
+                ) : null}
+
+                <GridCardFooter>
+                  <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — EWIC sheet, East-West Interconnector Log</span>
+                  {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
+                  <span>Flows and circuit energy as published. The energy column is headed &ldquo;MkWHr&rdquo; and printed in kWh; converted here, not restated.</span>
+                  <span className="font-medium">Reporting Date: {systemStats.date}</span>
+                </GridCardFooter>
+              </div>
+            ) : null}
 
             {/* Daily Outage Log */}
             <div className="grid-explorer-chart-card card lg:col-span-1">
