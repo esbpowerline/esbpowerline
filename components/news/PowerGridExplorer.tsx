@@ -36,6 +36,7 @@ import {
   REGIONAL_ZONE_COLORS,
   formatAxisCrore,
   formatAxisMw,
+  formatAxisMwCompact,
   formatAxisMmcfd,
   formatPgcbMonthlyTick,
   gridChartAxisTick,
@@ -2032,7 +2033,8 @@ export function PowerGridExplorer({
                 <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                   <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                   <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'time' })} />
-                  <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMw} />
+                  <YAxis yAxisId="left" width={40} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMwCompact}
+                    label={{ value: 'MW', angle: -90, position: 'insideLeft', offset: 8, style: { fontSize: 10, fill: chartTheme.axisTick } }} />
                   {/* The shedding axis is tinted in the shedding colour so it is
                       obvious which marks it measures — the left axis serves
                       generation and demand, which are the same measurement in the
@@ -2049,7 +2051,7 @@ export function PowerGridExplorer({
                       domain={[0, shedAxis.max]}
                       ticks={shedAxis.ticks}
                       allowDecimals={false}
-                      tickFormatter={formatAxisMw}
+                      tickFormatter={formatAxisMwCompact}
                     />
                   )}
                   <Tooltip
@@ -2124,13 +2126,13 @@ export function PowerGridExplorer({
                     iconSize={8}
                     wrapperStyle={{ fontSize: '11px' }}
                     colorResolver={(value) => {
-                      if (value === 'Actual Generation') return LOAD_CURVE_COLORS.generation;
+                      if (value === 'Generation') return LOAD_CURVE_COLORS.generation;
                       if (value.startsWith('Demand') || value.startsWith('Peak Demand')) return LOAD_CURVE_COLORS.demand;
                       if (value.includes('Load Shedding')) return chartTheme.destructive;
                       return 'inherit';
                     }}
                   />
-                  <Area yAxisId="left" type="monotone" dataKey="generation" name="Actual Generation" stroke={LOAD_CURVE_COLORS.generation} fill={LOAD_CURVE_COLORS.generation} fillOpacity={0.15} strokeWidth={2.5} />
+                  <Area yAxisId="left" type="monotone" dataKey="generation" name="Generation" stroke={LOAD_CURVE_COLORS.generation} fill={LOAD_CURVE_COLORS.generation} fillOpacity={0.15} strokeWidth={2.5} />
                   {/* Shedding sits on the right-hand axis, under the hours that
                       produced it, rather than in a panel of its own below the card.
                       It is drawn after the generation area so the bars stay crisp
@@ -2143,7 +2145,7 @@ export function PowerGridExplorer({
                     <Bar
                       yAxisId="shed"
                       dataKey="loadShed"
-                      name={sheddingIsHourly ? 'Load Shedding (hourly, right axis)' : 'Peak Load Shedding (right axis)'}
+                      name={sheddingIsHourly ? 'Load shedding' : 'Peak load shedding'}
                       fill={chartTheme.destructive}
                       fillOpacity={0.45}
                       stroke={chartTheme.destructive}
@@ -2157,7 +2159,7 @@ export function PowerGridExplorer({
                     // Every hour carries a figure, so demand is the second
                     // measured curve it is — and the gap between the two lines
                     // is the deficit the bars beneath measure directly.
-                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Demand (published hourly)" stroke={LOAD_CURVE_COLORS.demand} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
+                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Demand" stroke={LOAD_CURVE_COLORS.demand} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
                   ) : (
                     // Demand exists for one hour only, so it renders as a single
                     // marked point rather than a series interpolated across the

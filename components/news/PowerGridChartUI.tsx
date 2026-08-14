@@ -109,6 +109,24 @@ export function formatAxisMw(value: number) {
   return `${value} MW`;
 }
 
+/**
+ * The same figure without the unit repeated on every tick.
+ *
+ * "20.0k MW" is eight characters and wraps to two lines in a 54px axis, which
+ * on a 360px card spends a fifth of the plot's width restating a unit the axis
+ * could say once. Pair this with a `label` on the axis.
+ *
+ * The decimal appears only when it carries something: 20000 reads "20k" and
+ * 2800 reads "2.8k". Rounding everything would overstate the shedding axis,
+ * which tops out near 2.8k, by 7%; keeping a decimal everywhere would print
+ * "5.0k" beside "10k" on the same axis.
+ */
+export function formatAxisMwCompact(value: number) {
+  if (value < 1000) return `${value}`;
+  const k = value / 1000;
+  return Number.isInteger(k) ? `${k}k` : `${k.toFixed(1)}k`;
+}
+
 export function formatAxisCkm(value: number) {
   if (value >= 1000) return `${(value / 1000).toFixed(1)}k ckm`;
   return `${value} ckm`;
