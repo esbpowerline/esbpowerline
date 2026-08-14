@@ -7547,7 +7547,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
      Sized by the window, the same rule made a full-width card and a
      third-width card the same height at the same viewport — the third-width
      one squat, the full-width one short. */
-  min-height: clamp(11rem, 46cqi, 18rem);
+  min-height: clamp(13rem, 46cqi, 18rem);
   overflow: visible;
 }
 
@@ -7557,8 +7557,8 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 .grid-explorer-chart-area--lg {
-  min-height: clamp(12rem, 52cqi, 20rem);
-  height: clamp(12rem, 52cqi, 20rem);
+  min-height: clamp(15rem, 52cqi, 20rem);
+  height: clamp(15rem, 52cqi, 20rem);
 }
 
 .grid-explorer-chart-area--split {
@@ -7578,19 +7578,19 @@ html.theme-dark .locale-toggle__btn--active:hover {
    `min-height: 0` is deliberate too: without it the base floor would fight the
    height set here, and the taller of the two would win on a phone. */
 .grid-explorer-chart-area--h-compact {
-  height: clamp(10.5rem, 44cqi, 17.5rem);
+  height: clamp(13.5rem, 44cqi, 17.5rem);
   min-height: 0;
 }
 .grid-explorer-chart-area--h-standard {
-  height: clamp(12.5rem, 55cqi, 22rem);
+  height: clamp(15rem, 55cqi, 22rem);
   min-height: 0;
 }
 .grid-explorer-chart-area--h-tall {
-  height: clamp(13rem, 58cqi, 24rem);
+  height: clamp(16rem, 58cqi, 24rem);
   min-height: 0;
 }
 .grid-explorer-chart-area--h-taller {
-  height: clamp(13.5rem, 60cqi, 26rem);
+  height: clamp(17rem, 60cqi, 26rem);
   min-height: 0;
 }
 

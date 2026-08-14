@@ -20,13 +20,27 @@ export const GRID_CHART_MARGIN = {
   compact: { top: 12, right: 10, left: 4, bottom: 18 },
   legend: { top: 14, right: 6, left: 4, bottom: 18 },
   dualAxis: { top: 14, right: 6, left: 4, bottom: 18 },
-  topLegend: { top: 44, right: 12, left: 4, bottom: 18 },
+  /* `top` was 44 — room for the legend to sit in. It does not sit there:
+     Recharts places a top-aligned legend AFTER the top margin and then starts
+     the plot below the legend, so the two were counted twice. Measured on a
+     393px screen the chart box was 209px, of which 44 was blank, 36 the
+     legend and only 81 the plot. The blank band between a card's subtitle and
+     its legend was exactly this. 8 is breathing room above the legend; the
+     legend still reserves its own height and the plot keeps the rest. */
+  topLegend: { top: 8, right: 12, left: 4, bottom: 18 },
 } as const;
 
 /** Default margin for inline Grid Explorer charts (non-frame) */
 export const GRID_EXPLORER_CHART_MARGIN = {
   default: { top: 12, right: 12, left: 4, bottom: 18 },
-  topLegend: { top: 44, right: 12, left: 4, bottom: 18 },
+  /* `top` was 44 — room for the legend to sit in. It does not sit there:
+     Recharts places a top-aligned legend AFTER the top margin and then starts
+     the plot below the legend, so the two were counted twice. Measured on a
+     393px screen the chart box was 209px, of which 44 was blank, 36 the
+     legend and only 81 the plot. The blank band between a card's subtitle and
+     its legend was exactly this. 8 is breathing room above the legend; the
+     legend still reserves its own height and the plot keeps the rest. */
+  topLegend: { top: 8, right: 12, left: 4, bottom: 18 },
   dualAxis: { top: 14, right: 8, left: 4, bottom: 18 },
 } as const;
 
