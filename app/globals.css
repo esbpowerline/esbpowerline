@@ -5625,6 +5625,64 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply font-bold tabular-nums text-lg tracking-tight text-foreground leading-none mt-1;
 }
 
+/* ── The first screen on a phone ───────────────────────────────────────────
+   The page strip carries six tiles. Two-up that is three rows of figures
+   stacked under two banners, a heading and four date controls — a reader
+   reaches the tab bar without having been told anything.
+
+   Below 40rem the lead tile becomes the headline and the rest fold behind a
+   control. All six stay in the DOM; this hides them, so nothing that reads
+   the strip loses a figure and desktop is untouched — every rule here is
+   inside the media query. */
+.grid-explorer-kpi-slot {
+  display: contents;
+}
+
+@media (max-width: 40rem) {
+  /* The lead figure takes the full width and is read, not scanned.
+     Set on the tile, not on the slot: the slot is `display: contents`, so it
+     is not a grid item and `grid-column` on it does nothing at all. */
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child > * {
+    grid-column: 1 / -1;
+  }
+
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi__value {
+    font-size: 1.75rem;
+    line-height: 1.05;
+  }
+
+  .grid-explorer-kpi-strip--folds:not([data-expanded='true'])
+    .grid-explorer-kpi-slot.grid-explorer-kpi-overflow {
+    display: none;
+  }
+
+  .grid-explorer-kpi-more {
+    @apply col-span-full min-h-11 rounded-2xl border border-border/55 bg-card/60;
+    @apply text-[11px] font-bold uppercase tracking-wider text-muted-foreground;
+    @apply transition-colors;
+  }
+
+  .grid-explorer-kpi-more:hover {
+    @apply border-primary/35 text-foreground;
+  }
+
+  .grid-explorer-kpi-more:focus-visible {
+    @apply outline-none ring-2 ring-primary/45 ring-offset-2 ring-offset-background;
+  }
+}
+
+/* A control that only means anything once tiles are hidden, which only
+   happens on a phone. */
+.grid-explorer-kpi-more {
+  display: none;
+}
+
+@media (max-width: 40rem) {
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-more {
+    display: block;
+  }
+}
+
 /* Nine tabs in a scroller with the scrollbar suppressed and no other cue: on a
    phone about three are visible and nothing says the other six exist. The mask
    fades the trailing edge so the row reads as continuing past the screen, and

@@ -149,7 +149,16 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   // The page-level strip: its briefings drop over the tab content below, so it
   // must sit above any KPI strip rendered inside a tab.
   return (
-    <GridKpiStrip stripRef={kpiStripRef} layer="page" className="grid-explorer-kpi-strip--six">
+    <GridKpiStrip
+      stripRef={kpiStripRef}
+      layer="page"
+      className="grid-explorer-kpi-strip--six"
+      // Peak Supply leads, paired with Peak Demand and Load Shedding: the three
+      // together are the day's whole story — what the grid had, what it was
+      // asked for, and what went unserved. Capacity Idle, Gas Supply and Cost
+      // of Power explain that story rather than tell it, so they fold.
+      collapsibleAfter={3}
+    >
       <GridKpiCell
         icon={Zap}
         label={

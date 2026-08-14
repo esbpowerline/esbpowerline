@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Children, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentType, ReactNode } from 'react';
 
@@ -229,18 +230,68 @@ export function GridKpiStrip({
   className,
   stripRef,
   layer = 'panel',
+  collapsibleAfter,
 }: {
   children: ReactNode;
   className?: string;
   stripRef?: React.RefObject<HTMLDivElement | null>;
   layer?: GridKpiStripLayer;
+  /**
+   * Below 40rem, show this many tiles and fold the rest behind a control.
+   *
+   * The page strip carries six. Two-up on a phone that is three rows of
+   * figures before the tab bar is even reached, and a reader has to scroll
+   * past all of it to find out whether the grid coped today. Folding is a
+   * phone-only behaviour: the CSS that hides the remainder is inside the
+   * media query, so every tile renders unconditionally on a desktop and this
+   * prop changes nothing there.
+   *
+   * The tiles stay in the DOM either way — this hides them, it does not stop
+   * rendering them, so nothing that reads the strip loses a figure.
+   */
+  collapsibleAfter?: number;
 }) {
+  const [expanded, setExpanded] = useState(false);
+  const items = Children.toArray(children);
+  const folds = collapsibleAfter != null && items.length > collapsibleAfter;
+
   return (
     <div
       ref={stripRef}
-      className={cn('grid-explorer-kpi-strip relative', GRID_KPI_STRIP_LAYER[layer], className)}
+      data-expanded={folds && expanded ? 'true' : undefined}
+      className={cn(
+        'grid-explorer-kpi-strip relative',
+        GRID_KPI_STRIP_LAYER[layer],
+        folds && 'grid-explorer-kpi-strip--folds',
+        className,
+      )}
     >
-      {children}
+      {folds
+        ? items.map((child, i) => (
+            <div
+              key={i}
+              className={cn(
+                'grid-explorer-kpi-slot',
+                i >= collapsibleAfter! && 'grid-explorer-kpi-overflow',
+              )}
+            >
+              {child}
+            </div>
+          ))
+        : children}
+
+      {folds && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="grid-explorer-kpi-more"
+          aria-expanded={expanded}
+        >
+          {expanded
+            ? 'Show fewer'
+            : `Show ${items.length - collapsibleAfter!} more`}
+        </button>
+      )}
     </div>
   );
 }
