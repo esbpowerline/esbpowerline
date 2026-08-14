@@ -5625,6 +5625,15 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply font-bold tabular-nums text-lg tracking-tight text-foreground leading-none mt-1;
 }
 
+/* The text block sat at its natural width — 131px of content in a 237px tile,
+   so 45% of every tile was empty and a full-width hero was mostly nothing.
+   It fills the tile now, which is also what lets a long label truncate
+   against the tile edge instead of against itself. */
+.grid-explorer-kpi > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 /* ── The first screen on a phone ───────────────────────────────────────────
    The page strip carries six tiles. Two-up that is three rows of figures
    stacked under two banners, a heading and four date controls — a reader
@@ -5649,6 +5658,27 @@ html.theme-dark .locale-toggle__btn--active:hover {
   .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi__value {
     font-size: 1.75rem;
     line-height: 1.05;
+  }
+
+  /* A hero spanning the full width has room for the movement to sit beside the
+     figure rather than under it. Left-aligned in a full-width box, the tile was
+     a number with 200px of nothing to its right. */
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    column-gap: 0.75rem;
+  }
+
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi__label {
+    grid-column: 1 / -1;
+  }
+
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi > div > p {
+    grid-column: 2;
+    margin-top: 0;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .grid-explorer-kpi-strip--folds:not([data-expanded='true'])
