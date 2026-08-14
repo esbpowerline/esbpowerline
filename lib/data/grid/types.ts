@@ -34,6 +34,40 @@ export interface GridSystemStats {
   totalGasSuppliedPower: number;
   avgProductionCost: number;
   totalDailyCost: number;
+  /**
+   * The clock time P1 stamps against each figure above — the hour the peak was
+   * actually measured, which PGCB has always printed and the parser read past
+   * until now. Present only for the figures a given layout stamps, so a
+   * missing key means the sheet published no time, never midnight.
+   *
+   * The evening peak hour genuinely moves (18:00–21:00 across verified
+   * 2025–26 days), so anything naming a fixed hour in prose should read this
+   * instead.
+   */
+  peakTimes?: {
+    dayPeakGen?: string;
+    dayPeakDemand?: string;
+    eveningPeakGen?: string;
+    eveningPeakDemand?: string;
+    minGen?: string;
+    maxGen?: string;
+  };
+}
+
+/**
+ * One zone's row of P1's "Zone-wise Generation Summary" — the national fuel
+ * mix broken out by zone, and PGCB's only published statement of where each
+ * zone's energy comes from. Energy in MKWh, normalised from whichever unit the
+ * caption states.
+ */
+export interface ZoneGenerationItem {
+  zone: string;
+  /** Keyed by the same fuel names as `generationData`. A layout that omits a
+   *  fuel omits the key; zero is a published zero. */
+  fuels: Record<string, number>;
+  /** PGCB's own row total where it prints one, so a row whose parts do not add
+   *  up keeps the published figure rather than a silently corrected sum. */
+  total: number;
 }
 
 export interface GridGenerationItem {
@@ -224,6 +258,10 @@ export interface GridDailyData {
   gasDistributionData?: GasDistributionItem[];
   borderImportsData?: BorderImportItem[];
   regionalDemandData?: RegionalDemandItem[];
+  /** Zone x fuel from P1, in the order PGCB prints. Absent on the layouts
+   *  whose P1 carries no zone generation table — which is not the same as nine
+   *  zones that generated nothing. */
+  zoneGenerationData?: ZoneGenerationItem[];
   /** Where the zone Demand figures came from — the section is PGCB-attributed
    *  by default, so anything else has to say so:
    *    'p1-published'             PGCB's own printed P1 Demand column (P)

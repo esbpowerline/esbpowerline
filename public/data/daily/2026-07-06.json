@@ -13,7 +13,15 @@
     "maxTemp": 31.7,
     "totalGasSuppliedPower": 934.46,
     "avgProductionCost": 6.283,
-    "totalDailyCost": 2199917293
+    "totalDailyCost": 2199917293,
+    "peakTimes": {
+      "dayPeakGen": "12:00",
+      "dayPeakDemand": "12:00",
+      "eveningPeakGen": "20:00",
+      "eveningPeakDemand": "20:00",
+      "minGen": "08:00",
+      "maxGen": "20:00"
+    }
   },
   "generationData": [
     {
@@ -71,6 +79,134 @@
       "cost": 13267243,
       "unitCost": 14.71,
       "color": "#22c55e"
+    }
+  ],
+  "zoneGenerationData": [
+    {
+      "zone": "Dhaka",
+      "fuels": {
+        "Gas": 44.861397,
+        "Coal": 0.0,
+        "HFO": 14.041903,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.143825,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 59.047125
+    },
+    {
+      "zone": "Chattogram",
+      "fuels": {
+        "Gas": 4.124418,
+        "Coal": 41.667271,
+        "HFO": 3.961816,
+        "HSD": 0.0,
+        "Hydro": 2.6068,
+        "Solar": 0.013375,
+        "Imports": 0.0,
+        "Wind": 0.90192
+      },
+      "total": 53.2756
+    },
+    {
+      "zone": "Cumilla",
+      "fuels": {
+        "Gas": 28.809782,
+        "Coal": 0.0,
+        "HFO": 2.779676,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.140718,
+        "Imports": 3.09888,
+        "Wind": 0.0
+      },
+      "total": 34.829056
+    },
+    {
+      "zone": "Mymensingh",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 0.0,
+        "HFO": 4.18008,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.26666,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 4.44674
+    },
+    {
+      "zone": "Sylhet",
+      "fuels": {
+        "Gas": 26.377019,
+        "Coal": 0.0,
+        "HFO": 0.0,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.060297,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 26.437316
+    },
+    {
+      "zone": "Khulna",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 25.96363,
+        "HFO": 0.576608,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.1188,
+        "Imports": 22.505455,
+        "Wind": 0.0
+      },
+      "total": 49.164493
+    },
+    {
+      "zone": "Barishal",
+      "fuels": {
+        "Gas": 6.87579,
+        "Coal": 53.590727,
+        "HFO": 0.319536,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.001275,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 60.787328
+    },
+    {
+      "zone": "Rajshahi",
+      "fuels": {
+        "Gas": 19.405054,
+        "Coal": 0.0,
+        "HFO": 1.128018,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.867791,
+        "Imports": 32.200584,
+        "Wind": 0.0
+      },
+      "total": 53.601447
+    },
+    {
+      "zone": "Rangpur",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 5.491454,
+        "HFO": 1.453965,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.598878,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 8.544297
     }
   ],
   "borderImportsData": [

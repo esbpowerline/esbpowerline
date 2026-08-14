@@ -13,7 +13,15 @@
     "maxTemp": 36.1,
     "totalGasSuppliedPower": 951.9,
     "avgProductionCost": 6.599,
-    "totalDailyCost": 2422480557
+    "totalDailyCost": 2422480557,
+    "peakTimes": {
+      "dayPeakGen": "12:00",
+      "dayPeakDemand": "12:00",
+      "eveningPeakGen": "19:30",
+      "eveningPeakDemand": "19:30",
+      "minGen": "08:00",
+      "maxGen": "00:00"
+    }
   },
   "generationData": [
     {
@@ -71,6 +79,134 @@
       "cost": 18873518,
       "unitCost": 14.71,
       "color": "#22c55e"
+    }
+  ],
+  "zoneGenerationData": [
+    {
+      "zone": "Dhaka",
+      "fuels": {
+        "Gas": 46.520714,
+        "Coal": 0.0,
+        "HFO": 12.358458,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.249534,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 59.128706
+    },
+    {
+      "zone": "Chattogram",
+      "fuels": {
+        "Gas": 5.48768,
+        "Coal": 49.998179,
+        "HFO": 7.495462,
+        "HSD": 0.0,
+        "Hydro": 1.5627,
+        "Solar": 0.102628,
+        "Imports": 0.0,
+        "Wind": 1.28304
+      },
+      "total": 65.929689
+    },
+    {
+      "zone": "Cumilla",
+      "fuels": {
+        "Gas": 29.538318,
+        "Coal": 0.0,
+        "HFO": 5.859953,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.499727,
+        "Imports": 3.90912,
+        "Wind": 0.0
+      },
+      "total": 39.807118
+    },
+    {
+      "zone": "Mymensingh",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 0.0,
+        "HFO": 4.29132,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.558707,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 4.850027
+    },
+    {
+      "zone": "Sylhet",
+      "fuels": {
+        "Gas": 25.118195,
+        "Coal": 0.0,
+        "HFO": 0.0,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.087189,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 25.205384
+    },
+    {
+      "zone": "Khulna",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 26.30545,
+        "HFO": 0.26104,
+        "HSD": 0.788607,
+        "Hydro": 0.0,
+        "Solar": 0.47016,
+        "Imports": 22.667636,
+        "Wind": 0.0
+      },
+      "total": 50.492893
+    },
+    {
+      "zone": "Barishal",
+      "fuels": {
+        "Gas": 6.77008,
+        "Coal": 49.104545,
+        "HFO": 0.393792,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.004105,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 56.272522
+    },
+    {
+      "zone": "Rajshahi",
+      "fuels": {
+        "Gas": 20.701917,
+        "Coal": 0.0,
+        "HFO": 2.41468,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.682035,
+        "Imports": 30.316363,
+        "Wind": 0.0
+      },
+      "total": 55.114995
+    },
+    {
+      "zone": "Rangpur",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 5.545272,
+        "HFO": 3.080585,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.69135,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 10.317207
     }
   ],
   "borderImportsData": [
@@ -251,8 +387,8 @@
       "time": "18:48 - 21:45",
       "plant": "Shahjadpur 132/33kV S/S T-2(415T) HT Tripped showing Siemens relays",
       "load": "HT Outage",
-      "reason": "Due to 33kv Bera-Faridpur feeder OC & EF -\u098f \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09be\u09df 132 kv T-2 X-Former  LV(OC & EF) -\u098f \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7",
-      "full_desc": "Shahjadpur 132/33kV S/S T-2(415T) HT Tripped showing Siemens relays Due to 33kv Bera-Faridpur feeder OC & EF -\u098f \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09be\u09df 132 kv T-2 X-Former  LV(OC & EF) -\u098f \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7"
+      "reason": "Due to 33kv Bera-Faridpur feeder OC & EF -এ ট্রিপ করায় 132 kv T-2 X-Former  LV(OC & EF) -এ ট্রিপ করে",
+      "full_desc": "Shahjadpur 132/33kV S/S T-2(415T) HT Tripped showing Siemens relays Due to 33kv Bera-Faridpur feeder OC & EF -এ ট্রিপ করায় 132 kv T-2 X-Former  LV(OC & EF) -এ ট্রিপ করে"
     },
     {
       "time": "07:56",

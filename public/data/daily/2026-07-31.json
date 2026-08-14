@@ -13,7 +13,15 @@
     "maxTemp": 33.6,
     "totalGasSuppliedPower": 673.12,
     "avgProductionCost": 7.75,
-    "totalDailyCost": 2514685422
+    "totalDailyCost": 2514685422,
+    "peakTimes": {
+      "dayPeakGen": "12:00",
+      "dayPeakDemand": "12:00",
+      "eveningPeakGen": "21:00",
+      "eveningPeakDemand": "21:00",
+      "minGen": "10:00",
+      "maxGen": "22:00"
+    }
   },
   "generationData": [
     {
@@ -71,6 +79,134 @@
       "cost": 3502156,
       "unitCost": 14.71,
       "color": "#22c55e"
+    }
+  ],
+  "zoneGenerationData": [
+    {
+      "zone": "Dhaka",
+      "fuels": {
+        "Gas": 26.66888,
+        "Coal": 0.0,
+        "HFO": 14.675196,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.136628,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 41.480704
+    },
+    {
+      "zone": "Chattogram",
+      "fuels": {
+        "Gas": 5.55092,
+        "Coal": 42.041816,
+        "HFO": 14.039166,
+        "HSD": 0.0,
+        "Hydro": 1.94,
+        "Solar": 0.08496,
+        "Imports": 0.0,
+        "Wind": 0.23808
+      },
+      "total": 63.894942
+    },
+    {
+      "zone": "Cumilla",
+      "fuels": {
+        "Gas": 17.552104,
+        "Coal": 0.0,
+        "HFO": 11.761076,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.509555,
+        "Imports": 3.14592,
+        "Wind": 0.0
+      },
+      "total": 32.968655
+    },
+    {
+      "zone": "Mymensingh",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 0.0,
+        "HFO": 4.89336,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.393112,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 5.286472
+    },
+    {
+      "zone": "Sylhet",
+      "fuels": {
+        "Gas": 23.282834,
+        "Coal": 0.0,
+        "HFO": 0.0,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.07007,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 23.352904
+    },
+    {
+      "zone": "Khulna",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 24.25455,
+        "HFO": 0.235248,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.42192,
+        "Imports": 22.576727,
+        "Wind": 0.0
+      },
+      "total": 47.488445
+    },
+    {
+      "zone": "Barishal",
+      "fuels": {
+        "Gas": 8.15294,
+        "Coal": 43.777454,
+        "HFO": 0.838464,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.003651,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 52.772509
+    },
+    {
+      "zone": "Rajshahi",
+      "fuels": {
+        "Gas": 10.180218,
+        "Coal": 0.0,
+        "HFO": 3.583382,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.125462,
+        "Imports": 34.959163,
+        "Wind": 0.0
+      },
+      "total": 49.848225
+    },
+    {
+      "zone": "Rangpur",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 2.086,
+        "HFO": 3.75558,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.549795,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 7.391375
     }
   ],
   "borderImportsData": [
@@ -251,8 +387,8 @@
       "time": "09:58 - 17:30",
       "plant": "Baghabari-Roppur 230kV Ckt-1 Project Work",
       "load": "HT Outage",
-      "reason": "Due to SCADA Integration & Commissioning \u098f\u09b0 Live CRP side Cable Termination \u0995\u09be\u099c\u09c7\u09b0 \u099c\u09a8\u09cd\u09af\u0964",
-      "full_desc": "Baghabari-Roppur 230kV Ckt-1 Project Work S/D from Baghabari 230/132kV end Due to SCADA Integration & Commissioning \u098f\u09b0 Live CRP side Cable Termination \u0995\u09be\u099c\u09c7\u09b0 \u099c\u09a8\u09cd\u09af\u0964"
+      "reason": "Due to SCADA Integration & Commissioning এর Live CRP side Cable Termination কাজের জন্য।",
+      "full_desc": "Baghabari-Roppur 230kV Ckt-1 Project Work S/D from Baghabari 230/132kV end Due to SCADA Integration & Commissioning এর Live CRP side Cable Termination কাজের জন্য।"
     },
     {
       "time": "09:59",

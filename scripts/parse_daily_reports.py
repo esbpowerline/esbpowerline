@@ -1264,6 +1264,61 @@ FUEL_COLORS = {
 # appears in the newer layout.
 FUEL_ORDER = ['Gas', 'Coal', 'HFO', 'Hydro', 'Solar', 'Imports', 'HSD', 'Wind']
 
+# Both spellings of the four renamed cities appear across the corpus, so the
+# older ones map forward rather than becoming zones of their own. Longest
+# needle first: 'chittagong' must not be reached by a substring of another.
+ZONE_ALIASES = (
+    ('dhaka', 'Dhaka'),
+    ('chattogram', 'Chattogram'), ('chittagong', 'Chattogram'),
+    ('cumilla', 'Cumilla'), ('comilla', 'Cumilla'),
+    ('mymensingh', 'Mymensingh'),
+    ('sylhet', 'Sylhet'),
+    ('khulna', 'Khulna'),
+    ('barishal', 'Barishal'), ('barisal', 'Barishal'),
+    ('rajshahi', 'Rajshahi'),
+    ('rangpur', 'Rangpur'),
+)
+
+# The nine zones in the order P1 prints them, which is also the order the
+# regional table has always rendered. Kept explicit so a sheet that reorders
+# its rows does not reorder the site.
+ZONE_ORDER = ['Dhaka', 'Chattogram', 'Cumilla', 'Mymensingh', 'Sylhet',
+              'Khulna', 'Barishal', 'Rajshahi', 'Rangpur']
+
+TIME_RE = re.compile(r'^(\d{1,2}):(\d{2})')
+
+
+def canon_zone(text):
+    """PGCB's zone label to the archive's name: 'Dhaka Zone' -> 'Dhaka'.
+
+    Returns None for anything that is not one of the nine, so a 'Total' row or
+    a stray caption cannot enter the table as a tenth zone.
+    """
+    low = (text or '').lower()
+    for needle, name in ZONE_ALIASES:
+        if needle in low:
+            return name
+    return None
+
+
+def published_time(parts, idx):
+    """The 'HH:MM Hr.' stamp P1 prints beside a Power Supply Scenario figure.
+
+    A row reads: label | value | MW | 12:00 Hr. | <next block's label> | ...
+    so the stamp is looked for in the cells after the label rather than at a
+    fixed offset — the number of blank cells between the two columns differs
+    across layouts. The scan stops before the next block's label can be
+    reached, so a right-hand figure that carries no time (Maximum Temperature,
+    Total Gas Supplied) yields None instead of borrowing its neighbour's.
+    """
+    for cell in parts[idx + 1: idx + 4]:
+        m = TIME_RE.match(cell.strip())
+        if m:
+            hour, minute = int(m.group(1)), int(m.group(2))
+            if hour <= 24 and minute < 60:
+                return f'{hour:02d}:{minute:02d}'
+    return None
+
 
 def daily_extremes(p1, forecast, series):
     """(minGen, maxGen) for the day the report describes; None where unknown.
@@ -1324,21 +1379,47 @@ def parse_pgcb_file(filepath, op_date):
     # What this no longer does is scan the next-day half. The daily extremes
     # are the one genuinely forward-looking pair here and they are now derived
     # separately, by daily_extremes, from labels tied to the reported day.
+    # P1 stamps a clock time against every figure in the Power Supply Scenario
+    # — the hour the peak was actually measured. Six of them, read past for
+    # years, which is why the regional table had to hedge in prose about the
+    # evening peak hour varying rather than just printing it.
+    #
+    # First write wins: p1 leads stats_content, so a Forecast row restating the
+    # same label cannot overwrite the reported day's own stamp.
+    peak_times = {}
+
+    def note_time(key, parts, idx):
+        stamp = published_time(parts, idx)
+        if stamp and key not in peak_times:
+            peak_times[key] = stamp
+
     stats_content = p1 + "\n" + forecast_reported_section(forecast)
     for line in stats_content.split('\n'):
         line_lower = line.lower()
         parts = [p.strip() for p in line.split('|') if p.strip()]
         if not parts:
             continue
-        
+
         for idx, cell in enumerate(parts):
             cell_lower = cell.lower()
             if 'day peak generation' in cell_lower:
                 if idx + 1 < len(parts): day_peak_gen = clean_float(parts[idx+1])
+                note_time('dayPeakGen', parts, idx)
             elif 'evening peak generation' in cell_lower:
                 if idx + 1 < len(parts): evening_peak_gen = clean_float(parts[idx+1])
+                note_time('eveningPeakGen', parts, idx)
             elif 'evening peak demand' in cell_lower or 'e.p. demand' in cell_lower:
                 if idx + 1 < len(parts): evening_peak_demand = clean_float(parts[idx+1])
+                note_time('eveningPeakDemand', parts, idx)
+            # Time only. These three values are settled elsewhere — dayPeakDemand
+            # by `published`, the extremes by `daily_extremes` — and are left to
+            # those owners rather than re-read here.
+            elif 'day peak demand' in cell_lower:
+                note_time('dayPeakDemand', parts, idx)
+            elif 'minimum generation' in cell_lower:
+                note_time('minGen', parts, idx)
+            elif 'maximum generation' in cell_lower:
+                note_time('maxGen', parts, idx)
             elif 'energy generated' in cell_lower or 'total gen.' in cell_lower or 'total gen (' in cell_lower:
                 if idx + 1 < len(parts): total_energy_gen = clean_float(parts[idx+1])
             elif 'total gas supplied' in cell_lower or 'gas consumed' in cell_lower:
@@ -1610,35 +1691,78 @@ def parse_pgcb_file(filepath, op_date):
                 headers = parts
                 break
 
+    # The Total row is the national fuel mix. The nine rows above it are that
+    # same mix broken out by zone — PGCB's only published statement of where
+    # each zone's energy actually comes from — and this loop used to step over
+    # them to reach Total, discarding 72 published figures a day.
+    zone_generation_data = []
+
     if header_idx != -1:
+        total_col = headers.index('total') if 'total' in headers else -1
         for line in lines[header_idx + 1:]:
-            if '|' in line:
-                parts = [p.strip() for p in line.split('|')]
-                cells = [c for c in parts if c]
-                if cells and cells[0].lower() == 'total':
-                    val_map = {}
-                    for h_idx, h in enumerate(headers):
-                        if h_idx < len(cells) - 1:
-                            val_map[h] = clean_float(cells[h_idx + 1])
-                    
-                    # Normalise to MKWh using the unit the caption states.
-                    val_map = {k: (v / energy_div if isinstance(v, (int, float)) else v)
-                               for k, v in val_map.items()}
-                    gas_gen = val_map.get('gas', 0.0)
-                    coal_gen = val_map.get('coal', 0.0)
-                    oil_gen = val_map.get('hfo', 0.0) + val_map.get('hsd', 0.0)
-                    hydro_gen = val_map.get('hydro', 0.0)
-                    solar_gen = val_map.get('solar', 0.0)
-                    wind_gen = val_map.get('wind', 0.0)
-                    total_imports = val_map.get('import', 0.0)
-                    # Keep each published fuel under its own name. Folding HSD
-                    # into HFO and dropping Wind entirely lost two of the eight
-                    # fuels PGCB reports.
-                    for src_name, canon in FUEL_ALIASES.items():
-                        if src_name in val_map:
-                            fuel_gen[canon] = val_map[src_name]
-                    parsed_via_table = True
-                    break
+            if '|' not in line:
+                continue
+            parts = [p.strip() for p in line.split('|')]
+            cells = [c for c in parts if c]
+            if not cells:
+                continue
+
+            if cells[0].lower() == 'total':
+                val_map = {}
+                for h_idx, h in enumerate(headers):
+                    if h_idx < len(cells) - 1:
+                        val_map[h] = clean_float(cells[h_idx + 1])
+
+                # Normalise to MKWh using the unit the caption states.
+                val_map = {k: (v / energy_div if isinstance(v, (int, float)) else v)
+                           for k, v in val_map.items()}
+                gas_gen = val_map.get('gas', 0.0)
+                coal_gen = val_map.get('coal', 0.0)
+                oil_gen = val_map.get('hfo', 0.0) + val_map.get('hsd', 0.0)
+                hydro_gen = val_map.get('hydro', 0.0)
+                solar_gen = val_map.get('solar', 0.0)
+                wind_gen = val_map.get('wind', 0.0)
+                total_imports = val_map.get('import', 0.0)
+                # Keep each published fuel under its own name. Folding HSD
+                # into HFO and dropping Wind entirely lost two of the eight
+                # fuels PGCB reports.
+                for src_name, canon in FUEL_ALIASES.items():
+                    if src_name in val_map:
+                        fuel_gen[canon] = val_map[src_name]
+                parsed_via_table = True
+                break
+
+            zone = canon_zone(cells[0])
+            if not zone:
+                continue
+            # The load-shed table further down P1 names the same nine zones, so
+            # a zone label alone does not make a generation row. Require the row
+            # to be as wide as the fuel header: a generation row carries one
+            # cell per fuel plus Total, where a load-shed row carries two.
+            if len(cells) - 1 < len(headers):
+                continue
+            # A zone seen twice means the Total row was missing and the scan has
+            # walked on past this table. Stop rather than overwrite the
+            # generation rows with whatever the next table holds.
+            if any(z['zone'] == zone for z in zone_generation_data):
+                break
+
+            fuels = {}
+            for h_idx, h in enumerate(headers):
+                canon = FUEL_ALIASES.get(h)
+                if canon and h_idx < len(cells) - 1:
+                    fuels[canon] = round(clean_float(cells[h_idx + 1]) / energy_div, 6)
+            printed_total = (round(clean_float(cells[total_col + 1]) / energy_div, 6)
+                             if 0 <= total_col < len(cells) - 1 else None)
+            zone_generation_data.append({
+                'zone': zone,
+                'fuels': fuels,
+                # PGCB's own row total where it prints one. The fuels are summed
+                # only as a fallback, so a zone whose parts do not add up keeps
+                # the published figure and the discrepancy stays visible.
+                'total': printed_total if printed_total is not None
+                         else round(sum(fuels.values()), 6),
+            })
 
     if not parsed_via_table:
         # Fallback to search By Gas etc. in whole file
@@ -1807,9 +1931,20 @@ def parse_pgcb_file(filepath, op_date):
             'maxTemp': published['maxTemp'],
             'totalGasSuppliedPower': total_gas_supplied_power,
             'avgProductionCost': round(avg_production_cost, 3),
-            'totalDailyCost': int(total_daily_cost)
+            'totalDailyCost': int(total_daily_cost),
+            # The hour P1 stamps against each figure above. Only the keys the
+            # sheet actually stamped are present — an absent key means the
+            # layout printed no time, never midnight.
+            **({'peakTimes': peak_times} if peak_times else {}),
         },
         'generationData': generation_data,
+        # Zone x fuel, in the order P1 prints. Omitted rather than empty on the
+        # layouts whose P1 carries no zone generation table, so a day that
+        # published none is distinguishable from nine zones that generated none.
+        **({'zoneGenerationData': sorted(
+            zone_generation_data,
+            key=lambda z: ZONE_ORDER.index(z['zone']) if z['zone'] in ZONE_ORDER else 99,
+        )} if zone_generation_data else {}),
         'borderImportsData': border_imports_data,
         'regionalDemandData': regional_demand_data,
         'regionalDemandSource': regional_demand_source,

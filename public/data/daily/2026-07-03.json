@@ -13,7 +13,15 @@
     "maxTemp": 35.2,
     "totalGasSuppliedPower": 904.08,
     "avgProductionCost": 6.275,
-    "totalDailyCost": 2238028518
+    "totalDailyCost": 2238028518,
+    "peakTimes": {
+      "dayPeakGen": "12:00",
+      "dayPeakDemand": "12:00",
+      "eveningPeakGen": "21:00",
+      "eveningPeakDemand": "21:00",
+      "minGen": "10:00",
+      "maxGen": "21:00"
+    }
   },
   "generationData": [
     {
@@ -71,6 +79,134 @@
       "cost": 12921264,
       "unitCost": 14.71,
       "color": "#22c55e"
+    }
+  ],
+  "zoneGenerationData": [
+    {
+      "zone": "Dhaka",
+      "fuels": {
+        "Gas": 47.329549,
+        "Coal": 0.0,
+        "HFO": 9.058753,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.206804,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 56.595106
+    },
+    {
+      "zone": "Chattogram",
+      "fuels": {
+        "Gas": 5.577407,
+        "Coal": 45.119997,
+        "HFO": 5.409076,
+        "HSD": 0.0,
+        "Hydro": 2.28716,
+        "Solar": 0.098461,
+        "Imports": 0.0,
+        "Wind": 0.8784
+      },
+      "total": 59.370502
+    },
+    {
+      "zone": "Cumilla",
+      "fuels": {
+        "Gas": 29.433407,
+        "Coal": 0.0,
+        "HFO": 3.029836,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.537573,
+        "Imports": 3.63744,
+        "Wind": 0.0
+      },
+      "total": 36.638256
+    },
+    {
+      "zone": "Mymensingh",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 0.0,
+        "HFO": 4.02696,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.493882,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 4.520842
+    },
+    {
+      "zone": "Sylhet",
+      "fuels": {
+        "Gas": 24.635495,
+        "Coal": 0.0,
+        "HFO": 0.0,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.065785,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 24.70128
+    },
+    {
+      "zone": "Khulna",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 25.79636,
+        "HFO": 0.022464,
+        "HSD": 0.304018,
+        "Hydro": 0.0,
+        "Solar": 0.63504,
+        "Imports": 22.411636,
+        "Wind": 0.0
+      },
+      "total": 49.169518
+    },
+    {
+      "zone": "Barishal",
+      "fuels": {
+        "Gas": 6.86828,
+        "Coal": 52.514909,
+        "HFO": 1.02768,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.003945,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 60.414814
+    },
+    {
+      "zone": "Rajshahi",
+      "fuels": {
+        "Gas": 19.729173,
+        "Coal": 0.0,
+        "HFO": 2.46706,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.569037,
+        "Imports": 32.808363,
+        "Wind": 0.0
+      },
+      "total": 56.573633
+    },
+    {
+      "zone": "Rangpur",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 5.293818,
+        "HFO": 2.036178,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.353161,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 8.683157
     }
   ],
   "borderImportsData": [
@@ -349,8 +485,8 @@
       "time": "13:08",
       "plant": "Lalmonirhat-Rangpur 132 kV Ckt-2 Tripped from Rangpur 132/33kV end showing Quadramho 21 relays",
       "load": "30.0MW",
-      "reason": "Due to Trip Circuit Supervision RY and from Lalmonirhat 132/33kV end showing NA relays Due to \u09b0\u0982\u09aa\u09c1\u09b0 - \u09b2\u09be\u09b2\u09ae\u09a8\u09bf\u09b0\u09b9\u09be\u099f \u09e7\u09e9\u09e8 \u0995\u09c7\u09ad\u09bf \u09b2\u09be\u0987\u09a8 \u09b0\u0982\u09aa\u09c1\u09b0 \u09aa\u09cd\u09b0\u09be\u09a8\u09cd\u09a4\u09c7 \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7 \u0995\u09bf\u09a8\u09cd\u09a4\u09c1 \u09b2\u09be\u09b2\u09ae\u09a8\u09bf\u09b0\u09b9\u09be\u099f \u09aa\u09cd\u09b0\u09be\u09a8\u09cd\u09a4\u09c7 \u09ac\u09cd\u09b0\u09c7\u0995\u09be\u09b0 \u099a\u09be\u09b2\u09c1 \u099b\u09bf\u09b2\u0964 \u09aa\u09b0\u09ac\u09b0\u09cd\u09a4\u09c0\u09a4\u09c7 ALDC, Bogura \u09aa\u09b0\u09be\u09ae\u09b0\u09cd\u09b6\u09c7 CB OFF \u0995\u09b0\u09be \u09b9\u09df\u0964",
-      "full_desc": "Lalmonirhat-Rangpur 132 kV Ckt-2 Tripped from Rangpur 132/33kV end showing Quadramho 21 relays Due to Trip Circuit Supervision RY and from Lalmonirhat 132/33kV end showing NA relays Due to \u09b0\u0982\u09aa\u09c1\u09b0 - \u09b2\u09be\u09b2\u09ae\u09a8\u09bf\u09b0\u09b9\u09be\u099f \u09e7\u09e9\u09e8 \u0995\u09c7\u09ad\u09bf \u09b2\u09be\u0987\u09a8 \u09b0\u0982\u09aa\u09c1\u09b0 \u09aa\u09cd\u09b0\u09be\u09a8\u09cd\u09a4\u09c7 \u099f\u09cd\u09b0\u09bf\u09aa \u0995\u09b0\u09c7 \u0995\u09bf\u09a8\u09cd\u09a4\u09c1 \u09b2\u09be\u09b2\u09ae\u09a8\u09bf\u09b0\u09b9\u09be\u099f \u09aa\u09cd\u09b0\u09be\u09a8\u09cd\u09a4\u09c7 \u09ac\u09cd\u09b0\u09c7\u0995\u09be\u09b0 \u099a\u09be\u09b2\u09c1 \u099b\u09bf\u09b2\u0964 \u09aa\u09b0\u09ac\u09b0\u09cd\u09a4\u09c0\u09a4\u09c7 ALDC, Bogura \u09aa\u09b0\u09be\u09ae\u09b0\u09cd\u09b6\u09c7 CB OFF \u0995\u09b0\u09be \u09b9\u09df\u0964"
+      "reason": "Due to Trip Circuit Supervision RY and from Lalmonirhat 132/33kV end showing NA relays Due to রংপুর - লালমনিরহাট ১৩২ কেভি লাইন রংপুর প্রান্তে ট্রিপ করে কিন্তু লালমনিরহাট প্রান্তে ব্রেকার চালু ছিল। পরবর্তীতে ALDC, Bogura পরামর্শে CB OFF করা হয়।",
+      "full_desc": "Lalmonirhat-Rangpur 132 kV Ckt-2 Tripped from Rangpur 132/33kV end showing Quadramho 21 relays Due to Trip Circuit Supervision RY and from Lalmonirhat 132/33kV end showing NA relays Due to রংপুর - লালমনিরহাট ১৩২ কেভি লাইন রংপুর প্রান্তে ট্রিপ করে কিন্তু লালমনিরহাট প্রান্তে ব্রেকার চালু ছিল। পরবর্তীতে ALDC, Bogura পরামর্শে CB OFF করা হয়।"
     },
     {
       "time": "13:11 - 13:42",
@@ -398,8 +534,8 @@
       "time": "04:15",
       "plant": "Ashuganj Network 230 kV bus coupler",
       "load": "HT Outage",
-      "reason": "Due to overloading of Ashuganj (S)\u2013Ashuganj Network 230 kV Ckt-2, forced load shedding is occurring under Ashuganj, B. Baria, Bajitpur, and Kishoreganj Grid Substations.",
-      "full_desc": "Ashuganj Network 230 kV bus coupler tripped at 04:15 hrs showing O/C relay. During the first trial at 04:50 hrs, it tripped again. As a result, load on Ashuganj (S)\u2013Ashuganj Network 230 kV Ckt-1 and Ckt-2 became unbalanced. Due to overloading of Ashuganj (S)\u2013Ashuganj Network 230 kV Ckt-2, forced load shedding is occurring under Ashuganj, B. Baria, Bajitpur, and Kishoreganj Grid Substations."
+      "reason": "Due to overloading of Ashuganj (S)–Ashuganj Network 230 kV Ckt-2, forced load shedding is occurring under Ashuganj, B. Baria, Bajitpur, and Kishoreganj Grid Substations.",
+      "full_desc": "Ashuganj Network 230 kV bus coupler tripped at 04:15 hrs showing O/C relay. During the first trial at 04:50 hrs, it tripped again. As a result, load on Ashuganj (S)–Ashuganj Network 230 kV Ckt-1 and Ckt-2 became unbalanced. Due to overloading of Ashuganj (S)–Ashuganj Network 230 kV Ckt-2, forced load shedding is occurring under Ashuganj, B. Baria, Bajitpur, and Kishoreganj Grid Substations."
     },
     {
       "time": "07:44",
