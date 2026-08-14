@@ -1,6 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import {
+  CHART_INK,
+  categoricalSlot,
+  resolveFuelColor,
+  type ChartMode,
+} from '@/lib/data/grid/chart-palette';
 
 export type ChartTheme = {
   trendStroke: string;
@@ -12,6 +18,14 @@ export type ChartTheme = {
   destructive: string;
   gridStroke: string;
   palette: string[];
+  /** Which surface the chart is drawing on — palette steps are chosen per mode. */
+  mode: ChartMode;
+  /** Validated fuel colour by PGCB name. Ignores the payload's own `color`. */
+  fuel: (name: string) => string;
+  /** Nth validated categorical slot, for series that are not fuels. */
+  categorical: (index: number) => string;
+  /** Recessive chrome — gridlines, axes, muted label ink. */
+  ink: { gridline: string; axis: string; muted: string };
 };
 
 function hslVar(name: string): string {
@@ -40,8 +54,22 @@ const PALETTE_DARK = [
   'hsl(173 58% 42%)',
 ];
 
+/** The palette accessors for a mode, shared by the fallback and the live read. */
+function paletteFor(mode: ChartMode) {
+  return {
+    mode,
+    fuel: (name: string) => resolveFuelColor(name, mode),
+    categorical: (index: number) => categoricalSlot(index, mode),
+    ink: {
+      gridline: CHART_INK.gridline[mode],
+      axis: CHART_INK.axis[mode],
+      muted: CHART_INK.muted[mode],
+    },
+  };
+}
+
 function readChartTheme(): ChartTheme {
-  const fallback = {
+  const fallback: ChartTheme = {
     trendStroke: '#fafafa',
     trendFill: '#fafafa',
     axisTick: '#a1a1aa',
@@ -51,6 +79,7 @@ function readChartTheme(): ChartTheme {
     destructive: '#ef4444',
     gridStroke: '#334155',
     palette: PALETTE_DARK,
+    ...paletteFor('dark'),
   };
 
   if (typeof document === 'undefined') return fallback;
@@ -79,6 +108,7 @@ function readChartTheme(): ChartTheme {
     destructive,
     gridStroke,
     palette,
+    ...paletteFor(isLight ? 'light' : 'dark'),
   };
 }
 

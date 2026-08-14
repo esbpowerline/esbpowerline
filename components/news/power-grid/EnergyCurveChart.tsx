@@ -169,7 +169,7 @@ export function EnergyCurveChart({
                               <div key={g.name}>
                                 <div className="flex items-center justify-between gap-2">
                                   <span className="flex items-center gap-1.5 text-muted-foreground">
-                                    <span className="h-2 w-2 rounded-sm shrink-0" style={{ background: g.color }} />
+                                    <span className="h-2 w-2 rounded-sm shrink-0" style={{ background: chartTheme.fuel(g.name) }} />
                                     {g.name}
                                   </span>
                                   <span className="font-semibold tabular-nums">{formatNumber(Math.round(mw))} MW</span>
@@ -205,7 +205,7 @@ export function EnergyCurveChart({
                     // boundary has to be drawn rather than inferred from the
                     // colour change.
                     strokeWidth={1}
-                    fill={g.color}
+                    fill={chartTheme.fuel(g.name)}
                     fillOpacity={0.85}
                     isAnimationActive={false}
                   />
@@ -223,7 +223,7 @@ export function EnergyCurveChart({
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
         {[...active].reverse().map((g) => (
           <span key={g.name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: g.color }} />
+            <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: chartTheme.fuel(g.name) }} />
             {g.name}
           </span>
         ))}

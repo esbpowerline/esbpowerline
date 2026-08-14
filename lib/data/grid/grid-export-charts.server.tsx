@@ -2,6 +2,10 @@ import 'server-only';
 
 import { Svg, G, Rect, Line, Polyline, Polygon, Circle, Path, Text } from '@react-pdf/renderer';
 import { F, FB } from '@/lib/data/grid/grid-export-fonts.server';
+import {
+  FUEL_COLORS as FUEL_PALETTE,
+  FUEL_DISPLAY_ORDER,
+} from '@/lib/data/grid/chart-palette';
 
 /**
  * Editorial chart toolkit for the grid export report. Native react-pdf SVG —
@@ -23,17 +27,17 @@ export const CRITICAL = '#dc2626';
 /** Line dash per series index — the B&W-print channel (solid / dashed / dotted). */
 const SERIES_DASH: Array<string | undefined> = [undefined, '4 2.5', '1.2 2'];
 
-/** Canonical fuel colours (match the site's Grid Explorer identities). */
-export const FUEL_COLORS: Record<string, string> = {
-  Gas: '#0ea5e9',
-  Coal: '#64748b',
-  HFO: '#f97316',
-  Hydro: '#06b6d4',
-  Solar: '#eab308',
-  Imports: '#a855f7',
-  'HSD (Diesel)': '#ef4444',
-  Wind: '#14b8a6',
-};
+/**
+ * Fuel colours for the export, taken from the same table the site draws from so
+ * the PDF a member downloads matches the chart they downloaded it off. This was
+ * previously a hand-kept copy that claimed to match and did not — its Wind was
+ * a teal the site never used.
+ *
+ * The light step is the right one here: the report prints on white.
+ */
+export const FUEL_COLORS: Record<string, string> = Object.fromEntries(
+  FUEL_DISPLAY_ORDER.map((name) => [name, FUEL_PALETTE[name].light]),
+);
 
 function fmtNum(v: number): string {
   if (!Number.isFinite(v)) return '';
