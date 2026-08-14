@@ -7204,50 +7204,88 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2.5 py-1 rounded-full bg-muted border border-border/50 shrink-0;
 }
 
-/* ── Card proportions on a phone ───────────────────────────────────────────
-   Measured on a 393px screen: 24px of padding on every side leaves 345px of
-   content, and the head and the footer come to 109px each — around a plot
-   that is roughly 204px tall. The chrome was bigger than the chart it framed,
-   which is what makes a card feel overwhelmed by everything except its data.
+/* ══ Card sizing, driven by the card ═══════════════════════════════════════
+   Everything below asks the CARD how wide it is, not the window.
 
-   Nothing here is hidden. The padding tightens, the head and footer stop
-   spending a line on air, and the plot keeps the width and height it gains. */
+   That distinction is the whole point. The same card renders at 343px on a
+   phone, at ~470px in a three-column desktop grid, and at ~1430px full width
+   — all at once, on the same page, at the same viewport. A viewport media
+   query cannot tell those apart, so every value it sets is right for one of
+   them and wrong for the other two. It is why the earlier passes kept feeling
+   retrofitted: they were sizing a card by a number that had nothing to do
+   with the card.
+
+   `container-type: inline-size` makes each card the reference, and `cqi` is
+   1% of that card's width. Values then flow continuously between a floor and
+   the desktop figure instead of snapping at a breakpoint, so a card is
+   correct at every width rather than at two of them.
+
+   Safe here specifically because nothing inside a card is `position: fixed`,
+   and the KPI tooltips already anchor to their own tile — containment makes
+   the card a containing block, which would otherwise move them. */
+.grid-explorer-chart-card {
+  container-type: inline-size;
+  container-name: gridcard;
+}
+
+/* Padding and gap are the card's own box, and a container cannot size itself
+   — `cqi` here would resolve against an ancestor container, or against the
+   viewport when there is none, which is how this first rendered 24px of
+   padding on a 343px card. Its own box is the one thing that still has to be
+   set from the viewport; everything INSIDE the card is container-driven
+   below, because those are descendants and `cqi` means what it should. */
 @media (max-width: 40rem) {
   .grid-explorer-chart-card {
     @apply p-4 gap-1.5;
   }
+}
 
-  .grid-explorer-chart-card__head {
-    @apply mb-1.5 gap-2;
-  }
+.grid-explorer-chart-card__title {
+  font-size: clamp(0.9375rem, 3.4cqi, 1rem);
+  line-height: 1.3;
+}
 
-  .grid-explorer-chart-card__head--border {
-    @apply pb-3 mb-2.5;
-  }
+.grid-explorer-chart-card__sub {
+  font-size: clamp(0.6875rem, 2.6cqi, 0.75rem);
+  line-height: 1.5;
+}
 
-  .grid-explorer-chart-card__title {
-    @apply text-[0.9375rem] leading-snug;
-  }
+.grid-explorer-chart-card__head {
+  margin-bottom: clamp(0.375rem, 1.6cqi, 0.5rem);
+  gap: clamp(0.5rem, 2cqi, 0.75rem);
+}
 
-  .grid-explorer-chart-card__sub {
-    @apply text-[11px] leading-snug;
-  }
+.grid-explorer-chart-card__head--border {
+  padding-bottom: clamp(0.75rem, 2.8cqi, 1rem);
+  margin-bottom: clamp(0.625rem, 2.2cqi, 0.75rem);
+}
 
-  /* The footer is four provenance statements. Stacked they read as a list
-     rather than as a paragraph broken across a row. */
-  .grid-explorer-card-footer {
-    @apply flex-col items-start gap-1 pt-2;
-  }
+/* At full width the prose is simply there: the heading is a heading and the
+   control does not exist. Declared before the container query that reveals
+   it, or that query loses the cascade at equal specificity. */
+.grid-explorer-explain__toggle {
+  display: none;
+}
 
-  /* The negative inset exists to let a plot bleed into desktop padding there
-     is no longer enough of. */
+/* Below this the card is too narrow for a row of anything. Expressed against
+   the card, so a narrow column on a desktop gets the same treatment a phone
+   does — which is the correct answer, and one no viewport query can give. */
+@container gridcard (max-width: 34rem) {
+  /* The negative inset lets a plot bleed into padding there is no longer
+     enough of to bleed into. */
   .grid-explorer-chart-area {
     margin-left: 0;
     margin-right: 0;
   }
 
+  /* Four provenance statements read as a list, not as a paragraph broken
+     across a row. */
+  .grid-explorer-card-footer {
+    @apply flex-col items-start gap-1 pt-2;
+  }
+
   /* The prose closes behind its own heading. Open, it reads exactly as it
-     does on a desktop; closed, the card is its chart again. */
+     does at full width; closed, the card is its chart again. */
   .grid-explorer-explain__heading {
     display: none;
   }
@@ -7268,12 +7306,6 @@ html.theme-dark .locale-toggle__btn--active:hover {
   .grid-explorer-explain:not(.is-open) .grid-explorer-explain__body {
     display: none;
   }
-}
-
-/* On a desktop the prose is simply there — the heading is a heading and the
-   control does not exist. */
-.grid-explorer-explain__toggle {
-  display: none;
 }
 
 .grid-explorer-mix-stack {
@@ -7481,7 +7513,11 @@ html.theme-dark .locale-toggle__btn--active:hover {
    the height it had before at the top of its range. */
 .grid-explorer-chart-area {
   @apply w-full -mx-1;
-  min-height: clamp(11rem, 46vw, 18rem);
+  /* `cqi`, not `vw`: a plot should be proportioned to the card it sits in.
+     Sized by the window, the same rule made a full-width card and a
+     third-width card the same height at the same viewport — the third-width
+     one squat, the full-width one short. */
+  min-height: clamp(11rem, 46cqi, 18rem);
   overflow: visible;
 }
 
@@ -7491,8 +7527,8 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 .grid-explorer-chart-area--lg {
-  min-height: clamp(12rem, 52vw, 20rem);
-  height: clamp(12rem, 52vw, 20rem);
+  min-height: clamp(12rem, 52cqi, 20rem);
+  height: clamp(12rem, 52cqi, 20rem);
 }
 
 .grid-explorer-chart-area--split {
@@ -7512,19 +7548,19 @@ html.theme-dark .locale-toggle__btn--active:hover {
    `min-height: 0` is deliberate too: without it the base floor would fight the
    height set here, and the taller of the two would win on a phone. */
 .grid-explorer-chart-area--h-compact {
-  height: clamp(10.5rem, 44vw, 17.5rem);
+  height: clamp(10.5rem, 44cqi, 17.5rem);
   min-height: 0;
 }
 .grid-explorer-chart-area--h-standard {
-  height: clamp(12.5rem, 55vw, 22rem);
+  height: clamp(12.5rem, 55cqi, 22rem);
   min-height: 0;
 }
 .grid-explorer-chart-area--h-tall {
-  height: clamp(13rem, 58vw, 24rem);
+  height: clamp(13rem, 58cqi, 24rem);
   min-height: 0;
 }
 .grid-explorer-chart-area--h-taller {
-  height: clamp(13.5rem, 60vw, 26rem);
+  height: clamp(13.5rem, 60cqi, 26rem);
   min-height: 0;
 }
 
@@ -7994,7 +8030,19 @@ button.grid-explorer-link {
   display: none;
 }
 
-@media (max-width: 40rem) {
+/* Keyed to the card, so a table in a narrow column on a desktop stacks the
+   same way it does on a phone — the trigger is the space the table has,
+   which is the only thing that ever mattered. */
+/* Two thresholds, because tables are not one width. Measured min-content:
+   the transmission register needs 413px, the zone demand table 583px, and the
+   zone x fuel matrix 862px. A single breakpoint set for the narrow ones left
+   the matrix unstacked AND too wide between them, which is the horizontal
+   drag this was all meant to remove.
+
+   Duplicated rather than shared because a container condition cannot be
+   parameterised — the bodies are identical, only the width and the class
+   differ. Keep them in step. */
+@container gridcard (max-width: 40rem) {
   .grid-explorer-table--stack,
   .grid-explorer-table--stack tbody,
   .grid-explorer-table--stack tr,
@@ -8090,6 +8138,109 @@ button.grid-explorer-link {
   }
 
   .grid-explorer-table--stack td.grid-explorer-table__zeros {
+    display: flex;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.6875rem;
+    text-align: right;
+  }
+}
+
+@container gridcard (max-width: 58rem) {
+  .grid-explorer-table--stack-wide,
+  .grid-explorer-table--stack-wide tbody,
+  .grid-explorer-table--stack-wide tr,
+  .grid-explorer-table--stack-wide td {
+    display: block;
+    width: 100%;
+  }
+
+  .grid-explorer-table--stack-wide thead {
+    /* Hidden from sight, kept for screen readers and for `data-label`. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .grid-explorer-table--stack-wide tbody {
+    border-top: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .grid-explorer-table--stack-wide tr {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .grid-explorer-table--stack-wide td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.1875rem 0;
+    text-align: right;
+    border: 0;
+  }
+
+  .grid-explorer-table--stack-wide td[data-label]::before {
+    display: block;
+    flex: 0 1 auto;
+    text-align: left;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: hsl(var(--muted-foreground));
+    /* The label must not squeeze the value it names. */
+    min-width: 0;
+  }
+
+  /* The first cell is the record's name, so it reads as the block's heading
+     rather than as another label/value pair. */
+  .grid-explorer-table--stack-wide td:first-child {
+    justify-content: flex-start;
+    text-align: left;
+    padding-bottom: 0.375rem;
+    font-weight: 700;
+    font-size: 0.8125rem;
+  }
+
+  .grid-explorer-table--stack-wide td:first-child::before {
+    display: none;
+  }
+
+  /* A totals row is a record too, but it is the one that should still look
+     like a total once the table has stopped being a table. */
+  .grid-explorer-table--stack-wide tbody tr:last-child:has(td:first-child b),
+  .grid-explorer-table--stack-wide tbody tr.is-total {
+    background: hsl(var(--muted) / 0.25);
+    padding-inline: 0.625rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Truncation is a desktop affordance — here the cell has the full width. */
+  .grid-explorer-table--stack-wide .grid-explorer-table__truncate {
+    max-width: none;
+    white-space: normal;
+  }
+
+  /* Hover tinting a full-width block reads as a selected state. */
+  .grid-explorer-table--stack-wide tbody tr:hover {
+    background: transparent;
+  }
+
+  /* A wide matrix stacks badly on its own: nine zones by eight fuels is 72
+     label/value pairs, most of them zero. The zeros are dropped from the list
+     and named together on one line instead — see `__zeros` below. A published
+     zero is a measurement, so it is moved, never discarded. */
+  .grid-explorer-table--stack-wide td.is-zero {
+    display: none;
+  }
+
+  .grid-explorer-table--stack-wide td.grid-explorer-table__zeros {
     display: flex;
     color: hsl(var(--muted-foreground));
     font-size: 0.6875rem;

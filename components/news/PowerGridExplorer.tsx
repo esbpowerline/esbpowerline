@@ -5404,7 +5404,7 @@ export function PowerGridExplorer({
                     zeros drop out of the list and are named together on the
                     "No output" line below each zone — moved, not discarded. */}
                 <div className="grid-explorer-table-wrap">
-                  <table className="grid-explorer-table grid-explorer-table--stack">
+                  <table className="grid-explorer-table grid-explorer-table--stack-wide">
                     <thead>
                       <tr>
                         <th>Grid Zone</th>
