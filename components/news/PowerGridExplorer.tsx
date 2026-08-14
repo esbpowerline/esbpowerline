@@ -56,6 +56,7 @@ import {
 import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
 import { GRID_DEMO_DATE } from '@/lib/data/grid/public-sample-dates';
 import { coverageLabel } from '@/lib/data/grid/coverage';
+import { TIME_AXIS_PROPS, axisTickStyle, wholeHourTicks } from '@/lib/data/grid/chart-axis';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
@@ -5487,11 +5488,19 @@ export function PowerGridExplorer({
                   Positive MW is flow from <strong>West to East</strong>; negative is East to West.
                 </p>
 
-                <div className="h-[280px]">
+                <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={ewicChartData} margin={{ top: 8, right: 16, bottom: 4, left: 4 }}>
                       <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-                      <XAxis dataKey="time" tick={{ fontSize: 11, fill: chartTheme.axisTick }} interval="preserveStartEnd" minTickGap={24} />
+                      {/* Whole hours only, thinned by measured gap — a 24-hour
+                          axis has to survive a 393px screen without its labels
+                          running into each other. */}
+                      <XAxis
+                        dataKey="time"
+                        tick={axisTickStyle(chartTheme.axisTick)}
+                        ticks={wholeHourTicks(ewicChartData.map((r) => String(r.time ?? '')))}
+                        {...TIME_AXIS_PROPS}
+                      />
                       <YAxis tick={{ fontSize: 11, fill: chartTheme.axisTick }} width={52} label={{ value: 'MW', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: chartTheme.axisTick } }} />
                       <GridRechartsTooltip
                         content={({ active, payload, label }) => {

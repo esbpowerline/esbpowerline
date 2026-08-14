@@ -13,6 +13,7 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { GridCardFooter, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
 import { buildEnergyCurveSeries } from '@/lib/data/grid/energy-curve';
+import { TIME_AXIS_PROPS, axisTickStyle, wholeHourTicks } from '@/lib/data/grid/chart-axis';
 import { fetchEnergyCurve } from '@/lib/data/grid/energy-curve.client';
 import type { ChartTheme } from '@/hooks/useChartTheme';
 import type { EnergyCurve } from '@/lib/data/grid/types';
@@ -72,6 +73,7 @@ export function EnergyCurveChart({
   if (loading || !series) return null;
 
   const { points, active, breakdown } = series;
+  const hourTicks = wholeHourTicks(points.map((p) => p.time));
   const peak = points.reduce(
     (best, p) => (p.total > best.total ? p : best),
     points[0],
@@ -132,11 +134,9 @@ export function EnergyCurveChart({
                 <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
                 <XAxis
                   dataKey="time"
-                  tick={{ fontSize: 10, fill: chartTheme.axisTick }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={6}
-                  interval={3}
+                  tick={axisTickStyle(chartTheme.axisTick)}
+                  ticks={hourTicks}
+                  {...TIME_AXIS_PROPS}
                 />
                 <YAxis
                   width={56}
