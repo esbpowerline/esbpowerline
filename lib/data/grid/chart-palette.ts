@@ -121,6 +121,20 @@ export function isKnownFuel(name: string): boolean {
 }
 
 /**
+ * The payload's fuel name resolved to the one this module keys on — 'HSD' to
+ * 'HSD (Diesel)', and so on. Needed by anything that orders fuels by
+ * FUEL_DISPLAY_ORDER: the archive writes the short spellings, so matching
+ * against that list without normalising silently drops the fuel from the
+ * ordering, and with it the column or series it was meant to produce.
+ *
+ * An unrecognised name is returned unchanged rather than mapped to a
+ * placeholder, so a fuel PGCB adds later still carries its own label.
+ */
+export function canonicalFuelName(name: string): string {
+  return FUEL_NAME_ALIASES[name] ?? name;
+}
+
+/**
  * Slots for series that are not fuels — gas companies, distribution zones,
  * scenario arms. Assign in order and never cycle: a ninth series folds into
  * "Other" or the chart becomes small multiples.

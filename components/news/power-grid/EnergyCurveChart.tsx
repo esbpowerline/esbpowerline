@@ -220,7 +220,7 @@ export function EnergyCurveChart({
 
       {/* Legend, always present and in stack order (top band first), so identity
           never rests on colour alone. */}
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+      <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1.5">
         {[...active].reverse().map((g) => (
           <span key={g.name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: chartTheme.fuel(g.name) }} />

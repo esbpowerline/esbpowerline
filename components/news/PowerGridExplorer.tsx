@@ -18,6 +18,8 @@ import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import {
   LOAD_CURVE_COLORS as LOAD_CURVE_PALETTE,
+  FUEL_DISPLAY_ORDER,
+  canonicalFuelName,
   pick,
   type ChartMode,
 } from '@/lib/data/grid/chart-palette';
@@ -603,6 +605,9 @@ export function PowerGridExplorer({
     borderImportsData = [],
     regionalDemandData = [],
     regionalDemandSource,
+    // Zone x fuel from P1. Defaulted to [] so the card simply does not render
+    // on the layouts whose P1 carries no such table.
+    zoneGenerationData = [],
     // The workbook and gas PDF this day was built from, named exactly.
     sourceFiles,
     dailyOutages = [],
@@ -634,6 +639,7 @@ export function PowerGridExplorer({
     gasDistributionData: [] as GridDailyData['gasDistributionData'],
     borderImportsData: [] as GridDailyData['borderImportsData'],
     regionalDemandData: [] as GridDailyData['regionalDemandData'],
+    zoneGenerationData: [] as GridDailyData['zoneGenerationData'],
     dailyOutages: [] as GridDailyData['dailyOutages'],
     hourlyLoadData: [] as GridDailyData['hourlyLoadData'],
     energyCurveData: undefined as GridDailyData['energyCurveData'],
@@ -1278,6 +1284,47 @@ export function PowerGridExplorer({
   const totalRegionalDemand = regionalDemandData.reduce((sum, rd) => sum + rd.demand, 0);
   const totalRegionalLoadShed = regionalDemandData.reduce((sum, rd) => sum + rd.loadShed, 0);
   const avgRegionalPct = totalRegionalDemand > 0 ? ((totalRegionalLoadShed / totalRegionalDemand) * 100).toFixed(1) : '0.0';
+
+  // P1's own stamp for the hour the evening peak was measured. Not claimed on
+  // BPDB-sourced days: that zone table is a different publisher's reading and
+  // PGCB's stamp does not describe it.
+  const eveningPeakStamp = regionalDemandSource === 'bpdb-published'
+    ? null
+    : systemStats.peakTimes?.eveningPeakDemand ?? null;
+
+  // Zone-wise generation columns: the fuels this day actually published, in
+  // FUEL_DISPLAY_ORDER so the sequence holds across report layouts. Driven from
+  // the payload's own keys rather than filtering FUEL_DISPLAY_ORDER directly —
+  // the archive writes 'HSD' where the palette keys on 'HSD (Diesel)', so
+  // matching without canonicalising drops that column entirely.
+  const zoneGenFuelOrder = FUEL_DISPLAY_ORDER as readonly string[];
+  const zoneGenFuels = Array.from(
+    new Set(zoneGenerationData.flatMap((zg) => Object.keys(zg.fuels))),
+  ).sort((a, b) => {
+    const rank = (name: string) => {
+      const idx = zoneGenFuelOrder.indexOf(canonicalFuelName(name));
+      // A fuel the order does not list sorts to the end rather than the front.
+      return idx === -1 ? zoneGenFuelOrder.length : idx;
+    };
+    return rank(a) - rank(b) || a.localeCompare(b);
+  });
+  const zoneGenNationalTotal = zoneGenerationData.reduce((sum, zg) => sum + zg.total, 0);
+  // PGCB's own Total row, which is what `generationData` already holds. Used in
+  // preference to summing the zone rows so the footer stays a published figure;
+  // the sum is only the check on it.
+  // A record, not a Map — `Map` is the lucide icon in this file's scope.
+  const zoneGenPublishedTotals: Record<string, number> = Object.fromEntries(
+    generationData.map((g) => [g.name, g.gen]),
+  );
+  // MKWh spans four orders of magnitude here (0.0016 Barishal solar to 75.6
+  // Chattogram total). Rounding the small ones to 0.00 would print a published
+  // non-zero as nothing, so they are floored to a visible marker instead.
+  const formatZoneEnergy = (value: number | undefined) => {
+    if (value === undefined) return '—';
+    if (value === 0) return '0';
+    if (value < 0.01) return '<0.01';
+    return value.toFixed(2);
+  };
 
   return (
     <>
@@ -2379,13 +2426,6 @@ export function PowerGridExplorer({
               per-fuel authentication fetch this panel does not use, and the
               contrast it draws is the whole reason the table needs context.
             */}
-            <div className="mx-4 mt-3 text-[11px] leading-relaxed text-muted-foreground border-t border-border/30 pt-3">
-              <BpdbAccountsPanel
-                dailyImportRate={
-                  generationData.find((g) => g.name === 'Imports')?.unitCost ?? null
-                }
-              />
-            </div>
 
             {unitCostAuth.loaded && (
               <div className="mx-4 mb-4 text-[11px] leading-relaxed text-muted-foreground">
@@ -2575,6 +2615,20 @@ export function PowerGridExplorer({
               <span className="font-medium">Reporting Date: {systemStats.date}</span>
             </GridCardFooter>
           </div>
+
+          {/*
+            BPDB's own accounts, which price the same electricity over a
+            financial year rather than a fuel bill over a day. Its own card
+            directly beneath the daily table on purpose: the contrast between
+            the two is the whole reason the table needs context, and it carries
+            a card's worth of figures rather than a footnote's.
+
+            Outside the unitCostAuth gate below, which waits on a per-fuel
+            authentication fetch this card does not use.
+          */}
+          <BpdbAccountsPanel
+            dailyImportRate={generationData.find((g) => g.name === 'Imports')?.unitCost ?? null}
+          />
 
           {/* Daily Milestones */}
           <div className="grid-explorer-chart-card card p-4 space-y-4">
@@ -5095,10 +5149,18 @@ export function PowerGridExplorer({
                 <Cable className="h-5 w-5 text-primary shrink-0" />
                 <div>
                   <h3 className="grid-explorer-chart-card__title">Zone-wise Demand &amp; Load-Shedding<DailyBadge /></h3>
-                  {/* No fixed clock time: PGCB's printed evening-peak hour varies
-                      (18:00–21:00 across verified 2025–26 days), so naming one
-                      here was wrong on most days. */}
-                  <p className="grid-explorer-chart-card__sub">SCADA readings at the evening peak hour {regionalDemandSource === 'bpdb-published' ? 'BPDB' : 'PGCB'} reports for the day • <span className="text-primary font-semibold text-xs">{coverageLabel('regionalDemand')}</span></p>
+                  {/* The hour is read from P1's own stamp rather than named in
+                      prose. It genuinely varies (18:00–21:00 across verified
+                      2025–26 days), which is why hardcoding one here was wrong
+                      on most days; the sheet has always printed it. Omitted,
+                      not guessed, on layouts that carry no stamp. */}
+                  <p className="grid-explorer-chart-card__sub">
+                    SCADA readings at the evening peak hour {regionalDemandSource === 'bpdb-published' ? 'BPDB' : 'PGCB'} reports for the day
+                    {eveningPeakStamp ? (
+                      <> — <span className="text-foreground font-semibold">{eveningPeakStamp} hr</span><GridProvenanceTag kind="P" className="ml-1" /></>
+                    ) : null}
+                    {' '}• <span className="text-primary font-semibold text-xs">{coverageLabel('regionalDemand')}</span>
+                  </p>
                 </div>
               </div>
 
@@ -5211,11 +5273,173 @@ export function PowerGridExplorer({
               </GridCardFooter>
             </div>
 
-            {/* East-West Interconnector. Sits beside the zone table on purpose:
-                that card shows the imbalance between the country's two halves,
-                this one shows the wire that carries it. */}
+            {/* Daily Outage Log */}
+            <div className="grid-explorer-chart-card card lg:col-span-1">
+              <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+                <FileText className="h-5 w-5 text-amber-500 shrink-0" />
+                <div>
+                  <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<DailyBadge /></h3>
+                  <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold text-xs">{coverageLabel('outages')}</span></p>
+                  {/* Not uniformly P: PGCB prints ONE free-text description per
+                      event, and the asset/cause split shown below is ours. */}
+                  <p className="mt-1.5 text-[10px] text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="inline-flex items-center gap-1">
+                      <GridProvenanceTag kind="P" /> time, description, lost load
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <GridProvenanceTag kind="D" /> split into asset and cause
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Grows into whatever height the zone table beside it sets, rather
+                  than stopping at a fixed 31.5rem and leaving the footer stranded
+                  at the bottom of the stretched card. The basis keeps that height
+                  when the card stands alone (one column on small screens), and
+                  min-h-0 lets the scroll container shrink instead of forcing the
+                  full list height. */}
+              <div className="space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
+                {dailyOutages.map((o, idx) => (
+                  <div key={idx} className="p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
+                    <div className="flex justify-between font-bold text-foreground">
+                      <span>{o.plant}</span>
+                      <span className="text-muted-foreground font-mono font-normal">{o.time}</span>
+                    </div>
+                    <div className="flex justify-between gap-3 text-muted-foreground">
+                      <span>{o.reason}</span>
+                      {/* `load` holds a published MW figure only when the report
+                          prints one; otherwise the parser stores the literal
+                          "HT Outage", which is a category, not a measurement,
+                          and must not be styled like one. */}
+                      {/\d/.test(o.load) ? (
+                        <span className="font-semibold text-destructive whitespace-nowrap">
+                          {o.load}
+                          <GridProvenanceTag kind="P" className="ml-1" />
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground/70 whitespace-nowrap italic">
+                          no load stated
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Card Metadata Footer */}
+              <GridCardFooter>
+                <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet, NLDC daily outage log</span>
+              {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
+                <span>Asset and cause are cut from PGCB&rsquo;s single event description; the wording is theirs.</span>
+                <span className="font-medium">Reporting Period: 24-Hour Logs (Date: {systemStats.date})</span>
+              </GridCardFooter>
+            </div>
+
+            {/* Zone-wise generation. The table above is what each zone was
+                asked for; this is what it produced. The two are deliberately
+                never divided into one another — demand there is MW at a single
+                instant, generation here is MKWh across the whole day, and a
+                self-sufficiency ratio built from the pair would be meaningless.
+                Read side by side they still carry the point: Mymensingh's four
+                MKWh against Barishal's sixty is the transmission task. */}
+            {zoneGenerationData.length > 0 ? (
+              <div className="grid-explorer-chart-card card lg:col-span-3">
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+                  <Factory className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <h3 className="grid-explorer-chart-card__title">Zone-wise Generation by Fuel<DailyBadge /></h3>
+                    <p className="grid-explorer-chart-card__sub">
+                      Energy generated inside each zone across the full day, in MKWh
+                      {zoneGenNationalTotal > 0 ? <> • {zoneGenNationalTotal.toFixed(2)} MKWh national <GridProvenanceTag kind="P" /></> : null}
+                    </p>
+                  </div>
+                  <span className="grid-explorer-chip">P1</span>
+                </div>
+
+                <div className="grid-explorer-table-wrap">
+                  <table className="grid-explorer-table">
+                    <thead>
+                      <tr>
+                        <th>Grid Zone</th>
+                        {zoneGenFuels.map((fuel) => (
+                          <th key={fuel} className="text-left whitespace-nowrap">
+                            {/* The eight fuel hues cannot be told apart by colour
+                                alone, so each is named here beside its swatch
+                                rather than relying on a legend. */}
+                            <span className="inline-flex items-center gap-1.5">
+                              <span
+                                aria-hidden="true"
+                                className="inline-block h-2 w-2 rounded-sm shrink-0"
+                                style={{ backgroundColor: chartTheme.fuel(fuel) }}
+                              />
+                              {fuel}
+                            </span>
+                            <GridProvenanceTag kind="P" className="ml-1" />
+                          </th>
+                        ))}
+                        <th className="text-left">Zone Total<GridProvenanceTag kind="P" className="ml-1" /></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {zoneGenerationData.map((zg) => (
+                        <tr key={zg.zone}>
+                          <td className="font-semibold whitespace-nowrap">{zg.zone}</td>
+                          {zoneGenFuels.map((fuel) => (
+                            <td
+                              key={fuel}
+                              className={cn(
+                                'text-left tabular-nums',
+                                zg.fuels[fuel] ? 'font-medium' : 'text-muted-foreground/60',
+                              )}
+                            >
+                              {formatZoneEnergy(zg.fuels[fuel])}
+                            </td>
+                          ))}
+                          <td className="text-left tabular-nums font-semibold text-primary">{zg.total.toFixed(2)}</td>
+                        </tr>
+                      ))}
+                      <tr className="border-t border-border/80 font-bold bg-muted/20">
+                        <td>National Total</td>
+                        {zoneGenFuels.map((fuel) => (
+                          <td key={fuel} className="text-left tabular-nums">
+                            {formatZoneEnergy(zoneGenPublishedTotals[fuel])}
+                          </td>
+                        ))}
+                        <td className="text-left tabular-nums text-primary">{zoneGenNationalTotal.toFixed(2)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                  <span className="font-semibold text-foreground">Every figure on this card is published</span>
+                  <GridProvenanceTag kind="P" className="ml-1.5" />
+                  <span className="mx-1.5 text-muted-foreground/50">·</span>
+                  PGCB prints this table zone by zone and states its own National Total row, which is
+                  the row shown here and the same one the fuel-mix chart is built from. The nine zone
+                  rows sum to it, so the two are a check on each other rather than one being derived
+                  from the other. A dash means the fuel has no column on this day&rsquo;s sheet; a
+                  zero means the zone generated none. Figures under 0.01 MKWh are shown as
+                  &lsquo;&lt;0.01&rsquo; rather than rounded to nothing.
+                </div>
+
+                <GridCardFooter>
+                  <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet, zone-wise generation summary</span>
+                  {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
+                  <span>As published. Not independently audited.</span>
+                  <span className="font-medium">Reporting Period: Full day (Date: {systemStats.date})</span>
+                </GridCardFooter>
+              </div>
+            ) : null}
+
+            {/* East-West Interconnector. Full width, and last: the two cards
+                above are the two halves of each zone's day — what it was asked
+                for, and what it generated — and this is the wire that carries
+                the difference between the country's halves. A 24-hour series
+                also reads better across the full width than in two thirds. */}
             {ewic ? (
-              <div className="grid-explorer-chart-card card lg:col-span-2">
+              <div className="grid-explorer-chart-card card lg:col-span-3">
                 <div className="grid-explorer-chart-card__head">
                   <div>
                     <h3 className="grid-explorer-chart-card__title">East-West Interconnector Transfer<DailyBadge /></h3>
@@ -5334,68 +5558,6 @@ export function PowerGridExplorer({
               </div>
             ) : null}
 
-            {/* Daily Outage Log */}
-            <div className="grid-explorer-chart-card card lg:col-span-1">
-              <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
-                <FileText className="h-5 w-5 text-amber-500 shrink-0" />
-                <div>
-                  <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<DailyBadge /></h3>
-                  <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold text-xs">{coverageLabel('outages')}</span></p>
-                  {/* Not uniformly P: PGCB prints ONE free-text description per
-                      event, and the asset/cause split shown below is ours. */}
-                  <p className="mt-1.5 text-[10px] text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="inline-flex items-center gap-1">
-                      <GridProvenanceTag kind="P" /> time, description, lost load
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <GridProvenanceTag kind="D" /> split into asset and cause
-                    </span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Grows into whatever height the zone table beside it sets, rather
-                  than stopping at a fixed 31.5rem and leaving the footer stranded
-                  at the bottom of the stretched card. The basis keeps that height
-                  when the card stands alone (one column on small screens), and
-                  min-h-0 lets the scroll container shrink instead of forcing the
-                  full list height. */}
-              <div className="space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
-                {dailyOutages.map((o, idx) => (
-                  <div key={idx} className="p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
-                    <div className="flex justify-between font-bold text-foreground">
-                      <span>{o.plant}</span>
-                      <span className="text-muted-foreground font-mono font-normal">{o.time}</span>
-                    </div>
-                    <div className="flex justify-between gap-3 text-muted-foreground">
-                      <span>{o.reason}</span>
-                      {/* `load` holds a published MW figure only when the report
-                          prints one; otherwise the parser stores the literal
-                          "HT Outage", which is a category, not a measurement,
-                          and must not be styled like one. */}
-                      {/\d/.test(o.load) ? (
-                        <span className="font-semibold text-destructive whitespace-nowrap">
-                          {o.load}
-                          <GridProvenanceTag kind="P" className="ml-1" />
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground/70 whitespace-nowrap italic">
-                          no load stated
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Card Metadata Footer */}
-              <GridCardFooter>
-                <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet, NLDC daily outage log</span>
-              {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
-                <span>Asset and cause are cut from PGCB&rsquo;s single event description; the wording is theirs.</span>
-                <span className="font-medium">Reporting Period: 24-Hour Logs (Date: {systemStats.date})</span>
-              </GridCardFooter>
-            </div>
           </div>
 
           {/* Key Transmission Lines */}
