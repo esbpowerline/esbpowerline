@@ -5671,6 +5671,109 @@ html.theme-dark .locale-toggle__btn--active:hover {
   }
 }
 
+/* ── The date controls, docked ─────────────────────────────────────────────
+   Latest, Year, Month and Day each take the full width below the `sm`
+   breakpoint, so the row is four stacked controls — most of a phone's first
+   screen spent on a picker that most readers never touch, because the day
+   they want is the one already loaded.
+
+   Below 40rem the row docks into a bottom sheet behind a single chip naming
+   the day on screen. The controls themselves are unchanged: same components,
+   same handlers, same access-tier behaviour on locked dates. Only where they
+   live changes, so nothing about picking a date can break differently here
+   than it does on a desktop. */
+.grid-explorer-date-chip,
+.grid-explorer-date-scrim {
+  display: none;
+}
+
+@media (max-width: 40rem) {
+  .grid-explorer-date-chip {
+    @apply flex w-full items-center gap-2 min-h-11 px-3.5 py-2;
+    @apply rounded-2xl border border-border/55 bg-card/70 text-xs text-foreground;
+    @apply transition-colors;
+  }
+
+  .grid-explorer-date-chip:hover {
+    @apply border-primary/35;
+  }
+
+  .grid-explorer-date-chip:focus-visible {
+    @apply outline-none ring-2 ring-primary/45 ring-offset-2 ring-offset-background;
+  }
+
+  .grid-explorer-date-chip__tag {
+    @apply rounded-full bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary;
+  }
+
+  .grid-explorer-date-scrim {
+    @apply fixed inset-0 z-[190] bg-background/60 opacity-0 pointer-events-none;
+    display: block;
+    transition: opacity 200ms ease;
+    backdrop-filter: blur(2px);
+  }
+
+  .grid-explorer-date-scrim.is-open {
+    @apply opacity-100 pointer-events-auto;
+  }
+
+  .grid-explorer-date-dock {
+    @apply fixed inset-x-0 bottom-0 z-[200] flex flex-col gap-3;
+    @apply rounded-t-3xl border-t border-border bg-card p-4 shadow-2xl;
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    /* Not scrollable, and not clipped. A menu opening inside a scroll
+       container is trapped by it: the year list ran 136px past the sheet's
+       bottom edge and had to be scrolled to. The sheet holds four controls
+       and cannot grow, so it lets its menus escape instead. */
+    overflow: visible;
+    transform: translateY(101%);
+    transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* Anchored to the bottom of the screen, a menu that drops down has nowhere
+     to go. Inside the sheet they open upward, over the page rather than off it. */
+  .grid-explorer-date-dock .grid-explorer-dropdown-menu {
+    top: auto;
+    bottom: calc(100% + 0.5rem);
+    margin-top: 0;
+  }
+
+  .grid-explorer-date-dock.is-open {
+    transform: translateY(0);
+  }
+
+  /* Stacked, not wrapped: in a sheet there is no reason for a control to sit
+     beside another one. */
+  .grid-explorer-date-dock > div:last-child {
+    @apply flex-col items-stretch gap-2.5;
+  }
+
+  .grid-explorer-date-dock__head {
+    @apply flex items-center justify-between gap-3 pb-1;
+    @apply text-[10px] font-bold uppercase tracking-wider text-muted-foreground;
+  }
+
+  .grid-explorer-date-dock__close {
+    @apply min-h-11 rounded-xl px-3 text-xs font-bold text-primary;
+  }
+
+  .grid-explorer-date-dock__close:focus-visible {
+    @apply outline-none ring-2 ring-primary/45;
+  }
+}
+
+/* Desktop keeps the plain row — the sheet chrome only exists on a phone. */
+.grid-explorer-date-dock__head {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-explorer-date-dock,
+  .grid-explorer-date-scrim {
+    transition: none;
+  }
+}
+
 /* A control that only means anything once tiles are hidden, which only
    happens on a phone. */
 .grid-explorer-kpi-more {

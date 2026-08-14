@@ -292,6 +292,9 @@ export function PowerGridExplorer({
   const [showMethodologyBanner, setShowMethodologyBanner] = useState(true);
   const [activeReconciliationTopic, setActiveReconciliationTopic] = useState<'gen' | 'cost' | null>(null);
   const [isMethodologyBannerExpanded, setIsMethodologyBannerExpanded] = useState(false);
+  // Phones get one chip that opens the four date controls as a sheet; the row
+  // itself is untouched and simply docks somewhere else below 40rem.
+  const [isDateSheetOpen, setIsDateSheetOpen] = useState(false);
 
   // Helper to get color-shifting backlog badge styles (psychological timeline)
   const getBacklogBadgeStyles = useCallback((selected: string, latest: string) => {
@@ -1458,6 +1461,40 @@ export function PowerGridExplorer({
             )}
           </p>
         </div>
+        {/* Phone trigger. Four stacked full-width controls were most of the
+            first screen; this is one line that says which day is on screen and
+            opens the same controls when a reader actually wants to change it. */}
+        <button
+          type="button"
+          onClick={() => setIsDateSheetOpen(true)}
+          className="grid-explorer-date-chip"
+          aria-expanded={isDateSheetOpen}
+        >
+          <Calendar className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <span className="font-bold">{systemStats.date || selectedDate}</span>
+          {selectedDate === latestDate && <span className="grid-explorer-date-chip__tag">Latest</span>}
+          <ChevronDown className="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        </button>
+
+        {/* Backdrop, phone only — a tap outside closes without hunting for an X. */}
+        <div
+          className={cn('grid-explorer-date-scrim', isDateSheetOpen && 'is-open')}
+          onClick={() => setIsDateSheetOpen(false)}
+          aria-hidden
+        />
+
+        <div className={cn('grid-explorer-date-dock', isDateSheetOpen && 'is-open')}>
+          <div className="grid-explorer-date-dock__head">
+            <span>Choose a reporting date</span>
+            <button
+              type="button"
+              onClick={() => setIsDateSheetOpen(false)}
+              className="grid-explorer-date-dock__close"
+              aria-label="Close date picker"
+            >
+              Done
+            </button>
+          </div>
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
           {/* TODAY Reset Button — sized to match the Year control exactly */}
           <div className="w-full sm:w-28">
@@ -1528,6 +1565,7 @@ export function PowerGridExplorer({
               align="right"
             />
           </div>
+        </div>
         </div>
       </div>
 

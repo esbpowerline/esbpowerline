@@ -117,6 +117,10 @@ export function CustomDropdown({
         <div
           style={menuWidth ? { width: menuWidth } : undefined}
           className={cn(
+            // Stable hook so a host that anchors this to the bottom of the
+            // screen can flip the menu upward; Tailwind's own classes are not
+            // something CSS elsewhere should be matching on.
+            'grid-explorer-dropdown-menu',
             'absolute mt-2.5 rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl p-1.5 z-[100] animate-in fade-in slide-in-from-top-1 duration-150',
             // Grid menus hold a bounded set (years / 12 months / ≤31 days), so they
             // render in full — no height cap, no scrollbar. List menus keep the
