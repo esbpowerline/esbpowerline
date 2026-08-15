@@ -153,9 +153,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       stripRef={kpiStripRef}
       layer="page"
       className="grid-explorer-kpi-strip--six"
-      // Peak Supply leads, paired with Peak Demand and Load Shedding: the three
+      // Peak Supply leads, paired with Peak Demand and Peak Deficit: the three
       // together are the day's whole story — what the grid had, what it was
-      // asked for, and what went unserved. Capacity Idle, Gas Supply and Cost
+      // asked for, and the gap between them. Capacity Idle, Gas Supply and Cost
       // of Power explain that story rather than tell it, so they fold.
       collapsibleAfter={3}
     >
@@ -272,7 +272,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
                 : `${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`
             }
           />
-          {/* The deficit this demand implies is the Load Shedding tile's headline. */}
+          {/* The deficit this demand implies is the Peak Deficit tile's headline. */}
           <GridKpiTooltipRow
             provenance="P"
             label="Max System Temp:"
@@ -292,9 +292,18 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       <GridKpiCell
         icon={TrendingDown}
         iconClassName="text-destructive"
+        // "Load Shedding" named a figure this is not. The value is
+        // eveningPeakDemand - eveningPeakGen, which is why it carries a D: PGCB
+        // prints load shedding of its own, zone by zone, and on 2026-08-14 that
+        // printed figure summed to 396 MW against the 414 MW this subtraction
+        // gives. Two different measures reading as one contradiction, because
+        // PGCB's own three columns do not reconcile — demand exceeds generation
+        // plus shedding on every hourly row, which the ingest passes through as
+        // published rather than forcing to balance. The name now says which of
+        // the two this is.
         label={
           <>
-            Load Shedding
+            Peak Deficit
             <DailyBadge />
           </>
         }
