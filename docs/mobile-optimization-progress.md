@@ -360,3 +360,23 @@ Then: `npx tsc --noEmit`, `npm test`, and
 `macro/reserves` (3 panels, 68.3% / 205px / 177px) is **single-axis already**.
 It fails because the cards nest three deep and the inner ones report no card
 width at all. Different fix, no claim change, no approval needed.
+
+### 3 of 7 done
+
+| # | Tab | Chart | Before | After | Commit |
+|---|---|---|---|---|---|
+| 3 | renewables | Renewable Generation Timeline | 186px / 51.4% | **266px / 73.6%** | `c0d13fc8` |
+
+**The split alone was not enough here — read this before doing #4-#8.** After
+splitting, it sat at 240px / 66.4%. The remaining gap was not the axis: this card
+wraps its chart in its own `p-4`, which the other chart cards do not, costing
+32px of a 362px card. Dropping that gutter on narrow only (`.grid-explorer-chart-area`
+already carries `-mx-1`) finished it at 266px, the same figure Brent and LNG hit.
+
+So: **when a chart lands short after the split, measure its own padding before
+touching the axis again.** 266px at a 362px card looks like the natural ceiling
+for this layout; three charts now land on it exactly.
+
+This one also did not need extraction to module scope — `RenewablesTab` is a
+real component, not an IIFE, so the hook went straight in at the top and the
+tooltip became a component-scope `const` shared by all three renderings.
