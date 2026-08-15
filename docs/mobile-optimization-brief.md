@@ -52,8 +52,10 @@ plus the shared wrapper `PowerGridChartUI.tsx`.
 
 - `AGENTS.md` — this is not the Next.js you know. Read the relevant guide under
   `node_modules/next/dist/docs/` before writing code.
-- Project memory: `grid-explorer-mobile-overhaul`, `testing-mobile-layout`,
-  `verify-mobile-fixes-before-reporting`.
+- **The appendix at the end of this file.** It carries the three project-memory
+  notes this work produced, reproduced in full so they travel with the repo. If
+  you have those notes in your own memory, prefer whichever is newer and say
+  which you used.
 - `app/globals.css` from ~line 7240 (the `grid-explorer-*` layer — read the
   comments, they explain the architecture and its traps),
   `components/news/PowerGridChartUI.tsx`, and the chart files listed above.
@@ -232,3 +234,110 @@ after, clears 72% yes/no, axis labels colliding yes/no, data-integrity counts
 before → after, what changed. Numbers, not adjectives. Name every chart that
 fell short and why. Close with the converted-count delta (e.g. "23 → 41 of 57")
 and what you deliberately left alone.
+
+---
+
+# Appendix — the notes this work produced
+
+Reproduced from project memory so they survive a move to another machine. They
+are point-in-time observations, dated where it matters; verify against the code
+before treating any of it as current fact.
+
+## A1. Where the overhaul stopped
+
+*Branch `authenticating`, level with origin as of 2026-08-15.* Audience is
+mostly phone users, so mobile leads and desktop must stay intact.
+
+The architecture doc — audit, defects with evidence, the layered plan — is at
+https://claude.ai/code/artifact/18c77428-8d41-4acc-a703-e608978e0cd4
+
+**Scale:** 21,440 lines, 9 tabs plus ~10 sub-views, 88 cards, 75 tables, 38
+charts, 42 KPI tiles, and only 8 plain-language blocks. (The chart and table
+figures in the body of this brief were re-counted later and are the ones to
+trust; these were the original survey.)
+
+**Phases.** 1 (mobile primitives) and 2 (reclaim the first screen) are
+substantially done. 3 (regroup the tabs) and 4 (write the comprehension layer)
+are not started.
+
+**The one idea that made the difference:** cards are containers
+(`container-type: inline-size`) and their contents size in `cqi`, not `vw`. The
+same card renders at 343px on a phone, ~470px in a three-column desktop grid and
+~1430px full width — a viewport query is right for one of those and wrong for
+the rest. Two traps: a container cannot size itself, so a card's own padding
+still needs a viewport query; and `--h-*` height classes MUST stay declared
+below `--lg`, which sets height at equal specificity. Cascade order at equal
+specificity bit this work three separate times — when a rule "does nothing",
+check declaration order before anything else.
+
+**Chart gutters are the real mobile budget.** At a true 393px viewport the chart
+card is 326px wide and only **175px of it (54%) was plotted data**; the rest was
+axis chrome and margins. Cutting category padding 16→8, the shed axis 56→38, the
+right margin 12→4 and the left axis 40→34, and lifting the `MW` label out of the
+rotated axis to sit above it, took data to **221px (68%)**. Measure this ratio
+before assuming a chart is "too small" — usually it is not the card, it is the
+chrome.
+
+**Open decisions.** The section grouping for phase 3 — proposed Today / Supply /
+Cost / Network / Trends, arrived at after rejecting an earlier Supply/Delivery
+split ("Delivery" promised distribution data the product does not hold, and the
+first "Supply" swallowed cost). Bottom nav on phones. Five single words because
+Bangla labels are longer than the English ones and nothing compound fits a 78px
+tab. Plus the dual-axis and remaining-tables items covered in the body above.
+
+Unresolved and unrelated to layout: several published archive days still carry
+*derived* zone demand where PGCB printed a figure, and were never backfilled.
+Do not try to fix that as part of layout work.
+
+## A2. How to actually see the site at phone width
+
+**`resize_window` reports success and does nothing here.** `window.innerWidth`
+stays 2552 whatever it is set to, and screenshots keep coming back at the
+desktop size. Do not trust it.
+
+Shrinking a single element instead is worse than useless for layout work: it
+cannot reproduce Tailwind's viewport breakpoints, so `lg:grid-cols-2`, `md:` and
+every `@media` rule still resolve as desktop. Two real bugs — a double-counted
+chart legend margin, and 46% of a chart's width sitting in gutters — were
+invisible under that method and surfaced in one measurement each once the
+viewport was real.
+
+**Use an iframe.** It has its own viewport, so every media query resolves as it
+would on a phone:
+
+```js
+const f = document.createElement('iframe');
+f.id = 'phonesim';
+f.style.cssText = 'position:fixed;top:0;left:0;width:393px;height:1290px;'
+  + 'border:0;z-index:2147483647;background:#fff;'
+  + 'transform:scale(1.95);transform-origin:top left';
+f.src = 'http://localhost:3000/grid-explorer?tab=overview';
+document.body.appendChild(f);
+```
+
+`transform: scale()` is for legibility in screenshots only — the frame's own
+viewport stays 393px, so the scaling does not affect what the media queries see.
+Same origin, so `f.contentDocument` is reachable for measuring.
+
+Gotchas: rebuild the iframe rather than calling `reload()` on it, which kills
+the CDP evaluation mid-flight; and give it ~6.5s before querying, because the
+explorer hydrates and Recharts settles late.
+
+## A3. Verify before reporting — how this went wrong
+
+On 2026-08-14 the same layout was rejected four times — "Still not filled like
+lots of empty spaces!", "Still not fixed", and finally "I am not happy honestly,
+why can't you resize it to the size of the mobile. I see lots of empty spaces on
+either sides of the chart!" Each round had been checked by shrinking a single
+card rather than the viewport, so both real defects were invisible and each
+"fixed" claim was wrong.
+
+**Why it matters:** a proxy measurement cannot resolve Tailwind's `md:`/`lg:` or
+any `@media` rule, so it reports desktop layout while claiming to show phone.
+Reporting a fix off it burns trust faster than the bug does — the reader can see
+the screen; they know it is not fixed.
+
+**How to apply:** for any mobile layout change, measure inside the 393px iframe
+above before saying it is done, and quote the number that changed (px of plotted
+width, count of wrapped labels) rather than saying "should be better now". If
+the viewport cannot be made real, say so instead of substituting a proxy.
