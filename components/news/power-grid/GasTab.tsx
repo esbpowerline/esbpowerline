@@ -111,13 +111,23 @@ export function GasTab({
   const prodFocused = expandedProd != null;
   const distFocused = expandedDist != null;
 
+  // Which end of the window the file is keyed on is not fixed: through 2026-06
+  // the archive stores a report under the date its window ends, and the
+  // reconstructed 2026-08 files under the date it starts. Say which one this is
+  // rather than asserting one of them.
   const reportCaption =
     archiveDay && gasDay ? (
       <p className="grid-explorer-chart-card__sub mt-0.5">
         <span className="text-amber-500 font-semibold">
           Report: {archiveDay.report.report_date_label}
         </span>{' '}
-        — 8:00 AM → 8:00 AM gas day, archived under its end date ({gasDay})
+        — 8:00 AM → 8:00 AM gas day, archived under its{' '}
+        {archiveDay.report.gas_day_start === gasDay
+          ? 'start date'
+          : archiveDay.report.gas_day_end === gasDay
+            ? 'end date'
+            : 'file date'}{' '}
+        ({gasDay})
         {gasDay !== selectedDate && (
           <span className="text-muted-foreground"> • nearest report to your selected date</span>
         )}
