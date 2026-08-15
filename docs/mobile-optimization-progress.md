@@ -309,3 +309,54 @@ hiding one makes Recharts measure the hidden one as zero), and the
   debugging why the extension's Chrome disagrees with the dev server.
 - **jsdom/testing-library for this.** Neither is installed and the brief forbids
   new dependencies; Puppeteer already covers it and measures real pixels.
+
+## Dual-axis split — approved to generalize, 2 of 7 done
+
+User approved the split for all seven dual-axis charts after Brent measured
+55.2% → 73.6%. Progress:
+
+| # | Tab | Chart | Before | After | Commit |
+|---|---|---|---|---|---|
+| 1 | macro/global | Brent Crude vs. Retail Diesel | 194px / 55.2% | **266px / 73.6%** | `85d446a8` |
+| 2 | macro/global | Global LNG Benchmark vs. Gas Tariff | 204px / 56.4% | **266px / 73.6%** | `f12c10ee` |
+| 3 | renewables | Renewable Generation Timeline | 186px / 51.4% | — | todo |
+| 4 | macro/pricing | Macro Pressure Variables | 216px / 59.7% | — | todo |
+| 5 | macro/pricing | Global Fuel Commodity Import Costs | 216px / 59.7% | — | todo |
+| 6 | macro/budget | National Budget vs Capacity & Peak | 223px / 61.6% | — | todo |
+| 7 | macro/budget | Transmission Expansion Pace | 223px / 61.6% | — | todo |
+| 8 | overview | 24-Hour System Load Curve | 256px / 70.8% | — | todo |
+
+macro/global is now **5 of 5** above the floor; it was 1 of 3 at the start.
+
+### The recipe, so the next session does not re-derive it
+
+Both conversions followed the same five steps. `GridBrentDieselCard` and
+`GridLngTariffCard` in `PowerGridExplorer.tsx` are the worked examples — copy
+one.
+
+1. **Lift the tooltip to a module-scope component** (`GridXxxTooltip`). Both
+   layouts must share ONE definition or the field counts drift; that is the
+   whole data-integrity argument. Type `payload` as
+   `ReadonlyArray<{payload: {...}}>` and cast at the call site with
+   `as unknown as React.ComponentProps<typeof X>['payload']` — Recharts'
+   `TooltipPayload` is readonly and will not assign directly.
+2. **Lift the whole card to a module-scope component** taking
+   `{data, chartTheme, ready, ...}`. This is not optional: the macro tab body is
+   an `(() => {...})()` IIFE, so a hook cannot be called inside it.
+3. **`const [cardRef, isNarrow] = useNarrowChartCard()`**, ref on the card div.
+4. **Three branches** — `!ready` skeleton, `isNarrow` two stacked
+   `--h-compact` plots each with one `YAxis` and a
+   `.grid-explorer-chart-caption`, else the original wide JSX **byte-identical**.
+   Repeat the x-axis under both plots; do not share it.
+5. **Splice the inline card out** and call the component. Watch the closing
+   `</div>` count — the first splice ate the `grid lg:grid-cols-2` wrapper's
+   close because the card close and the grid close are adjacent.
+
+Then: `npx tsc --noEmit`, `npm test`, and
+`node scripts/measure-mobile.mjs 393 "tab=..."`.
+
+### Not part of the axis work
+
+`macro/reserves` (3 panels, 68.3% / 205px / 177px) is **single-axis already**.
+It fails because the cards nest three deep and the inner ones report no card
+width at all. Different fix, no claim change, no approval needed.
