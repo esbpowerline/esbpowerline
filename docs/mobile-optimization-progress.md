@@ -211,3 +211,101 @@ session produced, and it is what the fix list is built from.
 Deliberately left alone: `components/admin/AdminAnalyticsCharts.tsx` and
 `app/(public)/annual-reports/financials/FinancialsClient.tsx`, both out of scope
 per the brief.
+
+---
+
+# Session 2 — 2026-08-15 (same day, after the measurement pass)
+
+## The verification method changed, and that was the unblock
+
+The 393px iframe in the brief's appendix A2 was a workaround for `resize_window`
+being a no-op. It carries its own failure: it depends on whatever Chrome the
+extension is attached to, and on this machine that Chrome served a bundle
+**hours older** than the one the dev server had on disk — different ETag,
+different byte count, on a fresh origin, a cache-busted URL, after a browser
+restart, four server restarts and a full `.next*` + `node_modules/.cache` wipe.
+`curl` got the correct bundle from the same PID at the same moment.
+
+**Use `scripts/measure-mobile.mjs` instead.** Puppeteer was already a
+devDependency. It drives its own Chromium at a genuine 393px viewport, shares
+nothing with the user's profile or cache, and prints the whole table:
+
+```bash
+node scripts/measure-mobile.mjs            # all tabs at 393px
+node scripts/measure-mobile.mjs 320        # narrow check
+node scripts/measure-mobile.mjs 393 "tab=macro&macro=global"
+```
+
+Two gotchas baked into it: wait on `.recharts-wrapper`, never `networkidle2`
+(the explorer never goes quiet), and set a normal desktop UA — `proxy.ts`
+answers 403 to curl-ish agents, which is also why direct `/data/` probes fail.
+
+## Measured after the Brent split — 16 pass / 10 fail of 26 cartesian
+
+Card is 362px under Puppeteer (352px in the iframe); ratios are consistent.
+Horizontal overflow: **0px on all 12 tab/sub-tab views.**
+
+| Tab | Chart | yAx | Plot | Ratio | 72% |
+|---|---|---|---|---|---|
+| overview | Daily Fuel & Import Cost | 1 | 266 | 73.6 | PASS |
+| overview | 24-Hour System Load Curve | 2 | 256 | 70.8 | FAIL |
+| gen | Generation Mix Through the Day | 1 | 268 | 74.1 | PASS |
+| regional | East-West Interconnector | 1 | 264 | 73.0 | PASS |
+| renewables | Renewable Generation Timeline | 2 | 186 | 51.4 | FAIL |
+| macro/overview | Wholesale Tariff vs. Unit Cost | 1 | 266 | 73.6 | PASS |
+| macro/overview | Gas Supply Transition | 1 | 277 | 76.6 | PASS |
+| macro/budget | National Budget vs Capacity & Peak | 2 | 223 | 61.6 | FAIL |
+| macro/budget | Historical Pricing & Tariff | 1 | 269 | 74.3 | PASS |
+| macro/budget | Network Evolution by Voltage | 1 | 275 | 76.0 | PASS |
+| macro/budget | Cumulative Grid Build-out | 1 | 275 | 76.0 | PASS |
+| macro/budget | Transmission Expansion Pace | 2 | 223 | 61.6 | FAIL |
+| macro/budget | Long-term Trajectories (Indexed) | 1 | 269 | 74.3 | PASS |
+| macro/monthly | Regional Maximum Peak Supply | 1 | 266 | 73.6 | PASS |
+| macro/monthly | PGCB 13-Year Growth Trends | 1 | 274 | 75.8 | PASS |
+| macro/pricing | Macro Pressure Variables | 2 | 216 | 59.7 | FAIL |
+| macro/pricing | Global Fuel Commodity Import Costs | 2 | 216 | 59.7 | FAIL |
+| macro/reports | BPDB Cost, Revenue & Subsidy | 1 | 266 | 73.6 | PASS |
+| macro/global | **Brent Crude — upper half** | 1 | 266 | **73.6** | **PASS** |
+| macro/global | **Brent Crude — lower half** | 1 | 266 | **73.6** | **PASS** |
+| macro/global | Global LNG Benchmark vs. Gas Tariff | 2 | 204 | 56.4 | FAIL |
+| macro/global | Solar LCOE vs. Bangladesh Feed-In | 1 | 274 | 75.8 | PASS |
+| macro/system_loss | Historical System Loss (T&D) | 1 | 282 | 78.0 | PASS |
+| macro/reserves | Depletion — current rate | 1 | 247 | 68.3 | FAIL |
+| macro/reserves | Depletion — nested 2 | 1 | 205 | — | FAIL |
+| macro/reserves | Depletion — nested 3 | 1 | 177 | — | FAIL |
+
+Pie charts on overview and macro/monthly are exempt (axis-less), per the brief.
+
+## Done this session
+
+**Brent Crude vs. Retail Diesel — 194px → 266px, 55.2% → 73.6%** (`85d446a8`).
+Split into two stacked single-axis plots below `GRID_DUAL_AXIS_MIN_WIDTH` (420).
+The LNG card beside it is untouched at 56.4%, which is the control.
+
+Data-integrity gate, counted at 393px and 1440px: series drawn 2/2, series named
+2/2, data points 4/4, tooltip 6 rows + formula note, source footer both. No loss.
+Desktop wide branch is byte-identical JSX.
+
+New shared machinery: `useNarrowChartCard` in `PowerGridChartUI.tsx` (a container
+query can style a subtree but cannot swap element trees; rendering both and
+hiding one makes Recharts measure the hidden one as zero), and the
+`.grid-explorer-chart-caption` pair in `globals.css`.
+
+## Left, in order
+
+1. **Seven more dual-axis charts** — same treatment, listed FAIL above.
+   **Waiting on the user to say the pattern generalizes**; the brief reserves it.
+2. **`macro/reserves` — three nested cards.** Single-axis already, so this is
+   NOT the axis question. Card width resolves 362 → null → null through three
+   levels and plots land at 247/205/177px. Needs the nesting flattened.
+3. Tap-to-pin tooltips, 44px targets — still unaudited.
+4. The two fixed `<PieChart width={200} height={200}>`.
+5. Tables: 47 of 51 still unconverted to `--stack`.
+6. 320px and 430px sweeps — only 393px measured.
+
+## Added to the dead-ends list
+
+- **The 393px iframe.** Superseded; see above. Do not spend another session
+  debugging why the extension's Chrome disagrees with the dev server.
+- **jsdom/testing-library for this.** Neither is installed and the brief forbids
+  new dependencies; Puppeteer already covers it and measures real pixels.
