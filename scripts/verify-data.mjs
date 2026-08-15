@@ -50,6 +50,27 @@ const findings = [];
 const record = (check, severity, day, message) => findings.push({ check, severity, day, message });
 
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+const shiftDay = (day, n) => {
+  const t = new Date(`${day}T00:00:00Z`);
+  t.setUTCDate(t.getUTCDate() + n);
+  return t.toISOString().slice(0, 10);
+};
+const nextDay = (day) => shiftDay(day, 1);
+const dayBefore = (day) => shiftDay(day, -1);
+
+// Source filenames carry their date in one of two spellings — "(17.01.20)" on
+// the reports as Petrobangla publishes them, "2026-08-12" on the reconstructed
+// files. UUID-named downloads carry none, and return null.
+const dateInFilename = (name) => {
+  const iso = name.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  // Separators drift across the published filenames — "(16 12.25).pdf" is one
+  // of Petrobangla's own, with a space where the dot belongs.
+  const dmy = name.match(/\((\d{2})[.\-\s](\d{2})[.\-\s](\d{2})\)/);
+  if (dmy) return `20${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+  return null;
+};
 const zoneShed = (z) => num(z.loadShedding) ?? num(z.loadShed) ?? 0;
 const stable = (v) => JSON.stringify(v ?? null);
 
@@ -77,6 +98,59 @@ const read = (dir, day) => {
 };
 
 const runs = (name) => !ONLY || ONLY === name;
+
+// The archive cannot be looked up by filename. Through 2026-06 a report is
+// stored under the date its window ENDS ("16-17 Oct, 2020" lives in
+// 2020-10-17.json); the reconstructed 2026-08 files are stored under the date
+// it starts. Indexing on the window start the report itself states is the only
+// key that holds across both eras — reading `${GAS}/${day}.json` silently finds
+// nothing for most of the archive, which is how check 6 came to compare a day
+// against a document that was never loaded.
+//
+// Only scalars are kept: 2,295 parsed reports do not fit in memory at once.
+let archiveIndex = null;
+const archiveFor = (day) => {
+  if (!archiveIndex) {
+    archiveIndex = new Map();
+    for (const f of fs.readdirSync(GAS)) {
+      if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(f)) continue;
+      let a;
+      try {
+        a = JSON.parse(fs.readFileSync(path.join(GAS, f), 'utf8'));
+      } catch {
+        continue;
+      }
+      const start = a?.report?.gas_day_start;
+      if (!start || archiveIndex.has(start)) continue;
+      const fields = a.production?.fields;
+      archiveIndex.set(start, {
+        file: f.slice(0, -5),
+        source: a.meta?.source_filename ?? null,
+        sha: a.meta?.content_sha256 ?? null,
+        label: a.report?.report_date_label ?? null,
+        // The document's own field rows, summed. This is the figure our six
+        // company rows are a rollup of, so it is what they must agree with.
+        fieldSum: fields?.length ? fields.reduce((x, r) => x + (num(r.gas_mmcfd) ?? 0), 0) : null,
+        // What the document prints as its own grand total, which is a separate
+        // claim and does not always match the rows above it.
+        printed: num(a.production?.grand_total?.gas_mmcfd),
+      });
+    }
+  }
+  return archiveIndex.get(day) ?? null;
+};
+
+// Days the project has already declared unsourced, in public. Demanding a
+// source name for these asks for the invention that the declaration exists to
+// refuse, so they are reported as known rather than as defects.
+const noSourceDays = (() => {
+  try {
+    const j = JSON.parse(fs.readFileSync('public/data/grid-verification/no-source-days.json', 'utf8'));
+    return new Set(j.days ?? []);
+  } catch {
+    return new Set();
+  }
+})();
 
 let prev = null;
 let prevDay = null;
@@ -132,8 +206,25 @@ for (const day of days) {
   //    the pre-2020 archive where all-zero IS the representation of "no gas".
   if (runs('carry-forward') && gasTotal && prevGasTotal) {
     if (stable(gasProd) === stable(prev.gasProductionData)) {
+      // Which of the two days is the defective one is not decidable from the
+      // repeat alone: this fires on the second day, but it is often the first
+      // that holds figures belonging to the second. Naming the document both
+      // days rest on points at the day that has no source of its own, which is
+      // the thing to fix.
+      const named = d.sourceFiles?.petrobangla;
+      const prevNamed = prev.sourceFiles?.petrobangla;
+      const here = archiveFor(day);
+      const there = archiveFor(prevDay);
+      let why = '';
+      if (named && named === prevNamed) {
+        why = ` — both days name ${named}, so at most one of them is its day`;
+      } else if (here?.sha && here.sha === there?.sha) {
+        why = ` — the archive holds one document (${here.source}) under both ${there.file} and ${here.file}`;
+      } else if (!here) {
+        why = ' — no archive window starts on this day';
+      }
       record('carry-forward', 'ERROR', day,
-        `gasProductionData byte-identical to ${prevDay} at ${gasTotal.toFixed(1)} MMCFD — carried forward, not measured`);
+        `gasProductionData byte-identical to ${prevDay} at ${gasTotal.toFixed(1)} MMCFD — carried forward, not measured${why}`);
     }
     if (d.gasDistributionData && prev.gasDistributionData &&
         stable(d.gasDistributionData) === stable(prev.gasDistributionData)) {
@@ -169,10 +260,16 @@ for (const day of days) {
   //    is nothing to name.
   if (runs('provenance')) {
     const sf = d.sourceFiles;
+    const declaredUnsourced = noSourceDays.has(day);
     if (!sf) {
       record('provenance', 'ERROR', day, 'no sourceFiles — the day names no source at all');
     } else {
-      if (!sf.pgcb) record('provenance', 'ERROR', day, 'sourceFiles names no PGCB workbook');
+      if (!sf.pgcb) {
+        record('provenance', declaredUnsourced ? 'INFO' : 'ERROR', day,
+          declaredUnsourced
+            ? 'names no PGCB workbook — already published in no-source-days.json'
+            : 'sourceFiles names no PGCB workbook');
+      }
       if (gasTotal && !sf.petrobangla) {
         record('provenance', 'ERROR', day,
           `carries ${gasTotal.toFixed(1)} MMCFD of gas but sourceFiles names no Petrobangla report`);
@@ -180,16 +277,77 @@ for (const day of days) {
     }
   }
 
+  // 5b. Naming a report is not the same as naming the right one. A day that
+  //     cites a document whose window belongs to a different day is asserting a
+  //     provenance that does not hold, and presence-only checking cannot see it.
+  //
+  //     The two sides spell the same document differently and neither is wrong:
+  //     the grid names a citation for the gas day it covers ("(17.01.20).pdf"),
+  //     while the archive records the PDF as downloaded, named for the day the
+  //     window ends ("(18.01.20).pdf"). So a citation is checked by the date it
+  //     carries, not by string equality — a date of D or D+1 is this day's
+  //     report under one convention or the other. Only a citation naming some
+  //     other day, or an opaque filename that is not the one the archive holds,
+  //     is a claim that fails.
+  if (runs('provenance-agreement') && gasTotal && d.sourceFiles?.petrobangla) {
+    const cited = d.sourceFiles.petrobangla;
+    const arc = archiveFor(day);
+    if (!arc) {
+      record('provenance-agreement', 'WARN', day,
+        `names ${cited} but no archive window starts on this day — the citation cannot be checked`);
+    } else if (cited !== arc.source) {
+      const citedDay = dateInFilename(cited);
+      const arcDay = arc.source ? dateInFilename(arc.source) : null;
+      // A report published as "(D+1).pdf" prints the window D to D+1, so it is
+      // gas day D's document. Citing "(D).pdf" for gas day D therefore names
+      // the report for the day BEFORE — a real, different document holding
+      // different figures. One systematic offset, not many separate mistakes.
+      if (citedDay && arcDay && citedDay === day && arcDay === nextDay(day)) {
+        record('citation-offset', 'ERROR', day,
+          `cites ${cited}, which prints the ${dayBefore(day)}-${day} window; this day's figures come from ${arc.source} (${arc.label})`);
+      } else if (!citedDay) {
+        record('provenance-agreement', 'ERROR', day,
+          `names ${cited}, which is not the report covering this gas day (${arc.source}, ${arc.label}) and carries no date to reconcile`);
+      } else {
+        record('provenance-agreement', 'ERROR', day,
+          `names ${cited}, dated ${citedDay}, but the report covering this gas day is ${arc.source} (${arc.label})`);
+      }
+    }
+  }
+
   // 6. The grid day's gas should match the archive window it was taken from.
+  //
+  //    This read `production.summary.grand_total.gas` and `production.grand_total.gas`.
+  //    Neither key exists in any of the 2,295 archive files — the figure is at
+  //    `grand_total.gas_mmcfd` — so `printed` was always null and the check
+  //    never once fired. It passed 4,529 days by never looking at them.
+  //
+  //    Thresholds are calibrated against the whole archive: our six company
+  //    rows reproduce the document's field rows exactly on 1,463 of 1,476
+  //    comparable days. The 13 that drift do so by 2.0 or 8.0 MMCFD, in an era
+  //    where the document's own fields, subtotals and grand total disagree with
+  //    each other, so drift is reported but not called ours. A contradiction
+  //    the size of the 2026-08-10 defect (2329.6 against a printed 2199.1) is
+  //    an order of magnitude larger and is what ERROR is reserved for.
   if (runs('gas-vs-archive') && gasProd?.length) {
-    const arc = read(GAS, day);
-    const printed = num(arc?.production?.summary?.grand_total?.gas)
-      ?? num(arc?.production?.grand_total?.gas);
-    if (printed != null) {
-      const sum = gasProd.reduce((a, r) => a + (num(r.gas) ?? 0), 0);
-      if (Math.abs(sum - printed) > 5) {
-        record('gas-vs-archive', 'ERROR', day,
-          `grid gas ${sum.toFixed(1)} vs archive printed total ${printed.toFixed(1)} MMCFD`);
+    const arc = archiveFor(day);
+    const sum = gasProd.reduce((a, r) => a + (num(r.gas) ?? 0), 0);
+    if (arc && sum) {
+      if (arc.fieldSum != null) {
+        const gap = sum - arc.fieldSum;
+        if (Math.abs(gap) > 25) {
+          record('gas-vs-archive', 'ERROR', day,
+            `grid gas ${sum.toFixed(1)} vs ${arc.source} field rows ${arc.fieldSum.toFixed(1)} MMCFD (${gap > 0 ? '+' : ''}${gap.toFixed(1)})`);
+        } else if (Math.abs(gap) > 1) {
+          record('gas-vs-archive', 'WARN', day,
+            `grid gas ${sum.toFixed(1)} vs ${arc.source} field rows ${arc.fieldSum.toFixed(1)} MMCFD (${gap > 0 ? '+' : ''}${gap.toFixed(1)})`);
+        }
+      }
+      // The document against itself: what it prints as the total, against the
+      // rows it prints above that total. Petrobangla's own inconsistency.
+      if (arc.fieldSum != null && arc.printed != null && Math.abs(arc.fieldSum - arc.printed) > 1) {
+        record('archive-self', 'WARN', day,
+          `${arc.source} prints grand total ${arc.printed.toFixed(1)} but its field rows sum to ${arc.fieldSum.toFixed(1)} MMCFD`);
       }
     }
   }
