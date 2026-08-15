@@ -73,6 +73,7 @@ import {
   GridRechartsTooltip,
   gridChartXAxisProps,
   gridChartYAxisProps,
+  useNarrowChartCard,
   type GridChartLegendItem,
 } from '@/components/news/PowerGridChartUI';
 import { useChartTheme } from '@/hooks/useChartTheme';
@@ -85,7 +86,7 @@ import {
 import { ProjectRegisterCard } from '@/components/news/power-grid/renewables/ProjectRegisterCard';
 import { YearWiseTable } from '@/components/news/power-grid/renewables/YearWiseTable';
 import { sredaAvailableDates } from '@/lib/data/sreda/available-dates';
-import { formatNumber } from '@/lib/utils';
+import { cn, formatNumber } from '@/lib/utils';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
 
@@ -402,6 +403,63 @@ export function RenewablesTab({
       return next;
     });
 
+  const [timelineCardRef, isNarrowTimeline] = useNarrowChartCard();
+
+  /**
+   * One tooltip for the monthly timeline, shared by the combined chart and by
+   * the two the card splits into below GRID_DUAL_AXIS_MIN_WIDTH. Defined once
+   * so its rows — all three fuels, the renewable total, all generation and the
+   * share — cannot drift between the two layouts.
+   */
+  const monthlyTimelineTooltip = (
+    <GridRechartsTooltip
+      content={({ active, payload }) => {
+        if (!active || !payload?.length) return null;
+        const d = payload[0].payload as (typeof monthlySeries)[0];
+        return (
+          <GridChartTooltipShell title={monthLabel(d.month)} accent={FUEL_COLOR.Solar}>
+            <div className="grid-chart-tooltip__grid">
+              {RENEWABLE_FUELS.map((k) => (
+                <Fragment key={k}>
+                  <span className="grid-chart-tooltip__label flex items-center gap-1.5">
+                    <span className="grid-chart-tooltip__dot shrink-0" style={{ background: FUEL_COLOR[k] }} />
+                    {k}
+                  </span>
+                  <span className="grid-chart-tooltip__value" style={{ color: FUEL_COLOR[k] }}>
+                    {fmt(d[k], 2)} MKWh
+                  </span>
+                </Fragment>
+              ))}
+              <span className="grid-chart-tooltip__label">Renewable total</span>
+              <span className="grid-chart-tooltip__value">{fmt(d.renewable, 2)} MKWh</span>
+              <span className="grid-chart-tooltip__label">All generation</span>
+              <span className="grid-chart-tooltip__value">
+                {formatNumber(Math.round(d.total))} MKWh
+              </span>
+              <span className="grid-chart-tooltip__label flex items-center gap-1.5">
+                <span className="grid-chart-tooltip__dot shrink-0" style={{ background: '#a855f7' }} />
+                Share
+              </span>
+              <span className="grid-chart-tooltip__value" style={{ color: '#a855f7' }}>
+                {d.sharePct == null ? '—' : `${d.sharePct.toFixed(2)}%`}
+              </span>
+            </div>
+          </GridChartTooltipShell>
+        );
+      }}
+    />
+  );
+
+  const monthlyXAxis = (
+    <XAxis
+      {...gridChartXAxisProps(chartTheme, {
+        dataKey: 'month',
+        tickFormatter: (v: string) => v.slice(0, 4),
+        interval: Math.max(0, Math.floor(monthlySeries.length / 14)),
+      })}
+    />
+  );
+
   return (
     <div className="grid-explorer-panel space-y-6">
       {/* ── KPI strip ── */}
@@ -715,7 +773,7 @@ export function RenewablesTab({
       </div>
 
       {/* ── The whole monthly backlog, full width ── */}
-      <div className="grid-explorer-chart-card card">
+      <div ref={timelineCardRef} className="grid-explorer-chart-card card">
         <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
           <Sun className="h-5 w-5 text-amber-500 shrink-0" />
           <div>
@@ -728,19 +786,88 @@ export function RenewablesTab({
         </div>
 
         {monthlySeries.length ? (
-          <div className="p-4">
+          /* This card wraps its chart in its own padding, which the other chart
+             cards do not. At 362px that p-4 was 32px of the plot's width — the
+             difference between this card's 66.4% after the split and the 73.6%
+             its siblings reach. Narrow keeps a small gutter and gives the rest
+             back to the data; desktop keeps p-4. */
+          <div className={cn(isNarrowTimeline ? 'px-0 pb-4 pt-3' : 'p-4')}>
             <GridChartExternalLegend items={monthlyLegend} />
+            {isNarrowTimeline ? (
+              /* Two plots rather than two axes: the stack is MKWh and the share
+                 is a percentage, so on a phone they separate by unit instead of
+                 competing for one canvas. Combined they plotted 186px of a
+                 362px card — 51.4%, the worst on the explorer. */
+              <div className="flex flex-col gap-3">
+                <div>
+                  <p className="grid-explorer-chart-caption">Energy by source (MKWh)</p>
+                  <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        {monthlyXAxis}
+                        <YAxis
+                          {...gridChartYAxisProps(chartTheme, {
+                            tickFormatter: (v) => formatNumber(v, 0),
+                            domain: [0, 'auto'],
+                          })}
+                        />
+                        {monthlyTimelineTooltip}
+                        {(['Hydro', 'Wind', 'Solar'] as const).map((k) => (
+                          <Area
+                            key={k}
+                            type="monotone"
+                            dataKey={k}
+                            stackId="re"
+                            stroke={FUEL_COLOR[k]}
+                            fill={FUEL_COLOR[k]}
+                            fillOpacity={0.28}
+                            strokeWidth={2}
+                            legendType="none"
+                          />
+                        ))}
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+                <div>
+                  <p className="grid-explorer-chart-caption">
+                    <span className="grid-explorer-chart-caption__swatch" style={{ background: '#a855f7' }} />
+                    Renewables as a share of all generation (%)
+                  </p>
+                  <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        {monthlyXAxis}
+                        <YAxis
+                          {...gridChartYAxisProps(chartTheme, {
+                            tickFormatter: (v) => `${v}%`,
+                            domain: [0, 'auto'],
+                          })}
+                        />
+                        {monthlyTimelineTooltip}
+                        <Line
+                          type="monotone"
+                          dataKey="sharePct"
+                          stroke="#a855f7"
+                          strokeWidth={1.5}
+                          strokeDasharray="3 3"
+                          dot={false}
+                          activeDot={{ r: 4, strokeWidth: 0, fill: '#a855f7' }}
+                          legendType="none"
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            ) : (
             <div className="grid-explorer-chart-area grid-explorer-chart-area--lg w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                   <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-                  <XAxis
-                    {...gridChartXAxisProps(chartTheme, {
-                      dataKey: 'month',
-                      tickFormatter: (v: string) => v.slice(0, 4),
-                      interval: Math.max(0, Math.floor(monthlySeries.length / 14)),
-                    })}
-                  />
+                  {monthlyXAxis}
                   <YAxis
                     {...gridChartYAxisProps(chartTheme, {
                       yAxisId: 'mkwh',
@@ -756,42 +883,7 @@ export function RenewablesTab({
                       domain: [0, 'auto'],
                     })}
                   />
-                  <GridRechartsTooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const d = payload[0].payload as (typeof monthlySeries)[0];
-                      return (
-                        <GridChartTooltipShell title={monthLabel(d.month)} accent={FUEL_COLOR.Solar}>
-                          <div className="grid-chart-tooltip__grid">
-                            {RENEWABLE_FUELS.map((k) => (
-                              <Fragment key={k}>
-                                <span className="grid-chart-tooltip__label flex items-center gap-1.5">
-                                  <span className="grid-chart-tooltip__dot shrink-0" style={{ background: FUEL_COLOR[k] }} />
-                                  {k}
-                                </span>
-                                <span className="grid-chart-tooltip__value" style={{ color: FUEL_COLOR[k] }}>
-                                  {fmt(d[k], 2)} MKWh
-                                </span>
-                              </Fragment>
-                            ))}
-                            <span className="grid-chart-tooltip__label">Renewable total</span>
-                            <span className="grid-chart-tooltip__value">{fmt(d.renewable, 2)} MKWh</span>
-                            <span className="grid-chart-tooltip__label">All generation</span>
-                            <span className="grid-chart-tooltip__value">
-                              {formatNumber(Math.round(d.total))} MKWh
-                            </span>
-                            <span className="grid-chart-tooltip__label flex items-center gap-1.5">
-                              <span className="grid-chart-tooltip__dot shrink-0" style={{ background: '#a855f7' }} />
-                              Share
-                            </span>
-                            <span className="grid-chart-tooltip__value" style={{ color: '#a855f7' }}>
-                              {d.sharePct == null ? '—' : `${d.sharePct.toFixed(2)}%`}
-                            </span>
-                          </div>
-                        </GridChartTooltipShell>
-                      );
-                    }}
-                  />
+                  {monthlyTimelineTooltip}
                   {/* Hydro first: it is the only source for the first four years,
                       so stacking it at the base keeps the other bands readable
                       once they appear rather than shunting them up and down. */}
@@ -823,6 +915,7 @@ export function RenewablesTab({
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
+            )}
 
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[11px] text-muted-foreground">
               <span>
