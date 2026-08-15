@@ -15,7 +15,7 @@ import {
   Tooltip, Line, CartesianGrid, Area, ComposedChart,
 } from 'recharts';
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
-import { useChartTheme } from '@/hooks/useChartTheme';
+import { useChartTheme, type ChartTheme } from '@/hooks/useChartTheme';
 import {
   LOAD_CURVE_COLORS as LOAD_CURVE_PALETTE,
   FUEL_DISPLAY_ORDER,
@@ -44,6 +44,7 @@ import {
   gridChartXAxisProps,
   gridChartYAxisProps,
   GridRechartsTooltip,
+  useNarrowChartCard,
 } from '@/components/news/PowerGridChartUI';
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { shouldUseArchiveFallback } from '@/lib/data/grid/daily-access';
@@ -229,6 +230,200 @@ function GridUnpublishedCostNote({ totalDailyCostBdt }: { totalDailyCostBdt?: nu
           ? ` The published day total — ${formatBdtAmount(totalDailyCostBdt / 10000000)} Cr Tk. — is shown above.`
           : ''}
       </p>
+    </div>
+  );
+}
+
+/**
+ * Tooltip for Brent Crude vs. Retail Diesel.
+ *
+ * Lifted out of the card so the wide chart and the two narrow ones share one
+ * definition. The card renders a different element tree below
+ * GRID_DUAL_AXIS_MIN_WIDTH, and a tooltip copied into each tree is a tooltip
+ * that drifts: every field here — the exchange rate, the derived Tk/L
+ * equivalent, the subsidy gap and both provenance tags — has to survive the
+ * split, and sharing the component is what makes that true by construction
+ * rather than by review.
+ */
+function GridBrentDieselTooltip({
+  active,
+  payload,
+  exchangeRates,
+}: {
+  active?: boolean;
+  payload?: ReadonlyArray<{ payload: { year: string; globalOil: number; bdDiesel: number } }>;
+  exchangeRates: Record<string, number>;
+}) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  const exRate = exchangeRates[d.year] || 122.0;
+  // 1 bbl = 158.987 L
+  const brentBdtL = (d.globalOil * exRate) / 158.987;
+  const difference = d.bdDiesel - brentBdtL;
+  return (
+    <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+      <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
+        <span>Benchmark Oil Price ({d.year})</span>
+        <span className="text-[9px] uppercase font-bold text-blue-500 tracking-wider">Oil</span>
+      </div>
+      <div className="space-y-2 text-[11px] md:text-xs">
+        <div className="flex justify-between">
+          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Brent Crude:</span>
+          <span className="font-bold text-blue-500">${d.globalOil.toFixed(2)} / Bbl</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
+          <span className="font-semibold text-foreground">{exRate.toFixed(2)} Tk/$</span>
+        </div>
+        <div className="flex justify-between border-t border-border/20 pt-1">
+          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Brent Cost (Tk/L equivalent):</span>
+          <span className="font-bold text-blue-400">{brentBdtL.toFixed(2)} Tk/L</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />BD Retail Diesel:</span>
+          <span className="font-bold text-emerald-500">{d.bdDiesel.toFixed(2)} Tk/L</span>
+        </div>
+        <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
+          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Margin / Subsidy Gap:</span>
+          <span className={cn("font-bold", difference >= 0 ? "text-emerald-500" : "text-destructive")}>
+            {difference >= 0 ? `+${difference.toFixed(2)} Tk/L (Premium)` : `${difference.toFixed(2)} Tk/L (Subsidized)`}
+          </span>
+        </div>
+      </div>
+      <div className="mt-2.5 pt-1.5 border-t border-border/30 text-[8px] text-muted-foreground leading-normal font-medium">
+        <strong>Formula:</strong> <code>(Brent USD * Exchange Rate) / 158.987 L</code>
+      </div>
+      <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
+        <div><strong>Series from:</strong> OPEC Bulletin, World Bank Pink Sheet, BPC</div>
+        <div><strong>Ref:</strong> <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPC Pricing Gazettes</a></div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Brent Crude vs. Retail Diesel.
+ *
+ * A card rather than inline JSX because the macro tab's body is an IIFE, and
+ * the width observer this needs is a hook. Extracting it is also what keeps the
+ * diff in this file small.
+ *
+ * Wide, it is the chart it has always been: one plot, two value axes, one
+ * legend. At or below GRID_DUAL_AXIS_MIN_WIDTH the same two series are drawn as
+ * two stacked plots, each with the single axis its own unit needs. Measured at
+ * 393px the combined chart plotted 194px of a 352px card (55.2%); split, each
+ * plot gets the full width back.
+ *
+ * Nothing is dropped to buy that. Both series are still drawn, both axes still
+ * carry their unit, the year axis is repeated under each plot rather than
+ * shared so neither chart depends on the other being read first, and the
+ * tooltip is one shared component so all five of its fields and both
+ * provenance tags are identical in either layout. The legend becomes a caption
+ * per plot — one series each, which the brief prefers to a legend.
+ */
+function GridBrentDieselCard({
+  data,
+  exchangeRates,
+  chartTheme,
+  ready,
+}: {
+  data: ReadonlyArray<{ year: string; globalOil: number; bdDiesel: number }>;
+  exchangeRates: Record<string, number>;
+  chartTheme: ChartTheme;
+  ready: boolean;
+}) {
+  const [cardRef, isNarrow] = useNarrowChartCard();
+
+  const tooltip = (
+    <Tooltip
+      content={({ active, payload }) => (
+        <GridBrentDieselTooltip
+          active={active}
+          payload={payload as unknown as React.ComponentProps<typeof GridBrentDieselTooltip>['payload']}
+          exchangeRates={exchangeRates}
+        />
+      )}
+    />
+  );
+
+  const xAxis = (
+    <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={28} />
+  );
+
+  return (
+    <div ref={cardRef} className="grid-explorer-chart-card card">
+      <div className="grid-explorer-chart-card__head">
+        <div>
+          <h3 className="grid-explorer-chart-card__title">Brent Crude vs. Retail Diesel</h3>
+        <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) — <span className="text-primary font-semibold text-xs">Tracked since 1975</span></p>
+        </div>
+        <span className="grid-explorer-chip bg-blue-500/5 text-blue-500 border-blue-500/10">Petroleum</span>
+      </div>
+
+      {!ready ? (
+        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
+          <div className="grid-explorer-skeleton" />
+        </div>
+      ) : isNarrow ? (
+        <div className="mt-4 flex flex-col gap-3">
+          <div>
+            <p className="grid-explorer-chart-caption">
+              <span className="grid-explorer-chart-caption__swatch" style={{ background: '#3b82f6' }} />
+              Brent Crude ($/bbl)
+            </p>
+            <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  {xAxis}
+                  <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
+                  {tooltip}
+                  <Line type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div>
+            <p className="grid-explorer-chart-caption">
+              <span className="grid-explorer-chart-caption__swatch" style={{ background: '#10b981' }} />
+              BD Retail Diesel (Tk/L)
+            </p>
+            <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  {xAxis}
+                  <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
+                  {tooltip}
+                  <Area type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill="#10b981" fillOpacity={0.05} stroke="#10b981" strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+              <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+              <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
+              <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Brent Crude ($/bbl)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
+              <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'Retail Diesel (Tk/L)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
+              {tooltip}
+              <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Line yAxisId="left" type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
+              <Area yAxisId="right" type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill="#10b981" fillOpacity={0.05} stroke="#10b981" strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Card Metadata Footer */}
+      <GridCardFooter>
+        <span>Source: OPEC Bulletin Historical Spot Prices &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Official Pricing Gazettes</a></span>
+        <span>As published. Not independently audited.</span>
+        <span className="font-medium">Reporting Period: Global Comparison (1975 - 2026)</span>
+      </GridCardFooter>
     </div>
   );
 }
@@ -7915,89 +8110,12 @@ export function PowerGridExplorer({
 
               <div className="grid lg:grid-cols-2 gap-6">
                 {/* Chart 1: Oil vs Diesel */}
-                <div className="grid-explorer-chart-card card">
-                  <div className="grid-explorer-chart-card__head">
-                    <div>
-                      <h3 className="grid-explorer-chart-card__title">Brent Crude vs. Retail Diesel</h3>
-                    <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) — <span className="text-primary font-semibold text-xs">Tracked since 1975</span></p>
-                    </div>
-                    <span className="grid-explorer-chip bg-blue-500/5 text-blue-500 border-blue-500/10">Petroleum</span>
-                  </div>
-
-                  <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
-                    {macroChartsReady ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-                          <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
-                          <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Brent Crude ($/bbl)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
-                          <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'Retail Diesel (Tk/L)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
-                          <Tooltip
-                            content={({ active, payload }) => {
-                              if (!active || !payload?.length) return null;
-                              const d = payload[0].payload;
-                              const exRate = localHistoricalExchangeRates[d.year] || 122.0;
-                              // 1 bbl = 158.987 L
-                              const brentBdtL = (d.globalOil * exRate) / 158.987;
-                              const difference = d.bdDiesel - brentBdtL;
-                              return (
-                                <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
-                                  <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
-                                    <span>Benchmark Oil Price ({d.year})</span>
-                                    <span className="text-[9px] uppercase font-bold text-blue-500 tracking-wider">Oil</span>
-                                  </div>
-                                  <div className="space-y-2 text-[11px] md:text-xs">
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Brent Crude:</span>
-                                      <span className="font-bold text-blue-500">${d.globalOil.toFixed(2)} / Bbl</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-                                      <span className="font-semibold text-foreground">{exRate.toFixed(2)} Tk/$</span>
-                                    </div>
-                                    <div className="flex justify-between border-t border-border/20 pt-1">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Brent Cost (Tk/L equivalent):</span>
-                                      <span className="font-bold text-blue-400">{brentBdtL.toFixed(2)} Tk/L</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />BD Retail Diesel:</span>
-                                      <span className="font-bold text-emerald-500">{d.bdDiesel.toFixed(2)} Tk/L</span>
-                                    </div>
-                                    <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Margin / Subsidy Gap:</span>
-                                      <span className={cn("font-bold", difference >= 0 ? "text-emerald-500" : "text-destructive")}>
-                                        {difference >= 0 ? `+${difference.toFixed(2)} Tk/L (Premium)` : `${difference.toFixed(2)} Tk/L (Subsidized)`}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="mt-2.5 pt-1.5 border-t border-border/30 text-[8px] text-muted-foreground leading-normal font-medium">
-                                    <strong>Formula:</strong> <code>(Brent USD * Exchange Rate) / 158.987 L</code>
-                                  </div>
-                                  <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                                    <div><strong>Series from:</strong> OPEC Bulletin, World Bank Pink Sheet, BPC</div>
-                                    <div><strong>Ref:</strong> <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPC Pricing Gazettes</a></div>
-                                  </div>
-                                </div>
-                              );
-                            }}
-                          />
-                          <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Line yAxisId="left" type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
-                          <Area yAxisId="right" type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill="#10b981" fillOpacity={0.05} stroke="#10b981" strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
-                        </ComposedChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <div className="grid-explorer-skeleton" />
-                    )}
-                  </div>
-
-                  {/* Card Metadata Footer */}
-                  <GridCardFooter>
-                    <span>Source: OPEC Bulletin Historical Spot Prices &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Official Pricing Gazettes</a></span>
-                    <span>As published. Not independently audited.</span>
-                    <span className="font-medium">Reporting Period: Global Comparison (1975 - 2026)</span>
-                  </GridCardFooter>
-                </div>
+                <GridBrentDieselCard
+                  data={localGlobalVsDomesticData}
+                  exchangeRates={localHistoricalExchangeRates}
+                  chartTheme={chartTheme}
+                  ready={macroChartsReady}
+                />
 
                 {/* Chart 2: Gas vs Tariff */}
                 <div className="grid-explorer-chart-card card">

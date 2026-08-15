@@ -7594,6 +7594,31 @@ html.theme-dark .locale-toggle__btn--active:hover {
   min-height: 0;
 }
 
+/* Caption for a plot that carries a single series.
+   A one-series chart does not need a legend — the brief prefers direct
+   labelling under three series — and a Recharts legend costs 36px of height
+   plus its own margin band. This says the same thing in one line above the
+   plot, which is also where a reader looks first. Used by the stacked halves a
+   dual-axis card splits into below GRID_DUAL_AXIS_MIN_WIDTH, where the legend
+   entries the combined chart had have to survive somewhere pointable. */
+.grid-explorer-chart-caption {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-explorer-chart-caption__swatch {
+  width: 0.625rem;
+  height: 0.625rem;
+  flex: none;
+  border-radius: 9999px;
+}
+
 .grid-chart-tooltip {
   min-width: 9.5rem;
   padding: 0.55rem 0.7rem;

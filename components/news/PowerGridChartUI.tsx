@@ -1,9 +1,58 @@
 'use client';
 
-import React, { cloneElement, isValidElement } from 'react';
+import React, { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
 import { Legend, Tooltip, type LegendProps, type YAxisProps } from 'recharts';
 import { cn, formatNumber } from '@/lib/utils';
 import type { ChartTheme } from '@/hooks/useChartTheme';
+
+/**
+ * Width at or below which a card cannot afford a second value axis.
+ *
+ * Measured 2026-08-15 in a 393px viewport. Across the 21 cartesian charts on
+ * the explorer the split is exact and has no exceptions in either direction:
+ * every chart with one y-axis plots 72-77% of its card, every chart with two
+ * plots 50-70%. The macro/budget sub-tab is the controlled case — six charts,
+ * one 352px card, one 323px canvas — where single-axis charts plot 259-265px
+ * and dual-axis ones 213px. The second axis costs 46-70px depending on how
+ * wide its tick labels are, which is 14-21 points of plot ratio and more than
+ * the margins have left to give.
+ *
+ * 420 rather than 393 so a card that is merely narrow — a phone in landscape,
+ * a two-column tablet grid — splits before it gets to the point of being
+ * unreadable. Above it nothing changes: the desktop chart is the same chart.
+ */
+export const GRID_DUAL_AXIS_MIN_WIDTH = 420;
+
+/**
+ * Observe a card's own width so a chart can change *structure*, not just size.
+ *
+ * A container query cannot do this job. `@container` styles a subtree, but a
+ * dual-axis chart and a pair of stacked single-axis charts are different
+ * element trees, and CSS cannot swap one for the other. Rendering both and
+ * hiding one is worse than it looks: Recharts measures a `display:none`
+ * container as zero and the hidden chart settles at the wrong size.
+ *
+ * Measuring here is not the trap the CSS layer warns about. That trap is a
+ * container trying to *size itself* from its own `cqi`; this only reads a width
+ * the layout has already resolved and picks a tree from it.
+ */
+export function useNarrowChartCard(threshold: number = GRID_DUAL_AXIS_MIN_WIDTH) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [isNarrow, setIsNarrow] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width) setIsNarrow(width <= threshold);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, isNarrow] as const;
+}
 
 /** Y-axis slot widths — equal L/R keeps dual-axis plot areas visually centered */
 export const GRID_Y_AXIS_WIDTH = {
