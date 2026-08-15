@@ -76,6 +76,17 @@ const nextConfig: NextConfig = {
     ],
     '/admin/**': ['./public/data/**/*', './public/uploads/**/*'],
     '/cms/**': ['./public/data/**/*', './public/uploads/**/*'],
+    // The upload routes reach the same unresolvable `path.join(process.cwd(),
+    // 'public', 'data', …)` through their auth chain, so they traced the whole
+    // archive too. `category-icon` is the one that broke first because
+    // `media-storage` also pulls in sharp: 267.37MB against the 250MB limit,
+    // which failed the production deploy of 2026-08-15 after the build itself
+    // had already succeeded. Excluding the archive drops ~239MB from it.
+    //
+    // Note these keys are route paths, so `/admin/**` above does NOT cover
+    // `/api/admin/**` — those routes still carry the archive and sit closer to
+    // the limit than they look.
+    '/api/upload/**': ['./public/data/**/*', './public/uploads/**/*'],
     // Station detail and the half-hourly fuel curve are fetched over HTTP by
     // the browser and never read from disk on the server, so they belong in no
     // function bundle at all. Both are per-day files large enough to matter:
