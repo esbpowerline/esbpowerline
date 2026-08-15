@@ -380,3 +380,45 @@ for this layout; three charts now land on it exactly.
 This one also did not need extraction to module scope — `RenewablesTab` is a
 real component, not an IIFE, so the hook went straight in at the top and the
 tooltip became a component-scope `const` shared by all three renderings.
+
+---
+
+# Beyond the mobile work — where the session ended, 2026-08-15
+
+Mobile is 3 of 7 dual-axis charts done (see the table above). These are the
+other threads left open, so the next session does not have to reconstruct them.
+
+**Two verification commands now exist.** `npm run verify:data` reconciles the
+archive against itself; `npm run backtest:erp` compares it against PGCB's own
+hourly feed. Both found real defects on first run. See the project memory note
+`archive-self-verification` for their calibration and traps.
+
+**Open, in the order I would take them:**
+
+1. **2026-08-14 gas** — grid shipped without it; Petrobangla had not published
+   the 14-15 Aug window. Re-ingest once their listing shows 15-08.
+2. **5 carry-forward days** — `verify:data --check carry-forward`. 2020-10-17,
+   2026-06-28, 2026-06-29 currently serve gas copied from the day before. These
+   are ours, not the source's.
+3. **42 provenance days** — carry real gas, name no Petrobangla report.
+   Includes 2026-08-12/13, where `48c7152a` backfilled data without provenance.
+4. **5 remaining dual-axis charts** — recipe above, all approved.
+5. **PGCB's own import forecast** — `imported_power_india` and
+   `imported_power_nepal` publish Actual and Forecast hourly. That makes a
+   forecast feature possible without inventing a claim: their forecast is a P
+   figure, scoreable against the actual. Detail in the memory note.
+
+**Two questions still unanswered, both blocking anything predictive:**
+
+- **2017-2019 zone shedding is all zero** — 344/356/354 days carry the field
+  with no non-zero value. Real capacity-surplus era, or a column never
+  populated? Decides whether a model has 4 years of training data or 12.
+- **Zone demand sums 2-5% below the national evening peak on 3,763 days**,
+  consistently negative. Too systematic to be error; understand it before any
+  stress index leans on zone data.
+
+**Settled, do not reopen:** the load curve's 00:00 row. It matches the previous
+day in PGCB's hourly feed on 9 of 9 days, exactly — but the L-Curve sheet itself
+reads `00:00 | 15732.3` for energy day 14-08, so our parse is faithful and the
+two PGCB publications simply disagree about which date owns the midnight
+reading. WARN, not ERROR. Changing it would override the primary source.
