@@ -34,6 +34,7 @@
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "verify:data": "node scripts/verify-data.mjs",
+    "backtest:erp": "node scripts/backtest-erp.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:qa": "vitest run lib/test/role-isolation.test.ts lib/test/article-submit.test.ts lib/test/staff-accounts.test.ts lib/test/env-auth.test.ts lib/test/seed-credentials.test.ts lib/test/server-auth.test.ts lib/test/password-reset.test.ts lib/test/security-audit.test.ts lib/test/daily-grid.test.ts lib/test/editorial-limits.test.ts",
