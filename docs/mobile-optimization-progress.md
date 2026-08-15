@@ -397,13 +397,11 @@ hourly feed. Both found real defects on first run. See the project memory note
 
 1. **2026-08-14 gas** — grid shipped without it; Petrobangla had not published
    the 14-15 Aug window. Re-ingest once their listing shows 15-08.
-2. **5 carry-forward days** — `verify:data --check carry-forward`. 2020-10-17,
-   2026-06-28, 2026-06-29 currently serve gas copied from the day before. These
-   are ours, not the source's.
-3. **42 provenance days** — carry real gas, name no Petrobangla report.
-   Includes 2026-08-12/13, where `48c7152a` backfilled data without provenance.
-4. **5 remaining dual-axis charts** — recipe above, all approved.
-5. **PGCB's own import forecast** — `imported_power_india` and
+2. ~~**5 carry-forward days**~~ and ~~**42 provenance days**~~ — superseded by
+   the citation session below. 41 of the 42 are fixed; what remains of both is
+   the 13-day reconciliation backlog in that section.
+3. **5 remaining dual-axis charts** — recipe above, all approved.
+4. **PGCB's own import forecast** — `imported_power_india` and
    `imported_power_nepal` publish Actual and Forecast hourly. That makes a
    forecast feature possible without inventing a claim: their forecast is a P
    figure, scoreable against the actual. Detail in the memory note.
@@ -422,3 +420,124 @@ day in PGCB's hourly feed on 9 of 9 days, exactly — but the L-Curve sheet itse
 reads `00:00 | 15732.3` for energy day 14-08, so our parse is faithful and the
 two PGCB publications simply disagree about which date owns the midnight
 reading. WARN, not ERROR. Changing it would override the primary source.
+
+---
+
+# Session 3 — 2026-08-15. Gas provenance, and a check that never ran
+
+Not mobile work. `verify:data --errors-only` was run to pick up the backlog
+above, and the 47 ERRORs it reported turned out to be the smaller story.
+
+## `gas-vs-archive` had never fired, once, in 4,529 days
+
+Check 6 read `production.summary.grand_total.gas`, falling back to
+`production.grand_total.gas`. **Neither key exists in any of the 2,295 archive
+files** — the figure lives at `grand_total.gas_mmcfd`. So `printed` was always
+null, the comparison was skipped every day, and the check reported clean by
+never looking. It is the check the script's own header credits with catching the
+2026-08-10 defect (2329.6 against a printed 2199.1).
+
+It also read `${GAS}/${day}.json`, which finds the wrong document even when the
+key is right. **The archive cannot be looked up by filename.** Through 2026-06 a
+report is stored under the date its window *ends* — "16-17 Oct, 2020" lives in
+`2020-10-17.json` — while the reconstructed 2026-08 files are stored under the
+date it *starts*. The only key that holds across both eras is the window start
+the report itself states, `report.gas_day_start`. That is now indexed once and
+shared by every check that needs a source document.
+
+`gas_day_start` is also the trustworthy field: it agrees with the printed
+`report_date_label` on 2,261 of 2,291 files, and the 22 that disagree are
+Petrobangla's own stale-template typos (a file dated 2023-10-30 labelled
+"29-30 Jan, 2023"). Do not re-derive the window from the label.
+
+## The citation was one day behind the figures on 1,376 days
+
+A day's gas comes from the report labelled "D to D+1", published as
+`(D+1).pdf`. The daily builder took the filename's date to *be* the gas day, so
+day D cited `(D).pdf` — the report for **D-1**, a real and different document
+holding different numbers. Verified three ways: on 2020-01-17, 2025-07-15 and
+2026-03-10 the published gas matches the D+1 file's field rows exactly, and the
+archive pairs `source_filename: (17.01.20).pdf` with `report_date_label:
+"16-17 Jan, 2020"` inside one document.
+
+The PGCB citation on the same line was always right — `Daily Report
+18-01-2020.xlsm` for gas day 17. Both now name the D+1-dated document, which is
+the convention PGCB workbooks already followed. These strings are rendered to
+readers (`PowerGridExplorer.tsx:8857`), so this was a wrong attribution on the
+page, not just in the data.
+
+**Fixed by `scripts/fix-gas-citations.mjs`** — dry run by default, `--apply` to
+write, `--only backfill|offset`. It rewrites a citation *only* when the archive
+window's own field rows sum to the day's published gas within 1.0 MMCFD, so a
+citation is never moved onto a document that does not support the figures. It
+patches the JSON as text: the daily files are CRLF with no trailing newline and
+`core.autocrlf` is on, so a `JSON.stringify` round-trip rewrites all 4,529 files
+instead of the 1,416 that changed.
+
+- 1,376 offset citations corrected, 40 missing ones backfilled.
+- **No published figure was touched** — 1,416 files, one line each.
+
+## 47 ERRORs → 1,434 once the checks could see → 18
+
+| Check | Was | Now | What it is |
+|---|---|---|---|
+| `carry-forward` | 5 | 5 | real; see below |
+| `provenance` | 42 | 1 | 41 fixed; 2025-06-09 was a false positive |
+| `citation-offset` | — | 12 | new check; 1,376 fixed, 12 held back |
+| `provenance-agreement` | — | 4 WARN | new check |
+| `gas-vs-archive` | 0 (dead) | 13 WARN | revived |
+| `archive-self` | — | 61 WARN | new; Petrobangla against itself |
+
+**2025-06-09 was never a defect.** It is already listed in
+`public/data/grid-verification/no-source-days.json`, the registry that exists to
+declare unsourced days in public. Demanding a workbook name for it asked for the
+invention the registry refuses. It is INFO now, and the verifier reads that file.
+
+`archive-self` is new and is the source's problem, not ours: on 61 days the
+document's printed grand total disagrees with the field rows above it, by up to
+9.4 MMCFD. Report, never repair.
+
+## The 13 that were deliberately left alone
+
+12 `citation-offset` + 1 `provenance` are the same 13 days: our published gas
+does not reconcile with the source's field rows, so the guard refused to move
+the citation. Eleven are off by exactly **−2.0 MMCFD**, two by −8.0. One
+systematic under-count, not 13 accidents.
+
+Do not "fix" these by loosening the tolerance. In that era the document's own
+`fields`, `subtotals` and `grand_total` disagree with each other — the
+`subtotals` array is mis-parsed (`company: null` on most rows) and mixes in a
+"Total (1+2+3)" rollup, so it sums to ~3676 against a real total of ~2806. Find
+the missing 2.0 in the field rows first; the citation follows.
+
+## Still needing a decision — gas that belongs to another day
+
+Not repaired, because both mean deleting or re-fetching published figures.
+
+**2026-06-27 and 2026-06-28 carry 2026-06-29's gas.** One PDF
+(`Petrobangla_f1f50a29…`, printed label **"29-30 Jun, 2026"**) was stamped
+`gas_day_start` 06-27 *and* 06-28, both wrong. All three days publish 2708.8.
+06-29 is the correct one; 06-27 and 06-28 have no source of their own — and
+06-27 additionally cites `974ce969…`, which is the 26-27 report it does not
+carry. Note `carry-forward` flagged 06-28 and 06-29 and **missed 06-27**: it
+fires on whichever day repeats its predecessor, which is not the same as the day
+the source fails to cover. It now names the shared document so the finding
+points somewhere useful.
+
+**2020-10-17 duplicates 2020-10-16.** `2020-10-17.json` and `2020-10-18.json`
+carry different window labels but the **same `content_sha256`** — one PDF
+ingested twice. The label on the first says "16-17 Oct", so 10-16 is real and
+10-17 has no source.
+
+Options for all three days: re-fetch the genuine reports, or blank the gas and
+add them to `no-source-days.json`. Blanking is a data deletion, so it is the
+user's call.
+
+## Left, unchanged from session 2
+
+1. **5 remaining dual-axis charts** — recipe in session 2, all approved.
+2. `macro/reserves` — three nested cards, single-axis, needs the nesting flattened.
+3. Tap-to-pin tooltips, 44px targets — still unaudited.
+4. The two fixed `<PieChart width={200} height={200}>`.
+5. Tables: 47 of 51 still unconverted to `--stack`.
+6. 320px and 430px sweeps — only 393px measured.
