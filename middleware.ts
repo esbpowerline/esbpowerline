@@ -14,6 +14,9 @@ import { checkRateLimit, clientIpFromForwarded, edgeRateLimitKey } from '@/lib/r
 import {
   isBlockedBotUserAgent,
   isSameOriginDailyAccess,
+  isProtectedDataJsonPath,
+  canonicalDataPath,
+  dataPathIsoDate,
 } from '@/lib/data/grid/daily-access';
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import {
@@ -55,35 +58,6 @@ function isCredentialPath(pathname: string): boolean {
     pathname.startsWith('/sign-in') ||
     pathname.startsWith('/sign-up')
   );
-}
-
-/**
- * Runtime-published days are served by /api/data/*, which mirrors the static
- * /data/* path exactly. Canonicalising here means the gating below is written
- * once and applies to both — a second copy of the tier rules for the API twin
- * is precisely the kind of thing that drifts and quietly opens a hole.
- */
-function canonicalDataPath(pathname: string): string {
-  return pathname.startsWith('/api/data/') ? pathname.slice('/api'.length) : pathname;
-}
-
-function isDailyJsonPath(pathname: string): boolean {
-  // `plants` is the per-station detail for the same day, split into its own
-  // directory so Next stops tracing it into serverless bundles. It is the same
-  // day's data and must sit behind the same tier gate — matching only
-  // /data/daily/ here would publish every locked day's station-level figures.
-  return /^\/data\/(daily|plants)\/\d{4}-\d{2}-\d{2}\.json$/.test(pathname);
-}
-
-function isPetrobanglaJsonPath(pathname: string): boolean {
-  return /^\/data\/petrobangla\/(daily\/\d{4}-\d{2}-\d{2}\.json|_index\.json|timeline-summary\.json|_live_week\.json)$/.test(
-    pathname,
-  );
-}
-
-function isProtectedDataJsonPath(pathname: string): boolean {
-  const canonical = canonicalDataPath(pathname);
-  return isDailyJsonPath(canonical) || isPetrobanglaJsonPath(canonical);
 }
 
 function denyDailyJson(message: string, status = 403): NextResponse {
@@ -211,10 +185,7 @@ export async function middleware(request: NextRequest) {
     // Everything below reasons about the static shape, so runtime /api/data/*
     // requests are gated by the same rules as their /data/* twin.
     const dataPath = canonicalDataPath(pathname);
-    const dailyMatch = dataPath.match(
-      /\/data\/(?:daily|plants|petrobangla\/daily)\/(\d{4}-\d{2}-\d{2})\.json$/,
-    );
-    const isoDate = dailyMatch?.[1];
+    const isoDate = dataPathIsoDate(pathname);
     const latestDate = getLatestAvailableDate();
 
     // Petrobangla gas-day files power the visitor-accessible 1M rolling window,
