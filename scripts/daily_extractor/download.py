@@ -90,18 +90,39 @@ def probe_erp_for_energy(energy: date, start_id: int | None = None) -> tuple[Pat
             if found_energy == energy:
                 return path, ERP_BY_ENERGY[iso]
 
-    base = start_id or (max(ERP_BY_ENERGY.values()) if ERP_BY_ENERGY else 5000)
+    # Anchor on the NEAREST mapped day, not the newest, and scan outward from
+    # the id that day implies. Anchoring on the newest and walking forward can
+    # only ever reach the future: every day older than the map was reported
+    # "not published" when the workbook was sitting on the ERP the whole time,
+    # which is what made the archive look unverifiable before 2026-08.
+    #
+    # It also absorbs a wrong map entry. The first twelve (5046..5057) name an
+    # energy day one earlier than the workbook actually covers — 5053 is mapped
+    # to 2026-07-01 and holds 2026-07-02 — so the exact lookup above fails its
+    # own guard and lands here. Estimating from a neighbour and searching both
+    # ways finds it anyway rather than trusting the table.
+    if start_id is not None:
+        estimate, slack = start_id, 20
+    elif ERP_BY_ENERGY:
+        nearest = min(ERP_BY_ENERGY, key=lambda k: abs((energy - date.fromisoformat(k)).days))
+        gap = (energy - date.fromisoformat(nearest)).days
+        estimate = ERP_BY_ENERGY[nearest] + gap
+        # PGCB skips ids (5048, 5082 are two), so the estimate drifts further
+        # the longer the walk. Widen with distance instead of guessing once.
+        slack = max(20, abs(gap) // 2 + 20)
+    else:
+        estimate, slack = 5000, 20
 
-    # The window has to cover the gap between the newest mapped day and the one
-    # being asked for: PGCB issues roughly one id per day, so a fixed +20 silently
-    # stops finding reports once the map is three weeks stale — which is how the
-    # archive came to stop at 2026-07-27 while ids ran on to 5090. Scale the scan
-    # to that distance (plus slack for the ids PGCB skips) instead of guessing.
-    newest_mapped = max(ERP_BY_ENERGY) if ERP_BY_ENERGY else None
-    day_gap = (energy - date.fromisoformat(newest_mapped)).days if newest_mapped else 0
-    span = max(20, day_gap + 20)
+    # Closest-first: the estimate is usually right or within a day or two, so
+    # this stops after a couple of requests on the common path instead of
+    # walking the whole window every time.
+    order: list[int] = [estimate]
+    for step in range(1, slack + 1):
+        order.extend((estimate + step, estimate - step))
 
-    for fid in range(base, base + span):
+    for fid in order:
+        if fid < 1:
+            continue
         path = download_erp_by_id(fid)
         if not path:
             continue
