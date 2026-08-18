@@ -10,7 +10,7 @@ import type { GridDailyData } from '@/lib/data/grid/types';
 const PowerGridExplorer = dynamic(
   () => import('@/components/news/PowerGridExplorer').then((mod) => mod.PowerGridExplorer),
   {
-    ssr: false,
+    ssr: true,
     loading: () => (
       <div className="h-[28rem] rounded-2xl border border-border/50 bg-muted/15 animate-pulse" />
     ),

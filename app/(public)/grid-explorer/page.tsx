@@ -8,9 +8,9 @@ import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-
 import { getLatestAvailableDate, availableDates } from '@/lib/data/grid/available-dates';
 import { getRuntimeOnlyDates } from '@/lib/data/grid/available-dates.server';
 import { Activity } from 'lucide-react';
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { safeJsonLd } from '@/lib/json-ld';
-import { GridExplorerServerSummary } from '@/components/news/power-grid/GridExplorerServerSummary';
 
 // Dynamic grid data is client-fetched; settings mutations call revalidatePath('/grid-explorer'),
 // so this time window is only a safety net. 300s keeps ISR churn low (new report dates ship via
@@ -69,6 +69,18 @@ export const metadata = {
       'Daily generation, demand, load shedding and gas supply for Bangladesh’s national grid, from the official daily reports.',
   },
 };
+
+/** The eight `?tab=` views the explorer switches between, as crawlable links. */
+const GRID_EXPLORER_VIEWS: { tab: string; label: string; blurb: string }[] = [
+  { tab: 'gen', label: 'Generation & cost', blurb: 'Half-hourly fuel mix and the day’s production cost by fuel' },
+  { tab: 'gas', label: 'Gas & LNG supply', blurb: 'Field-by-field gas production and where it was allocated' },
+  { tab: 'imports', label: 'Cross-border imports', blurb: 'The four interconnectors with India and Nepal, hour by hour' },
+  { tab: 'regional', label: 'Regional grid', blurb: 'Zone-wise demand, load shedding and the NLDC outage log' },
+  { tab: 'renewables', label: 'Renewables', blurb: 'Solar, wind and hydro output against installed capacity' },
+  { tab: 'plants', label: 'Power stations', blurb: 'Every station’s output, installed capacity and utilisation' },
+  { tab: 'transmission', label: 'Technical information', blurb: 'Transmission lines, substations and grid infrastructure' },
+  { tab: 'macro', label: 'Macro trends', blurb: 'Gas reserves, budgets, monthly archives and long-run indicators' },
+];
 
 export default async function PowerGridExplorerPage() {
   const [settings, prefetchedDailyReports, runtimeDates] = await Promise.all([
@@ -198,15 +210,6 @@ export default async function PowerGridExplorerPage() {
         </div>
       </div>
 
-      {/* Real HTML for crawlers and for anyone whose JavaScript never arrives.
-          The interactive explorer is below it. */}
-      <GridExplorerServerSummary
-        data={latestDate ? prefetchedDailyReports[latestDate] : undefined}
-        date={latestDate ?? undefined}
-        archiveDays={availableDates.length}
-        earliestDate={availableDates[0]}
-      />
-
       <Suspense fallback={<div className="h-[28rem] rounded-2xl border border-border/50 bg-muted/15 animate-pulse" />}>
         <PowerGridExplorerClient
           initialLines={grid.gridLines}
@@ -218,6 +221,22 @@ export default async function PowerGridExplorerPage() {
 
       <MemberToolsPanel latestDate={latestDate ?? undefined} earliestDate={availableDates[0]} />
 
+      {/* The explorer's tabs are state-driven buttons, so without these the eight
+          views have no crawlable anchor and no path for a reader whose JavaScript
+          never arrives — measured at zero `href="?tab="` in the served HTML once
+          the old summary block went. This is the navigation itself, not a summary
+          of it, which is why it sits below the explorer rather than on top of it. */}
+      <nav aria-labelledby="grid-views-heading" className="grid-explorer-views no-print">
+        <h2 id="grid-views-heading">Every view in the explorer</h2>
+        <ul>
+          {GRID_EXPLORER_VIEWS.map((v) => (
+            <li key={v.tab}>
+              <Link href={`/grid-explorer?tab=${v.tab}`}>{v.label}</Link>
+              <span> — {v.blurb}</span>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </div>
   );
 }

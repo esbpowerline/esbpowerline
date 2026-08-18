@@ -2125,8 +2125,6 @@ html.locale-bn .search-page__header h1 {
   font-size: 1.05rem;
 }
 
-
-
 /* Trending â€” matches home section cards (lead + numbered list) */
 .home-trending-item__rank {
   font-family: var(--font-mono);
@@ -2245,7 +2243,6 @@ html.locale-bn .article-card h3 {
   background-color: var(--bg);
   overflow: visible;
 }
-
 
 /* Hub band â€” balanced gaps: ticker â†” hub â†” categories */
 .public-nav-bar__hub-band {
@@ -3150,8 +3147,6 @@ html.locale-bn .home-snapshot__agency {
   letter-spacing: 0.05em;
   text-transform: none;
 }
-
-
 
 .public-market-strip .mask-fade {
   mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
@@ -5366,8 +5361,6 @@ html.theme-dark .locale-toggle__btn--active:hover {
     0 1px 3px hsl(0 0% 0% / 0.24);
 }
 
-
-
 .locale-toggle__btn:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
@@ -5866,7 +5859,6 @@ html.theme-dark .locale-toggle__btn--active:hover {
   }
 }
 
-
 .grid-explorer-panel {
   animation: grid-panel-in 180ms ease;
 }
@@ -6350,7 +6342,6 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply text-[9px] text-muted-foreground leading-snug;
   text-wrap: pretty;
 }
-
 
 /* ── Gas Reserve Depletion: the panel around the chart ──────────────────────
    Three tiers. The finding, the chart, then the evidence — and the evidence is
@@ -7172,8 +7163,6 @@ html.theme-dark .reserve-verdict--blue { color: hsl(210 85% 68%); }
 .gas-reserve-chart-plot--flex {
   @apply flex-1 min-h-[14rem] !h-auto;
 }
-
-
 
 .gas-reserve-live-week__body--fill {
   @apply flex flex-col flex-1 min-h-0 h-full px-4 pb-4 pt-2;
@@ -9410,7 +9399,6 @@ button.grid-explorer-link {
   animation: marquee 28s linear infinite;
 }
 
-
 .mask-fade {
   mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
@@ -10088,7 +10076,6 @@ html.theme-white {
     font-size: 13px;
   }
 
-
   .admin-action-pill {
     gap: 0.4rem;
     padding: 0.45rem 0.6rem;
@@ -10143,7 +10130,6 @@ html.theme-white {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-
   .admin-analytics-insight-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--shell-gap);
@@ -10183,7 +10169,6 @@ html.theme-white {
   .admin-card-grid--cols-3 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
-
 
   .admin-analytics-insight-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -13332,7 +13317,6 @@ html.theme-white .modern-tooltip--member .modern-tooltip-arrow {
   vertical-align: middle;
   flex: none;
 }
-
 
 .modern-tooltip--out {
   animation: modern-tooltip-out 200ms ease-in forwards;
@@ -16715,8 +16699,6 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   contain: none !important;
 }
 
-
-
 .cms-editor-surface--resizable .tiptap-toolbar__zone {
   background: hsl(var(--card) / 0.45);
   border-color: hsl(var(--border) / 0.32);
@@ -18841,7 +18823,6 @@ html.theme-white .cms-datetime-grid-cell {
   height: 100%;
 }
 
-
 .cms-preview-theme-toggle__btn {
   display: inline-flex;
   align-items: center;
@@ -19732,7 +19713,6 @@ html.theme-white .cms-datetime-grid-cell {
   color: hsl(var(--foreground)) !important;
 }
 
-
 /* Preview Modal Device Overrides */
 .cms-preview-device-frame--mobile .home-article-grid {
   grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
@@ -20240,7 +20220,6 @@ html.theme-white .cms-datetime-grid-cell {
    ========================================= */
 
 /* Custom Sleek Scrollbar */
-
 
 @layer utilities {
   /* Safe area insets for mobile bezels/home bars */
@@ -21448,7 +21427,6 @@ html.theme-dark .public-footer-logo .brand-logo__img {
   }
 }
 
-
 @media (max-width: 767px) {
   /* 1. Hide the traditional desktop collapse/expand sidebar button strictly on mobile */
   .admin-collapse-toggle {
@@ -21700,8 +21678,6 @@ iframe::-webkit-scrollbar-track {
   padding-right: 0.5rem !important;
   gap: 0 !important;
 }
-
-
 
 /* Premium light mode contrast system for preview panels & device viewports */
 .theme-white .cms-preview-viewport {
@@ -22127,7 +22103,6 @@ iframe::-webkit-scrollbar-track {
     animation: none;
   }
 }
-
 
 /* Exact source filenames in card footers — a receipt rather than an attribution. */
 .grid-source-files {
@@ -23377,7 +23352,6 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   pointer-events: none;
 }
 
-
 /* ── how the three gas views relate ──────────────────────────────────────────
    The page carries a projection, a six-year history and a live operational
    view, one under the other, and nothing said how they differ. Three lines,
@@ -23561,80 +23535,31 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
    explorer directly below it is the main event — but never hidden: content a
    crawler can read and a user cannot is cloaking. */
 
-.grid-explorer-summary {
-  margin-bottom: 1.5rem;
-  padding: 1.1rem 1.25rem;
-  border-radius: 1rem;
-  border: 1px solid hsl(var(--border) / 0.45);
-  background: hsl(var(--card) / 0.5);
+
+/**
+ * The explorer's own tabs are state-driven buttons, so this nav carries the only
+ * crawlable anchors to the eight views. It sits under the explorer because it is
+ * navigation, not a summary — the block that used to duplicate the day's figures
+ * above the fold was measured at 67% of the viewport and has been removed.
+ */
+.grid-explorer-views {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border) / 0.45);
 }
 
-.grid-explorer-summary h2 {
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: hsl(var(--foreground));
-  margin: 0 0 0.5rem;
-}
-
-.grid-explorer-summary h3 {
+.grid-explorer-views h2 {
   font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: hsl(var(--muted-foreground));
-  margin: 1.1rem 0 0.5rem;
+  margin: 0 0 0.6rem;
 }
 
-.grid-explorer-summary p {
-  margin: 0 0 0.5rem;
-  font-size: 0.8125rem;
-  line-height: 1.65;
-  color: hsl(var(--muted-foreground));
-  max-width: 68rem;
-  text-wrap: pretty;
-}
-
-.grid-explorer-summary strong { color: hsl(var(--foreground)); font-variant-numeric: tabular-nums; }
-
-.grid-explorer-summary table {
-  width: 100%;
-  max-width: 42rem;
-  border-collapse: collapse;
-  font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.grid-explorer-summary caption {
-  caption-side: bottom;
-  padding-top: 0.5rem;
-  font-size: 0.6875rem;
-  line-height: 1.5;
-  color: hsl(var(--muted-foreground));
-  text-align: left;
-}
-
-.grid-explorer-summary th,
-.grid-explorer-summary td {
-  padding: 0.3rem 0.75rem 0.3rem 0;
-  border-bottom: 1px solid hsl(var(--border) / 0.3);
-  text-align: left;
-}
-
-.grid-explorer-summary thead th {
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
-}
-
-.grid-explorer-summary td { text-align: right; }
-.grid-explorer-summary tbody th { font-weight: 600; color: hsl(var(--foreground)); }
-
-.grid-explorer-summary ul {
+.grid-explorer-views ul {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.35rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -23644,12 +23569,10 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 }
 
 @media (min-width: 60rem) {
-  .grid-explorer-summary ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem 2rem; }
+  .grid-explorer-views ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.35rem 2rem; }
 }
 
-.grid-explorer-summary ul a {
+.grid-explorer-views a {
   font-weight: 600;
   color: hsl(var(--primary));
 }
-
-.grid-explorer-summary ul a:hover { text-decoration: underline; }
