@@ -57,9 +57,9 @@ export function MethodologyReconciliationBanner({
       <button
         type="button"
         onClick={onToggleExpanded}
-        className="w-full flex items-center justify-between p-2 px-3 text-left transition-colors"
+        className="w-full flex min-h-11 items-center justify-between gap-3 p-3 text-left transition-colors hover:bg-muted/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <Info className="h-3.5 w-3.5 text-primary shrink-0" />
           {/* The full sentence wraps to three lines on a phone, which is most
               of what the collapsed state was meant to save. The short form says
@@ -105,7 +105,7 @@ export function MethodologyReconciliationBanner({
                 our sum of the per-fuel rows in the zone-wise table <GridProvenanceTag kind="D" />.
                 Both are printed on the same report, and PGCB does not state that they must agree.
               </p>
-              <div className="bg-muted/10 p-2 rounded border border-border/20 font-mono text-[10px] text-foreground">
+              <div className="bg-muted/10 p-3 rounded-lg border border-border/20 font-mono tabular-nums text-[10px] text-foreground space-y-0.5">
                 <div>Published headline = {netEnergyGenMkwh.toFixed(2)} MKWh</div>
                 <div>Sum of fuel rows = {grossEnergyGenMkwh.toFixed(2)} MKWh</div>
                 <div className="font-bold border-t border-border/30 mt-1 pt-1 text-primary">
@@ -127,7 +127,7 @@ export function MethodologyReconciliationBanner({
                 <strong>Daily Fuel &amp; Import Cost</strong> header adds up the per-fuel bars above
                 it <GridProvenanceTag kind="D" />.
               </p>
-              <div className="bg-muted/10 p-2 rounded border border-border/20 font-mono text-[10px] text-foreground">
+              <div className="bg-muted/10 p-3 rounded-lg border border-border/20 font-mono tabular-nums text-[10px] text-foreground space-y-0.5">
                 <div>Published total = {publishedCostCr.toFixed(2)} Cr BDT</div>
                 <div>Sum of fuel costs = {summedCostCr.toFixed(2)} Cr BDT</div>
                 <div className="font-bold border-t border-border/30 mt-1 pt-1 text-emerald-500">
@@ -174,7 +174,7 @@ export function MethodologyReconciliationBanner({
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-border/20 text-[10px] text-muted-foreground/80 leading-relaxed">
-            <div>
+            <div className="min-w-0 flex-1">
               ※ <strong>This day:</strong> on <strong>{reportDate}</strong>,{' '}
               {genMaterial ? (
                 <>
@@ -193,7 +193,7 @@ export function MethodologyReconciliationBanner({
             <button
               type="button"
               onClick={onHide}
-              className="text-muted-foreground/60 hover:text-foreground hover:bg-muted/15 px-2 py-1 rounded transition-colors text-[9px] font-bold uppercase tracking-wider"
+              className="shrink-0 text-muted-foreground/60 hover:text-foreground hover:bg-muted/15 border border-transparent hover:border-border/40 px-3 py-1.5 rounded-lg transition-colors text-[9px] font-bold uppercase tracking-wider focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               Hide Banner Completely
             </button>

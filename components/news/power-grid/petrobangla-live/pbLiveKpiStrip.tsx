@@ -6,14 +6,17 @@ import { cn, formatNumber } from '@/lib/utils';
 import type { LiveWeekKpis } from '@/lib/data/petrobangla/types';
 import {
   GridKpiLabel,
+  GridProvenanceTag,
   GridSinceBadge,
   LiveBadge,
+  type GridProvenance,
 } from '@/components/news/power-grid/GridExplorerUI';
 
 function PbLiveKpiCard({
   icon: Icon,
   iconClassName,
   label,
+  provenance,
   value,
   valueClassName,
   hint,
@@ -21,17 +24,21 @@ function PbLiveKpiCard({
   icon: typeof Droplet;
   iconClassName?: string;
   label: ReactNode;
+  provenance: GridProvenance;
   value: ReactNode;
   valueClassName?: string;
   hint: ReactNode;
 }) {
   return (
     <div className="grid-explorer-kpi stat group">
-      <Icon className={cn('grid-explorer-kpi__icon', iconClassName)} />
-      <div>
-        <GridKpiLabel>{label}</GridKpiLabel>
+      <Icon className={cn('grid-explorer-kpi__icon shrink-0', iconClassName)} />
+      <div className="min-w-0">
+        <GridKpiLabel>
+          {label}
+          <GridProvenanceTag kind={provenance} className="ml-1.5" />
+        </GridKpiLabel>
         <div className={cn('grid-explorer-kpi__value', valueClassName)}>{value}</div>
-        <p className="text-[9px] text-muted-foreground mt-1">{hint}</p>
+        <p className="text-[9px] text-muted-foreground mt-1 leading-snug">{hint}</p>
       </div>
     </div>
   );
@@ -68,6 +75,7 @@ export function PbLiveKpiStrip({
             <GridSinceBadge />
           </>
         }
+        provenance="D"
         value={formatNumber(periodKpis.avgGas, 0)}
         hint={`${periodKpis.daysCount}-day official average MMCFD`}
       />
@@ -84,6 +92,7 @@ export function PbLiveKpiStrip({
                 <GridSinceBadge />
               </>
             }
+            provenance="D"
             value={`${periodKpis.avgFulfillment.toFixed(1)}%`}
             valueClassName={fulfillmentClass}
             hint="Average supply vs demand over period"
@@ -99,6 +108,7 @@ export function PbLiveKpiStrip({
                 <GridSinceBadge />
               </>
             }
+            provenance="D"
             value={`${periodKpis.avgLngShare.toFixed(1)}%`}
             hint="Average imported LNG share over period"
           />
@@ -113,6 +123,7 @@ export function PbLiveKpiStrip({
                 <GridSinceBadge />
               </>
             }
+            provenance="D"
             value={formatNumber(periodKpis.volatility, 1)}
             hint="Max/Min spread across period"
           />

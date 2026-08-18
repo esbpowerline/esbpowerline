@@ -11,6 +11,7 @@ import {
 } from '@/lib/data/petrobangla/constants';
 import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { ArchiveBadge, ArchiveInsightCallout, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 
 type SortKey = 'largest' | 'decline' | 'depleted';
@@ -220,18 +221,30 @@ export function PetrobanglaArchiveFieldCards({
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="text-lg font-bold tabular-nums">
-                  {formatNumber(c.current, 1)}{' '}
-                  <span className="text-[10px] font-normal text-muted-foreground">MMCFD</span>
+                <div className="flex items-center gap-1.5 text-lg font-bold tabular-nums">
+                  <span>
+                    {formatNumber(c.current, 1)}{' '}
+                    <span className="text-[10px] font-normal text-muted-foreground">MMCFD</span>
+                  </span>
+                  <GridProvenanceTag kind="P" />
                 </div>
-                <div className={cn('text-[10px] tabular-nums', c.pctFromPeak < -20 ? 'text-red-500' : 'text-muted-foreground')}>
-                  {c.pctFromPeak >= 0 ? '+' : ''}{c.pctFromPeak.toFixed(0)}% from peak ({formatNumber(c.peak.gas, 0)} · {c.peak.date})
+                <div className={cn('flex items-center gap-1.5 text-[10px] tabular-nums', c.pctFromPeak < -20 ? 'text-red-500' : 'text-muted-foreground')}>
+                  <span>
+                    {c.pctFromPeak >= 0 ? '+' : ''}{c.pctFromPeak.toFixed(0)}% from peak ({formatNumber(c.peak.gas, 0)} · {c.peak.date})
+                  </span>
+                  <GridProvenanceTag kind="D" />
                 </div>
                 {showDetail && (
                   <div className="text-[10px] text-muted-foreground mt-1 space-y-0.5">
-                    <div>{c.wells} wells · {c.util.toFixed(0)}% capacity util</div>
-                    <div className={cn('tabular-nums', c.trend30 < 0 ? 'text-red-500/80' : 'text-emerald-600/80')}>
-                      30d trend: {c.trend30 >= 0 ? '+' : ''}{formatNumber(c.trend30, 1)} MMCFD
+                    <div className="flex items-center gap-1.5">
+                      <span className="tabular-nums">{c.wells} wells</span>
+                      <GridProvenanceTag kind="P" />
+                      <span className="tabular-nums">· {c.util.toFixed(0)}% capacity util</span>
+                      <GridProvenanceTag kind="D" />
+                    </div>
+                    <div className={cn('flex items-center gap-1.5 tabular-nums', c.trend30 < 0 ? 'text-red-500/80' : 'text-emerald-600/80')}>
+                      <span>30d trend: {c.trend30 >= 0 ? '+' : ''}{formatNumber(c.trend30, 1)} MMCFD</span>
+                      <GridProvenanceTag kind="D" />
                     </div>
                   </div>
                 )}
@@ -246,9 +259,18 @@ export function PetrobanglaArchiveFieldCards({
                   <p className="gas-reserve-field-tooltip__role">{c.meta.role}</p>
                   <p className="gas-reserve-field-tooltip__body">{fieldInsight(mode, c.fieldName)}</p>
                   <div className="gas-reserve-field-tooltip__stats">
-                    <span>30d avg {formatNumber(c.recentAvg, 0)}</span>
-                    <span>{c.wells} wells</span>
-                    <span>{c.util.toFixed(0)}% util</span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="tabular-nums">30d avg {formatNumber(c.recentAvg, 0)}</span>
+                      <GridProvenanceTag kind="D" />
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="tabular-nums">{c.wells} wells</span>
+                      <GridProvenanceTag kind="P" />
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="tabular-nums">{c.util.toFixed(0)}% util</span>
+                      <GridProvenanceTag kind="D" />
+                    </span>
                   </div>
                   <p className="gas-reserve-field-tooltip__foot">Click for full daily history</p>
                 </div>
@@ -285,10 +307,15 @@ export function PetrobanglaArchiveFieldCards({
                   )}
                   <div className="grid-explorer-table-wrap max-h-64 overflow-auto">
                     <table className="grid-explorer-table text-xs">
-                      <thead><tr><th>Date</th><th>Gas MMCFD</th></tr></thead>
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Gas MMCFD<GridProvenanceTag kind="P" className="ml-1" /></th>
+                        </tr>
+                      </thead>
                       <tbody>
                         {(card?.series ?? []).slice(-90).reverse().map((p) => (
-                          <tr key={p.date}><td>{p.date}</td><td className="tabular-nums">{formatNumber(p.gas, 1)}</td></tr>
+                          <tr key={p.date}><td className="tabular-nums">{p.date}</td><td className="tabular-nums">{formatNumber(p.gas, 1)}</td></tr>
                         ))}
                       </tbody>
                     </table>

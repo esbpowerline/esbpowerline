@@ -27,7 +27,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, ChevronDown, Scale, ShieldCheck, Sigma } from 'lucide-react';
+import { AlertTriangle, CalendarDays, CheckCircle2, Scale, ShieldCheck, Sigma } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   GridCardFooter,
@@ -215,8 +215,13 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
   }
   if (error || !index) {
     return (
-      <div className="p-6 text-sm text-muted-foreground border border-border/40 rounded-2xl">
-        Verification data is not available. {error}
+      <div className="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-2xl border border-border/40 p-6 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/20">
+          <AlertTriangle className="h-6 w-6 shrink-0 text-amber-500" />
+        </span>
+        <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+          Verification data is not available. {error}
+        </p>
       </div>
     );
   }
@@ -346,7 +351,7 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
                         ? `Dual-parse gated: every day read twice by independent engines${m.dual.withheld ? `, ${m.dual.withheld} day${m.dual.withheld === 1 ? '' : 's'} withheld` : ''}`
                         : undefined}
                       className={cn(
-                        'px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all duration-150',
+                        'px-3 py-1.5 text-xs font-semibold tabular-nums rounded-xl border transition-all duration-150',
                         active
                           ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
                           : 'bg-transparent text-muted-foreground border-border/40 hover:text-foreground',
@@ -371,8 +376,11 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
       {monthData && (
         <div className="rounded-2xl border border-border/40 overflow-hidden">
           <div className="px-4 py-3 border-b border-border/40 flex items-center justify-between gap-3 flex-wrap">
-            <h4 className="text-sm font-semibold">{monthData.month} — operating days</h4>
-            <p className="text-[11px] text-muted-foreground">
+            <h4 className="inline-flex items-center gap-2 text-sm font-semibold">
+              <CalendarDays className="h-4 w-4 shrink-0 text-primary" />
+              {monthData.month} — operating days
+            </h4>
+            <p className="text-[11px] tabular-nums text-muted-foreground">
               {monthData.totals.checks.toLocaleString('en-US')} P/D pairs ·{' '}
               {monthData.totals.failures} beyond rounding · {monthData.totals.defects} defects
             </p>
@@ -391,7 +399,7 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
                     onClick={() => setDay(d)}
                     title={`${d} — ${dd.checks.length} pairs, ${dd.defects.length} defects`}
                     className={cn(
-                      'w-9 h-9 text-[11px] font-semibold rounded-lg border transition-all',
+                      'w-9 h-9 text-[11px] font-semibold tabular-nums rounded-lg border transition-all',
                       active
                         ? 'bg-primary/15 text-primary border-primary/30'
                         : bad
@@ -443,8 +451,11 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
         <div className="rounded-2xl border border-border/40 overflow-hidden">
           <div className="px-4 py-3 border-b border-border/40">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <h4 className="text-sm font-semibold">{detail.date}</h4>
-              <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+              <h4 className="inline-flex items-center gap-2 text-sm font-semibold tabular-nums">
+                <Sigma className="h-4 w-4 shrink-0 text-primary" />
+                {detail.date}
+              </h4>
+              <div className="flex flex-wrap gap-3 text-[11px] tabular-nums text-muted-foreground">
                 {Object.entries(detail.agencies).map(([k, v]) => (
                   <span key={k}>
                     {v.label} <span className="font-semibold text-foreground">{v.checks}</span>
@@ -545,7 +556,7 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
                       {r.check}
                       {r.independent && (
                         <span
-                          className="ml-1.5 text-[9px] font-semibold text-sky-600 dark:text-sky-400"
+                          className="ml-1.5 inline-block rounded-full border border-sky-500/20 bg-sky-500/10 px-2 py-0.5 align-middle text-[10px] font-semibold text-sky-600 dark:text-sky-400"
                           title="The two sides come from different parts of the document, so this check can fail for reasons other than arithmetic."
                         >
                           INDEPENDENT

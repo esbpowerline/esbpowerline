@@ -40,7 +40,7 @@ export function GridDataLockedGate({
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-md p-1.5 text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all focus:outline-none"
+          className="absolute right-4 top-4 z-20 rounded-lg p-1.5 text-muted-foreground hover:bg-muted/70 hover:text-foreground transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/45"
           aria-label="Close locked panel"
         >
           <X className="h-4 w-4" />

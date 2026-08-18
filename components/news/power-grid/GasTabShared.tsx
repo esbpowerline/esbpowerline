@@ -45,11 +45,11 @@ export const GasExplanationBlock = GridExplanationBlock;
 
 export function GasSectorFootnote() {
   return (
-    <div className="p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
-      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-        <Info className="h-3.5 w-3.5 text-sky-500" /> Gas Sector Acronyms &amp; Units
+    <div className="space-y-3 rounded-2xl border border-border/30 bg-muted/5 p-4">
+      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        <Info className="h-4 w-4 shrink-0 text-sky-500" /> Gas Sector Acronyms &amp; Units
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-[10px] text-muted-foreground leading-relaxed">
+      <div className="grid grid-cols-2 gap-4 text-[10px] leading-relaxed text-muted-foreground sm:grid-cols-3 md:grid-cols-6">
         <div>
           <strong className="text-foreground block font-bold mb-0.5">MMCFD</strong>
           Million Standard Cubic Feet per Day. Standard unit of gas volume flow rate.

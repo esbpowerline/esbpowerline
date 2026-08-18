@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Building2, Check, ChevronDown, Clock3, Factory, Gauge, Search } from 'lucide-react';
-import { GridCardFooter, GridProvenanceTag, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
+import {
+  GridCardFooter,
+  GridProvenanceTag,
+  GridSourceFiles,
+  GridTablePager,
+  useTablePager,
+} from '@/components/news/power-grid/GridExplorerUI';
 import { CountChip } from '@/components/news/power-grid/renewables/shared';
 import { fetchPlantDetail, plantTotals } from '@/lib/data/grid/plant-detail.client';
 import { cn } from '@/lib/utils';
@@ -307,6 +313,10 @@ export function PowerStationsTab({
     );
   }, [detail, query, sort]);
 
+  // 149 stations on a normal day. Paged, or the card is one long scroll and a
+  // reader looking for a named plant has nothing but the browser's find.
+  const pager = useTablePager(rows, 25);
+
   const totals = plantTotals(detail);
 
   /* ── Fleet roll-ups, always over the full station list, never the filtered view ── */
@@ -364,8 +374,10 @@ export function PowerStationsTab({
   if (state === 'absent') {
     return (
       <div className="grid-explorer-panel">
-        <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[220px] gap-2">
-          <Factory className="h-6 w-6 text-muted-foreground" />
+        <div className="grid-explorer-chart-card card flex min-h-[220px] flex-col items-center justify-center gap-3 p-6 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/20">
+            <Factory className="h-6 w-6 shrink-0 text-muted-foreground" />
+          </span>
           <p className="text-sm font-semibold text-muted-foreground">
             No per-station detail published for {systemStats.date}
           </p>
@@ -430,7 +442,7 @@ export function PowerStationsTab({
               </tr>
             </thead>
             <tbody>
-              {rows.map((p) => (
+              {pager.rows.map((p) => (
                 <tr
                   key={p.name}
                   className={p.eveningPeakMw === 0 && !p.dayPeakMw && !p.energyKwh ? 'opacity-50' : ''}
@@ -464,6 +476,17 @@ export function PowerStationsTab({
               )}
             </tbody>
           </table>
+          <GridTablePager
+            page={pager.page}
+            totalPages={pager.totalPages}
+            pageSize={pager.pageSize}
+            total={pager.total}
+            from={pager.from}
+            to={pager.to}
+            onPage={pager.setPage}
+            onPageSize={pager.setPageSize}
+            noun="stations"
+          />
         </div>
 
         {totals && (
@@ -544,7 +567,7 @@ export function PowerStationsTab({
                                 align="right"
                                 text="The evening peak is measured after sunset, so a solar station's zero is a real reading — not idle capacity. No evening-peak utilisation is shown for Solar."
                               >
-                                <span className="ml-1.5 inline-block px-1.5 py-px rounded border text-[9px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 cursor-help">
+                                <span className="ml-1.5 inline-block px-1.5 py-px rounded border text-[10px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 cursor-help">
                                   after sunset
                                 </span>
                               </HoverTip>
@@ -687,7 +710,10 @@ export function PowerStationsTab({
               </p>
             </div>
           </div>
-          <div className="overflow-x-auto max-h-[28rem] rounded-lg border border-border/40">
+          {/* Not `.grid-explorer-table-wrap`: that wrapper bleeds 4px either
+              side, which would show under this card's own border and behind the
+              sticky station column. Same overflow behaviour, kept local. */}
+          <div className="max-h-[28rem] overflow-auto rounded-lg border border-border/40">
             <table className="grid-explorer-table w-full text-[11px]">
               <thead className="sticky top-0 bg-card z-10">
                 <tr>

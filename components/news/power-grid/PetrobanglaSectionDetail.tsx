@@ -140,13 +140,13 @@ export function distributionCompanyForLabel(
  * dark steps drop to 600 (both validated for lightness, chroma, CVD separation
  * and surface contrast; identity is never color-alone — rows are text-labeled).
  */
-export const PRODUCER_COLORS: Record<string, { dot: string; bar: string; shell: string; tint: string }> = {
-  BGFCL: { dot: 'bg-sky-500 dark:bg-sky-600', bar: 'bg-sky-500 dark:bg-sky-600', shell: 'border-sky-500/40 dark:border-sky-600/45', tint: 'bg-sky-500/5 dark:bg-sky-600/10' },
-  SGFL: { dot: 'bg-amber-500 dark:bg-amber-600', bar: 'bg-amber-500 dark:bg-amber-600', shell: 'border-amber-500/40 dark:border-amber-600/45', tint: 'bg-amber-500/5 dark:bg-amber-600/10' },
-  BAPEX: { dot: 'bg-emerald-500 dark:bg-emerald-600', bar: 'bg-emerald-500 dark:bg-emerald-600', shell: 'border-emerald-500/40 dark:border-emerald-600/45', tint: 'bg-emerald-500/5 dark:bg-emerald-600/10' },
-  CHEVRON: { dot: 'bg-violet-500', bar: 'bg-violet-500', shell: 'border-violet-500/40 dark:border-violet-500/45', tint: 'bg-violet-500/5 dark:bg-violet-500/10' },
-  TULLOW: { dot: 'bg-rose-500', bar: 'bg-rose-500', shell: 'border-rose-500/40 dark:border-rose-500/45', tint: 'bg-rose-500/5 dark:bg-rose-500/10' },
-  RPGCL: { dot: 'bg-teal-600', bar: 'bg-teal-600', shell: 'border-teal-600/40 dark:border-teal-600/45', tint: 'bg-teal-600/5 dark:bg-teal-600/10' },
+export const PRODUCER_COLORS: Record<string, { dot: string; bar: string; shell: string; tint: string; accent: string }> = {
+  BGFCL: { dot: 'bg-sky-500 dark:bg-sky-600', bar: 'bg-sky-500 dark:bg-sky-600', shell: 'border-sky-500/40 dark:border-sky-600/45', tint: 'bg-sky-500/5 dark:bg-sky-600/10', accent: '#0ea5e9' },
+  SGFL: { dot: 'bg-amber-500 dark:bg-amber-600', bar: 'bg-amber-500 dark:bg-amber-600', shell: 'border-amber-500/40 dark:border-amber-600/45', tint: 'bg-amber-500/5 dark:bg-amber-600/10', accent: '#f59e0b' },
+  BAPEX: { dot: 'bg-emerald-500 dark:bg-emerald-600', bar: 'bg-emerald-500 dark:bg-emerald-600', shell: 'border-emerald-500/40 dark:border-emerald-600/45', tint: 'bg-emerald-500/5 dark:bg-emerald-600/10', accent: '#10b981' },
+  CHEVRON: { dot: 'bg-violet-500', bar: 'bg-violet-500', shell: 'border-violet-500/40 dark:border-violet-500/45', tint: 'bg-violet-500/5 dark:bg-violet-500/10', accent: '#8b5cf6' },
+  TULLOW: { dot: 'bg-rose-500', bar: 'bg-rose-500', shell: 'border-rose-500/40 dark:border-rose-500/45', tint: 'bg-rose-500/5 dark:bg-rose-500/10', accent: '#f43f5e' },
+  RPGCL: { dot: 'bg-teal-600', bar: 'bg-teal-600', shell: 'border-teal-600/40 dark:border-teal-600/45', tint: 'bg-teal-600/5 dark:bg-teal-600/10', accent: '#0d9488' },
 };
 
 export function producerKeyFromLabel(label: string): string {
@@ -154,7 +154,7 @@ export function producerKeyFromLabel(label: string): string {
 }
 
 /** Same validated palette, same fixed order, applied to the distributor roster. */
-export const DISTRIBUTOR_COLORS: Record<string, { dot: string; bar: string; shell: string; tint: string }> = {
+export const DISTRIBUTOR_COLORS: Record<string, { dot: string; bar: string; shell: string; tint: string; accent: string }> = {
   TGTDCL: PRODUCER_COLORS.BGFCL,
   BGDCL: PRODUCER_COLORS.SGFL,
   KGDCL: PRODUCER_COLORS.BAPEX,
@@ -183,11 +183,20 @@ const GROUP_TH = 'px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider tex
  * PDF Section I detail for one producer: per-field wells, capacity, gas,
  * condensate and national %-of-capacity / %-of-production, with a sub-total.
  */
-function StatChip({ label, value }: { label: string; value: string }) {
+function StatChip({
+  label,
+  value,
+  provenance,
+}: {
+  label: string;
+  value: string;
+  provenance: 'P' | 'D';
+}) {
   return (
-    <span className="inline-flex items-baseline gap-1.5 rounded-full border border-border/40 bg-muted/20 px-2.5 py-1">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-muted/20 px-2.5 py-1">
       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
       <span className="text-xs font-bold tabular-nums text-foreground">{value}</span>
+      <GridProvenanceTag kind={provenance} />
     </span>
   );
 }
@@ -207,31 +216,44 @@ function MiniBar({ pctValue, fillClass }: { pctValue: number | null; fillClass: 
   );
 }
 
+/**
+ * The summary strip above a detail table.
+ *
+ * `inline` is the disclosure-list case: the row that opened this panel is
+ * directly above it and already carries the company's name, colour dot and
+ * chevron, so repeating all three here read as a second header for the same
+ * thing. Inline drops the label and keeps the stat chips, which are the part
+ * that says something the row does not.
+ */
 function DetailHeader({
   label,
   colors,
   onToggle,
+  inline = false,
   children,
 }: {
   label: string;
   colors: { dot: string; shell: string; tint: string } | null;
   onToggle?: () => void;
+  inline?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div
-      role={onToggle ? 'button' : undefined}
-      aria-expanded={onToggle ? true : undefined}
-      onClick={onToggle}
+      role={!inline && onToggle ? 'button' : undefined}
+      aria-expanded={!inline && onToggle ? true : undefined}
+      onClick={inline ? undefined : onToggle}
       className={`flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b px-3 py-2.5 ${
-        onToggle ? 'cursor-pointer' : ''
+        !inline && onToggle ? 'cursor-pointer' : ''
       } ${colors ? `${colors.tint} ${colors.shell}` : 'bg-muted/15 border-border/30'}`}
     >
-      <span className="inline-flex items-center gap-2 text-sm font-bold text-foreground">
-        {onToggle && <ChevronDown className="h-3.5 w-3.5 shrink-0 text-primary" />}
-        {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
-        {label}
-      </span>
+      {!inline && (
+        <span className="inline-flex items-center gap-2 text-sm font-bold text-foreground">
+          {onToggle && <ChevronDown className="h-3.5 w-3.5 shrink-0 text-primary" />}
+          {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
+          {label}
+        </span>
+      )}
       <span className="flex flex-wrap items-center gap-1.5">{children}</span>
     </div>
   );
@@ -243,12 +265,14 @@ export function ProductionCompanyDetail({
   producerKey,
   label,
   onToggle,
+  inline = false,
 }: {
   fields: ProductionField[];
   grandTotal?: ProductionField | null;
   producerKey?: string;
   label: string;
   onToggle?: () => void;
+  inline?: boolean;
 }) {
   if (!fields.length) return null;
   const colors = (producerKey && PRODUCER_COLORS[producerKey]) || null;
@@ -280,14 +304,18 @@ export function ProductionCompanyDetail({
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border bg-muted/10 ${colors ? colors.shell : 'border-border/40'}`}
+      className={
+        inline
+          ? 'overflow-hidden rounded-lg border border-border/30 bg-background/40'
+          : `overflow-hidden rounded-xl border bg-muted/10 ${colors ? colors.shell : 'border-border/40'}`
+      }
     >
-      <DetailHeader label={label} colors={colors} onToggle={onToggle}>
-        <StatChip label="Fields" value={String(fields.length)} />
-        <StatChip label="Wells" value={formatNumber(sum((f) => f.producing_wells), 0)} />
-        <StatChip label="Capacity" value={`${formatNumber(capSum, 0)} MMCFD`} />
-        <StatChip label="Gas" value={`${formatNumber(gasSum, 1)} MMCFD`} />
-        {utilization != null && <StatChip label="Utilization" value={`${utilization.toFixed(0)}%`} />}
+      <DetailHeader label={label} colors={colors} onToggle={onToggle} inline={inline}>
+        <StatChip label="Fields" value={String(fields.length)} provenance="D" />
+        <StatChip label="Wells" value={formatNumber(sum((f) => f.producing_wells), 0)} provenance="D" />
+        <StatChip label="Capacity" value={`${formatNumber(capSum, 0)} MMCFD`} provenance="D" />
+        <StatChip label="Gas" value={`${formatNumber(gasSum, 1)} MMCFD`} provenance="D" />
+        {utilization != null && <StatChip label="Utilization" value={`${utilization.toFixed(0)}%`} provenance="D" />}
       </DetailHeader>
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -368,11 +396,13 @@ export function DistributionCompanyDetail({
   distributorKey,
   label,
   onToggle,
+  inline = false,
 }: {
   company: DistributionCompany;
   distributorKey?: string;
   label: string;
   onToggle?: () => void;
+  inline?: boolean;
 }) {
   const plants = company.power_plants || [];
   const fert = company.fertilizer;
@@ -389,15 +419,19 @@ export function DistributionCompanyDetail({
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border bg-muted/10 ${colors ? colors.shell : 'border-border/40'}`}
+      className={
+        inline
+          ? 'overflow-hidden rounded-lg border border-border/30 bg-background/40'
+          : `overflow-hidden rounded-xl border bg-muted/10 ${colors ? colors.shell : 'border-border/40'}`
+      }
     >
-      <DetailHeader label={label} colors={colors} onToggle={onToggle}>
-        <StatChip label="Plants" value={String(plants.length)} />
-        <StatChip label="Online" value={`${onlinePlants}/${plants.length}`} />
-        <StatChip label="Power Demand" value={`${num(company.power_demand_mmcfd)} MMCFD`} />
-        <StatChip label="Power Supply" value={`${num(company.power_supply_mmcfd)} MMCFD`} />
-        {coverage != null && <StatChip label="Coverage" value={`${coverage.toFixed(0)}%`} />}
-        <StatChip label="Total" value={`${num(company.total_mmcfd)} MMCFD`} />
+      <DetailHeader label={label} colors={colors} onToggle={onToggle} inline={inline}>
+        <StatChip label="Plants" value={String(plants.length)} provenance="D" />
+        <StatChip label="Online" value={`${onlinePlants}/${plants.length}`} provenance="D" />
+        <StatChip label="Power Demand" value={`${num(company.power_demand_mmcfd)} MMCFD`} provenance="P" />
+        <StatChip label="Power Supply" value={`${num(company.power_supply_mmcfd)} MMCFD`} provenance="P" />
+        {coverage != null && <StatChip label="Coverage" value={`${coverage.toFixed(0)}%`} provenance="D" />}
+        <StatChip label="Total" value={`${num(company.total_mmcfd)} MMCFD`} provenance="P" />
       </DetailHeader>
       <div className="overflow-x-auto">
       <table className="w-full">
@@ -488,7 +522,7 @@ export function DistributionCompanyDetail({
             <td className={`${TD} ${SEP}`} />
           </tr>
           <tr className="border-t border-border/60 bg-muted/20 font-bold">
-            <td className={TD}>Company Total</td>
+            <td className={TD}>Company Total<GridProvenanceTag kind="P" className="ml-1" /></td>
             <td className={`${TDC} text-muted-foreground ${SEP}`}>—</td>
             <td className={`${TDC} ${SEP} text-primary`}>{num(company.total_mmcfd)}</td>
             <td className={`${TD} ${SEP}`} />

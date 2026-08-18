@@ -15,6 +15,7 @@ import {
   type LiveWeekPreset,
 } from '@/lib/data/petrobangla/getLiveWeek';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { GridDataLockedGate } from '@/components/news/power-grid/GridDataLockedGate';
 import { usePetrobanglaBootstrap } from '../PetrobanglaBootstrap';
 import type { AudienceMode } from '@/lib/data/petrobangla/types';
@@ -322,7 +323,12 @@ export function PetrobanglaLiveWeekPanel({
             )}
           >
             <span className="font-semibold text-foreground">PGCB vs Petrobangla:</span>{' '}
-            {formatNumber(pgcbGasTotal, 1)} MMCFD (grid) · {formatNumber(kpis.latestGas, 1)} MMCFD (fields) — different reporting layers.
+            <span className="tabular-nums">{formatNumber(pgcbGasTotal, 1)} MMCFD (grid)</span>
+            <GridProvenanceTag kind="P" className="mx-1" />
+            ·{' '}
+            <span className="tabular-nums">{formatNumber(kpis.latestGas, 1)} MMCFD (fields)</span>
+            <GridProvenanceTag kind="P" className="mx-1" />
+            — different reporting layers.
           </p>
         )}
       </div>

@@ -2,6 +2,7 @@
 
 import { Calendar, TrendingDown, TrendingUp } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 
 interface Props {
   gridDate: string;
@@ -40,7 +41,7 @@ export function GasReserveArchiveContext({
           <div className="gas-reserve-archive-context__stat-card gas-reserve-archive-context__stat-card--peak">
             <TrendingUp className="h-3.5 w-3.5 text-sky-500 shrink-0" />
             <div>
-              <span className="gas-reserve-archive-context__stat-label">Archive peak</span>
+              <span className="gas-reserve-archive-context__stat-label">Archive peak<GridProvenanceTag kind="D" className="ml-1.5" /></span>
               <span className="gas-reserve-archive-context__stat-value text-sky-500">{formatNumber(peakGas, 0)} MMCFD</span>
               <span className="gas-reserve-archive-context__stat-date">{peakDate}</span>
             </div>
@@ -50,7 +51,7 @@ export function GasReserveArchiveContext({
           <div className="gas-reserve-archive-context__stat-card gas-reserve-archive-context__stat-card--low">
             <TrendingDown className="h-3.5 w-3.5 text-amber-500 shrink-0" />
             <div>
-              <span className="gas-reserve-archive-context__stat-label">Archive low</span>
+              <span className="gas-reserve-archive-context__stat-label">Archive low<GridProvenanceTag kind="D" className="ml-1.5" /></span>
               <span className="gas-reserve-archive-context__stat-value text-amber-500">{formatNumber(lowGas, 0)} MMCFD</span>
               <span className="gas-reserve-archive-context__stat-date">{lowDate}</span>
             </div>
@@ -59,7 +60,7 @@ export function GasReserveArchiveContext({
         <div className="gas-reserve-archive-context__stat-card gas-reserve-archive-context__stat-card--decline">
           <TrendingDown className="h-3.5 w-3.5 text-red-500 shrink-0" />
           <div>
-            <span className="gas-reserve-archive-context__stat-label">Since Jan 2020</span>
+            <span className="gas-reserve-archive-context__stat-label">Since Jan 2020<GridProvenanceTag kind="D" className="ml-1.5" /></span>
             <span className="gas-reserve-archive-context__stat-value text-red-500">−{Math.abs(declinePct).toFixed(1)}%</span>
             <span className="gas-reserve-archive-context__stat-date">National output</span>
           </div>

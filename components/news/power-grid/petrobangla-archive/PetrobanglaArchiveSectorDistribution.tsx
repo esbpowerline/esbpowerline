@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo , type ReactNode} from 'react';
+import { PieChart } from 'lucide-react';
 import {
   Area,
   CartesianGrid,
@@ -13,18 +14,21 @@ import {
 import { useChartTheme } from '@/hooks/useChartTheme';
 import {
   GRID_EXPLORER_CHART_MARGIN,
+  GridChartExternalLegend,
   GridChartTooltipShell,
   GridRechartsTooltip,
   gridChartXAxisProps,
   gridChartYAxisProps,
-  GridRechartsLegend,
+  type GridChartLegendItem,
 } from '@/components/news/PowerGridChartUI';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { cn, formatNumber, formatTooltipDate } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { filterTimelineDays } from '@/lib/data/petrobangla/compute';
 import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { ArchiveBadge, ArchiveChartFooter, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
+import { chartGridProps } from '@/lib/data/grid/chart-axis';
 
 const SECTOR_COLORS = {
   powerSupply: PB_ARCHIVE_COLORS.domestic,
@@ -65,9 +69,15 @@ function SectorTooltip({
     <GridChartTooltipShell title={formatTooltipDate(d.date)} accent={SECTOR_COLORS.powerSupply}>
       <div className="grid-chart-tooltip__grid" style={{ gridTemplateColumns: 'auto auto auto auto', gap: '0.4rem 0.8rem', alignItems: 'center' }}>
         <span className="text-[9px] font-bold text-muted-foreground uppercase">Sector</span>
-        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">Volume</span>
-        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">Share of Day</span>
-        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">Fulfillment</span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">
+          Volume<GridProvenanceTag kind="P" className="ml-1" />
+        </span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">
+          Share of Day<GridProvenanceTag kind="D" className="ml-1" />
+        </span>
+        <span className="text-[9px] font-bold text-muted-foreground uppercase text-right">
+          Fulfillment<GridProvenanceTag kind="D" className="ml-1" />
+        </span>
 
         {/* Power Sector Row */}
         <span className="grid-chart-tooltip__label flex items-center gap-1.5 font-medium whitespace-nowrap">
@@ -152,6 +162,13 @@ export function PetrobanglaArchiveSectorDistribution({
     }));
   }, [rangeDays]);
 
+  const legendItems: GridChartLegendItem[] = [
+    { id: 'powerSupply', label: 'Power supply', color: SECTOR_COLORS.powerSupply, variant: 'area', provenance: 'P' },
+    { id: 'fertSupply', label: 'Fertilizer supply', color: SECTOR_COLORS.fertSupply, variant: 'area', provenance: 'P' },
+    { id: 'others', label: 'Others/Industry', color: SECTOR_COLORS.others, variant: 'area', provenance: 'P' },
+    { id: 'powerDemand', label: 'Power demand', color: SECTOR_COLORS.powerDemand, variant: 'dashed', provenance: 'P' },
+  ];
+
   const wrapperClass = embedded ? 'grid-explorer-gas-subview' : 'grid-explorer-chart-card card';
 
   return (
@@ -168,8 +185,9 @@ export function PetrobanglaArchiveSectorDistribution({
         </div>
       )}
       {!compact && (
-        <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
-          <div>
+        <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex items-center gap-2.5">
+          <PieChart className="h-5 w-5 shrink-0 text-primary" />
+          <div className="flex-1 min-w-0">
             <h3 className="grid-explorer-chart-card__title">Who Gets the Gas<ArchiveBadge /></h3>
             <p className="grid-explorer-chart-card__sub">Sector allocation — power, fertilizer, industry/others</p>
           </div>
@@ -177,24 +195,26 @@ export function PetrobanglaArchiveSectorDistribution({
       )}
 
       <ArchiveRangeLockedOverlay preset={preset} className="mt-4" onClose={onClose}>
-        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg">
+        <div className="gas-reserve-archive-chart-block">
+        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg gas-reserve-archive-chart-block__plot">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                 <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
                 <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
                 <GridRechartsTooltip content={<SectorTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
-                <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
-                <Area type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} />
-                <Area type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} />
-                <Area type="monotone" dataKey="powerSupply" name="Power supply" stackId="s" fill={SECTOR_COLORS.powerSupply} stroke={SECTOR_COLORS.powerSupply} fillOpacity={0.2} />
-                <Line type="monotone" dataKey="powerDemand" name="Power demand" stroke={SECTOR_COLORS.powerDemand} strokeWidth={2} dot={false} strokeDasharray="4 4" />
+                <Area type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} legendType="none" />
+                <Area type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} legendType="none" />
+                <Area type="monotone" dataKey="powerSupply" name="Power supply" stackId="s" fill={SECTOR_COLORS.powerSupply} stroke={SECTOR_COLORS.powerSupply} fillOpacity={0.2} legendType="none" />
+                <Line type="monotone" dataKey="powerDemand" name="Power demand" stroke={SECTOR_COLORS.powerDemand} strokeWidth={2} dot={false} strokeDasharray="4 4" legendType="none" />
               </ComposedChart>
             </ResponsiveContainer>
           ) : (
             <div className="grid-explorer-skeleton" />
           )}
+        </div>
+        <GridChartExternalLegend items={legendItems} position="bottom" />
         </div>
       </ArchiveRangeLockedOverlay>
 

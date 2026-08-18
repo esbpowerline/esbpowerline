@@ -34,6 +34,8 @@
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
     "verify:data": "node scripts/verify-data.mjs",
+    "verify:reserves": "python scripts/verify_reserve_model.py",
+    "build:reserves": "python scripts/build_reserve_model.py --apply && python scripts/reserve_sensitivity.py --json public/data/petrobangla/reserve-sensitivity.json && python scripts/verify_reserve_model.py",
     "backtest:erp": "node scripts/backtest-erp.mjs",
     "test": "vitest run",
     "test:watch": "vitest",

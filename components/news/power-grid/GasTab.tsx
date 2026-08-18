@@ -1,13 +1,18 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronRight, Database, Droplet, Info } from 'lucide-react';
 import type { GasDistributionItem, GasProductionItem } from '@/lib/data/grid/types';
 import { formatNumber } from '@/lib/utils';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { coverageLabel } from '@/lib/data/grid/coverage';
 import { GridLockedContent } from './GridLockedContent';
-import { GridCardFooter, GridProvenanceTag } from './GridExplorerUI';
+import {
+  GridCardFooter,
+  GridDataBadge,
+  GridExplanationBlock,
+  GridProvenanceTag,
+} from './GridExplorerUI';
 import { PetrobanglaGasKpiStrip } from './PetrobanglaGasKpiStrip';
 import {
   DISTRIBUTOR_COLORS,
@@ -19,6 +24,43 @@ import {
   productionFieldsForLabel,
   usePetrobanglaArchiveDay,
 } from './PetrobanglaSectionDetail';
+
+/**
+ * Column tracks for the two disclosure lists. The name column takes the slack
+ * and the figure columns are sized to their widest realistic value, so the
+ * header, every row and the totals line up on one grid — which is what lets a
+ * row open without anything else on the list moving.
+ */
+const PROD_COLS = 'minmax(11rem, 1.6fr) minmax(6rem, 0.9fr) minmax(7rem, 0.9fr) minmax(8rem, 1fr)';
+const DIST_COLS =
+  'minmax(11rem, 1.5fr) minmax(5.5rem, 0.8fr) minmax(5.5rem, 0.8fr) minmax(6rem, 0.8fr) minmax(8rem, 1fr)';
+
+/**
+ * A figure in a disclosure row.
+ *
+ * The list is not marked up as a table. It reads as one, but each row is a
+ * button that opens a panel, and `role="row"` on a button would take its button
+ * semantics — and therefore the expandability — away from screen readers. The
+ * column header is decorative instead, and every figure carries its own label:
+ * visually on phones where the header is dropped, and to assistive tech
+ * everywhere, so a value is never announced as a bare number.
+ */
+function Figure({
+  label,
+  className = '',
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className={`gas-disclosure__num ${className}`}>
+      <span className="gas-disclosure__label">{label}</span>
+      {children}
+    </span>
+  );
+}
 
 interface GasTabProps {
   selectedDate: string;
@@ -101,13 +143,10 @@ export function GasTab({
     ? archiveDay.report.report_date_label
     : systemStatsDate;
 
-  // Rounded list rows need the separate-borders model (collapsed cells can't round).
-  const listTable = 'grid-explorer-table border-separate [border-spacing:0_0.375rem]';
-  const rowTd = 'bg-muted/10 transition-colors group-hover:bg-muted/20';
-  const totalTd = 'bg-muted/25';
-  // While a detail card is open, its table goes into focus mode: the column
-  // header and totals hide (the card supersedes them) and the other rows
-  // shrink to name-only pills that switch the expansion on click.
+  // While a company is open the list dims everything else rather than rebuilding
+  // itself: the header, the totals and the unopened rows all stay exactly where
+  // they are, so the only thing that moves is the panel opening. See the
+  // .gas-disclosure block in globals.css for why that replaced a table.
   const prodFocused = expandedProd != null;
   const distFocused = expandedDist != null;
 
@@ -137,15 +176,15 @@ export function GasTab({
   if (selectedDate < '2020-01-12') {
     return (
       <div className="grid-explorer-panel space-y-6">
-        <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-          <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-            <Info className="h-8 w-8 text-primary animate-pulse" />
-          </div>
-          <h4 className="text-base font-bold text-foreground mb-2">Petrobangla Gas Production &amp; Distribution Data</h4>
-          <p className="text-xs text-muted-foreground max-w-sm">
+        <div className="grid-explorer-chart-card card flex min-h-[400px] flex-col items-center justify-center gap-3 p-6 text-center">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
+            <Info className="h-8 w-8 shrink-0 text-primary" />
+          </span>
+          <h4 className="text-base font-bold text-foreground">Petrobangla Gas Production &amp; Distribution Data</h4>
+          <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
             No official records are available for the selected date. Petrobangla gas production tracking officially started on January 12, 2020.
           </p>
-          <div className="mt-4 text-[10px] text-muted-foreground">Official Backlog Start Date: January 12, 2020</div>
+          <div className="text-[10px] tabular-nums text-muted-foreground">Official Backlog Start Date: January 12, 2020</div>
         </div>
       </div>
     );
@@ -154,12 +193,12 @@ export function GasTab({
   if (!gasProductionData.length) {
     return (
       <div className="grid-explorer-panel space-y-6">
-        <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-          <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-            <Info className="h-8 w-8 text-primary animate-pulse" />
-          </div>
-          <h4 className="text-base font-bold text-foreground mb-2">Petrobangla Gas &amp; LNG Supply</h4>
-          <p className="text-xs text-muted-foreground max-w-sm">
+        <div className="grid-explorer-chart-card card flex min-h-[400px] flex-col items-center justify-center gap-3 p-6 text-center">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
+            <Droplet className="h-8 w-8 shrink-0 text-sky-500" />
+          </span>
+          <h4 className="text-base font-bold text-foreground">Petrobangla Gas &amp; LNG Supply</h4>
+          <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
             PGCB grid data is available for this date, but Petrobangla production and distribution tables are missing from the daily record. Re-run the official ingest when Petrobangla reports are online.
           </p>
         </div>
@@ -191,7 +230,7 @@ export function GasTab({
           <div>
             <h3 className="grid-explorer-chart-card__title">
               Daily Gas &amp; Condensate Production
-              <sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup>
+              <GridDataBadge cadence="daily" />
             </h3>
             <p className="grid-explorer-chart-card__sub">
               Petrobangla Production &amp; Marketing Division Report •{' '}
@@ -210,9 +249,14 @@ export function GasTab({
             variant="micro"
             onTryDemo={onTryDemo}
           >
-          <table className={listTable}>
-            {!prodFocused && (
-              <thead>
+          <div
+            className="gas-disclosure"
+            data-focused={prodFocused}
+            style={{ ['--gas-cols' as string]: PROD_COLS }}
+            role="list"
+            aria-label="Daily gas and condensate production by company"
+          >
+            <div className="gas-disclosure__head" aria-hidden="true">
                 {/*
                   "Active Fields/Wells" was removed. It was six constants baked
                   into parse_daily_reports — 5, 5, 9, 3, 1, 0 — that never moved
@@ -235,111 +279,121 @@ export function GasTab({
                   2026-08-08, against Petrobangla's own subtotals. The strip
                   under the table proves it for whichever day is on screen.
                 */}
-                <tr>
-                  <th>Field / Company Operator</th>
-                  <th className="text-left">
-                    Gas Produced (MMCFD)
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                  <th className="text-left">
-                    Condensate Produced (BBL)
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                  <th className="text-left">
-                    National Gas Share
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                </tr>
-              </thead>
-            )}
-            <tbody>
-              {productionRows.map((gp, idx) => {
-                const detailFields = productionFieldsForLabel(archiveDay, gp.company);
-                const expandable = detailFields.length > 0;
-                const expanded = expandable && expandedProd === gp.company;
-                const producerKey = producerKeyFromLabel(gp.company);
-                const colors = PRODUCER_COLORS[producerKey];
-                return (
-                  <Fragment key={idx}>
-                    {!expanded && prodFocused && (
-                      <tr
-                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
-                        onClick={expandable ? () => setExpandedProd(gp.company) : undefined}
-                      >
-                        <td colSpan={4} className={`rounded-xl pl-3 !py-2 font-semibold ${rowTd}`}>
-                          <span className="inline-flex items-center gap-2 text-muted-foreground">
-                            {expandable && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
-                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
-                            {gp.company}
-                          </span>
-                        </td>
-                      </tr>
-                    )}
-                    {!expanded && !prodFocused && (
-                      <tr
-                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
-                        aria-expanded={expandable ? false : undefined}
-                        onClick={expandable ? () => setExpandedProd(gp.company) : undefined}
-                      >
-                        <td className={`font-semibold rounded-l-xl pl-3 ${rowTd}`}>
-                          <span className="inline-flex items-center gap-2">
-                            {expandable && (
-                              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                            )}
-                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
-                            {gp.company}
-                          </span>
-                        </td>
-                        <td className={`text-left tabular-nums font-medium ${rowTd}`}>{gp.gas ? gp.gas.toFixed(1) : '-'}</td>
-                        <td className={`text-left tabular-nums ${rowTd}`}>{gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '-'}</td>
-                        <td className={`text-left rounded-r-xl ${rowTd}`}>
-                          {gp.share !== undefined ? (
-                            <span className="inline-flex items-center gap-2">
-                              <span className="h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-muted/40 sm:w-20">
-                                <span
-                                  className={`block h-full rounded-full ${colors?.bar || 'bg-primary'}`}
-                                  style={{ width: `${Math.min(100, Math.max(0, gp.share))}%` }}
-                                />
-                              </span>
-                              <span className="tabular-nums text-muted-foreground">{gp.share.toFixed(1)}%</span>
-                            </span>
-                          ) : (
-                            '-'
-                          )}
-                        </td>
-                      </tr>
-                    )}
-                    {expanded && (
-                      <tr>
-                        <td colSpan={4} className="!p-0">
-                          <div className="py-2">
-                            <ProductionCompanyDetail
-                              fields={detailFields}
-                              grandTotal={archiveDay?.production?.grand_total ?? null}
-                              producerKey={producerKey}
-                              label={gp.company}
-                              onToggle={() => setExpandedProd(null)}
+              <span>Field / Company Operator</span>
+              <span>
+                Gas Produced (MMCFD)
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+              <span>
+                Condensate Produced (BBL)
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+              <span>
+                National Gas Share
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+            </div>
+
+            {productionRows.map((gp, idx) => {
+              const detailFields = productionFieldsForLabel(archiveDay, gp.company);
+              const expandable = detailFields.length > 0;
+              const expanded = expandable && expandedProd === gp.company;
+              const producerKey = producerKeyFromLabel(gp.company);
+              const colors = PRODUCER_COLORS[producerKey];
+              return (
+                <div
+                  key={idx}
+                  className={`gas-disclosure__item${expandable ? ' gas-disclosure__item--expandable' : ''}`}
+                  data-open={expanded}
+                  style={colors ? ({ ['--gas-accent' as string]: colors.accent }) : undefined}
+                  role="listitem"
+                >
+                  <button
+                    type="button"
+                    className="gas-disclosure__row"
+                    aria-expanded={expandable ? expanded : undefined}
+                    aria-controls={expandable ? `gas-prod-panel-${idx}` : undefined}
+                    disabled={!expandable}
+                    onClick={
+                      expandable
+                        ? () => setExpandedProd(expanded ? null : gp.company)
+                        : undefined
+                    }
+                  >
+                    <span className="gas-disclosure__name">
+                      {expandable && (
+                        <ChevronRight className="gas-disclosure__chevron h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                      {colors && (
+                        <span
+                          className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span className="truncate">{gp.company}</span>
+                    </span>
+                    <Figure label="Gas (MMCFD)" className="font-medium">
+                      {gp.gas ? gp.gas.toFixed(1) : '—'}
+                    </Figure>
+                    <Figure label="Condensate (BBL)">
+                      {gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '—'}
+                    </Figure>
+                    <span className="gas-disclosure__share">
+                      <span className="gas-disclosure__label">National share</span>
+                      {gp.share !== undefined ? (
+                        <>
+                          <span className="gas-disclosure__track" aria-hidden="true">
+                            <span
+                              className={`gas-disclosure__fill ${colors?.bar || 'bg-primary'}`}
+                              style={{ width: `${Math.min(100, Math.max(0, gp.share))}%` }}
                             />
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                );
-              })}
-              {!prodFocused && (
-                <tr className="font-bold">
-                  <td className={`rounded-l-xl pl-3 ${totalTd}`}>
-                    Grand Total Production
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </td>
-                  <td className={`text-left text-primary ${totalTd}`}>{formatNumber(productionTotalGas, 1)}</td>
-                  <td className={`text-left ${totalTd}`}>{formatNumber(productionTotalCondensate, 1)}</td>
-                  <td className={`text-left rounded-r-xl ${totalTd}`}>100.0%</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                          </span>
+                          <span className="gas-disclosure__num text-muted-foreground">
+                            {gp.share.toFixed(1)}%
+                          </span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </span>
+                  </button>
+
+                  {/* Mounted whether or not it is open, so the panel has a height
+                      to animate from in both directions. Its contents are only
+                      built for the open company, which is the expensive part. */}
+                  <div className="gas-disclosure__panel" id={`gas-prod-panel-${idx}`}>
+                    <div className="gas-disclosure__panel-inner">
+                      <div className="px-2 pb-2.5 pt-0.5">
+                        {expanded && (
+                          <ProductionCompanyDetail
+                            fields={detailFields}
+                            grandTotal={archiveDay?.production?.grand_total ?? null}
+                            producerKey={producerKey}
+                            label={gp.company}
+                            inline
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="gas-disclosure__total" role="listitem">
+              <span>
+                Grand Total Production
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+              <Figure label="Gas (MMCFD)" className="text-primary">
+                {formatNumber(productionTotalGas, 1)}
+              </Figure>
+              <Figure label="Condensate (BBL)">
+                {formatNumber(productionTotalCondensate, 1)}
+              </Figure>
+              <Figure label="National share">100.0%</Figure>
+            </div>
+          </div>
           </GridLockedContent>
         </div>
 
@@ -359,7 +413,7 @@ export function GasTab({
           const delta = productionTotalGas - petrobanglaGrandTotal;
           const ok = Math.abs(delta) <= 0.5;
           return (
-            <div className="mx-4 mt-3 p-3 rounded-lg border border-border/50 bg-muted/15 text-[11px]">
+            <div className="mt-3 rounded-lg border border-border/50 bg-muted/15 p-3 text-[11px]">
               <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 tabular-nums">
                 <span className="text-muted-foreground">
                   Company rows sum
@@ -390,12 +444,15 @@ export function GasTab({
           );
         })()}
 
-        <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
-          <p><strong>What is being shown?</strong></p>
-          <p className="leading-relaxed">This table displays the daily gas volume (MMCFD) and associated condensate liquids (BBL) produced by local gas fields and foreign operators (Chevron, Tullow), alongside imported liquefied natural gas (LNG) regasified into the grid.</p>
-          <p className="leading-relaxed"><strong>Analytical Insight:</strong> Chevron (operating the Bibiyana field) remains the dominant producer of natural gas in Bangladesh, supplying over 50% of domestic gas. The high dependency on a single field and company exposes the entire gas-to-power supply chain to operational vulnerability and highlights the urgency of expanding national exploration or gas import capacity.</p>
-          <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> Each report covers an 8:00 AM → 8:00 AM &ldquo;gas day&rdquo; and is dated by the morning it closes — the report for the 31 Dec → 1 Jan window is filed under 1 Jan. In the per-field detail, <em>% T. Cap</em> is a field&apos;s gas output divided by national installed capacity, and <em>% T. Prod</em> is its share of the day&apos;s grand-total production. Sub-totals are recomputed from volumes exactly as Petrobangla computes its own subtotal lines; the PDF&apos;s per-field % column is rounded to one decimal (and occasionally misprinted at source), so summing that printed column can drift a few tenths from the official subtotal.</p>
-        </div>
+        <GridExplanationBlock
+          what={
+            <>
+              <p className="leading-relaxed">This table displays the daily gas volume (MMCFD) and associated condensate liquids (BBL) produced by local gas fields and foreign operators (Chevron, Tullow), alongside imported liquefied natural gas (LNG) regasified into the grid.</p>
+              <p className="leading-relaxed"><strong>Analytical Insight:</strong> Chevron (operating the Bibiyana field) remains the dominant producer of natural gas in Bangladesh, supplying over 50% of domestic gas. The high dependency on a single field and company exposes the entire gas-to-power supply chain to operational vulnerability and highlights the urgency of expanding national exploration or gas import capacity.</p>
+              <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> Each report covers an 8:00 AM → 8:00 AM &ldquo;gas day&rdquo; and is dated by the morning it closes — the report for the 31 Dec → 1 Jan window is filed under 1 Jan. In the per-field detail, <em>% T. Cap</em> is a field&apos;s gas output divided by national installed capacity, and <em>% T. Prod</em> is its share of the day&apos;s grand-total production. Sub-totals are recomputed from volumes exactly as Petrobangla computes its own subtotal lines; the PDF&apos;s per-field % column is rounded to one decimal (and occasionally misprinted at source), so summing that printed column can drift a few tenths from the official subtotal.</p>
+            </>
+          }
+        />
 
         <GridCardFooter>
           <span>
@@ -415,7 +472,7 @@ export function GasTab({
           <div>
             <h3 className="grid-explorer-chart-card__title">
               Sectorwise Gas Distribution
-              <sup className="text-emerald-500 font-extrabold text-[10px] ml-2 select-none">Daily</sup>
+              <GridDataBadge cadence="daily" />
             </h3>
             <p className="grid-explorer-chart-card__sub">
               Allocated supply (MMCFD) across regional gas distributors •{' '}
@@ -434,132 +491,143 @@ export function GasTab({
             variant="micro"
             onTryDemo={onTryDemo}
           >
-          <table className={listTable}>
-            {!distFocused && (
-              <thead>
-                {/* Sector splits are read per distributor from the report's
-                    distribution table; the row total is our sum of the three. */}
-                <tr>
-                  <th>Distributor</th>
-                  <th className="text-left">
-                    Power Grid Supply
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                  <th className="text-left">
-                    Fertilizer Supply
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                  <th className="text-left">
-                    Industrial / Others
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                  <th className="text-left">
-                    Total Gas Distributed
-                    <GridProvenanceTag kind="P" className="ml-1" />
-                  </th>
-                </tr>
-              </thead>
-            )}
-            <tbody>
-              {distributionRows.map((gd, idx) => {
-                const detailCompany = distributionCompanyForLabel(archiveDay, gd.company);
-                const expandable = detailCompany != null;
-                const expanded = expandable && expandedDist === gd.company;
-                const distributorKey = gd.company.toUpperCase().split(/[\s(]/)[0];
-                const colors = DISTRIBUTOR_COLORS[distributorKey];
-                const shareOfTotal = distGrandTotal > 0 ? (gd.total / distGrandTotal) * 100 : null;
-                return (
-                  <Fragment key={idx}>
-                    {!expanded && distFocused && (
-                      <tr
-                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
-                        onClick={expandable ? () => setExpandedDist(gd.company) : undefined}
-                      >
-                        <td colSpan={5} className={`rounded-xl pl-3 !py-2 font-semibold ${rowTd}`}>
-                          <span className="inline-flex items-center gap-2 text-muted-foreground">
-                            {expandable && <ChevronRight className="h-3.5 w-3.5 shrink-0" />}
-                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
-                            {gd.company}
-                          </span>
-                        </td>
-                      </tr>
-                    )}
-                    {!expanded && !distFocused && (
-                      <tr
-                        className={`group ${expandable ? 'cursor-pointer' : ''}`}
-                        aria-expanded={expandable ? false : undefined}
-                        onClick={expandable ? () => setExpandedDist(gd.company) : undefined}
-                      >
-                        <td className={`font-semibold rounded-l-xl pl-3 ${rowTd}`}>
-                          <span className="inline-flex items-center gap-2">
-                            {expandable && (
-                              <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                            )}
-                            {colors && <span className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`} />}
-                            {gd.company}
-                          </span>
-                        </td>
-                        <td className={`text-left tabular-nums ${rowTd}`}>{gd.power.toFixed(1)}</td>
-                        <td className={`text-left tabular-nums ${rowTd}`}>{gd.fertilizer.toFixed(1)}</td>
-                        <td className={`text-left tabular-nums text-muted-foreground ${rowTd}`}>{gd.others.toFixed(1)}</td>
-                        <td className={`text-left rounded-r-xl ${rowTd}`}>
-                          <span className="inline-flex items-center gap-2">
-                            {shareOfTotal != null && (
-                              <span className="h-1.5 w-14 shrink-0 overflow-hidden rounded-full bg-muted/40 sm:w-20">
-                                <span
-                                  className={`block h-full rounded-full ${colors?.bar || 'bg-primary'}`}
-                                  style={{ width: `${Math.min(100, Math.max(0, shareOfTotal))}%` }}
-                                />
-                              </span>
-                            )}
-                            <span className="tabular-nums font-semibold">{gd.total.toFixed(1)}</span>
-                          </span>
-                        </td>
-                      </tr>
-                    )}
-                    {expanded && detailCompany && (
-                      <tr>
-                        <td colSpan={5} className="!p-0">
-                          <div className="py-2">
-                            <DistributionCompanyDetail
-                              company={detailCompany}
-                              distributorKey={distributorKey}
-                              label={gd.company}
-                              onToggle={() => setExpandedDist(null)}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                );
-              })}
-              {!distFocused && (
-                <tr className="font-bold">
-                  <td className={`rounded-l-xl pl-3 ${totalTd}`}>National Total Supply</td>
-                  <td className={`text-left tabular-nums text-primary ${totalTd}`}>{distPowerTotal.toFixed(1)}</td>
-                  <td className={`text-left tabular-nums ${totalTd}`}>{distFertTotal.toFixed(1)}</td>
-                  <td className={`text-left tabular-nums ${totalTd}`}>{distOthersTotal.toFixed(1)}</td>
-                  <td className={`text-left tabular-nums text-primary rounded-r-xl ${totalTd}`}>{distGrandTotal.toFixed(1)}</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <div
+            className="gas-disclosure"
+            data-focused={distFocused}
+            style={{ ['--gas-cols' as string]: DIST_COLS }}
+            role="list"
+            aria-label="Daily gas distribution by distributor"
+          >
+            {/* Sector splits are read per distributor from the report's
+                distribution table; the row total is our sum of the three. */}
+            <div className="gas-disclosure__head" aria-hidden="true">
+              <span>Distributor</span>
+              <span>
+                Power Grid Supply
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+              <span>
+                Fertilizer Supply
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+              <span>
+                Industrial / Others
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+              <span>
+                Total Gas Distributed
+                <GridProvenanceTag kind="P" className="ml-1" />
+              </span>
+            </div>
+
+            {distributionRows.map((gd, idx) => {
+              const detailCompany = distributionCompanyForLabel(archiveDay, gd.company);
+              const expandable = detailCompany != null;
+              const expanded = expandable && expandedDist === gd.company;
+              const distributorKey = gd.company.toUpperCase().split(/[\s(]/)[0];
+              const colors = DISTRIBUTOR_COLORS[distributorKey];
+              const shareOfTotal = distGrandTotal > 0 ? (gd.total / distGrandTotal) * 100 : null;
+              return (
+                <div
+                  key={idx}
+                  className={`gas-disclosure__item${expandable ? ' gas-disclosure__item--expandable' : ''}`}
+                  data-open={expanded}
+                  style={colors ? ({ ['--gas-accent' as string]: colors.accent }) : undefined}
+                  role="listitem"
+                >
+                  <button
+                    type="button"
+                    className="gas-disclosure__row"
+                    aria-expanded={expandable ? expanded : undefined}
+                    aria-controls={expandable ? `gas-dist-panel-${idx}` : undefined}
+                    disabled={!expandable}
+                    onClick={
+                      expandable
+                        ? () => setExpandedDist(expanded ? null : gd.company)
+                        : undefined
+                    }
+                  >
+                    <span className="gas-disclosure__name">
+                      {expandable && (
+                        <ChevronRight className="gas-disclosure__chevron h-3.5 w-3.5 text-muted-foreground" />
+                      )}
+                      {colors && (
+                        <span
+                          className={`h-2 w-2 shrink-0 rounded-full ${colors.dot}`}
+                          aria-hidden="true"
+                        />
+                      )}
+                      <span className="truncate">{gd.company}</span>
+                    </span>
+                    <Figure label="Power grid">{gd.power.toFixed(1)}</Figure>
+                    <Figure label="Fertilizer">{gd.fertilizer.toFixed(1)}</Figure>
+                    <Figure label="Industrial / others" className="text-muted-foreground">
+                      {gd.others.toFixed(1)}
+                    </Figure>
+                    <span className="gas-disclosure__share">
+                      <span className="gas-disclosure__label">Total distributed</span>
+                      {shareOfTotal != null && (
+                        <span className="gas-disclosure__track" aria-hidden="true">
+                          <span
+                            className={`gas-disclosure__fill ${colors?.bar || 'bg-primary'}`}
+                            style={{ width: `${Math.min(100, Math.max(0, shareOfTotal))}%` }}
+                          />
+                        </span>
+                      )}
+                      <span className="gas-disclosure__num font-semibold">
+                        {gd.total.toFixed(1)}
+                      </span>
+                    </span>
+                  </button>
+
+                  <div className="gas-disclosure__panel" id={`gas-dist-panel-${idx}`}>
+                    <div className="gas-disclosure__panel-inner">
+                      <div className="px-2 pb-2.5 pt-0.5">
+                        {expanded && detailCompany && (
+                          <DistributionCompanyDetail
+                            company={detailCompany}
+                            distributorKey={distributorKey}
+                            label={gd.company}
+                            inline
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="gas-disclosure__total" role="listitem">
+              <span>National Total Supply</span>
+              <Figure label="Power grid" className="text-primary">
+                {distPowerTotal.toFixed(1)}
+              </Figure>
+              <Figure label="Fertilizer">{distFertTotal.toFixed(1)}</Figure>
+              <Figure label="Industrial / others">{distOthersTotal.toFixed(1)}</Figure>
+              <Figure label="Total distributed" className="text-primary">
+                {distGrandTotal.toFixed(1)}
+              </Figure>
+            </div>
+          </div>
           </GridLockedContent>
         </div>
 
-        <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
-          <p><strong>What is being shown?</strong></p>
-          <p className="leading-relaxed">This table tracks the distribution of natural gas across different sectors (power grid generators, fertilizer plants, and industrial/domestic consumers) by regional distribution utilities.</p>
-          <p className="leading-relaxed"><strong>Analytical Insight:</strong> Natural gas distribution is heavily skewed toward the power sector and industrial customers. Titas Gas (TGTDCL) remains the largest distributor by volume. Under gas supply shortages, fertilizer plants and industries are often rationed to prioritize power generation, illustrating the competing demands for limited gas supply.</p>
-          <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> In the per-plant detail, &ldquo;demand&rdquo; is each plant&apos;s nominal gas requirement at full output and &ldquo;supply&rdquo; is the metered delivery over the same 8:00 AM → 8:00 AM gas day; plants with zero supply form the report&apos;s shutdown list. Because plants never all peak simultaneously, Petrobangla also applies its own diversity factor (typically ×0.85) to raw power demand to estimate the realistic requirement — the True Power-Gas Gap KPI above is measured against that adjusted demand, not the raw plant total.</p>
-        </div>
+        <GridExplanationBlock
+          what={
+            <>
+              <p className="leading-relaxed">This table tracks the distribution of natural gas across different sectors (power grid generators, fertilizer plants, and industrial/domestic consumers) by regional distribution utilities.</p>
+              <p className="leading-relaxed"><strong>Analytical Insight:</strong> Natural gas distribution is heavily skewed toward the power sector and industrial customers. Titas Gas (TGTDCL) remains the largest distributor by volume. Under gas supply shortages, fertilizer plants and industries are often rationed to prioritize power generation, illustrating the competing demands for limited gas supply.</p>
+              <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> In the per-plant detail, &ldquo;demand&rdquo; is each plant&apos;s nominal gas requirement at full output and &ldquo;supply&rdquo; is the metered delivery over the same 8:00 AM → 8:00 AM gas day; plants with zero supply form the report&apos;s shutdown list. Because plants never all peak simultaneously, Petrobangla also applies its own diversity factor (typically ×0.85) to raw power demand to estimate the realistic requirement — the True Power-Gas Gap KPI above is measured against that adjusted demand, not the raw plant total.</p>
+            </>
+          }
+        />
 
-        <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Info className="h-3.5 w-3.5 text-sky-500" /> Gas Sector Acronyms &amp; Units Footnote
+        <div className="mt-4 space-y-3 rounded-2xl border border-border/30 bg-muted/5 p-4">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            <Info className="h-4 w-4 shrink-0 text-sky-500" /> Gas Sector Acronyms &amp; Units Footnote
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-[10px] text-muted-foreground leading-relaxed">
+          <div className="grid grid-cols-2 gap-4 text-[10px] leading-relaxed text-muted-foreground sm:grid-cols-3 md:grid-cols-6">
             <div>
               <strong className="text-foreground block font-bold mb-0.5">MMCFD</strong>
               Million Standard Cubic Feet per Day. Standard unit of gas volume flow rate.

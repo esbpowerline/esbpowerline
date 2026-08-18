@@ -629,7 +629,430 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 01-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (31.05.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (01.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              11,
+              232,
+              766
+            ],
+            "mvar": [
+              -44,
+              110,
+              -108
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              7,
+              214,
+              680
+            ],
+            "mvar": [
+              -40,
+              116,
+              -86
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              9,
+              204,
+              610
+            ],
+            "mvar": [
+              -42,
+              96,
+              -86
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              10,
+              210,
+              562
+            ],
+            "mvar": [
+              -41,
+              106,
+              -66
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              10,
+              202,
+              472
+            ],
+            "mvar": [
+              -37,
+              106,
+              -54
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              12,
+              188,
+              356
+            ],
+            "mvar": [
+              -35,
+              92,
+              -32
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              28,
+              224,
+              362
+            ],
+            "mvar": [
+              -33,
+              90,
+              -16
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              22,
+              196,
+              302
+            ],
+            "mvar": [
+              -34,
+              84,
+              -22
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              44,
+              260,
+              388
+            ],
+            "mvar": [
+              -33,
+              112,
+              -14
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              44,
+              284,
+              474
+            ],
+            "mvar": [
+              -33,
+              102,
+              -18
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              67,
+              292,
+              538
+            ],
+            "mvar": [
+              -33,
+              94,
+              -8
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              69,
+              296,
+              520
+            ],
+            "mvar": [
+              -34,
+              94,
+              8
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              61,
+              294,
+              426
+            ],
+            "mvar": [
+              -32,
+              102,
+              18
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              55,
+              298,
+              418
+            ],
+            "mvar": [
+              -37,
+              112,
+              -2
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              45,
+              246,
+              440
+            ],
+            "mvar": [
+              -38,
+              94,
+              -24
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              42,
+              260,
+              460
+            ],
+            "mvar": [
+              -36,
+              112,
+              -26
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              51,
+              292,
+              636
+            ],
+            "mvar": [
+              -35,
+              118,
+              -22
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              52,
+              288,
+              688
+            ],
+            "mvar": [
+              -33,
+              108,
+              -8
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              46,
+              270,
+              586
+            ],
+            "mvar": [
+              -32,
+              104,
+              -2
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              50,
+              300,
+              648
+            ],
+            "mvar": [
+              -31,
+              108,
+              24
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              29,
+              280,
+              496
+            ],
+            "mvar": [
+              -36,
+              128,
+              0
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              0,
+              216,
+              562
+            ],
+            "mvar": [
+              -10,
+              102,
+              -68
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              0,
+              218,
+              702
+            ],
+            "mvar": [
+              -10,
+              102,
+              -74
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              1,
+              254,
+              796
+            ],
+            "mvar": [
+              -53,
+              140,
+              -70
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              0,
+              258,
+              650
+            ],
+            "mvar": [
+              -10,
+              122,
+              -62
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              57,
+              208,
+              718
+            ],
+            "mvar": [
+              -9,
+              100,
+              -96
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 879854.55
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 1414000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1416000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 6700000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 6690000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 17099854.55,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Ishurdi-Ghorashal",
+            "message": "Ishurdi-Ghorashal: the MW curve integrates to 794,000 kWh but its circuits are metered at 879,855 kWh (0.90x). Both are reproduced as published."
+          },
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 5,952,000 kWh but its circuits are metered at 2,830,000 kWh (2.10x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-01": {
@@ -1209,7 +1632,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 02-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (01.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (02.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              67,
+              206,
+              796
+            ],
+            "mvar": [
+              -3,
+              96,
+              -98
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              65,
+              256,
+              1074
+            ],
+            "mvar": [
+              -21,
+              114,
+              -118
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              91,
+              292,
+              1024
+            ],
+            "mvar": [
+              10,
+              130,
+              -90
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              96,
+              324,
+              1114
+            ],
+            "mvar": [
+              13,
+              144,
+              -62
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              94,
+              304,
+              1100
+            ],
+            "mvar": [
+              12,
+              130,
+              -60
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              94,
+              288,
+              1010
+            ],
+            "mvar": [
+              14,
+              130,
+              -58
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              95,
+              300,
+              832
+            ],
+            "mvar": [
+              18,
+              122,
+              -16
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              97,
+              292,
+              776
+            ],
+            "mvar": [
+              20,
+              134,
+              -4
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              108,
+              350,
+              978
+            ],
+            "mvar": [
+              23,
+              138,
+              38
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              126,
+              446,
+              1134
+            ],
+            "mvar": [
+              31,
+              166,
+              88
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              134,
+              486,
+              1214
+            ],
+            "mvar": [
+              34,
+              156,
+              140
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              131,
+              454,
+              1222
+            ],
+            "mvar": [
+              33,
+              102,
+              150
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              128,
+              480,
+              1266
+            ],
+            "mvar": [
+              29,
+              158,
+              164
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              126,
+              470,
+              1394
+            ],
+            "mvar": [
+              23,
+              156,
+              204
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              128,
+              470,
+              1492
+            ],
+            "mvar": [
+              25,
+              162,
+              214
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              135,
+              530,
+              1566
+            ],
+            "mvar": [
+              30,
+              184,
+              222
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              132,
+              480,
+              1506
+            ],
+            "mvar": [
+              28,
+              146,
+              210
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              81,
+              460,
+              1318
+            ],
+            "mvar": [
+              9,
+              130,
+              206
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              133,
+              470,
+              1386
+            ],
+            "mvar": [
+              29,
+              128,
+              138
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              136,
+              470,
+              1472
+            ],
+            "mvar": [
+              31,
+              124,
+              106
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              143,
+              510,
+              1482
+            ],
+            "mvar": [
+              33,
+              148,
+              78
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              139,
+              460,
+              1396
+            ],
+            "mvar": [
+              27,
+              112,
+              10
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              139,
+              450,
+              1344
+            ],
+            "mvar": [
+              31,
+              120,
+              62
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              144,
+              480,
+              1442
+            ],
+            "mvar": [
+              33,
+              128,
+              60
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              137,
+              470,
+              1390
+            ],
+            "mvar": [
+              29,
+              154,
+              52
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              142,
+              470,
+              1424
+            ],
+            "mvar": [
+              37,
+              160,
+              66
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2780072.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2448000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2452000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 14970000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 15000000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 37650072.73,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 9,850,000 kWh but its circuits are metered at 4,900,000 kWh (2.01x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-02": {
@@ -1709,7 +2551,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "regionalDemandSource": "bpdb-published",
       "sourceFiles": {
         "pgcb": "Daily Report 03-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (02.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (03.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              138,
+              440,
+              1442
+            ],
+            "mvar": [
+              32,
+              138,
+              46
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              137,
+              456,
+              1420
+            ],
+            "mvar": [
+              32,
+              140,
+              14
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              132,
+              420,
+              1386
+            ],
+            "mvar": [
+              35,
+              130,
+              36
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              135,
+              440,
+              1342
+            ],
+            "mvar": [
+              34,
+              128,
+              46
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              134,
+              450,
+              1384
+            ],
+            "mvar": [
+              33,
+              128,
+              64
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              133,
+              450,
+              1364
+            ],
+            "mvar": [
+              33,
+              128,
+              86
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              135,
+              460,
+              1412
+            ],
+            "mvar": [
+              39,
+              124,
+              116
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              136,
+              480,
+              1442
+            ],
+            "mvar": [
+              40,
+              122,
+              120
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              139,
+              560,
+              1504
+            ],
+            "mvar": [
+              42,
+              142,
+              162
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              149,
+              580,
+              1616
+            ],
+            "mvar": [
+              46,
+              170,
+              242
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              155,
+              610,
+              1720
+            ],
+            "mvar": [
+              45,
+              184,
+              288
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              158,
+              580,
+              1680
+            ],
+            "mvar": [
+              48,
+              184,
+              304
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              155,
+              560,
+              1804
+            ],
+            "mvar": [
+              49,
+              182,
+              310
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              155,
+              566,
+              1798
+            ],
+            "mvar": [
+              47,
+              180,
+              270
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              140,
+              484,
+              1678
+            ],
+            "mvar": [
+              37,
+              140,
+              212
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              150,
+              496,
+              1658
+            ],
+            "mvar": [
+              45,
+              176,
+              210
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              146,
+              490,
+              1602
+            ],
+            "mvar": [
+              41,
+              174,
+              226
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              138,
+              480,
+              1490
+            ],
+            "mvar": [
+              38,
+              160,
+              192
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              131,
+              400,
+              1372
+            ],
+            "mvar": [
+              33,
+              134,
+              168
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              137,
+              400,
+              1456
+            ],
+            "mvar": [
+              38,
+              150,
+              184
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              138,
+              364,
+              1314
+            ],
+            "mvar": [
+              40,
+              136,
+              68
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              136,
+              390,
+              1556
+            ],
+            "mvar": [
+              33,
+              122,
+              34
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              130,
+              390,
+              1616
+            ],
+            "mvar": [
+              28,
+              116,
+              58
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              136,
+              360,
+              1670
+            ],
+            "mvar": [
+              34,
+              104,
+              64
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              141,
+              390,
+              1474
+            ],
+            "mvar": [
+              40,
+              132,
+              70
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              137,
+              360,
+              1454
+            ],
+            "mvar": [
+              38,
+              126,
+              92
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3380581.82
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1672.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2808000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2817000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 18440000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 18470000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 45917254.55,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,241,500 kWh but its circuits are metered at 5,625,000 kWh (2.00x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-03": {
@@ -2324,7 +3585,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 04-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (03.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (04.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              133,
+              382,
+              1572
+            ],
+            "mvar": [
+              34,
+              128,
+              108
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              130,
+              380,
+              1552
+            ],
+            "mvar": [
+              36,
+              132,
+              106
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              131,
+              352,
+              1536
+            ],
+            "mvar": [
+              37,
+              144,
+              88
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              125,
+              348,
+              1528
+            ],
+            "mvar": [
+              32,
+              122,
+              66
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              133,
+              382,
+              1574
+            ],
+            "mvar": [
+              37,
+              130,
+              102
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              126,
+              392,
+              1596
+            ],
+            "mvar": [
+              30,
+              140,
+              114
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              128,
+              400,
+              1668
+            ],
+            "mvar": [
+              31,
+              120,
+              120
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              135,
+              420,
+              1514
+            ],
+            "mvar": [
+              39,
+              132,
+              134
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              142,
+              460,
+              1694
+            ],
+            "mvar": [
+              41,
+              150,
+              208
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              156,
+              522,
+              1790
+            ],
+            "mvar": [
+              49,
+              164,
+              260
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              166,
+              598,
+              1960
+            ],
+            "mvar": [
+              54,
+              188,
+              360
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              159,
+              578,
+              1956
+            ],
+            "mvar": [
+              50,
+              196,
+              312
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              159,
+              540,
+              1846
+            ],
+            "mvar": [
+              56,
+              196,
+              324
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              166,
+              530,
+              1826
+            ],
+            "mvar": [
+              59,
+              180,
+              312
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              163,
+              520,
+              1882
+            ],
+            "mvar": [
+              55,
+              174,
+              258
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              165,
+              510,
+              1866
+            ],
+            "mvar": [
+              57,
+              172,
+              274
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              175,
+              570,
+              2006
+            ],
+            "mvar": [
+              64,
+              210,
+              222
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              189,
+              570,
+              1902
+            ],
+            "mvar": [
+              43,
+              192,
+              348
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              181,
+              570,
+              1634
+            ],
+            "mvar": [
+              30,
+              176,
+              296
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              185,
+              580,
+              1648
+            ],
+            "mvar": [
+              31,
+              192,
+              282
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              174,
+              590,
+              1694
+            ],
+            "mvar": [
+              30,
+              206,
+              212
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              159,
+              490,
+              1672
+            ],
+            "mvar": [
+              20,
+              158,
+              188
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              154,
+              470,
+              1616
+            ],
+            "mvar": [
+              20,
+              162,
+              178
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              139,
+              430,
+              1642
+            ],
+            "mvar": [
+              11,
+              136,
+              154
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              130,
+              440,
+              1632
+            ],
+            "mvar": [
+              10,
+              150,
+              134
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              137,
+              460,
+              1720
+            ],
+            "mvar": [
+              15,
+              162,
+              122
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3608072.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2843000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2853000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20720000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20770000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 50794072.73,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,433,000 kWh but its circuits are metered at 5,696,000 kWh (2.01x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-04": {
@@ -3079,7 +4759,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 05-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (04.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (05.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              140,
+              440,
+              1878
+            ],
+            "mvar": [
+              21,
+              152,
+              128
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              133,
+              420,
+              1936
+            ],
+            "mvar": [
+              21,
+              150,
+              124
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              136,
+              446,
+              1814
+            ],
+            "mvar": [
+              23,
+              154,
+              170
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              140,
+              466,
+              1746
+            ],
+            "mvar": [
+              26,
+              162,
+              198
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              138,
+              464,
+              1772
+            ],
+            "mvar": [
+              24,
+              164,
+              196
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              149,
+              482,
+              1902
+            ],
+            "mvar": [
+              30,
+              174,
+              212
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              138,
+              430,
+              1844
+            ],
+            "mvar": [
+              25,
+              144,
+              208
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              138,
+              420,
+              1776
+            ],
+            "mvar": [
+              27,
+              158,
+              216
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              148,
+              430,
+              1776
+            ],
+            "mvar": [
+              36,
+              164,
+              306
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              167,
+              460,
+              1812
+            ],
+            "mvar": [
+              44,
+              156,
+              74
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              176,
+              500,
+              1942
+            ],
+            "mvar": [
+              49,
+              190,
+              368
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              186,
+              530,
+              2028
+            ],
+            "mvar": [
+              50,
+              186,
+              378
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              172,
+              490,
+              1870
+            ],
+            "mvar": [
+              43,
+              150,
+              360
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              149,
+              410,
+              1794
+            ],
+            "mvar": [
+              31,
+              104,
+              290
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              143,
+              390,
+              1736
+            ],
+            "mvar": [
+              32,
+              114,
+              322
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              152,
+              460,
+              1838
+            ],
+            "mvar": [
+              37,
+              168,
+              328
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              161,
+              480,
+              1730
+            ],
+            "mvar": [
+              40,
+              170,
+              320
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              179,
+              520,
+              1676
+            ],
+            "mvar": [
+              48,
+              180,
+              368
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              209,
+              610,
+              1798
+            ],
+            "mvar": [
+              44,
+              166,
+              374
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              223,
+              670,
+              1874
+            ],
+            "mvar": [
+              43,
+              186,
+              382
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              210,
+              660,
+              1920
+            ],
+            "mvar": [
+              45,
+              204,
+              362
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              183,
+              510,
+              1892
+            ],
+            "mvar": [
+              32,
+              150,
+              276
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              173,
+              500,
+              1930
+            ],
+            "mvar": [
+              28,
+              160,
+              266
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              163,
+              490,
+              2030
+            ],
+            "mvar": [
+              31,
+              194,
+              338
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              165,
+              500,
+              2002
+            ],
+            "mvar": [
+              34,
+              182,
+              316
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              127,
+              430,
+              1642
+            ],
+            "mvar": [
+              21,
+              170,
+              264
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3795418.18
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1672.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2844000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2851000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 22000000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 22040000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 53532090.91,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,405,500 kWh but its circuits are metered at 5,695,000 kWh (2.00x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-05": {
@@ -3729,7 +5828,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 06-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (05.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (06.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              122,
+              390,
+              1614
+            ],
+            "mvar": [
+              16,
+              128,
+              210
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              116,
+              368,
+              1530
+            ],
+            "mvar": [
+              22,
+              136,
+              220
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              126,
+              410,
+              1446
+            ],
+            "mvar": [
+              20,
+              150,
+              228
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              131,
+              420,
+              1446
+            ],
+            "mvar": [
+              20,
+              144,
+              216
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              130,
+              420,
+              1488
+            ],
+            "mvar": [
+              19,
+              134,
+              218
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              141,
+              440,
+              1518
+            ],
+            "mvar": [
+              24,
+              130,
+              256
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              141,
+              410,
+              1372
+            ],
+            "mvar": [
+              20,
+              114,
+              236
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              131,
+              390,
+              1200
+            ],
+            "mvar": [
+              18,
+              116,
+              258
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              155,
+              420,
+              1210
+            ],
+            "mvar": [
+              24,
+              116,
+              192
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              177,
+              460,
+              1302
+            ],
+            "mvar": [
+              26,
+              118,
+              330
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              191,
+              490,
+              1310
+            ],
+            "mvar": [
+              29,
+              124,
+              366
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              190,
+              480,
+              1378
+            ],
+            "mvar": [
+              28,
+              116,
+              384
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              168,
+              430,
+              1268
+            ],
+            "mvar": [
+              20,
+              108,
+              392
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              124,
+              340,
+              1120
+            ],
+            "mvar": [
+              6,
+              120,
+              262
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              118,
+              364,
+              1000
+            ],
+            "mvar": [
+              0,
+              124,
+              236
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              143,
+              380,
+              1194
+            ],
+            "mvar": [
+              9,
+              96,
+              294
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              140,
+              410,
+              1130
+            ],
+            "mvar": [
+              8,
+              108,
+              280
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              148,
+              430,
+              1196
+            ],
+            "mvar": [
+              11,
+              110,
+              300
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              145,
+              420,
+              1166
+            ],
+            "mvar": [
+              10,
+              104,
+              270
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              134,
+              400,
+              1150
+            ],
+            "mvar": [
+              7,
+              108,
+              246
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              134,
+              420,
+              1238
+            ],
+            "mvar": [
+              8,
+              140,
+              236
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              102,
+              320,
+              1190
+            ],
+            "mvar": [
+              -10,
+              110,
+              134
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              95,
+              320,
+              1326
+            ],
+            "mvar": [
+              -5,
+              120,
+              130
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              108,
+              366,
+              1350
+            ],
+            "mvar": [
+              2,
+              150,
+              184
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              103,
+              340,
+              1336
+            ],
+            "mvar": [
+              4,
+              124,
+              138
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              105,
+              360,
+              1334
+            ],
+            "mvar": [
+              4,
+              130,
+              122
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3286909.09
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2426000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2434000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 8146909.09,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 9,628,000 kWh but its circuits are metered at 4,860,000 kWh (1.98x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-06": {
@@ -4284,7 +6802,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 07-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (06.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (07.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              103,
+              352,
+              1330
+            ],
+            "mvar": [
+              0,
+              131,
+              118
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              94,
+              350,
+              1348
+            ],
+            "mvar": [
+              4,
+              120,
+              116
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              99,
+              360,
+              1400
+            ],
+            "mvar": [
+              9,
+              136,
+              136
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              115,
+              390,
+              1448
+            ],
+            "mvar": [
+              7,
+              134,
+              134
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              121,
+              400,
+              1404
+            ],
+            "mvar": [
+              10,
+              140,
+              158
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              126,
+              400,
+              1404
+            ],
+            "mvar": [
+              13,
+              136,
+              174
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              134,
+              390,
+              1382
+            ],
+            "mvar": [
+              18,
+              130,
+              202
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              130,
+              380,
+              1334
+            ],
+            "mvar": [
+              16,
+              120,
+              188
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              148,
+              416,
+              1344
+            ],
+            "mvar": [
+              27,
+              154,
+              272
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              186,
+              506,
+              1696
+            ],
+            "mvar": [
+              46,
+              172,
+              376
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              202,
+              568,
+              1782
+            ],
+            "mvar": [
+              61,
+              194,
+              398
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              208,
+              590,
+              1942
+            ],
+            "mvar": [
+              63,
+              204,
+              444
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              200,
+              552,
+              1836
+            ],
+            "mvar": [
+              63,
+              166,
+              446
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              210,
+              556,
+              1724
+            ],
+            "mvar": [
+              53,
+              172,
+              420
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              242,
+              722,
+              1716
+            ],
+            "mvar": [
+              56,
+              224,
+              470
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              228,
+              590,
+              1824
+            ],
+            "mvar": [
+              67,
+              214,
+              520
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              222,
+              560,
+              1812
+            ],
+            "mvar": [
+              55,
+              194,
+              492
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              197,
+              490,
+              1764
+            ],
+            "mvar": [
+              25,
+              118,
+              474
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              162,
+              410,
+              1320
+            ],
+            "mvar": [
+              8,
+              112,
+              308
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              173,
+              470,
+              1508
+            ],
+            "mvar": [
+              8,
+              138,
+              356
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              171,
+              520,
+              1642
+            ],
+            "mvar": [
+              9,
+              150,
+              344
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              142,
+              410,
+              1512
+            ],
+            "mvar": [
+              -2,
+              112,
+              270
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              143,
+              430,
+              1492
+            ],
+            "mvar": [
+              -4,
+              130,
+              270
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              143,
+              440,
+              1472
+            ],
+            "mvar": [
+              -1,
+              150,
+              260
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              136,
+              440,
+              1426
+            ],
+            "mvar": [
+              -5,
+              152,
+              246
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              140,
+              470,
+              1456
+            ],
+            "mvar": [
+              -4,
+              170,
+              232
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3877381.82
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1672.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2801000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2810000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 18650000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 18670000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 46810054.55,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,311,000 kWh but its circuits are metered at 5,611,000 kWh (2.02x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-07": {
@@ -4783,7 +7720,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 08-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (07.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (08.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              146,
+              472,
+              1484
+            ],
+            "mvar": [
+              -1,
+              162,
+              238
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              127,
+              434,
+              1400
+            ],
+            "mvar": [
+              -6,
+              156,
+              246
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              128,
+              440,
+              1390
+            ],
+            "mvar": [
+              -4,
+              150,
+              256
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              138,
+              430,
+              1428
+            ],
+            "mvar": [
+              3,
+              168,
+              286
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              144,
+              450,
+              1532
+            ],
+            "mvar": [
+              4,
+              164,
+              304
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              147,
+              430,
+              1560
+            ],
+            "mvar": [
+              3,
+              142,
+              290
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              143,
+              400,
+              1398
+            ],
+            "mvar": [
+              5,
+              138,
+              316
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              138,
+              390,
+              1430
+            ],
+            "mvar": [
+              7,
+              138,
+              334
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              160,
+              450,
+              1554
+            ],
+            "mvar": [
+              15,
+              160,
+              376
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              196,
+              560,
+              1834
+            ],
+            "mvar": [
+              37,
+              210,
+              504
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              200,
+              570,
+              1914
+            ],
+            "mvar": [
+              44,
+              218,
+              538
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              190,
+              540,
+              1790
+            ],
+            "mvar": [
+              43,
+              216,
+              552
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              187,
+              540,
+              1728
+            ],
+            "mvar": [
+              50,
+              236,
+              536
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              165,
+              520,
+              1614
+            ],
+            "mvar": [
+              37,
+              204,
+              548
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              171,
+              540,
+              1670
+            ],
+            "mvar": [
+              44,
+              220,
+              586
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              191,
+              570,
+              1858
+            ],
+            "mvar": [
+              65,
+              248,
+              740
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              176,
+              490,
+              1726
+            ],
+            "mvar": [
+              61,
+              220,
+              700
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              174,
+              480,
+              1658
+            ],
+            "mvar": [
+              54,
+              200,
+              622
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              188,
+              520,
+              1588
+            ],
+            "mvar": [
+              21,
+              160,
+              506
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              188,
+              490,
+              1576
+            ],
+            "mvar": [
+              23,
+              132,
+              528
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              189,
+              480,
+              1546
+            ],
+            "mvar": [
+              30,
+              140,
+              476
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              162,
+              410,
+              1546
+            ],
+            "mvar": [
+              24,
+              150,
+              488
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              148,
+              410,
+              1514
+            ],
+            "mvar": [
+              18,
+              156,
+              440
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              144,
+              410,
+              1490
+            ],
+            "mvar": [
+              28,
+              180,
+              462
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              142,
+              430,
+              1560
+            ],
+            "mvar": [
+              23,
+              162,
+              446
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              134,
+              450,
+              1630
+            ],
+            "mvar": [
+              12,
+              180,
+              466
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3864000
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2813000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2821000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 19370000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 19410000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 48278000,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,372,500 kWh but its circuits are metered at 5,634,000 kWh (2.02x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-08": {
@@ -5289,7 +8645,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 09-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (08.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (09.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              142,
+              470,
+              1678
+            ],
+            "mvar": [
+              15,
+              196,
+              440
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              133,
+              454,
+              1612
+            ],
+            "mvar": [
+              15,
+              196,
+              428
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              142,
+              460,
+              1628
+            ],
+            "mvar": [
+              20,
+              182,
+              436
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              141,
+              450,
+              1598
+            ],
+            "mvar": [
+              19,
+              180,
+              418
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              141,
+              450,
+              1594
+            ],
+            "mvar": [
+              20,
+              180,
+              420
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              147,
+              440,
+              1970
+            ],
+            "mvar": [
+              25,
+              178,
+              448
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              142,
+              370,
+              1426
+            ],
+            "mvar": [
+              27,
+              154,
+              458
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              146,
+              380,
+              1520
+            ],
+            "mvar": [
+              26,
+              142,
+              440
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              176,
+              470,
+              1748
+            ],
+            "mvar": [
+              40,
+              176,
+              548
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              203,
+              540,
+              1834
+            ],
+            "mvar": [
+              59,
+              194,
+              580
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              198,
+              530,
+              1868
+            ],
+            "mvar": [
+              53,
+              190,
+              604
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              192,
+              500,
+              1790
+            ],
+            "mvar": [
+              53,
+              188,
+              600
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              178,
+              502,
+              1684
+            ],
+            "mvar": [
+              45,
+              184,
+              600
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              155,
+              410,
+              1422
+            ],
+            "mvar": [
+              42,
+              168,
+              588
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              159,
+              480,
+              1598
+            ],
+            "mvar": [
+              40,
+              224,
+              590
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              156,
+              454,
+              1550
+            ],
+            "mvar": [
+              44,
+              218,
+              644
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              155,
+              460,
+              1578
+            ],
+            "mvar": [
+              42,
+              208,
+              646
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              162,
+              500,
+              1670
+            ],
+            "mvar": [
+              41,
+              216,
+              660
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              178,
+              480,
+              1612
+            ],
+            "mvar": [
+              54,
+              196,
+              636
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              179,
+              500,
+              1612
+            ],
+            "mvar": [
+              57,
+              196,
+              640
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              173,
+              468,
+              1624
+            ],
+            "mvar": [
+              61,
+              190,
+              626
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              171,
+              466,
+              1734
+            ],
+            "mvar": [
+              57,
+              170,
+              600
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              198,
+              540,
+              1850
+            ],
+            "mvar": [
+              69,
+              202,
+              634
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              176,
+              496,
+              1688
+            ],
+            "mvar": [
+              59,
+              220,
+              600
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              191,
+              560,
+              1788
+            ],
+            "mvar": [
+              54,
+              210,
+              576
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              182,
+              520,
+              1694
+            ],
+            "mvar": [
+              51,
+              210,
+              578
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3987781.82
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2847000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2855000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 19940000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 19990000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 49619781.82,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,403,000 kWh but its circuits are metered at 5,702,000 kWh (2.00x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-09": {
@@ -5914,7 +9689,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 10-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (09.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (10.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              177,
+              510,
+              1678
+            ],
+            "mvar": [
+              49,
+              200,
+              572
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              164,
+              510,
+              1700
+            ],
+            "mvar": [
+              38,
+              200,
+              534
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              155,
+              480,
+              1622
+            ],
+            "mvar": [
+              44,
+              190,
+              526
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              160,
+              470,
+              1546
+            ],
+            "mvar": [
+              37,
+              184,
+              516
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              174,
+              528,
+              1630
+            ],
+            "mvar": [
+              39,
+              182,
+              528
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              189,
+              558,
+              1730
+            ],
+            "mvar": [
+              46,
+              184,
+              532
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              189,
+              524,
+              1652
+            ],
+            "mvar": [
+              49,
+              168,
+              534
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              189,
+              506,
+              1688
+            ],
+            "mvar": [
+              48,
+              110,
+              530
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              155,
+              518,
+              1596
+            ],
+            "mvar": [
+              14,
+              136,
+              491
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              204,
+              524,
+              1730
+            ],
+            "mvar": [
+              44,
+              168,
+              600
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              196,
+              576,
+              1838
+            ],
+            "mvar": [
+              37,
+              170,
+              602
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              189,
+              532,
+              1848
+            ],
+            "mvar": [
+              33,
+              122,
+              606
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              194,
+              480,
+              1780
+            ],
+            "mvar": [
+              48,
+              122,
+              602
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              174,
+              480,
+              1746
+            ],
+            "mvar": [
+              30,
+              124,
+              564
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              165,
+              488,
+              1700
+            ],
+            "mvar": [
+              35,
+              146,
+              580
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              170,
+              534,
+              1772
+            ],
+            "mvar": [
+              38,
+              176,
+              622
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              162,
+              492,
+              1596
+            ],
+            "mvar": [
+              34,
+              148,
+              572
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              166,
+              516,
+              1640
+            ],
+            "mvar": [
+              32,
+              150,
+              574
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              158,
+              478,
+              1476
+            ],
+            "mvar": [
+              26,
+              134,
+              520
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              179,
+              542,
+              1660
+            ],
+            "mvar": [
+              27,
+              144,
+              556
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              179,
+              536,
+              1734
+            ],
+            "mvar": [
+              32,
+              168,
+              558
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              170,
+              484,
+              1854
+            ],
+            "mvar": [
+              28,
+              144,
+              500
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              154,
+              452,
+              1852
+            ],
+            "mvar": [
+              22,
+              132,
+              478
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              156,
+              480,
+              1882
+            ],
+            "mvar": [
+              26,
+              170,
+              492
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              152,
+              478,
+              1852
+            ],
+            "mvar": [
+              22,
+              156,
+              466
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              166,
+              516,
+              1912
+            ],
+            "mvar": [
+              23,
+              150,
+              468
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4150036.36
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1672.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3057000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3066000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20770000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20810000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 51854709.09,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 12,181,500 kWh but its circuits are metered at 6,123,000 kWh (1.99x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-10": {
@@ -6385,7 +10579,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 11-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (10.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (11.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              162,
+              492,
+              1876
+            ],
+            "mvar": [
+              21,
+              140,
+              442
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              153,
+              470,
+              1844
+            ],
+            "mvar": [
+              18,
+              138,
+              414
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              153,
+              460,
+              1890
+            ],
+            "mvar": [
+              13,
+              114,
+              414
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              147,
+              438,
+              1756
+            ],
+            "mvar": [
+              15,
+              128,
+              418
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              143,
+              392,
+              1708
+            ],
+            "mvar": [
+              15,
+              116,
+              416
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              146,
+              404,
+              1572
+            ],
+            "mvar": [
+              16,
+              104,
+              406
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              150,
+              394,
+              1545
+            ],
+            "mvar": [
+              13,
+              100,
+              412
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              155,
+              406,
+              1656
+            ],
+            "mvar": [
+              15,
+              100,
+              418
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              186,
+              502,
+              1854
+            ],
+            "mvar": [
+              28,
+              134,
+              532
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              219,
+              602,
+              1920
+            ],
+            "mvar": [
+              51,
+              176,
+              578
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              205,
+              582,
+              1894
+            ],
+            "mvar": [
+              49,
+              170,
+              606
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              186,
+              520,
+              1808
+            ],
+            "mvar": [
+              35,
+              154,
+              560
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              182,
+              540,
+              1810
+            ],
+            "mvar": [
+              44,
+              134,
+              596
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              157,
+              470,
+              1674
+            ],
+            "mvar": [
+              14,
+              88,
+              450
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              165,
+              516,
+              1638
+            ],
+            "mvar": [
+              15,
+              124,
+              460
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              185,
+              520,
+              1786
+            ],
+            "mvar": [
+              39,
+              134,
+              562
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              212,
+              570,
+              1254
+            ],
+            "mvar": [
+              56,
+              146,
+              624
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              203,
+              528,
+              1764
+            ],
+            "mvar": [
+              44,
+              138,
+              574
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              190,
+              536,
+              1796
+            ],
+            "mvar": [
+              32,
+              134,
+              516
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              193,
+              554,
+              1824
+            ],
+            "mvar": [
+              31,
+              124,
+              464
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              185,
+              542,
+              1708
+            ],
+            "mvar": [
+              31,
+              156,
+              458
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              149,
+              450,
+              1548
+            ],
+            "mvar": [
+              11,
+              128,
+              370
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              140,
+              424,
+              1495
+            ],
+            "mvar": [
+              5,
+              116,
+              358
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              155,
+              452,
+              1586
+            ],
+            "mvar": [
+              17,
+              134,
+              390
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              155,
+              454,
+              1598
+            ],
+            "mvar": [
+              15,
+              132,
+              390
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              162,
+              484,
+              1694
+            ],
+            "mvar": [
+              16,
+              138,
+              426
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4091490.91
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2916000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2925000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20910000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20960000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 51802490.91,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,685,000 kWh but its circuits are metered at 5,841,000 kWh (2.00x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-11": {
@@ -6912,7 +11525,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 12-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (11.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (12.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              168,
+              480,
+              1700
+            ],
+            "mvar": [
+              19,
+              128,
+              416
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              160,
+              452,
+              1666
+            ],
+            "mvar": [
+              17,
+              114,
+              420
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              153,
+              432,
+              1612
+            ],
+            "mvar": [
+              15,
+              106,
+              404
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              169,
+              472,
+              1726
+            ],
+            "mvar": [
+              24,
+              114,
+              462
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              162,
+              458,
+              1680
+            ],
+            "mvar": [
+              21,
+              100,
+              416
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              165,
+              464,
+              1692
+            ],
+            "mvar": [
+              20,
+              112,
+              412
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              171,
+              480,
+              1672
+            ],
+            "mvar": [
+              24,
+              40,
+              436
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              167,
+              496,
+              1732
+            ],
+            "mvar": [
+              19,
+              102,
+              426
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              189,
+              552,
+              1850
+            ],
+            "mvar": [
+              29,
+              136,
+              502
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              211,
+              620,
+              1952
+            ],
+            "mvar": [
+              46,
+              162,
+              570
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              209,
+              560,
+              1882
+            ],
+            "mvar": [
+              45,
+              140,
+              594
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              212,
+              592,
+              1882
+            ],
+            "mvar": [
+              47,
+              154,
+              618
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              193,
+              570,
+              1866
+            ],
+            "mvar": [
+              39,
+              142,
+              624
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              186,
+              588,
+              1812
+            ],
+            "mvar": [
+              30,
+              128,
+              524
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              210,
+              632,
+              2036
+            ],
+            "mvar": [
+              47,
+              142,
+              616
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              228,
+              668,
+              1942
+            ],
+            "mvar": [
+              60,
+              167,
+              560
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              227,
+              650,
+              1872
+            ],
+            "mvar": [
+              55,
+              182,
+              568
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              241,
+              730,
+              2008
+            ],
+            "mvar": [
+              57,
+              200,
+              644
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              224,
+              660,
+              1856
+            ],
+            "mvar": [
+              51,
+              192,
+              614
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              219,
+              674,
+              1858
+            ],
+            "mvar": [
+              45,
+              192,
+              602
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              215,
+              660,
+              1880
+            ],
+            "mvar": [
+              42,
+              180,
+              576
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              179,
+              530,
+              1774
+            ],
+            "mvar": [
+              22,
+              120,
+              510
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              171,
+              506,
+              1792
+            ],
+            "mvar": [
+              17,
+              106,
+              486
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              173,
+              526,
+              1730
+            ],
+            "mvar": [
+              20,
+              152,
+              484
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              170,
+              520,
+              1690
+            ],
+            "mvar": [
+              14,
+              130,
+              434
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              176,
+              562,
+              1704
+            ],
+            "mvar": [
+              19,
+              174,
+              466
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4548145.45
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1672.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3346000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3360000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 21810000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 21850000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 54915818.18,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,351,500 kWh but its circuits are metered at 6,706,000 kWh (1.99x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-12": {
@@ -7576,7 +12608,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 13-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (12.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (13.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              170,
+              552,
+              1770
+            ],
+            "mvar": [
+              12,
+              160,
+              428
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              167,
+              560,
+              1810
+            ],
+            "mvar": [
+              10,
+              160,
+              406
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              172,
+              592,
+              1804
+            ],
+            "mvar": [
+              12,
+              152,
+              416
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              168,
+              590,
+              1824
+            ],
+            "mvar": [
+              6,
+              156,
+              416
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              175,
+              612,
+              1870
+            ],
+            "mvar": [
+              9,
+              148,
+              406
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              178,
+              610,
+              1896
+            ],
+            "mvar": [
+              10,
+              128,
+              406
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              153,
+              500,
+              1618
+            ],
+            "mvar": [
+              -2,
+              88,
+              352
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              150,
+              510,
+              1588
+            ],
+            "mvar": [
+              3,
+              104,
+              362
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              163,
+              540,
+              1710
+            ],
+            "mvar": [
+              2,
+              112,
+              366
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              173,
+              620,
+              1786
+            ],
+            "mvar": [
+              5,
+              166,
+              356
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              184,
+              610,
+              1834
+            ],
+            "mvar": [
+              6,
+              112,
+              396
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              184,
+              600,
+              1818
+            ],
+            "mvar": [
+              8,
+              116,
+              398
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              182,
+              580,
+              1764
+            ],
+            "mvar": [
+              10,
+              120,
+              406
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              182,
+              630,
+              1774
+            ],
+            "mvar": [
+              1,
+              152,
+              396
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              182,
+              616,
+              1774
+            ],
+            "mvar": [
+              6,
+              132,
+              410
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              186,
+              620,
+              1840
+            ],
+            "mvar": [
+              11,
+              146,
+              442
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              175,
+              576,
+              1810
+            ],
+            "mvar": [
+              4,
+              122,
+              400
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              172,
+              580,
+              1832
+            ],
+            "mvar": [
+              4,
+              120,
+              384
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              167,
+              560,
+              1750
+            ],
+            "mvar": [
+              4,
+              108,
+              368
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              169,
+              542,
+              1748
+            ],
+            "mvar": [
+              -2,
+              102,
+              374
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              155,
+              530,
+              1690
+            ],
+            "mvar": [
+              -8,
+              104,
+              312
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              116,
+              400,
+              1540
+            ],
+            "mvar": [
+              -11,
+              86,
+              260
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              116,
+              440,
+              1594
+            ],
+            "mvar": [
+              -12,
+              100,
+              262
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              118,
+              450,
+              1570
+            ],
+            "mvar": [
+              -13,
+              110,
+              264
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              156,
+              570,
+              1758
+            ],
+            "mvar": [
+              4,
+              158,
+              342
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              167,
+              600,
+              1806
+            ],
+            "mvar": [
+              4,
+              162,
+              400
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3987781.82
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3397000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3406000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 21050000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 21080000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 52920781.82,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,628,000 kWh but its circuits are metered at 6,803,000 kWh (2.00x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-13": {
@@ -8205,7 +13656,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 14-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (13.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (14.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              153,
+              560,
+              1778
+            ],
+            "mvar": [
+              -7,
+              140,
+              344
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              141,
+              552,
+              1792
+            ],
+            "mvar": [
+              -11,
+              144,
+              320
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              135,
+              560,
+              1760
+            ],
+            "mvar": [
+              -15,
+              148,
+              342
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              125,
+              530,
+              1690
+            ],
+            "mvar": [
+              -18,
+              116,
+              332
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              133,
+              530,
+              1696
+            ],
+            "mvar": [
+              -12,
+              104,
+              340
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              146,
+              530,
+              1794
+            ],
+            "mvar": [
+              -7,
+              88,
+              346
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              141,
+              520,
+              1804
+            ],
+            "mvar": [
+              -8,
+              104,
+              332
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              137,
+              510,
+              1858
+            ],
+            "mvar": [
+              -21,
+              108,
+              348
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              151,
+              520,
+              1896
+            ],
+            "mvar": [
+              -12,
+              130,
+              370
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              195,
+              630,
+              2114
+            ],
+            "mvar": [
+              16,
+              168,
+              520
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              215,
+              666,
+              2080
+            ],
+            "mvar": [
+              39,
+              166,
+              582
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              214,
+              646,
+              2080
+            ],
+            "mvar": [
+              44,
+              168,
+              660
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              197,
+              612,
+              1946
+            ],
+            "mvar": [
+              26,
+              166,
+              576
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              172,
+              580,
+              1882
+            ],
+            "mvar": [
+              10,
+              138,
+              488
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              181,
+              600,
+              1934
+            ],
+            "mvar": [
+              25,
+              164,
+              506
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              189,
+              630,
+              1950
+            ],
+            "mvar": [
+              28,
+              166,
+              542
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              176,
+              590,
+              1902
+            ],
+            "mvar": [
+              23,
+              142,
+              512
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              181,
+              590,
+              1930
+            ],
+            "mvar": [
+              29,
+              134,
+              520
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              187,
+              580,
+              1846
+            ],
+            "mvar": [
+              39,
+              168,
+              520
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              187,
+              590,
+              1876
+            ],
+            "mvar": [
+              37,
+              146,
+              480
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              181,
+              610,
+              1812
+            ],
+            "mvar": [
+              29,
+              154,
+              434
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              168,
+              560,
+              1914
+            ],
+            "mvar": [
+              18,
+              106,
+              428
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              171,
+              570,
+              1904
+            ],
+            "mvar": [
+              22,
+              126,
+              436
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              161,
+              550,
+              1858
+            ],
+            "mvar": [
+              16,
+              112,
+              434
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              165,
+              540,
+              1860
+            ],
+            "mvar": [
+              17,
+              112,
+              444
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              154,
+              552,
+              1786
+            ],
+            "mvar": [
+              9,
+              138,
+              402
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4021236.36
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3423000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 343400
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 22880000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 22950000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 53617636.36,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,736,500 kWh but its circuits are metered at 3,766,400 kWh (3.65x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-14": {
@@ -8697,7 +14567,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 15-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (14.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (15.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              150,
+              520,
+              1844
+            ],
+            "mvar": [
+              3,
+              104,
+              412
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              152,
+              540,
+              1846
+            ],
+            "mvar": [
+              8,
+              134,
+              434
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              151,
+              530,
+              1824
+            ],
+            "mvar": [
+              9,
+              140,
+              424
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              152,
+              542,
+              1830
+            ],
+            "mvar": [
+              8,
+              134,
+              434
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              153,
+              546,
+              1754
+            ],
+            "mvar": [
+              11,
+              150,
+              440
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              153,
+              544,
+              1748
+            ],
+            "mvar": [
+              10,
+              146,
+              424
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              156,
+              540,
+              1748
+            ],
+            "mvar": [
+              17,
+              124,
+              428
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              152,
+              526,
+              1670
+            ],
+            "mvar": [
+              13,
+              124,
+              426
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              179,
+              556,
+              1842
+            ],
+            "mvar": [
+              28,
+              128,
+              530
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              204,
+              612,
+              1928
+            ],
+            "mvar": [
+              52,
+              160,
+              610
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              209,
+              630,
+              1980
+            ],
+            "mvar": [
+              58,
+              176,
+              686
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              198,
+              630,
+              1970
+            ],
+            "mvar": [
+              47,
+              182,
+              694
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              191,
+              550,
+              1842
+            ],
+            "mvar": [
+              47,
+              142,
+              666
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              192,
+              540,
+              1820
+            ],
+            "mvar": [
+              35,
+              110,
+              568
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              183,
+              548,
+              1750
+            ],
+            "mvar": [
+              31,
+              114,
+              558
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              199,
+              600,
+              1896
+            ],
+            "mvar": [
+              45,
+              150,
+              582
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              188,
+              570,
+              1906
+            ],
+            "mvar": [
+              35,
+              134,
+              572
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              184,
+              560,
+              1902
+            ],
+            "mvar": [
+              35,
+              130,
+              564
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              172,
+              534,
+              1840
+            ],
+            "mvar": [
+              32,
+              128,
+              554
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              170,
+              524,
+              1784
+            ],
+            "mvar": [
+              28,
+              120,
+              534
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              189,
+              596,
+              1934
+            ],
+            "mvar": [
+              33,
+              154,
+              536
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              165,
+              520,
+              1818
+            ],
+            "mvar": [
+              23,
+              112,
+              482
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              162,
+              514,
+              1750
+            ],
+            "mvar": [
+              26,
+              108,
+              468
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              150,
+              486,
+              1676
+            ],
+            "mvar": [
+              9,
+              104,
+              402
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              141,
+              474,
+              1598
+            ],
+            "mvar": [
+              4,
+              110,
+              386
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              148,
+              510,
+              1734
+            ],
+            "mvar": [
+              8,
+              126,
+              430
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4108218.18
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3306000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3315000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 21790000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 21840000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 54359218.18,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,155,000 kWh but its circuits are metered at 6,621,000 kWh (1.99x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-15": {
@@ -9105,7 +15394,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report-16-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (15.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (16.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              158,
+              524,
+              1770
+            ],
+            "mvar": [
+              15,
+              120,
+              486
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              163,
+              534,
+              1794
+            ],
+            "mvar": [
+              12,
+              118,
+              476
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              160,
+              542,
+              1752
+            ],
+            "mvar": [
+              9,
+              114,
+              466
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              151,
+              528,
+              1806
+            ],
+            "mvar": [
+              3,
+              114,
+              456
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              152,
+              529,
+              1762
+            ],
+            "mvar": [
+              12,
+              116,
+              430
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              154,
+              516,
+              1784
+            ],
+            "mvar": [
+              15,
+              98,
+              430
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              154,
+              500,
+              1698
+            ],
+            "mvar": [
+              15,
+              88,
+              434
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              153,
+              508,
+              1734
+            ],
+            "mvar": [
+              9,
+              86,
+              440
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              175,
+              560,
+              1876
+            ],
+            "mvar": [
+              25,
+              112,
+              520
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              193,
+              590,
+              1906
+            ],
+            "mvar": [
+              44,
+              150,
+              570
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              206,
+              624,
+              1972
+            ],
+            "mvar": [
+              49,
+              164,
+              614
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              190,
+              588,
+              1972
+            ],
+            "mvar": [
+              35,
+              154,
+              614
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              191,
+              608,
+              1856
+            ],
+            "mvar": [
+              35,
+              160,
+              610
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              213,
+              654,
+              1936
+            ],
+            "mvar": [
+              53,
+              182,
+              624
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              203,
+              620,
+              1942
+            ],
+            "mvar": [
+              38,
+              140,
+              608
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              182,
+              592,
+              1866
+            ],
+            "mvar": [
+              34,
+              120,
+              572
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              211,
+              660,
+              2016
+            ],
+            "mvar": [
+              52,
+              160,
+              604
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              209,
+              610,
+              1904
+            ],
+            "mvar": [
+              56,
+              150,
+              600
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              194,
+              582,
+              1826
+            ],
+            "mvar": [
+              54,
+              160,
+              564
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              187,
+              594,
+              1832
+            ],
+            "mvar": [
+              49,
+              158,
+              498
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              190,
+              574,
+              1884
+            ],
+            "mvar": [
+              48,
+              128,
+              482
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              161,
+              502,
+              1722
+            ],
+            "mvar": [
+              32,
+              92,
+              432
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              167,
+              494,
+              1608
+            ],
+            "mvar": [
+              35,
+              94,
+              378
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              151,
+              486,
+              1608
+            ],
+            "mvar": [
+              18,
+              112,
+              378
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              148,
+              496,
+              1632
+            ],
+            "mvar": [
+              12,
+              112,
+              348
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              167,
+              554,
+              1716
+            ],
+            "mvar": [
+              24,
+              116,
+              406
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4243709.09
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3391000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3397000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 21880000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 21890000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 54801709.09,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,480,000 kWh but its circuits are metered at 6,788,000 kWh (1.99x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-16": {
@@ -9471,7 +16179,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 17-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (16.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (17.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              186,
+              590,
+              1852
+            ],
+            "mvar": [
+              37,
+              128,
+              454
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              159,
+              520,
+              1722
+            ],
+            "mvar": [
+              25,
+              104,
+              398
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              155,
+              522,
+              1676
+            ],
+            "mvar": [
+              22,
+              110,
+              396
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              153,
+              502,
+              1632
+            ],
+            "mvar": [
+              22,
+              96,
+              360
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              156,
+              514,
+              1636
+            ],
+            "mvar": [
+              24,
+              104,
+              368
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              155,
+              504,
+              1586
+            ],
+            "mvar": [
+              25,
+              104,
+              382
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              134,
+              468,
+              1268
+            ],
+            "mvar": [
+              15,
+              80,
+              268
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              135,
+              470,
+              1340
+            ],
+            "mvar": [
+              8,
+              64,
+              260
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              153,
+              502,
+              1412
+            ],
+            "mvar": [
+              20,
+              86,
+              326
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              194,
+              596,
+              1640
+            ],
+            "mvar": [
+              38,
+              102,
+              400
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              208,
+              630,
+              1740
+            ],
+            "mvar": [
+              49,
+              120,
+              470
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              205,
+              648,
+              1698
+            ],
+            "mvar": [
+              43,
+              144,
+              480
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              211,
+              630,
+              1764
+            ],
+            "mvar": [
+              52,
+              130,
+              526
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              210,
+              618,
+              1802
+            ],
+            "mvar": [
+              51,
+              134,
+              530
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              212,
+              626,
+              1792
+            ],
+            "mvar": [
+              54,
+              130,
+              524
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              211,
+              628,
+              1774
+            ],
+            "mvar": [
+              51,
+              128,
+              486
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              207,
+              610,
+              1782
+            ],
+            "mvar": [
+              53,
+              130,
+              494
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              199,
+              600,
+              1640
+            ],
+            "mvar": [
+              52,
+              130,
+              476
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              196,
+              540,
+              1566
+            ],
+            "mvar": [
+              51,
+              104,
+              470
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              186,
+              550,
+              1506
+            ],
+            "mvar": [
+              42,
+              114,
+              442
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              196,
+              582,
+              1508
+            ],
+            "mvar": [
+              45,
+              134,
+              416
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              168,
+              456,
+              1358
+            ],
+            "mvar": [
+              35,
+              64,
+              376
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              160,
+              456,
+              1380
+            ],
+            "mvar": [
+              31,
+              64,
+              352
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              164,
+              516,
+              1490
+            ],
+            "mvar": [
+              26,
+              102,
+              368
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              161,
+              518,
+              1532
+            ],
+            "mvar": [
+              21,
+              100,
+              340
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              164,
+              556,
+              1596
+            ],
+            "mvar": [
+              21,
+              88,
+              354
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4280509.09
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3666000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3680000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 19320000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 19370000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 50316509.09,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,292,000 kWh but its circuits are metered at 7,346,000 kWh (1.81x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-17": {
@@ -9928,7 +17055,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 18-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (17.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (18.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              175,
+              504,
+              1712
+            ],
+            "mvar": [
+              42,
+              90,
+              388
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              150,
+              492,
+              1606
+            ],
+            "mvar": [
+              31,
+              98,
+              312
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              145,
+              508,
+              1622
+            ],
+            "mvar": [
+              29,
+              96,
+              338
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              158,
+              526,
+              1674
+            ],
+            "mvar": [
+              19,
+              96,
+              334
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              151,
+              530,
+              1618
+            ],
+            "mvar": [
+              13,
+              106,
+              278
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              142,
+              504,
+              1572
+            ],
+            "mvar": [
+              10,
+              102,
+              262
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              143,
+              516,
+              1586
+            ],
+            "mvar": [
+              10,
+              114,
+              272
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              146,
+              516,
+              1550
+            ],
+            "mvar": [
+              9,
+              118,
+              244
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              163,
+              502,
+              1704
+            ],
+            "mvar": [
+              29,
+              92,
+              376
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              194,
+              580,
+              1794
+            ],
+            "mvar": [
+              46,
+              124,
+              410
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              202,
+              602,
+              1942
+            ],
+            "mvar": [
+              52,
+              116,
+              490
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              205,
+              618,
+              1932
+            ],
+            "mvar": [
+              43,
+              120,
+              500
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              200,
+              570,
+              1990
+            ],
+            "mvar": [
+              32,
+              108,
+              518
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              198,
+              570,
+              1912
+            ],
+            "mvar": [
+              39,
+              108,
+              480
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              203,
+              630,
+              1964
+            ],
+            "mvar": [
+              37,
+              144,
+              466
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              193,
+              580,
+              1914
+            ],
+            "mvar": [
+              31,
+              104,
+              434
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              179,
+              520,
+              1840
+            ],
+            "mvar": [
+              35,
+              90,
+              416
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              170,
+              460,
+              1754
+            ],
+            "mvar": [
+              36,
+              78,
+              400
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              154,
+              468,
+              1676
+            ],
+            "mvar": [
+              37,
+              136,
+              404
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              172,
+              580,
+              1706
+            ],
+            "mvar": [
+              36,
+              160,
+              338
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              183,
+              552,
+              1766
+            ],
+            "mvar": [
+              42,
+              136,
+              354
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              172,
+              530,
+              1768
+            ],
+            "mvar": [
+              35,
+              124,
+              300
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              161,
+              510,
+              1712
+            ],
+            "mvar": [
+              29,
+              120,
+              300
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              162,
+              500,
+              1680
+            ],
+            "mvar": [
+              27,
+              118,
+              306
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              149,
+              510,
+              1618
+            ],
+            "mvar": [
+              19,
+              120,
+              274
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              140,
+              460,
+              1600
+            ],
+            "mvar": [
+              14,
+              104,
+              292
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 4034618.18
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2866000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2874000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20860000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20900000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 51534618.18,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 12,740,500 kWh but its circuits are metered at 5,740,000 kWh (2.22x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-18": {
@@ -10591,7 +18137,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 19-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (18.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (19.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              158,
+              520,
+              1748
+            ],
+            "mvar": [
+              25,
+              122,
+              342
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              139,
+              480,
+              1436
+            ],
+            "mvar": [
+              16,
+              106,
+              226
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              128,
+              460,
+              1626
+            ],
+            "mvar": [
+              10,
+              96,
+              272
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              120,
+              442,
+              1572
+            ],
+            "mvar": [
+              6,
+              92,
+              252
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              127,
+              480,
+              1532
+            ],
+            "mvar": [
+              -8,
+              90,
+              214
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              115,
+              482,
+              1536
+            ],
+            "mvar": [
+              -21,
+              82,
+              162
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              117,
+              450,
+              1418
+            ],
+            "mvar": [
+              -13,
+              92,
+              218
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              123,
+              468,
+              1436
+            ],
+            "mvar": [
+              -10,
+              104,
+              226
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              142,
+              540,
+              1546
+            ],
+            "mvar": [
+              2,
+              146,
+              312
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              166,
+              550,
+              1590
+            ],
+            "mvar": [
+              28,
+              158,
+              438
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              181,
+              550,
+              1598
+            ],
+            "mvar": [
+              42,
+              144,
+              526
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              192,
+              580,
+              1618
+            ],
+            "mvar": [
+              43,
+              142,
+              590
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              168,
+              530,
+              1660
+            ],
+            "mvar": [
+              27,
+              126,
+              538
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              149,
+              500,
+              1594
+            ],
+            "mvar": [
+              15,
+              138,
+              478
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              177,
+              520,
+              1626
+            ],
+            "mvar": [
+              41,
+              120,
+              512
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              227,
+              600,
+              2018
+            ],
+            "mvar": [
+              54,
+              150,
+              670
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              218,
+              620,
+              1998
+            ],
+            "mvar": [
+              47,
+              146,
+              664
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              203,
+              590,
+              1914
+            ],
+            "mvar": [
+              35,
+              140,
+              592
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              183,
+              530,
+              1768
+            ],
+            "mvar": [
+              28,
+              122,
+              520
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              181,
+              530,
+              1756
+            ],
+            "mvar": [
+              27,
+              120,
+              490
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              182,
+              560,
+              1838
+            ],
+            "mvar": [
+              21,
+              128,
+              426
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              163,
+              510,
+              1754
+            ],
+            "mvar": [
+              18,
+              120,
+              406
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              168,
+              530,
+              1786
+            ],
+            "mvar": [
+              19,
+              116,
+              388
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              176,
+              540,
+              1804
+            ],
+            "mvar": [
+              24,
+              128,
+              414
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              155,
+              500,
+              1636
+            ],
+            "mvar": [
+              27,
+              128,
+              408
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              145,
+              470,
+              1618
+            ],
+            "mvar": [
+              18,
+              116,
+              332
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3828872.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 1672.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3096000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3104000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20280000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20420000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 50730545.46,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 12,442,000 kWh but its circuits are metered at 6,200,000 kWh (2.01x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-19": {
@@ -11191,7 +19156,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 20-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (19.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (20.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              135,
+              460,
+              1602
+            ],
+            "mvar": [
+              12,
+              114,
+              352
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              132,
+              450,
+              1648
+            ],
+            "mvar": [
+              12,
+              100,
+              346
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              129,
+              450,
+              1638
+            ],
+            "mvar": [
+              9,
+              100,
+              334
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              149,
+              478,
+              1596
+            ],
+            "mvar": [
+              11,
+              98,
+              380
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              153,
+              496,
+              1604
+            ],
+            "mvar": [
+              13,
+              100,
+              388
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              156,
+              498,
+              1556
+            ],
+            "mvar": [
+              14,
+              92,
+              380
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              160,
+              478,
+              1520
+            ],
+            "mvar": [
+              15,
+              66,
+              386
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              154,
+              490,
+              1440
+            ],
+            "mvar": [
+              16,
+              94,
+              364
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              156,
+              500,
+              1434
+            ],
+            "mvar": [
+              17,
+              112,
+              410
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              162,
+              510,
+              1458
+            ],
+            "mvar": [
+              21,
+              132,
+              390
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              172,
+              488,
+              1314
+            ],
+            "mvar": [
+              23,
+              118,
+              404
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              189,
+              520,
+              1420
+            ],
+            "mvar": [
+              26,
+              114,
+              418
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              176,
+              480,
+              1520
+            ],
+            "mvar": [
+              26,
+              128,
+              370
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              151,
+              460,
+              1474
+            ],
+            "mvar": [
+              17,
+              130,
+              342
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              179,
+              540,
+              1568
+            ],
+            "mvar": [
+              27,
+              126,
+              394
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              187,
+              570,
+              1726
+            ],
+            "mvar": [
+              33,
+              136,
+              412
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              178,
+              526,
+              1632
+            ],
+            "mvar": [
+              31,
+              124,
+              428
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              170,
+              490,
+              1536
+            ],
+            "mvar": [
+              26,
+              112,
+              448
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              156,
+              440,
+              1558
+            ],
+            "mvar": [
+              21,
+              90,
+              318
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              159,
+              450,
+              1658
+            ],
+            "mvar": [
+              12,
+              92,
+              406
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              141,
+              460,
+              1552
+            ],
+            "mvar": [
+              3,
+              130,
+              372
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              117,
+              400,
+              1530
+            ],
+            "mvar": [
+              0,
+              130,
+              282
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              123,
+              430,
+              1584
+            ],
+            "mvar": [
+              5,
+              124,
+              300
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              119,
+              444,
+              1582
+            ],
+            "mvar": [
+              1,
+              130,
+              324
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              100,
+              410,
+              1584
+            ],
+            "mvar": [
+              -4,
+              128,
+              300
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              115,
+              460,
+              1558
+            ],
+            "mvar": [
+              7,
+              154,
+              318
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3661600.06
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2904000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2911000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 18550000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 18480000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 46506600.06,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,505,500 kWh but its circuits are metered at 5,815,000 kWh (1.98x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-20": {
@@ -11620,7 +20004,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 21-06-2026.xlsx",
-        "petrobangla": "Daily-Gas-Intake-Offtake-Report (20.06.26).pdf"
+        "petrobangla": "Daily-Gas-Intake-Offtake-Report (21.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              112,
+              422,
+              1552
+            ],
+            "mvar": [
+              8,
+              146,
+              300
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              118,
+              444,
+              1548
+            ],
+            "mvar": [
+              12,
+              144,
+              306
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              122,
+              454,
+              1554
+            ],
+            "mvar": [
+              17,
+              146,
+              316
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              137,
+              496,
+              1656
+            ],
+            "mvar": [
+              10,
+              136,
+              312
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              146,
+              510,
+              1720
+            ],
+            "mvar": [
+              15,
+              138,
+              358
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              151,
+              510,
+              1692
+            ],
+            "mvar": [
+              18,
+              140,
+              348
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              155,
+              534,
+              1672
+            ],
+            "mvar": [
+              19,
+              136,
+              360
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              152,
+              530,
+              1672
+            ],
+            "mvar": [
+              18,
+              144,
+              390
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              168,
+              560,
+              1750
+            ],
+            "mvar": [
+              31,
+              156,
+              452
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              152,
+              480,
+              1780
+            ],
+            "mvar": [
+              49,
+              140,
+              480
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              166,
+              506,
+              1752
+            ],
+            "mvar": [
+              49,
+              126,
+              550
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              180,
+              580,
+              1904
+            ],
+            "mvar": [
+              57,
+              162,
+              582
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              166,
+              532,
+              1778
+            ],
+            "mvar": [
+              52,
+              160,
+              562
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              159,
+              526,
+              1678
+            ],
+            "mvar": [
+              48,
+              156,
+              514
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              148,
+              512,
+              1686
+            ],
+            "mvar": [
+              43,
+              160,
+              536
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              160,
+              560,
+              1806
+            ],
+            "mvar": [
+              48,
+              160,
+              542
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              148,
+              510,
+              1782
+            ],
+            "mvar": [
+              48,
+              160,
+              522
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              141,
+              480,
+              1718
+            ],
+            "mvar": [
+              43,
+              160,
+              508
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              131,
+              420,
+              1532
+            ],
+            "mvar": [
+              42,
+              122,
+              510
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              123,
+              360,
+              1540
+            ],
+            "mvar": [
+              42,
+              104,
+              510
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              133,
+              420,
+              1608
+            ],
+            "mvar": [
+              47,
+              150,
+              328
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              96,
+              380,
+              1538
+            ],
+            "mvar": [
+              25,
+              156,
+              448
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              100,
+              370,
+              1514
+            ],
+            "mvar": [
+              45,
+              184,
+              492
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              94,
+              370,
+              1434
+            ],
+            "mvar": [
+              40,
+              178,
+              498
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              99,
+              376,
+              1564
+            ],
+            "mvar": [
+              34,
+              120,
+              412
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              111,
+              440,
+              1656
+            ],
+            "mvar": [
+              35,
+              148,
+              442
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3306981.82
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2857000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2866000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20120000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20160000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 49309981.82,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 11,513,500 kWh but its circuits are metered at 5,723,000 kWh (2.01x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-21": {
@@ -12340,6 +21143,425 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "sourceFiles": {
         "pgcb": "Daily Report 22-06-2026.xlsx",
         "petrobangla": "Daily-Gas-Intake-Offtake-Report (21.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              121,
+              460,
+              1808
+            ],
+            "mvar": [
+              23,
+              116,
+              456
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              117,
+              450,
+              1804
+            ],
+            "mvar": [
+              22,
+              120,
+              458
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              120,
+              484,
+              1734
+            ],
+            "mvar": [
+              14,
+              120,
+              410
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              110,
+              460,
+              1662
+            ],
+            "mvar": [
+              9,
+              116,
+              386
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              105,
+              418,
+              1604
+            ],
+            "mvar": [
+              11,
+              116,
+              370
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              101,
+              412,
+              1596
+            ],
+            "mvar": [
+              10,
+              116,
+              382
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              102,
+              408,
+              1474
+            ],
+            "mvar": [
+              11,
+              116,
+              348
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              104,
+              412,
+              1510
+            ],
+            "mvar": [
+              28,
+              124,
+              380
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              119,
+              436,
+              1642
+            ],
+            "mvar": [
+              35,
+              140,
+              468
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              142,
+              496,
+              1704
+            ],
+            "mvar": [
+              48,
+              168,
+              492
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              149,
+              500,
+              1862
+            ],
+            "mvar": [
+              49,
+              140,
+              532
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              153,
+              522,
+              1804
+            ],
+            "mvar": [
+              56,
+              168,
+              548
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              154,
+              440,
+              1778
+            ],
+            "mvar": [
+              54,
+              124,
+              540
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              133,
+              440,
+              1696
+            ],
+            "mvar": [
+              44,
+              124,
+              506
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              145,
+              460,
+              1784
+            ],
+            "mvar": [
+              48,
+              114,
+              518
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              146,
+              460,
+              1832
+            ],
+            "mvar": [
+              49,
+              130,
+              520
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              130,
+              390,
+              1844
+            ],
+            "mvar": [
+              44,
+              100,
+              558
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              108,
+              306,
+              1686
+            ],
+            "mvar": [
+              35,
+              76,
+              568
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              102,
+              326,
+              1410
+            ],
+            "mvar": [
+              17,
+              74,
+              476
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              104,
+              310,
+              1350
+            ],
+            "mvar": [
+              17,
+              80,
+              452
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              83,
+              336,
+              1440
+            ],
+            "mvar": [
+              7,
+              122,
+              346
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              67,
+              340,
+              1324
+            ],
+            "mvar": [
+              3,
+              106,
+              274
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              65,
+              332,
+              1488
+            ],
+            "mvar": [
+              1,
+              88,
+              336
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              66,
+              304,
+              1454
+            ],
+            "mvar": [
+              11,
+              102,
+              332
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              50,
+              296,
+              1532
+            ],
+            "mvar": [
+              1,
+              100,
+              270
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              51,
+              310,
+              1558
+            ],
+            "mvar": [
+              -2,
+              104,
+              268
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2621163.64
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2641000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2658000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 19780000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 19810000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 47510163.64,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 9,775,500 kWh but its circuits are metered at 5,299,000 kWh (1.84x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-22": {
@@ -12926,6 +22148,425 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "sourceFiles": {
         "pgcb": "Daily Report 23-06-2026.xlsx",
         "petrobangla": "Daily-Gas-Intake-Offtake-Report (23.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              46,
+              306,
+              1570
+            ],
+            "mvar": [
+              -3,
+              100,
+              262
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              43,
+              272,
+              1434
+            ],
+            "mvar": [
+              0,
+              86,
+              316
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              48,
+              300,
+              1488
+            ],
+            "mvar": [
+              3,
+              100,
+              326
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              81,
+              350,
+              1642
+            ],
+            "mvar": [
+              16,
+              112,
+              388
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              85,
+              362,
+              1656
+            ],
+            "mvar": [
+              19,
+              110,
+              388
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              89,
+              364,
+              1672
+            ],
+            "mvar": [
+              21,
+              110,
+              392
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              88,
+              338,
+              1598
+            ],
+            "mvar": [
+              23,
+              114,
+              412
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              87,
+              356,
+              1574
+            ],
+            "mvar": [
+              24,
+              128,
+              402
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              106,
+              380,
+              1632
+            ],
+            "mvar": [
+              32,
+              124,
+              476
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              137,
+              428,
+              1822
+            ],
+            "mvar": [
+              47,
+              126,
+              550
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              158,
+              500,
+              1900
+            ],
+            "mvar": [
+              54,
+              146,
+              586
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              153,
+              478,
+              1946
+            ],
+            "mvar": [
+              52,
+              142,
+              592
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              144,
+              498,
+              1854
+            ],
+            "mvar": [
+              42,
+              158,
+              584
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              136,
+              490,
+              1830
+            ],
+            "mvar": [
+              37,
+              156,
+              562
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              135,
+              520,
+              1828
+            ],
+            "mvar": [
+              34,
+              172,
+              544
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              143,
+              536,
+              1914
+            ],
+            "mvar": [
+              45,
+              190,
+              608
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              141,
+              518,
+              1932
+            ],
+            "mvar": [
+              43,
+              170,
+              602
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              160,
+              536,
+              1918
+            ],
+            "mvar": [
+              48,
+              180,
+              642
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              152,
+              540,
+              1726
+            ],
+            "mvar": [
+              39,
+              164,
+              524
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              155,
+              540,
+              1754
+            ],
+            "mvar": [
+              38,
+              154,
+              454
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              143,
+              478,
+              1664
+            ],
+            "mvar": [
+              20,
+              132,
+              404
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              106,
+              374,
+              1476
+            ],
+            "mvar": [
+              8,
+              86,
+              308
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              104,
+              372,
+              1450
+            ],
+            "mvar": [
+              6,
+              96,
+              308
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              117,
+              440,
+              1478
+            ],
+            "mvar": [
+              -1,
+              130,
+              300
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              109,
+              420,
+              1482
+            ],
+            "mvar": [
+              -11,
+              106,
+              260
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              134,
+              470,
+              1604
+            ],
+            "mvar": [
+              5,
+              134,
+              352
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2793454.54
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 2384000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2378000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20590000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20630000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 48775454.54,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 10,324,000 kWh but its circuits are metered at 4,762,000 kWh (2.17x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-23": {
@@ -13470,6 +23111,420 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "sourceFiles": {
         "pgcb": "Daily Report 24-06-2026.xlsx",
         "petrobangla": "Daily-Gas-Intake-Offtake-Report (24.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              127,
+              462,
+              1588
+            ],
+            "mvar": [
+              -3,
+              124,
+              266
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              120,
+              438,
+              1542
+            ],
+            "mvar": [
+              -7,
+              116,
+              244
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              136,
+              464,
+              1614
+            ],
+            "mvar": [
+              17,
+              126,
+              362
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              142,
+              482,
+              1684
+            ],
+            "mvar": [
+              16,
+              124,
+              362
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              141,
+              480,
+              1614
+            ],
+            "mvar": [
+              16,
+              122,
+              360
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              143,
+              458,
+              1602
+            ],
+            "mvar": [
+              20,
+              104,
+              360
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              143,
+              464,
+              1574
+            ],
+            "mvar": [
+              19,
+              106,
+              356
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              141,
+              450,
+              1582
+            ],
+            "mvar": [
+              18,
+              104,
+              352
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              165,
+              518,
+              1652
+            ],
+            "mvar": [
+              29,
+              118,
+              418
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              195,
+              590,
+              1836
+            ],
+            "mvar": [
+              54,
+              154,
+              544
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              188,
+              616,
+              1818
+            ],
+            "mvar": [
+              43,
+              170,
+              544
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              186,
+              620,
+              1898
+            ],
+            "mvar": [
+              36,
+              170,
+              518
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              177,
+              570,
+              1846
+            ],
+            "mvar": [
+              32,
+              144,
+              520
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              178,
+              584,
+              1778
+            ],
+            "mvar": [
+              30,
+              154,
+              544
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              185,
+              572,
+              1810
+            ],
+            "mvar": [
+              40,
+              146,
+              578
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              186,
+              530,
+              1852
+            ],
+            "mvar": [
+              42,
+              128,
+              592
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              181,
+              550,
+              1780
+            ],
+            "mvar": [
+              41,
+              164,
+              578
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              171,
+              496,
+              1584
+            ],
+            "mvar": [
+              43,
+              134,
+              604
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              170,
+              500,
+              1492
+            ],
+            "mvar": [
+              45,
+              140,
+              580
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              173,
+              536,
+              1564
+            ],
+            "mvar": [
+              50,
+              138,
+              576
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              161,
+              510,
+              1628
+            ],
+            "mvar": [
+              35,
+              140,
+              482
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              140,
+              440,
+              1628
+            ],
+            "mvar": [
+              24,
+              108,
+              482
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              135,
+              420,
+              1430
+            ],
+            "mvar": [
+              22,
+              87,
+              404
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              128,
+              400,
+              1448
+            ],
+            "mvar": [
+              15,
+              88,
+              374
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              144,
+              470,
+              1478
+            ],
+            "mvar": [
+              27,
+              130,
+              396
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              149,
+              490,
+              1360
+            ],
+            "mvar": [
+              24,
+              146,
+              402
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3765309.09
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 19670000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 19710000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 43145309.09,
+          "import": 0
+        },
+        "checks": []
       }
     },
   "2026-06-24": {
@@ -14056,6 +24111,425 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "sourceFiles": {
         "pgcb": "Daily Report 25-06-2026.xlsx",
         "petrobangla": "Daily-Gas-Intake-Offtake-Report (25.06.26).pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              117,
+              452,
+              1629
+            ],
+            "mvar": [
+              33,
+              94,
+              414
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              113,
+              450,
+              1582
+            ],
+            "mvar": [
+              33,
+              102,
+              440
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              105,
+              430,
+              1568
+            ],
+            "mvar": [
+              28,
+              102,
+              406
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              96,
+              440,
+              1554
+            ],
+            "mvar": [
+              23,
+              102,
+              368
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              118,
+              454,
+              1538
+            ],
+            "mvar": [
+              34,
+              112,
+              398
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              152,
+              524,
+              1568
+            ],
+            "mvar": [
+              13,
+              112,
+              404
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              141,
+              492,
+              1430
+            ],
+            "mvar": [
+              9,
+              114,
+              438
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              147,
+              510,
+              1500
+            ],
+            "mvar": [
+              22,
+              140,
+              426
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              164,
+              540,
+              1614
+            ],
+            "mvar": [
+              31,
+              152,
+              538
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              185,
+              600,
+              1770
+            ],
+            "mvar": [
+              45,
+              172,
+              570
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              199,
+              640,
+              1744
+            ],
+            "mvar": [
+              57,
+              190,
+              684
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              192,
+              620,
+              1792
+            ],
+            "mvar": [
+              55,
+              190,
+              680
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              181,
+              550,
+              1710
+            ],
+            "mvar": [
+              40,
+              152,
+              612
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              154,
+              510,
+              1732
+            ],
+            "mvar": [
+              24,
+              150,
+              570
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              183,
+              610,
+              1730
+            ],
+            "mvar": [
+              40,
+              182,
+              600
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              177,
+              580,
+              1758
+            ],
+            "mvar": [
+              38,
+              170,
+              572
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              172,
+              550,
+              1738
+            ],
+            "mvar": [
+              40,
+              176,
+              608
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              172,
+              560,
+              1662
+            ],
+            "mvar": [
+              44,
+              176,
+              624
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              159,
+              520,
+              1544
+            ],
+            "mvar": [
+              40,
+              186,
+              620
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              166,
+              530,
+              1666
+            ],
+            "mvar": [
+              40,
+              166,
+              548
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              163,
+              550,
+              1514
+            ],
+            "mvar": [
+              32,
+              160,
+              424
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              137,
+              440,
+              1516
+            ],
+            "mvar": [
+              18,
+              112,
+              404
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              137,
+              460,
+              1562
+            ],
+            "mvar": [
+              10,
+              116,
+              426
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              131,
+              420,
+              1626
+            ],
+            "mvar": [
+              15,
+              96,
+              466
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              125,
+              460,
+              1672
+            ],
+            "mvar": [
+              -2,
+              116,
+              420
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              138,
+              510,
+              1738
+            ],
+            "mvar": [
+              6,
+              144,
+              462
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3648218.18
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3046000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3054000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 20000000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 20040000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 49788218.18,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 12,426,000 kWh but its circuits are metered at 6,100,000 kWh (2.04x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-25": {
@@ -14359,7 +24833,430 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "regionalDemandSource": "p1-published",
       "sourceFiles": {
         "pgcb": "Daily Report 26-06-2026.xlsx",
-        "petrobangla": "d1c8bca0-72a7-4aed-ba0e-9b8570d7a501.pdf"
+        "petrobangla": "a627934c-a98a-4f72-bc9a-c9fc4fbd767f.pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              155,
+              530,
+              1832
+            ],
+            "mvar": [
+              16,
+              134,
+              460
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              136,
+              540,
+              1798
+            ],
+            "mvar": [
+              9,
+              136,
+              448
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              142,
+              490,
+              1914
+            ],
+            "mvar": [
+              10,
+              132,
+              454
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              143,
+              530,
+              1934
+            ],
+            "mvar": [
+              8,
+              150,
+              432
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              141,
+              540,
+              1938
+            ],
+            "mvar": [
+              6,
+              146,
+              436
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              147,
+              540,
+              1956
+            ],
+            "mvar": [
+              10,
+              134,
+              456
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              143,
+              510,
+              1814
+            ],
+            "mvar": [
+              12,
+              138,
+              432
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              148,
+              520,
+              1754
+            ],
+            "mvar": [
+              16,
+              134,
+              476
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              174,
+              570,
+              1904
+            ],
+            "mvar": [
+              34,
+              152,
+              588
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              206,
+              660,
+              1986
+            ],
+            "mvar": [
+              59,
+              206,
+              730
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              194,
+              650,
+              1868
+            ],
+            "mvar": [
+              52,
+              208,
+              743
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              189,
+              620,
+              1868
+            ],
+            "mvar": [
+              44,
+              184,
+              716
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              178,
+              620,
+              1818
+            ],
+            "mvar": [
+              35,
+              184,
+              686
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              195,
+              650,
+              1892
+            ],
+            "mvar": [
+              43,
+              196,
+              718
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              187,
+              630,
+              1870
+            ],
+            "mvar": [
+              46,
+              190,
+              748
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              187,
+              650,
+              1922
+            ],
+            "mvar": [
+              45,
+              198,
+              750
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              189,
+              610,
+              1940
+            ],
+            "mvar": [
+              54,
+              190,
+              766
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              196,
+              560,
+              1776
+            ],
+            "mvar": [
+              68,
+              180,
+              796
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              193,
+              540,
+              1694
+            ],
+            "mvar": [
+              65,
+              180,
+              788
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              185,
+              540,
+              1728
+            ],
+            "mvar": [
+              53,
+              150,
+              694
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              169,
+              520,
+              1718
+            ],
+            "mvar": [
+              41,
+              148,
+              604
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              141,
+              440,
+              1712
+            ],
+            "mvar": [
+              26,
+              122,
+              552
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              142,
+              470,
+              1902
+            ],
+            "mvar": [
+              22,
+              118,
+              516
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              140,
+              470,
+              1920
+            ],
+            "mvar": [
+              20,
+              128,
+              488
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              148,
+              510,
+              1950
+            ],
+            "mvar": [
+              18,
+              120,
+              486
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              155,
+              540,
+              1994
+            ],
+            "mvar": [
+              25,
+              160,
+              512
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3994472.73
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 2908268871.46
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 74036581.79
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3345000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3354000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 22690000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 22730000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 2964382344.19,
+          "import": 74036581.79
+        },
+        "checks": [
+          {
+            "scope": "Ishurdi-Ghorashal",
+            "message": "Ishurdi-Ghorashal: the MW curve integrates to 3,991,750 kWh but its circuits are metered at 2,912,263,344 kWh (0.00x). Both are reproduced as published."
+          },
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,452,500 kWh but its circuits are metered at 6,699,000 kWh (2.01x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-26": {
@@ -14676,7 +25573,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 27-06-2026.xlsx",
-        "petrobangla": "a627934c-a98a-4f72-bc9a-c9fc4fbd767f.pdf"
+        "petrobangla": "974ce969-8c1e-4b9c-b9b4-281255abe33e.pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              155,
+              560,
+              2058
+            ],
+            "mvar": [
+              25,
+              148,
+              470
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              148,
+              550,
+              2072
+            ],
+            "mvar": [
+              13,
+              132,
+              468
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              142,
+              550,
+              2072
+            ],
+            "mvar": [
+              21,
+              148,
+              458
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              146,
+              540,
+              2074
+            ],
+            "mvar": [
+              24,
+              124,
+              460
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              157,
+              540,
+              2094
+            ],
+            "mvar": [
+              23,
+              104,
+              462
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              171,
+              560,
+              2124
+            ],
+            "mvar": [
+              36,
+              124,
+              494
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              180,
+              550,
+              2114
+            ],
+            "mvar": [
+              32,
+              116,
+              506
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              164,
+              480,
+              1832
+            ],
+            "mvar": [
+              25,
+              100,
+              486
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              174,
+              520,
+              1722
+            ],
+            "mvar": [
+              28,
+              96,
+              508
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              186,
+              530,
+              1684
+            ],
+            "mvar": [
+              33,
+              100,
+              516
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              195,
+              580,
+              1784
+            ],
+            "mvar": [
+              36,
+              116,
+              536
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              207,
+              610,
+              1792
+            ],
+            "mvar": [
+              36,
+              126,
+              548
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              182,
+              560,
+              1962
+            ],
+            "mvar": [
+              17,
+              108,
+              514
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              162,
+              580,
+              1982
+            ],
+            "mvar": [
+              12,
+              120,
+              492
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              164,
+              590,
+              1852
+            ],
+            "mvar": [
+              15,
+              130,
+              466
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              164,
+              600,
+              1964
+            ],
+            "mvar": [
+              14,
+              126,
+              472
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              161,
+              600,
+              1972
+            ],
+            "mvar": [
+              16,
+              132,
+              454
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              166,
+              600,
+              1886
+            ],
+            "mvar": [
+              22,
+              140,
+              492
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              168,
+              582,
+              1662
+            ],
+            "mvar": [
+              31,
+              128,
+              486
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              170,
+              550,
+              1692
+            ],
+            "mvar": [
+              31,
+              86,
+              486
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              153,
+              546,
+              1842
+            ],
+            "mvar": [
+              17,
+              152,
+              462
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              115,
+              450,
+              1780
+            ],
+            "mvar": [
+              -18,
+              96,
+              326
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              120,
+              450,
+              1850
+            ],
+            "mvar": [
+              -3,
+              102,
+              352
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              120,
+              480,
+              2032
+            ],
+            "mvar": [
+              -9,
+              110,
+              390
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              159,
+              580,
+              2092
+            ],
+            "mvar": [
+              21,
+              148,
+              474
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              162,
+              580,
+              2032
+            ],
+            "mvar": [
+              16,
+              120,
+              390
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3892436.36
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3300000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3311000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 10503436.36,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,297,000 kWh but its circuits are metered at 6,611,000 kWh (2.01x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-27": {
@@ -14930,7 +26246,426 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       ],
       "sourceFiles": {
         "pgcb": "Daily Report 28-06-2026.xlsx",
-        "petrobangla": "974ce969-8c1e-4b9c-b9b4-281255abe33e.pdf"
+        "petrobangla": "Petrobangla_f1f50a29-46df-49eb-a841-b4f4801f023c.pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              162,
+              520,
+              1946
+            ],
+            "mvar": [
+              16,
+              92,
+              342
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              139,
+              510,
+              2016
+            ],
+            "mvar": [
+              2,
+              90,
+              354
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              134,
+              556,
+              2040
+            ],
+            "mvar": [
+              10,
+              94,
+              358
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              134,
+              554,
+              2048
+            ],
+            "mvar": [
+              14,
+              104,
+              360
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              136,
+              558,
+              2072
+            ],
+            "mvar": [
+              5,
+              88,
+              356
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              147,
+              566,
+              2120
+            ],
+            "mvar": [
+              11,
+              112,
+              400
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              158,
+              586,
+              2120
+            ],
+            "mvar": [
+              18,
+              118,
+              400
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              154,
+              596,
+              2090
+            ],
+            "mvar": [
+              12,
+              124,
+              430
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              187,
+              640,
+              2118
+            ],
+            "mvar": [
+              33,
+              140,
+              578
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              218,
+              666,
+              2088
+            ],
+            "mvar": [
+              56,
+              148,
+              610
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              219,
+              712,
+              1972
+            ],
+            "mvar": [
+              52,
+              164,
+              566
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              217,
+              696,
+              1960
+            ],
+            "mvar": [
+              48,
+              162,
+              544
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              197,
+              640,
+              1970
+            ],
+            "mvar": [
+              39,
+              154,
+              500
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              216,
+              688,
+              2106
+            ],
+            "mvar": [
+              57,
+              164,
+              560
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              193,
+              622,
+              1970
+            ],
+            "mvar": [
+              45,
+              154,
+              528
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              202,
+              656,
+              1934
+            ],
+            "mvar": [
+              56,
+              172,
+              512
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              187,
+              620,
+              1856
+            ],
+            "mvar": [
+              43,
+              150,
+              514
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              180,
+              634,
+              1852
+            ],
+            "mvar": [
+              37,
+              174,
+              496
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              176,
+              616,
+              1780
+            ],
+            "mvar": [
+              36,
+              136,
+              482
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              188,
+              630,
+              1800
+            ],
+            "mvar": [
+              52,
+              180,
+              526
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              180,
+              600,
+              1736
+            ],
+            "mvar": [
+              45,
+              154,
+              516
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              162,
+              550,
+              1690
+            ],
+            "mvar": [
+              35,
+              120,
+              508
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              155,
+              500,
+              1610
+            ],
+            "mvar": [
+              38,
+              108,
+              478
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              131,
+              462,
+              1600
+            ],
+            "mvar": [
+              37,
+              158,
+              472
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              131,
+              460,
+              1470
+            ],
+            "mvar": [
+              33,
+              162,
+              424
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              124,
+              434,
+              1484
+            ],
+            "mvar": [
+              30,
+              156,
+              434
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3525000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3533000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 22410000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 22450000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 51918000,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 14,060,000 kWh but its circuits are metered at 7,058,000 kWh (1.99x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-28": {
@@ -15372,6 +27107,429 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "sourceFiles": {
         "pgcb": "Daily Report 29-06-2026.xlsx",
         "petrobangla": "Petrobangla_f1f50a29-46df-49eb-a841-b4f4801f023c.pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              154,
+              520,
+              1628
+            ],
+            "mvar": [
+              41,
+              122,
+              544
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              140,
+              500,
+              1614
+            ],
+            "mvar": [
+              33,
+              106,
+              456
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              128,
+              480,
+              1598
+            ],
+            "mvar": [
+              25,
+              120,
+              436
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              140,
+              500,
+              1620
+            ],
+            "mvar": [
+              18,
+              100,
+              416
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              148,
+              524,
+              1626
+            ],
+            "mvar": [
+              20,
+              114,
+              426
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              140,
+              512,
+              1574
+            ],
+            "mvar": [
+              15,
+              122,
+              430
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              137,
+              502,
+              1574
+            ],
+            "mvar": [
+              14,
+              120,
+              412
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              140,
+              498,
+              1574
+            ],
+            "mvar": [
+              11,
+              102,
+              390
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              158,
+              556,
+              1694
+            ],
+            "mvar": [
+              21,
+              144,
+              470
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              186,
+              570,
+              1846
+            ],
+            "mvar": [
+              41,
+              124,
+              526
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              199,
+              580,
+              1950
+            ],
+            "mvar": [
+              50,
+              120,
+              604
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              199,
+              652,
+              1996
+            ],
+            "mvar": [
+              50,
+              188,
+              626
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              179,
+              700,
+              1942
+            ],
+            "mvar": [
+              25,
+              210,
+              578
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              187,
+              650,
+              1930
+            ],
+            "mvar": [
+              34,
+              190,
+              574
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              190,
+              634,
+              1956
+            ],
+            "mvar": [
+              35,
+              190,
+              562
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              190,
+              632,
+              1948
+            ],
+            "mvar": [
+              42,
+              172,
+              604
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              187,
+              616,
+              1932
+            ],
+            "mvar": [
+              45,
+              176,
+              612
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              180,
+              594,
+              1900
+            ],
+            "mvar": [
+              39,
+              172,
+              582
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              167,
+              560,
+              1770
+            ],
+            "mvar": [
+              34,
+              176,
+              600
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              171,
+              524,
+              1770
+            ],
+            "mvar": [
+              44,
+              180,
+              600
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              157,
+              500,
+              1662
+            ],
+            "mvar": [
+              38,
+              174,
+              576
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              141,
+              456,
+              1710
+            ],
+            "mvar": [
+              25,
+              146,
+              548
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              141,
+              474,
+              1714
+            ],
+            "mvar": [
+              21,
+              160,
+              550
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              110,
+              420,
+              1552
+            ],
+            "mvar": [
+              12,
+              170,
+              478
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              98,
+              416,
+              1520
+            ],
+            "mvar": [
+              11,
+              154,
+              470
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              114,
+              492,
+              1566
+            ],
+            "mvar": [
+              16,
+              188,
+              510
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 1609163.66
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3265000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3274000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 21190000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 21240000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 50578163.66,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Ishurdi-Ghorashal",
+            "message": "Ishurdi-Ghorashal: the MW curve integrates to 3,749,500 kWh but its circuits are metered at 1,609,164 kWh (2.33x). Both are reproduced as published."
+          },
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 13,049,500 kWh but its circuits are metered at 6,539,000 kWh (2.00x). Both are reproduced as published."
+          }
+        ]
       }
     },
   "2026-06-29": {
@@ -15724,6 +27882,425 @@ export const powerGridArchive: Record<string, GridDailyData> = {
       "sourceFiles": {
         "pgcb": "Daily Report 30-06-2026.xlsx",
         "petrobangla": "Petrobangla_f1f50a29-46df-49eb-a841-b4f4801f023c.pdf"
+      },
+      "ewicData": {
+        "corridors": [
+          "Ishurdi-Ghorashal",
+          "Sirajganj-Sreepur",
+          "Gopalganj-Aminbazar"
+        ],
+        "rows": [
+          {
+            "time": "00:00",
+            "mw": [
+              134,
+              496,
+              1628
+            ],
+            "mvar": [
+              43,
+              99,
+              544
+            ]
+          },
+          {
+            "time": "01:00",
+            "mw": [
+              117,
+              464,
+              1660
+            ],
+            "mvar": [
+              34,
+              136,
+              452
+            ]
+          },
+          {
+            "time": "02:00",
+            "mw": [
+              121,
+              476,
+              1690
+            ],
+            "mvar": [
+              33,
+              140,
+              468
+            ]
+          },
+          {
+            "time": "03:00",
+            "mw": [
+              135,
+              520,
+              1746
+            ],
+            "mvar": [
+              25,
+              160,
+              438
+            ]
+          },
+          {
+            "time": "04:00",
+            "mw": [
+              133,
+              612,
+              1710
+            ],
+            "mvar": [
+              0,
+              174,
+              400
+            ]
+          },
+          {
+            "time": "05:00",
+            "mw": [
+              138,
+              550,
+              1772
+            ],
+            "mvar": [
+              -1,
+              192,
+              400
+            ]
+          },
+          {
+            "time": "06:00",
+            "mw": [
+              141,
+              620,
+              1806
+            ],
+            "mvar": [
+              -1,
+              150,
+              388
+            ]
+          },
+          {
+            "time": "07:00",
+            "mw": [
+              145,
+              610,
+              1782
+            ],
+            "mvar": [
+              -5,
+              140,
+              372
+            ]
+          },
+          {
+            "time": "08:00",
+            "mw": [
+              162,
+              620,
+              1854
+            ],
+            "mvar": [
+              16,
+              160,
+              470
+            ]
+          },
+          {
+            "time": "09:00",
+            "mw": [
+              175,
+              646,
+              1930
+            ],
+            "mvar": [
+              28,
+              182,
+              532
+            ]
+          },
+          {
+            "time": "10:00",
+            "mw": [
+              181,
+              636,
+              1884
+            ],
+            "mvar": [
+              34,
+              186,
+              604
+            ]
+          },
+          {
+            "time": "11:00",
+            "mw": [
+              177,
+              624,
+              1698
+            ],
+            "mvar": [
+              37,
+              220,
+              624
+            ]
+          },
+          {
+            "time": "12:00",
+            "mw": [
+              143,
+              548,
+              1480
+            ],
+            "mvar": [
+              22,
+              220,
+              556
+            ]
+          },
+          {
+            "time": "13:00",
+            "mw": [
+              147,
+              540,
+              1442
+            ],
+            "mvar": [
+              20,
+              174,
+              514
+            ]
+          },
+          {
+            "time": "14:00",
+            "mw": [
+              157,
+              516,
+              1506
+            ],
+            "mvar": [
+              22,
+              170,
+              508
+            ]
+          },
+          {
+            "time": "15:00",
+            "mw": [
+              128,
+              524,
+              1588
+            ],
+            "mvar": [
+              50,
+              196,
+              568
+            ]
+          },
+          {
+            "time": "16:00",
+            "mw": [
+              128,
+              520,
+              1724
+            ],
+            "mvar": [
+              50,
+              200,
+              578
+            ]
+          },
+          {
+            "time": "17:00",
+            "mw": [
+              124,
+              506,
+              1608
+            ],
+            "mvar": [
+              52,
+              184,
+              558
+            ]
+          },
+          {
+            "time": "18:00",
+            "mw": [
+              110,
+              470,
+              1380
+            ],
+            "mvar": [
+              49,
+              190,
+              524
+            ]
+          },
+          {
+            "time": "18:30",
+            "mw": [
+              131,
+              504,
+              1432
+            ],
+            "mvar": [
+              35,
+              182,
+              490
+            ]
+          },
+          {
+            "time": "19:00",
+            "mw": [
+              155,
+              484,
+              1565
+            ],
+            "mvar": [
+              35,
+              204,
+              462
+            ]
+          },
+          {
+            "time": "19:30",
+            "mw": [
+              119,
+              452,
+              1424
+            ],
+            "mvar": [
+              8,
+              180,
+              338
+            ]
+          },
+          {
+            "time": "20:00",
+            "mw": [
+              125,
+              456,
+              1512
+            ],
+            "mvar": [
+              14,
+              188,
+              378
+            ]
+          },
+          {
+            "time": "21:00",
+            "mw": [
+              126,
+              462,
+              1516
+            ],
+            "mvar": [
+              20,
+              186,
+              430
+            ]
+          },
+          {
+            "time": "22:00",
+            "mw": [
+              118,
+              460,
+              1434
+            ],
+            "mvar": [
+              8,
+              180,
+              372
+            ]
+          },
+          {
+            "time": "23:00",
+            "mw": [
+              133,
+              520,
+              1570
+            ],
+            "mvar": [
+              4,
+              188,
+              370
+            ]
+          }
+        ],
+        "circuits": [
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3327054.54
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Export",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Ishurdi-Ghorashal Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Export",
+            "energyKwh": 3244000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Export",
+            "energyKwh": 3249000
+          },
+          {
+            "circuit": "Sirajganj-Sreepur Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Export",
+            "energyKwh": 19660000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-1",
+            "direction": "Import",
+            "energyKwh": 0
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Export",
+            "energyKwh": 19690000
+          },
+          {
+            "circuit": "Gopalganj-Aminbazar Ckt-2",
+            "direction": "Import",
+            "energyKwh": 0
+          }
+        ],
+        "totals": {
+          "export": 49170054.54,
+          "import": 0
+        },
+        "checks": [
+          {
+            "scope": "Sirajganj-Sreepur",
+            "message": "Sirajganj-Sreepur: the MW curve integrates to 12,896,500 kWh but its circuits are metered at 6,493,000 kWh (1.99x). Both are reproduced as published."
+          }
+        ]
       }
     }
 };

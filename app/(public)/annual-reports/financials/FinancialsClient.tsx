@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { TrendingDown, AlertTriangle, BatteryCharging, Landmark } from "lucide-react";
+import { chartGridProps } from '@/lib/data/grid/chart-axis';
 
 const chartData = [
   {
@@ -126,7 +127,16 @@ export default function FinancialsPage() {
                   data={bpdbChartData}
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  {/*
+                    Same gridline geometry as every other chart on the site, but
+                    the stroke is this page's own zinc rather than the theme's
+                    border colour. This page is deliberately dark-only — it sets
+                    bg-zinc-950 and hardcodes ten other colours — so a
+                    theme-aware stroke would go pale here in light mode and dim
+                    to nothing in dark. Passing the ground's own neutral keeps
+                    the shading identical to the themed charts as it appears.
+                  */}
+                  <CartesianGrid {...chartGridProps('#a1a1aa')} />
                   <XAxis dataKey="name" stroke="#a1a1aa" tick={{fill: '#a1a1aa'}} />
                   <YAxis stroke="#a1a1aa" tick={{fill: '#a1a1aa'}} />
                   <Tooltip 
@@ -176,7 +186,16 @@ export default function FinancialsPage() {
                   data={chartData}
                   margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  {/*
+                    Same gridline geometry as every other chart on the site, but
+                    the stroke is this page's own zinc rather than the theme's
+                    border colour. This page is deliberately dark-only — it sets
+                    bg-zinc-950 and hardcodes ten other colours — so a
+                    theme-aware stroke would go pale here in light mode and dim
+                    to nothing in dark. Passing the ground's own neutral keeps
+                    the shading identical to the themed charts as it appears.
+                  */}
+                  <CartesianGrid {...chartGridProps('#a1a1aa')} />
                   <XAxis dataKey="name" stroke="#a1a1aa" tick={{fill: '#a1a1aa'}} />
                   <YAxis stroke="#a1a1aa" tick={{fill: '#a1a1aa'}} />
                   <Tooltip 

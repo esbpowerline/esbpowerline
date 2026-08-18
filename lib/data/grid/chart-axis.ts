@@ -61,3 +61,49 @@ export const TIME_AXIS_PROPS = {
 export function axisTickStyle(fill: string) {
   return { fontSize: 10, fill } as const;
 }
+
+/**
+ * The gridline every cartesian chart on the site draws.
+ *
+ * Horizontal only, because a value axis is what a reader traces back to and
+ * vertical rules just fence the data in. Dashed 3-on-6-off at 30% of the border
+ * colour: present enough to measure against, quiet enough that the eye reads
+ * the series first.
+ *
+ * This exists as shared props because it was previously the same literal
+ * written out at every chart — and thirty-five identical copies is exactly the
+ * condition under which copies stop being identical. Six had already drifted
+ * (two dash patterns, two opacities, and one pair with a hardcoded near-black
+ * stroke that only worked on a dark ground).
+ *
+ * Spread it, then override deliberately where a chart genuinely differs:
+ *
+ *   <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
+ *   <CartesianGrid {...chartGridProps(t.gridStroke)} vertical horizontal={false} />
+ *
+ * The second form is for `layout="vertical"` bar charts, where the numeric axis
+ * runs across the bottom and the useful rules are the vertical ones.
+ *
+ * Sparklines are the deliberate exception and take no grid at all: at 24-40px
+ * tall a gridline is noise competing with a line that has no axis to measure
+ * against anyway.
+ *
+ * **Pass `yAxisId` on any chart whose axes are named.** Recharts draws one rule
+ * per tick of the y-axis the grid is bound to, and an unbound grid falls back to
+ * the default axis id `0`. On a dual-axis chart — `yAxisId="left"` and
+ * `"right"`, or `"left"` and `"shed"` — nothing answers to `0`, so the grid
+ * silently degrades to two lines at the top and bottom of the plot. They read as
+ * a chart border, which is why this went unnoticed on ten charts, the 24-Hour
+ * System Load Curve among them: the grid was present and correctly styled and
+ * still drew no gridlines. Bind it to the axis the reader traces values against,
+ * which is the left one.
+ */
+export function chartGridProps(stroke: string, yAxisId?: string | number) {
+  return {
+    strokeDasharray: '3 6',
+    stroke,
+    opacity: 0.3,
+    vertical: false,
+    ...(yAxisId === undefined ? {} : { yAxisId }),
+  } as const;
+}

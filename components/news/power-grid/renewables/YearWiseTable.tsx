@@ -27,7 +27,7 @@ export function YearWiseTable({ table }: { table: SredaYearTable }) {
     <div>
       <h4 className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-1.5">
         {table.category}
-        <span className="ml-1.5 font-normal normal-case opacity-70">
+        <span className="ml-1.5 font-normal normal-case tabular-nums opacity-70">
           {`${table.rows.length} years`}
         </span>
       </h4>
@@ -55,7 +55,7 @@ export function YearWiseTable({ table }: { table: SredaYearTable }) {
                   {r.year}
                   {r.yearMalformed && (
                     <span
-                      className="ml-1.5 inline-block px-1.5 py-px rounded border text-[9px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                      className="ml-1.5 inline-block px-1.5 py-px rounded border text-[10px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                       title="SREDA's year column carries this value as printed. It is not a usable year, and the row is left exactly as published rather than reassigned to a date."
                     >
                       as printed

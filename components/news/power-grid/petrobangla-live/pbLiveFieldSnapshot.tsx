@@ -5,6 +5,7 @@ import { cn, formatNumber } from '@/lib/utils';
 import { fieldSparklines } from '@/lib/data/petrobangla/computeLiveWeek';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import type { PetrobanglaDaily, PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { LiveBadge } from './pbLiveShared';
 
 const HIGHLIGHT_FIELDS = new Set(['Bibiyana', 'R-LNG Terminal', 'Titas']);
@@ -31,11 +32,11 @@ export function PbLiveFieldSnapshot({
           <thead>
             <tr>
               <th>Field</th>
-              <th className="text-left">Wells</th>
-              <th className="text-left">Gas MMCFD</th>
-              {showSparklines && <th className="text-left w-24">7d</th>}
-              <th className="text-left">Capacity</th>
-              <th className="text-left">% Total</th>
+              <th className="text-left">Wells<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className="text-left">Gas MMCFD<GridProvenanceTag kind="P" className="ml-1" /></th>
+              {showSparklines && <th className="text-left w-24">7d<GridProvenanceTag kind="P" className="ml-1" /></th>}
+              <th className="text-left">Capacity<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className="text-left">% Total<GridProvenanceTag kind="D" className="ml-1" /></th>
             </tr>
           </thead>
           <tbody>

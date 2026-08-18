@@ -36,6 +36,7 @@ import { cn } from '@/lib/utils';
 
 import {
   GridCardFooter,
+  GridDataBadge,
   GridExplanationBlock,
   GridKpiCell,
   GridKpiStrip,
@@ -194,7 +195,9 @@ export function BpdbAccountsPanel({
         <div className="min-w-0">
           <h3 className="grid-explorer-chart-card__title">
             BPDB Annual Accounts
-            <sup>Annual</sup>
+            {/* Same cadence badge the rest of the explorer uses, rather than a
+                bare uncoloured superscript. */}
+            <GridDataBadge cadence="monthly" label="Annual" />
           </h3>
           <p className="grid-explorer-chart-card__sub">
             Purchase prices over a whole financial year, from BPDB&rsquo;s own published accounts —

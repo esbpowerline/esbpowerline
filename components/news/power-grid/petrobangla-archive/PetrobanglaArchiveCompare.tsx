@@ -19,12 +19,13 @@ import { isDateAllowedForTier, type GridAccessTier } from '@/lib/data/grid/grid-
 import { COMPARE_FREE_BASELINE_DATE } from '@/lib/data/grid/public-sample-dates';
 import { GridDataLockedGate } from '@/components/news/power-grid/GridDataLockedGate';
 import { CustomDropdown } from '@/components/news/power-grid/shared';
+import { GridProvenanceTag, type GridProvenance } from '@/components/news/power-grid/GridExplorerUI';
 import { ArchiveBadge, ArchiveDateGridPicker, ArchiveInsightCallout } from './PetrobanglaArchiveShared';
 
 const COMPARE_MODE_HINT: Record<AudienceMode, string> = {
   simple: 'Interactive side-by-side gas comparison — national total, power fulfillment, and top fields. Hover a row to sync highlight.',
   analyst: 'Full analyst mode: hover fields to compare inline deltas, filter by field name, and use YoY or DoD presets.',
-  investor: 'Risk dashboard: watch power fulfillment, LNG import share, andBibiyana concentration shift over time.',
+  investor: 'Risk dashboard: watch power fulfillment, LNG import share, and Bibiyana concentration shift over time.',
   researcher: 'Validation reconciliation status, copy-to-markdown exports, and raw telemetry field delta tracking.',
 };
 
@@ -290,7 +291,7 @@ export function PetrobanglaArchiveCompare({
         </div>
       ) : (
         <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
-          <GitCompare className="h-5 w-5 text-sky-500 shrink-0" />
+          <GitCompare className="h-5 w-5 shrink-0 text-primary" />
           <div className="flex-1 min-w-0">
             <h3 className="grid-explorer-chart-card__title">Compare Any Two Days<ArchiveBadge /></h3>
             <p className="grid-explorer-chart-card__sub">Right date follows grid selector · pick any two days to compare</p>
@@ -485,7 +486,10 @@ export function PetrobanglaArchiveCompare({
             </div>
 
             <div className="gas-reserve-compare-movers mt-4">
-              <h4 className="gas-reserve-compare-movers__title">Top field movers</h4>
+              <h4 className="gas-reserve-compare-movers__title flex items-center gap-1.5">
+                Top field movers
+                <GridProvenanceTag kind="D" />
+              </h4>
               <div className="gas-reserve-compare-movers__chips">
                 {topMovers.map((m) => (
                   <span
@@ -582,15 +586,18 @@ function CompareDeltaStrip({
       </p>
       <div className="gas-reserve-compare-delta-strip__grid grid-cols-2 md:grid-cols-5 gap-3">
         {items.map((item) => (
-          <div key={item.label} className="gas-reserve-compare-delta-strip__item flex flex-col p-2 bg-muted/20 border border-border/30 rounded-xl">
-            <span className="gas-reserve-compare-delta-strip__label text-[10px] text-muted-foreground uppercase font-semibold">{item.label}</span>
+          <div key={item.label} className="gas-reserve-compare-delta-strip__item flex flex-col p-3 bg-muted/20 border border-border/30 rounded-xl">
+            <span className="gas-reserve-compare-delta-strip__label flex items-center justify-center gap-1 text-[10px] text-muted-foreground uppercase font-semibold leading-tight">
+              {item.label}
+              <GridProvenanceTag kind="D" />
+            </span>
             <span
               className={cn(
-                'gas-reserve-compare-delta-strip__value text-sm font-bold flex items-center gap-1 mt-0.5',
+                'gas-reserve-compare-delta-strip__value text-sm font-bold tabular-nums flex items-center justify-center gap-1 mt-1',
                 item.delta >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500',
               )}
             >
-              {item.delta >= 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+              {item.delta >= 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : <ArrowDown className="h-3 w-3 shrink-0" />}
               {item.delta >= 0 ? '+' : ''}{item.fmt(item.delta)} {item.unit}
             </span>
           </div>
@@ -651,34 +658,36 @@ function ComparePanel({
       )}
     >
       <div className="gas-reserve-compare-panel__head flex items-center justify-between pb-3 border-b border-border/30">
-        <span className="gas-reserve-compare-panel__date font-bold text-foreground text-sm">{label}</span>
+        <span className="gas-reserve-compare-panel__date font-bold tabular-nums text-foreground text-sm">{label}</span>
         {deltaGas != null && (
           <span
             className={cn(
-              'gas-reserve-compare-panel__delta text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 select-none',
+              'gas-reserve-compare-panel__delta text-xs font-bold tabular-nums px-2 py-0.5 rounded-full flex items-center gap-1 select-none',
               deltaGas >= 0 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-red-500/10 text-red-500',
             )}
           >
-            {deltaGas >= 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+            {deltaGas >= 0 ? <ArrowUp className="h-3 w-3 shrink-0" /> : <ArrowDown className="h-3 w-3 shrink-0" />}
             {deltaGas >= 0 ? '+' : ''}
             {formatNumber(deltaGas, 1)} MMCFD
+            <GridProvenanceTag kind="D" />
           </span>
         )}
       </div>
 
       <div className="gas-reserve-compare-panel__stats grid grid-cols-3 gap-2 my-4">
-        <div className="gas-reserve-compare-panel__stat flex flex-col p-2 bg-background border border-border/40 rounded-xl">
-          <span className="gas-reserve-compare-panel__stat-label text-[9px] text-muted-foreground uppercase font-semibold">National gas</span>
-          <span className="gas-reserve-compare-panel__stat-value font-bold text-sm text-foreground mt-0.5">{formatNumber(total, 1)}</span>
-        </div>
-        <div className="gas-reserve-compare-panel__stat flex flex-col p-2 bg-background border border-border/40 rounded-xl">
-          <span className="gas-reserve-compare-panel__stat-label text-[9px] text-muted-foreground uppercase font-semibold">Fulfillment</span>
-          <span className="gas-reserve-compare-panel__stat-value font-bold text-sm text-foreground mt-0.5">{fulfillment.toFixed(0)}%</span>
-        </div>
-        <div className="gas-reserve-compare-panel__stat flex flex-col p-2 bg-background border border-border/40 rounded-xl">
-          <span className="gas-reserve-compare-panel__stat-label text-[9px] text-muted-foreground uppercase font-semibold">LNG share</span>
-          <span className="gas-reserve-compare-panel__stat-value font-bold text-sm text-foreground mt-0.5">{lngShare.toFixed(0)}%</span>
-        </div>
+        {([
+          { label: 'National gas', value: formatNumber(total, 1), provenance: 'P' as GridProvenance },
+          { label: 'Fulfillment', value: `${fulfillment.toFixed(0)}%`, provenance: 'D' as GridProvenance },
+          { label: 'LNG share', value: `${lngShare.toFixed(0)}%`, provenance: 'D' as GridProvenance },
+        ]).map((stat) => (
+          <div key={stat.label} className="gas-reserve-compare-panel__stat flex flex-col p-3 bg-background border border-border/40 rounded-xl">
+            <span className="gas-reserve-compare-panel__stat-label flex items-center gap-1 text-[9px] text-muted-foreground uppercase font-semibold leading-tight">
+              <span className="truncate">{stat.label}</span>
+              <GridProvenanceTag kind={stat.provenance} />
+            </span>
+            <span className="gas-reserve-compare-panel__stat-value font-bold text-sm tabular-nums text-foreground mt-1">{stat.value}</span>
+          </div>
+        ))}
       </div>
 
       <div className="grid-explorer-table-wrap gas-reserve-compare-panel__table max-h-72 overflow-y-auto">
@@ -686,7 +695,9 @@ function ComparePanel({
           <thead>
             <tr>
               <th className="text-left font-bold text-muted-foreground pb-2">Field</th>
-              <th className="text-right font-bold text-muted-foreground pb-2">Gas MMCFD</th>
+              <th className="text-right font-bold text-muted-foreground pb-2">
+                Gas MMCFD<GridProvenanceTag kind="P" className="ml-1" />
+              </th>
             </tr>
           </thead>
           <tbody>

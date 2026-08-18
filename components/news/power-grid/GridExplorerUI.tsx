@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { Children, useState } from 'react';
+import { Children, useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentType, ReactNode } from 'react';
 
 type GridIcon = LucideIcon | ComponentType<{ className?: string }>;
 import { cn } from '@/lib/utils';
+import { ModernTooltip } from '@/components/shared/ModernTooltip';
 
 /* ── Data cadence badges (title / KPI labels) ── */
 
@@ -85,15 +86,187 @@ export const GRID_PROVENANCE_TITLE: Record<GridProvenance, string> = {
   D: 'Derived — calculated by ESB PowerLine from published figures. The source does not state this number.',
 };
 
+/** The heading line of the P/D tooltip — the claim in two words. */
+const GRID_PROVENANCE_HEADING: Record<GridProvenance, string> = {
+  P: 'Published figure',
+  D: 'Derived figure',
+};
+
+/**
+ * The P/D mark.
+ *
+ * The explanation used to ride on the native `title` attribute, which meant the
+ * single most-repeated piece of methodology on the site — it appears over 160
+ * times in the explorer alone — was delivered by the browser's own tooltip:
+ * roughly a second of delay, no styling, no dark mode, and nothing at all on
+ * touch. It now uses the same portal tooltip as the rest of the site, wrapped in
+ * a `span` so it stays legal inside the sentences and table cells it sits in.
+ *
+ * `aria-label` and the tooltip's own `role="tooltip"` carry the meaning for
+ * assistive tech, so nothing is lost by dropping `title`.
+ */
 export function GridProvenanceTag({ kind, className }: { kind: GridProvenance; className?: string }) {
   return (
-    <span
-      className={cn('grid-provenance-tag', `grid-provenance-tag--${kind.toLowerCase()}`, className)}
-      title={GRID_PROVENANCE_TITLE[kind]}
-      aria-label={kind === 'P' ? 'Published figure' : 'Derived figure'}
+    <ModernTooltip
+      label={GRID_PROVENANCE_HEADING[kind]}
+      hint={GRID_PROVENANCE_TITLE[kind]}
+      variant="data"
+      wrapperAs="span"
+      fast
+      className={cn('grid-provenance-tag-wrap', className)}
     >
-      {kind}
-    </span>
+      {/* Deliberately not focusable. The explorer carries over 160 of these on
+          one page, so making each a tab stop would put 160 stops between a
+          keyboard reader and the date picker. The meaning travels on the
+          `aria-label` — which is what a screen reader announced from `title`
+          before this — and the full methodology is a heading-level disclosure
+          at the top of the page rather than something only a hover reveals. */}
+      <span
+        className={cn('grid-provenance-tag', `grid-provenance-tag--${kind.toLowerCase()}`)}
+        aria-label={kind === 'P' ? 'Published figure' : 'Derived figure'}
+        role="note"
+      >
+        {kind}
+      </span>
+    </ModernTooltip>
+  );
+}
+
+/* ── Paging long tables ─────────────────────────────────────────────────── */
+
+/**
+ * Page state for a long table.
+ *
+ * Returns the slice to render plus everything the pager needs to draw itself.
+ * The page resets whenever the row count changes, because a filter that shrinks
+ * a list to nine rows should not leave a reader stranded on page four looking
+ * at nothing.
+ */
+export function useTablePager<T>(rows: T[], initialSize = 25) {
+  const [pageSize, setPageSize] = useState(initialSize);
+  const [page, setPage] = useState(1);
+  const total = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const current = Math.min(page, totalPages);
+
+  useEffect(() => {
+    setPage(1);
+  }, [total, pageSize]);
+
+  const start = (current - 1) * pageSize;
+  const end = Math.min(start + pageSize, total);
+
+  return {
+    rows: rows.slice(start, end),
+    page: current,
+    setPage,
+    pageSize,
+    setPageSize,
+    total,
+    totalPages,
+    from: total === 0 ? 0 : start + 1,
+    to: end,
+  };
+}
+
+/** 1 … 4 5 6 … 20 — never more than seven slots, so the row cannot reflow. */
+function pagerNumbers(current: number, total: number): (number | '…')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 4) return [1, 2, 3, 4, 5, '…', total];
+  if (current >= total - 3) return [1, '…', total - 4, total - 3, total - 2, total - 1, total];
+  return [1, '…', current - 1, current, current + 1, '…', total];
+}
+
+// The same three the admin panel offers, so the two halves of the product
+// behave identically.
+const PAGE_SIZES = [25, 50, 100];
+
+/**
+ * The pager under a long table.
+ *
+ * One component for the whole explorer: the substation registry had grown its
+ * own with prev/next only, and every other long list had nothing at all, so a
+ * reader met 149 power stations as one scroll. Same controls, same wording and
+ * same page sizes wherever a list is long enough to need them — which is also
+ * what makes them predictable.
+ */
+export function GridTablePager({
+  page,
+  totalPages,
+  pageSize,
+  total,
+  from,
+  to,
+  onPage,
+  onPageSize,
+  noun = 'rows',
+  className,
+}: {
+  page: number;
+  totalPages: number;
+  pageSize: number;
+  total: number;
+  from: number;
+  to: number;
+  onPage: (p: number) => void;
+  onPageSize: (n: number) => void;
+  /** What is being listed, for the count line: "of 149 stations". */
+  noun?: string;
+  className?: string;
+}) {
+  if (total <= PAGE_SIZES[0] && totalPages <= 1) return null;
+
+  return (
+    <div className={cn('grid-pager', className)}>
+      <p className="grid-pager__count">
+        Showing <strong>{from.toLocaleString()}</strong>–<strong>{to.toLocaleString()}</strong> of{' '}
+        <strong>{total.toLocaleString()}</strong> {noun}
+      </p>
+
+      <div className="grid-pager__size">
+        <span>Show</span>
+        {PAGE_SIZES.map((n) => (
+          <button
+            key={n}
+            type="button"
+            aria-pressed={pageSize === n}
+            className={cn('grid-pager__size-btn', pageSize === n && 'is-active')}
+            onClick={() => onPageSize(n)}
+          >
+            {n}
+          </button>
+        ))}
+        <span>per page</span>
+      </div>
+
+      {totalPages > 1 ? (
+        <nav className="grid-pager__nav" aria-label="Table pages">
+          <button type="button" className="grid-pager__step" disabled={page === 1}
+            onClick={() => onPage(1)} aria-label="First page">«</button>
+          <button type="button" className="grid-pager__step" disabled={page === 1}
+            onClick={() => onPage(Math.max(1, page - 1))} aria-label="Previous page">‹</button>
+          {pagerNumbers(page, totalPages).map((n, i) =>
+            n === '…' ? (
+              <span key={`gap-${i}`} className="grid-pager__gap" aria-hidden>…</span>
+            ) : (
+              <button
+                key={n}
+                type="button"
+                className={cn('grid-pager__num', n === page && 'is-current')}
+                aria-current={n === page ? 'page' : undefined}
+                onClick={() => onPage(n)}
+              >
+                {n}
+              </button>
+            ),
+          )}
+          <button type="button" className="grid-pager__step" disabled={page === totalPages}
+            onClick={() => onPage(Math.min(totalPages, page + 1))} aria-label="Next page">›</button>
+          <button type="button" className="grid-pager__step" disabled={page === totalPages}
+            onClick={() => onPage(totalPages)} aria-label="Last page">»</button>
+        </nav>
+      ) : null}
+    </div>
   );
 }
 
@@ -257,6 +430,26 @@ const GRID_KPI_STRIP_LAYER: Record<GridKpiStripLayer, string> = {
   panel: 'z-20',
 };
 
+/**
+ * How many columns a strip of this many tiles wants.
+ *
+ * The base strip is five columns, which is right for exactly one strip on the
+ * page. A three-tile strip on a five-column grid leaves two empty columns and
+ * reads as though two figures failed to load — which is what the Petrobangla
+ * gas strip did, since it renders between one and three tiles depending on
+ * what the day's report carries.
+ *
+ * Applied only when the caller has not named a variant itself, so every
+ * existing `--four` / `--six` call site behaves exactly as before.
+ */
+const GRID_KPI_STRIP_COUNT_VARIANT: Record<number, string> = {
+  1: 'grid-explorer-kpi-strip--one',
+  2: 'grid-explorer-kpi-strip--two',
+  3: 'grid-explorer-kpi-strip--three',
+  4: 'grid-explorer-kpi-strip--four',
+  6: 'grid-explorer-kpi-strip--six',
+};
+
 export function GridKpiStrip({
   children,
   className,
@@ -286,6 +479,9 @@ export function GridKpiStrip({
   const [expanded, setExpanded] = useState(false);
   const items = Children.toArray(children);
   const folds = collapsibleAfter != null && items.length > collapsibleAfter;
+  const countVariant = className?.includes('grid-explorer-kpi-strip--')
+    ? undefined
+    : GRID_KPI_STRIP_COUNT_VARIANT[items.length];
 
   return (
     <div
@@ -294,6 +490,7 @@ export function GridKpiStrip({
       className={cn(
         'grid-explorer-kpi-strip relative',
         GRID_KPI_STRIP_LAYER[layer],
+        countVariant,
         folds && 'grid-explorer-kpi-strip--folds',
         className,
       )}
@@ -364,7 +561,12 @@ export function GridKpiTrend({
   const tone = flat || good == null ? 'text-muted-foreground' : good ? 'text-emerald-500' : 'text-destructive';
   const arrow = flat ? '→' : diff > 0 ? '▲' : '▼';
   return (
-    <span className={cn('inline-flex items-center gap-1 font-semibold', tone)}>
+    <span
+      className={cn(
+        'grid-explorer-kpi__trend inline-flex flex-wrap items-center gap-x-1 gap-y-0.5 font-semibold tabular-nums',
+        tone,
+      )}
+    >
       <span aria-hidden>{arrow}</span>
       {flat ? 'level' : `${Math.abs(pct).toFixed(1)}%`}
       <span className="font-normal text-muted-foreground">
@@ -447,7 +649,11 @@ export function GridKpiCell({
           {provenance && <GridProvenanceTag kind={provenance} className="ml-2" />}
         </GridKpiLabel>
         <div className="grid-explorer-kpi__value">{value}</div>
-        {hint && <p className="text-[9px] text-muted-foreground mt-1 leading-snug">{hint}</p>}
+        {hint && (
+          <p className="grid-explorer-kpi__hint text-[9px] text-muted-foreground mt-1 leading-snug tabular-nums">
+            {hint}
+          </p>
+        )}
       </div>
       {children && tooltipTitle && TooltipIcon && tooltipAccent && (
         <GridKpiTooltipPanel
@@ -490,7 +696,10 @@ export function GridKpiTooltipPanel({
   return (
     <div
       className={cn(
-        'absolute text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto',
+        // Stated rather than inherited: the panel is a portal-less child of the
+        // tile, so a tile that ever set its own text alignment would drag eight
+        // label/value rows along with it.
+        'absolute text-left text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto',
         widthClass,
         pos,
         active && 'opacity-100 scale-100 translate-y-0 pointer-events-auto',
@@ -508,7 +717,7 @@ export function GridKpiTooltipPanel({
           accent,
         )}
       >
-        <Icon className="h-3.5 w-3.5" />
+        <Icon className="h-3.5 w-3.5 shrink-0" />
         {title}
       </div>
       {children}
@@ -532,12 +741,14 @@ export function GridKpiTooltipRow({
   provenance?: GridProvenance;
 }) {
   return (
-    <div className="flex justify-between gap-4">
-      <span className="text-muted-foreground inline-flex items-center gap-1">
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-muted-foreground inline-flex items-center gap-1 min-w-0">
         {provenance && <GridProvenanceTag kind={provenance} />}
         {label}
       </span>
-      <span className={cn('font-bold text-foreground text-right', valueClass)}>{value}</span>
+      <span className={cn('font-bold text-foreground text-right tabular-nums', valueClass)}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -635,11 +846,18 @@ export function GridKpiTooltipGridRow({
   value,
   valueClass,
   dotColor,
+  provenance,
 }: {
   label: string;
   value: ReactNode;
   valueClass?: string;
   dotColor?: string;
+  /**
+   * Whose figure this row is. Optional so existing callers keep working, but a
+   * row inside a hover panel is exactly where a reader decides whether to quote
+   * a number, so it should be set wherever the answer is known.
+   */
+  provenance?: GridProvenance;
 }) {
   return (
     <>
@@ -649,10 +867,11 @@ export function GridKpiTooltipGridRow({
         ) : (
           <span className="grid-chart-tooltip__dot shrink-0 bg-transparent" />
         )}
+        {provenance ? <GridProvenanceTag kind={provenance} /> : null}
         {label}
       </span>
       <span
-        className={cn('grid-chart-tooltip__value text-right', valueClass)}
+        className={cn('grid-chart-tooltip__value text-right tabular-nums', valueClass)}
         style={dotColor && !valueClass ? { color: dotColor } : undefined}
       >
         {value}

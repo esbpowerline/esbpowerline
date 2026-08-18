@@ -84,11 +84,13 @@ import {
   fmt,
 } from '@/components/news/power-grid/renewables/shared';
 import { ProjectRegisterCard } from '@/components/news/power-grid/renewables/ProjectRegisterCard';
+import { YearAttributionNote } from '@/components/news/power-grid/renewables/YearAttributionNote';
 import { YearWiseTable } from '@/components/news/power-grid/renewables/YearWiseTable';
 import { sredaAvailableDates } from '@/lib/data/sreda/available-dates';
 import { cn, formatNumber } from '@/lib/utils';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
+import { chartGridProps } from '@/lib/data/grid/chart-axis';
 
 /** The fuels PGCB reports that SREDA also counts as renewable. */
 const RENEWABLE_FUELS = ['Solar', 'Hydro', 'Wind'] as const;
@@ -157,9 +159,26 @@ interface MonthlyRow {
 
 function EmptyCard({ title, reason }: { title: string; reason: string }) {
   return (
-    <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[180px]">
-      <h4 className="text-sm font-bold text-foreground mb-2">{title}</h4>
-      <p className="text-xs text-muted-foreground max-w-md leading-relaxed">{reason}</p>
+    <div className="grid-explorer-chart-card card flex min-h-[180px] flex-col items-center justify-center gap-2 p-6 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/20">
+        <Leaf className="h-6 w-6 shrink-0 text-emerald-500" />
+      </span>
+      <h4 className="text-sm font-bold text-foreground">{title}</h4>
+      <p className="max-w-md text-xs leading-relaxed text-muted-foreground">{reason}</p>
+    </div>
+  );
+}
+
+/**
+ * The body of a card that has nothing to show — loading, or a page the source
+ * did not publish. Same centred treatment as the content it stands in for, so a
+ * card does not change shape when its data is missing.
+ */
+function CardNotice({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex min-h-[120px] flex-col items-center justify-center gap-2 p-6 text-center">
+      <Info className="h-5 w-5 shrink-0 text-muted-foreground/70" />
+      <p className="max-w-md text-xs leading-relaxed text-muted-foreground">{children}</p>
     </div>
   );
 }
@@ -352,10 +371,10 @@ export function RenewablesTab({
   // are PGCB's published monthly energy, the share line is our quotient.
   const monthlyLegend: GridChartLegendItem[] = useMemo(
     () => [
-      { id: 'Hydro', label: 'Hydro (P)', color: FUEL_COLOR.Hydro, variant: 'area' },
-      { id: 'Wind', label: 'Wind (P)', color: FUEL_COLOR.Wind, variant: 'area' },
-      { id: 'Solar', label: 'Solar (P)', color: FUEL_COLOR.Solar, variant: 'area' },
-      { id: 'share', label: 'Share of generation (D)', color: '#a855f7', variant: 'dashed' },
+      { id: 'Hydro', label: 'Hydro', color: FUEL_COLOR.Hydro, variant: 'area', provenance: 'P' },
+      { id: 'Wind', label: 'Wind', color: FUEL_COLOR.Wind, variant: 'area', provenance: 'P' },
+      { id: 'Solar', label: 'Solar', color: FUEL_COLOR.Solar, variant: 'area', provenance: 'P' },
+      { id: 'share', label: 'Share of generation', color: '#a855f7', variant: 'line', provenance: 'D' },
     ],
     [],
   );
@@ -410,6 +429,13 @@ export function RenewablesTab({
    * the two the card splits into below GRID_DUAL_AXIS_MIN_WIDTH. Defined once
    * so its rows — all three fuels, the renewable total, all generation and the
    * share — cannot drift between the two layouts.
+   *
+   * Every row is marked, and the marks are not decoration: the three fuels and
+   * the month's total generation are columns PGCB prints, while the renewable
+   * total and the share are arithmetic done here on top of them. The hover is
+   * where a reader reads the actual numbers, so it is the last place the
+   * distinction can be left implicit. Marks sit before the name, as they do in
+   * the load curve and the dispatch stack.
    */
   const monthlyTimelineTooltip = (
     <GridRechartsTooltip
@@ -423,6 +449,7 @@ export function RenewablesTab({
                 <Fragment key={k}>
                   <span className="grid-chart-tooltip__label flex items-center gap-1.5">
                     <span className="grid-chart-tooltip__dot shrink-0" style={{ background: FUEL_COLOR[k] }} />
+                    <GridProvenanceTag kind="P" />
                     {k}
                   </span>
                   <span className="grid-chart-tooltip__value" style={{ color: FUEL_COLOR[k] }}>
@@ -430,14 +457,21 @@ export function RenewablesTab({
                   </span>
                 </Fragment>
               ))}
-              <span className="grid-chart-tooltip__label">Renewable total</span>
+              <span className="grid-chart-tooltip__label flex items-center gap-1.5">
+                <GridProvenanceTag kind="D" />
+                Renewable total
+              </span>
               <span className="grid-chart-tooltip__value">{fmt(d.renewable, 2)} MKWh</span>
-              <span className="grid-chart-tooltip__label">All generation</span>
+              <span className="grid-chart-tooltip__label flex items-center gap-1.5">
+                <GridProvenanceTag kind="P" />
+                All generation
+              </span>
               <span className="grid-chart-tooltip__value">
                 {formatNumber(Math.round(d.total))} MKWh
               </span>
               <span className="grid-chart-tooltip__label flex items-center gap-1.5">
                 <span className="grid-chart-tooltip__dot shrink-0" style={{ background: '#a855f7' }} />
+                <GridProvenanceTag kind="D" />
                 Share
               </span>
               <span className="grid-chart-tooltip__value" style={{ color: '#a855f7' }}>
@@ -666,7 +700,7 @@ export function RenewablesTab({
                             {r.unitCost == null ? '—' : r.unitCost.toFixed(4)}
                             {ADMINISTERED_FUELS.has(r.name) && (
                               <span
-                                className="ml-1.5 inline-block px-1.5 py-px rounded border text-[9px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
+                                className="ml-1.5 inline-block px-1.5 py-px rounded border text-[10px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
                                 title="Administered rate — the publisher applies a fixed Tk/kWh to this fuel rather than reporting an observed cost, so it should not be read as a daily measurement."
                               >
                                 flat
@@ -685,7 +719,7 @@ export function RenewablesTab({
                   </tbody>
                 </table>
               </div>
-              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+              <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
                 Hydro and Wind carry a <strong>flat</strong>{' '}
                 mark because PGCB applies a fixed rate to
                 them — 0.1000 and 14.7100 Tk/kWh on essentially every day of 2026 — rather than
@@ -693,9 +727,7 @@ export function RenewablesTab({
               </div>
             </>
           ) : (
-            <div className="p-6 text-xs text-muted-foreground">
-              PGCB published no fuel-wise generation for this date.
-            </div>
+            <CardNotice>PGCB published no fuel-wise generation for this date.</CardNotice>
           )}
 
           <GridCardFooter>
@@ -722,28 +754,34 @@ export function RenewablesTab({
           </div>
 
           {latestMonth && latestMonthRenewable != null ? (
-            <div className="p-4 space-y-3">
-              <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className="space-y-3">
+              {/* Four tiles on one grid: same padding, same three lines, and a
+                  swatch on every label — including the share, which takes the
+                  purple the chart already gives that series — so the labels,
+                  the figures and the unit lines each sit on one axis across the
+                  row instead of the share tile starting 14px left of the rest. */}
+              <div className="grid grid-cols-2 gap-3">
                 {RENEWABLE_FUELS.map((k) => (
-                  <div key={k} className="p-3 rounded-lg bg-muted/20 border border-border/40">
-                    <div className="text-muted-foreground flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full shrink-0" style={{ background: FUEL_COLOR[k] }} />
+                  <div key={k} className="min-w-0 rounded-lg border border-border/40 bg-muted/20 p-3">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: FUEL_COLOR[k] }} />
                       {k}
                       <GridProvenanceTag kind="P" />
                     </div>
-                    <div className="font-bold tabular-nums text-sm mt-0.5">{fmt(latestMonth[k], 2)}</div>
-                    <div className="text-[10px] text-muted-foreground">MKWh</div>
+                    <div className="mt-1 text-sm font-bold tabular-nums leading-none">{fmt(latestMonth[k], 2)}</div>
+                    <div className="mt-1 text-[10px] text-muted-foreground">MKWh</div>
                   </div>
                 ))}
-                <div className="p-3 rounded-lg bg-primary/5 border border-primary/25">
-                  <div className="text-muted-foreground flex items-center gap-1.5">
+                <div className="min-w-0 rounded-lg border border-primary/25 bg-primary/5 p-3">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: '#a855f7' }} />
                     Share of generation
                     <GridProvenanceTag kind="D" />
                   </div>
-                  <div className="font-bold tabular-nums text-sm mt-0.5 text-primary">
+                  <div className="mt-1 text-sm font-bold tabular-nums leading-none text-primary">
                     {latestMonth.sharePct == null ? '—' : `${latestMonth.sharePct.toFixed(2)}%`}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
+                  <div className="mt-1 text-[10px] tabular-nums text-muted-foreground">
                     {fmt(latestMonthRenewable, 2)} of {formatNumber(Math.round(latestMonth.total))} MKWh
                   </div>
                 </div>
@@ -755,9 +793,7 @@ export function RenewablesTab({
               </p>
             </div>
           ) : (
-            <div className="p-6 text-xs text-muted-foreground">
-              PGCB monthly reports could not be loaded.
-            </div>
+            <CardNotice>PGCB monthly reports could not be loaded.</CardNotice>
           )}
 
           <GridCardFooter>
@@ -793,6 +829,20 @@ export function RenewablesTab({
              back to the data; desktop keeps p-4. */
           <div className={cn(isNarrowTimeline ? 'px-0 pb-4 pt-3' : 'p-4')}>
             <GridChartExternalLegend items={monthlyLegend} />
+            {/* One gradient per fuel, shared by the narrow and wide plots. A
+                flat fill made three slabs of poster paint; a gradient under a
+                saturated top edge keeps the band boundaries crisp while letting
+                the stack recede where it is deep. */}
+            <svg width="0" height="0" aria-hidden="true" className="absolute">
+              <defs>
+                {RENEWABLE_FUELS.map((k) => (
+                  <linearGradient key={k} id={`re-grad-${k}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={FUEL_COLOR[k]} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={FUEL_COLOR[k]} stopOpacity={0.5} />
+                  </linearGradient>
+                ))}
+              </defs>
+            </svg>
             {isNarrowTimeline ? (
               /* Two plots rather than two axes: the stack is MKWh and the share
                  is a percentage, so on a phone they separate by unit instead of
@@ -804,7 +854,7 @@ export function RenewablesTab({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         {monthlyXAxis}
                         <YAxis
                           {...gridChartYAxisProps(chartTheme, {
@@ -820,9 +870,9 @@ export function RenewablesTab({
                             dataKey={k}
                             stackId="re"
                             stroke={FUEL_COLOR[k]}
-                            fill={FUEL_COLOR[k]}
-                            fillOpacity={0.28}
-                            strokeWidth={2}
+                            fill={`url(#re-grad-${k})`}
+                            fillOpacity={1}
+                            strokeWidth={1.5}
                             legendType="none"
                           />
                         ))}
@@ -838,7 +888,7 @@ export function RenewablesTab({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         {monthlyXAxis}
                         <YAxis
                           {...gridChartYAxisProps(chartTheme, {
@@ -850,9 +900,19 @@ export function RenewablesTab({
                         <Line
                           type="monotone"
                           dataKey="sharePct"
+                          stroke="hsl(var(--card))"
+                          strokeWidth={3.5}
+                          dot={false}
+                          activeDot={false}
+                          legendType="none"
+                          tooltipType="none"
+                          isAnimationActive={false}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="sharePct"
                           stroke="#a855f7"
-                          strokeWidth={1.5}
-                          strokeDasharray="3 3"
+                          strokeWidth={2}
                           dot={false}
                           activeDot={{ r: 4, strokeWidth: 0, fill: '#a855f7' }}
                           legendType="none"
@@ -866,7 +926,7 @@ export function RenewablesTab({
             <div className="grid-explorer-chart-area grid-explorer-chart-area--lg w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {monthlyXAxis}
                   <YAxis
                     {...gridChartYAxisProps(chartTheme, {
@@ -894,20 +954,47 @@ export function RenewablesTab({
                       type="monotone"
                       dataKey={k}
                       stackId="re"
+                      /* The original drew a 2px fuel-coloured stroke over a 28%
+                         fill, and the eye read the outlines rather than the
+                         bands: Wind's stroke was as heavy as Hydro's while the
+                         band under it was 8 MKWh against 155. Now the fill
+                         carries the quantity and the stroke is only the top
+                         edge of that fill, so thickness is the figure. */
                       stroke={FUEL_COLOR[k]}
-                      fill={FUEL_COLOR[k]}
-                      fillOpacity={0.28}
-                      strokeWidth={2}
+                      fill={`url(#re-grad-${k})`}
+                      fillOpacity={1}
+                      strokeWidth={1.5}
                       legendType="none"
                     />
                   ))}
+                  {/* Drawn twice: a card-coloured halo, then the line itself.
+                      A 1.5px dashed purple line was legible over pale washes
+                      and vanishes over solid amber, and it is the one series
+                      here that is ours rather than PGCB's — it has to stay
+                      readable to stay honest.
+
+                      Solid, not dashed. The dash used to be what said "this one
+                      is derived"; the D chip in the legend says it outright now,
+                      and a dashed line inside a white halo over a gradient was
+                      three textures fighting for the same 2px. */}
+                  <Line
+                    yAxisId="share"
+                    type="monotone"
+                    dataKey="sharePct"
+                    stroke="hsl(var(--card))"
+                    strokeWidth={3.5}
+                    dot={false}
+                    activeDot={false}
+                    legendType="none"
+                    tooltipType="none"
+                    isAnimationActive={false}
+                  />
                   <Line
                     yAxisId="share"
                     type="monotone"
                     dataKey="sharePct"
                     stroke="#a855f7"
-                    strokeWidth={1.5}
-                    strokeDasharray="3 3"
+                    strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 4, strokeWidth: 0, fill: '#a855f7' }}
                     legendType="none"
@@ -938,9 +1025,7 @@ export function RenewablesTab({
             </p>
           </div>
         ) : (
-          <div className="p-6 text-xs text-muted-foreground">
-            PGCB monthly reports could not be loaded, so no timeline is shown.
-          </div>
+          <CardNotice>PGCB monthly reports could not be loaded, so no timeline is shown.</CardNotice>
         )}
 
         <GridCardFooter>
@@ -974,7 +1059,7 @@ export function RenewablesTab({
         </div>
 
         {plants === null ? (
-          <div className="p-6 text-xs text-muted-foreground">Loading station detail…</div>
+          <CardNotice>Loading station detail…</CardNotice>
         ) : renewablePlants.length ? (
           <div className="grid-explorer-table-wrap">
             <table className="grid-explorer-table">
@@ -1037,15 +1122,15 @@ export function RenewablesTab({
             </table>
           </div>
         ) : (
-          <div className="p-6 text-xs text-muted-foreground">
+          <CardNotice>
             PGCB published no per-station table for {isoDate || 'this date'}, or the day&rsquo;s
             workbook did not reconcile against its own totals. Nothing from a neighbouring day is
             shown in its place.
-          </div>
+          </CardNotice>
         )}
 
         {stationVsFuel.length > 0 && (
-          <div className="mx-4 mb-3 p-3 rounded-lg border border-border/50 bg-muted/15">
+          <div className="mb-3 p-3 rounded-lg border border-border/50 bg-muted/15">
             <div className="text-[11px] font-bold text-foreground mb-1.5 flex items-center gap-1.5">
               {stationVsFuel.every((c) => c.ok) ? (
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
@@ -1079,7 +1164,7 @@ export function RenewablesTab({
           </div>
         )}
 
-        <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+        <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
           Solar stations report a day peak and no evening peak, because the evening peak is measured
           after sunset. A zero there is a real reading, not a gap.
         </div>
@@ -1203,12 +1288,12 @@ export function RenewablesTab({
                 </table>
               </div>
             ) : (
-              <div className="p-6 text-xs text-muted-foreground">
+              <CardNotice>
                 SREDA&rsquo;s technology-wise page could not be read for this snapshot.
-              </div>
+              </CardNotice>
             )}
 
-            <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+            <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
               <strong>Installations</strong>{' '}
               is a count, not a capacity: 6,037,583 solar home systems
               sit beside 14 solar parks, so the columns cannot be ranked against each other.
@@ -1284,12 +1369,12 @@ export function RenewablesTab({
                   </table>
                 </div>
               ) : (
-                <div className="p-6 text-xs text-muted-foreground">
+                <CardNotice>
                   SREDA&rsquo;s generation-mix page could not be read for this snapshot.
-                </div>
+                </CardNotice>
               )}
 
-              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+              <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
                 This page states renewable capacity in <strong>MW</strong>; the technology page states
                 the same quantity in <strong>MWp</strong>. SREDA uses both labels for it, and the two
                 figures differ slightly — the reconciliation below reports that rather than picking one.
@@ -1318,15 +1403,16 @@ export function RenewablesTab({
               </div>
 
               {sreda.yearWiseTables?.length ? (
-                <div className="p-4 space-y-4">
+                <div className="space-y-4">
                   {sreda.yearWiseTables.map((table) => (
                     <YearWiseTable key={table.category} table={table} />
                   ))}
+                  <YearAttributionNote tables={sreda.yearWiseTables} />
                 </div>
               ) : (
-                <div className="p-6 text-xs text-muted-foreground">
+                <CardNotice>
                   SREDA&rsquo;s year-wise pages could not be read for this snapshot.
-                </div>
+                </CardNotice>
               )}
 
               <GridCardFooter>
@@ -1458,7 +1544,7 @@ export function RenewablesTab({
               <>
                 {/* The differences are the story; the other 29 rows are a
                     guarantee, not reading. Default to the ones that moved. */}
-                <div className="px-4 pt-3 flex flex-wrap items-center gap-2 text-[11px]">
+                <div className="pt-3 flex flex-wrap items-center gap-2 text-[11px]">
                   <span className="text-muted-foreground">
                     {showAllChecks
                       ? `Showing all ${checks.length} checks`
@@ -1535,12 +1621,10 @@ export function RenewablesTab({
                 </div>
               </>
             ) : (
-              <div className="p-6 text-xs text-muted-foreground">
-                No reconciliation available for this snapshot.
-              </div>
+              <CardNotice>No reconciliation available for this snapshot.</CardNotice>
             )}
 
-            <div className="px-4 pb-4 text-[11px] text-muted-foreground leading-relaxed">
+            <div className="pb-4 text-[11px] text-muted-foreground leading-relaxed">
               The band is half of the last digit SREDA prints, once per figure summed — derived from
               how the source states its numbers, not chosen.
               {failed.length > 0 && (
@@ -1580,7 +1664,7 @@ export function RenewablesTab({
                 </div>
               </div>
 
-              <div className="mx-4 mt-3 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
+              <div className="mt-3 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
                 <strong>These are estimates, including the &ldquo;so far&rdquo; column.</strong>{' '}
                 SREDA heads both of its column groups &ldquo;Expected Energy Generation&rdquo; — the figures
                 are modelled from installed capacity and elapsed time, not measured at a meter. SREDA
@@ -1753,7 +1837,7 @@ function UnitsGlossary() {
           </p>
         </div>
       </div>
-      <div className="p-4 grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         {groups.map((g) => (
           <div key={g.heading}>
             <h4 className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground mb-2">
@@ -1774,7 +1858,7 @@ function UnitsGlossary() {
         The marking rule, stated rather than left to be inferred. Without it the
         unmarked first column of every table reads as an oversight.
       */}
-      <div className="px-4 pb-4 text-[11px] text-muted-foreground leading-relaxed">
+      <div className="pb-4 text-[11px] text-muted-foreground leading-relaxed">
         <strong className="text-foreground">Where the marks go.</strong>{' '}
         Every column that states something about a row carries{' '}
         <GridProvenanceTag kind="P" /> or <GridProvenanceTag kind="D" />. The first column of each

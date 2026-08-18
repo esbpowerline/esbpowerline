@@ -16,10 +16,17 @@
  *
  * The comparison happens here rather than in the export because the page
  * already knows the rate it is displaying; only the witness needs shipping.
- * Measured across the first half of 2026, the two derivations agree on gas and
- * coal on every day both agencies published, and on imports on all but one —
- * 2026-04-03, where BPDB's own page overstates imported energy by exactly
- * 188.00 MKWh and PGCB's three interconnectors sum exactly to its own total.
+ * Re-measured 2026-08-16 over every witnessed day from 2025-01-01 to
+ * 2026-06-24: gas agrees on 274/274 days, coal on 274/274, imports on 273/274 —
+ * the exception being 2026-04-03, where BPDB's own page overstates imported
+ * energy by exactly 188.00 MKWh and PGCB's three interconnectors sum exactly to
+ * its own total.
+ *
+ * The witness file is a periodic export and currently stops at 2026-06-24, so
+ * every later day is `awaiting-witness` rather than corroborated. Rebuilding it
+ * needs BPDB's daily reports for the missing span run through the acquisition
+ * pipeline; until that happens the newest days on the site — the ones most
+ * likely to be read — carry the weakest evidence marker.
  */
 
 import { useEffect, useState } from 'react';
@@ -28,7 +35,18 @@ export type UnitCostStatus =
   | 'corroborated'
   | 'disagreement'
   | 'administered'
-  | 'published-only';
+  | 'published-only'
+  /**
+   * The day falls after the last day this file carries a witness for.
+   *
+   * Distinct from `published-only`, which is a claim about BPDB — that it does
+   * not publish the inputs for this fuel. Beyond the coverage cutoff we simply
+   * have not looked, and saying "no second publisher states the same inputs"
+   * there asserts something about BPDB we have not checked. The witness file is
+   * rebuilt from BPDB's own daily reports by the acquisition pipeline, so it
+   * lags whenever that has not been run.
+   */
+  | 'awaiting-witness';
 
 interface Witness {
   second_publisher: string;
@@ -52,6 +70,8 @@ export interface UnitCostFact {
   secondPublisherUnitCost: number | null;
   delta: number | null;
   tolerance: number | null;
+  /** Last day the witness file covers — set on `awaiting-witness` only. */
+  witnessThrough?: string | null;
 }
 
 let cache: UnitCostFile | null = null;
@@ -85,11 +105,17 @@ export function useUnitCostAuthentication(isoDate: string | null | undefined) {
   }, []);
 
   const day = isoDate && file ? file.days[isoDate] : undefined;
+  // The file is a frozen export, so its newest day is the coverage cutoff.
+  const witnessThrough = file ? Object.keys(file.days).reduce((a, b) => (a > b ? a : b), '') : '';
 
   return {
     /** True once the file has loaded, whether or not this day has a witness. */
     loaded: !!file,
     administeredNote: file?.administered_note ?? null,
+    /** Last day any witness exists for, so the page can say where cover ends. */
+    witnessThrough: witnessThrough || null,
+    /** True when the day on screen is past the cutoff rather than unwitnessed. */
+    beyondWitnessCoverage: !!(isoDate && witnessThrough && isoDate > witnessThrough),
     /**
      * @param fuelName the app's own fuel name, e.g. "Imports"
      * @param ownUnitCost the rate the page is about to display
@@ -108,13 +134,17 @@ export function useUnitCostAuthentication(isoDate: string | null | undefined) {
       }
       const w = day?.[fuelName];
       if (!w) {
+        // Past the cutoff nothing has been checked, which is not the same as
+        // having checked and found no second publisher.
+        const beyond = !!(isoDate && witnessThrough && isoDate > witnessThrough);
         return {
-          status: 'published-only',
+          status: beyond ? 'awaiting-witness' : 'published-only',
           ownUnitCost,
           secondPublisher: null,
           secondPublisherUnitCost: null,
           delta: null,
           tolerance: null,
+          witnessThrough: beyond ? witnessThrough : null,
         };
       }
       const delta = ownUnitCost - w.second_publisher_unit_cost;

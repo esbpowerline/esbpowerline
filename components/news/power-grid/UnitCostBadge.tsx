@@ -30,10 +30,17 @@ const STYLE: Record<UnitCostStatus, { label: string; cls: string; title: string 
   administered: {
     label: 'flat',
     cls: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+    // Not "identical on essentially every day": these rates are revised, and
+    // saying otherwise is falsifiable in one query. Hydro held 0.1000 through
+    // 2026 apart from 2026-06-30 to 07-15, when it stepped to 3.8100 and back.
+    // What makes it administered is that the figure is applied, not observed —
+    // it holds to four decimals for long runs and then steps, which no measured
+    // daily cost does.
     title:
       'Administered rate, not a measurement. The publisher applies a fixed Tk/kWh to '
-      + 'this fuel rather than reporting an observed cost — the figure is identical on '
-      + 'essentially every day of the year — so it should not be read as a daily cost.',
+      + 'this fuel rather than reporting an observed cost: the figure holds to four '
+      + 'decimals for long runs and then steps to a new flat value, so read it as a '
+      + 'tariff in force on this day, not as what the fuel cost that day.',
   },
   'published-only': {
     label: '1×',
@@ -41,6 +48,15 @@ const STYLE: Record<UnitCostStatus, { label: string; cls: string; title: string 
     title:
       'Derived from this agency’s published cost and energy. No second publisher '
       + 'states the same inputs for this fuel, so there is no independent check.',
+  },
+  'awaiting-witness': {
+    label: '1×',
+    cls: 'bg-muted text-muted-foreground border-border/40 border-dashed',
+    title:
+      'Derived from this agency’s published cost and energy, and not yet cross-checked. '
+      + 'The second-publisher comparison is a periodic export from BPDB’s own daily '
+      + 'reports and this day falls after the last one loaded — so the check is '
+      + 'outstanding, not failed, and nothing here says BPDB disagrees.',
   },
 };
 
@@ -57,7 +73,9 @@ export function UnitCostBadge({
     fact.secondPublisherUnitCost != null && fact.secondPublisher
       ? ` ${fact.secondPublisher} derives ${fact.secondPublisherUnitCost.toFixed(4)} Tk/kWh`
         + ` from its own published figures (difference ${Math.abs(fact.delta ?? 0).toFixed(4)}).`
-      : '';
+      : fact.status === 'awaiting-witness' && fact.witnessThrough
+        ? ` Cross-checks currently run through ${fact.witnessThrough}.`
+        : '';
   return (
     <span
       className={cn(

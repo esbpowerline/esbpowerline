@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { cn, formatNumber } from '@/lib/utils';
 import { dayOverDayDelta } from '@/lib/data/petrobangla/computeLiveWeek';
 import type { PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { LiveBadge } from './pbLiveShared';
 
 export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle }) {
@@ -73,9 +74,12 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
           { label: 'Bibiyana Δ', value: delta.bibiyanaDelta, unit: 'MMCFD' },
           { label: 'Fulfillment Δ', value: delta.fulfillmentDelta, unit: 'pp' },
         ].map((item) => (
-          <div key={item.label} className="rounded-xl border border-border/50 p-2 bg-muted/5 text-center">
-            <div className="text-[9px] text-muted-foreground uppercase font-bold">{item.label}</div>
-            <div className={cn('text-sm font-bold tabular-nums', item.value >= 0 ? 'text-emerald-500' : 'text-red-500')}>
+          <div key={item.label} className="rounded-xl border border-border/50 p-3 bg-muted/5 text-center">
+            <div className="flex items-center justify-center gap-1 text-[9px] text-muted-foreground uppercase font-bold leading-tight">
+              {item.label}
+              <GridProvenanceTag kind="D" />
+            </div>
+            <div className={cn('text-sm font-bold tabular-nums mt-1', item.value >= 0 ? 'text-emerald-500' : 'text-red-500')}>
               {item.value >= 0 ? '+' : ''}
               {item.unit === 'pp' ? item.value.toFixed(1) : formatNumber(item.value, 1)}
               {item.unit === 'pp' ? 'pp' : ''}
@@ -85,8 +89,11 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
       </div>
       <div className="flex flex-wrap gap-2">
         {delta.topMovers.map((m) => (
-          <span key={m.field} className="grid-explorer-chip text-[10px]">
-            {m.field}: {m.delta >= 0 ? '+' : ''}{formatNumber(m.delta, 1)}
+          <span key={m.field} className="grid-explorer-chip text-[10px] inline-flex items-center gap-1">
+            <span className="tabular-nums">
+              {m.field}: {m.delta >= 0 ? '+' : ''}{formatNumber(m.delta, 1)}
+            </span>
+            <GridProvenanceTag kind="D" />
           </span>
         ))}
       </div>

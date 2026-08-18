@@ -17,6 +17,7 @@ import { ROLES, USER_ROLE_LABELS, type Role } from '@/lib/constants';
 import { formatDelta, PERIOD_ACCENTS } from '@/lib/analytics-period';
 import { LiveArticleTextLink } from '@/components/shared/LiveArticleLink';
 import type { AnalyticsPeriod } from '@/lib/analytics-period';
+import { chartGridProps } from '@/lib/data/grid/chart-axis';
 
 const ROLE_COLORS: Record<string, string> = {
   SUPER_ADMIN: 'hsl(346 77% 58%)',
@@ -369,7 +370,7 @@ export function AdminAnalyticsCharts({
               <div className="admin-analytics-chart-area admin-analytics-chart-area--mom">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={monthlySnapshots} margin={{ top: 10, right: 8, left: -12, bottom: 56 }}>
-                    <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border) / 0.35)" vertical={false} />
+                    <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                     <XAxis
                       dataKey="label"
                       tick={{ fontSize: 8, fill: chartTheme.axisTick }}
@@ -470,7 +471,7 @@ export function AdminAnalyticsCharts({
           <div className="admin-analytics-chart-area admin-analytics-chart-area--md">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={publishingTrend} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border) / 0.35)" vertical={false} />
+                <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'posts')} />
                 <XAxis
                   dataKey="label"
                   tick={{ fontSize: 8, fill: chartTheme.axisTick }}
@@ -539,7 +540,7 @@ export function AdminAnalyticsCharts({
           <div className="admin-analytics-category-chart-wrap">
             <ResponsiveContainer width="100%" height={Math.max(120, categories.length * 28)}>
               <BarChart data={categories} layout="vertical" margin={{ top: 0, right: 12, left: 4, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border) / 0.3)" horizontal={false} />
+                <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} vertical horizontal={false} />
                 <XAxis type="number" tick={{ fontSize: 8 }} tickFormatter={(v) => formatNumber(v)} axisLine={false} tickLine={false} />
                 <YAxis type="category" dataKey="shortName" width={88} tick={{ fontSize: 9 }} axisLine={false} tickLine={false} />
                 <Tooltip

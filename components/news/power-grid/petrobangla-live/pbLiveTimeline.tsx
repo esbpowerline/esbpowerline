@@ -19,12 +19,14 @@ import {
   gridChartXAxisProps,
   gridChartYAxisProps,
 } from '@/components/news/PowerGridChartUI';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { cn, formatNumber, formatTooltipDate, formatDynamicXAxisDate } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { liveWeekTimelinePoints, formatLiveWeekAxisLabel } from '@/lib/data/petrobangla/computeLiveWeek';
 import { decimateTimelineDays } from '@/lib/data/petrobangla/compute';
 import type { PetrobanglaLiveWeekBundle, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { LiveBadge } from './pbLiveShared';
+import { chartGridProps } from '@/lib/data/grid/chart-axis';
 
 function LiveWeekTooltip({
   active,
@@ -50,6 +52,7 @@ function LiveWeekTooltip({
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: nationalColor }} />
           National gas
+          <GridProvenanceTag kind="P" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: nationalColor }}>
           {formatNumber(d.totalGas, 1)} MMCFD
@@ -57,6 +60,7 @@ function LiveWeekTooltip({
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: demandColor }} />
           Power demand
+          <GridProvenanceTag kind="P" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: demandColor }}>
           {formatNumber(d.powerDemand, 1)} MMCFD
@@ -64,6 +68,7 @@ function LiveWeekTooltip({
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: supplyColor }} />
           Power supply
+          <GridProvenanceTag kind="P" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: supplyColor }}>
           {formatNumber(d.powerSupply, 1)} MMCFD
@@ -71,6 +76,7 @@ function LiveWeekTooltip({
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: fulfillmentColor }} />
           Fulfillment
+          <GridProvenanceTag kind="D" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: fulfillmentColor }}>
           {d.fulfillment.toFixed(1)}%
@@ -149,7 +155,7 @@ export function PbLiveTimeline({
         {chartsReady ? (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-              <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+              <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'axisLabel', minTickGap: 30 })} />
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [0, 'auto'] })} />
               <GridRechartsTooltip content={<LiveWeekTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
@@ -191,9 +197,9 @@ export function PbLiveTimeline({
         <GridChartExternalLegend
           position="bottom"
           items={[
-            { id: 'national', label: 'National gas', color: nationalColor, variant: 'line' },
-            { id: 'demand', label: 'Power demand', color: demandColor, variant: 'dashed' },
-            { id: 'supply', label: 'Power supply', color: PB_ARCHIVE_COLORS.powerSupply, variant: 'area' },
+            { id: 'national', label: 'National gas', color: nationalColor, variant: 'line', provenance: 'P' },
+            { id: 'demand', label: 'Power demand', color: demandColor, variant: 'dashed', provenance: 'P' },
+            { id: 'supply', label: 'Power supply', color: PB_ARCHIVE_COLORS.powerSupply, variant: 'area', provenance: 'P' },
           ]}
         />
       </div>

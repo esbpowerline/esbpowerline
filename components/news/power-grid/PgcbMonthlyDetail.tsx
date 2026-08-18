@@ -19,6 +19,18 @@
  */
 
 import { useMemo, useState } from 'react';
+import {
+  Activity,
+  AlertTriangle,
+  Building2,
+  CalendarDays,
+  Gauge,
+  Network,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { GridTablePager, useTablePager } from '@/components/news/power-grid/GridExplorerUI';
 
 import { cn } from '@/lib/utils';
 import { GridProvenanceTag } from './GridExplorerUI';
@@ -68,12 +80,15 @@ function pctChange(current: number | null | undefined, prev: number | null | und
 /* ------------------------------------------------------------- primitives */
 
 function PanelCard({
+  icon: Icon,
   title,
   subtitle,
   badge,
   children,
   actions,
 }: {
+  /** The concept this panel is about, in the explorer's own icon vocabulary. */
+  icon: LucideIcon;
   title: string;
   subtitle?: React.ReactNode;
   badge?: string;
@@ -82,21 +97,25 @@ function PanelCard({
 }) {
   return (
     <div className="grid-explorer-chart-card card">
-      <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+      {/* Same head as every other card on the explorer — icon, then the title
+          and its sub — rather than a private two-column layout, so these panels
+          line up with the tabs either side of them. */}
+      <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex-wrap">
+        <Icon className="h-5 w-5 shrink-0 text-primary" />
         <div className="min-w-0">
           <h3 className="grid-explorer-chart-card__title">
             {title}
             {badge && (
-              <span className="ml-2 align-middle text-[9px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
+              <span className="ml-2 align-middle text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">
                 {badge}
               </span>
             )}
           </h3>
           {subtitle && <p className="grid-explorer-chart-card__sub">{subtitle}</p>}
         </div>
-        {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+        {actions && <div className="ml-auto flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
-      <div className="mt-4">{children}</div>
+      <div>{children}</div>
     </div>
   );
 }
@@ -263,10 +282,15 @@ function StatTile({
         {value}
         {unit && <span className="ml-1 text-xs font-medium text-muted-foreground">{unit}</span>}
       </div>
-      <div className="flex items-center justify-center gap-2 flex-wrap">
-        <DeltaBadge change={change ?? null} goodWhen={goodWhen} suffix={compareLabel} />
-      </div>
-      {note && <div className="text-[10px] text-muted-foreground leading-relaxed">{note}</div>}
+      {/* Only when there is a movement to state — an empty row still spent the
+          tile's gap, so tiles with a delta sat a few pixels taller than those
+          without and the strip lost its shared baseline. */}
+      {change != null && Number.isFinite(change) && (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <DeltaBadge change={change} goodWhen={goodWhen} suffix={compareLabel} />
+        </div>
+      )}
+      {note && <div className="text-[10px] leading-relaxed text-muted-foreground">{note}</div>}
     </div>
   );
 }
@@ -284,7 +308,7 @@ function MagnitudeBar({
   value: number;
   max: number;
   unit?: string;
-  sub?: string;
+  sub?: React.ReactNode;
   color?: string;
 }) {
   const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
@@ -716,7 +740,12 @@ function GenerationByOwner({ keyed }: { keyed: Record<string, PgcbSystemStat> })
             value={o.stat.value}
             max={max}
             unit="MKWh"
-            sub={`${((o.stat.value / total) * 100).toFixed(1)}% D`}
+            sub={
+              <>
+                {`${((o.stat.value / total) * 100).toFixed(1)}%`}
+                <GridProvenanceTag kind="D" className="ml-1" />
+              </>
+            }
           />
         </div>
       ))}
@@ -856,28 +885,28 @@ function AreaPeakComparison({
     <div className="space-y-5">
       {/* The headline the panel exists to make: the parts sum to more than the whole. */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border border-border/50 bg-muted/15 p-3 text-center">
-          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+        <div className="rounded-2xl border border-border/50 bg-muted/15 p-4 text-center shadow-sm">
+          <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
             Sum at system peak<GridProvenanceTag kind="D" className="ml-1" />
           </div>
           <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{fmt(totalCoincident)}</div>
-          <div className="text-[9px] text-muted-foreground">MW, all at once</div>
+          <div className="text-[10px] text-muted-foreground">MW, all at once</div>
         </div>
-        <div className="rounded-xl border border-border/50 bg-muted/15 p-3 text-center">
-          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+        <div className="rounded-2xl border border-border/50 bg-muted/15 p-4 text-center shadow-sm">
+          <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
             Sum of area peaks<GridProvenanceTag kind="D" className="ml-1" />
           </div>
           <div className="text-lg font-bold tabular-nums text-foreground mt-0.5">{fmt(totalOwn)}</div>
-          <div className="text-[9px] text-muted-foreground">MW, each at its own hour</div>
+          <div className="text-[10px] text-muted-foreground">MW, each at its own hour</div>
         </div>
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-center">
-          <div className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground">
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 text-center shadow-sm">
+          <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
             Diversity<GridProvenanceTag kind="D" className="ml-1" />
           </div>
           <div className="text-lg font-bold tabular-nums text-amber-600 dark:text-amber-500 mt-0.5">
             {fmt(totalGap)}
           </div>
-          <div className="text-[9px] text-muted-foreground">
+          <div className="text-[10px] text-muted-foreground">
             MW never needed together ({((totalGap / totalCoincident) * 100).toFixed(1)}%)
           </div>
         </div>
@@ -1056,8 +1085,11 @@ function OutageEventsPanel({
 
   if (!opened) {
     return (
-      <div className="text-center py-6">
-        <p className="text-xs text-muted-foreground mb-3">
+      <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/20">
+          <AlertTriangle className="h-6 w-6 shrink-0 text-muted-foreground" />
+        </span>
+        <p className="max-w-md text-xs leading-relaxed text-muted-foreground">
           {fmt(expected)} individual outage events recorded this month — substation and transmission line, emergency
           and scheduled. Loaded separately because the log is larger than the rest of the month combined.
         </p>
@@ -1095,7 +1127,7 @@ function OutageEventsPanel({
             <Td className="text-muted-foreground">{e.equipment ?? '—'}</Td>
             <Td className="whitespace-nowrap text-muted-foreground">{e.start}</Td>
             <Td align="right">{e.duration ?? '—'}</Td>
-            <Td className="max-w-[18rem] truncate" >{e.cause ?? '—'}</Td>
+            <Td className="max-w-[18rem] truncate">{e.cause ?? '—'}</Td>
             <Td align="right">{fmt(e.unserved_energy_mwh, 1)}</Td>
           </tr>
         ))}
@@ -1145,7 +1177,6 @@ export function PgcbMonthlyDetail({
   const [circleMetric, setCircleMetric] = useState<'unserved' | 'tripping'>('unserved');
   const [assetView, setAssetView] = useState<'load' | 'voltage' | 'transformer' | 'interruption'>('load');
   const [assetQuery, setAssetQuery] = useState('');
-  const [assetLimit, setAssetLimit] = useState(PAGE);
 
   const keyed = detail.system?.keyed ?? {};
   const shedRows = detail.daily_load_shedding?.[shedPeak] ?? [];
@@ -1176,6 +1207,14 @@ export function PgcbMonthlyDetail({
   );
   const filteredInt = useFiltered(interruptions, assetQuery, (r, q) => r.substation.toLowerCase().includes(q));
 
+  // Four reference tables, the longest in the explorer. Paged rather than
+  // grown by a "load more": someone hunting a named substation should be able
+  // to step through pages, not scroll past 278 rows to reach the last one.
+  const loadPager = useTablePager(filteredLoad, 25);
+  const voltPager = useTablePager(filteredVolt, 25);
+  const txPager = useTablePager(filteredTx, 25);
+  const intPager = useTablePager(filteredInt, 25);
+
   const fgmo = detail.fgmo ?? [];
   const fgmoActive = fgmo.filter((p) => p.days_active > 0);
   const fgmoCapacity = fgmoActive.reduce((s, p) => s + (p.capacity_mw ?? 0), 0);
@@ -1189,7 +1228,8 @@ export function PgcbMonthlyDetail({
 
   const switchAsset = (id: typeof assetView) => {
     setAssetView(id);
-    setAssetLimit(PAGE);
+    // Each table owns its own page now, so switching views no longer has to
+    // reset a shared row limit.
   };
 
   const pill = (active: boolean) =>
@@ -1215,9 +1255,7 @@ export function PgcbMonthlyDetail({
       {stale.length > 0 && (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
           <div className="flex items-start gap-2.5">
-            <span className="text-amber-600 dark:text-amber-500 font-bold text-sm leading-none mt-0.5" aria-hidden="true">
-              ⚠
-            </span>
+            <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" aria-hidden="true" />
             <div className="min-w-0">
               <h4 className="text-xs font-bold text-foreground">Source data note for {monthLabel}</h4>
               <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">
@@ -1244,6 +1282,7 @@ export function PgcbMonthlyDetail({
       {/* 1 — reliability headline */}
       {detail.system && (
         <PanelCard
+          icon={Gauge}
           title="Load Shedding & Reliability"
           badge="Monthly"
           subtitle={`How often supply fell short in ${monthLabel}, against ${prevMonthLabel}`}
@@ -1277,6 +1316,7 @@ export function PgcbMonthlyDetail({
       {/* 2 — daily heatmap */}
       {shedRows.length > 0 && (
         <PanelCard
+          icon={CalendarDays}
           title="Daily Load Shedding by Zone"
           badge="Monthly"
           subtitle={`Megawatts shed each day at ${shedPeak === 'evening_peak' ? 'evening' : 'day'} peak, ${monthLabel}`}
@@ -1298,7 +1338,7 @@ export function PgcbMonthlyDetail({
       <div className="grid lg:grid-cols-2 gap-6">
         {/* 3 — who generated it */}
         {detail.system && (
-          <PanelCard title="Generation by Owner" badge="Monthly" subtitle={`Net generation share, ${monthLabel}`}>
+          <PanelCard icon={Building2} title="Generation by Owner" badge="Monthly" subtitle={`Net generation share, ${monthLabel}`}>
             <GenerationByOwner keyed={keyed} />
           </PanelCard>
         )}
@@ -1306,6 +1346,7 @@ export function PgcbMonthlyDetail({
         {/* 5 — coincident vs own max */}
         {detail.area_supply_at_system_peak?.areas?.length && detail.area_max_load?.length ? (
           <PanelCard
+            icon={TrendingUp}
             title="Area Peak Load: Coincident vs Own Maximum"
             badge="Monthly"
             subtitle="Two different peaks, often confused for each other"
@@ -1321,6 +1362,7 @@ export function PgcbMonthlyDetail({
       {/* 4 — grid circle reliability */}
       {(detail.unserved_energy || detail.tripping_outage) && (
         <PanelCard
+          icon={Network}
           title="Grid Circle Reliability"
           badge="Monthly"
           subtitle={
@@ -1380,6 +1422,7 @@ export function PgcbMonthlyDetail({
       {/* 6 — asset-level tables */}
       {assetTabs.length > 0 && (
         <PanelCard
+          icon={Zap}
           title="Substation & Asset Detail"
           badge="Monthly"
           subtitle={`Per-asset records published for ${monthLabel}`}
@@ -1404,7 +1447,7 @@ export function PgcbMonthlyDetail({
                   </>
                 }
               >
-                {filteredLoad.slice(0, assetLimit).map((r) => (
+                {loadPager.rows.map((r) => (
                   <tr key={r.substation} className="hover:bg-muted/20">
                     <Td className="font-semibold">{r.substation}</Td>
                     <Td align="right" className="font-bold">
@@ -1414,10 +1457,16 @@ export function PgcbMonthlyDetail({
                   </tr>
                 ))}
               </TableShell>
-              <MoreButton
-                shown={Math.min(assetLimit, filteredLoad.length)}
-                total={filteredLoad.length}
-                onMore={() => setAssetLimit((l) => l + PAGE)}
+              <GridTablePager
+                page={loadPager.page}
+                totalPages={loadPager.totalPages}
+                pageSize={loadPager.pageSize}
+                total={loadPager.total}
+                from={loadPager.from}
+                to={loadPager.to}
+                onPage={loadPager.setPage}
+                onPageSize={loadPager.setPageSize}
+                noun="substations"
               />
             </>
           )}
@@ -1436,7 +1485,7 @@ export function PgcbMonthlyDetail({
                   </>
                 }
               >
-                {filteredVolt.slice(0, assetLimit).map((r, i) => {
+                {voltPager.rows.map((r, i) => {
                   const dev = r.rated_kv && r.min_kv ? ((r.min_kv - r.rated_kv) / r.rated_kv) * 100 : null;
                   const severe = dev !== null && dev <= -10;
                   return (
@@ -1468,10 +1517,16 @@ export function PgcbMonthlyDetail({
               <p className="mt-2 text-[10px] text-muted-foreground">
                 ⚠ marks a minimum more than 10% below rated voltage.
               </p>
-              <MoreButton
-                shown={Math.min(assetLimit, filteredVolt.length)}
-                total={filteredVolt.length}
-                onMore={() => setAssetLimit((l) => l + PAGE)}
+              <GridTablePager
+                page={voltPager.page}
+                totalPages={voltPager.totalPages}
+                pageSize={voltPager.pageSize}
+                total={voltPager.total}
+                from={voltPager.from}
+                to={voltPager.to}
+                onPage={voltPager.setPage}
+                onPageSize={voltPager.setPageSize}
+                noun="readings"
               />
             </>
           )}
@@ -1489,7 +1544,7 @@ export function PgcbMonthlyDetail({
                   </>
                 }
               >
-                {filteredTx.slice(0, assetLimit).map((r, i) => (
+                {txPager.rows.map((r, i) => (
                   <tr key={`${r.substation}-${r.transformer}-${i}`} className="hover:bg-muted/20">
                     <Td className="font-semibold">{r.substation}</Td>
                     <Td className="text-muted-foreground">{r.transformer ?? '—'}</Td>
@@ -1510,10 +1565,16 @@ export function PgcbMonthlyDetail({
                 ))}
               </TableShell>
               <p className="mt-2 text-[10px] text-muted-foreground">⚠ marks transformers loaded at 80% or above.</p>
-              <MoreButton
-                shown={Math.min(assetLimit, filteredTx.length)}
-                total={filteredTx.length}
-                onMore={() => setAssetLimit((l) => l + PAGE)}
+              <GridTablePager
+                page={txPager.page}
+                totalPages={txPager.totalPages}
+                pageSize={txPager.pageSize}
+                total={txPager.total}
+                from={txPager.from}
+                to={txPager.to}
+                onPage={txPager.setPage}
+                onPageSize={txPager.setPageSize}
+                noun="transformers"
               />
             </>
           )}
@@ -1530,7 +1591,7 @@ export function PgcbMonthlyDetail({
                   </>
                 }
               >
-                {filteredInt.slice(0, assetLimit).map((r, i) => (
+                {intPager.rows.map((r, i) => (
                   <tr key={`${r.substation}-${i}`} className="hover:bg-muted/20">
                     <Td className="font-semibold">{r.substation}</Td>
                     <Td align="right">{fmt(r.interruptions)}</Td>
@@ -1543,10 +1604,16 @@ export function PgcbMonthlyDetail({
                   </tr>
                 ))}
               </TableShell>
-              <MoreButton
-                shown={Math.min(assetLimit, filteredInt.length)}
-                total={filteredInt.length}
-                onMore={() => setAssetLimit((l) => l + PAGE)}
+              <GridTablePager
+                page={intPager.page}
+                totalPages={intPager.totalPages}
+                pageSize={intPager.pageSize}
+                total={intPager.total}
+                from={intPager.from}
+                to={intPager.to}
+                onPage={intPager.setPage}
+                onPageSize={intPager.setPageSize}
+                noun="interruptions"
               />
             </>
           )}
@@ -1585,6 +1652,7 @@ export function PgcbMonthlyDetail({
       {/* FGMO */}
       {fgmo.length > 0 && (
         <PanelCard
+          icon={Activity}
           title="Free Governor Mode of Operation"
           badge="Monthly"
           subtitle="Plants able to respond automatically to frequency deviation — the grid's first line of defence"
@@ -1640,6 +1708,7 @@ export function PgcbMonthlyDetail({
       {/* Outage events */}
       {(detail.outage_event_count ?? 0) > 0 && (
         <PanelCard
+          icon={AlertTriangle}
           title="Outage Event Log"
           badge="Monthly"
           subtitle={`Every recorded substation and transmission outage in ${monthLabel}`}

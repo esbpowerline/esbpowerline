@@ -15,6 +15,7 @@ import {
   GridKpiTooltipGrid,
   GridKpiTooltipGridRow,
   GridKpiTooltipPanel,
+  GridProvenanceTag,
 } from '@/components/news/power-grid/GridExplorerUI';
 import { cn, formatNumber } from '@/lib/utils';
 import { ARCHIVE_BASELINE_DATE, ARCHIVE_BASELINE_GAS, ARCHIVE_INSIGHTS, PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
@@ -74,7 +75,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('stress')}>
         <Gauge className={cn('grid-explorer-kpi__icon shrink-0', stressClass)} />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Supply stress</div>
+          <div className="grid-explorer-kpi__label">Supply stress<GridProvenanceTag kind="D" className="ml-1.5" /></div>
           <div className={cn('grid-explorer-kpi__value', preview ? 'text-muted-foreground' : stressClass)}>
             {preview ? pending : kpis.stressScore}
           </div>
@@ -89,17 +90,17 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'stress'}
         >
             <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Stress score" value={kpis.stressScore} valueClass={stressClass} dotColor={kpis.stressColor === 'green' ? '#10b981' : kpis.stressColor === 'amber' ? '#f59e0b' : '#ef4444'} />
-            <GridKpiTooltipGridRow label="Power fulfillment" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} dotColor="#ef4444" />
-            <GridKpiTooltipGridRow label="Domestic share" value={`${domesticSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.domestic} />
-            <GridKpiTooltipGridRow label="LNG import share" value={`${kpis.lngSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.lng} />
+            <GridKpiTooltipGridRow label="Stress score" provenance="D" value={kpis.stressScore} valueClass={stressClass} dotColor={kpis.stressColor === 'green' ? '#10b981' : kpis.stressColor === 'amber' ? '#f59e0b' : '#ef4444'} />
+            <GridKpiTooltipGridRow label="Power fulfillment" provenance="D" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} dotColor="#ef4444" />
+            <GridKpiTooltipGridRow label="Domestic share" provenance="D" value={`${domesticSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.domestic} />
+            <GridKpiTooltipGridRow label="LNG import share" provenance="D" value={`${kpis.lngSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.lng} />
             <GridKpiTooltipGridRow
-              label="Bibiyana / domestic"
+              label="Bibiyana / domestic" provenance="D"
               value={`${kpis.bibiyanaDomesticSharePct.toFixed(0)}%`}
             />
             {peakGas != null && (
               <GridKpiTooltipGridRow
-                label="Vs archive peak"
+                label="Vs archive peak" provenance="D"
                 value={`${((kpis.totalGas / peakGas) * 100).toFixed(0)}% of ${formatNumber(peakGas, 0)}`}
               />
             )}
@@ -114,7 +115,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('total')}>
         <Droplet className="grid-explorer-kpi__icon text-sky-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">National gas</div>
+          <div className="grid-explorer-kpi__label">National gas<GridProvenanceTag kind="P" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{formatNumber(kpis.totalGas, 1)}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {kpis.totalGas < 2800 && <span className="text-red-500 font-bold">▼ </span>}
@@ -129,25 +130,25 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'total'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Grand total" value={`${formatNumber(kpis.totalGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
+            <GridKpiTooltipGridRow label="Grand total" provenance="P" value={`${formatNumber(kpis.totalGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
             <GridKpiTooltipGridRow
-              label={`Vs ${ARCHIVE_BASELINE_DATE}`}
+              label={`Vs ${ARCHIVE_BASELINE_DATE}`} provenance="D"
               value={`${kpis.totalGasDeltaBaseline >= 0 ? '+' : ''}${formatNumber(kpis.totalGasDeltaBaseline, 1)} MMCFD`}
               valueClass={kpis.totalGasDeltaBaseline < 0 ? 'text-red-500' : 'text-emerald-500'}
             />
             {kpis.totalGasDeltaYear != null && (
               <GridKpiTooltipGridRow
-                label="Vs same day last year"
+                label="Vs same day last year" provenance="D"
                 value={`${kpis.totalGasDeltaYear >= 0 ? '+' : ''}${formatNumber(kpis.totalGasDeltaYear, 1)} MMCFD`}
               />
             )}
             {kpis.totalGasDeltaPeak != null && peakDate && (
               <GridKpiTooltipGridRow
-                label={`Vs peak (${peakDate})`}
+                label={`Vs peak (${peakDate})`} provenance="D"
                 value={`${kpis.totalGasDeltaPeak >= 0 ? '+' : ''}${formatNumber(kpis.totalGasDeltaPeak, 1)} MMCFD`}
               />
             )}
-            <GridKpiTooltipGridRow label="Jan 2020 baseline" value={`${formatNumber(ARCHIVE_BASELINE_GAS, 1)} MMCFD`} />
+            <GridKpiTooltipGridRow label="Jan 2020 baseline" provenance="P" value={`${formatNumber(ARCHIVE_BASELINE_GAS, 1)} MMCFD`} />
           </div>
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             {exactMatch ? `Synced to grid date ${gridDate}` : `Nearest gas-day to ${gridDate}`}
@@ -159,7 +160,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('power')}>
         <Flame className="grid-explorer-kpi__icon text-red-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Power fulfillment</div>
+          <div className="grid-explorer-kpi__label">Power fulfillment<GridProvenanceTag kind="D" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">
             {preview ? pending : `${kpis.powerFulfillmentPct.toFixed(1)}%`}
           </div>
@@ -177,16 +178,16 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'power'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Fulfillment rate" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} valueClass="text-red-500" dotColor="#ef4444" />
-            <GridKpiTooltipGridRow label="Plants received" value={`${formatNumber(kpis.powerSupply, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.powerSupply} />
-            <GridKpiTooltipGridRow label="Plants requested" value={`${formatNumber(kpis.powerDemand, 1)} MMCFD`} dotColor="#f59e0b" />
-            <GridKpiTooltipGridRow label="Unmet demand" value={`${formatNumber(powerShortfall, 1)} MMCFD`} valueClass="text-destructive" dotColor={PB_ARCHIVE_COLORS.shortage} />
+            <GridKpiTooltipGridRow label="Fulfillment rate" provenance="D" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} valueClass="text-red-500" dotColor="#ef4444" />
+            <GridKpiTooltipGridRow label="Plants received" provenance="P" value={`${formatNumber(kpis.powerSupply, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.powerSupply} />
+            <GridKpiTooltipGridRow label="Plants requested" provenance="P" value={`${formatNumber(kpis.powerDemand, 1)} MMCFD`} dotColor="#f59e0b" />
+            <GridKpiTooltipGridRow label="Unmet demand" provenance="D" value={`${formatNumber(powerShortfall, 1)} MMCFD`} valueClass="text-destructive" dotColor={PB_ARCHIVE_COLORS.shortage} />
             <GridKpiTooltipGridRow
-              label="Jan 2020 benchmark"
+              label="Jan 2020 benchmark" provenance="D"
               value={`${ARCHIVE_INSIGHTS.jan2020Baseline.powerFulfillment}%`}
             />
             <GridKpiTooltipGridRow
-              label="Collapse since 2020"
+              label="Collapse since 2020" provenance="D"
               value={`−${(ARCHIVE_INSIGHTS.jan2020Baseline.powerFulfillment - kpis.powerFulfillmentPct).toFixed(1)} pts`}
             />
           </div>
@@ -200,7 +201,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('lng')}>
         <Layers className="grid-explorer-kpi__icon text-purple-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">LNG share</div>
+          <div className="grid-explorer-kpi__label">LNG share<GridProvenanceTag kind="D" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{preview ? pending : `${kpis.lngSharePct.toFixed(1)}%`}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {preview ? 'Loading production mix…' : `${formatNumber(kpis.lngGasMmcfd, 1)} MMCFD imported`}
@@ -213,12 +214,12 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'lng'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Imported LNG (RPGCL)" value={`${formatNumber(kpis.lngGasMmcfd, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.lng} />
-            <GridKpiTooltipGridRow label="Share of national mix" value={`${kpis.lngSharePct.toFixed(1)}%`} valueClass="text-purple-500" dotColor={PB_ARCHIVE_COLORS.lng} />
-            <GridKpiTooltipGridRow label="Domestic fields" value={`${formatNumber(kpis.domesticGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
-            <GridKpiTooltipGridRow label="Domestic share" value={`${domesticSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.domestic} />
+            <GridKpiTooltipGridRow label="Imported LNG (RPGCL)" provenance="P" value={`${formatNumber(kpis.lngGasMmcfd, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.lng} />
+            <GridKpiTooltipGridRow label="Share of national mix" provenance="D" value={`${kpis.lngSharePct.toFixed(1)}%`} valueClass="text-purple-500" dotColor={PB_ARCHIVE_COLORS.lng} />
+            <GridKpiTooltipGridRow label="Domestic fields" provenance="D" value={`${formatNumber(kpis.domesticGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
+            <GridKpiTooltipGridRow label="Domestic share" provenance="D" value={`${domesticSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.domestic} />
             <GridKpiTooltipGridRow
-              label="LNG ramp since 2020"
+              label="LNG ramp since 2020" provenance="D"
               value={`${ARCHIVE_INSIGHTS.lngRamp.from} → ${ARCHIVE_INSIGHTS.lngRamp.to} MMCFD (+${ARCHIVE_INSIGHTS.lngRamp.pct}%)`}
             />
           </div>
@@ -232,7 +233,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('domestic')}>
         <Activity className="grid-explorer-kpi__icon text-sky-600 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Domestic output</div>
+          <div className="grid-explorer-kpi__label">Domestic output<GridProvenanceTag kind="P" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{preview ? pending : formatNumber(kpis.domesticGas, 1)}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {preview ? 'Loading field output…' : 'Own gas, excluding imports'}
@@ -245,18 +246,18 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'domestic'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Own-field production" value={`${formatNumber(kpis.domesticGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
+            <GridKpiTooltipGridRow label="Own-field production" provenance="D" value={`${formatNumber(kpis.domesticGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
             <GridKpiTooltipGridRow
-              label="Vs Jan 2020 domestic"
+              label="Vs Jan 2020 domestic" provenance="D"
               value={`${kpis.domesticDeltaBaseline >= 0 ? '+' : ''}${formatNumber(kpis.domesticDeltaBaseline, 1)} MMCFD`}
               valueClass={kpis.domesticDeltaBaseline < 0 ? 'text-red-500' : undefined}
             />
-            <GridKpiTooltipGridRow label="Bibiyana field" value={`${formatNumber(kpis.bibiyanaGas, 1)} MMCFD`} />
+            <GridKpiTooltipGridRow label="Bibiyana field" provenance="P" value={`${formatNumber(kpis.bibiyanaGas, 1)} MMCFD`} />
             <GridKpiTooltipGridRow
-              label="Bibiyana share"
+              label="Bibiyana share" provenance="D"
               value={`${kpis.bibiyanaDomesticSharePct.toFixed(0)}% of domestic`}
             />
-            <GridKpiTooltipGridRow label="National decline" value={`${ARCHIVE_INSIGHTS.nationalDecline.pct}% since 2020`} valueClass="text-red-500" dotColor={PB_ARCHIVE_COLORS.shortage} />
+            <GridKpiTooltipGridRow label="National decline" provenance="D" value={`${ARCHIVE_INSIGHTS.nationalDecline.pct}% since 2020`} valueClass="text-red-500" dotColor={PB_ARCHIVE_COLORS.shortage} />
           </div>
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">
             All fields except RPGCL/LNG import terminals
@@ -268,7 +269,7 @@ export function PetrobanglaArchiveKpiStrip({
       <div className={kpiShell} onClick={() => toggleTooltip('wells')}>
         <AlertTriangle className="grid-explorer-kpi__icon text-amber-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Active wells</div>
+          <div className="grid-explorer-kpi__label">Active wells<GridProvenanceTag kind="P" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{preview ? pending : Math.round(kpis.activeWells)}</div>
           {mode !== 'simple' && (
             <p className="text-[9px] text-muted-foreground mt-1">
@@ -286,15 +287,15 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'wells'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Producing wells" value={Math.round(kpis.activeWells)} dotColor="#f59e0b" />
-            <GridKpiTooltipGridRow label="Bibiyana output" value={`${formatNumber(kpis.bibiyanaGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
+            <GridKpiTooltipGridRow label="Producing wells" provenance="P" value={Math.round(kpis.activeWells)} dotColor="#f59e0b" />
+            <GridKpiTooltipGridRow label="Bibiyana output" provenance="P" value={`${formatNumber(kpis.bibiyanaGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
             <GridKpiTooltipGridRow
-              label="Bibiyana decline"
+              label="Bibiyana decline" provenance="P"
               value={`${ARCHIVE_INSIGHTS.bibiyanaDecline.from} → ${ARCHIVE_INSIGHTS.bibiyanaDecline.to} MMCFD`}
             />
-            <GridKpiTooltipGridRow label="Bibiyana wells" value={`${ARCHIVE_INSIGHTS.bibiyanaDecline.wells} active`} />
+            <GridKpiTooltipGridRow label="Bibiyana wells" provenance="P" value={`${ARCHIVE_INSIGHTS.bibiyanaDecline.wells} active`} />
             <GridKpiTooltipGridRow
-              label="Concentration risk"
+              label="Concentration risk" provenance="D"
               value={`${kpis.bibiyanaDomesticSharePct.toFixed(0)}% of domestic from one field`}
               valueClass={kpis.bibiyanaDomesticSharePct > 45 ? 'text-amber-500' : undefined}
               dotColor="#f59e0b"

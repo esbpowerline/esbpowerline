@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Calendar, History, Layers } from 'lucide-react';
+import { ArrowDown, Calendar, History, Layers } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
 import type { LiveWeekKpis } from '@/lib/data/petrobangla/types';
 import { formatLiveWeekDate } from '@/lib/data/petrobangla/getLiveWeek';
@@ -29,7 +29,12 @@ export function MacroGasMetaChip({
           : 'bg-muted/30 text-muted-foreground border-border/50';
 
   return (
-    <span className={cn('inline-flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1 rounded-full border', toneClass)}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 text-[10px] font-semibold tabular-nums px-2.5 py-1 rounded-full border leading-tight',
+        toneClass,
+      )}
+    >
       {children}
     </span>
   );
@@ -53,9 +58,9 @@ export function MacroGasInnerSection({
   return (
     <section className="grid-explorer-macro-gas-block">
       <div className="grid-explorer-macro-gas-block__head flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex gap-2.5 items-start">
-          <div className="grid-explorer-macro-gas-block__icon">
-            <Icon className="h-4 w-4 text-sky-500" />
+        <div className="flex min-w-0 gap-2.5 items-start">
+          <div className="grid-explorer-macro-gas-block__icon shrink-0">
+            <Icon className="h-4 w-4 shrink-0 text-sky-500" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
@@ -90,11 +95,17 @@ export function MacroGasWeekSummary({
   const deltaTone = (kpis.latestGasDelta ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500';
 
   return (
-    <div className="grid-explorer-macro-gas-stat-row lg:grid-cols-5">
+    // `lg:grid-cols-5` alone never took effect: `.grid-explorer-macro-gas-stat-row`
+    // sets `grid-template-columns` from plain CSS that sits after the Tailwind
+    // utilities layer, so at equal specificity the rule wins and five stats stayed
+    // two-up at every width. The `--five` modifier carries the same intent from
+    // inside that block; the utility is left in place so nothing regresses if it
+    // is ever reachable.
+    <div className="grid-explorer-macro-gas-stat-row grid-explorer-macro-gas-stat-row--five lg:grid-cols-5">
       <div className="grid-explorer-macro-gas-stat border-sky-500/25 bg-sky-500/5">
         <span className="grid-explorer-macro-gas-stat__label">Latest national gas</span>
         <span className="grid-explorer-macro-gas-stat__value">{formatNumber(kpis.latestGas, 1)}</span>
-        <span className="grid-explorer-macro-gas-stat__hint">
+        <span className="grid-explorer-macro-gas-stat__hint tabular-nums">
           {kpis.latestLabel}
           {kpis.latestGasDelta != null && (
             <span className={cn(' font-semibold', deltaTone)}>
@@ -107,14 +118,14 @@ export function MacroGasWeekSummary({
       <div className="grid-explorer-macro-gas-stat">
         <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} average` : 'Week average'}</span>
         <span className="grid-explorer-macro-gas-stat__value">{formatNumber(avgGas, 0)}</span>
-        <span className="grid-explorer-macro-gas-stat__hint">MMCFD · to {formatLiveWeekDate(kpis.latestDate)}</span>
+        <span className="grid-explorer-macro-gas-stat__hint tabular-nums">MMCFD · to {formatLiveWeekDate(kpis.latestDate)}</span>
       </div>
       <div className="grid-explorer-macro-gas-stat">
         <span className="grid-explorer-macro-gas-stat__label">{labelPrefix ? `${labelPrefix} Power fulfillment` : 'Power fulfillment'}</span>
         <span className={cn('grid-explorer-macro-gas-stat__value', fulfillmentTone)}>
           {fulfillment.toFixed(0)}%
         </span>
-        <span className="grid-explorer-macro-gas-stat__hint">
+        <span className="grid-explorer-macro-gas-stat__hint tabular-nums">
           {periodKpis
             ? `avg over ${periodKpis.daysCount} days`
             : `${formatNumber(kpis.powerSupply, 0)} of ${formatNumber(kpis.powerDemand, 0)} MMCFD`}
@@ -128,7 +139,7 @@ export function MacroGasWeekSummary({
       <div className="grid-explorer-macro-gas-stat">
         <span className="grid-explorer-macro-gas-stat__label">Bibiyana</span>
         <span className="grid-explorer-macro-gas-stat__value">{formatNumber(kpis.bibiyanaGas, 0)}</span>
-        <span className="grid-explorer-macro-gas-stat__hint">{kpis.bibiyanaWells} wells active</span>
+        <span className="grid-explorer-macro-gas-stat__hint tabular-nums">{kpis.bibiyanaWells} wells active</span>
       </div>
     </div>
   );
@@ -159,7 +170,7 @@ export function MacroGasArchiveDayBanner({
     <div className="grid-explorer-macro-gas-day-banner space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <MacroGasMetaChip tone={exact ? 'emerald' : 'amber'}>
-          <Calendar className="h-3 w-3" />
+          <Calendar className="h-3 w-3 shrink-0" />
           {exact ? `Grid date ${gridDate} · synced` : `Gas-day ${archiveDate}`}
         </MacroGasMetaChip>
         {peakGas != null && peakDate && (
@@ -173,7 +184,8 @@ export function MacroGasArchiveDayBanner({
           </MacroGasMetaChip>
         )}
         <MacroGasMetaChip tone="amber">
-          ↓ {Math.abs(declinePct).toFixed(1)}% since Jan 2020
+          <ArrowDown className="h-3 w-3 shrink-0" />
+          {Math.abs(declinePct).toFixed(1)}% since Jan 2020
         </MacroGasMetaChip>
       </div>
       {agentSummary && (

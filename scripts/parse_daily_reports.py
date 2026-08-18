@@ -543,6 +543,16 @@ def parse_ewic(content):
     for line in sheet.split('\n'):
         if '|' not in line:
             continue
+        # Two converters feed this parser and they disagree about the leading
+        # delimiter: the pipe-table form opens every row with '|' (so the first
+        # cell is empty), the plain-text form does not. Every column index below
+        # is written for the former, so a row whose first cell carries content
+        # arrives shifted by one and matches nothing — which is how the daily
+        # extractor's text path returned None here on every run, dropping
+        # ewicData from each freshly ingested day without a warning. Normalise
+        # to the leading-delimiter form instead of indexing off both shapes.
+        if not line.lstrip().startswith('|'):
+            line = '|' + line
         parts = [c.strip() for c in line.split('|')]
 
         # --- left block: the hourly curve ---------------------------------

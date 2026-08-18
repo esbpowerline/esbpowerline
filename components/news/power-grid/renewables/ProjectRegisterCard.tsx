@@ -105,7 +105,7 @@ export function ProjectRegisterCard({
         </div>
       </div>
 
-      <div className="px-4 pt-3 flex flex-wrap gap-1.5">
+      <div className="pt-3 flex flex-wrap gap-1.5">
         {registers.map((r) => (
           <button
             key={r.technology}
@@ -127,7 +127,7 @@ export function ProjectRegisterCard({
 
       {/* Status chips double as filters: the counts are the point, and clicking
           one is the obvious way to act on them. */}
-      <div className="px-4 pt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <div className="pt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
         <button
           type="button"
           onClick={() => setStatus('all')}
@@ -137,7 +137,7 @@ export function ProjectRegisterCard({
           }
           aria-pressed={status === 'all'}
         >
-          <span className="px-1.5 py-px rounded border text-[9px] font-bold bg-muted text-muted-foreground border-border/50">
+          <span className="px-1.5 py-px rounded border text-[10px] font-bold bg-muted text-muted-foreground border-border/50">
             {active.rows.length}
           </span>
           <span className="text-muted-foreground">All statuses</span>
@@ -153,26 +153,26 @@ export function ProjectRegisterCard({
             }
             aria-pressed={status === name}
           >
-            <span className={`px-1.5 py-px rounded border text-[9px] font-bold ${statusClass(name)}`}>
+            <span className={`px-1.5 py-px rounded border text-[10px] font-bold ${statusClass(name)}`}>
               {n}
             </span>
             <span className="text-muted-foreground">{name}</span>
           </button>
         ))}
-        <div className="relative ml-auto">
-          <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative ml-auto w-full sm:w-60">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 shrink-0 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Filter project, location, agency"
             aria-label="Filter projects"
-            className="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-border/60 bg-background w-60"
+            className="w-full rounded-lg border border-border/60 bg-background py-1.5 pl-8 pr-3 text-xs"
           />
         </div>
       </div>
 
       {visible.length !== active.rows.length && (
-        <p className="px-4 pt-2 text-[11px] text-muted-foreground">
+        <p className="pt-2 text-[11px] text-muted-foreground">
           {`Showing ${visible.length} of ${active.rows.length} projects. `}
           <button
             type="button"
@@ -250,7 +250,7 @@ export function ProjectRegisterCard({
                 <td className="text-xs tabular-nums align-top">{r.completionDate}</td>
                 <td className="align-top">
                   <span
-                    className={`inline-block px-1.5 py-px rounded border text-[9px] font-bold whitespace-nowrap ${statusClass(r.status)}`}
+                    className={`inline-block px-1.5 py-px rounded border text-[10px] font-bold whitespace-nowrap ${statusClass(r.status)}`}
                   >
                     {r.status}
                   </span>
@@ -277,7 +277,7 @@ export function ProjectRegisterCard({
       </div>
 
       {(countCheck || capCheck || (techRow && runCheck)) && (
-        <div className="mx-4 mt-3 p-3 rounded-lg border border-border/50 bg-muted/15 space-y-1">
+        <div className="mt-3 p-3 rounded-lg border border-border/50 bg-muted/15 space-y-1">
           <div className="text-[11px] font-bold text-foreground mb-1 flex items-center gap-1.5">
             {[countCheck, capCheck, runCheck].every((c) => !c || c.ok) ? (
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
@@ -337,7 +337,7 @@ export function ProjectRegisterCard({
         </div>
       )}
 
-      <div className="px-4 py-3 text-[11px] text-muted-foreground leading-relaxed space-y-1.5">
+      <div className="py-3 text-[11px] text-muted-foreground leading-relaxed space-y-1.5">
         <p>
           <strong>{`Only “${STATUS_RUNNING}” projects are installed capacity.`}</strong>{' '}
           {`The register lists every life stage — planning, construction, maintenance, retired, and applications rejected — and that capacity is never added to the totals elsewhere on this page. ${active.technology} lists ${active.rows.length} projects of which ${running.length} ${running.length === 1 ? 'is' : 'are'} running.`}

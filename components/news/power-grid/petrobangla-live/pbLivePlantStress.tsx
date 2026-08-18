@@ -3,6 +3,7 @@
 import { formatNumber } from '@/lib/utils';
 import { stressedPlants } from '@/lib/data/petrobangla/computeLiveWeek';
 import type { PetrobanglaDaily } from '@/lib/data/petrobangla/types';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { LiveBadge } from './pbLiveShared';
 
 export function PbLivePlantStress({ latest }: { latest: PetrobanglaDaily }) {
@@ -22,9 +23,9 @@ export function PbLivePlantStress({ latest }: { latest: PetrobanglaDaily }) {
             <tr>
               <th>Plant</th>
               <th>DISCO</th>
-              <th className="text-left">Demand</th>
-              <th className="text-left">Supply</th>
-              <th className="text-left">Gap</th>
+              <th className="text-left">Demand<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className="text-left">Supply<GridProvenanceTag kind="P" className="ml-1" /></th>
+              <th className="text-left">Gap<GridProvenanceTag kind="D" className="ml-1" /></th>
             </tr>
           </thead>
           <tbody>

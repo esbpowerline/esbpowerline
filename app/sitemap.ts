@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { POLICIES } from '@/lib/data/policy/policies';
+import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 
 export const revalidate = 3600; // revalidate sitemap every hour
 
@@ -73,6 +74,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // pages that Google crawls and refuses to index. They are noindex,follow so
   // link equity still reaches the articles.
 
+  // /grid-explorer changes when a new report day lands, not when the sitemap is
+  // built. Stamping `new Date()` on it told Google the page had changed on every
+  // hourly revalidation, which is the fastest way to make lastmod worthless —
+  // once a crawler learns the field is always "now" it stops weighing it. The
+  // catalogue's newest day is the honest answer.
+  const latestGridDate = getLatestAvailableDate();
+  const gridLastModified = latestGridDate ? new Date(`${latestGridDate}T00:00:00Z`) : new Date();
+
   const staticRoutes = [
     '',
     '/grid-explorer',
@@ -84,7 +93,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/contact',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date(),
+    lastModified: route === '/grid-explorer' ? gridLastModified : new Date(),
     changeFrequency: 'daily' as const,
     priority: route === '' ? 1.0 : route === '/grid-explorer' ? 0.9 : 0.8,
   }));

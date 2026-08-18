@@ -52,13 +52,14 @@ import {
   getCachedDailyReport,
   peekLatestCachedReport,
   resolveInitialDailyReport,
+  resolveInitialDailyReportEntry,
   seedDailyReportCache,
   setCachedDailyReport,
 } from '@/lib/data/grid/daily-cache';
 import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
 import { GRID_DEMO_DATE } from '@/lib/data/grid/public-sample-dates';
 import { coverageLabel } from '@/lib/data/grid/coverage';
-import { TIME_AXIS_PROPS, axisTickStyle, wholeHourTicks } from '@/lib/data/grid/chart-axis';
+import { axisTickStyle, chartGridProps } from '@/lib/data/grid/chart-axis';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { getLatestMonthlyDateKey } from '@/lib/data/companies/pgcb';
@@ -71,6 +72,8 @@ import { PgcbMonthlyDetail } from '@/components/news/power-grid/PgcbMonthlyDetai
 import { UnitCostBadge } from '@/components/news/power-grid/UnitCostBadge';
 import { useUnitCostAuthentication, type UnitCostFact } from '@/components/news/power-grid/useUnitCostAuthentication';
 import { EnergyCurveChart } from '@/components/news/power-grid/EnergyCurveChart';
+import { LoadCurveCanvas } from '@/components/news/power-grid/LoadCurveCanvas';
+import { InterconnectorCanvas } from '@/components/news/power-grid/InterconnectorCanvas';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
 import { totalCapacityRenewables } from '@/lib/data/companies/sreda';
 import { ongoingProjectsData } from '@/lib/data/infrastructure/projects-ongoing';
@@ -99,7 +102,7 @@ import {
 } from '@/components/news/power-grid/TabKpiStrips';
 import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
 import { BpdbAccountsPanel } from '@/components/news/power-grid/BpdbAccountsPanel';
-import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
+import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, MonthlyBadge , GridTablePager, useTablePager} from '@/components/news/power-grid/GridExplorerUI';
 import { GridDataTable, type GridTableDensity } from '@/components/news/power-grid/GridDataTable';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
@@ -147,6 +150,11 @@ interface GridLineItem {
 }
 
 interface PowerGridExplorerProps {
+  /**
+   * Retained but unused since the Transmission Grid Assets card was removed —
+   * the rows are hand-entered settings with no publishable source. Kept on the
+   * props and in the admin editor so the card can return the day it has one.
+   */
   initialLines?: GridLineItem[];
   urlBoot?: GridExplorerUrlBoot;
   prefetchedDailyReports?: Record<string, GridDailyData>;
@@ -222,7 +230,7 @@ function ShedActiveBar({ x = 0, y = 0, width = 0, height = 0, fill }: {
 function GridUnpublishedCostNote({ totalDailyCostBdt }: { totalDailyCostBdt?: number | null }) {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center gap-2 px-6 rounded-xl border border-dashed border-border/60 bg-muted/10">
-      <Info className="h-5 w-5 text-muted-foreground/70" />
+      <Info className="h-5 w-5 shrink-0 text-muted-foreground/70" />
       <p className="text-sm font-semibold text-foreground">Per-fuel cost not published for this day</p>
       <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
         PGCB&apos;s report for this date carries no production-cost breakdown by fuel.
@@ -269,19 +277,19 @@ function GridBrentDieselTooltip({
       <div className="space-y-2 text-[11px] md:text-xs">
         <div className="flex justify-between">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Brent Crude:</span>
-          <span className="font-bold text-blue-500">${d.globalOil.toFixed(2)} / Bbl</span>
+          <span className="font-bold text-blue-500 tabular-nums">${d.globalOil.toFixed(2)} / Bbl</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-          <span className="font-semibold text-foreground">{exRate.toFixed(2)} Tk/$</span>
+          <span className="font-semibold text-foreground tabular-nums">{exRate.toFixed(2)} Tk/$</span>
         </div>
         <div className="flex justify-between border-t border-border/20 pt-1">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Brent Cost (Tk/L equivalent):</span>
-          <span className="font-bold text-blue-400">{brentBdtL.toFixed(2)} Tk/L</span>
+          <span className="font-bold text-blue-400 tabular-nums">{brentBdtL.toFixed(2)} Tk/L</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />BD Retail Diesel:</span>
-          <span className="font-bold text-emerald-500">{d.bdDiesel.toFixed(2)} Tk/L</span>
+          <span className="font-bold text-emerald-500 tabular-nums">{d.bdDiesel.toFixed(2)} Tk/L</span>
         </div>
         <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Margin / Subsidy Gap:</span>
@@ -353,9 +361,12 @@ function GridBrentDieselCard({
   return (
     <div ref={cardRef} className="grid-explorer-chart-card card">
       <div className="grid-explorer-chart-card__head">
-        <div>
-          <h3 className="grid-explorer-chart-card__title">Brent Crude vs. Retail Diesel</h3>
-        <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) — <span className="text-primary font-semibold text-xs">Tracked since 1975</span></p>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <DollarSign className="h-5 w-5 shrink-0 text-blue-500" />
+          <div className="min-w-0">
+            <h3 className="grid-explorer-chart-card__title">Brent Crude vs. Retail Diesel</h3>
+            <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) — <span className="text-primary font-semibold text-xs">Tracked since 1975</span></p>
+          </div>
         </div>
         <span className="grid-explorer-chip bg-blue-500/5 text-blue-500 border-blue-500/10">Petroleum</span>
       </div>
@@ -374,7 +385,7 @@ function GridBrentDieselCard({
             <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
                   {tooltip}
@@ -391,7 +402,7 @@ function GridBrentDieselCard({
             <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
                   {tooltip}
@@ -405,7 +416,7 @@ function GridBrentDieselCard({
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-              <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+              <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
               <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
               <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Brent Crude ($/bbl)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
               <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'Retail Diesel (Tk/L)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
@@ -454,19 +465,19 @@ function GridLngTariffTooltip({
       <div className="space-y-2 text-[11px] md:text-xs">
         <div className="flex justify-between">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Global LNG (US/JKM):</span>
-          <span className="font-bold text-violet-500">${d.globalGas.toFixed(2)} / MMBtu</span>
+          <span className="font-bold text-violet-500 tabular-nums">${d.globalGas.toFixed(2)} / MMBtu</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-          <span className="font-semibold text-foreground">{exRate.toFixed(2)} Tk/$</span>
+          <span className="font-semibold text-foreground tabular-nums">{exRate.toFixed(2)} Tk/$</span>
         </div>
         <div className="flex justify-between border-t border-border/20 pt-1">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Global Gas (Tk/CM equivalent):</span>
-          <span className="font-bold text-violet-400">{globalGasBdtCm.toFixed(2)} Tk/CM</span>
+          <span className="font-bold text-violet-400 tabular-nums">{globalGasBdtCm.toFixed(2)} Tk/CM</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />BD Avg Gas Tariff:</span>
-          <span className="font-bold text-amber-500">{d.bdGas.toFixed(2)} Tk/CM</span>
+          <span className="font-bold text-amber-500 tabular-nums">{d.bdGas.toFixed(2)} Tk/CM</span>
         </div>
         <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
           <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Subsidization Gap:</span>
@@ -523,9 +534,12 @@ function GridLngTariffCard({
   return (
     <div ref={cardRef} className="grid-explorer-chart-card card">
       <div className="grid-explorer-chart-card__head">
-        <div>
-          <h3 className="grid-explorer-chart-card__title">Global LNG Benchmark vs. Gas Tariff</h3>
-        <p className="grid-explorer-chart-card__sub">Global Gas/LNG (USD/MMBtu) vs. BD Avg Tariff (Tk/CM) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Droplet className="h-5 w-5 shrink-0 text-violet-500" />
+          <div className="min-w-0">
+            <h3 className="grid-explorer-chart-card__title">Global LNG Benchmark vs. Gas Tariff</h3>
+            <p className="grid-explorer-chart-card__sub">Global Gas/LNG (USD/MMBtu) vs. BD Avg Tariff (Tk/CM) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+          </div>
         </div>
         <span className="grid-explorer-chip bg-violet-500/5 text-violet-500 border-violet-500/10">Natural Gas</span>
       </div>
@@ -544,7 +558,7 @@ function GridLngTariffCard({
             <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
                   {tooltip}
@@ -561,7 +575,7 @@ function GridLngTariffCard({
             <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
                   {tooltip}
@@ -575,7 +589,7 @@ function GridLngTariffCard({
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-              <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+              <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
               <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
               <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Global LNG ($/MMBtu)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
               <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'BD Avg Gas Tariff (Tk/CM)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
@@ -599,7 +613,7 @@ function GridLngTariffCard({
 }
 
 export function PowerGridExplorer({
-  initialLines,
+  initialLines: _initialLines,
   urlBoot,
   prefetchedDailyReports,
   serverLatestDate,
@@ -640,6 +654,20 @@ export function PowerGridExplorer({
   const [tierLockRequired, setTierLockRequired] = useState<ReturnType<typeof gridAccess.requiredTierForDate> | null>(null);
   const [activeData, setActiveData] = useState<GridDailyData | null>(() =>
     resolveInitialDailyReport(bootDate, latestDate, prefetchedDailyReports),
+  );
+  /**
+   * The day `activeData` actually holds.
+   *
+   * `selectedDate` moves the instant the reader picks a date; the report for it
+   * arrives a fetch later. Anything that pairs a figure on screen with a lookup
+   * keyed by date has to use this, not the selection — otherwise it matches the
+   * outgoing day's numbers against the incoming day's reference data. The
+   * per-fuel unit-cost witness is the case that bit: for a moment it compared
+   * the old day's rates to the new day's BPDB figures and marked gas, coal and
+   * imports as "publishers disagree" on days where they agree exactly.
+   */
+  const [activeDataDate, setActiveDataDate] = useState<string | null>(
+    () => resolveInitialDailyReportEntry(bootDate, latestDate, prefetchedDailyReports)?.date ?? null,
   );
   const [isLoadingDaily, setIsLoadingDaily] = useState<boolean>(
     () => !resolveInitialDailyReport(bootDate, latestDate, prefetchedDailyReports),
@@ -903,6 +931,7 @@ export function PowerGridExplorer({
     const cached = getCachedDailyReport(selectedDate);
     if (cached) {
       setActiveData(cached);
+      setActiveDataDate(selectedDate);
       setIsDataMissing(false);
       setIsLoadingDaily(false);
     } else {
@@ -914,6 +943,7 @@ export function PowerGridExplorer({
         if (!isMounted || requestSeq !== fetchSeqRef.current) return;
         if (result.ok) {
           setActiveData(result.data);
+          setActiveDataDate(selectedDate);
           setIsDataMissing(false);
         } else if (!result.ok && result.status === 403) {
           setTierLockRequired(gridAccess.requiredTierForDate(selectedDate));
@@ -925,12 +955,15 @@ export function PowerGridExplorer({
           if (fallback) {
             setCachedDailyReport(selectedDate, fallback);
             setActiveData(fallback);
+            setActiveDataDate(selectedDate);
             setIsDataMissing(false);
           } else if (stale) {
             setActiveData(stale);
+            setActiveDataDate(selectedDate);
             setIsDataMissing(false);
           } else {
             setActiveData(null);
+            setActiveDataDate(null);
             setIsDataMissing(true);
           }
           if (result.status !== 404 && result.status !== 429) {
@@ -942,9 +975,11 @@ export function PowerGridExplorer({
           const stale = getCachedDailyReport(selectedDate);
           if (stale) {
             setActiveData(stale);
+            setActiveDataDate(selectedDate);
             setIsDataMissing(false);
           } else {
             setActiveData(null);
+            setActiveDataDate(null);
             setIsDataMissing(true);
           }
           if (result.status !== 404 && result.status !== 429) {
@@ -1269,12 +1304,11 @@ export function PowerGridExplorer({
     [hourlyLoadData],
   );
 
-  // Shedding is drawn on this card's own right-hand axis rather than in a
-  // separate panel below it, so the deficit sits under the hours that produced
-  // it. Sharing the generation axis would flatten it onto the floor, so the
-  // right axis carries its true scale and prints its own ticks in the shedding
-  // colour — the reader can see which axis a mark belongs to and read its
-  // value off it.
+  // Shedding sits under the hours that produced it rather than in a separate
+  // panel below the card. It has no axis of its own: on the generation scale it
+  // would flatten onto the floor, and a second axis only hides that two
+  // quantities do not share a scale. It runs as an intensity strip along the
+  // foot of the plot instead, sized against the day's own worst hour.
   //
   // The headroom multiplier keeps the bars inside the bottom third of the plot
   // so they never climb through the load curves. It changes how tall the bars
@@ -1400,8 +1434,6 @@ export function PowerGridExplorer({
   const [subVoltageFilter, setSubVoltageFilter] = useState<string>('all');
   const [subZoneFilter, setSubZoneFilter] = useState<string>('all');
   const [subOwnerFilter, setSubOwnerFilter] = useState<string>('all');
-  const [subPage, setSubPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(50);
   const [subTableDensity, setSubTableDensity] = useState<GridTableDensity>('comfortable');
   const [subFiltersOpen, setSubFiltersOpen] = useState(false);
   const zones = ['Dhaka', 'Khulna', 'Barishal', 'Cumilla', 'Sylhet', 'Rajshahi', 'Chattogram', 'Rangpur', 'Mymensingh'];
@@ -1574,19 +1606,20 @@ export function PowerGridExplorer({
     return sum + val;
   }, 0);
 
-  const paginatedSubstations = filteredSubstations.slice(
-    (subPage - 1) * itemsPerPage,
-    subPage * itemsPerPage
-  );
+  // Was a bespoke pager with prev/next only and its own page sizes. Same hook
+  // as every other long list now, so a reader who learns the controls once has
+  // learned them everywhere.
+  const substationPager = useTablePager(filteredSubstations, 25);
+  const paginatedSubstations = substationPager.rows;
 
-  const totalSubPages = Math.ceil(filteredSubstations.length / itemsPerPage);
-
-  // Reset page to 1 when filters change
-  useEffect(() => {
-    setSubPage(1);
-  }, [debouncedSubSearch, subVoltageFilter, subZoneFilter, subOwnerFilter]);
+  // The filter reset lives in useTablePager: it keys off the row count, which
+  // is what actually changes when a filter is applied.
 
   // Overview calculations
+  // The outage log runs to thirty-odd entries on a normal day and more on a bad
+  // one. Paged like every other long list rather than left as a scroll well.
+  const outagePager = useTablePager(dailyOutages, 25);
+
   const totalGenMkwhr = generationData.reduce((sum, item) => sum + item.gen, 0);
   const totalCostBdt = generationData.reduce((sum, item) => sum + (item.cost ?? 0), 0);
 
@@ -1594,20 +1627,63 @@ export function PowerGridExplorer({
   // Absent on every layout before the EWIC sheet existed, so every consumer
   // below is written to fall away rather than render an empty frame.
   const ewic = ewicData ?? null;
-  const ewicChartData = useMemo(
-    () =>
-      (ewic?.rows ?? []).map((r) => {
-        const point: Record<string, string | number | null> = { time: r.time };
-        r.mw.forEach((v, i) => { point[`c${i}`] = v; });
-        return point;
-      }),
-    [ewic],
-  );
   // Exports only: the day's transfer is what crossed, and pairing it with a
   // zero import line would imply the two net off.
   const ewicTotalMkwh = ewic?.totals?.export != null ? ewic.totals.export / 1e6 : null;
+  /**
+   * A transfer between two halves of the same grid cannot exceed what the grid
+   * generated. On 2026-06-25 PGCB prints Ishurdi-Ghorashal Ckt-2 at 2.9 billion
+   * kWh against a MW curve that integrates to 3.99 million — a source defect the
+   * sheet's own reconciliation catches at 0.00x — which totals to 2,964 MKWh
+   * against a national day of 332. The figure is still shown, because it is what
+   * the report says, but the derived share is withheld: dividing their bad
+   * number by our good one to announce "892% of national generation" would be
+   * our arithmetic asserting something physically impossible.
+   */
+  const ewicExceedsGeneration =
+    ewicTotalMkwh != null && totalGenMkwhr > 0 && ewicTotalMkwh > totalGenMkwhr;
   const ewicShareOfGen =
-    ewicTotalMkwh != null && totalGenMkwhr > 0 ? (ewicTotalMkwh / totalGenMkwhr) * 100 : null;
+    ewicTotalMkwh != null && totalGenMkwhr > 0 && !ewicExceedsGeneration
+      ? (ewicTotalMkwh / totalGenMkwhr) * 100
+      : null;
+  /**
+   * One direction for the day, so nothing on the card can contradict itself.
+   *
+   * Mean rather than peak: a corridor that spikes for one hour and idles for
+   * twenty-three should not set the day's direction. The sign is honoured even
+   * though no corridor in the archive has ever reported a negative reading,
+   * because the day one does, this follows it rather than restating a
+   * convention the data no longer supports. Lane widths and speeds inside the
+   * crossing diagram are the canvas's own business — it has the rows.
+   */
+  const ewicNet = useMemo(() => {
+    const rows = ewic?.rows ?? [];
+    if (!rows.length) return null;
+    const net = rows.reduce(
+      (sum, r) => sum + r.mw.reduce((s: number, v) => s + (typeof v === 'number' ? v : 0), 0),
+      0,
+    );
+    return net === 0 ? null : { westToEast: net > 0 };
+  }, [ewic]);
+
+  /**
+   * The hour at which the corridors together carry the most.
+   *
+   * This is the figure PGCB itself prints on P1 as "Maximum Power Flow (W-E)" —
+   * on 2026-08-15 the corridor sum peaks at 2,011 MW at 12:00 and P1 states
+   * 2,011 MW, and the EWIC sheet's Total Export matches P1's "Energy Flow from
+   * West to East" to the kWh. Two sheets, independently parsed, agreeing: that
+   * is what establishes that "Export" here means west-to-east at all.
+   */
+  const ewicPeakSum = useMemo(() => {
+    let best: { mw: number; time: string } | null = null;
+    for (const r of ewic?.rows ?? []) {
+      const sum = r.mw.reduce((acc: number, v) => acc + (typeof v === 'number' ? v : 0), 0);
+      if (!best || Math.abs(sum) > Math.abs(best.mw)) best = { mw: sum, time: r.time };
+    }
+    return best;
+  }, [ewic]);
+
   const ewicCircuitBars = useMemo(() => {
     const rows = (ewic?.circuits ?? []).filter((c) => c.direction === 'Export' && (c.energyKwh ?? 0) > 0);
     const max = Math.max(...rows.map((c) => c.energyKwh ?? 0), 0);
@@ -1635,7 +1711,12 @@ export function PowerGridExplorer({
   const avgCostPerKwh = totalCostBdt / (totalGenMkwhr * 1000000);
   // What stands behind each per-fuel unit rate: a second agency's independent
   // arithmetic, a flat administered tariff, or only the one publisher.
-  const unitCostAuth = useUnitCostAuthentication(selectedDate);
+  //
+  // Keyed to the day the rates on screen belong to, not the day selected — see
+  // activeDataDate. Keying it to the selection made the badge compare the
+  // outgoing day's rates against the incoming day's BPDB figures, which flashed
+  // "publishers disagree" on days where they agree to four decimals.
+  const unitCostAuth = useUnitCostAuthentication(activeDataDate);
 
   const methodologyBanner = showMethodologyBanner ? (
     <MethodologyReconciliationBanner
@@ -1793,7 +1874,7 @@ export function PowerGridExplorer({
       <div id="grid-status-overview-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 relative z-[60]">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Activity className="h-5 w-5 text-primary animate-pulse" />
+            <Activity className="h-5 w-5 shrink-0 text-primary animate-pulse" />
             Grid Status Overview
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5 inline-flex items-center flex-wrap gap-1">
@@ -1817,7 +1898,7 @@ export function PowerGridExplorer({
                   className="text-primary hover:text-primary-focus transition-colors ml-1.5 p-0.5 inline-flex items-center justify-center"
                   aria-label="Restore methodology banner"
                 >
-                  <Info className="h-3.5 w-3.5" />
+                  <Info className="h-3.5 w-3.5 shrink-0" />
                 </button>
                 {/* Theme-compliant Tooltip */}
                 <span className="absolute bottom-[calc(100%+6px)] left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border/80 text-[10px] font-bold px-2 py-1.5 rounded-lg shadow-xl pointer-events-none opacity-0 scale-95 translate-y-1 transition-all duration-150 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 z-[100] whitespace-nowrap">
@@ -2001,7 +2082,7 @@ export function PowerGridExplorer({
             <div className="flex flex-col items-center gap-3 bg-card/60 px-6 py-4 rounded-2xl border border-border/50 shadow-2xl backdrop-blur-md animate-in zoom-in-95 duration-150">
               <div className="relative">
                 <div className="h-10 w-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                <Activity className="h-5 w-5 text-primary animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <Activity className="h-5 w-5 shrink-0 text-primary animate-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
               </div>
               <span className="text-xs font-semibold text-primary tracking-wide animate-pulse">Loading Grid Data...</span>
             </div>
@@ -2010,16 +2091,16 @@ export function PowerGridExplorer({
 
         {isDataMissing && !activeData && (
           <div className="grid-explorer-panel space-y-6">
-            <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4 animate-pulse">
-                <Info className="h-8 w-8 text-amber-500" />
+            <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
+              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground animate-pulse">
+                <Info className="h-8 w-8 shrink-0 text-amber-500" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">
+              <h4 className="text-base font-bold text-foreground">
                 {isDateAvailable(selectedDate)
                   ? 'Report file not loaded yet'
                   : 'Report has not been released for this day yet'}
               </h4>
-              <p className="text-xs text-muted-foreground max-w-sm mb-4">
+              <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
                 {isDateAvailable(selectedDate)
                   ? `The ${selectedDate} PGCB daily report is in our catalog but could not be fetched — it may still be syncing to the site mirror. Petrobangla field data may load separately below.`
                   : `The daily grid status report and Petrobangla production telemetry for ${selectedDate} have not been finalized or published by PGCB/NLDC.`}
@@ -2028,7 +2109,7 @@ export function PowerGridExplorer({
                 <button
                   type="button"
                   onClick={() => selectAccessibleDate(latestDate)}
-                  className="grid-explorer-control mb-4 px-4 py-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                  className="grid-explorer-control px-4 py-2 bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
                 >
                   View latest report ({isoDateToLegacy(latestDate) ?? latestDate})
                 </button>
@@ -2039,7 +2120,7 @@ export function PowerGridExplorer({
                   <div className="font-semibold text-foreground mb-1">
                     Date: {latestCachedReport.systemStats.date || isoDateToLegacy(latestDate) || latestDate}
                   </div>
-                  <div className="text-[11px] text-muted-foreground mt-2 pt-2 border-t border-border/10 leading-relaxed">
+                  <div className="text-[11px] text-muted-foreground mt-2 pt-2 border-t border-border/10 leading-relaxed tabular-nums">
                     Peak Gen: {formatNumber(latestCachedReport.systemStats.eveningPeakGen, 1)} MW / Demand:{' '}
                     {formatNumber(latestCachedReport.systemStats.eveningPeakDemand, 1)} MW / Energy:{' '}
                     {latestCachedReport.systemStats.totalEnergyGen == null ? '—' : formatNumber(latestCachedReport.systemStats.totalEnergyGen, 1)} MKWh
@@ -2053,15 +2134,15 @@ export function PowerGridExplorer({
         {!isDataMissing && activeTab === 'overview' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
-            <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-                <Info className="h-8 w-8 text-primary animate-pulse" />
+            <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
+              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground">
+                <Info className="h-8 w-8 shrink-0 text-primary animate-pulse" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">PGCB Grid Overview Data</h4>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <h4 className="text-base font-bold text-foreground">PGCB Grid Overview Data</h4>
+              <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
                 No official records are available for the selected date. PGCB data tracking officially started on December 31, 2013.
               </p>
-              <div className="mt-4 text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground tabular-nums">
                 Official Backlog Start Date: December 31, 2013
               </div>
             </div>
@@ -2072,12 +2153,15 @@ export function PowerGridExplorer({
           {/* Generation Pie Chart */}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
-              <div>
-                <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<DailyBadge /></h3>
-                {/* The total here is our sum of the fuel rows, not PGCB's own
-                    headline figure — the two are different numbers, which is
-                    what the reconciliation banner above exists to explain. */}
-                <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh <GridProvenanceTag kind="D" />) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Zap className="h-5 w-5 shrink-0 text-primary" />
+                <div className="min-w-0">
+                  <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<DailyBadge /></h3>
+                  {/* The total here is our sum of the fuel rows, not PGCB's own
+                      headline figure — the two are different numbers, which is
+                      what the reconciliation banner above exists to explain. */}
+                  <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh <GridProvenanceTag kind="D" />) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
+                </div>
               </div>
               <span className="grid-explorer-chip">Fuel Type</span>
             </div>
@@ -2147,7 +2231,7 @@ export function PowerGridExplorer({
                           <div className="space-y-2 text-[11px] md:text-xs">
                             <div className="flex justify-between">
                               <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Energy Output:</span>
-                              <span className="font-bold text-foreground">{row.gen.toFixed(2)} MKWh</span>
+                              <span className="font-bold text-foreground tabular-nums">{row.gen.toFixed(2)} MKWh</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />System Share:</span>
@@ -2194,7 +2278,11 @@ export function PowerGridExplorer({
               )}
             </div>
 
-            {/* Custom Legend */}
+            {/* Custom Legend. Rendered only when there is a legend to draw and a
+                denominator to divide by: on a day whose fuel rows are all zero
+                the share is 0/0, and every row printed "NaN%". */}
+            {pieGenerationData.length > 0 && totalGenMkwhr > 0 ? (
+            <>
             <div className="grid-chart-legend">
               {pieGenerationData.map((item, i) => {
                 const dimmed = hoveredIndex !== null && hoveredIndex !== i;
@@ -2208,13 +2296,23 @@ export function PowerGridExplorer({
                   >
                     <span className="grid-chart-legend__swatch" style={{ backgroundColor: chartTheme.fuel(item.name) }} />
                     <span className="grid-chart-legend__name">{item.name}</span>
-                    {/* The share is ours; the MKWh beside it is PGCB's own row. */}
-                    <span className="grid-chart-legend__meta">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}% <GridProvenanceTag kind="D" /></span>
-                    <span className="grid-chart-legend__val">{item.gen.toFixed(1)} MKWh <GridProvenanceTag kind="P" /></span>
+                    <span className="grid-chart-legend__meta">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}%</span>
+                    <span className="grid-chart-legend__val">{item.gen.toFixed(1)} MKWh</span>
                   </button>
                 );
               })}
             </div>
+            {/* The share is ours; the MKWh beside it is PGCB's own row — said
+                once for the column rather than sixteen times down the legend.
+                Two marks per row put a badge on every figure in the card's
+                densest block, which is where the notation stops being read. */}
+            <p className="grid-chart-legend__key">
+              <span>Share <GridProvenanceTag kind="D" /></span>
+              <span aria-hidden>·</span>
+              <span>Energy <GridProvenanceTag kind="P" /></span>
+            </p>
+            </>
+            ) : null}
 
             {/* Card Metadata Footer */}
             <GridCardFooter>
@@ -2228,12 +2326,15 @@ export function PowerGridExplorer({
           {/* Cost Bar Chart */}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
-              <div>
-                <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
-                {/* The bars are PGCB's published per-fuel costs; this header adds
-                    them up, which is not the same as PGCB's own "Total :" row —
-                    on 08 Aug 2026 the two differ by 3 Tk. */}
-                <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type ({hasPublishedFuelCost ? <>Total: {formatBdtAmount(totalCostBdt / 10000000)} Cr Tk. <GridProvenanceTag kind="D" /></> : 'per-fuel split not published for this day'}) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelCost')}</span></p>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <DollarSign className="h-5 w-5 shrink-0 text-amber-500" />
+                <div className="min-w-0">
+                  <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
+                  {/* The bars are PGCB's published per-fuel costs; this header adds
+                      them up, which is not the same as PGCB's own "Total :" row —
+                      on 08 Aug 2026 the two differ by 3 Tk. */}
+                  <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type ({hasPublishedFuelCost ? <>Total: {formatBdtAmount(totalCostBdt / 10000000)} Cr Tk. <GridProvenanceTag kind="D" /></> : 'per-fuel split not published for this day'}) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelCost')}</span></p>
+                </div>
               </div>
               <span className="grid-explorer-chip">Cost Analysis</span>
             </div>
@@ -2244,7 +2345,7 @@ export function PowerGridExplorer({
               ) : chartsReady ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart accessibilityLayer={false} data={dailyCostChartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                    <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                    <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                     <XAxis
                       {...gridChartXAxisProps(chartTheme, { dataKey: 'name' })}
                       tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }}
@@ -2278,7 +2379,7 @@ export function PowerGridExplorer({
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Average Unit Rate:</span>
-                                <span className="font-bold text-foreground">{formatUnitRate(row.unitCost)} Tk/KWh</span>
+                                <span className="font-bold text-foreground tabular-nums">{formatUnitRate(row.unitCost)} Tk/KWh</span>
                               </div>
                             </div>
                             {/* The old note stated the calculation backwards — cost
@@ -2325,23 +2426,25 @@ export function PowerGridExplorer({
             </div>
 
             <div className="grid grid-cols-2 gap-3 mt-6 pt-4 pb-4 border-t border-border/50">
-              <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[5.5rem] text-center">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1">
+              <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[5.5rem] text-center">
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1.5">
+                  <DollarSign className="h-4 w-4 shrink-0 text-primary" />
                   Avg Production Cost <GridProvenanceTag kind="D" />
                 </div>
                 {/* Published total cost ÷ published headline generation. Note the
                     KPI strip's "Average Bulk Cost" divides by the summed fuel
                     rows instead, so the two rates differ where those disagree. */}
-                <div className="text-2xl font-bold mt-1.5 text-primary tabular-nums leading-none">
+                <div className="text-2xl font-bold text-primary tabular-nums leading-none">
                   {formatUnitRate(systemStats.avgProductionCost)}{' '}
                   <span className="text-xs font-medium text-muted-foreground">Tk/KWh</span>
                 </div>
               </div>
-              <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center min-h-[5.5rem] text-center">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1">
+              <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[5.5rem] text-center">
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1.5">
+                  <Droplet className="h-4 w-4 shrink-0 text-sky-500" />
                   Total Gas to Power <GridProvenanceTag kind="P" />
                 </div>
-                <div className="text-2xl font-bold mt-1.5 text-sky-500 tabular-nums leading-none">
+                <div className="text-2xl font-bold text-sky-500 tabular-nums leading-none">
                   {systemStats.totalGasSuppliedPower.toFixed(2)}{' '}
                   <span className="text-xs font-medium text-muted-foreground">MMCFD</span>
                 </div>
@@ -2365,28 +2468,35 @@ export function PowerGridExplorer({
         {/* 24-Hour System Load Curve */}
         <div className="grid-explorer-chart-card card">
           <div className="grid-explorer-chart-card__head">
-            <div>
-              <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<DailyBadge /></h3>
-              <p className="grid-explorer-chart-card__sub">
-                {curveIsHourly
-                  ? <>Generation, demand and load shedding for every hour PGCB publishes, from the NLDC hourly report (Date: {systemStats.date})</>
-                  : sheddingIsHourly
-                    ? <>Hourly generation and load shedding from the NLDC hourly report; demand as published for the evening peak hour (Date: {systemStats.date})</>
-                    : <>Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date})</>}
-                {' • '}<span className="text-primary font-semibold text-xs">
-                  {coverageLabel(curveIsHourly || sheddingIsHourly ? 'hourlyShedding' : 'loadCurve')}
-                </span>
-              </p>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <Activity className="h-5 w-5 shrink-0 text-destructive" />
+              <div className="min-w-0">
+                <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<DailyBadge /></h3>
+                <p className="grid-explorer-chart-card__sub">
+                  {curveIsHourly
+                    ? <>Generation, demand and load shedding for every hour PGCB publishes, from the NLDC hourly report (Date: {systemStats.date})</>
+                    : sheddingIsHourly
+                      ? <>Hourly generation and load shedding from the NLDC hourly report; demand as published for the evening peak hour (Date: {systemStats.date})</>
+                      : <>Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date})</>}
+                  {' • '}<span className="text-primary font-semibold text-xs">
+                    {coverageLabel(curveIsHourly || sheddingIsHourly ? 'hourlyShedding' : 'loadCurve')}
+                  </span>
+                </p>
+              </div>
             </div>
             <span className="grid-explorer-chip bg-destructive/10 text-destructive border-destructive/20">NLDC SCADA Curve</span>
           </div>
 
-          <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-tall">
+          {/* No fixed height here. The load curve sizes itself — a plot of its
+              own plus the key beneath it — and the shared chart-area class caps
+              at 24rem, which is shorter than the two together. The overflow
+              landed the key's hint line on top of the paragraph below the card. */}
+          <div className="mt-4">
             {hourlyLoadData.length === 0 ? (
               // Reports before 2018 carry no load-curve sheet. Drawing empty
               // axes would imply a flat or missing grid rather than an
               // unpublished measurement.
-              <div className="h-full flex flex-col items-center justify-center text-center gap-2 px-6">
+              <div className="min-h-[16rem] flex flex-col items-center justify-center text-center gap-2 px-6">
                 <p className="text-sm font-semibold text-muted-foreground">No load curve published for this day</p>
                 <p className="text-xs text-muted-foreground/80 max-w-md">
                   PGCB&apos;s report for {systemStats.date} does not include the half-hourly NLDC load-curve
@@ -2394,166 +2504,42 @@ export function PowerGridExplorer({
                 </p>
               </div>
             ) : chartsReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart accessibilityLayer={false} data={hourlyLoadData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                  <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-                  <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'time' })} />
-                  <YAxis yAxisId="left" width={34} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={formatAxisMwCompact}
-                    /* Above the axis, not rotated inside it: turned on its side the unit
-                       costs horizontal width the plot needs, and height is the one
-                       thing a phone chart has to spare. */
-                    label={{ value: 'MW', position: 'top', offset: 6, style: { fontSize: 9, fill: chartTheme.axisTick, textAnchor: 'start' } }} />
-                  {/* The shedding axis is tinted in the shedding colour so it is
-                      obvious which marks it measures — the left axis serves
-                      generation and demand, which are the same measurement in the
-                      same units and share a scale honestly. */}
-                  {showShedding && (
-                    <YAxis
-                      yAxisId="shed"
-                      orientation="right"
-                      width={38}
-                      tick={{ fontSize: 10, fill: chartTheme.destructive }}
-                      axisLine={false}
-                      tickLine={false}
-                      tickMargin={4}
-                      domain={[0, shedAxis.max]}
-                      ticks={shedAxis.ticks}
-                      allowDecimals={false}
-                      tickFormatter={formatAxisMwCompact}
-                    />
-                  )}
-                  <Tooltip
-                    // Recharts draws a band cursor once a Bar is on the chart and a
-                    // vertical rule otherwise, and the two take different props —
-                    // a fill on the rule would leave the hovered hour unmarked.
-                    cursor={showShedding
-                      ? { fill: chartTheme.gridStroke, opacity: 0.2 }
-                      : { stroke: chartTheme.gridStroke, strokeWidth: 1 }}
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const d = payload[0].payload;
-                      const peakIndicator = peakDemandTime && d.time === peakDemandTime ? ' (Peak Hour)' : '';
-                      return (
-                        <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
-                          <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
-                            <span>Grid Profile at {d.time}{peakIndicator}</span>
-                            {/* Muted rather than amber: amber is the demand series
-                                now that the panel is colour-matched, and a source
-                                badge in a series colour reads as a fourth reading. */}
-                            <span className="text-[9px] md:text-[10px] uppercase font-bold text-muted-foreground tracking-wider">NLDC Telemetry</span>
-                          </div>
-                          {/* Every label and value here is painted from the same
-                              constants the marks and the legend use, so the panel
-                              names a series in the colour the reader just hovered.
-                              An unpublished figure stays muted: colouring the words
-                              "not published" as if they were a reading would give a
-                              measurement the weight of one that exists. */}
-                          <div className="space-y-2 text-[11px] md:text-xs">
-                            <div className="flex justify-between">
-                              <span className="inline-flex items-center gap-1" style={{ color: LOAD_CURVE_COLORS.generation }}><GridProvenanceTag kind="P" />Actual Gen:</span>
-                              <span className="font-bold" style={{ color: LOAD_CURVE_COLORS.generation }}>{formatNumber(Math.round(d.generation))} MW</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="inline-flex items-center gap-1" style={{ color: LOAD_CURVE_COLORS.demand }}><GridProvenanceTag kind="P" />System Demand:</span>
-                              {d.demand == null ? (
-                                <span className="font-medium text-muted-foreground">not published for this hour</span>
-                              ) : (
-                                <span className="font-bold" style={{ color: LOAD_CURVE_COLORS.demand }}>{formatNumber(Math.round(d.demand))} MW</span>
-                              )}
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="inline-flex items-center gap-1" style={{ color: chartTheme.destructive }}><GridProvenanceTag kind="P" />Load Shedding:</span>
-                              {d.loadShed == null ? (
-                                <span className="font-medium text-muted-foreground">not published for this hour</span>
-                              ) : (
-                                <span className="font-bold" style={{ color: chartTheme.destructive }}>{formatNumber(Math.round(d.loadShed))} MW</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                            {curveIsHourly
-                              ? 'All three figures are published for this hour on PGCB’s hourly demand, generation and load-shed sheet.'
-                              : sheddingIsHourly
-                                ? 'Generation and load shedding are logged hourly on this layout; PGCB publishes demand for the evening peak hour alone.'
-                                : 'Generation is logged hourly. PGCB reports demand and load shedding at the evening peak hour only on this layout.'}
-                            {/* Only where bars were actually drawn — on a day with
-                                nothing shed there is no second axis to point at. */}
-                            {showShedding && ' Shedding is read against the right-hand axis.'}
-                          </div>
-                          <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                            <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB NLDC Daily Curve Sheet</a></div>
-                            <div><strong>Telemetry:</strong> NLDC SCADA System Real-time Integrator</div>
-                          </div>
-                        </div>
-                      );
-                    }}
-                  />
-                  <GridRechartsLegend
-                    verticalAlign="top"
-                    height={36}
-                    iconSize={8}
-                    wrapperStyle={{ fontSize: '11px' }}
-                    colorResolver={(value) => {
-                      if (value === 'Generation') return LOAD_CURVE_COLORS.generation;
-                      if (value.startsWith('Demand') || value.startsWith('Peak Demand')) return LOAD_CURVE_COLORS.demand;
-                      if (value.includes('Load Shedding')) return chartTheme.destructive;
-                      return 'inherit';
-                    }}
-                  />
-                  <Area yAxisId="left" type="monotone" dataKey="generation" name="Generation" stroke={LOAD_CURVE_COLORS.generation} fill={LOAD_CURVE_COLORS.generation} fillOpacity={0.15} strokeWidth={2.5} />
-                  {/* Shedding sits on the right-hand axis, under the hours that
-                      produced it, rather than in a panel of its own below the card.
-                      It is drawn after the generation area so the bars stay crisp
-                      instead of showing through it, and before the demand line so
-                      the line — the series the deficit is measured against — is
-                      never occluded by a bar. The legend names the axis, because a
-                      bar and a curve on one plot at different scales is only honest
-                      if the reader is told which scale each one is on. */}
-                  {showShedding && (
-                    <Bar
-                      yAxisId="shed"
-                      dataKey="loadShed"
-                      name={sheddingIsHourly ? 'Load shedding' : 'Peak load shedding'}
-                      fill={chartTheme.destructive}
-                      fillOpacity={0.45}
-                      stroke={chartTheme.destructive}
-                      strokeWidth={1}
-                      radius={[2, 2, 0, 0]}
-                      maxBarSize={15}
-                      activeBar={<ShedActiveBar />}
-                    />
-                  )}
-                  {curveIsHourly ? (
-                    // Every hour carries a figure, so demand is the second
-                    // measured curve it is — and the gap between the two lines
-                    // is the deficit the bars beneath measure directly.
-                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Demand" stroke={LOAD_CURVE_COLORS.demand} strokeWidth={2} dot={false} activeDot={{ r: 5 }} />
-                  ) : (
-                    // Demand exists for one hour only, so it renders as a single
-                    // marked point rather than a series interpolated across the
-                    // evening. Shedding may still be hourly on the same day — the
-                    // bars are named for what they actually are, because calling a
-                    // 23-hour series "Peak" misreads the chart for the reader.
-                    <Line yAxisId="left" type="monotone" dataKey="demand" name="Peak Demand (published)" stroke={LOAD_CURVE_COLORS.demand} strokeWidth={0} connectNulls={false} dot={{ r: 5, fill: LOAD_CURVE_COLORS.demand, stroke: LOAD_CURVE_COLORS.demand }} activeDot={{ r: 7 }} />
-                  )}
-                </ComposedChart>
-              </ResponsiveContainer>
+              <LoadCurveCanvas
+                rows={hourlyLoadData as never}
+                peaks={{
+                  dayPeakGen: systemStats.dayPeakGen,
+                  eveningPeakGen: systemStats.eveningPeakGen,
+                  minGen: systemStats.minGen,
+                  peakTimes: systemStats.peakTimes ?? null,
+                }}
+                generationColor={LOAD_CURVE_COLORS.generation}
+                demandColor={LOAD_CURVE_COLORS.demand}
+                shedColor={chartTheme.destructive}
+                axisColor={chartTheme.axisTick}
+                gridColor={chartTheme.gridStroke}
+                reportDate={systemStats.date}
+              />
             ) : (
-              <div className="grid-explorer-skeleton" />
+              // Matches the figure it stands in for — canvas plus key — so the
+              // card does not jump when the chart arrives.
+              <div className="grid-explorer-skeleton h-[25.5rem] rounded-xl" />
             )}
           </div>
 
-          {/* Load shedding used to be drawn here, in a panel of its own beneath
-              the card. It now shares the plot above on a right-hand axis, so the
-              deficit reads against the hour and the curve that produced it
-              instead of against a second copy of the x-axis. The scale argument
-              that put it down here is answered by the axis itself: the ticks on
-              the right state shedding's own MW, tinted in its own colour. */}
+          {/* Shedding had its own right-hand axis here, with a note explaining
+              that on the generation scale it would be "a flat line on the
+              floor". The note was right and the axis was the wrong answer to
+              it: two quantities that do not share a scale should not share a
+              frame pretending they do. The curve now carries the shortfall as
+              the band between demand and generation, and shedding's own
+              published column runs as an intensity strip along the foot — no
+              second axis, and nothing to apologise for. */}
           {showShedding && chartsReady && (
             <p className="mt-2 text-[11px] text-muted-foreground">
+              The band between the two curves is demand the grid did not meet.{' '}
               <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load shedding</span>
-              {' '}is read against the right-hand axis — on the generation scale it would be
-              a flat line on the floor.
+              {' '}below it is PGCB&apos;s own published figure for each hour, drawn against the
+              worst hour of the day rather than a megawatt scale of its own.
             </p>
           )}
 
@@ -2596,21 +2582,98 @@ export function PowerGridExplorer({
                     than from Tailwind's palette. text-amber-500 (#f59e0b) is not
                     the colour the demand line is drawn in (#eab308), so the prose
                     used to name a series in a shade the chart never uses. */}
-                {/* The right-hand axis and the shedding bars only exist on days
+                {/* The shedding strip only exists on days
                     that shed something, so the prose names them only then — a day
                     PGCB reports as nil is described by its own sentence rather than
                     pointed at an axis the reader cannot see. */}
                 {curveIsHourly ? (
-                  <p className="leading-relaxed">The <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> and <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> curves are read from PGCB&apos;s hourly demand, generation and load-shed sheet, which states each figure for every hour it publishes. {showShedding
-                    ? <><span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding</span> is PGCB&apos;s own third column on that sheet — the demand the grid could not meet and disconnected — and not this card subtracting one curve from the other. The two are close but not the same measurement: where load is shed, the gap between the curves runs a few per cent above the figure PGCB publishes, so the bars are drawn from the published column, against the right-hand axis.</>
-                    : <>The two curves meet at every hour, because this report states no load shedding in any hour of this day.</>}</p>
+                  <>
+                    <p className="leading-relaxed">
+                      Everything on this chart comes from one sheet — PGCB&apos;s hourly demand,
+                      generation and load-shed table — which states each figure for every hour it
+                      publishes. Most days carry <strong>25 readings, not 24</strong>: the
+                      twenty-four hours plus a half-hour sample at 19:30 taken across the
+                      evening-peak window.
+                    </p>
+                    <dl className="grid-load-glossary">
+                      <div>
+                        <dt style={{ color: LOAD_CURVE_COLORS.generation }}>
+                          Generation <GridProvenanceTag kind="P" />
+                        </dt>
+                        <dd>
+                          The megawatts actually produced and delivered at that moment — the blue
+                          mass. This is what the country <em>had</em>.
+                        </dd>
+                      </div>
+                      <div>
+                        <dt style={{ color: LOAD_CURVE_COLORS.demand }}>
+                          Demand <GridProvenanceTag kind="P" />
+                        </dt>
+                        <dd>
+                          What the country <em>asked for</em> — the dashed ceiling. PGCB publishes
+                          this column, but it is not measured independently: across all 3,600 hourly
+                          rows of 2026 it equals <em>generation + 1.045 × load shed</em>, to within
+                          a megawatt. The 4.5% is a network-loss allowance — shedding is counted
+                          where consumers are, generation where the plants are — so demand is
+                          reconstructed on the generation side of the network rather than metered
+                          at the door.
+                        </dd>
+                      </div>
+                      <div>
+                        <dt style={{ color: chartTheme.destructive }}>
+                          Unmet demand <GridProvenanceTag kind="D" />
+                        </dt>
+                        <dd>
+                          The shaded band between the two curves: demand minus generation. It is
+                          the electricity the country asked for and did not get. This is our
+                          subtraction, not a figure PGCB states &mdash; and because demand is built
+                          from the shed column above, the band is the same quantity as the strip
+                          below, 4.5% larger. It is drawn because a shortfall is easier to judge as
+                          a gap between two lines than as a number in a table.
+                        </dd>
+                      </div>
+                      {showShedding ? (
+                        <div>
+                          <dt style={{ color: chartTheme.destructive }}>
+                            Load shed, by hour <GridProvenanceTag kind="P" />
+                          </dt>
+                          <dd>
+                            PGCB&apos;s own third column, along the foot: load the grid deliberately
+                            disconnected because it could not supply it. This is the published
+                            figure and the one to quote. Bars are sized against the day&apos;s worst
+                            hour, so the strip shows shape and severity rather than a second
+                            megawatt scale. A flat grey stub means an hour PGCB reported as
+                            <em> none</em>; a gap in the baseline means an hour it did not report
+                            at all.
+                          </dd>
+                        </div>
+                      ) : (
+                        <div>
+                          <dt style={{ color: chartTheme.destructive }}>Load shed, by hour</dt>
+                          <dd>
+                            Nothing to show: this report states no load shedding in any hour of this
+                            day, which is why the two curves meet all the way across.
+                          </dd>
+                        </div>
+                      )}
+                      <div>
+                        <dt style={{ color: '#c98a1a' }}>19:30 sample</dt>
+                        <dd>
+                          The gold bar. PGCB takes one extra reading half an hour before the
+                          evening-peak hour, so it sits closer to its neighbours than the rest.
+                          It is a reading like any other, not a separate series &mdash; marked only
+                          so its spacing does not read as a mistake.
+                        </dd>
+                      </div>
+                    </dl>
+                  </>
                 ) : sheddingIsHourly ? (
                   <p className="leading-relaxed">The <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is read from PGCB&apos;s hourly station log, which carries a national total and a shortage figure at every hourly stamp{showShedding
-                    ? <>; the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding</span> bars are that shortage column, drawn against the right-hand axis on their own scale.</>
+                    ? <>; the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding</span> strip along the foot is that shortage column, sized against the day's worst hour.</>
                     : <>, and records no shortage in any hour of this day.</>} That sheet publishes no demand column, so <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is the evening-peak figure from the report&apos;s front page and appears as a single marked point rather than a curve.</p>
                 ) : (
                   <p className="leading-relaxed">The hourly <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is the NLDC load-curve sheet, logged every half hour. <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Total Demand</span>{showShedding
-                    ? <> and the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding Deficit</span> are published for the evening peak hour only on this report&apos;s layout, so they appear as single marks rather than continuous lines — the deficit as a bar against the right-hand axis.</>
+                    ? <> and the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding Deficit</span> are published for the evening peak hour only on this report&apos;s layout, so they appear as single marks rather than continuous lines, and the shortfall band is drawn only where both were measured.</>
                     : <> is published for the evening peak hour only on this report&apos;s layout, so it appears as a single marked point rather than a continuous line.</>}</p>
                 )}
                 <p className="leading-relaxed">
@@ -2621,18 +2684,18 @@ export function PowerGridExplorer({
                     <>
                       {' '}Load was shed in <span className="font-semibold text-primary">{shedHours.length} of the {wholeHourRows.length} published hours</span>, worst at{' '}
                       <span className="font-semibold text-primary">{worstShed.time} Hr</span> with{' '}
-                      <span className="font-bold text-destructive">{formatNumber(Math.round(worstShed.loadShed ?? 0))} MW</span> unserved
+                      <span className="font-bold text-destructive tabular-nums">{formatNumber(Math.round(worstShed.loadShed ?? 0))} MW</span> unserved
                       {shedTotalMwh > 0 && (
-                        <> — around <span className="font-bold text-foreground">{formatNumber(Math.round(shedTotalMwh))} MWh</span> across the day, taking each hourly figure as the rate for that hour.</>
+                        <> — around <span className="font-bold text-foreground tabular-nums">{formatNumber(Math.round(shedTotalMwh))} MWh</span> across the day, taking each hourly figure as the rate for that hour.</>
                       )}
                     </>
                   ) : curveIsHourly || sheddingIsHourly ? (
                     ' No load shedding was recorded in any published hour of this day.'
                   ) : peakRow && peakRow.demand != null ? (
                     <>
-                      {' '}At the evening peak (<span className="font-semibold text-primary">{peakRow.time} Hr</span>) PGCB reported demand of <span className="font-bold text-foreground">{formatNumber(Math.round(peakRow.demand))} MW</span>
+                      {' '}At the evening peak (<span className="font-semibold text-primary tabular-nums">{peakRow.time} Hr</span>) PGCB reported demand of <span className="font-bold text-foreground">{formatNumber(Math.round(peakRow.demand))} MW</span>
                       {peakRow.loadShed != null && peakRow.loadShed > 0 ? (
-                        <> against <span className="font-bold text-destructive">{formatNumber(Math.round(peakRow.loadShed))} MW</span> of load shedding.</>
+                        <> against <span className="font-bold text-destructive tabular-nums">{formatNumber(Math.round(peakRow.loadShed))} MW</span> of load shedding.</>
                       ) : (
                         ' with no load shedding recorded.'
                       )}
@@ -2660,15 +2723,15 @@ export function PowerGridExplorer({
       {!isDataMissing && activeTab === 'gen' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
-            <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-                <Info className="h-8 w-8 text-primary animate-pulse" />
+            <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
+              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground">
+                <Info className="h-8 w-8 shrink-0 text-primary animate-pulse" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">PGCB Fuel Mix &amp; Generation Cost Data</h4>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <h4 className="text-base font-bold text-foreground">PGCB Fuel Mix &amp; Generation Cost Data</h4>
+              <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
                 No official records are available for the selected date. PGCB generation and cost data tracking officially started on December 31, 2013.
               </p>
-              <div className="mt-4 text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground tabular-nums">
                 Official Backlog Start Date: December 31, 2013
               </div>
             </div>
@@ -2983,15 +3046,28 @@ export function PowerGridExplorer({
                   <li>
                     <UnitCostBadge fact={{ status: 'corroborated' } as UnitCostFact} className="ml-0" />{' '}
                     BPDB publishes the same cost and the same energy in a separate report with
-                    its own control totals, and the rate derived from those agrees. Across the
-                    first half of 2026 this held for gas and coal on every day both agencies
-                    published, and for imports on all but one.
+                    its own control totals, and the rate derived from those agrees. Re-measured
+                    across every witnessed day from 2025-01-01 to 2026-06-24: gas agrees on
+                    274 of 274 days, coal on 274 of 274, imports on 273 of 274 — the exception
+                    being 2026-04-03, where BPDB&rsquo;s own page overstates imported energy by
+                    exactly 188.00 MKWh while PGCB&rsquo;s three interconnectors sum to its own
+                    total.
                   </li>
+                  {/*
+                    This line used to read "Hydro at 0.1000 on all but one" day
+                    of 2026. It is 0.1000 on 128 days and 3.8100 on 16 — the
+                    unbroken run 2026-06-30 to 07-15 — so the claim was wrong by
+                    fifteen days, and wrong in the direction that overstates our
+                    confidence. A tally frozen in prose goes stale the moment the
+                    archive grows, which is how it broke; the rates are named
+                    here and the counts left to the table itself.
+                  */}
                   <li>
                     <UnitCostBadge fact={{ status: 'administered' } as UnitCostFact} className="ml-0" />{' '}
-                    a flat rate the publisher applies rather than measures — PGCB prints Wind at
-                    14.7100 Tk/KWh on every day of 2026 and Hydro at 0.1000 on all but one, so
-                    these are tariffs, not daily costs.
+                    a flat rate the publisher applies rather than measures. Through 2026 PGCB
+                    prints Wind at 14.7100 Tk/KWh unchanged, and Hydro at 0.1000 except for
+                    2026-06-30 to 07-15, when it stepped to 3.8100 and back. Rates that hold to
+                    four decimals for weeks and then jump are tariffs in force, not daily costs.
                   </li>
                   <li>
                     <UnitCostBadge fact={{ status: 'disagreement' } as UnitCostFact} className="ml-0" />{' '}
@@ -3002,6 +3078,13 @@ export function PowerGridExplorer({
                     <UnitCostBadge fact={{ status: 'published-only' } as UnitCostFact} className="ml-0" />{' '}
                     correctly derived, but only one agency publishes the inputs, so there is no
                     second witness.
+                  </li>
+                  <li>
+                    <UnitCostBadge fact={{ status: 'awaiting-witness' } as UnitCostFact} className="ml-0" />{' '}
+                    correctly derived, and the cross-check has not been run for this day yet. The
+                    BPDB comparison is a periodic export
+                    {unitCostAuth.witnessThrough ? ` covering days through ${unitCostAuth.witnessThrough}` : ''};
+                    a day past that is unchecked, which is not the same as unconfirmed.
                   </li>
                 </ul>
               </div>
@@ -3040,9 +3123,10 @@ export function PowerGridExplorer({
           />
 
           {/* Daily Milestones */}
-          <div className="grid-explorer-chart-card card p-4 space-y-4">
-            <div className="grid-explorer-chart-card__head">
-              <div>
+          <div className="grid-explorer-chart-card card p-4">
+            <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+              <CheckSquare className="h-5 w-5 shrink-0 text-primary" />
+              <div className="min-w-0">
                 <h3 className="grid-explorer-chart-card__title">Daily Operational Milestones<DailyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">Key metrics on system margin, load shedding demand, and gas-to-power allocations • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
               </div>
@@ -3050,22 +3134,28 @@ export function PowerGridExplorer({
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Load-Shedding &amp; Demand</div>
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <Activity className="h-4 w-4 shrink-0 text-destructive" />
+                  Load-Shedding &amp; Demand
+                </div>
                 {/* All three are printed by PGCB's P1 sheet. */}
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Peak Demand:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left">{systemStats.eveningPeakDemand.toFixed(1)} MW</span>
+                  <span className="font-bold text-foreground text-left tabular-nums">{systemStats.eveningPeakDemand.toFixed(1)} MW</span>
                   <span>Peak Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left">{systemStats.eveningPeakGen.toFixed(1)} MW</span>
+                  <span className="font-bold text-foreground text-left tabular-nums">{systemStats.eveningPeakGen.toFixed(1)} MW</span>
                   <span>Unserved Energy:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-semibold text-destructive text-left">
+                  <span className="font-semibold text-destructive text-left tabular-nums">
                     {systemStats.totalEnergyUnserved == null ? '—' : `${systemStats.totalEnergyUnserved.toFixed(2)} MKWh`}
                   </span>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Daily System Margins</div>
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <BarChart3 className="h-4 w-4 shrink-0 text-primary" />
+                  Daily System Margins
+                </div>
                 {/*
                   All three are printed. Max and min generation are PGCB's own
                   stated extremes for the day, not the load curve's — its stated
@@ -3075,22 +3165,25 @@ export function PowerGridExplorer({
                 */}
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Max Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left">
+                  <span className="font-bold text-foreground text-left tabular-nums">
                     {systemStats.maxGen == null ? '—' : `${systemStats.maxGen.toFixed(1)} MW`}
                   </span>
                   <span>Min Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left">
+                  <span className="font-bold text-foreground text-left tabular-nums">
                     {systemStats.minGen == null ? '—' : `${systemStats.minGen.toFixed(1)} MW`}
                   </span>
                   <span>Max Temp:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-semibold text-foreground text-left">
+                  <span className="font-semibold text-foreground text-left tabular-nums">
                     {systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
                   </span>
                 </div>
               </div>
 
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gas-to-Power</div>
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <Droplet className="h-4 w-4 shrink-0 text-sky-500" />
+                  Gas-to-Power
+                </div>
                 {/*
                   Gas supplied and gas cost are printed by PGCB — the MMCFD
                   figure is PGCB's own "Total Gas Supplied", not Petrobangla's
@@ -3100,16 +3193,16 @@ export function PowerGridExplorer({
                 */}
                 <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Gas Supplied:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left">{systemStats.totalGasSuppliedPower.toFixed(1)} MMCFD</span>
+                  <span className="font-bold text-foreground text-left tabular-nums">{systemStats.totalGasSuppliedPower.toFixed(1)} MMCFD</span>
                   <span>Gas Cost:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left">
+                  <span className="font-bold text-foreground text-left tabular-nums">
                     {(() => {
                       const c = generationData.find(g => g.name === 'Gas')?.cost;
                       return c == null ? '—' : `${(c / 10000000).toFixed(2)} Crore Tk`;
                     })()}
                   </span>
                   <span>Gas Unit Cost:<GridProvenanceTag kind="D" className="ml-1" /></span>
-                  <span className="font-semibold text-primary text-left">
+                  <span className="font-semibold text-primary text-left tabular-nums">
                     {(() => {
                       const u = generationData.find(g => g.name === 'Gas')?.unitCost;
                       return u == null ? '—' : `${u.toFixed(2)} Tk/KWh`;
@@ -3158,15 +3251,15 @@ export function PowerGridExplorer({
       {!isDataMissing && activeTab === 'imports' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
-            <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-                <Info className="h-8 w-8 text-primary animate-pulse" />
+            <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
+              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground">
+                <Info className="h-8 w-8 shrink-0 text-primary animate-pulse" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">Cross-Border Power Imports Data</h4>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <h4 className="text-base font-bold text-foreground">Cross-Border Power Imports Data</h4>
+              <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
                 No official records are available for the selected date. PGCB import data tracking officially started on December 31, 2013.
               </p>
-              <div className="mt-4 text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground tabular-nums">
                 Official Backlog Start Date: December 31, 2013
               </div>
             </div>
@@ -3289,7 +3382,7 @@ export function PowerGridExplorer({
               </table>
             </div>
 
-            <div className="p-4 bg-muted/20 border border-border/40 rounded-xl mt-5 text-xs text-muted-foreground leading-relaxed space-y-2">
+            <div className="p-4 bg-muted/20 border border-border/40 rounded-xl mt-4 text-xs text-muted-foreground leading-relaxed space-y-2">
               <p>
                 <strong>Why cost is shown once, and no rate at all:</strong> PGCB reports energy and peak
                 flow for each interconnector, but prices imports as a single line in its production-cost
@@ -3348,15 +3441,15 @@ export function PowerGridExplorer({
       {!isDataMissing && activeTab === 'transmission' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
-            <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-                <Info className="h-8 w-8 text-primary animate-pulse" />
+            <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
+              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground">
+                <Info className="h-8 w-8 shrink-0 text-primary animate-pulse" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">PGCB Transmission Grid Data</h4>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <h4 className="text-base font-bold text-foreground">PGCB Transmission Grid Data</h4>
+              <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
                 No official records are available for the selected date. PGCB transmission outages and substation tracking officially started on December 31, 2013.
               </p>
-              <div className="mt-4 text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground tabular-nums">
                 Official Backlog Start Date: December 31, 2013
               </div>
             </div>
@@ -3431,7 +3524,7 @@ export function PowerGridExplorer({
                   ))}
                 </select>
                 <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                  <ChevronDown className="h-4 w-4" />
+                  <ChevronDown className="h-4 w-4 shrink-0" />
                 </div>
               </div>
             </div>
@@ -3535,7 +3628,7 @@ export function PowerGridExplorer({
             register, not a daily reading: it does not move with the date picker,
             so a reader could otherwise take these figures for the selected day's.
           */}
-          <div className="p-3.5 rounded-2xl bg-muted/10 border border-border/30 text-[11px] text-muted-foreground leading-relaxed flex items-start gap-2.5">
+          <div className="p-3 rounded-2xl bg-muted/10 border border-border/30 text-[11px] text-muted-foreground leading-relaxed flex items-start gap-2.5">
             <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
             <span>
               <strong className="text-foreground">What P and D mean here.</strong>{' '}
@@ -3559,7 +3652,7 @@ export function PowerGridExplorer({
                 <div className="space-y-6 relative z-10">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20 shrink-0">
-                      <Activity className="h-6 w-6 animate-pulse" />
+                      <Activity className="h-6 w-6 shrink-0 animate-pulse" />
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -3578,7 +3671,7 @@ export function PowerGridExplorer({
                       </p>
                       <details className="group/jargon">
                         <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors list-none flex items-center gap-1.5">
-                          <ChevronDown className="h-3 w-3 transition-transform group-open/jargon:rotate-180" />
+                          <ChevronDown className="h-3 w-3 shrink-0 transition-transform group-open/jargon:rotate-180" />
                           PGCB&apos;s exact wording
                         </summary>
                         <p className="text-xs text-muted-foreground italic leading-relaxed border-l-2 border-primary/40 pl-3 mt-2">
@@ -3589,15 +3682,15 @@ export function PowerGridExplorer({
                   </div>
 
                   {/* Wheeling Workflow Visualization */}
-                  <div className="space-y-4 pt-5 border-t border-border/30">
+                  <div className="space-y-4 pt-4 border-t border-border/30">
                     <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">How power reaches you</h4>
                     <div className="relative grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
                       {/* Step 1 */}
-                      <div className="group p-5 rounded-2xl bg-muted/15 border border-border/30 hover:border-primary/20 hover:bg-muted/20 transition-all flex flex-col justify-between relative overflow-hidden">
+                      <div className="group p-4 rounded-2xl bg-muted/15 border border-border/30 hover:border-primary/20 hover:bg-muted/20 transition-all flex flex-col justify-between relative overflow-hidden">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted-foreground/10 px-2.5 py-0.5 rounded-full">Step 1: Generation</span>
-                            <Zap className="h-4 w-4 text-amber-500 animate-pulse" />
+                            <Zap className="h-4 w-4 shrink-0 text-amber-500 animate-pulse" />
                           </div>
                           <h5 className="text-sm font-bold text-foreground">Power Generation Plants</h5>
                           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -3610,11 +3703,11 @@ export function PowerGridExplorer({
                       </div>
 
                       {/* Step 2 */}
-                      <div className="group p-5 rounded-2xl bg-primary/5 border border-primary/25 hover:border-primary/40 hover:bg-primary/10 transition-all flex flex-col justify-between relative overflow-hidden">
+                      <div className="group p-4 rounded-2xl bg-primary/5 border border-primary/25 hover:border-primary/40 hover:bg-primary/10 transition-all flex flex-col justify-between relative overflow-hidden">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-2.5 py-0.5 rounded-full">Step 2: Transmission</span>
-                            <Cable className="h-4 w-4 text-primary" />
+                            <Cable className="h-4 w-4 shrink-0 text-primary" />
                           </div>
                           <h5 className="text-sm font-bold text-foreground">High-Voltage Wheeling Grid</h5>
                           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -3627,11 +3720,11 @@ export function PowerGridExplorer({
                       </div>
 
                       {/* Step 3 */}
-                      <div className="group p-5 rounded-2xl bg-muted/15 border border-border/30 hover:border-primary/20 hover:bg-muted/20 transition-all flex flex-col justify-between relative overflow-hidden">
+                      <div className="group p-4 rounded-2xl bg-muted/15 border border-border/30 hover:border-primary/20 hover:bg-muted/20 transition-all flex flex-col justify-between relative overflow-hidden">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-muted-foreground/10 px-2.5 py-0.5 rounded-full">Step 3: Distribution</span>
-                            <Globe className="h-4 w-4 text-emerald-500" />
+                            <Globe className="h-4 w-4 shrink-0 text-emerald-500" />
                           </div>
                           <h5 className="text-sm font-bold text-foreground">Distribution Entities (Clients)</h5>
                           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -3721,7 +3814,7 @@ export function PowerGridExplorer({
 
                       <details className="group/quote">
                         <summary className="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors list-none flex items-center gap-1.5">
-                          <ChevronDown className="h-3 w-3 transition-transform group-open/quote:rotate-180" />
+                          <ChevronDown className="h-3 w-3 shrink-0 transition-transform group-open/quote:rotate-180" />
                           PGCB&apos;s exact wording
                         </summary>
                         <p className="text-xs text-muted-foreground leading-relaxed italic border-l-2 border-sky-500/50 pl-3 mt-2">
@@ -3777,8 +3870,8 @@ export function PowerGridExplorer({
 
               {/* Takeover vs. Standing Comparative Table */}
               <div className="grid-explorer-chart-card card p-6">
-                <div className="flex items-center gap-2 mb-4 border-b border-border/40 pb-3">
-                  <Database className="h-5 w-5 text-primary" />
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+                  <Database className="h-5 w-5 shrink-0 text-primary" />
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Then vs Now</h3>
                 </div>
                 <div className="grid-explorer-table-wrap">
@@ -3849,7 +3942,7 @@ export function PowerGridExplorer({
               {/* Callout box for projects */}
               <div className="p-4 bg-primary/5 border border-primary/20 rounded-2xl flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-xl text-primary border border-primary/20 shrink-0">
-                  <TrendingUp className="h-4 w-4" />
+                  <TrendingUp className="h-4 w-4 shrink-0" />
                 </div>
                 <p className="text-xs text-foreground font-semibold leading-normal">
                   PGCB is building more lines and substations — the projects are listed under Grid Projects in the menu.
@@ -3859,7 +3952,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary" /> Jargon, translated
+                  <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -4016,7 +4109,7 @@ export function PowerGridExplorer({
                 {/* Row 2: Substation Capacity details (Full width) */}
                 <div className="lg:col-span-12">
                   <div className="grid-explorer-chart-card card p-6">
-                    <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4">
+                    <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                       <Database className="h-5 w-5 text-indigo-500 shrink-0" />
                       <div>
                         <h3 className="grid-explorer-chart-card__title">Substation as on: June, 2026</h3>
@@ -4096,7 +4189,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary" /> Jargon, translated
+                  <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -4134,7 +4227,7 @@ export function PowerGridExplorer({
                   <div className="space-y-4">
                     <div className="flex items-start gap-4">
                       <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400 border border-indigo-500/20 shrink-0">
-                        <Database className="h-6 w-6" />
+                        <Database className="h-6 w-6 shrink-0" />
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -4384,54 +4477,18 @@ export function PowerGridExplorer({
                   emptyMessage="No substations match your filter criteria."
                   aria-label="National grid substation registry"
                   footer={
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-border/40">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">Show:</span>
-                        <div className="flex gap-1.5">
-                          {[25, 50, 100].map((size) => (
-                            <button
-                              key={size}
-                              type="button"
-                              onClick={() => {
-                                setItemsPerPage(size);
-                                setSubPage(1);
-                              }}
-                              className={cn(
-                                'px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all duration-150',
-                                itemsPerPage === size
-                                  ? 'bg-primary/10 text-primary border-primary/20 shadow-sm'
-                                  : 'bg-muted/10 border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted/30',
-                              )}
-                            >
-                              {size}
-                            </button>
-                          ))}
-                        </div>
-                        <span className="text-xs text-muted-foreground">per page</span>
-                      </div>
-
-                      <span className="text-xs text-muted-foreground text-center">
-                        Page <strong className="text-foreground">{totalSubPages === 0 ? 0 : subPage}</strong> of <strong className="text-foreground">{totalSubPages}</strong> ({filteredSubstations.length} total stations)
-                      </span>
-
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          disabled={subPage === 1}
-                          onClick={() => setSubPage((p) => Math.max(p - 1, 1))}
-                          className="p-1.5 rounded-lg border border-border/40 hover:bg-muted/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-muted-foreground focus:outline-none"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={subPage === totalSubPages || totalSubPages === 0}
-                          onClick={() => setSubPage((p) => Math.min(p + 1, totalSubPages))}
-                          className="p-1.5 rounded-lg border border-border/40 hover:bg-muted/10 disabled:opacity-40 disabled:hover:bg-transparent transition-colors text-muted-foreground focus:outline-none"
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-                      </div>
+                    <div className="px-4 py-2">
+                      <GridTablePager
+                        page={substationPager.page}
+                        totalPages={substationPager.totalPages}
+                        pageSize={substationPager.pageSize}
+                        total={substationPager.total}
+                        from={substationPager.from}
+                        to={substationPager.to}
+                        onPage={substationPager.setPage}
+                        onPageSize={substationPager.setPageSize}
+                        noun="substations"
+                      />
                     </div>
                   }
                 >
@@ -4490,7 +4547,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary" /> Jargon, translated
+                  <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -4547,7 +4604,7 @@ export function PowerGridExplorer({
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <TrendingUp className="h-3.5 w-3.5" />
+                  <TrendingUp className="h-3.5 w-3.5 shrink-0" />
                   Ongoing Projects ({ongoingProjectsData.length})
                 </button>
                 <button
@@ -4560,7 +4617,7 @@ export function PowerGridExplorer({
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  <Activity className="h-3.5 w-3.5" />
+                  <Activity className="h-3.5 w-3.5 shrink-0" />
                   Upcoming Projects ({upcomingProjectsData.length})
                 </button>
                 <button
@@ -4570,7 +4627,7 @@ export function PowerGridExplorer({
                   }}
                   className="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-150 flex items-center gap-2 select-none text-muted-foreground hover:text-foreground"
                 >
-                  <CheckSquare className="h-3.5 w-3.5" />
+                  <CheckSquare className="h-3.5 w-3.5 shrink-0" />
                   Completed Projects ({completedProjectsData.length})
                 </button>
               </div>
@@ -4607,7 +4664,7 @@ export function PowerGridExplorer({
                         className={cn("w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold select-none text-left", projectPartnerFilter === 'all' ? "bg-primary/10 text-primary font-bold" : "text-muted-foreground hover:text-foreground hover:bg-muted/40")}
                       >
                         <span>All Development Partners</span>
-                        {projectPartnerFilter === 'all' && <Check className="h-3.5 w-3.5" />}
+                        {projectPartnerFilter === 'all' && <Check className="h-3.5 w-3.5 shrink-0" />}
                       </button>
                       {['EXIM Bank of India', 'World Bank', 'ADB', 'AIIB', 'JICA', 'EDCF', 'KfW', 'Exim Bank China (G to G)', 'Indian LoC', 'N/A'].map((p) => (
                         <button
@@ -4617,7 +4674,7 @@ export function PowerGridExplorer({
                           className={cn("w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold select-none text-left", projectPartnerFilter === p ? "bg-primary/10 text-primary font-bold" : "text-muted-foreground hover:text-foreground hover:bg-muted/40")}
                         >
                           <span>{p}</span>
-                          {projectPartnerFilter === p && <Check className="h-3.5 w-3.5" />}
+                          {projectPartnerFilter === p && <Check className="h-3.5 w-3.5 shrink-0" />}
                         </button>
                       ))}
                     </div>
@@ -4652,7 +4709,7 @@ export function PowerGridExplorer({
                           </div>
                           
                           {/* Progress Bars */}
-                          <div className="flex items-center gap-6 shrink-0 bg-muted/10 p-3.5 rounded-2xl border border-border/20">
+                          <div className="flex items-center gap-6 shrink-0 bg-muted/10 p-3 rounded-2xl border border-border/20">
                             <div className="space-y-1">
                               <div className="flex items-center justify-between gap-8 text-[10px] font-bold text-foreground">
                                 <span>Physical Progress</span>
@@ -4760,10 +4817,10 @@ export function PowerGridExplorer({
                           </div>
                           
                           {/* Status Badge & Status Details */}
-                          <div className="flex items-center gap-3 shrink-0 bg-muted/10 p-3.5 rounded-2xl border border-border/20 max-w-xs md:max-w-md">
+                          <div className="flex items-center gap-3 shrink-0 bg-muted/10 p-3 rounded-2xl border border-border/20 max-w-xs md:max-w-md">
                             <div className="space-y-1.5">
                               <div className="flex items-center gap-1.5">
-                                <StatusIcon className="h-3.5 w-3.5 text-primary" />
+                                <StatusIcon className="h-3.5 w-3.5 shrink-0 text-primary" />
                                 <span className={cn("px-2 py-0.5 text-[9px] font-bold rounded-full border uppercase tracking-wider", statusInfo.bgColor, statusInfo.textColor)}>
                                   {statusInfo.label}
                                 </span>
@@ -4850,7 +4907,7 @@ export function PowerGridExplorer({
                       onClick={() => setProjectPage(projectPage - 1)}
                       className="p-1.5 border border-border/40 rounded-lg bg-card/65 text-muted-foreground hover:text-foreground hover:bg-muted/40 disabled:opacity-40 disabled:pointer-events-none transition-all"
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-4 w-4 shrink-0" />
                     </button>
                     <div className="text-xs font-semibold text-foreground">
                       Page {projectPage} of {totalProjectPages}
@@ -4861,7 +4918,7 @@ export function PowerGridExplorer({
                       onClick={() => setProjectPage(projectPage + 1)}
                       className="p-1.5 border border-border/40 rounded-lg bg-card/65 text-muted-foreground hover:text-foreground hover:bg-muted/40 disabled:opacity-40 disabled:pointer-events-none transition-all"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-4 w-4 shrink-0" />
                     </button>
                   </div>
                 </div>
@@ -4910,7 +4967,7 @@ export function PowerGridExplorer({
                   }}
                   className="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-150 flex items-center gap-2 select-none text-muted-foreground hover:text-foreground"
                 >
-                  <TrendingUp className="h-3.5 w-3.5" />
+                  <TrendingUp className="h-3.5 w-3.5 shrink-0" />
                   Ongoing Projects ({ongoingProjectsData.length})
                 </button>
                 <button
@@ -4921,7 +4978,7 @@ export function PowerGridExplorer({
                   }}
                   className="px-4 py-2 text-xs font-bold rounded-xl transition-all duration-150 flex items-center gap-2 select-none text-muted-foreground hover:text-foreground"
                 >
-                  <Activity className="h-3.5 w-3.5" />
+                  <Activity className="h-3.5 w-3.5 shrink-0" />
                   Upcoming Projects ({upcomingProjectsData.length})
                 </button>
                 <button
@@ -4930,7 +4987,7 @@ export function PowerGridExplorer({
                     "px-4 py-2 text-xs font-bold rounded-xl transition-all duration-150 flex items-center gap-2 select-none border border-transparent bg-emerald-500 text-white shadow-lg shadow-emerald-500/10 border-emerald-600/20"
                   )}
                 >
-                  <CheckSquare className="h-3.5 w-3.5" />
+                  <CheckSquare className="h-3.5 w-3.5 shrink-0" />
                   Completed Projects ({completedProjectsData.length})
                 </button>
               </div>
@@ -4967,7 +5024,7 @@ export function PowerGridExplorer({
                         className={cn("w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold select-none text-left", completedPartnerFilter === 'all' ? "bg-primary/10 text-primary font-bold" : "text-muted-foreground hover:text-foreground hover:bg-muted/40")}
                       >
                         <span>All Development Partners</span>
-                        {completedPartnerFilter === 'all' && <Check className="h-3.5 w-3.5" />}
+                        {completedPartnerFilter === 'all' && <Check className="h-3.5 w-3.5 shrink-0" />}
                       </button>
                       {['ADB', 'IDB', 'World Bank', 'JICA', 'EDCF', 'KfW', 'DANIDA', 'PGCB', 'N/A'].map((p) => (
                         <button
@@ -4977,7 +5034,7 @@ export function PowerGridExplorer({
                           className={cn("w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs md:text-sm font-semibold select-none text-left", completedPartnerFilter === p ? "bg-primary/10 text-primary font-bold" : "text-muted-foreground hover:text-foreground hover:bg-muted/40")}
                         >
                           <span>{p}</span>
-                          {completedPartnerFilter === p && <Check className="h-3.5 w-3.5" />}
+                          {completedPartnerFilter === p && <Check className="h-3.5 w-3.5 shrink-0" />}
                         </button>
                       ))}
                     </div>
@@ -5006,7 +5063,7 @@ export function PowerGridExplorer({
                       {/* Completed status badge */}
                       <div className="flex items-center gap-3 shrink-0 bg-emerald-500/10 p-3 rounded-2xl border border-emerald-500/20">
                         <div className="flex items-center gap-1.5">
-                          <Check className="h-3.5 w-3.5 text-emerald-500" />
+                          <Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />
                           <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
                             Completed Project
                           </span>
@@ -5095,7 +5152,7 @@ export function PowerGridExplorer({
                       onClick={() => setCompletedPage(completedPage - 1)}
                       className="p-1.5 border border-border/40 rounded-lg bg-card/65 text-muted-foreground hover:text-foreground hover:bg-muted/40 disabled:opacity-40 disabled:pointer-events-none transition-all"
                     >
-                      <ChevronLeft className="h-4 w-4" />
+                      <ChevronLeft className="h-4 w-4 shrink-0" />
                     </button>
                     <div className="text-xs font-semibold text-foreground">
                       Page {completedPage} of {totalCompletedProjectPages}
@@ -5106,7 +5163,7 @@ export function PowerGridExplorer({
                       onClick={() => setCompletedPage(completedPage + 1)}
                       className="p-1.5 border border-border/40 rounded-lg bg-card/65 text-muted-foreground hover:text-foreground hover:bg-muted/40 disabled:opacity-40 disabled:pointer-events-none transition-all"
                     >
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className="h-4 w-4 shrink-0" />
                     </button>
                   </div>
                 </div>
@@ -5136,7 +5193,7 @@ export function PowerGridExplorer({
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-primary/10 rounded-2xl text-primary border border-primary/20 shrink-0">
-                      <Network className="h-6 w-6 animate-pulse" />
+                      <Network className="h-6 w-6 shrink-0 animate-pulse" />
                     </div>
                     <div className="space-y-1 w-full">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -5150,7 +5207,7 @@ export function PowerGridExplorer({
                           rel="noopener noreferrer"
                           className="self-start sm:self-center px-4 py-2 text-xs font-semibold bg-primary/10 text-primary border border-primary/20 rounded-xl hover:bg-primary/20 transition-all flex items-center gap-1.5 shadow-sm"
                         >
-                          <FileText className="h-3.5 w-3.5" />
+                          <FileText className="h-3.5 w-3.5 shrink-0" />
                           Open PDF in New Tab
                         </a>
                       </div>
@@ -5175,7 +5232,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary" /> Diagram Key &amp; Technical Footnote
+                  <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Diagram Key &amp; Technical Footnote
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -5206,7 +5263,7 @@ export function PowerGridExplorer({
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-teal-500/10 rounded-2xl text-teal-400 border border-teal-500/20 shrink-0">
-                      <MapPin className="h-6 w-6 animate-pulse" />
+                      <MapPin className="h-6 w-6 shrink-0 animate-pulse" />
                     </div>
                     <div className="space-y-1 w-full">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -5220,7 +5277,7 @@ export function PowerGridExplorer({
                           rel="noopener noreferrer"
                           className="self-start sm:self-center px-4 py-2 text-xs font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-xl hover:bg-teal-500/20 transition-all flex items-center gap-1.5 shadow-sm"
                         >
-                          <FileText className="h-3.5 w-3.5" />
+                          <FileText className="h-3.5 w-3.5 shrink-0" />
                           Open PDF in New Tab
                         </a>
                       </div>
@@ -5245,7 +5302,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-teal-400" /> Mapping &amp; Geography Footnote
+                  <Info className="h-3.5 w-3.5 shrink-0 text-teal-400" /> Mapping &amp; Geography Footnote
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -5276,7 +5333,7 @@ export function PowerGridExplorer({
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400 border border-purple-500/20 shrink-0">
-                      <Map className="h-6 w-6 animate-pulse" />
+                      <Map className="h-6 w-6 shrink-0 animate-pulse" />
                     </div>
                     <div className="space-y-1 w-full">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -5290,7 +5347,7 @@ export function PowerGridExplorer({
                           rel="noopener noreferrer"
                           className="self-start sm:self-center px-4 py-2 text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20 rounded-xl hover:bg-purple-500/20 transition-all flex items-center gap-1.5 shadow-sm"
                         >
-                          <FileText className="h-3.5 w-3.5" />
+                          <FileText className="h-3.5 w-3.5 shrink-0" />
                           Open PDF in New Tab
                         </a>
                       </div>
@@ -5315,7 +5372,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-purple-400" /> OPGW &amp; Telecom Footnote
+                  <Info className="h-3.5 w-3.5 shrink-0 text-purple-400" /> OPGW &amp; Telecom Footnote
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -5348,7 +5405,7 @@ export function PowerGridExplorer({
                 <div className="space-y-4 relative z-10">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500 border border-emerald-500/20 shrink-0">
-                      <DollarSign className="h-6 w-6" />
+                      <DollarSign className="h-6 w-6 shrink-0" />
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-lg font-bold text-foreground">Optical Fiber Leasing</h3>
@@ -5370,14 +5427,14 @@ export function PowerGridExplorer({
                 <div className="lg:col-span-8 space-y-6">
                   {/* Licensing & Networks */}
                   <div className="grid-explorer-chart-card card p-6">
-                    <div className="grid-explorer-chart-card__head mb-4 border-b border-border/40 pb-3">
+                    <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                       <Network className="h-5 w-5 text-primary shrink-0" />
                       <div>
                         <h4 className="font-bold text-foreground">Licensing &amp; Leasing Agreements</h4>
                         <p className="text-xs text-muted-foreground">National regulatory and partner allocations</p>
                       </div>
                     </div>
-                    <ul className="space-y-3.5 text-xs text-muted-foreground">
+                    <ul className="space-y-3 text-xs text-muted-foreground">
                       <li className="flex items-start gap-2.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
                         <span>
@@ -5408,7 +5465,7 @@ export function PowerGridExplorer({
 
                   {/* Backbone & Internet Capacity */}
                   <div className="grid-explorer-chart-card card p-6">
-                    <div className="grid-explorer-chart-card__head mb-4 border-b border-border/40 pb-3">
+                    <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                       <Globe className="h-5 w-5 text-emerald-500 shrink-0" />
                       <div>
                         <h4 className="font-bold text-foreground">Transmission Network &amp; Backbone Capacity</h4>
@@ -5434,7 +5491,7 @@ export function PowerGridExplorer({
                     <div>
                       <div className="flex items-center gap-2 mb-4">
                         <div className="p-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl">
-                          <DollarSign className="h-4 w-4" />
+                          <DollarSign className="h-4 w-4 shrink-0" />
                         </div>
                         <h4 className="font-bold text-foreground uppercase tracking-wider text-xs">Dark Fiber Lease Rate</h4>
                       </div>
@@ -5458,7 +5515,7 @@ export function PowerGridExplorer({
                   {/* Contacts details Card */}
                   <div className="grid-explorer-chart-card card p-6 space-y-4">
                     <h4 className="font-bold text-foreground text-xs uppercase tracking-wider">OFCL Contact Details</h4>
-                    <div className="space-y-3.5 text-xs text-muted-foreground leading-relaxed">
+                    <div className="space-y-3 text-xs text-muted-foreground leading-relaxed">
                       <div>
                         <strong className="text-foreground block font-bold">Superintending Engineer</strong>
                         Optical Fiber Commercial Leasing (OFCL)
@@ -5479,7 +5536,7 @@ export function PowerGridExplorer({
               {/* Technical Glossary Footnote */}
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                  <Info className="h-3.5 w-3.5 text-primary" /> Jargon, translated
+                  <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-[10px] text-muted-foreground leading-relaxed">
                   <div>
@@ -5524,15 +5581,15 @@ export function PowerGridExplorer({
       {!isDataMissing && activeTab === 'regional' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
-            <div className="grid-explorer-chart-card card p-8 flex flex-col items-center justify-center text-center min-h-[400px]">
-              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground mb-4">
-                <Info className="h-8 w-8 text-primary animate-pulse" />
+            <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
+              <div className="p-4 rounded-full bg-muted/20 text-muted-foreground">
+                <Info className="h-8 w-8 shrink-0 text-primary animate-pulse" />
               </div>
-              <h4 className="text-base font-bold text-foreground mb-2">Zone-wise Demand &amp; Load-Shedding Data</h4>
-              <p className="text-xs text-muted-foreground max-w-sm">
+              <h4 className="text-base font-bold text-foreground">Zone-wise Demand &amp; Load-Shedding Data</h4>
+              <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
                 No official records are available for the selected date. Zone-wise demand and load-shedding tracking officially started on December 31, 2013.
               </p>
-              <div className="mt-4 text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground tabular-nums">
                 Official Backlog Start Date: December 31, 2013
               </div>
             </div>
@@ -5712,7 +5769,7 @@ export function PowerGridExplorer({
                   min-h-0 lets the scroll container shrink instead of forcing the
                   full list height. */}
               <div className="space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
-                {dailyOutages.map((o, idx) => (
+                {outagePager.rows.map((o, idx) => (
                   <div key={idx} className="p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
                     <div className="flex justify-between font-bold text-foreground">
                       <span>{o.plant}</span>
@@ -5738,6 +5795,17 @@ export function PowerGridExplorer({
                   </div>
                 ))}
               </div>
+              <GridTablePager
+                page={outagePager.page}
+                totalPages={outagePager.totalPages}
+                pageSize={outagePager.pageSize}
+                total={outagePager.total}
+                from={outagePager.from}
+                to={outagePager.to}
+                onPage={outagePager.setPage}
+                onPageSize={outagePager.setPageSize}
+                noun="outages"
+              />
 
               {/* Card Metadata Footer */}
               <GridCardFooter>
@@ -5876,16 +5944,26 @@ export function PowerGridExplorer({
             {ewic ? (
               <div className="grid-explorer-chart-card card lg:col-span-3">
                 <div className="grid-explorer-chart-card__head">
-                  <div>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                  <Cable className="h-5 w-5 shrink-0 text-primary" />
+                  <div className="min-w-0">
                     <h3 className="grid-explorer-chart-card__title">East-West Interconnector Transfer<DailyBadge /></h3>
                     <p className="grid-explorer-chart-card__sub">
                       Hourly flow across the three corridors joining the western and eastern grids
                       {ewicTotalMkwh != null ? (
                         <> • {ewicTotalMkwh.toFixed(2)} MKWh transferred <GridProvenanceTag kind="P" />
                           {ewicShareOfGen != null ? <> · {ewicShareOfGen.toFixed(1)}% of national generation <GridProvenanceTag kind="D" /></> : null}
+                          {ewicExceedsGeneration ? (
+                            <span className="text-amber-600 dark:text-amber-500 font-semibold">
+                              {' '}· exceeds the day&rsquo;s national generation — see the reconciliation note
+                            </span>
+                          ) : null}
+                          {ewicNet ? <> · flowing {ewicNet.westToEast ? 'west to east' : 'east to west'}</> : null}
+                          {ewicPeakSum ? <> · peak {formatNumber(Math.round(Math.abs(ewicPeakSum.mw)))} MW at {ewicPeakSum.time}<GridProvenanceTag kind="P" /></> : null}
                         </>
                       ) : null}
                     </p>
+                  </div>
                   </div>
                   <span className="grid-explorer-chip">EWIC</span>
                 </div>
@@ -5894,77 +5972,27 @@ export function PowerGridExplorer({
                     is unreadable without it — so it is stated, not buried. */}
                 <p className="text-[11px] text-muted-foreground mb-3">
                   Positive MW is flow from <strong>West to East</strong>; negative is East to West.
+                  Every reading in the archive so far has been positive — the western grid has
+                  exported to the eastern one on every hour on record, and Total Import has been
+                  zero on every day.
                 </p>
 
-                <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={ewicChartData} margin={{ top: 8, right: 16, bottom: 4, left: 4 }}>
-                      <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
-                      {/* Whole hours only, thinned by measured gap — a 24-hour
-                          axis has to survive a 393px screen without its labels
-                          running into each other. */}
-                      <XAxis
-                        dataKey="time"
-                        tick={axisTickStyle(chartTheme.axisTick)}
-                        ticks={wholeHourTicks(ewicChartData.map((r) => String(r.time ?? '')))}
-                        {...TIME_AXIS_PROPS}
-                      />
-                      <YAxis tick={{ fontSize: 11, fill: chartTheme.axisTick }} width={52} label={{ value: 'MW', angle: -90, position: 'insideLeft', style: { fontSize: 11, fill: chartTheme.axisTick } }} />
-                      <GridRechartsTooltip
-                        content={({ active, payload, label }) => {
-                          if (!active || !payload?.length) return null;
-                          return (
-                            <div className="p-4 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs w-72 max-w-[calc(100vw-2rem)] select-none bg-card">
-                              <div className="font-bold border-b border-border/40 pb-1.5 mb-2">{label}</div>
-                              <div className="space-y-1.5">
-                                {payload.map((s: { dataKey?: unknown; color?: string; name?: string; value?: number }) => (
-                                  <div key={String(s.dataKey)} className="flex justify-between gap-3">
-                                    <span className="text-muted-foreground inline-flex items-center gap-1.5">
-                                      <span className="h-2 w-2 rounded-sm shrink-0" style={{ background: s.color }} />
-                                      {s.name}
-                                    </span>
-                                    <span className="font-bold tabular-nums">{formatNumber(Math.round(Number(s.value)))} MW</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="mt-2 pt-2 border-t border-border/30 text-[9px] text-muted-foreground italic">
-                                Read from the report&apos;s EWIC sheet as published.
-                              </div>
-                            </div>
-                          );
-                        }}
-                      />
-                      {ewic.corridors.map((name, i) => (
-                        <Line
-                          key={name}
-                          type="monotone"
-                          dataKey={`c${i}`}
-                          name={name}
-                          stroke={chartTheme.categorical(i)}
-                          strokeWidth={2}
-                          dot={false}
-                          activeDot={{ r: 5 }}
-                          isAnimationActive={false}
-                        />
-                      ))}
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Legend always present, in the same order as the lines, so a
-                    corridor is never identified by colour alone. */}
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-                  {ewic.corridors.map((name, i) => (
-                    <span key={name} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: chartTheme.categorical(i) }} />
-                      {name}
-                    </span>
-                  ))}
-                </div>
+                {/* Corridor names appear on the lanes and again on the bands
+                    they label, so no separate legend is carried: a key exists to
+                    stop a reader matching colours, and there is nothing here to
+                    match. */}
+                <InterconnectorCanvas
+                  corridors={ewic.corridors}
+                  rows={ewic.rows}
+                  color={(i) => chartTheme.categorical(i)}
+                  axisColor={chartTheme.axisTick}
+                  gridColor={chartTheme.gridStroke}
+                  reportDate={systemStats.date}
+                />
 
                 {/* Per-circuit metered energy. Ranked, and labelled in place —
                     six bars do not need a second colour scale to be read. */}
-                <div className="mt-5 pt-4 border-t border-border/30">
+                <div className="mt-4 pt-4 border-t border-border/30">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
                     Metered energy by circuit <GridProvenanceTag kind="P" />
                   </h4>
@@ -6003,61 +6031,25 @@ export function PowerGridExplorer({
 
           </div>
 
-          {/* Key Transmission Lines */}
-          <div className="w-full">
-            <div className="grid-explorer-chart-card card">
-              <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
-                <Cable className="h-5 w-5 text-primary shrink-0" />
-                <div>
-                  <h3 className="grid-explorer-chart-card__title">Transmission Grid Assets</h3>
-                    <p className="grid-explorer-chart-card__sub">Major transmission line parameters and load status — <span className="text-primary font-semibold text-xs">Tracked since 2014</span></p>
-                </div>
-              </div>
-              <div className="grid-explorer-table-wrap">
-                <table className="grid-explorer-table grid-explorer-table--stack">
-                  <thead>
-                    <tr>
-                      <th>Line Asset</th>
-                      <th>Owner</th>
-                      <th>Capacity</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/*
-                      The "Load Status" column is gone: its 74/82/90% figures
-                      were seeded, not published — no agency reports per-line
-                      loading, so this table no longer shows any.
-                    */}
-                    {(initialLines ?? []).map((line: any, idx: number) => (
-                      <tr key={idx}>
-                        <td className="font-semibold">{line.name}</td>
-                        <td data-label="Owner">{line.owner}</td>
-                        <td data-label="Capacity" className="tabular-nums font-medium">{line.capacity}</td>
-                        <td data-label="Status" className="text-xs text-muted-foreground">{line.status}</td>
-                      </tr>
-                    ))}
-                    {(initialLines ?? []).length === 0 && (
-                      <tr>
-                        <td colSpan={4} className="py-6 text-center text-xs text-muted-foreground">
-                          No transmission line records are loaded.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
-                PGCB publishes no per-line load telemetry, so none is shown here.
-              </div>
+          {/*
+            "Transmission Grid Assets" was removed here.
 
-              {/* Card Metadata Footer */}
-              <GridCardFooter>
-                <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Power Grid Bangladesh PLC</a> &mdash; transmission line register (standing, not a daily file)</span>
-                <span className="font-medium">Line records as supplied to this page</span>
-              </GridCardFooter>
-            </div>
-          </div>
+            It rendered `settings.gridLines` — four rows typed into the admin
+            Settings form, with a hardcoded fallback — under a footer crediting
+            "Power Grid Bangladesh PLC — transmission line register" and a link
+            to pgcb.gov.bd. No such register is read by anything in this
+            pipeline, so the card attributed hand-entered content to an agency
+            that never supplied it, beside genuinely daily PGCB data, in a tab
+            keyed to a date the card had no relationship with. Its subtitle also
+            claimed "Tracked since 2014" for a list carrying no dates at all.
+
+            The right fix would be a real source. There is not one: PGCB
+            publishes no machine-readable line register, and nothing in the daily
+            report carries per-line capacity or status. Rather than keep a card
+            whose provenance cannot be stated truthfully, it is gone. The
+            settings field and the admin editor are left in place, so this can
+            return the day it has something behind it.
+          */}
         </div>
         </GridLockedContent> )
       )}
@@ -6231,12 +6223,12 @@ export function PowerGridExplorer({
         return (
         <div className="grid-explorer-panel space-y-6">
           {isTruncated && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
               <div className="flex items-start gap-3">
-                <History className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                <History className="h-5 w-5 shrink-0 text-amber-500 mt-0.5" />
                 <div>
                   <h4 className="text-sm font-semibold text-amber-500">Historical Preview Mode</h4>
-                  <p className="text-[11.5px] text-muted-foreground mt-1">
+                  <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
                     You are viewing a {activeAllowedYears}-year preview of the macro trends. {gridAccess.isMember ? 'Upgrade your plan' : 'Subscribe'} to unlock the full historical backlog (you are missing {activeHiddenPercentage}% of the data spanning 15+ years).
                   </p>
                 </div>
@@ -6271,7 +6263,7 @@ export function PowerGridExplorer({
                       : "border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
-                  <SubIcon className="h-3.5 w-3.5" />
+                  <SubIcon className="h-3.5 w-3.5 shrink-0" />
                   {t.label}
                 </button>
               );
@@ -6285,7 +6277,7 @@ export function PowerGridExplorer({
             we worked out from theirs.
           */}
           {macroSubTab !== 'verification' && (
-            <div className="p-3.5 rounded-2xl bg-muted/10 border border-border/30 text-[11px] text-muted-foreground leading-relaxed flex items-start gap-2.5">
+            <div className="p-3 rounded-2xl bg-muted/10 border border-border/30 text-[11px] text-muted-foreground leading-relaxed flex items-start gap-2.5">
               <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
               <span>
                 <strong className="text-foreground">What P and D mean here.</strong>{' '}
@@ -6345,7 +6337,7 @@ export function PowerGridExplorer({
                             <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.5} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                         <XAxis
                           dataKey="fiscal_year"
                           tick={gridChartAxisTick(chartTheme)}
@@ -6537,7 +6529,7 @@ export function PowerGridExplorer({
                   ]}
                 >
                   <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_CHART_MARGIN.legend} barCategoryGap="20%">
-                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         <XAxis
                           dataKey="year"
                           tick={gridChartAxisTick(chartTheme)}
@@ -6569,15 +6561,15 @@ export function PowerGridExplorer({
                                 <div className="space-y-2 text-xs">
                                   <div className="flex justify-between flex-col mb-2">
                                     <span className="text-muted-foreground font-semibold">Approved Bulk Tariff (BPDB to Utilities):</span>
-                                    <span className="font-bold text-foreground mt-0.5">{d.tariff.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.tariff.toFixed(2)} Tk/KWh</span>
                                   </div>
                                   <div className="flex justify-between flex-col mb-2">
                                     <span className="text-muted-foreground font-semibold">Total Generation &amp; Procurement Cost:</span>
-                                    <span className="font-bold text-foreground mt-0.5">{d.cost.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.cost.toFixed(2)} Tk/KWh</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/30 pt-2 mt-2">
                                     <span className="text-destructive font-semibold">BPDB Unit Deficit / Subsidy Reqd:</span>
-                                    <span className="font-bold text-destructive">{deficit} Tk/KWh</span>
+                                    <span className="font-bold text-destructive tabular-nums">{deficit} Tk/KWh</span>
                                   </div>
                                 </div>
                               </div>
@@ -6621,9 +6613,12 @@ export function PowerGridExplorer({
                 {/* Wholesale Tariff vs. Unit Production Cost */}
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
-                    <div>
-                      <h3 className="grid-explorer-chart-card__title">Wholesale Tariff vs. Unit Production Cost</h3>
-                    <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <DollarSign className="h-5 w-5 shrink-0 text-primary" />
+                      <div className="min-w-0">
+                        <h3 className="grid-explorer-chart-card__title">Wholesale Tariff vs. Unit Production Cost</h3>
+                        <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                      </div>
                     </div>
                     <span className="grid-explorer-chip">Bulk Tariff Gap</span>
                   </div>
@@ -6632,7 +6627,7 @@ export function PowerGridExplorer({
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
                           <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v} Tk` })} tick={{ fontSize: 11, fill: chartTheme.axisTick }} />
                           <Tooltip
@@ -6649,15 +6644,15 @@ export function PowerGridExplorer({
                                   <div className="space-y-2 text-[11px] md:text-xs">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Wholesale Bulk Tariff:</span>
-                                      <span className="font-bold text-foreground">{d.tariff.toFixed(2)} Tk/KWh</span>
+                                      <span className="font-bold text-foreground tabular-nums">{d.tariff.toFixed(2)} Tk/KWh</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Unit Production Cost:</span>
-                                      <span className="font-bold text-foreground">{d.cost.toFixed(2)} Tk/KWh</span>
+                                      <span className="font-bold text-foreground tabular-nums">{d.cost.toFixed(2)} Tk/KWh</span>
                                     </div>
                                     <div className="flex justify-between border-t border-border/30 pt-1">
                                       <span className="text-destructive font-semibold inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Unit Deficit:</span>
-                                      <span className="font-bold text-destructive">{deficit} Tk/KWh</span>
+                                      <span className="font-bold text-destructive tabular-nums">{deficit} Tk/KWh</span>
                                     </div>
                                   </div>
                                   <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
@@ -6709,9 +6704,12 @@ export function PowerGridExplorer({
                 {/* LNG Dependency Area Chart */}
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
-                    <div>
-                      <h3 className="grid-explorer-chart-card__title">Gas Supply Transition: Domestic vs. Imported LNG</h3>
-                    <p className="grid-explorer-chart-card__sub">Historical shift towards imported liquefied natural gas (MMCFD) — <span className="text-primary font-semibold text-xs">Tracked since 2000</span></p>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Droplet className="h-5 w-5 shrink-0 text-sky-500" />
+                      <div className="min-w-0">
+                        <h3 className="grid-explorer-chart-card__title">Gas Supply Transition: Domestic vs. Imported LNG</h3>
+                        <p className="grid-explorer-chart-card__sub">Historical shift towards imported liquefied natural gas (MMCFD) — <span className="text-primary font-semibold text-xs">Tracked since 2000</span></p>
+                      </div>
                     </div>
                     <span className="grid-explorer-chip">LNG Reliance</span>
                   </div>
@@ -6725,7 +6723,7 @@ export function PowerGridExplorer({
                     ]}
                   >
                     <ComposedChart accessibilityLayer={false} data={localMacroGasData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
                           <YAxis
                             {...gridChartYAxisProps(chartTheme, {
@@ -6804,7 +6802,7 @@ export function PowerGridExplorer({
 
               {/* Reserves and Capacity Charges Audit info */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="card p-5 space-y-3">
+                <div className="card p-4 space-y-3">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">Petrobangla Natural Gas Reserves<GridProvenanceTag kind="P" /></div>
                   <div className="space-y-1">
                     <div className="text-xl font-bold text-foreground">7.63 Tcf Remaining</div>
@@ -6817,7 +6815,7 @@ export function PowerGridExplorer({
                   </div>
                 </div>
 
-                <div className="card p-5 space-y-3">
+                <div className="card p-4 space-y-3">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">Capacity Charge Drag<GridProvenanceTag kind="P" /></div>
                   <div className="space-y-1">
                     <div className="text-xl font-bold text-destructive">~40% of Wholesale Costs</div>
@@ -6827,7 +6825,7 @@ export function PowerGridExplorer({
                   </div>
                 </div>
 
-                <div className="card p-5 space-y-3">
+                <div className="card p-4 space-y-3">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">State Subsidy Burden<GridProvenanceTag kind="D" /></div>
                   <div className="space-y-1">
                     <div className="text-xl font-bold text-foreground">~35k-40k Crore BDT / Year</div>
@@ -6877,7 +6875,7 @@ export function PowerGridExplorer({
                 because the interesting result is not the pass — it is the nine
                 rows PGCB dated to an earlier month.
               */}
-              <div className="p-3.5 rounded-2xl border border-border/40 bg-muted/[0.06] text-[11px] leading-relaxed text-muted-foreground flex items-start gap-2.5">
+              <div className="p-3 rounded-2xl border border-border/40 bg-muted/[0.06] text-[11px] leading-relaxed text-muted-foreground flex items-start gap-2.5">
                 <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
                   <strong className="text-foreground">How these months were checked.</strong>{' '}
@@ -7004,7 +7002,7 @@ export function PowerGridExplorer({
                       const stale = staleRowsFor(selectedMonthlyKey);
                       if (!stale.length) return null;
                       return (
-                        <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] text-[11px] leading-relaxed flex items-start gap-2.5">
+                        <div className="p-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] text-[11px] leading-relaxed flex items-start gap-2.5">
                           <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                           <span className="text-muted-foreground">
                             <strong className="text-foreground">
@@ -7240,7 +7238,7 @@ export function PowerGridExplorer({
                                     margin={GRID_EXPLORER_CHART_MARGIN.default}
                                     onMouseLeave={() => setHoveredZoneIndex(null)}
                                   >
-                                    <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                                    <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                                     <XAxis
                                       dataKey="name"
                                       tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }}
@@ -7328,11 +7326,14 @@ export function PowerGridExplorer({
               {/* Historical Long-term Trend Chart */}
               <div className="grid-explorer-chart-card card">
                 <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:pr-4">
-                  <div>
-                    <h3 className="grid-explorer-chart-card__title">PGCB 13-Year Historical Growth Trends<MonthlyBadge /></h3>
-                    <p className="grid-explorer-chart-card__sub">Grid operational metrics charted monthly from 2013 to 2026 — the plotted values are PGCB&apos;s own <GridProvenanceTag kind="P" />, the month-on-month changes in the tooltip are ours <GridProvenanceTag kind="D" /> • <span className="text-primary font-semibold text-xs">Tracked since January 2013</span></p>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <TrendingUp className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="min-w-0">
+                      <h3 className="grid-explorer-chart-card__title">PGCB 13-Year Historical Growth Trends<MonthlyBadge /></h3>
+                      <p className="grid-explorer-chart-card__sub">Grid operational metrics charted monthly from 2013 to 2026 — the plotted values are PGCB&apos;s own <GridProvenanceTag kind="P" />, the month-on-month changes in the tooltip are ours <GridProvenanceTag kind="D" /> • <span className="text-primary font-semibold text-xs">Tracked since January 2013</span></p>
+                    </div>
                   </div>
-                  
+
                   {/* Selector Controls for Chart */}
                   <div className="flex flex-wrap items-center justify-start sm:justify-end gap-2.5 self-start sm:self-center shrink-0 w-full sm:w-auto relative z-50">
                     <button
@@ -7404,7 +7405,7 @@ export function PowerGridExplorer({
                     <ResponsiveContainer width="100%" height="100%">
                       {monthlyTrendMetric === 'peaks' ? (
                         <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis
                             dataKey="date_key"
                             tick={{ fontSize: 9, fill: chartTheme.axisTick }}
@@ -7486,7 +7487,7 @@ export function PowerGridExplorer({
                                       {deficit > 0 && (
                                         <div className="text-left text-[10px]">
                                           <span className="text-muted-foreground mr-1">Deficit Share:</span>
-                                          <span className="font-semibold text-destructive">{deficitPct.toFixed(1)}%</span>
+                                          <span className="font-semibold text-destructive tabular-nums">{deficitPct.toFixed(1)}%</span>
                                         </div>
                                       )}
                                     </div>
@@ -7517,7 +7518,7 @@ export function PowerGridExplorer({
                         </ComposedChart>
                       ) : monthlyTrendMetric === 'energy' ? (
                         <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis
                             dataKey="date_key"
                             tick={{ fontSize: 9, fill: chartTheme.axisTick }}
@@ -7597,7 +7598,7 @@ export function PowerGridExplorer({
                         </ComposedChart>
                       ) : (
                         <ComposedChart accessibilityLayer={false} data={pgcbFuelTrendData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis
                             dataKey="date_key"
                             tick={{ fontSize: 9, fill: chartTheme.axisTick }}
@@ -7768,9 +7769,12 @@ export function PowerGridExplorer({
                 {/* Inflation & Exchange Rate Drivers */}
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
-                    <div>
-                      <h3 className="grid-explorer-chart-card__title">Macro Pressure Variables (2021 - 2026)</h3>
-                    <p className="grid-explorer-chart-card__sub">Devaluation of BDT/USD vs. National Inflation Rate (CPI %) — <span className="text-primary font-semibold text-xs">Tracked since 2021</span></p>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <TrendingUp className="h-5 w-5 shrink-0 text-primary" />
+                      <div className="min-w-0">
+                        <h3 className="grid-explorer-chart-card__title">Macro Pressure Variables (2021 - 2026)</h3>
+                        <p className="grid-explorer-chart-card__sub">Devaluation of BDT/USD vs. National Inflation Rate (CPI %) — <span className="text-primary font-semibold text-xs">Tracked since 2021</span></p>
+                      </div>
                     </div>
                     <span className="grid-explorer-chip">Macro Factors</span>
                   </div>
@@ -7779,7 +7783,7 @@ export function PowerGridExplorer({
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                           <XAxis dataKey="year" tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} Tk`} />
                           <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v}%`} />
@@ -7796,11 +7800,11 @@ export function PowerGridExplorer({
                                   <div className="space-y-2 text-[11px] md:text-xs">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-                                      <span className="font-bold text-primary">{d.exchangeRate.toFixed(2)} BDT/USD</span>
+                                      <span className="font-bold text-primary tabular-nums">{d.exchangeRate.toFixed(2)} BDT/USD</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Inflation Rate (CPI):</span>
-                                      <span className="font-bold text-amber-500">{d.inflation.toFixed(2)}%</span>
+                                      <span className="font-bold text-amber-500 tabular-nums">{d.inflation.toFixed(2)}%</span>
                                     </div>
                                   </div>
                                   <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
@@ -7842,9 +7846,12 @@ export function PowerGridExplorer({
                 {/* Spot LNG vs Coal Import Price Trends */}
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
-                    <div>
-                      <h3 className="grid-explorer-chart-card__title">Global Fuel Commodity Import Costs</h3>
-                    <p className="grid-explorer-chart-card__sub">Spot LNG (USD/MMBtu) vs. Import Coal (USD/Metric Ton) — <span className="text-primary font-semibold text-xs">Tracked since 2021</span></p>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Globe className="h-5 w-5 shrink-0 text-amber-500" />
+                      <div className="min-w-0">
+                        <h3 className="grid-explorer-chart-card__title">Global Fuel Commodity Import Costs</h3>
+                        <p className="grid-explorer-chart-card__sub">Spot LNG (USD/MMBtu) vs. Import Coal (USD/Metric Ton) — <span className="text-primary font-semibold text-xs">Tracked since 2021</span></p>
+                      </div>
                     </div>
                     <span className="grid-explorer-chip">Import Costs</span>
                   </div>
@@ -7853,7 +7860,7 @@ export function PowerGridExplorer({
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
                         <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                          <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                          <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                           <XAxis dataKey="year" tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} $/MMBtu`} />
                           <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} $/t`} />
@@ -7870,11 +7877,11 @@ export function PowerGridExplorer({
                                   <div className="space-y-2 text-[11px] md:text-xs">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground text-purple-400 font-medium">Spot LNG (R-LNG):</span>
-                                      <span className="font-bold text-purple-500">${d.spotLng.toFixed(2)} / MMBtu</span>
+                                      <span className="font-bold text-purple-500 tabular-nums">${d.spotLng.toFixed(2)} / MMBtu</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground text-slate-400">Imported Coal (CIF):</span>
-                                      <span className="font-bold text-slate-400">${d.importCoal.toFixed(2)} / Ton</span>
+                                      <span className="font-bold text-slate-400 tabular-nums">${d.importCoal.toFixed(2)} / Ton</span>
                                     </div>
                                   </div>
                                   <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
@@ -7972,7 +7979,7 @@ export function PowerGridExplorer({
                 provenance. Same treatment as PGCB's 1 MVA total error and its
                 prose-vs-table contradiction elsewhere in this explorer.
               */}
-              <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] text-[11px] leading-relaxed flex items-start gap-2.5">
+              <div className="p-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] text-[11px] leading-relaxed flex items-start gap-2.5">
                 <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                 <span className="text-muted-foreground">
                   <strong className="text-foreground">These accounts do not reconcile against themselves.</strong>{' '}
@@ -8020,10 +8027,11 @@ export function PowerGridExplorer({
                 <div className="space-y-6">
                   {/* BPDB Audited chart */}
                   <div className="grid-explorer-chart-card card">
-                    <div className="grid-explorer-chart-card__head">
-                      <div>
+                    <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+                      <Landmark className="h-5 w-5 shrink-0 text-emerald-500" />
+                      <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">BPDB Annual Cost, Revenue &amp; Subsidy Profile (Crore BDT)</h3>
-                    <p className="grid-explorer-chart-card__sub">Historical audited gap showing rising purchase costs vs treasury transfers — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                        <p className="grid-explorer-chart-card__sub">Historical audited gap showing rising purchase costs vs treasury transfers — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                       </div>
                     </div>
 
@@ -8031,7 +8039,7 @@ export function PowerGridExplorer({
                       {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart accessibilityLayer={false} data={localBpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                            <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                            <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                             <YAxis width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={formatAxisCrore} />
                             <Tooltip
@@ -8047,19 +8055,19 @@ export function PowerGridExplorer({
                                     <div className="space-y-2 text-[11px] md:text-xs">
                                       <div className="flex justify-between">
                                         <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Operating Revenue:</span>
-                                        <span className="font-bold text-foreground">{formatNumber(d.revenue)} Crore Tk</span>
+                                        <span className="font-bold text-foreground tabular-nums">{formatNumber(d.revenue)} Crore Tk</span>
                                       </div>
                                       <div className="flex justify-between">
                                         <span className="text-destructive inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Gen &amp; Purchase Cost:</span>
-                                        <span className="font-bold text-destructive">{formatNumber(d.cost)} Crore Tk</span>
+                                        <span className="font-bold text-destructive tabular-nums">{formatNumber(d.cost)} Crore Tk</span>
                                       </div>
                                       <div className="flex justify-between">
                                         <span className="text-emerald-500 inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Government Subsidy:</span>
-                                        <span className="font-bold text-emerald-500">{formatNumber(d.subsidy)} Crore Tk</span>
+                                        <span className="font-bold text-emerald-500 tabular-nums">{formatNumber(d.subsidy)} Crore Tk</span>
                                       </div>
                                       <div className="flex justify-between border-t border-border/30 pt-1">
                                         <span className="text-destructive font-bold inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Net Profit/Loss:</span>
-                                        <span className="font-bold text-destructive">{formatNumber(d.loss)} Crore Tk</span>
+                                        <span className="font-bold text-destructive tabular-nums">{formatNumber(d.loss)} Crore Tk</span>
                                       </div>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
@@ -8140,10 +8148,11 @@ export function PowerGridExplorer({
                 <div className="space-y-6">
                   {/* Petrobangla Audited Chart */}
                   <div className="grid-explorer-chart-card card">
-                    <div className="grid-explorer-chart-card__head">
-                      <div>
+                    <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+                      <Landmark className="h-5 w-5 shrink-0 text-violet-500" />
+                      <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">Petrobangla Annual Revenue &amp; LNG Import Costs</h3>
-                    <p className="grid-explorer-chart-card__sub">Audited historical financials illustrating LNG import cost burden (Crore BDT) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                        <p className="grid-explorer-chart-card__sub">Audited historical financials illustrating LNG import cost burden (Crore BDT) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                       </div>
                     </div>
 
@@ -8151,7 +8160,7 @@ export function PowerGridExplorer({
                       {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
                           <ComposedChart accessibilityLayer={false} data={localPetrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                            <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                            <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                             <YAxis width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={formatAxisCrore} />
                             <Tooltip
@@ -8169,11 +8178,11 @@ export function PowerGridExplorer({
                                     <div className="space-y-2 text-[11px] md:text-xs">
                                       <div className="flex justify-between">
                                         <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Gas Sales Revenue:</span>
-                                        <span className="font-bold text-foreground">{formatNumber(d.revenue)} Crore Tk</span>
+                                        <span className="font-bold text-foreground tabular-nums">{formatNumber(d.revenue)} Crore Tk</span>
                                       </div>
                                       <div className="flex justify-between">
                                         <span className="text-purple-400 font-medium inline-flex items-center gap-1"><GridProvenanceTag kind="P" />LNG Import Payments:</span>
-                                        <span className="font-bold text-purple-500">{formatNumber(d.lngCost)} Crore Tk</span>
+                                        <span className="font-bold text-purple-500 tabular-nums">{formatNumber(d.lngCost)} Crore Tk</span>
                                       </div>
                                       <div className="flex justify-between border-t border-border/30 pt-1">
                                         <span className="text-muted-foreground">{profitLabel}:</span>
@@ -8299,9 +8308,12 @@ export function PowerGridExplorer({
               {/* Chart 3: Solar LCOE vs feed in tariff */}
               <div className="grid-explorer-chart-card card max-w-full">
                 <div className="grid-explorer-chart-card__head">
-                  <div>
-                    <h3 className="grid-explorer-chart-card__title">Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff</h3>
-                    <p className="grid-explorer-chart-card__sub">Global Average Solar LCOE vs. Domestic Solar Contracts (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2015</span></p>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Sun className="h-5 w-5 shrink-0 text-teal-500" />
+                    <div className="min-w-0">
+                      <h3 className="grid-explorer-chart-card__title">Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff</h3>
+                      <p className="grid-explorer-chart-card__sub">Global Average Solar LCOE vs. Domestic Solar Contracts (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2015</span></p>
+                    </div>
                   </div>
                   <span className="grid-explorer-chip bg-teal-500/5 text-teal-500 border-teal-500/10">Solar Energy</span>
                 </div>
@@ -8310,7 +8322,7 @@ export function PowerGridExplorer({
                   {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                         <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
                         <Tooltip
@@ -8330,19 +8342,19 @@ export function PowerGridExplorer({
                                 <div className="space-y-2 text-[11px] md:text-xs">
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground">Global Solar LCOE:</span>
-                                    <span className="font-bold text-teal-500">{d.globalSolar.toFixed(2)} US Cents/KWh</span>
+                                    <span className="font-bold text-teal-500 tabular-nums">{d.globalSolar.toFixed(2)} US Cents/KWh</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-                                    <span className="font-semibold text-foreground">{exRate.toFixed(2)} Tk/$</span>
+                                    <span className="font-semibold text-foreground tabular-nums">{exRate.toFixed(2)} Tk/$</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/20 pt-1">
                                     <span className="text-muted-foreground">Global Solar (Tk/KWh equivalent):</span>
-                                    <span className="font-bold text-teal-400">{globalSolarBdt.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-teal-400 tabular-nums">{globalSolarBdt.toFixed(2)} Tk/KWh</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground">BD Solar Contract Tariff:</span>
-                                    <span className="font-bold text-rose-500">{d.bdSolar.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-rose-500 tabular-nums">{d.bdSolar.toFixed(2)} Tk/KWh</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
                                     <span className="text-muted-foreground">Domestic Contract Premium:</span>
@@ -8395,8 +8407,8 @@ export function PowerGridExplorer({
             <div className="space-y-6 grid-explorer-subpanel">
               {/* Power Sector at a Glance */}
               <div className="grid-explorer-chart-card card p-6">
-                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4 flex flex-col items-center text-center">
-                  <Landmark className="h-6 w-6 text-primary mb-2" />
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex flex-col items-center text-center">
+                  <Landmark className="h-6 w-6 shrink-0 text-primary mb-2" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title text-lg font-bold">Power Sector at a Glance</h3>
                     <p className="grid-explorer-chart-card__sub text-xs text-muted-foreground">Official key indicators of grid capacity, consumer base, transmission, and performance</p>
@@ -8407,9 +8419,9 @@ export function PowerGridExplorer({
                   {glanceIndicators.map((stat, idx) => {
                     const Icon = stat.Icon;
                     return (
-                      <div key={idx} className="p-4 bg-muted/10 border border-border/30 rounded-2xl flex items-center justify-center gap-3.5 hover:bg-muted/15 transition-all duration-200 shadow-sm group relative cursor-help">
+                      <div key={idx} className="p-4 bg-muted/10 border border-border/30 rounded-2xl flex items-center justify-start gap-3 hover:bg-muted/15 transition-all duration-200 shadow-sm group relative cursor-help">
                         <div className={`h-9 w-9 flex items-center justify-center rounded-xl ${stat.iconColor} group-hover:scale-110 transition-transform duration-200 shrink-0`}>
-                          <Icon className="h-4.5 w-4.5" />
+                          <Icon className="h-4 w-4 shrink-0" />
                         </div>
                         <div className="space-y-0.5 text-left font-medium">
                           <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{stat.label}</div>
@@ -8424,7 +8436,7 @@ export function PowerGridExplorer({
                         >
                           <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
                           <div className={`font-bold text-xs uppercase tracking-wider ${stat.iconColor.split(' ')[0]} border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5 text-left`}>
-                            <Icon className="h-3.5 w-3.5" /> {stat.tooltipTitle}
+                            <Icon className="h-3.5 w-3.5 shrink-0" /> {stat.tooltipTitle}
                           </div>
                           <div className="text-[11px] leading-relaxed text-muted-foreground font-medium whitespace-normal text-left">
                             {stat.tooltipDesc}
@@ -8458,7 +8470,7 @@ export function PowerGridExplorer({
                     >
                       <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]" style={{ backgroundColor: 'hsl(var(--card))' }} />
                       <div className="font-bold text-xs uppercase tracking-wider text-amber-500 border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5 text-left">
-                        <Activity className="h-3.5 w-3.5" /> Target Distribution Loss
+                        <Activity className="h-3.5 w-3.5 shrink-0" /> Target Distribution Loss
                       </div>
                       <div className="text-[11px] leading-relaxed text-muted-foreground font-medium whitespace-normal text-left">
                         The official government performance contract target for utility-level power line distribution system losses (BPDB, BREB, DPDC, DESCO, WZPDCO, NESCO).
@@ -8480,7 +8492,7 @@ export function PowerGridExplorer({
 
               {/* Year-wise System Loss Chart */}
               <div className="grid-explorer-chart-card card p-6">
-                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4">
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                   <Activity className="h-5 w-5 text-primary shrink-0" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title">Historical System Loss Trends (T&amp;D)</h3>
@@ -8496,7 +8508,7 @@ export function PowerGridExplorer({
                         data={[...localSystemLossData].reverse()}
                         margin={{ top: 10, right: 5, left: -5, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                        <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         <XAxis
                           dataKey="fiscal_year"
                           tick={{ fontSize: 9, fill: chartTheme.axisTick }}
@@ -8554,27 +8566,27 @@ export function PowerGridExplorer({
                                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10.5px] tabular-nums">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">BPDB:</span>
-                                      <span className="text-foreground font-bold">{d.bpdb.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold tabular-nums">{d.bpdb.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">REB:</span>
-                                      <span className="text-foreground font-bold">{d.reb.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold tabular-nums">{d.reb.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">DPDC:</span>
-                                      <span className="text-foreground font-bold">{d.dpdc.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold tabular-nums">{d.dpdc.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground font-semibold">DESCO:</span>
-                                      <span className="text-foreground font-bold">{d.desco.toFixed(2)}%</span>
+                                      <span className="text-foreground font-bold tabular-nums">{d.desco.toFixed(2)}%</span>
                                     </div>
                                     <div className="flex justify-between col-span-2 sm:col-span-1">
                                       <span className="text-muted-foreground font-semibold">WZPDCO:</span>
-                                      <span className="text-foreground font-bold">{d.wzpdco !== null ? `${d.wzpdco.toFixed(2)}%` : '—'}</span>
+                                      <span className="text-foreground font-bold tabular-nums">{d.wzpdco !== null ? `${d.wzpdco.toFixed(2)}%` : '—'}</span>
                                     </div>
                                     <div className="flex justify-between col-span-2 sm:col-span-1">
                                       <span className="text-muted-foreground font-semibold">NESCO:</span>
-                                      <span className="text-foreground font-bold">{d.nesco !== null ? `${d.nesco.toFixed(2)}%` : '—'}</span>
+                                      <span className="text-foreground font-bold tabular-nums">{d.nesco !== null ? `${d.nesco.toFixed(2)}%` : '—'}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -8612,7 +8624,7 @@ export function PowerGridExplorer({
 
               {/* Data Table */}
               <div className="grid-explorer-chart-card card p-6">
-                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border pb-3 mb-4">
+                <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                   <FileText className="h-5 w-5 text-indigo-500 shrink-0" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title">Year-wise System Loss Statistics</h3>
@@ -8695,15 +8707,15 @@ export function PowerGridExplorer({
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="card p-5 space-y-4">
+                <div className="card p-4 space-y-4">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-                    <DollarSign className="h-5 w-5 text-amber-500" />
+                    <DollarSign className="h-5 w-5 shrink-0 text-amber-500" />
                     <div>
                       <h4 className="font-display font-bold text-sm text-foreground">Listed IPPs Receivables &amp; Working Capital Risk</h4>
                       <p className="text-[10px] text-muted-foreground">Analysis for Summit Power, Baraka, United Power equity holders</p>
                     </div>
                   </div>
-                  <div className="space-y-3.5 text-xs">
+                  <div className="space-y-3 text-xs">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />BPDB Arrears Payment Aging:</span>
                       <span className="font-semibold text-destructive">150 - 180 Days</span>
@@ -8727,15 +8739,15 @@ export function PowerGridExplorer({
                   </div>
                 </div>
 
-                <div className="card p-5 space-y-4">
+                <div className="card p-4 space-y-4">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-                    <Globe className="h-5 w-5 text-sky-500" />
+                    <Globe className="h-5 w-5 shrink-0 text-sky-500" />
                     <div>
                       <h4 className="font-display font-bold text-sm text-foreground">Forex Exposure &amp; Currency Devaluation Burden</h4>
                       <p className="text-[10px] text-muted-foreground">Macro-economic impact on national fuel imports</p>
                     </div>
                   </div>
-                  <div className="space-y-3.5 text-xs">
+                  <div className="space-y-3 text-xs">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />6-Year Devaluation Trend (BDT/USD):</span>
                       <span className="font-semibold text-destructive">+43.70% (84.90 to 122.00)</span>
@@ -8759,15 +8771,15 @@ export function PowerGridExplorer({
                   </div>
                 </div>
 
-                <div className="card p-5 space-y-4">
+                <div className="card p-4 space-y-4">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-                    <Activity className="h-5 w-5 text-rose-500" />
+                    <Activity className="h-5 w-5 shrink-0 text-rose-500" />
                     <div>
                       <h4 className="font-display font-bold text-sm text-foreground">Industrial Gas Shortage &amp; Corporate Earnings Clues</h4>
                       <p className="text-[10px] text-muted-foreground">Earnings impact on listed steel, cement, and textile mills</p>
                     </div>
                   </div>
-                  <div className="space-y-3.5 text-xs">
+                  <div className="space-y-3 text-xs">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />National Gas Deficit:</span>
                       <span className="font-semibold text-destructive">30.33% (~1,150 MMCFD short)</span>
@@ -8791,15 +8803,15 @@ export function PowerGridExplorer({
                   </div>
                 </div>
 
-                <div className="card p-5 space-y-4">
+                <div className="card p-4 space-y-4">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-                    <Zap className="h-5 w-5 text-emerald-500" />
+                    <Zap className="h-5 w-5 shrink-0 text-emerald-500" />
                     <div>
                       <h4 className="font-display font-bold text-sm text-foreground">Grid Capacity Margin &amp; Overcapacity Charges</h4>
                       <p className="text-[10px] text-muted-foreground">The operational driver of the national power subsidy</p>
                     </div>
                   </div>
-                  <div className="space-y-3.5 text-xs">
+                  <div className="space-y-3 text-xs">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Installed National Grid Capacity:</span>
                       <span className="font-semibold text-foreground">28,420 MW</span>
@@ -8949,7 +8961,7 @@ export function PowerGridExplorer({
       {/* Section 1: Daily Generation Mix & Fuel Audits */}
       <div className="space-y-4 page-break-inside-avoid">
         <h2 className="text-lg font-bold border-b border-border pb-1.5 flex items-center gap-1.5 text-primary">
-          <Zap className="h-4 w-4" /> 1. Daily Generation Mix & Fuel Audits
+          <Zap className="h-4 w-4 shrink-0" /> 1. Daily Generation Mix & Fuel Audits
         </h2>
         <table className="print-report-table w-full text-xs">
           <thead>
@@ -8985,7 +8997,7 @@ export function PowerGridExplorer({
       {/* Section 2: Gas Distribution & LNG Supply */}
       <div className="space-y-4 page-break-inside-avoid">
         <h2 className="text-lg font-bold border-b border-border pb-1.5 flex items-center gap-1.5 text-primary">
-          <Droplet className="h-4 w-4" /> 2. Gas Distribution & LNG Supply
+          <Droplet className="h-4 w-4 shrink-0" /> 2. Gas Distribution & LNG Supply
         </h2>
         <div className="grid grid-cols-2 gap-6">
           <div>
@@ -9039,7 +9051,7 @@ export function PowerGridExplorer({
       {/* Section 3: Regional Grid Performance & Outages */}
       <div className="space-y-4 page-break-inside-avoid">
         <h2 className="text-lg font-bold border-b border-border pb-1.5 flex items-center gap-1.5 text-primary">
-          <Cable className="h-4 w-4" /> 3. Regional Grid Performance & Outage Logs
+          <Cable className="h-4 w-4 shrink-0" /> 3. Regional Grid Performance & Outage Logs
         </h2>
         <div className="grid grid-cols-5 gap-6">
           <div className="col-span-3">
@@ -9092,67 +9104,16 @@ export function PowerGridExplorer({
         </div>
       </div>
 
-      {/* Section 4: Infrastructure Assets & Planning Tracker */}
-      <div className="space-y-4 page-break-inside-avoid">
-        <h2 className="text-lg font-bold border-b border-border pb-1.5 flex items-center gap-1.5 text-primary">
-          <Database className="h-4 w-4" /> 4. Infrastructure Assets & Planning Tracker
-        </h2>
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-xs font-bold text-muted-foreground uppercase mb-2">Transmission Grid Assets</h3>
-            <table className="print-report-table w-full text-[10px]">
-              <thead>
-                <tr className="border-b border-border bg-muted/10">
-                  <th className="text-left py-1.5 px-2">Line Asset</th>
-                  <th className="text-left py-1.5 px-2">Owner</th>
-                  <th className="text-right py-1.5 px-2">Capacity</th>
-                  <th className="text-right py-1.5 px-2">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/*
-                  No hardcoded fallback. This used to fall back to four invented
-                  lines — including load factors of 74%, 82% and 90% that no
-                  source publishes — beneath a "PGCB System Operations & NLDC"
-                  attribution, so an empty dataset produced a sourced-looking
-                  table of figures nobody had measured. An empty tracker is a
-                  true statement about what we hold; that was not. The same
-                  three percentages then resurfaced from the DB seed, so the
-                  Load column itself is now gone: no agency publishes per-line
-                  loading, and this table no longer shows any.
-                */}
-                {(initialLines ?? []).map((line: any, idx: number) => (
-                  <tr key={idx} className="border-b border-border/40">
-                    <td className="py-1 px-2 font-medium">{line.name}</td>
-                    <td className="py-1 px-2">{line.owner}</td>
-                    <td className="text-right py-1 px-2 tabular-nums">{line.capacity}</td>
-                    <td className="text-right py-1 px-2 text-muted-foreground">{line.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {(initialLines ?? []).length === 0 && (
-              <div className="text-[9px] text-muted-foreground mt-1 px-1 italic">
-                No transmission asset records are loaded for this report.
-              </div>
-            )}
-            <div className="text-[8px] text-muted-foreground mt-1 px-1">
-              Source: PGCB System Operations &amp; NLDC National Grid Map
-            </div>
-          </div>
-
-          {/*
-            "Upcoming Generation Projects" removed 2026-08-11. It listed four
-            projects — "SREDA 1800 MW Solar+Wind (Tender, Q3 2026)", Matarbari
-            Phase-2, a Payra expansion and a BREB programme — with statuses and
-            dates hardcoded in this file, carrying no source line and traceable
-            to no publication. SREDA's own database publishes 14 solar parks
-            totalling 745.25 MWp, so the headline figure contradicted the agency
-            it named. A project pipeline belongs here only once it is read from
-            something a reader can check.
-          */}
-        </div>
-      </div>
+      {/*
+        Section 4, "Infrastructure Assets & Planning Tracker", was removed with
+        the Transmission Grid Assets card it mirrored. Its one remaining table
+        printed the same hand-entered `settings.gridLines` rows under a "Source:
+        PGCB System Operations & NLDC National Grid Map" credit — a second false
+        attribution for the same unsourced content, and worse here, because a
+        printed report is the artefact a reader keeps and cites. Its sibling
+        (hardcoded "Upcoming Generation Projects") had already gone for the same
+        reason, leaving the section with nothing that could be sourced.
+      */}
 
       {/* Data Methodology & Reconciliation Guide */}
       <div className="card mt-6 border border-border/60 bg-muted/5 rounded-2xl overflow-hidden shadow-sm">

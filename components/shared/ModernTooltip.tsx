@@ -27,7 +27,16 @@ type ModernTooltipProps = {
   /** Snappier show animation (public chrome, icon controls) */
   fast?: boolean;
   /** Public navbar styling — matches theme swatch flyouts */
-  variant?: 'default' | 'chrome' | 'editor' | 'member';
+  variant?: 'default' | 'chrome' | 'editor' | 'member' | 'data';
+  /**
+   * Element used to wrap the trigger.
+   *
+   * `div` is the default and is wrong inside running text: a block element
+   * inside a `<p>` closes the paragraph in the parser, which is how the grid
+   * explorer's inline P/D marks would have detached themselves from the
+   * sentences that explain them. Anything sitting inline should pass `span`.
+   */
+  wrapperAs?: 'div' | 'span';
   /** Show even when CMS editor guidance is in pro mode (no tooltips) */
   alwaysShow?: boolean;
   /** Force hide even when guidance mode allows tooltips */
@@ -50,6 +59,7 @@ export function ModernTooltip({
   side = 'top',
   fast = false,
   variant = 'default',
+  wrapperAs = 'div',
   alwaysShow = false,
   disabled = false,
   showDelayMs = 0,
@@ -64,7 +74,7 @@ export function ModernTooltip({
   const [closing, setClosing] = useState(false);
   const [placement, setPlacement] = useState<Placement>(side);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockedRef = useRef(false);
@@ -206,6 +216,7 @@ export function ModernTooltip({
       })
     : children;
 
+  const Wrapper = wrapperAs;
   const showPortal = open || closing;
   const tooltipsEnabled = (alwaysShow || showTooltips) && !disabled;
 
@@ -215,20 +226,20 @@ export function ModernTooltip({
 
   return (
     <>
-      <div
-        ref={triggerRef}
+      <Wrapper
+        ref={triggerRef as React.Ref<HTMLDivElement & HTMLSpanElement>}
         className={cn('modern-tooltip-wrap inline-flex', className)}
         onMouseEnter={scheduleShow}
         onMouseLeave={scheduleHide}
         onFocusCapture={scheduleShow}
-        onBlurCapture={(event: FocusEvent<HTMLDivElement>) => {
+        onBlurCapture={(event: FocusEvent<HTMLElement>) => {
           const next = event.relatedTarget as Node | null;
           if (next && triggerRef.current?.contains(next)) return;
           scheduleHide();
         }}
       >
         {child}
-      </div>
+      </Wrapper>
       {mounted && showPortal && createPortal(
         <div
           role="tooltip"
@@ -238,6 +249,7 @@ export function ModernTooltip({
             variant === 'chrome' && 'modern-tooltip--chrome',
             variant === 'editor' && 'modern-tooltip--editor',
             variant === 'member' && 'modern-tooltip--member',
+            variant === 'data' && 'modern-tooltip--data',
             closing && 'modern-tooltip--out',
             closing && clickFadeMs >= 400 && 'modern-tooltip--out-slow',
             placement === 'top' ? 'modern-tooltip--top' : 'modern-tooltip--bottom',

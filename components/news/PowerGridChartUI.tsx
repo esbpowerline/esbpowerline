@@ -4,6 +4,7 @@ import React, { cloneElement, isValidElement, useEffect, useRef, useState } from
 import { Legend, Tooltip, type LegendProps, type YAxisProps } from 'recharts';
 import { cn, formatNumber } from '@/lib/utils';
 import type { ChartTheme } from '@/hooks/useChartTheme';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 
 /**
  * Width at or below which a card cannot afford a second value axis.
@@ -303,6 +304,46 @@ type GridRechartsLegendProps = Omit<LegendProps, 'formatter'> & {
   colorResolver?: (value: string, entry: { color?: string; dataKey?: string | number }) => string;
 };
 
+/**
+ * Recharts' own legend entry shape, narrowed to what the mark glyph needs.
+ * `type` is the series' `legendType`; a dashed stroke is carried on the entry's
+ * payload rather than the entry itself.
+ */
+type RechartsLegendEntry = {
+  value?: unknown;
+  color?: string;
+  dataKey?: string | number;
+  type?: string;
+  payload?: { strokeDasharray?: string | number };
+};
+
+/** Recharts' legendType vocabulary mapped onto the glyph shapes we draw. */
+function legendVariantFor(entry: RechartsLegendEntry): GridChartLegendItem['variant'] {
+  if (entry.payload?.strokeDasharray) return 'dashed';
+  switch (entry.type) {
+    case 'rect':
+    case 'square':
+      return 'bar';
+    case 'line':
+    case 'plainline':
+      return 'line';
+    default:
+      return 'line';
+  }
+}
+
+/**
+ * The in-plot legend.
+ *
+ * It renders the *same markup* as `GridChartExternalLegend` rather than
+ * Recharts' default rows, because the two were visibly different legends on one
+ * page: this one reserved 36px and drew every series as a circle, the external
+ * one reserved 15px and drew a bar as a bar and a line as a line. A reader
+ * moving between two cards saw two legend languages and no reason for either.
+ *
+ * Now only the placement differs — inside the chart's own layout here, below
+ * the card there — and a legend looks the same wherever it sits.
+ */
 export function GridRechartsLegend({
   colorResolver,
   verticalAlign = 'bottom',
@@ -313,28 +354,27 @@ export function GridRechartsLegend({
     <Legend
       verticalAlign={verticalAlign}
       align="center"
-      iconType="circle"
-      iconSize={7}
       wrapperStyle={{
-        fontSize: '10px',
         width: '100%',
         left: 0,
-        lineHeight: 1.55,
-        paddingTop: isTop ? '2px' : '8px',
-        paddingBottom: isTop ? '8px' : '2px',
+        paddingTop: isTop ? 0 : '4px',
+        paddingBottom: isTop ? '4px' : 0,
         ...props.wrapperStyle,
       }}
-      formatter={(value, entry) => {
-        const color =
-          colorResolver?.(String(value), entry as { color?: string; dataKey?: string | number }) ??
-          entry.color ??
-          'inherit';
-        return (
-          <span style={{ color, fontWeight: 600, fontSize: '10px', paddingRight: '12px' }}>
-            {value}
-          </span>
-        );
-      }}
+      content={({ payload }) => (
+        <GridChartLegendList
+          items={((payload ?? []) as RechartsLegendEntry[]).map((entry, i) => {
+            const label = String(entry.value ?? '');
+            return {
+              id: `${entry.dataKey ?? label}-${i}`,
+              label,
+              color: colorResolver?.(label, entry) ?? entry.color ?? 'currentColor',
+              variant: legendVariantFor(entry),
+            };
+          })}
+          inPlot
+        />
+      )}
       {...props}
     />
   );
@@ -345,22 +385,41 @@ export type GridChartLegendItem = {
   label: string;
   color: string;
   variant?: 'bar' | 'line' | 'area' | 'dashed';
+  /**
+   * Whether this series is the agency's own figure or ours.
+   *
+   * Set it rather than writing "(P)" into `label`: spelled into the text it is
+   * a different glyph from the tag used everywhere else on the page for the
+   * same claim, and it inherits the series colour, so a "(D)" on a purple line
+   * reads as part of the series name rather than as a provenance mark.
+   */
+  provenance?: 'P' | 'D';
 };
 
-export function GridChartExternalLegend({
+/**
+ * The legend itself — one list, one set of glyphs, one type scale.
+ *
+ * Both legend placements render this. `inPlot` only drops the outer margin,
+ * because inside a chart Recharts has already reserved the band the legend
+ * sits in and an extra margin there pushes the plot up off its own axis.
+ */
+export function GridChartLegendList({
   items,
   position = 'top',
+  inPlot = false,
   className,
 }: {
   items: GridChartLegendItem[];
   position?: 'top' | 'bottom';
+  inPlot?: boolean;
   className?: string;
 }) {
   return (
     <ul
       className={cn(
         'grid-chart-external-legend',
-        position === 'bottom' && 'grid-chart-external-legend--bottom',
+        position === 'bottom' && !inPlot && 'grid-chart-external-legend--bottom',
+        inPlot && 'grid-chart-external-legend--in-plot',
         className,
       )}
       aria-label="Chart legend"
@@ -381,10 +440,24 @@ export function GridChartExternalLegend({
           >
             {item.label}
           </span>
+          {item.provenance ? <GridProvenanceTag kind={item.provenance} /> : null}
         </li>
       ))}
     </ul>
   );
+}
+
+/** The legend as a sibling of the chart, below or above the plot. */
+export function GridChartExternalLegend({
+  items,
+  position = 'top',
+  className,
+}: {
+  items: GridChartLegendItem[];
+  position?: 'top' | 'bottom';
+  className?: string;
+}) {
+  return <GridChartLegendList items={items} position={position} className={className} />;
 }
 
 export function GridChartFrame({
@@ -469,6 +542,39 @@ export function GridRechartsTooltip({
   );
 }
 
+/**
+ * One labelled figure inside a tooltip, with the mark that says whose it is.
+ *
+ * The shared tooltips used to print a capacity and a share side by side with no
+ * distinction between them — one is a figure an agency published, the other is
+ * arithmetic of ours, and a hover is exactly where that difference matters
+ * because it is where a reader is looking when they decide to quote something.
+ */
+export function GridTooltipFigure({
+  label,
+  value,
+  provenance,
+  dot,
+}: {
+  label: string;
+  value: React.ReactNode;
+  provenance: 'P' | 'D';
+  dot?: string;
+}) {
+  return (
+    <>
+      <span className="grid-chart-tooltip__label">
+        {dot ? (
+          <span className="grid-chart-tooltip__dot" style={{ background: dot }} />
+        ) : null}
+        <GridProvenanceTag kind={provenance} className="mr-1" />
+        {label}
+      </span>
+      <span className="grid-chart-tooltip__value">{value}</span>
+    </>
+  );
+}
+
 export function GridChartTooltipShell({
   title,
   accent,
@@ -508,12 +614,9 @@ export function GridPieTooltip({
   return (
     <GridChartTooltipShell title={row.name} accent={accent}>
       <div className="grid-chart-tooltip__grid">
-        <span className="grid-chart-tooltip__label">Capacity</span>
-        <span className="grid-chart-tooltip__value">{formatNumber(row.mw)} MW</span>
-        <span className="grid-chart-tooltip__label">Share</span>
-        <span className="grid-chart-tooltip__value">{share}%</span>
-        <span className="grid-chart-tooltip__label">Mix index</span>
-        <span className="grid-chart-tooltip__value">{row.value}%</span>
+        <GridTooltipFigure label="Capacity" provenance="P" value={`${formatNumber(row.mw)} MW`} />
+        <GridTooltipFigure label="Share" provenance="D" value={`${share}%`} />
+        <GridTooltipFigure label="Mix index" provenance="D" value={`${row.value}%`} />
       </div>
     </GridChartTooltipShell>
   );
@@ -538,10 +641,8 @@ export function GridBarTooltip({
   return (
     <GridChartTooltipShell title={label ?? row.name} accent={accent}>
       <div className="grid-chart-tooltip__grid">
-        <span className="grid-chart-tooltip__label">Installed</span>
-        <span className="grid-chart-tooltip__value">{formatNumber(row.mw)} MW</span>
-        <span className="grid-chart-tooltip__label">Of total</span>
-        <span className="grid-chart-tooltip__value">{share}%</span>
+        <GridTooltipFigure label="Installed" provenance="P" value={`${formatNumber(row.mw)} MW`} />
+        <GridTooltipFigure label="Of total" provenance="D" value={`${share}%`} />
       </div>
     </GridChartTooltipShell>
   );
@@ -565,10 +666,16 @@ export function GridLineTooltip({
     <GridChartTooltipShell title={label} accent={accent}>
       <div className="grid-chart-tooltip__row">
         <span className="grid-chart-tooltip__dot grid-chart-tooltip__dot--line" />
-        <span className="grid-chart-tooltip__label">Grid demand</span>
+        <span className="grid-chart-tooltip__label">
+          <GridProvenanceTag kind="P" className="mr-1" />
+          Grid demand
+        </span>
         <span className="grid-chart-tooltip__value">{formatNumber(demand)} MW</span>
       </div>
-      <div className="grid-chart-tooltip__foot">{gw} GW equivalent</div>
+      <div className="grid-chart-tooltip__foot">
+        <GridProvenanceTag kind="D" className="mr-1" />
+        {gw} GW equivalent
+      </div>
     </GridChartTooltipShell>
   );
 }
@@ -587,6 +694,7 @@ export function MixLegend({
   totalMw: number;
 }) {
   return (
+    <>
     <div className="grid-chart-legend">
       {data.map((item, i) => {
         const color = mixColor(chartTheme, i);
@@ -609,6 +717,14 @@ export function MixLegend({
         );
       })}
     </div>
+    {/* Marked once for the column rather than twice on every row: the share is
+        ours, the megawatts are the agency's. */}
+    <p className="grid-chart-legend__key">
+      <span>Share <GridProvenanceTag kind="D" /></span>
+      <span aria-hidden>·</span>
+      <span>MW <GridProvenanceTag kind="P" /></span>
+    </p>
+    </>
   );
 }
 

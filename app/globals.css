@@ -5599,8 +5599,15 @@ html.theme-dark .locale-toggle__btn--active:hover {
    put it — across the six Overview tiles the icons landed between 27.4px and
    38px from their left edges, so no icon, label or number shared a vertical rule
    with its neighbour. Left-aligned, all three line up down the row. */
+/* Top-aligned, not centred.
+   Centring each tile's own content made the row ragged: a tile whose hint runs
+   to two lines (or has none at all) centred a different block height, so on the
+   six-tile strip the Gas Supply label sat 8px below the five beside it and its
+   figure 8px below theirs. Every tile is the same height, so aligning the
+   content to the top of the box lines the labels and the figures up across the
+   whole strip, which is the row a reader scans horizontally. */
 .grid-explorer-kpi {
-  @apply flex items-center justify-start gap-3.5 relative overflow-visible transition-all duration-300;
+  @apply flex items-start justify-start gap-3.5 relative overflow-visible transition-all duration-300;
   padding: 0.875rem 1rem !important;
   background-color: color-mix(in srgb, hsl(var(--card)) 92%, transparent) !important;
   border: 1px solid hsl(var(--border) / 0.55) !important;
@@ -5613,12 +5620,22 @@ html.theme-dark .locale-toggle__btn--active:hover {
   box-shadow: 0 12px 24px -10px hsl(var(--primary) / 0.15) !important;
 }
 
+/* Nudged to sit on the label's optical line now that the tile is top-aligned. */
 .grid-explorer-kpi__icon {
   @apply h-[22px] w-[22px] text-primary shrink-0;
+  margin-top: -1px;
 }
 
+/* A row, so the cadence badge and the P/D mark centre on the label instead of
+   riding the text baseline — the mark is a 15px box against 10px caps, and on
+   the baseline it hung four pixels below the badge next to it. */
 .grid-explorer-kpi__label {
   @apply text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 leading-tight;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 0.15rem;
+  min-height: 1rem;
 }
 
 .grid-explorer-kpi__value {
@@ -5916,6 +5933,14 @@ html.theme-dark .locale-toggle__btn--active:hover {
   margin: 0.5rem 0.25rem 0;
   padding: 0 0.25rem;
   list-style: none;
+}
+
+/* Inside a chart, Recharts already reserves the legend band — an outer margin
+   here pushes the plot up off its own axis, so the in-plot placement keeps the
+   type and glyphs and drops only the spacing the card version needs. */
+.grid-chart-external-legend--in-plot {
+  margin: 0;
+  padding: 0 0.25rem;
 }
 
 .grid-chart-external-legend--bottom {
@@ -6245,28 +6270,715 @@ html.theme-dark .locale-toggle__btn--active:hover {
   @apply text-sm text-muted-foreground mt-1 leading-relaxed max-w-2xl;
 }
 
+/* The four figures, read left to right like the rest of the page.
+   Centred text made every tile a different shape — the label wrapped over two
+   lines in one, the hint over three in another, and nothing lined up with
+   anything. Left-aligned on a common grid, the labels sit on one line, the
+   figures on another, and the unit belongs to the figure rather than floating
+   in the hint. */
 .gas-reserve-metric-band {
-  @apply grid grid-cols-2 lg:grid-cols-4 gap-2.5;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5;
 }
 
 .gas-reserve-metric {
-  @apply flex flex-col items-center text-center gap-1 p-3.5 rounded-xl border border-border/35 bg-background/55;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.35rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.4);
+  background: hsl(var(--background) / 0.55);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.gas-reserve-metric:hover {
+  border-color: hsl(var(--border) / 0.75);
+  background: hsl(var(--background) / 0.8);
 }
 
 .gas-reserve-metric__top {
-  @apply flex items-center justify-center gap-1.5 min-w-0 w-full;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+/* The icon gets a well of its own, tinted to the tile's meaning, so the row of
+   four reads as a set rather than four loose glyphs. */
+.gas-reserve-metric__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 0.4rem;
+  background: currentColor;
+  flex: none;
+}
+
+.gas-reserve-metric__icon > svg {
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
 .gas-reserve-metric__label {
   @apply text-[9px] font-bold uppercase tracking-wider text-muted-foreground;
+  line-height: 1.25;
+  min-width: 0;
 }
 
 .gas-reserve-metric__value {
-  @apply text-2xl font-bold tabular-nums text-foreground leading-none text-center;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: hsl(var(--foreground));
+}
+
+.gas-reserve-metric__unit {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--muted-foreground));
 }
 
 .gas-reserve-metric__hint {
-  @apply text-[9px] text-muted-foreground leading-snug text-center max-w-[14rem];
+  @apply text-[9px] text-muted-foreground leading-snug;
+  text-wrap: pretty;
+}
+
+
+/* ── Gas Reserve Depletion: the panel around the chart ──────────────────────
+   Three tiers. The finding, the chart, then the evidence — and the evidence is
+   one panel with three views rather than three walls stacked down the page, so
+   the method, the field detail and the comparison against everybody else are
+   all present without any of them shouting at a reader who came for the number.
+
+   Type here is the site's own: data tables use `.grid-explorer-table`, the same
+   class the zone and outage tables use, rather than the 9px inline spans this
+   panel used to invent for units and R². Units live in the column head. */
+
+/* ── the one-line credibility strip under the KPIs ── */
+
+.reserve-confidence {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  margin-top: 0.9rem;
+  padding: 0.7rem 0.9rem;
+  text-align: left;
+  border-radius: 0.7rem;
+  border: 1px solid hsl(142 45% 45% / 0.28);
+  background: hsl(142 45% 45% / 0.07);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.reserve-confidence:hover {
+  background: hsl(142 45% 45% / 0.12);
+  border-color: hsl(142 45% 45% / 0.45);
+}
+
+.reserve-confidence__cta {
+  margin-left: auto;
+  white-space: nowrap;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  align-self: center;
+}
+
+@media (max-width: 48rem) {
+  .reserve-confidence { flex-wrap: wrap; }
+  .reserve-confidence__cta { margin-left: 0; }
+}
+
+/* ── how to read the two edges ── */
+
+.reserve-read {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  padding-top: 0.25rem;
+}
+
+@media (min-width: 52rem) {
+  .reserve-read { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.reserve-read__col {
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.65rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--card));
+}
+
+.reserve-read__col p {
+  margin: 0.35rem 0 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+.reserve-read__tag {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.reserve-read__tag--muted { color: hsl(var(--muted-foreground)); }
+
+/* ── the evidence panel: three drawers, all closed until asked ── */
+
+.reserve-evidence {
+  border-top: 1px solid hsl(var(--border) / 0.45);
+  margin-top: 0.5rem;
+  padding: 1rem 1.5rem 1.25rem;
+}
+
+@media (max-width: 40rem) {
+  .reserve-evidence { padding: 0.9rem 1rem 1rem; }
+}
+
+.reserve-evidence__intro {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.625;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+.reserve-drawer {
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 0.75rem;
+  background: hsl(var(--card));
+  overflow: hidden;
+  /* The site header is sticky; without this, jumping to a drawer parks its
+     own heading underneath it. */
+  scroll-margin-top: 8rem;
+}
+
+.reserve-drawer + .reserve-drawer { margin-top: 0.5rem; }
+
+.reserve-drawer.is-open {
+  border-color: hsl(var(--primary) / 0.3);
+  background: hsl(var(--muted) / 0.16);
+}
+
+.reserve-drawer__heading { margin: 0; }
+
+.reserve-drawer__toggle {
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  transition: background 150ms ease;
+}
+
+.reserve-drawer__toggle:hover { background: hsl(var(--muted) / 0.3); }
+
+.reserve-drawer__toggle:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.55);
+  outline-offset: -2px;
+}
+
+.reserve-drawer__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+}
+
+.reserve-drawer__hint {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 44rem) {
+  .reserve-drawer__hint { display: none; }
+}
+
+.reserve-drawer__chev {
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  color: hsl(var(--muted-foreground));
+  transition: transform 180ms ease, color 150ms ease;
+}
+
+.reserve-drawer.is-open .reserve-drawer__chev {
+  transform: rotate(180deg);
+  color: hsl(var(--primary));
+}
+
+.reserve-drawer__body {
+  padding: 0.25rem 1rem 1.1rem;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  animation: reserve-drawer-in 180ms ease-out;
+}
+
+@keyframes reserve-drawer-in {
+  from { opacity: 0; transform: translateY(-3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reserve-drawer__body { animation: none; }
+  .reserve-drawer__chev { transition: none; }
+}
+
+/* ── view: method ── */
+
+/* Two columns on a wide card.
+   The panel sits in a 1,430px box. Prose set to a readable measure left ~340px
+   of dead space on the right, and prose set to the full width would run past
+   180 characters a line, which nobody reads. Columns solve both: the text keeps
+   a sane measure and the card is used. */
+.reserve-method {
+  display: grid;
+  gap: 1.1rem 2.25rem;
+}
+
+@media (min-width: 64rem) {
+  .reserve-method { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.reserve-method__step h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground));
+  margin: 0 0 0.45rem;
+}
+
+.reserve-method__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 999px;
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+  font-size: 0.5625rem;
+  font-weight: 800;
+}
+
+.reserve-method__step p,
+.reserve-method__step li {
+  font-size: 0.75rem;
+  line-height: 1.625;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+.reserve-method__step p { margin: 0 0 0.5rem; }
+
+.reserve-method__step ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.reserve-method__step ul li {
+  padding-left: 0.85rem;
+  border-left: 2px solid hsl(var(--border) / 0.7);
+}
+
+.reserve-method__plain {
+  padding-left: 1.1rem !important;
+  list-style: disc !important;
+}
+
+.reserve-method__plain li {
+  padding-left: 0 !important;
+  border-left: 0 !important;
+}
+
+.reserve-method__eq {
+  display: inline-block;
+  margin: 0.15rem 0 0.6rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.45rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  background: hsl(var(--muted) / 0.35);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.75rem;
+  color: hsl(var(--foreground));
+}
+
+/* ── view: fields ── */
+
+.reserve-fields__intro,
+.reserve-fields__foot,
+.reserve-checks__lead,
+.reserve-checks__note {
+  font-size: 0.75rem;
+  line-height: 1.625;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+  margin: 0 0 0.75rem;
+}
+
+/* A note beside a figure rather than a paragraph alone across 1,400px. */
+.reserve-note-row {
+  display: grid;
+  gap: 0.75rem 2rem;
+  align-items: start;
+  margin-bottom: 0.9rem;
+}
+
+@media (min-width: 64rem) {
+  .reserve-note-row { grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr); }
+}
+
+.reserve-note-row > p { margin: 0; }
+
+.reserve-callout {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.7rem;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--muted) / 0.25);
+}
+
+.reserve-callout__row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.reserve-callout__row strong {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+  font-size: 0.8125rem;
+}
+
+.reserve-callout__title {
+  font-size: 0.5625rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.reserve-fields__foot,
+.reserve-checks__note { margin: 0.75rem 0 0; }
+
+/* The unit belongs in the column head, at the head's own size, not squeezed
+   beside every value at 9px. */
+.reserve-th-unit {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: hsl(var(--muted-foreground) / 0.75);
+}
+
+.reserve-fields__flag {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background: hsl(var(--muted) / 0.6);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  vertical-align: middle;
+}
+
+.reserve-verdict {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+}
+
+.reserve-verdict--green { color: hsl(142 60% 36%); }
+.reserve-verdict--amber { color: hsl(38 92% 40%); }
+.reserve-verdict--red { color: hsl(0 72% 46%); }
+.reserve-verdict--blue { color: hsl(210 80% 45%); }
+.reserve-verdict--muted { color: hsl(var(--muted-foreground)); border-style: dashed; }
+
+html.theme-dark .reserve-verdict--green { color: hsl(142 55% 58%); }
+html.theme-dark .reserve-verdict--amber { color: hsl(38 92% 62%); }
+html.theme-dark .reserve-verdict--red { color: hsl(0 78% 66%); }
+html.theme-dark .reserve-verdict--blue { color: hsl(210 85% 68%); }
+
+/* ── view: checks ── */
+
+.reserve-checks { display: grid; gap: 1.75rem; }
+
+.reserve-checks__head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground));
+  margin: 0 0 0.45rem;
+}
+
+.reserve-bench-table td { vertical-align: top; }
+
+.reserve-bench-table td:nth-child(2),
+.reserve-bench-table td:nth-child(3) { min-width: 15rem; }
+
+.reserve-bench-source {
+  display: block;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.reserve-bench-source a { color: inherit; }
+.reserve-bench-source a:hover { color: hsl(var(--primary)); text-decoration: underline; }
+
+.reserve-bench-meta {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.625rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+  white-space: normal;
+}
+
+.reserve-bench-claim {
+  font-size: 0.75rem;
+  line-height: 1.625;
+  color: hsl(var(--muted-foreground));
+  white-space: normal;
+}
+
+.reserve-bench-quote {
+  display: block;
+  margin-top: 0.3rem;
+  padding-left: 0.55rem;
+  border-left: 2px solid hsl(var(--border));
+  color: hsl(var(--foreground) / 0.85);
+}
+
+.reserve-bench-ours {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+/* ── Reserve depletion trajectory (hand-drawn SVG, see ReserveTrajectoryCanvas)
+   Two plots on one time axis: the stock still booked underground, and the rate
+   it is coming out at. Same type scale and readout as the load curve and the
+   interconnector, because a reader should not have to learn a third chart. */
+
+.rtraj {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rtraj__canvas {
+  position: relative;
+  width: 100%;
+  height: 30rem;
+  cursor: crosshair;
+  touch-action: pan-y;
+  outline: none;
+  border-radius: 0.75rem;
+}
+
+.rtraj__canvas:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.6);
+}
+
+.rtraj__svg { display: block; overflow: visible; }
+
+.rtraj__tick {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.rtraj__unit {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.rtraj__note {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.rtraj__wedge {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.rtraj__readout-name { font-weight: 600; }
+
+.rtraj__readout-total {
+  margin-left: auto;
+  color: hsl(var(--muted-foreground));
+  font-weight: 700;
+}
+
+.rtraj__anchor {
+  font-size: 9.5px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+/* The projection wipes in from today rather than the left edge — the history is
+   not news and should be on screen before the forecast arrives over it. */
+.rtraj__svg.is-idle .rtraj__wipe { transform: scaleX(0); }
+.rtraj__svg.is-idle .rtraj__late { opacity: 0; }
+
+.rtraj__svg.is-playing .rtraj__wipe {
+  animation: rtraj-wipe 1100ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.rtraj__svg.is-playing .rtraj__late {
+  animation: rtraj-late-in 400ms ease-out 900ms both;
+}
+
+@keyframes rtraj-wipe {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes rtraj-late-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rtraj__svg.is-playing .rtraj__wipe,
+  .rtraj__svg.is-playing .rtraj__late {
+    animation: none !important;
+  }
+}
+
+.rtraj__readout {
+  position: absolute;
+  min-width: 15rem;
+  max-width: 21rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.7rem;
+  border: 1px solid hsl(var(--border) / 0.8);
+  background: hsl(var(--card));
+  box-shadow: 0 12px 34px -14px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.08);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rtraj__readout-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.rtraj__pin {
+  margin-left: auto;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.rtraj__readout-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 10.5px;
+}
+
+.rtraj__readout-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.rtraj__readout-list strong {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rtraj__readout-foot {
+  color: hsl(var(--muted-foreground));
+  font-size: 9.5px;
+  line-height: 1.4;
+  display: block !important;
+}
+
+.rtraj__swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.12rem;
+  flex: none;
+  align-self: center;
+}
+
+.rtraj__swatch--dash {
+  height: 0.2rem;
+  border-radius: 0;
+}
+
+@media (max-width: 40rem) {
+  .rtraj__canvas { height: 24rem; }
+  .rtraj__readout { min-width: 11.5rem; font-size: 9px; }
 }
 
 /* Depletion trajectory + scenarios â€” single full-width chart card */
@@ -7226,6 +7938,12 @@ html.theme-dark .locale-toggle__btn--active:hover {
   text-transform: none !important;
 }
 
+/* The KPI label is a flex row (see above), so the badge is a flex item and the
+   superscript raise that suits a running heading only pushes it off the line. */
+.grid-explorer-kpi__label sup {
+  top: 0 !important;
+}
+
 .grid-explorer-chart-card__sub {
   @apply text-xs text-muted-foreground mt-0.5 leading-relaxed;
 }
@@ -7354,9 +8072,14 @@ html.theme-dark .locale-toggle__btn--active:hover {
   filter: saturate(0.65);
 }
 
+/* The donut is a fixed 200px drawing in a card whose height is set by whatever
+   sits beside it, so a fixed 13.5rem box left the surplus as dead space under
+   the legend. Growing the wrap instead keeps the ring optically centred in the
+   space the card actually has, at any row height. */
 .grid-explorer-donut-wrap {
   position: relative;
-  height: 13.5rem;
+  min-height: 13.5rem;
+  flex: 1 1 auto;
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
@@ -7774,6 +8497,28 @@ html.theme-dark .locale-toggle__btn--active:hover {
   color: hsl(var(--foreground));
   min-width: 2.75rem;
   text-align: right;
+}
+
+/* One provenance statement for the whole legend, sitting under it like a key.
+   The marks it carries are the same two the rows used to repeat on every
+   line. */
+.grid-chart-legend__key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-chart-legend__key > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .grid-status {
@@ -12538,6 +13283,56 @@ html.theme-white .modern-tooltip--member .modern-tooltip-arrow {
 .member-panel__nav-tooltip {
   flex-shrink: 0;
 }
+
+/* Data-provenance tooltips (the P/D marks, and anything else explaining a
+   figure rather than naming a control).
+
+   The pill shape the other variants use is for two or three words; these carry
+   a sentence of methodology, so this variant is a left-aligned card: a heading
+   line, then the explanation at reading width. Same surface, same entrance —
+   only the geometry changes. */
+.modern-tooltip--data {
+  align-items: flex-start;
+  gap: 0.25rem;
+  /* The base rule pins `min-width: max-content`, which is right for a two-word
+     pill and catastrophic for a sentence: min-width beats max-width, so the
+     card laid itself out 834px wide and hung off the left of the viewport. */
+  min-width: 0;
+  width: max-content;
+  max-width: 19rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.6rem;
+  border-color: hsl(var(--border) / 0.8);
+  box-shadow:
+    0 14px 34px -12px hsl(0 0% 0% / 0.34),
+    0 1px 2px hsl(0 0% 0% / 0.06);
+  text-align: left;
+}
+
+.modern-tooltip--data .modern-tooltip-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground));
+}
+
+.modern-tooltip--data .modern-tooltip-hint {
+  font-size: 11px;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+  text-align: left;
+  text-wrap: pretty;
+}
+
+/* The mark is a 0.95rem square; the wrapper must not stretch it in flex rows
+   or push the line-height of the sentence it sits in. */
+.grid-provenance-tag-wrap {
+  align-items: center;
+  vertical-align: middle;
+  flex: none;
+}
+
 
 .modern-tooltip--out {
   animation: modern-tooltip-out 200ms ease-in forwards;
@@ -21398,3 +22193,1463 @@ iframe::-webkit-scrollbar-track {
 .grid-kpi-cite__host {
   @apply text-primary hover:underline break-all;
 }
+
+/* ── Gas & LNG disclosure list ──────────────────────────────────────────────
+   The production and distribution lists used to be tables that rebuilt
+   themselves on expand: the header unmounted, the grand total unmounted, and
+   every unopened company swapped from a four-column row to a one-column pill.
+   Three different DOM shapes meant nothing could transition — the table simply
+   jumped to a new layout and the detail card appeared fully formed.
+
+   This is a grid list instead, so a row never changes shape and the detail is a
+   sibling panel that can actually animate. One curve and one duration family
+   drive the rail, the chevron, the panel and the receding siblings, so opening
+   a company reads as a single movement rather than four unrelated ones.
+
+   Height is animated with grid-template-rows 0fr -> 1fr, which needs no
+   measurement and so cannot disagree with the content's real height. */
+
+.gas-disclosure {
+  --gas-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.gas-disclosure__head,
+.gas-disclosure__row,
+.gas-disclosure__total {
+  display: grid;
+  grid-template-columns: var(--gas-cols);
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 0.85rem;
+}
+
+.gas-disclosure__head {
+  padding-block: 0.15rem 0.35rem;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: hsl(var(--muted-foreground));
+  transition: opacity 220ms ease;
+}
+
+.gas-disclosure__item {
+  position: relative;
+  border-radius: 0.75rem;
+  background: hsl(var(--muted) / 0.1);
+  transition:
+    background 220ms ease,
+    box-shadow 220ms ease,
+    opacity 220ms ease;
+}
+
+/* The producer's own colour, drawn as a rail that grows out of the row when it
+   opens — the one piece of motion that says "this row, not the others". */
+.gas-disclosure__item::before {
+  content: '';
+  position: absolute;
+  inset-block: 0.4rem;
+  left: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--gas-accent, transparent);
+  opacity: 0;
+  transform: scaleY(0.35);
+  transition:
+    opacity 240ms ease,
+    transform 320ms var(--gas-ease);
+}
+
+.gas-disclosure__item[data-open='true']::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.gas-disclosure__item[data-open='true'] {
+  background: hsl(var(--muted) / 0.2);
+  box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.55);
+}
+
+.gas-disclosure__item--expandable:hover {
+  background: hsl(var(--muted) / 0.22);
+}
+
+.gas-disclosure__row {
+  width: 100%;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  padding-block: 0.7rem;
+  border-radius: 0.75rem;
+  cursor: default;
+}
+
+.gas-disclosure__item--expandable .gas-disclosure__row {
+  cursor: pointer;
+}
+
+.gas-disclosure__row:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
+
+.gas-disclosure__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.gas-disclosure__chevron {
+  flex: none;
+  transition: transform 300ms var(--gas-ease), color 220ms ease;
+}
+
+.gas-disclosure__item[data-open='true'] .gas-disclosure__chevron {
+  transform: rotate(90deg);
+  color: var(--gas-accent, hsl(var(--primary)));
+}
+
+/* Everything that is not the open row steps back rather than disappearing, so
+   the columns stay aligned and the reader keeps their place in the list. */
+.gas-disclosure[data-focused='true'] .gas-disclosure__item[data-open='false'],
+.gas-disclosure[data-focused='true'] .gas-disclosure__head,
+.gas-disclosure[data-focused='true'] .gas-disclosure__total {
+  opacity: 0.45;
+}
+
+.gas-disclosure[data-focused='true'] .gas-disclosure__item[data-open='false']:hover,
+.gas-disclosure[data-focused='true'] .gas-disclosure__item[data-open='false']:focus-within {
+  opacity: 0.9;
+}
+
+.gas-disclosure__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 380ms var(--gas-ease);
+}
+
+.gas-disclosure__item[data-open='true'] .gas-disclosure__panel {
+  grid-template-rows: 1fr;
+}
+
+.gas-disclosure__panel-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition:
+    opacity 190ms ease,
+    transform 280ms var(--gas-ease);
+}
+
+.gas-disclosure__item[data-open='true'] .gas-disclosure__panel-inner {
+  opacity: 1;
+  transform: none;
+  transition-delay: 110ms;
+}
+
+.gas-disclosure__total {
+  padding-block: 0.7rem;
+  border-radius: 0.75rem;
+  background: hsl(var(--muted) / 0.25);
+  font-weight: 700;
+  transition: opacity 220ms ease;
+}
+
+.gas-disclosure__num {
+  font-variant-numeric: tabular-nums;
+}
+
+.gas-disclosure__share {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.gas-disclosure__track {
+  height: 0.375rem;
+  width: 3.5rem;
+  flex: none;
+  overflow: hidden;
+  border-radius: 999px;
+  background: hsl(var(--muted) / 0.4);
+}
+
+@media (min-width: 640px) {
+  .gas-disclosure__track {
+    width: 5rem;
+  }
+}
+
+.gas-disclosure__fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transform-origin: left center;
+  transition: width 420ms var(--gas-ease);
+}
+
+/* Every figure names itself. The column header above the list is decorative
+   (aria-hidden), so this label is what a screen reader reads before the number —
+   and it is the same element that becomes the visible caption on a phone, so the
+   label exists once rather than twice. */
+.gas-disclosure__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Phones: the row stacks instead of scrolling sideways, and the labels surface. */
+@media (max-width: 40rem) {
+  .gas-disclosure__head {
+    display: none;
+  }
+
+  .gas-disclosure__row,
+  .gas-disclosure__total {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 0.4rem;
+  }
+
+  .gas-disclosure__row > .gas-disclosure__name,
+  .gas-disclosure__total > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .gas-disclosure__share {
+    flex-wrap: wrap;
+  }
+
+  .gas-disclosure__label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    display: block;
+    flex-basis: 100%;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gas-disclosure__item,
+  .gas-disclosure__item::before,
+  .gas-disclosure__head,
+  .gas-disclosure__total,
+  .gas-disclosure__chevron,
+  .gas-disclosure__panel,
+  .gas-disclosure__panel-inner,
+  .gas-disclosure__fill {
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
+/* ── East-West Interconnector Transfer ──────────────────────────────────────
+   The stacked day, hand-drawn SVG (see InterconnectorCanvas). These rules cover
+   the type inside the plot and the scrub readout.
+
+   The old chart drew three overlapping Recharts lines with a travelling dash on
+   each to imply direction — twelve overlay series, three sets of near-identical
+   per-corridor rules and a bundle of custom properties to get duration and
+   colour down to elements the chart owned. Stacking says what the dashes were
+   reaching for, and none of that machinery survives.
+
+   What the redesign did lose with it was any sense of movement: the crossing
+   has a direction, west to east, and a still chart says nothing about it. The
+   motion below puts that back on one layer instead of twelve — see the block
+   after the readout rules. */
+
+.xgrid {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.xgrid__canvas {
+  position: relative;
+  width: 100%;
+  height: 22rem;
+  border-radius: 0.75rem;
+  cursor: crosshair;
+  touch-action: pan-y;
+  outline: none;
+}
+
+.xgrid__canvas:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.6);
+}
+
+.xgrid__svg { display: block; overflow: visible; }
+
+/* ── the day ── */
+
+.xgrid__tick {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.xgrid__unit {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.xgrid__band-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.xgrid__peak {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+}
+
+/* The in-plot P/D mark. Deliberately the same two letters, weight and box as
+   the HTML GridProvenanceTag — a reader should not have to learn a second
+   notation for the same claim just because it moved inside the chart. */
+.xgrid__prov {
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+/* ── scrub readout ── */
+
+.xgrid__readout {
+  position: absolute;
+  min-width: 14rem;
+  max-width: 19rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.7rem;
+  border: 1px solid hsl(var(--border) / 0.8);
+  background: hsl(var(--card));
+  box-shadow: 0 12px 34px -14px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.08);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.xgrid__readout-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.xgrid__readout-total { margin-left: auto; color: hsl(var(--muted-foreground)); }
+
+.xgrid__pin {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.xgrid__readout-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.xgrid__readout-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 10px;
+}
+
+.xgrid__readout-name { font-weight: 600; }
+.xgrid__readout-mw { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.xgrid__readout-pct {
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+  min-width: 2.2rem;
+  text-align: right;
+}
+
+.xgrid__swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.12rem;
+  flex: none;
+}
+
+.xgrid__caption {
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+  padding: 0 0.5rem;
+}
+
+/* ── motion ──────────────────────────────────────────────────────────────────
+   Three things move, and only one of them keeps moving.
+
+   1. The stack wipes in west to east, so the day arrives in the order it
+      happened. The axis is drawn first and stays put: the frame is not news,
+      the day is.
+   2. Names, the peak marker and its ring land once the wipe has passed them.
+   3. A file of dots then travels along each corridor's top edge, left to
+      right, which is the direction the power actually crosses. Speed is the
+      same on every corridor and every day — it is a direction cue, not a
+      figure, and the caption says so. It stops the moment a reader scrubs,
+      because then the chart is being read rather than watched.
+
+   Everything is `both`-filled off a *visible* base, so `animation: none` under
+   reduced motion leaves the finished chart on screen rather than a blank one. */
+
+.xgrid__wipe {
+  transform-box: view-box;
+}
+
+.xgrid__svg.is-idle .xgrid__wipe { transform: scaleX(0); }
+.xgrid__svg.is-idle .xgrid__late { opacity: 0; }
+
+.xgrid__svg.is-playing .xgrid__wipe {
+  animation: xgrid-wipe 900ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.xgrid__svg.is-playing .xgrid__late {
+  animation: xgrid-late-in 420ms ease-out 760ms both;
+}
+
+.xgrid__flow {
+  pointer-events: none;
+  stroke-dasharray: 2.5 14;
+  stroke-linecap: round;
+}
+
+.xgrid__svg.is-playing .xgrid__flow {
+  animation: xgrid-flow 1.9s linear 900ms infinite both;
+}
+
+.xgrid__svg.is-playing .xgrid__peak-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: xgrid-peak-ring 2.2s ease-out 1s 3 both;
+}
+
+/* Scrubbing or pinned: the decoration gets out of the way. */
+.xgrid__svg.is-still .xgrid__flow { animation-play-state: paused; }
+
+@keyframes xgrid-wipe {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes xgrid-late-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes xgrid-flow {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -16.5; }
+}
+
+@keyframes xgrid-peak-ring {
+  0% { transform: scale(1); opacity: 0.5; }
+  70%, 100% { transform: scale(3.4); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xgrid__svg.is-playing .xgrid__wipe,
+  .xgrid__svg.is-playing .xgrid__late,
+  .xgrid__svg.is-playing .xgrid__flow,
+  .xgrid__svg.is-playing .xgrid__peak-ring {
+    animation: none !important;
+  }
+  .xgrid__flow { opacity: 0 !important; }
+}
+
+@media (max-width: 40rem) {
+  .xgrid__canvas { height: 18rem; }
+  .xgrid__readout { min-width: 11rem; font-size: 9px; }
+}
+
+/* ── 24-Hour System Load Curve ──────────────────────────────────────────────
+   The chart is hand-drawn SVG (see LoadCurveCanvas). These rules cover the type
+   inside it, the floating readout, and the key beneath — everything that reads
+   better as HTML than as SVG text. */
+
+.load-curve {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.load-curve__canvas {
+  position: relative;
+  width: 100%;
+  height: 22.5rem;
+  touch-action: pan-y;
+  cursor: crosshair;
+  border-radius: 0.75rem;
+  outline: none;
+}
+
+.load-curve__canvas:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.6);
+}
+
+.load-curve__svg {
+  display: block;
+  overflow: visible;
+}
+
+.load-curve__tick {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.load-curve__unit {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.load-curve__flag-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* ── the floating readout ── */
+.load-curve__readout {
+  position: absolute;
+  /* Clears the peak-flag band. At 0.75rem the panel sat on top of the "EVENING
+     PEAK" label it was usually next to, because the flags live in the plot's
+     top padding and the readout started above them. */
+  top: 2.9rem;
+  min-width: 12.75rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.7rem;
+  border: 1px solid hsl(var(--border) / 0.8);
+  background: hsl(var(--card));
+  box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.35), 0 1px 2px rgb(0 0 0 / 0.08);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.load-curve__readout-time {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.load-curve__pin {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.load-curve__readout-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.load-curve__readout-list > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.load-curve__readout-list dt {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.load-curve__readout-list dd {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* The gap is the chart's subject, so it is set apart from the three published
+   figures above it — and marked as ours, not PGCB's, by being a subtraction. */
+.load-curve__readout-gap {
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px dashed hsl(var(--border) / 0.7);
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── key ── */
+.load-curve__caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  /* Centred, matching every other legend on the site. Left-aligned it read as
+     the start of a paragraph rather than as a key belonging to the chart. */
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+  padding: 0 0.25rem;
+}
+
+.load-curve__key {
+  display: inline-flex;
+  /* Top, not centre: the swatch lines up with the label rather than floating
+     between the label and the figure under it. */
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+}
+
+.load-curve__key-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.load-curve__key-label {
+  color: hsl(var(--foreground));
+}
+
+.load-curve__key-value {
+  font-size: 9px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
+.load-curve__swatch {
+  flex: none;
+  width: 0.95rem;
+  height: 0.16rem;
+  border-radius: 999px;
+  margin-top: 0.42rem;
+}
+
+.load-curve__swatch--dashed {
+  height: 0;
+  background: none;
+  border-top: 2px dashed;
+  margin-top: 0.45rem;
+}
+
+.load-curve__swatch--band {
+  height: 0.55rem;
+  width: 0.75rem;
+  border-radius: 0.15rem;
+  opacity: 0.32;
+  margin-top: 0.15rem;
+}
+
+.load-curve__swatch--bar {
+  height: 0.55rem;
+  width: 0.35rem;
+  border-radius: 0.1rem;
+  opacity: 0.6;
+  margin-top: 0.15rem;
+}
+
+/* Its own centred line: pushed to the right of a centred key it dragged the
+   whole row off-centre. */
+.load-curve__hint {
+  flex-basis: 100%;
+  text-align: center;
+  font-size: 9px;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.7;
+}
+
+@media (max-width: 40rem) {
+  .load-curve__canvas { height: 18rem; }
+  .load-curve__readout { min-width: 11rem; padding: 0.5rem 0.6rem; }
+}
+
+/* ── readout: the named-hour tag, the met/unmet meter, secondary figures ── */
+.load-curve__tag {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+.load-curve__meter {
+  display: flex;
+  height: 0.3rem;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.28rem;
+}
+
+.load-curve__meter-fill { display: block; }
+
+/* Takes whatever the met share leaves, so the two always fill the track. */
+.load-curve__meter-rest {
+  display: block;
+  flex: 1;
+  opacity: 0.55;
+}
+
+.load-curve__meter-caption {
+  font-size: 9px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.45rem;
+}
+
+/* The second line of a figure — a share, or what it is measured against. */
+.load-curve__sub {
+  display: block;
+  font-size: 9px;
+  font-weight: 500;
+  /* Never wrapped: "peak 16,211 MW" breaking after "16,211" reads as two
+     separate figures. The panel widens instead. */
+  white-space: nowrap;
+  color: hsl(var(--muted-foreground));
+}
+
+.load-curve__readout-list dt {
+  white-space: nowrap;
+}
+
+.load-curve__readout-list dd {
+  text-align: right;
+}
+
+/* The shed strip's gutter label, set to match the plot's "MW" so the two
+   panels read as one chart with two scales rather than a chart and an
+   afterthought. */
+.load-curve__strip-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* "none" and "not published" are states, not quantities — set apart from the
+   figures beside them so neither reads as a number. */
+.load-curve__muted {
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+
+/* The shed strip's ceiling, set inside the strip at its right edge rather than
+   stacked under the value axis, where it read as another MW tick. */
+.load-curve__strip-max {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+/* The load curve's glossary — what each mark on the chart actually is.
+   A definition list rather than a paragraph: five terms a reader looks up one
+   at a time, not prose they read end to end.
+
+   Laid out with columns, not a two-column grid. A grid aligns rows, so the
+   row holding a two-line entry beside a five-line one grew to the taller of
+   the two and left a hole under the short one — a visible gap between
+   "Generation" and "Unmet demand" that belonged to neither. Column flow packs
+   each entry directly under the last, so every gap is the same. */
+.grid-load-glossary {
+  margin: 0.25rem 0 0;
+}
+
+@media (min-width: 60rem) {
+  .grid-load-glossary {
+    columns: 2;
+    column-gap: 1.75rem;
+  }
+}
+
+.grid-load-glossary > div {
+  /* An entry never splits across the column break — a term at the foot of one
+     column with its definition at the head of the next is worse than an
+     uneven column. */
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 0.65rem;
+}
+
+.grid-load-glossary > div:last-child {
+  margin-bottom: 0;
+}
+
+.grid-load-glossary dt {
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+}
+
+.grid-load-glossary dd {
+  margin: 0.15rem 0 0;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── Generation Mix Through the Day ─────────────────────────────────────────
+   The dispatch stack. Chart is hand-drawn SVG (GenerationMixCanvas); these
+   rules cover its controls, the scrub readout and the type inside the plot. */
+
+.genmix {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.genmix__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.genmix__modes {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--muted) / 0.2);
+}
+
+.genmix__mode {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.genmix__mode--on {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+.genmix__mode:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 1px;
+}
+
+.genmix__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 10px;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+
+.genmix__canvas {
+  position: relative;
+  width: 100%;
+  height: 24rem;
+  border-radius: 0.75rem;
+  cursor: crosshair;
+  touch-action: pan-y;
+  outline: none;
+}
+
+.genmix__canvas:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.6);
+}
+
+.genmix__svg { display: block; overflow: visible; }
+
+.genmix__tick {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.genmix__unit {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+/* Set on the band it names, so it has to hold against a saturated fill. */
+.genmix__band-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  paint-order: stroke;
+  pointer-events: none;
+}
+
+/* ── scrub readout ── */
+.genmix__readout {
+  position: absolute;
+  top: 0.6rem;
+  min-width: 15rem;
+  max-width: 19rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 0.7rem;
+  border: 1px solid hsl(var(--border) / 0.8);
+  background: hsl(var(--card));
+  box-shadow: 0 12px 34px -14px rgb(0 0 0 / 0.4), 0 1px 2px rgb(0 0 0 / 0.08);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.genmix__readout-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.35rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.genmix__readout-total { margin-left: auto; color: hsl(var(--muted-foreground)); }
+
+.genmix__pin {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.genmix__readout-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+/* Name, megawatts and share on one line; the public/private split wraps under
+   it on its own row when the sheet carries one. */
+.genmix__readout-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 10px;
+}
+
+.genmix__readout-name { font-weight: 600; }
+.genmix__readout-mw { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.genmix__readout-pct {
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+  min-width: 2.6rem;
+  text-align: right;
+}
+
+.genmix__readout-parts {
+  grid-column: 2 / -1;
+  font-size: 9px;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.85;
+}
+
+.genmix__readout-short {
+  margin-top: 0.3rem;
+  padding-top: 0.3rem;
+  border-top: 1px dashed hsl(var(--border) / 0.7);
+}
+
+.genmix__swatch {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 0.12rem;
+  flex: none;
+}
+
+.genmix__swatch--hatch {
+  background: transparent;
+  border: 1px dashed;
+}
+
+.genmix__caption {
+  display: flex;
+  justify-content: center;
+  padding: 0 0.25rem;
+}
+
+.genmix__note {
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+}
+
+@media (max-width: 40rem) {
+  .genmix__canvas { height: 19rem; }
+  .genmix__readout { min-width: 12rem; font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .genmix__mode { transition: none; }
+}
+
+/* The readout's one-line note about the share column. */
+.genmix__readout-foot {
+  margin: 0.4rem 0 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+  font-size: 9px;
+  color: hsl(var(--muted-foreground));
+}
+
+/* The sensitivity table inside the method drawer. Same data-table type as the
+   rest of the panel; the second line under each choice says what the choice
+   does, so the table needs no key. */
+.reserve-sens { margin: 0.25rem 0 0.75rem; }
+
+.reserve-sens__note {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+  white-space: normal;
+}
+
+.reserve-sens__base {
+  background: hsl(var(--primary) / 0.06);
+}
+
+.reserve-sens__foot {
+  margin: 0.6rem 0 0;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+/* The limits list: a question and the honest answer, in two columns where the
+   card is wide enough to hold them side by side. */
+.reserve-limits {
+  display: grid;
+  gap: 0.65rem 2rem;
+  margin: 0.25rem 0 0;
+}
+
+@media (min-width: 64rem) {
+  .reserve-limits { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.reserve-limits__item {
+  padding-left: 0.85rem;
+  border-left: 2px solid hsl(var(--border) / 0.7);
+}
+
+.reserve-limits dt {
+  font-size: 12px;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.15rem;
+}
+
+.reserve-limits dd {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+/* The citation list. Numbered, hanging indent, the role of each document under
+   it — a reader checking a figure should be able to find the page it came from
+   without leaving the panel. */
+.reserve-cites {
+  margin: 0.25rem 0 0;
+  padding-left: 1.35rem;
+  display: grid;
+  gap: 0.55rem;
+  list-style: decimal;
+}
+
+.reserve-cites li { padding-left: 0.15rem; }
+
+.reserve-cites__cite {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: hsl(var(--foreground));
+}
+
+.reserve-cites__cite a { color: hsl(var(--primary)); }
+.reserve-cites__cite a:hover { text-decoration: underline; }
+
+.reserve-cites__role {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.625rem;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+/* The two forward edges, named in the same colours the chart draws them in. */
+.reserve-read__tag--reserves { color: hsl(38 92% 42%); }
+.reserve-read__tag--decline { color: hsl(var(--destructive)); }
+html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
+
+/* The in-plot P/D mark on the reserve chart — same size and weight as the one
+   the interconnector draws, so the notation is identical wherever it appears. */
+.rtraj__prov {
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+
+/* ── how the three gas views relate ──────────────────────────────────────────
+   The page carries a projection, a six-year history and a live operational
+   view, one under the other, and nothing said how they differ. Three lines,
+   stated once, so a reader knows which one answers their question. */
+
+.reserve-ladder {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--muted) / 0.2);
+}
+
+@media (min-width: 60rem) {
+  .reserve-ladder { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem 1.5rem; }
+}
+
+.reserve-ladder__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.reserve-ladder__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 999px;
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+  font-size: 0.5625rem;
+  font-weight: 800;
+  margin-top: 0.05rem;
+}
+
+.reserve-ladder__title {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.reserve-ladder__body {
+  display: block;
+  font-size: 0.625rem;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+.gas-reserve-metric__value .gas-reserve-metric__unit.is-tight {
+  margin-left: -0.22rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+/* ── The pager under a long table ───────────────────────────────────────────
+   One set of controls for every long list in the explorer. Count on the left,
+   page size in the middle, page navigation on the right; on a phone they stack
+   in that order, because the count is the part you read and the navigation is
+   the part you reach for. */
+
+.grid-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--card) / 0.5);
+}
+
+.grid-pager__count {
+  margin: 0;
+  font-size: 0.6875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-pager__count strong {
+  color: hsl(var(--foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-pager__size {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.6875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-pager__size-btn {
+  min-width: 2rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.45rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--muted) / 0.2);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.grid-pager__size-btn:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted) / 0.45);
+}
+
+.grid-pager__size-btn.is-active {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+}
+
+.grid-pager__nav {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.grid-pager__step,
+.grid-pager__num {
+  min-width: 1.85rem;
+  height: 1.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.45rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--background) / 0.4);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+  transition: background 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.grid-pager__step:hover:not(:disabled),
+.grid-pager__num:hover:not(.is-current) {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted) / 0.4);
+}
+
+.grid-pager__step:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.grid-pager__num.is-current {
+  border-color: hsl(var(--primary) / 0.4);
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+}
+
+.grid-pager__gap {
+  min-width: 1.25rem;
+  text-align: center;
+  font-size: 0.6875rem;
+  color: hsl(var(--muted-foreground) / 0.6);
+  user-select: none;
+}
+
+@media (max-width: 44rem) {
+  .grid-pager { justify-content: center; }
+  .grid-pager__nav .grid-pager__num:not(.is-current) { display: none; }
+}
+
+/* ── The server-rendered grid summary ────────────────────────────────────────
+   Present in the HTML for crawlers and for readers whose JavaScript never
+   arrives, and legible for both. Visually quiet, because the interactive
+   explorer directly below it is the main event — but never hidden: content a
+   crawler can read and a user cannot is cloaking. */
+
+.grid-explorer-summary {
+  margin-bottom: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--card) / 0.5);
+}
+
+.grid-explorer-summary h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+  margin: 0 0 0.5rem;
+}
+
+.grid-explorer-summary h3 {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  margin: 1.1rem 0 0.5rem;
+}
+
+.grid-explorer-summary p {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: hsl(var(--muted-foreground));
+  max-width: 68rem;
+  text-wrap: pretty;
+}
+
+.grid-explorer-summary strong { color: hsl(var(--foreground)); font-variant-numeric: tabular-nums; }
+
+.grid-explorer-summary table {
+  width: 100%;
+  max-width: 42rem;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-explorer-summary caption {
+  caption-side: bottom;
+  padding-top: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+  text-align: left;
+}
+
+.grid-explorer-summary th,
+.grid-explorer-summary td {
+  padding: 0.3rem 0.75rem 0.3rem 0;
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
+  text-align: left;
+}
+
+.grid-explorer-summary thead th {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-explorer-summary td { text-align: right; }
+.grid-explorer-summary tbody th { font-weight: 600; color: hsl(var(--foreground)); }
+
+.grid-explorer-summary ul {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+
+@media (min-width: 60rem) {
+  .grid-explorer-summary ul { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.3rem 2rem; }
+}
+
+.grid-explorer-summary ul a {
+  font-weight: 600;
+  color: hsl(var(--primary));
+}
+
+.grid-explorer-summary ul a:hover { text-decoration: underline; }

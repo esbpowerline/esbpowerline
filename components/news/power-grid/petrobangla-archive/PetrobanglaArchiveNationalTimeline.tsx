@@ -22,12 +22,14 @@ import {
   gridChartYAxisProps,
   type GridChartLegendItem,
 } from '@/components/news/PowerGridChartUI';
+import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { cn, formatNumber, formatTooltipDate, formatDynamicXAxisDate } from '@/lib/utils';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { movingAverage } from '@/lib/data/petrobangla/compute';
 import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { PetrobanglaTimelineDay, PetrobanglaTimelineSummary } from '@/lib/data/petrobangla/types';
 import { ArchiveBadge, ArchiveChartFooter, ArchiveInsightCallout, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
+import { chartGridProps } from '@/lib/data/grid/chart-axis';
 
 export function PetrobanglaArchiveNationalTimeline({
   timeline,
@@ -67,12 +69,12 @@ export function PetrobanglaArchiveNationalTimeline({
 
   const legendItems = useMemo((): GridChartLegendItem[] => {
     const items: GridChartLegendItem[] = [
-      { id: 'domestic', label: 'Domestic gas', color: PB_ARCHIVE_COLORS.domestic, variant: 'area' },
-      { id: 'lng', label: 'Imported LNG', color: PB_ARCHIVE_COLORS.lng, variant: 'area' },
-      { id: 'total', label: 'Grand total', color: PB_ARCHIVE_COLORS.totalLine, variant: 'dashed' },
+      { id: 'domestic', label: 'Domestic gas', color: PB_ARCHIVE_COLORS.domestic, variant: 'area', provenance: 'D' },
+      { id: 'lng', label: 'Imported LNG', color: PB_ARCHIVE_COLORS.lng, variant: 'area', provenance: 'P' },
+      { id: 'total', label: 'Grand total', color: PB_ARCHIVE_COLORS.totalLine, variant: 'dashed', provenance: 'P' },
     ];
     if (showMa) {
-      items.push({ id: 'ma', label: '7-day MA', color: PB_ARCHIVE_COLORS.ma, variant: 'line' });
+      items.push({ id: 'ma', label: '7-day MA', color: PB_ARCHIVE_COLORS.ma, variant: 'line', provenance: 'D' });
     }
     return items;
   }, [showMa]);
@@ -91,7 +93,7 @@ export function PetrobanglaArchiveNationalTimeline({
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                <CartesianGrid strokeDasharray="3 6" stroke={chartTheme.gridStroke} opacity={0.3} vertical={false} />
+                <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                 <XAxis
                   {...gridChartXAxisProps(chartTheme, {
                     dataKey: 'date',
@@ -115,6 +117,7 @@ export function PetrobanglaArchiveNationalTimeline({
                           <span className="grid-chart-tooltip__label flex items-center gap-1.5">
                             <span className="grid-chart-tooltip__dot shrink-0" style={{ background: PB_ARCHIVE_COLORS.domestic }} />
                             Domestic gas
+                            <GridProvenanceTag kind="D" />
                           </span>
                           <span className="grid-chart-tooltip__value" style={{ color: PB_ARCHIVE_COLORS.domestic }}>
                             {formatNumber(d.domestic, 1)} MMCFD
@@ -122,6 +125,7 @@ export function PetrobanglaArchiveNationalTimeline({
                           <span className="grid-chart-tooltip__label flex items-center gap-1.5">
                             <span className="grid-chart-tooltip__dot shrink-0" style={{ background: PB_ARCHIVE_COLORS.lng }} />
                             Imported LNG
+                            <GridProvenanceTag kind="P" />
                           </span>
                           <span className="grid-chart-tooltip__value" style={{ color: PB_ARCHIVE_COLORS.lng }}>
                             {formatNumber(d.lng, 1)} MMCFD
@@ -129,6 +133,7 @@ export function PetrobanglaArchiveNationalTimeline({
                           <span className="grid-chart-tooltip__label flex items-center gap-1.5">
                             <span className="grid-chart-tooltip__dot shrink-0" style={{ background: PB_ARCHIVE_COLORS.totalLine }} />
                             Grand total
+                            <GridProvenanceTag kind="P" />
                           </span>
                           <span className="grid-chart-tooltip__value" style={{ color: PB_ARCHIVE_COLORS.totalLine }}>
                             {formatNumber(d.total, 1)} MMCFD
@@ -138,6 +143,7 @@ export function PetrobanglaArchiveNationalTimeline({
                               <span className="grid-chart-tooltip__label flex items-center gap-1.5">
                                 <span className="grid-chart-tooltip__dot shrink-0" style={{ background: PB_ARCHIVE_COLORS.ma }} />
                                 7-day MA
+                                <GridProvenanceTag kind="D" />
                               </span>
                               <span className="grid-chart-tooltip__value" style={{ color: PB_ARCHIVE_COLORS.ma }}>
                                 {formatNumber(d.totalMa, 1)} MMCFD
@@ -227,7 +233,8 @@ export function PetrobanglaArchiveNationalTimeline({
 
   return (
     <div className={cn(wrapperClass, 'space-y-4')}>
-      <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+      <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex items-center gap-2.5">
+        <History className="h-5 w-5 shrink-0 text-primary" />
         <div className="flex-1 min-w-0">
           <h3 className="grid-explorer-chart-card__title">
             National Gas Timeline (2020—today)<ArchiveBadge />

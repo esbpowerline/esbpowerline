@@ -21,16 +21,35 @@ export function seedDailyReportCache(reports: Record<string, GridDailyData>): vo
   }
 }
 
+/**
+ * The report to render on first paint, and the day it is actually for.
+ *
+ * The two are not always the same day: when nothing is available for the
+ * selected date — it is tier-locked, or simply absent — this falls back to the
+ * latest report so the page opens with something rather than an empty frame.
+ * Callers that pair the payload with anything else keyed by date must use the
+ * returned `date`, not the date they asked for. Assuming they matched is what
+ * made the unit-cost badge compare one day's rates against another day's BPDB
+ * figures and report a disagreement between publishers that did not exist.
+ */
+export function resolveInitialDailyReportEntry(
+  selectedDate: string,
+  latestDate: string,
+  prefetched?: Record<string, GridDailyData>,
+): { date: string; data: GridDailyData } | null {
+  const forSelected = prefetched?.[selectedDate] ?? getCachedDailyReport(selectedDate);
+  if (forSelected) return { date: selectedDate, data: forSelected };
+
+  const forLatest = prefetched?.[latestDate] ?? getCachedDailyReport(latestDate);
+  if (forLatest) return { date: latestDate, data: forLatest };
+
+  return null;
+}
+
 export function resolveInitialDailyReport(
   selectedDate: string,
   latestDate: string,
   prefetched?: Record<string, GridDailyData>,
 ): GridDailyData | null {
-  return (
-    prefetched?.[selectedDate] ??
-    getCachedDailyReport(selectedDate) ??
-    prefetched?.[latestDate] ??
-    getCachedDailyReport(latestDate) ??
-    null
-  );
+  return resolveInitialDailyReportEntry(selectedDate, latestDate, prefetched)?.data ?? null;
 }
