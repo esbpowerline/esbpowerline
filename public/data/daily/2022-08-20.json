@@ -487,5 +487,47 @@
   "sourceFiles": {
     "pgcb": "Daily Report 21-8-20223.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (21.08.22).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 14000.0,
+    "maxDemandDayMw": 11800.0,
+    "maxGenEveningMw": 13826.0,
+    "totalEnergyGenMkwh": 294.7802761816497,
+    "totalLoadShedMw": 160.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 40.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 40.0,
+      "Mymensingh": 80.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2022-08-19",
+    "issuedIn": "Daily Report 20-08-2022",
+    "targetDay": "2022-08-20",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2022-08-20T00:00:00+06:00",
+      "end": "2022-08-21T00:00:00+06:00",
+      "filedAs": "2022-08-21",
+      "sourceFile": "Daily Report 21-8-20223.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2022-08-20T08:00:00+06:00",
+      "end": "2022-08-21T08:00:00+06:00",
+      "filedAs": "2022-08-21",
+      "publishedLabel": "20-21 Aug, 2022",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (21.08.22).pdf"
+    }
   }
 }

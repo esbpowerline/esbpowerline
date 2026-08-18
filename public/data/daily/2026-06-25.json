@@ -723,5 +723,197 @@
         "message": "Sirajganj-Sreepur: the MW curve integrates to 13,452,500 kWh but its circuits are metered at 6,699,000 kWh (2.01x). Both are reproduced as published."
       }
     ]
+  },
+  "forecast": {
+    "maxDemandEveningMw": 17800.0,
+    "maxDemandDayMw": 15300.0,
+    "maxGenEveningMw": 15700.0,
+    "totalEnergyGenMkwh": 349.13,
+    "maxTempC": 34.0,
+    "totalLoadShedMw": 2006.0,
+    "hourly": [
+      {
+        "time": "00:00",
+        "generationMw": 14820.0,
+        "loadShedMw": 1970.0,
+        "demandMw": 16790.0
+      },
+      {
+        "time": "01:00",
+        "generationMw": 14440.0,
+        "loadShedMw": 1820.0,
+        "demandMw": 16260.0
+      },
+      {
+        "time": "02:00",
+        "generationMw": 14240.0,
+        "loadShedMw": 1760.0,
+        "demandMw": 16000.0
+      },
+      {
+        "time": "03:00",
+        "generationMw": 14130.0,
+        "loadShedMw": 1430.0,
+        "demandMw": 15560.0
+      },
+      {
+        "time": "04:00",
+        "generationMw": 14170.0,
+        "loadShedMw": 870.0,
+        "demandMw": 15040.0
+      },
+      {
+        "time": "05:00",
+        "generationMw": 14170.0,
+        "loadShedMw": 560.0,
+        "demandMw": 14730.0
+      },
+      {
+        "time": "06:00",
+        "generationMw": 13970.0,
+        "loadShedMw": 480.0,
+        "demandMw": 14450.0
+      },
+      {
+        "time": "07:00",
+        "generationMw": 13900.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13900.0
+      },
+      {
+        "time": "08:00",
+        "generationMw": 13850.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13850.0
+      },
+      {
+        "time": "09:00",
+        "generationMw": 14040.0,
+        "loadShedMw": 76.4,
+        "demandMw": 14120.0
+      },
+      {
+        "time": "10:00",
+        "generationMw": 14320.0,
+        "loadShedMw": 229.2,
+        "demandMw": 14560.0
+      },
+      {
+        "time": "11:00",
+        "generationMw": 14450.0,
+        "loadShedMw": 382.0,
+        "demandMw": 14850.0
+      },
+      {
+        "time": "12:00",
+        "generationMw": 14600.0,
+        "loadShedMw": 668.5,
+        "demandMw": 15300.0
+      },
+      {
+        "time": "13:00",
+        "generationMw": 14600.0,
+        "loadShedMw": 926.35,
+        "demandMw": 15570.0
+      },
+      {
+        "time": "14:00",
+        "generationMw": 14520.0,
+        "loadShedMw": 916.8,
+        "demandMw": 15480.0
+      },
+      {
+        "time": "15:00",
+        "generationMw": 14410.0,
+        "loadShedMw": 1499.35,
+        "demandMw": 15980.0
+      },
+      {
+        "time": "16:00",
+        "generationMw": 14340.0,
+        "loadShedMw": 1117.35,
+        "demandMw": 15510.0
+      },
+      {
+        "time": "17:00",
+        "generationMw": 14210.0,
+        "loadShedMw": 897.7,
+        "demandMw": 15150.0
+      },
+      {
+        "time": "18:00",
+        "generationMw": 14230.0,
+        "loadShedMw": 725.8,
+        "demandMw": 14990.0
+      },
+      {
+        "time": "18:30",
+        "generationMw": 14800.0,
+        "loadShedMw": 668.5,
+        "demandMw": 15500.0
+      },
+      {
+        "time": "19:00",
+        "generationMw": 15320.0,
+        "loadShedMw": 1241.5,
+        "demandMw": 16620.0
+      },
+      {
+        "time": "19:30",
+        "generationMw": 15180.0,
+        "loadShedMw": 1824.05,
+        "demandMw": 17090.0
+      },
+      {
+        "time": "20:00",
+        "generationMw": 15340.0,
+        "loadShedMw": 1604.4,
+        "demandMw": 17020.0
+      },
+      {
+        "time": "21:00",
+        "generationMw": 15700.0,
+        "loadShedMw": 2005.5,
+        "demandMw": 17800.0
+      },
+      {
+        "time": "22:00",
+        "generationMw": 15760.0,
+        "loadShedMw": 1432.5,
+        "demandMw": 17260.0
+      },
+      {
+        "time": "23:00",
+        "generationMw": 15600.0,
+        "loadShedMw": 1604.4,
+        "demandMw": 17280.0
+      }
+    ],
+    "issuedAt": "2026-06-25T08:14:00+06:00",
+    "areaLoadShedUnread": true,
+    "issuedOn": "2026-06-24",
+    "issuedIn": "Daily Report 25-06-2026",
+    "targetDay": "2026-06-25",
+    "layout": "scenario",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2026-06-25T00:00:00+06:00",
+      "end": "2026-06-26T00:00:00+06:00",
+      "filedAs": "2026-06-26",
+      "sourceFile": "Daily Report 26-06-2026.xlsx"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2026-06-25T08:00:00+06:00",
+      "end": "2026-06-26T08:00:00+06:00",
+      "filedAs": "2026-06-26",
+      "publishedLabel": "25-26 Jun, 2026",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (26.06.26).pdf"
+    }
   }
 }

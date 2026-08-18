@@ -87,6 +87,9 @@ import { ProjectRegisterCard } from '@/components/news/power-grid/renewables/Pro
 import { YearAttributionNote } from '@/components/news/power-grid/renewables/YearAttributionNote';
 import { YearWiseTable } from '@/components/news/power-grid/renewables/YearWiseTable';
 import { sredaAvailableDates } from '@/lib/data/sreda/available-dates';
+// Reads go through the publish manifest so a day or a correction published
+// after the last deploy shows here without one.
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
 import { cn, formatNumber } from '@/lib/utils';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
@@ -223,10 +226,10 @@ export function RenewablesTab({
       setSredaState('error');
       return;
     }
-    fetch(`/data/sreda/daily/${latest}.json`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j: SredaDailyData | null) => {
+    fetchDataJson<SredaDailyData>(`sreda/daily/${latest}.json`)
+      .then((res) => {
         if (!alive) return;
+        const j = res.ok ? res.data : null;
         setSreda(j);
         setSredaState(j ? 'ready' : 'error');
       })
@@ -243,9 +246,8 @@ export function RenewablesTab({
     let alive = true;
     setPlants(null);
     if (!isoDate) return;
-    fetch(`/data/plants/${isoDate}.json`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => alive && setPlants(j?.plants ?? []))
+    fetchDataJson<{ plants?: PlantRow[] }>(`plants/${isoDate}.json`)
+      .then((res) => alive && setPlants(res.ok ? (res.data?.plants ?? []) : []))
       .catch(() => alive && setPlants([]));
     return () => {
       alive = false;
@@ -254,9 +256,8 @@ export function RenewablesTab({
 
   useEffect(() => {
     let alive = true;
-    fetch('/data/pgcb-monthly/_series.json')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => alive && setMonthly(Array.isArray(j) ? j : []))
+    fetchDataJson<MonthlyRow[]>('pgcb-monthly/_series.json')
+      .then((res) => alive && setMonthly(res.ok && Array.isArray(res.data) ? res.data : []))
       .catch(() => alive && setMonthly([]));
     return () => {
       alive = false;

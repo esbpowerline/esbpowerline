@@ -213,8 +213,16 @@ export interface ReserveSensitivity {
   spread: { y5: [number, number]; y10: [number, number]; y5_pct: number; y10_pct: number };
 }
 
-export const RESERVE_MODEL_URL = '/data/petrobangla/reserve-model.json';
-export const RESERVE_SENSITIVITY_URL = '/data/petrobangla/reserve-sensitivity.json';
+/**
+ * Paths relative to `public/data`. Readers pass these to `fetchDataJson`, which
+ * picks the published copy over the file that shipped with the build — a rerun
+ * of the model published from the admin panel used to need a redeploy to show.
+ */
+export const RESERVE_MODEL_PATH = 'petrobangla/reserve-model.json';
+export const RESERVE_SENSITIVITY_PATH = 'petrobangla/reserve-sensitivity.json';
+
+export const RESERVE_MODEL_URL = `/data/${RESERVE_MODEL_PATH}`;
+export const RESERVE_SENSITIVITY_URL = `/data/${RESERVE_SENSITIVITY_PATH}`;
 
 /** Fractional year of an ISO date, for placing a point on a year axis. */
 export function fractionalYear(iso: string): number {

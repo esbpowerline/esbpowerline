@@ -228,10 +228,33 @@ def main() -> None:
     ap.add_argument("--apply", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--index-cache", default=str(REPO / "scratch" / "backfill-source-index.json"))
+    # `index_sources` reads every held workbook and caches the result, and its
+    # own docstring tells you to "pass --reindex after the source directory
+    # changes" — a flag this script never had. So the cache silently outlived
+    # the archive: after 975 workbooks were fetched it still listed 2,005 days
+    # ending at 2026-08-17, and the newly ingested 2026-08-18 was never even
+    # considered. A stale cache here does not fail, it just quietly stops
+    # building days, which is the worst way for it to be wrong.
+    ap.add_argument(
+        "--reindex",
+        action="store_true",
+        help="rebuild the source index instead of reusing the cache",
+    )
+    # Without this the daily run rebuilt all ~2,400 days off the network share
+    # to reach the one day that was new — about forty minutes for one file.
+    ap.add_argument("--from", dest="start", default="", help="only days on or after this date")
+    ap.add_argument("--only", default="", help="only this exact day")
     args = ap.parse_args()
 
-    sources = index_sources(Path(args.index_cache))
+    cache = Path(args.index_cache)
+    if args.reindex and cache.exists():
+        cache.unlink()
+    sources = index_sources(cache)
     days = sorted(sources)
+    if args.only:
+        days = [d for d in days if d == args.only]
+    elif args.start:
+        days = [d for d in days if d >= args.start]
     if args.limit:
         days = days[: args.limit]
     print(f"{len(days)} day(s) with a source workbook")
@@ -283,6 +306,27 @@ def main() -> None:
         for note in notes:
             stats["published without a roll-up column the report got wrong"] += 1
             flagged.append(f"{day}: {note}")
+
+        # PGCB's per-station availability projection FOR this day, from the
+        # workbook filed this day — the same sheet, two columns to the right of
+        # the actuals above. Added here rather than by a separate backfill so a
+        # day built today carries it, and attached to the day it DESCRIBES, the
+        # rule the summary forecast follows too.
+        try:
+            import sys as _sys
+
+            _scripts = str(Path(__file__).resolve().parent)
+            if _scripts not in _sys.path:
+                _sys.path.insert(0, _scripts)
+            from daily_enrich import plant_forecast_for
+            import datetime as _dt
+
+            pf = plant_forecast_for(_dt.date.fromisoformat(day))
+            if pf:
+                doc["plantForecast"] = pf
+                stats["with per-station forecast"] += 1
+        except Exception as exc:  # noqa: BLE001
+            flagged.append(f"{day}: per-station forecast skipped ({exc})")
 
         if plants:
             stats["with plant table"] += 1

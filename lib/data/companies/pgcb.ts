@@ -13,7 +13,15 @@
  * Per-month detail belongs in the second shape so it never re-enters the bundle.
  */
 
-const BASE = '/data/pgcb-monthly';
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
+
+/**
+ * Paths are relative to `public/data`: reads go through `fetchDataJson`, which
+ * consults the publish manifest and reads the database copy when one is
+ * authoritative. A month corrected after the last deploy used to be invisible
+ * here — the stale static file answered 200, so nothing ever looked further.
+ */
+const BASE = 'pgcb-monthly';
 
 export interface PgcbMonthlyFuelMix {
   gas: number;
@@ -220,14 +228,12 @@ export function peekPgcbMonthlyRecord(dateKey: string): PgcbMonthlyRecord | null
 export function fetchPgcbMonthlySeries(): Promise<PgcbMonthlySeriesRecord[]> {
   if (seriesCache) return Promise.resolve(seriesCache);
   if (!seriesInFlight) {
-    seriesInFlight = fetch(`${BASE}/_series.json`)
+    seriesInFlight = fetchDataJson<PgcbMonthlySeriesRecord[]>(`${BASE}/_series.json`)
       .then((res) => {
-        if (!res.ok) throw new Error(`pgcb monthly series: HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((rows: PgcbMonthlySeriesRecord[]) => {
-        seriesCache = rows;
-        return rows;
+        // A tier denial still reads as a failure here, exactly as the 403 did.
+        if (!res.ok) throw new Error(`pgcb monthly series: ${res.error}`);
+        seriesCache = res.data;
+        return res.data;
       })
       .finally(() => {
         // Cleared either way, so a failed load is retried rather than cached.
@@ -245,14 +251,11 @@ export function fetchPgcbMonthlyRecord(dateKey: string): Promise<PgcbMonthlyReco
   const existing = recordInFlight.get(dateKey);
   if (existing) return existing;
 
-  const pending = fetch(`${BASE}/${dateKey}.json`)
+  const pending = fetchDataJson<PgcbMonthlyRecord>(`${BASE}/${dateKey}.json`)
     .then((res) => {
-      if (!res.ok) throw new Error(`pgcb monthly ${dateKey}: HTTP ${res.status}`);
-      return res.json();
-    })
-    .then((row: PgcbMonthlyRecord) => {
-      recordCache.set(dateKey, row);
-      return row;
+      if (!res.ok) return null;
+      recordCache.set(dateKey, res.data);
+      return res.data;
     })
     .catch(() => null)
     .finally(() => {
@@ -282,14 +285,11 @@ export function fetchPgcbMonthlyEvents(dateKey: string): Promise<PgcbOutageEvent
   const existing = eventsInFlight.get(dateKey);
   if (existing) return existing;
 
-  const pending = fetch(`${BASE}/${dateKey}-events.json`)
+  const pending = fetchDataJson<PgcbOutageEvent[]>(`${BASE}/${dateKey}-events.json`)
     .then((res) => {
-      if (!res.ok) throw new Error(`pgcb monthly events ${dateKey}: HTTP ${res.status}`);
-      return res.json();
-    })
-    .then((rows: PgcbOutageEvent[]) => {
-      eventsCache.set(dateKey, rows);
-      return rows;
+      if (!res.ok) return [] as PgcbOutageEvent[];
+      eventsCache.set(dateKey, res.data);
+      return res.data;
     })
     .catch(() => [] as PgcbOutageEvent[])
     .finally(() => {

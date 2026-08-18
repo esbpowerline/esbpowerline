@@ -45,11 +45,33 @@ export function resolveDailyLoadFromStatus(
   return { ok: false, error: `HTTP ${status}`, status };
 }
 
-/** Server-side read from public/data/daily (Node fs). */
+/**
+ * Server-side read of one daily report: a runtime release if the day has been
+ * published, otherwise public/data/daily (Node fs).
+ */
 export async function loadDailyReportFromDisk(isoDate: string): Promise<DailyLoadResult> {
   const parsed = parseIsoDate(isoDate);
   if (!parsed) {
     return { ok: false, error: `Invalid date: ${isoDate}` };
+  }
+
+  // Release first, not file first. A correction to a day that already shipped
+  // has a static file, so an ENOENT-only fallback would never reach it and the
+  // stale day would be served forever. This is the schema's rule: a release
+  // always wins over a static file of the same key. `getReleaseOverride` fails
+  // soft to null, so a database outage just falls through to the file below.
+  try {
+    const { getReleaseOverride } = await import('@/lib/data/releases.server');
+    const released = await getReleaseOverride('GRID_DAILY', parsed);
+    if (released) {
+      const result = resolveDailyLoadFromStatus(isoDate, 200, released as GridDailyData);
+      if (result.ok && result.source === 'network') {
+        return { ok: true, data: result.data, source: 'disk' };
+      }
+      return result;
+    }
+  } catch {
+    // Never let the enhancement break the read path it enhances.
   }
 
   try {
@@ -67,8 +89,9 @@ export async function loadDailyReportFromDisk(isoDate: string): Promise<DailyLoa
     const code = err && typeof err === 'object' && 'code' in err ? String((err as NodeJS.ErrnoException).code) : '';
     const status = code === 'ENOENT' ? 404 : null;
 
-    // Missing from the shipped archive — it may have been published at runtime
-    // since the last deploy. Only ENOENT is retried: a malformed file should
+    // Backstop for the check above: the key list is cached, so a day published
+    // seconds ago on another instance can still be missing from it while the
+    // file is missing too. Only ENOENT is retried — a malformed file should
     // surface as an error, not be masked by a release that may not exist.
     if (status === 404) {
       const { getReleasePayload } = await import('@/lib/data/releases.server');

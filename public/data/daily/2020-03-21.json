@@ -570,5 +570,49 @@
   "sourceFiles": {
     "pgcb": "Daily Report 22.03.2020.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (22.03.20).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 10700.0,
+    "maxDemandDayMw": 9000.0,
+    "maxGenEveningMw": 14039.0,
+    "totalEnergyGenMkwh": 213.2293821938933,
+    "reserveMw": 3339.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2020-03-20",
+    "issuedIn": "Daily Report  21-03-2020_",
+    "targetDay": "2020-03-21",
+    "layout": "divider",
+    "issuedFrom": "converted-text",
+    "issuedFromNote": "read from a pre-converted text copy; no workbook is held for this day"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2020-03-21T00:00:00+06:00",
+      "end": "2020-03-22T00:00:00+06:00",
+      "filedAs": "2020-03-22",
+      "sourceFile": "Daily Report 22.03.2020.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2020-03-21T08:00:00+06:00",
+      "end": "2020-03-22T08:00:00+06:00",
+      "filedAs": "2020-03-22",
+      "publishedLabel": "21-22 Mar, 2020",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (22.03.20).pdf"
+    }
   }
 }

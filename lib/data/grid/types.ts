@@ -249,6 +249,194 @@ export interface DailyPlantDetail {
   date: string;
   plants?: PlantActual[];
   genlog?: GenLog;
+  /** What PGCB expected of each station on this day, published the day before. */
+  plantForecast?: PlantForecast;
+}
+
+/**
+ * PGCB's per-station availability forecast for this day.
+ *
+ * The 2025+ Forecast sheet prints two projections per station beside the
+ * actuals: `Forecasted Available Gen.` — what the station is expected to be
+ * able to offer — and `Effective Available Gen.` — what PGCB expects to
+ * actually be able to take from it. Where they differ, the gap is a constraint
+ * PGCB is anticipating, and the station's `remarks` usually name it ("Gas
+ * shortage", "Coal shortage", "Liquid fuel shortage").
+ *
+ * Anchored to the day it describes, so it sits beside that day's actuals.
+ * Present on the 2025+ layout only — earlier sheets carry no such columns.
+ */
+export interface PlantForecast {
+  targetDay: string;
+  /** The energy day of the report that carried it — targetDay minus one. */
+  issuedOn: string;
+  issuedIn: string;
+  stationCount: number;
+  /**
+   * The station sums at the evening peak. BOTH are stored rather than only
+   * their difference, because they do not behave as a system forecast: on
+   * 2026-08-17 the stations sum to 20,220 MW forecast-available and 13,382 MW
+   * effective, while the same report forecasts 16,130 MW of generation at the
+   * evening peak and the grid delivered 15,891 MW. The effective sum therefore
+   * sits BELOW both — it is a station-by-station availability figure, not a
+   * prediction of system output, and presenting the gap alone would read as a
+   * shortfall claim the source does not make.
+   */
+  forecastAvailableEveningMw: number;
+  effectiveAvailableEveningMw: number;
+  deratedStations: number;
+  deratedMwAtEveningPeak: number;
+  stations: Array<{
+    name: string;
+    fuel: string | null;
+    producer: string | null;
+    forecastDayPeakMw: number | null;
+    forecastEveningPeakMw: number | null;
+    effectiveDayPeakMw: number | null;
+    effectiveEveningPeakMw: number | null;
+    remarks: string | null;
+  }>;
+}
+
+/**
+ * PGCB's projection for this day, published the day BEFORE in that day's
+ * workbook — "Forecast Scenario" on the 2025+ layout, the block below the lone
+ * "Forecast" divider before it.
+ *
+ * It anchors here, to the day it describes, rather than to the report that
+ * issued it: a forecast for 1 April belongs on 1 April, beside the actuals it
+ * can be judged against. `issuedOn` names the energy day whose report carried
+ * it, so the lead time is never in doubt.
+ *
+ * Absent on days whose issuing workbook is not held — roughly a quarter of the
+ * archive has one. Absent is not "no shortfall was expected".
+ */
+export interface GridForecast {
+  /** The day this projects. Equals the key of the file it sits on. */
+  targetDay: string;
+  /**
+   * The energy day of the report that carried it — always targetDay minus one.
+   *
+   * This is NOT when the forecast was issued. The workbook reporting energy day
+   * D is filed on D+1 and its scenario targets D+1, so the projection is
+   * published on the day it describes. `issuedAt` carries the actual instant.
+   */
+  issuedOn: string;
+  /**
+   * When PGCB's Operation Information System generated the report, from the
+   * stamp it prints — "generated digitally ... at 10:06 hrs on 17-08-2026".
+   *
+   * Consistently ~10:00 on the TARGET day across every 2025+ report checked,
+   * which makes this a same-day projection with eight to eleven hours of lead
+   * to the evening peak, not a day-ahead one. Absent on the pre-2025 layout,
+   * which prints no stamp.
+   */
+  issuedAt?: string;
+  /**
+   * The forecast load curve for the target day: 24 hourly rows plus the 18:30
+   * and 19:30 samples PGCB takes around the evening peak.
+   *
+   * Comparable hour-for-hour against `hourlyLoadData`, which holds the actual
+   * curve for the same day. Note the lead time above: rows before `issuedAt`
+   * were published after those hours had already passed, so they are not
+   * predictions and must not be scored as though they were.
+   *
+   * Present only on the 2025+ layout; earlier reports forecast summary
+   * figures alone.
+   */
+  hourly?: Array<{
+    time: string;
+    generationMw: number | null;
+    loadShedMw: number | null;
+    demandMw: number | null;
+  }>;
+  /** The workbook, named as PGCB names it. */
+  issuedIn: string;
+  /** Which layout stated it: 'scenario' from 2025, 'divider' before. */
+  layout: 'scenario' | 'divider';
+  /**
+   * Which of the project's two workbook stores this was read from.
+   *
+   * Both hold the document PGCB issued. `erp.powergrid.gov.bd` is not a third
+   * party republishing the report — it is the portal PGCB's own site links as
+   * its Daily Operation Report, and pgcb.gov.bd hosts no daily report files at
+   * all. Sampled 2026-08-19 across 15 days spanning 2014-2026 and every
+   * container format (.xls, .xlsm, .xlsx): the held copy is byte-identical to
+   * what that portal serves today, on all 15.
+   *
+   * So this records WHERE the archive keeps the file, not how trustworthy it
+   * is. 'source-copy' means the primary store; 'erp-store' means the copy
+   * acquired from the portal. Neither is second-hand.
+   */
+  issuedFrom?: 'source-copy' | 'erp-mirror' | 'converted-text';
+  /** Why a converted-text read was necessary, where it was. */
+  issuedFromNote?: string;
+  maxDemandEveningMw?: number;
+  maxDemandDayMw?: number;
+  /**
+   * The 2014-era sheets forecast ONE demand figure, "Maximum Demand
+   * (Generation end)", with no evening/day split. It is kept apart from the
+   * pair above rather than filed under `maxDemandEveningMw`, because calling
+   * it an evening peak would invent a distinction PGCB did not draw. Present
+   * only where the split pair is genuinely absent.
+   */
+  maxDemandMw?: number;
+  maxGenEveningMw?: number;
+  totalEnergyGenMkwh?: number;
+  /** Generation-end reserve. Pre-2025 layouts only. */
+  reserveMw?: number;
+  /**
+   * "Shortage (Generation end)" on the 2014-era sheets — the same quantity as
+   * `reserveMw` with the sign reversed, printed negative when generation was
+   * expected to fall short. Not folded into `reserveMw`: flipping a published
+   * sign is a restatement, not a parse.
+   */
+  shortageMw?: number;
+  /** Probable maximum temperature in Dhaka. 2025+ layouts only. */
+  maxTempC?: number;
+  totalLoadShedMw?: number;
+  /** Per-area shortfall PGCB expected at the evening peak, in MW. Present only
+   *  where the nine areas sum to PGCB's own stated total. */
+  areaLoadShedMw?: Record<string, number>;
+  /** True where the area row was found but did not reconcile, so it was
+   *  dropped. Distinguishes "we could not read it" from "none was published". */
+  areaLoadShedUnread?: boolean;
+}
+
+/**
+ * The span of time each publisher's figures on this day actually cover.
+ *
+ * Written by scripts/repair_daily_windows.py so the page never has to infer a
+ * window, and so an export carries the same statement the page makes. The two
+ * do not coincide: PGCB's energy day runs midnight to midnight, Petrobangla's
+ * gas day 08:00 to 08:00, and they share only 16 of their 24 hours.
+ *
+ * See lib/data/grid/observation-window.ts for the anchor rule and for what may
+ * legitimately be compared with what.
+ */
+export interface GridObservationWindows {
+  /** Always "+06:00". Both publishers report Bangladesh local clock time. */
+  timezone: string;
+  pgcb?: {
+    unit: string;
+    start: string;
+    end: string;
+    /** The date PGCB files this workbook under — the energy day plus one. */
+    filedAs: string;
+    sourceFile?: string | null;
+  };
+  petrobangla?: {
+    unit: string;
+    start: string;
+    end: string;
+    /** The morning the window closes, which is how Petrobangla names the PDF. */
+    filedAs: string;
+    /** The range printed on the PDF itself, e.g. "16-17 Aug, 2026". */
+    publishedLabel?: string | null;
+    /** The reporting period as printed, e.g. "8.00 to 8.00". */
+    period?: string | null;
+    sourceFile?: string | null;
+  };
 }
 
 export interface GridDailyData {
@@ -296,6 +484,10 @@ export interface GridDailyData {
     pgcb?: string;
     petrobangla?: string;
   };
+  /** What span of time this day's figures cover, per publisher. */
+  observationWindows?: GridObservationWindows;
+  /** What PGCB expected of this day, published the day before. */
+  forecast?: GridForecast;
 }
 
 /** Known Petrobangla gas production entity names (full company labels). */

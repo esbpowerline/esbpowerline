@@ -557,5 +557,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report  16-12-2021.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (16.12.21).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 9200.0,
+    "maxDemandDayMw": 7700.0,
+    "maxGenEveningMw": 13042.0,
+    "totalEnergyGenMkwh": 180.05908157466652,
+    "reserveMw": 3842.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2021-12-14",
+    "issuedIn": "Daily Report 15.12.2021_",
+    "targetDay": "2021-12-15",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2021-12-15T00:00:00+06:00",
+      "end": "2021-12-16T00:00:00+06:00",
+      "filedAs": "2021-12-16",
+      "sourceFile": "Daily Report  16-12-2021.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2021-12-15T08:00:00+06:00",
+      "end": "2021-12-16T08:00:00+06:00",
+      "filedAs": "2021-12-16",
+      "publishedLabel": "15-16 Dec, 2021",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (16.12.21).pdf"
+    }
   }
 }

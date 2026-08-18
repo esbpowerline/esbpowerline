@@ -126,3 +126,49 @@ export function SvgProvMark({
     </g>
   );
 }
+
+/** A point on a canvas, in SVG user units. */
+export type Pt = { x: number; y: number };
+
+/**
+ * Monotone cubic path — a smooth curve that never overshoots its own points.
+ *
+ * A plain Catmull-Rom or Recharts' "monotone" on this data invents dips below a
+ * trough and bumps above a peak, which on a load curve reads as generation the
+ * grid never produced. This keeps the eye's smooth line without drawing a
+ * megawatt that was not published.
+ */
+export function monotonePath(pts: Pt[]): string {
+  if (pts.length === 0) return '';
+  if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+
+  const n = pts.length;
+  const dx: number[] = [];
+  const slope: number[] = [];
+  for (let i = 0; i < n - 1; i++) {
+    dx.push(pts[i + 1].x - pts[i].x);
+    slope.push((pts[i + 1].y - pts[i].y) / (pts[i + 1].x - pts[i].x || 1));
+  }
+
+  const m: number[] = new Array(n).fill(0);
+  m[0] = slope[0];
+  m[n - 1] = slope[n - 2];
+  for (let i = 1; i < n - 1; i++) {
+    if (slope[i - 1] * slope[i] <= 0) {
+      m[i] = 0; // a turning point stays a turning point
+    } else {
+      const w1 = 2 * dx[i] + dx[i - 1];
+      const w2 = dx[i] + 2 * dx[i - 1];
+      m[i] = (w1 + w2) / (w1 / slope[i - 1] + w2 / slope[i]);
+    }
+  }
+
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx[i];
+    d += ` C ${pts[i].x + h / 3} ${pts[i].y + (m[i] * h) / 3}`;
+    d += ` ${pts[i + 1].x - h / 3} ${pts[i + 1].y - (m[i + 1] * h) / 3}`;
+    d += ` ${pts[i + 1].x} ${pts[i + 1].y}`;
+  }
+  return d;
+}

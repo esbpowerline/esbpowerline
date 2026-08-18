@@ -178,6 +178,228 @@ function SredaCard({ latestSredaDate }: { latestSredaDate: string | null }) {
   );
 }
 
+type LocalStep = {
+  artifact: string;
+  key: string;
+  status: 'published' | 'unchanged' | 'absent' | 'failed';
+  detail?: string;
+};
+
+const STEP_MARK: Record<LocalStep['status'], string> = {
+  published: '✓',
+  unchanged: '=',
+  absent: '·',
+  failed: '✗',
+};
+
+type IngestRunResult = {
+  ok: boolean;
+  date: string;
+  steps: Array<{ step: string; ok: boolean; seconds: number; detail?: string }>;
+  artifacts: { grid: boolean; curve: boolean; plants: boolean; gas: boolean };
+  note?: string | null;
+};
+
+/** What the day has on disk, named the way the site's tabs are named. */
+function ArtifactRow({ artifacts }: { artifacts: IngestRunResult['artifacts'] }) {
+  const items: Array<[string, boolean, string]> = [
+    ['Grid day', artifacts.grid, 'Overview, System Snapshot'],
+    ['Fuel curve', artifacts.curve, 'Energy Curve chart'],
+    ['Station detail', artifacts.plants, 'Power Stations tab'],
+    ['Gas day', artifacts.gas, 'Gas & LNG tab'],
+  ];
+  return (
+    <div className="grid gap-1.5 sm:grid-cols-2">
+      {items.map(([label, present, feeds]) => (
+        <div key={label} className="flex items-baseline gap-2 text-[11.5px]">
+          <span className={present ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>
+            {present ? '✓' : '·'}
+          </span>
+          <span className="font-semibold">{label}</span>
+          <span className="text-muted-foreground">— {present ? feeds : 'not produced yet'}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Publish the files the local ingest chain already wrote.
+ *
+ * The collect/upload flow below parses a day in the browser and publishes that
+ * payload. It cannot publish a day produced the usual way — by running the
+ * extractor and its chain on this machine — and it never published the fuel
+ * curve or the station detail at all, so a day pushed through it arrived on the
+ * site with an empty Energy Curve and Power Stations tab. This reads whatever
+ * is on disk for the day and publishes all of it.
+ */
+function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
+  const [day, setDay] = useState(suggestedDay);
+  const [month, setMonth] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [steps, setSteps] = useState<LocalStep[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
+  const [ingesting, setIngesting] = useState(false);
+  const [ingest, setIngest] = useState<IngestRunResult | null>(null);
+
+  /**
+   * Build the complete day before publishing it. The collect-and-parse flow
+   * below produces the grid and gas days only; this runs the whole chain, so
+   * the curve, the Nepal interconnector, the station detail and the gas
+   * timeline exist before anything goes live.
+   */
+  async function runIngest() {
+    if (!day) return;
+    setIngesting(true);
+    setError(null);
+    setIngest(null);
+    setDone(null);
+    try {
+      const res = await fetch('/api/admin/data/ingest-day', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: day }),
+      });
+      const json = (await res.json()) as IngestRunResult & { error?: string };
+      setIngest(json);
+      if (!json.ok && json.error) setError(json.error);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setIngesting(false);
+    }
+  }
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    setDone(null);
+    setSteps([]);
+    try {
+      const res = await fetch('/api/admin/data/publish-local', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: day || undefined, month: month || undefined }),
+      });
+      const json = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        steps?: LocalStep[];
+        summary?: { published: number; unchanged: number; absent: number; failed: number };
+      };
+      setSteps(json.steps ?? []);
+      if (!json.ok) {
+        setError(json.error ?? 'Publish failed');
+        return;
+      }
+      setDone(
+        `${json.summary?.published ?? 0} published, ${json.summary?.unchanged ?? 0} already current` +
+          (json.summary?.absent ? `, ${json.summary.absent} not produced yet` : ''),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AdminCard title="Publish what the local ingest produced" icon={Rocket}>
+      <div className="space-y-3">
+        <p className="text-[12px] text-muted-foreground">
+          <strong>Run full ingest</strong> collects the day and runs the whole chain — grid day,
+          fuel curve, Nepal interconnector, per-station detail, gas day and the gas aggregates — so
+          the day is complete rather than just parsed. <strong>Publish to the site</strong> then
+          puts every file the chain wrote onto the live site with no deployment. Files the day does
+          not have yet are skipped, not failed.
+        </p>
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="mb-1.5 block text-[12px] font-semibold">Energy day</label>
+            <input
+              type="date"
+              value={day}
+              onChange={(e) => setDay(e.target.value)}
+              className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-[12px] font-semibold">
+              Month <span className="font-normal text-muted-foreground">(optional)</span>
+            </label>
+            <input
+              type="month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
+            />
+          </div>
+          <button
+            onClick={runIngest}
+            disabled={ingesting || busy || !day}
+            className="inline-flex items-center gap-2 rounded-lg border border-border/60 px-4 py-2 text-[13px] font-semibold transition hover:bg-muted disabled:opacity-40"
+          >
+            {ingesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            {ingesting ? 'Running the chain…' : 'Run full ingest'}
+          </button>
+          <button
+            onClick={run}
+            disabled={busy || ingesting || (!day && !month)}
+            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40"
+          >
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
+            {busy ? 'Publishing…' : 'Publish to the site'}
+          </button>
+        </div>
+
+        {ingest && (
+          <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3">
+            <p className="text-[12px] font-semibold">
+              Ingest for {ingest.date} — {ingest.ok ? 'complete' : 'finished with problems'}
+            </p>
+            <ArtifactRow artifacts={ingest.artifacts} />
+            <ul className="space-y-0.5">
+              {ingest.steps.map((s) => (
+                <li key={s.step} className="text-[11px] text-muted-foreground">
+                  {s.ok ? '✓' : '✗'} {s.step}
+                  <span className="tabular-nums"> ({s.seconds}s)</span>
+                  {s.detail ? ` — ${s.detail}` : ''}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {done && (
+          <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/[0.07] p-3">
+            <p className="text-[13px] font-bold text-emerald-700 dark:text-emerald-400">
+              Live now — {done}.
+            </p>
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg border border-red-500/40 bg-red-500/[0.07] p-3 text-[12px] text-red-700 dark:text-red-400">
+            {error}
+          </div>
+        )}
+        {steps.length > 0 && (
+          <ul className="space-y-0.5">
+            {steps.map((s) => (
+              <li key={`${s.artifact}:${s.key}`} className="text-[11.5px] text-muted-foreground">
+                {STEP_MARK[s.status]} {s.artifact} <span className="tabular-nums">{s.key}</span>
+                {s.status === 'unchanged' ? ' — already current' : ''}
+                {s.status === 'absent' ? ' — not produced for this day' : ''}
+                {s.status === 'failed' && s.detail ? ` — ${s.detail}` : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </AdminCard>
+  );
+}
+
 export function DataIngestPanel({
   status,
   latestSredaDate,
@@ -302,6 +524,8 @@ export function DataIngestPanel({
   return (
     <div className="space-y-4">
       <StatusBanner status={status} />
+
+      <PublishLocalCard suggestedDay={latestArchiveDate ?? ''} />
 
       <SredaCard latestSredaDate={latestSredaDate} />
 

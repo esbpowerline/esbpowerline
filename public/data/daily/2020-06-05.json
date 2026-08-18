@@ -528,5 +528,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report  06.06.2020.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (06.06.20).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 9000.0,
+    "maxDemandDayMw": 7900.0,
+    "maxGenEveningMw": 15065.0,
+    "totalEnergyGenMkwh": 193.09349649639483,
+    "reserveMw": 6065.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2020-06-04",
+    "issuedIn": "Daily Report 05.06.2020_",
+    "targetDay": "2020-06-05",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2020-06-05T00:00:00+06:00",
+      "end": "2020-06-06T00:00:00+06:00",
+      "filedAs": "2020-06-06",
+      "sourceFile": "Daily Report  06.06.2020.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2020-06-05T08:00:00+06:00",
+      "end": "2020-06-06T08:00:00+06:00",
+      "filedAs": "2020-06-06",
+      "publishedLabel": "05-06 Jun, 2020",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (06.06.20).pdf"
+    }
   }
 }

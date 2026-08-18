@@ -1,5 +1,7 @@
 import type { DailyPlantDetail } from '@/lib/data/grid/types';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
+import { staticDataUrl } from '@/lib/data/feed-paths';
 
 /**
  * Per-station detail for a day, fetched only when the Plants tab is opened.
@@ -19,8 +21,13 @@ import { parseIsoDate } from '@/lib/data/grid/date-utils';
  * the deploy failed. These files are only ever fetched over HTTP by the
  * browser, so they belong outside anything the tracer follows.
  */
+/** Path relative to `public/data` — what the runtime reader keys on. */
+export function plantDetailDataPath(isoDate: string): string {
+  return `plants/${isoDate}.json`;
+}
+
 export function plantDetailPath(isoDate: string): string {
-  return `/data/plants/${isoDate}.json`;
+  return staticDataUrl(plantDetailDataPath(isoDate));
 }
 
 const cache = new Map<string, DailyPlantDetail | null>();
@@ -32,9 +39,12 @@ export async function fetchPlantDetail(isoDate: string): Promise<DailyPlantDetai
 
   let detail: DailyPlantDetail | null = null;
   try {
-    const res = await fetch(plantDetailPath(parsed));
+    // Manifest-aware, like every other client reader: this file only ever read
+    // `/data`, so a day published after the last deploy opened the Plants tab
+    // on an empty table even though the same day's headline figures were there.
+    const res = await fetchDataJson<DailyPlantDetail>(plantDetailDataPath(parsed));
     if (res.ok) {
-      const data = (await res.json()) as DailyPlantDetail;
+      const { data } = res;
       // Guard against a stale or truncated file rather than rendering junk.
       detail = data && typeof data === 'object' && (data.plants || data.genlog) ? data : null;
     }

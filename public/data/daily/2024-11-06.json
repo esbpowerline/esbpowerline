@@ -773,5 +773,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report 07-11-2024.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (07.11.24).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 13000.0,
+    "maxDemandDayMw": 11200.0,
+    "maxGenEveningMw": 13807.0,
+    "totalEnergyGenMkwh": 287.4243340392157,
+    "reserveMw": 807.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2024-11-05",
+    "issuedIn": "Daily Report 06-11-2024",
+    "targetDay": "2024-11-06",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2024-11-06T00:00:00+06:00",
+      "end": "2024-11-07T00:00:00+06:00",
+      "filedAs": "2024-11-07",
+      "sourceFile": "Daily Report 07-11-2024.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2024-11-06T08:00:00+06:00",
+      "end": "2024-11-07T08:00:00+06:00",
+      "filedAs": "2024-11-07",
+      "publishedLabel": "06-07 Nov, 2024",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (07.11.24).pdf"
+    }
   }
 }

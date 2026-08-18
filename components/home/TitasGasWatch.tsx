@@ -130,10 +130,15 @@ export function TitasGasWatch() {
                   <span className="flex items-baseline justify-end whitespace-nowrap">
                     {f ? (
                       <>
-                        <span className="mr-1 text-[10px] font-semibold opacity-70">{f.prefix}</span>
+                        {/* The 10px unit labels were `opacity-70` over rose-600,
+                            computing to 3.22:1 contrast — below WCAG's 4.5:1 for
+                            small text. A darker rose at full opacity keeps them
+                            visibly secondary to the numeral while reading
+                            accessibly. */}
+                        <span className="mr-1 text-[10px] font-semibold text-rose-700 dark:text-rose-300">{f.prefix}</span>
                         <span className="text-[16px] font-bold tabular-nums">{f.numeral}</span>
                         {/* Fixed slot: keeps the numeral axis true whether or not there is a unit. */}
-                        <span className="w-[15px] shrink-0 text-left text-[10px] font-semibold opacity-70">
+                        <span className="w-[15px] shrink-0 text-left text-[10px] font-semibold text-rose-700 dark:text-rose-300">
                           {f.suffix}
                         </span>
                       </>

@@ -1,5 +1,7 @@
 import type { EnergyCurve } from '@/lib/data/grid/types';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
+import { staticDataUrl } from '@/lib/data/feed-paths';
 
 /**
  * The day's half-hourly generation-by-fuel curve, fetched when the chart is on
@@ -15,8 +17,13 @@ import { parseIsoDate } from '@/lib/data/grid/date-utils';
  * En-Curve sheet partway through 2018, and days whose stack does not reconcile
  * against the load curve are deliberately left without one.
  */
+/** Path relative to `public/data` — what the runtime reader keys on. */
+export function energyCurveDataPath(isoDate: string): string {
+  return `curves/${isoDate}.json`;
+}
+
 export function energyCurvePath(isoDate: string): string {
-  return `/data/curves/${isoDate}.json`;
+  return staticDataUrl(energyCurveDataPath(isoDate));
 }
 
 const cache = new Map<string, EnergyCurve | null>();
@@ -28,9 +35,15 @@ export async function fetchEnergyCurve(isoDate: string): Promise<EnergyCurve | n
 
   let curve: EnergyCurve | null = null;
   try {
-    const res = await fetch(energyCurvePath(parsed));
+    // Read through the manifest rather than straight off `/data`: this file had
+    // no runtime path at all, so a day published after the last deploy rendered
+    // its headline numbers from the runtime daily payload and then charted
+    // nothing — the curve 404'd and was cached as "no curve for that day".
+    const res = await fetchDataJson<EnergyCurve & { date?: string }>(
+      energyCurveDataPath(parsed),
+    );
     if (res.ok) {
-      const data = (await res.json()) as EnergyCurve & { date?: string };
+      const { data } = res;
       // Guard against a truncated file rather than charting junk: `mw` is
       // positional against `fuels`, so a short row would re-label every series
       // after the gap.

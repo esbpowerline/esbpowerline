@@ -14,13 +14,14 @@ import { getRuntimeLatestDate } from '@/lib/data/grid/available-dates.server';
  * further day, so "today's downloads" rarely means "today's data".
  */
 
-const ISO_RE = /^(\d{4}-\d{2}-\d{2})\.json$/;
+const ISO_FILE_RE = /^(\d{4}-\d{2}-\d{2})\.json$/;
+const ISO_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 async function latestFileDate(dir: string): Promise<string | null> {
   try {
     const names = await readdir(path.join(process.cwd(), 'public', 'data', ...dir.split('/')));
     const dates = names
-      .map((n) => ISO_RE.exec(n)?.[1])
+      .map((n) => ISO_FILE_RE.exec(n)?.[1])
       .filter((d): d is string => Boolean(d))
       .sort();
     return dates.length ? dates[dates.length - 1] : null;
@@ -53,11 +54,21 @@ export type IngestStatus = {
 };
 
 export const getIngestStatus = cache(async (): Promise<IngestStatus> => {
-  const [latestGridDay, latestGasDay, published] = await Promise.all([
+  const [latestGridDay, latestGasFileDay, published, publishedGas] = await Promise.all([
+    // Already runtime-aware: this merges published GRID_DAILY keys in.
     getRuntimeLatestDate(),
     latestFileDate('petrobangla/daily'),
     getPublishedKeys('GRID_DAILY'),
+    getPublishedKeys('GAS_DAILY'),
   ]);
+
+  // The gas side had no such merge, so a gas day published from the admin panel
+  // left the banner reporting the last *deployed* day — and, through
+  // `gasBehindBy`, an ingest gap that had already been filled.
+  const gasDays = [latestGasFileDay, ...publishedGas.filter((k) => ISO_RE.test(k))].filter(
+    (d): d is string => Boolean(d),
+  );
+  const latestGasDay = gasDays.length > 0 ? gasDays.sort()[gasDays.length - 1] : null;
 
   const nextGridDay = latestGridDay ? addDays(latestGridDay, 1) : null;
 

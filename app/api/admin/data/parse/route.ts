@@ -128,8 +128,21 @@ export async function POST(request: NextRequest) {
 
     workdir = await mkdtemp(path.join(tmpdir(), 'esb-upload-'));
 
-    // Keep the original extension: pandas picks its Excel engine from it.
-    const pgcbExt = path.extname(pgcb.name) || '.xlsx';
+    // Keep the original extension so pandas picks the right Excel engine — but
+    // only from a fixed allowlist. Left unconstrained, `path.extname` echoed
+    // whatever the uploader named the file (`.exe`, `.py`, an NTFS `:stream`
+    // suffix) into the temp filename. It is never executed — only passed as an
+    // argv to the Python parser — but a workbook has exactly these extensions,
+    // so anything else is a malformed upload and is rejected outright.
+    const ALLOWED_PGCB_EXT = new Set(['.xlsx', '.xls', '.xlsm']);
+    const rawExt = path.extname(pgcb.name).toLowerCase();
+    if (rawExt && !ALLOWED_PGCB_EXT.has(rawExt)) {
+      return NextResponse.json(
+        { ok: false, error: 'PGCB workbook must be .xlsx, .xls, or .xlsm.' },
+        { status: 400 },
+      );
+    }
+    const pgcbExt = ALLOWED_PGCB_EXT.has(rawExt) ? rawExt : '.xlsx';
     const pgcbPath = path.join(workdir, `pgcb${pgcbExt}`);
     await writeFile(pgcbPath, Buffer.from(await pgcb.arrayBuffer()));
 

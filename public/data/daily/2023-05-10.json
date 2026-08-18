@@ -465,5 +465,38 @@
   "sourceFiles": {
     "pgcb": "Daily Report 11-05-2023.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (10.05.23).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 15600.0,
+    "maxDemandDayMw": 13800.0,
+    "maxGenEveningMw": 14761.0,
+    "totalEnergyGenMkwh": 342.47999741156167,
+    "totalLoadShedMw": 793.0,
+    "areaLoadShedMw": {
+      "Dhaka": 199.0,
+      "Chattogram": 86.0,
+      "Khulna": 120.0,
+      "Rajshahi": 114.0,
+      "Cumilla": 94.0,
+      "Mymensingh": 83.0,
+      "Sylhet": 32.0,
+      "Barishal": 0.0,
+      "Rangpur": 65.0
+    },
+    "issuedOn": "2023-05-09",
+    "issuedIn": "Daily Report 10-05-2023",
+    "targetDay": "2023-05-10",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2023-05-10T00:00:00+06:00",
+      "end": "2023-05-11T00:00:00+06:00",
+      "filedAs": "2023-05-11",
+      "sourceFile": "Daily Report 11-05-2023.xlsm"
+    }
   }
 }

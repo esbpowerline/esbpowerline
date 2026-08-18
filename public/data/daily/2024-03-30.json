@@ -654,5 +654,39 @@
   "sourceFiles": {
     "pgcb": "Daily Report 31-03-2024.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (30.03.24).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 12500.0,
+    "maxDemandDayMw": 13800.0,
+    "maxGenEveningMw": 14102.0,
+    "totalEnergyGenMkwh": 260.17182974448406,
+    "reserveMw": 1602.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2024-03-29",
+    "issuedIn": "Daily Report-30-03-2024",
+    "targetDay": "2024-03-30",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2024-03-30T00:00:00+06:00",
+      "end": "2024-03-31T00:00:00+06:00",
+      "filedAs": "2024-03-31",
+      "sourceFile": "Daily Report 31-03-2024.xlsm"
+    }
   }
 }

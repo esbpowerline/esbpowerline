@@ -528,5 +528,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report 17-08-2020.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (17.08.20).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 11900.0,
+    "maxDemandDayMw": 9800.0,
+    "maxGenEveningMw": 14876.0,
+    "totalEnergyGenMkwh": 238.8019002612613,
+    "reserveMw": 2976.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2020-08-15",
+    "issuedIn": "Daily Report 16.8.2020",
+    "targetDay": "2020-08-16",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2020-08-16T00:00:00+06:00",
+      "end": "2020-08-17T00:00:00+06:00",
+      "filedAs": "2020-08-17",
+      "sourceFile": "Daily Report 17-08-2020.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2020-08-16T08:00:00+06:00",
+      "end": "2020-08-17T08:00:00+06:00",
+      "filedAs": "2020-08-17",
+      "publishedLabel": "16-17 Aug, 2020",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (17.08.20).pdf"
+    }
   }
 }

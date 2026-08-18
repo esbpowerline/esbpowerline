@@ -527,6 +527,15 @@ enum DataFeed {
   PGCB_MONTHLY_SERIES  // public/data/pgcb-monthly/_series.json
   PGCB_MONTHLY         // public/data/pgcb-monthly/{YYYY-MM}.json
   SREDA_DAILY          // public/data/sreda/daily/{date}.json
+  // A published day is only complete if the Explorer's other tabs can read it
+  // too. Without these a newly published day showed its headline figures while
+  // the Energy Curve chart and the Power Stations tab silently 404ed, because
+  // the ingest writes those as separate files.
+  GRID_CURVE           // public/data/curves/{date}.json
+  GRID_PLANTS          // public/data/plants/{date}.json
+  PGCB_MONTHLY_EVENTS  // public/data/pgcb-monthly/{YYYY-MM}-events.json
+  GAS_RESERVE_MODEL    // public/data/petrobangla/reserve-model.json
+  GAS_RESERVE_SENSITIVITY // public/data/petrobangla/reserve-sensitivity.json
 }
 
 /// A parsed payload awaiting review. Transient: cleared once published or discarded.

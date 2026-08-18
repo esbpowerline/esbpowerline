@@ -600,5 +600,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report  29.11.2020.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (29.11.20).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 8800.0,
+    "maxDemandDayMw": 6900.0,
+    "maxGenEveningMw": 14126.0,
+    "totalEnergyGenMkwh": 170.8664118548799,
+    "reserveMw": 5326.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2020-11-27",
+    "issuedIn": "Daily Report  28-11-2020",
+    "targetDay": "2020-11-28",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2020-11-28T00:00:00+06:00",
+      "end": "2020-11-29T00:00:00+06:00",
+      "filedAs": "2020-11-29",
+      "sourceFile": "Daily Report  29.11.2020.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2020-11-28T08:00:00+06:00",
+      "end": "2020-11-29T08:00:00+06:00",
+      "filedAs": "2020-11-29",
+      "publishedLabel": "28-29 November, 2020",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (29.11.20).pdf"
+    }
   }
 }

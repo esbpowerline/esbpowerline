@@ -424,5 +424,39 @@
   "sourceFiles": {
     "pgcb": "Daily Report  09.07.2022.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (08.07.22).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 12500.0,
+    "maxDemandDayMw": 10300.0,
+    "maxGenEveningMw": 14002.0,
+    "totalEnergyGenMkwh": 272.5179785593656,
+    "reserveMw": 1502.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2022-07-07",
+    "issuedIn": "Daily report 08.7.2022",
+    "targetDay": "2022-07-08",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2022-07-08T00:00:00+06:00",
+      "end": "2022-07-09T00:00:00+06:00",
+      "filedAs": "2022-07-09",
+      "sourceFile": "Daily Report  09.07.2022.xlsm"
+    }
   }
 }

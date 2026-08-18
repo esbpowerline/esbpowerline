@@ -564,5 +564,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report 25-05-2021.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (25.05.21).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 14500.0,
+    "maxDemandDayMw": 12100.0,
+    "maxGenEveningMw": 15881.0,
+    "totalEnergyGenMkwh": 317.56075477277835,
+    "reserveMw": 1381.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2021-05-23",
+    "issuedIn": "Daily Report 24-05-2021_",
+    "targetDay": "2021-05-24",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2021-05-24T00:00:00+06:00",
+      "end": "2021-05-25T00:00:00+06:00",
+      "filedAs": "2021-05-25",
+      "sourceFile": "Daily Report 25-05-2021.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2021-05-24T08:00:00+06:00",
+      "end": "2021-05-25T08:00:00+06:00",
+      "filedAs": "2021-05-25",
+      "publishedLabel": "24-25 May, 2021",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (25.05.21).pdf"
+    }
   }
 }

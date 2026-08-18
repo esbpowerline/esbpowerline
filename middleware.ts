@@ -133,6 +133,7 @@ export async function middleware(request: NextRequest) {
   const ip = clientIpFromForwarded(
     request.headers.get('x-forwarded-for'),
     request.headers.get('x-real-ip'),
+    request.headers.get('x-vercel-forwarded-for'),
   );
 
   // Global Upstash Rate Limiting. An Upstash outage used to reject inside

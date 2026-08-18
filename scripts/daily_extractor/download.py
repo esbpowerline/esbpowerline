@@ -262,7 +262,15 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
             continue
         if data[:4] != b"%PDF" or len(data) < 5000:
             continue
-        dest = dest_dir / f"Petrobangla_{energy.isoformat()}.pdf"
+        # Named the way Petrobangla names it, not the way this pipeline thinks
+        # of it. The filename becomes the citation the site prints, and a
+        # reader has to be able to ask Petrobangla for that exact document —
+        # "Petrobangla_2026-08-16.pdf" is a name only this archive uses, and
+        # the Oracle object name ("a627934c-....pdf") is one nobody can use.
+        # 46 days were published citing the latter before this was changed.
+        filed = energy + timedelta(days=1)
+        stamp = f"{filed.day:02d}.{filed.month:02d}.{str(filed.year)[-2:]}"
+        dest = dest_dir / f"Daily-Gas-Intake-Offtake-Report ({stamp}).pdf"
         dest.write_bytes(data)
         try:
             import pypdf
@@ -275,6 +283,64 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
         except Exception:
             continue
     return None, None
+
+
+# Where the publisher's own workbooks are kept. Searched before any mirror.
+PGCB_SOURCE_DIRS = [
+    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
+]
+
+
+def find_archived_workbook(report_date: date) -> Path | None:
+    """The held source workbook for a report date, if there is one.
+
+    PGCB's own filenames are not consistent — "Daily Report  01-04-2026.xlsx",
+    "Daily Report 01.04.2026_.xlsm", "Daily_Report02-01-14_.xls", and at least
+    one "Dalay Report" — so the date is parsed out of each name rather than
+    reconstructed into a template that would miss most of them.
+    """
+    from parse_daily_reports import parse_date_from_filename
+
+    for root in PGCB_SOURCE_DIRS:
+        if not root.is_dir():
+            continue
+        for path in sorted(root.iterdir()):
+            if path.suffix.lower() not in {".xlsx", ".xlsm", ".xls"}:
+                continue
+            if path.name.startswith("~$"):
+                continue
+            if parse_date_from_filename(path.name) == report_date:
+                return path
+    return None
+
+
+def archive_workbook(src: Path, report_date: date) -> Path | None:
+    """Keep the collected workbook, under PGCB's own name for that report date.
+
+    The collector downloaded a workbook, parsed it, and left it in the scratch
+    directory. Nothing filed it, so days ingested live were unavailable to every
+    later pass — which is exactly why forecast coverage stopped dead at
+    2026-08-12 while the site was serving days up to the 17th, and why 996 days
+    had to be re-fetched from PGCB's portal to close the gap.
+
+    Filing it here closes that loop: whatever the collector reads today, a
+    re-parse can read tomorrow.
+    """
+    for root in PGCB_SOURCE_DIRS:
+        if not root.is_dir():
+            continue
+        dd = f"{report_date.day:02d}-{report_date.month:02d}-{report_date.year}"
+        dest = root / f"Daily Report {dd}{src.suffix.lower() or '.xlsx'}"
+        if dest.exists():
+            return dest
+        try:
+            dest.write_bytes(src.read_bytes())
+            return dest
+        except Exception:
+            # A read-only or absent share is not a reason to fail a collection.
+            continue
+    return None
 
 
 def download_for_energy_day(energy: date) -> DownloadResult:
@@ -290,19 +356,28 @@ def download_for_energy_day(energy: date) -> DownloadResult:
     local_path3 = Path(rf"C:\Users\hamim\Desktop\PGCB\Daily Report {dd}-{mm}-{yy}.xlsx")
     local_path4 = Path(rf"C:\Users\hamim\Desktop\PGCB\Daily Report  {dd}-{mm}-{yy}.xlsx")
     
-    if local_path1.exists():
-        pgcb_path = local_path1
-    elif local_path2.exists():
-        pgcb_path = local_path2
-    elif local_path3.exists():
-        pgcb_path = local_path3
-    elif local_path4.exists():
-        pgcb_path = local_path4
+    for candidate in (local_path1, local_path2, local_path3, local_path4):
+        if candidate.exists():
+            pgcb_path = candidate
+            break
 
+    # Source precedence. The ERP portal republishes PGCB's workbook; it is a
+    # verification tool, not the source. Reaching for it first meant a day whose
+    # real workbook was sitting in the archive got ingested from the mirror, and
+    # the citation this site prints named the ERP copy rather than the document
+    # PGCB issued. So: held source copy, then pgcb.gov.bd itself, then ERP.
     if not pgcb_path:
-        pgcb_path, erp_id = probe_erp_for_energy(energy)
+        pgcb_path = find_archived_workbook(report_date)
     if not pgcb_path:
         pgcb_path = try_pgcb_legacy(report_date)
+    if not pgcb_path:
+        pgcb_path, erp_id = probe_erp_for_energy(energy)
+
+    # Anything that came off the network gets filed. A copy already read from
+    # the archive is left where it is — `archive_workbook` returns the existing
+    # path rather than rewriting it.
+    if pgcb_path and Path(pgcb_path).exists():
+        archive_workbook(Path(pgcb_path), report_date)
         if pgcb_path:
             _, found = report_energy_dates(pgcb_path)
             if found != energy:

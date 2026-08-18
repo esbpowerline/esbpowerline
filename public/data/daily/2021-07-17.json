@@ -445,5 +445,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report 18-07-2021.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (18.07.21).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 13300.0,
+    "maxDemandDayMw": 10500.0,
+    "maxGenEveningMw": 15427.0,
+    "totalEnergyGenMkwh": 283.6885574937811,
+    "reserveMw": 2127.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2021-07-16",
+    "issuedIn": "Daily Report 17.7.2021_",
+    "targetDay": "2021-07-17",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2021-07-17T00:00:00+06:00",
+      "end": "2021-07-18T00:00:00+06:00",
+      "filedAs": "2021-07-18",
+      "sourceFile": "Daily Report 18-07-2021.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2021-07-17T08:00:00+06:00",
+      "end": "2021-07-18T08:00:00+06:00",
+      "filedAs": "2021-07-18",
+      "publishedLabel": "17-18 July, 2021",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (18.07.21).pdf"
+    }
   }
 }

@@ -95,16 +95,35 @@ export async function toggleSaveMagazine(magazineId: string) {
   return { saved: true };
 }
 
+const MAX_COMMENT_LENGTH = 5000;
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
+
 export async function submitArticleComment(articleId: string, articleSlug: string, content: string) {
   const { userId, session, autoApprove } = await requireCommentAuthor();
   const trimmed = content.trim();
   if (trimmed.length < 3) {
     throw new Error('Comment is too short');
   }
+  // Cap the length: the field had a floor but no ceiling, so a single comment
+  // could store an unbounded blob.
+  if (trimmed.length > MAX_COMMENT_LENGTH) {
+    throw new Error('Comment is too long');
+  }
+  // The comment must attach to a real, published article — not any id a caller
+  // supplies (which let a comment be pinned to a draft). And the slug is fed to
+  // revalidatePath, so it must be a slug, not an arbitrary path fragment: read
+  // both from the article record rather than trusting the arguments.
+  const article = await prisma.article.findUnique({
+    where: { id: articleId },
+    select: { id: true, slug: true, status: true },
+  });
+  if (!article || article.status !== 'PUBLISHED') {
+    throw new Error('Article not found');
+  }
 
   await prisma.comment.create({
     data: {
-      articleId,
+      articleId: article.id,
       userId,
       authorName: session.user.name ?? 'Member',
       authorEmail: session.user.email ?? null,
@@ -113,7 +132,9 @@ export async function submitArticleComment(articleId: string, articleSlug: strin
     },
   });
 
-  revalidatePath(`/articles/${articleSlug}`);
+  // article.slug is DB-controlled; guard anyway so a malformed stored slug can
+  // never reach revalidatePath as a path fragment.
+  if (SLUG_RE.test(article.slug)) revalidatePath(`/articles/${article.slug}`);
   revalidatePath('/members/comments');
   revalidatePath('/cms/comments');
   return { ok: true, autoApproved: autoApprove };

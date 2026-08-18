@@ -1419,7 +1419,16 @@ def parse_pgcb_file(filepath, op_date):
                 if idx + 1 < len(parts): evening_peak_gen = clean_float(parts[idx+1])
                 note_time('eveningPeakGen', parts, idx)
             elif 'evening peak demand' in cell_lower or 'e.p. demand' in cell_lower:
-                if idx + 1 < len(parts): evening_peak_demand = clean_float(parts[idx+1])
+                # Label cells only, never column headers. The zone table's header
+                # "% Evening Peak Demand as Book-2017" also matches this substring,
+                # and its neighbour "Extra Load as Book-2017(MW)" clean_floats to
+                # -2017 — which overwrote the real figure and shipped a negative
+                # demand on 2018-08-05. A header names no value: require the next
+                # cell to actually be a number before believing it.
+                if '%' not in cell and idx + 1 < len(parts):
+                    nxt = parts[idx + 1].replace(',', '').strip()
+                    if re.fullmatch(r'-?\d+(\.\d+)?', nxt):
+                        evening_peak_demand = clean_float(parts[idx+1])
                 note_time('eveningPeakDemand', parts, idx)
             # Time only. These three values are settled elsewhere — dayPeakDemand
             # by `published`, the extremes by `daily_extremes` — and are left to

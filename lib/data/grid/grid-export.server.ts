@@ -3,6 +3,8 @@ import 'server-only';
 import { loadDailyReportFromDisk } from '@/lib/data/grid/daily-loader.server';
 import { availableDates } from '@/lib/data/grid/available-dates';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
+import { getReleaseOverride } from '@/lib/data/releases.server';
+import { SINGLETON } from '@/lib/data/feed-paths';
 import {
   GRID_EXPORT_DATASETS,
   type ExportColumn,
@@ -12,10 +14,23 @@ import {
   type PetrobanglaIndexDayInput,
 } from '@/lib/data/grid/grid-export-datasets';
 
-/** Read a Petrobangla daily archive file from disk (server-safe; no HTTP fetch). */
+/**
+ * Read one Petrobangla day: the runtime release if that day has been published,
+ * otherwise the archive file (server-safe; no HTTP fetch).
+ */
 async function loadPetrobanglaDayFromDisk(isoDate: string): Promise<PetrobanglaDayInput | null> {
   const parsed = parseIsoDate(isoDate);
   if (!parsed) return null;
+
+  // Release wins over a static file of the same key, so a re-parsed gas day
+  // reaches the member export without a redeploy. Fails soft to the file.
+  try {
+    const released = await getReleaseOverride('GAS_DAILY', parsed);
+    if (released) return released as PetrobanglaDayInput;
+  } catch {
+    // Enhancement only.
+  }
+
   try {
     const fs = await import('node:fs/promises');
     const path = await import('node:path');
@@ -26,21 +41,37 @@ async function loadPetrobanglaDayFromDisk(isoDate: string): Promise<PetrobanglaD
   }
 }
 
-let pbIndexCache: PetrobanglaIndexDayInput[] | null = null;
+/**
+ * Only the *file* is memoised, and only because it cannot change without a
+ * redeploy. The release is deliberately re-checked on every call — a cache that
+ * outlived the first read would pin the index for the life of the process and
+ * defeat the point of publishing one. That check is itself cached (per feed,
+ * ~60s) inside releases.server, so re-checking costs nothing per call.
+ */
+let pbIndexFileCache: PetrobanglaIndexDayInput[] | null = null;
 
-/** Load the Petrobangla archive index (per-day totals) from disk, cached. */
+/** Load the Petrobangla archive index (per-day totals): release, else disk. */
 export async function loadPetrobanglaIndexDays(): Promise<PetrobanglaIndexDayInput[]> {
-  if (pbIndexCache) return pbIndexCache;
+  try {
+    const released = (await getReleaseOverride('GAS_INDEX', SINGLETON)) as
+      | { days?: PetrobanglaIndexDayInput[] }
+      | null;
+    if (released && Array.isArray(released.days)) return released.days;
+  } catch {
+    // Enhancement only; fall through to the shipped index.
+  }
+
+  if (pbIndexFileCache) return pbIndexFileCache;
   try {
     const fs = await import('node:fs/promises');
     const path = await import('node:path');
     const filePath = path.join(process.cwd(), 'public', 'data', 'petrobangla', '_index.json');
     const parsed = JSON.parse(await fs.readFile(filePath, 'utf8')) as { days?: PetrobanglaIndexDayInput[] };
-    pbIndexCache = Array.isArray(parsed.days) ? parsed.days : [];
+    pbIndexFileCache = Array.isArray(parsed.days) ? parsed.days : [];
   } catch {
-    pbIndexCache = [];
+    pbIndexFileCache = [];
   }
-  return pbIndexCache;
+  return pbIndexFileCache;
 }
 
 /** Restrict a dataset's columns to a selected subset (all columns if none/empty). */

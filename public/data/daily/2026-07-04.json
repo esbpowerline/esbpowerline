@@ -1063,5 +1063,195 @@
       "import": 0.0
     },
     "checks": []
+  },
+  "forecast": {
+    "maxDemandEveningMw": 16910.0,
+    "maxDemandDayMw": 14460.0,
+    "maxGenEveningMw": 16359.0,
+    "totalEnergyGenMkwh": 347.815,
+    "maxTempC": 34.0,
+    "hourly": [
+      {
+        "time": "00:00",
+        "generationMw": 16110.0,
+        "loadShedMw": 57.3,
+        "demandMw": 16170.0
+      },
+      {
+        "time": "01:00",
+        "generationMw": 15660.0,
+        "loadShedMw": 0.0,
+        "demandMw": 15660.0
+      },
+      {
+        "time": "02:00",
+        "generationMw": 15470.0,
+        "loadShedMw": 0.0,
+        "demandMw": 15470.0
+      },
+      {
+        "time": "03:00",
+        "generationMw": 15150.0,
+        "loadShedMw": 0.0,
+        "demandMw": 15150.0
+      },
+      {
+        "time": "04:00",
+        "generationMw": 14500.0,
+        "loadShedMw": 0.0,
+        "demandMw": 14500.0
+      },
+      {
+        "time": "05:00",
+        "generationMw": 13800.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13800.0
+      },
+      {
+        "time": "06:00",
+        "generationMw": 13140.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13140.0
+      },
+      {
+        "time": "07:00",
+        "generationMw": 13360.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13360.0
+      },
+      {
+        "time": "08:00",
+        "generationMw": 13220.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13220.0
+      },
+      {
+        "time": "09:00",
+        "generationMw": 13246.0,
+        "loadShedMw": 137.52,
+        "demandMw": 13390.0
+      },
+      {
+        "time": "10:00",
+        "generationMw": 13165.0,
+        "loadShedMw": 300.825,
+        "demandMw": 13480.0
+      },
+      {
+        "time": "11:00",
+        "generationMw": 13436.0,
+        "loadShedMw": 366.72,
+        "demandMw": 13820.0
+      },
+      {
+        "time": "12:00",
+        "generationMw": 13980.0,
+        "loadShedMw": 458.4,
+        "demandMw": 14460.0
+      },
+      {
+        "time": "13:00",
+        "generationMw": 14524.0,
+        "loadShedMw": 339.98,
+        "demandMw": 14880.0
+      },
+      {
+        "time": "14:00",
+        "generationMw": 14302.0,
+        "loadShedMw": 561.54,
+        "demandMw": 14890.0
+      },
+      {
+        "time": "15:00",
+        "generationMw": 14491.0,
+        "loadShedMw": 428.795,
+        "demandMw": 14940.0
+      },
+      {
+        "time": "16:00",
+        "generationMw": 14189.0,
+        "loadShedMw": 459.355,
+        "demandMw": 14670.0
+      },
+      {
+        "time": "17:00",
+        "generationMw": 13765.0,
+        "loadShedMw": 405.875,
+        "demandMw": 14190.0
+      },
+      {
+        "time": "18:00",
+        "generationMw": 13246.0,
+        "loadShedMw": 729.62,
+        "demandMw": 14010.0
+      },
+      {
+        "time": "18:30",
+        "generationMw": 13600.0,
+        "loadShedMw": 1241.5,
+        "demandMw": 14900.0
+      },
+      {
+        "time": "19:00",
+        "generationMw": 14146.0,
+        "loadShedMw": 1694.17,
+        "demandMw": 15920.0
+      },
+      {
+        "time": "19:30",
+        "generationMw": 15913.0,
+        "loadShedMw": 398.235,
+        "demandMw": 16330.0
+      },
+      {
+        "time": "20:00",
+        "generationMw": 15905.0,
+        "loadShedMw": 510.925,
+        "demandMw": 16440.0
+      },
+      {
+        "time": "21:00",
+        "generationMw": 16359.0,
+        "loadShedMw": 526.205,
+        "demandMw": 16910.0
+      },
+      {
+        "time": "22:00",
+        "generationMw": 16308.0,
+        "loadShedMw": 145.16,
+        "demandMw": 16460.0
+      },
+      {
+        "time": "23:00",
+        "generationMw": 16343.0,
+        "loadShedMw": 503.285,
+        "demandMw": 16870.0
+      }
+    ],
+    "issuedAt": "2026-07-04T09:55:00+06:00",
+    "issuedOn": "2026-07-03",
+    "issuedIn": "Daily Report 04-07-2026",
+    "targetDay": "2026-07-04",
+    "layout": "scenario",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2026-07-04T00:00:00+06:00",
+      "end": "2026-07-05T00:00:00+06:00",
+      "filedAs": "2026-07-05",
+      "sourceFile": "Daily Report  05-07-2026.xlsx"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2026-07-04T08:00:00+06:00",
+      "end": "2026-07-05T08:00:00+06:00",
+      "filedAs": "2026-07-05",
+      "publishedLabel": "04-05 Jul, 2026",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (05.07.26).pdf"
+    }
   }
 }

@@ -35,14 +35,15 @@ import {
 import { useChartTheme } from '@/hooks/useChartTheme';
 import { GridChartExternalLegend } from '@/components/news/PowerGridChartUI';
 import {
-  RESERVE_MODEL_URL,
-  RESERVE_SENSITIVITY_URL,
+  RESERVE_MODEL_PATH,
+  RESERVE_SENSITIVITY_PATH,
   yearOf,
   type ReserveField,
   type ReserveModel,
   type ReserveSensitivity,
 } from '@/lib/data/macro/reserveModel';
 import { RESERVE_BENCHMARKS } from '@/lib/data/macro/reserveBenchmarks';
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
 import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
 import { GridCardFooter, GridProvenanceTag, GridSourceFiles } from './GridExplorerUI';
 import { PetrobanglaMacroGasSection } from './PetrobanglaMacroGasSection';
@@ -99,15 +100,19 @@ function GasReserveDepletionContent({ selectedDate, systemStatsDate, pgcbGasTota
 
   useEffect(() => {
     let alive = true;
-    fetch(RESERVE_MODEL_URL)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((json: ReserveModel) => { if (alive) setModel(json); })
+    // Manifest-aware, so a model rerun published since the last deploy is the
+    // one charted here.
+    fetchDataJson<ReserveModel>(RESERVE_MODEL_PATH)
+      .then((res) => {
+        if (!alive) return;
+        if (res.ok) setModel(res.data);
+        else setFailed(true);
+      })
       .catch(() => { if (alive) setFailed(true); });
     // The sensitivity run is optional: if it is missing the panel simply does
     // not claim anything about how much the choices are worth.
-    fetch(RESERVE_SENSITIVITY_URL)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((json: ReserveSensitivity | null) => { if (alive && json) setSensitivity(json); })
+    fetchDataJson<ReserveSensitivity>(RESERVE_SENSITIVITY_PATH)
+      .then((res) => { if (alive && res.ok) setSensitivity(res.data); })
       .catch(() => {});
     return () => { alive = false; };
   }, []);

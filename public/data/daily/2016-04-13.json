@@ -506,5 +506,39 @@
   ],
   "sourceFiles": {
     "pgcb": "Daily Report14-04-16.xls"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 8400.0,
+    "maxDemandDayMw": 7400.0,
+    "shortageMw": -214.0,
+    "maxGenEveningMw": 8186.0,
+    "totalEnergyGenMkwh": 179.0,
+    "totalLoadShedMw": 198.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 41.0,
+      "Khulna": 41.0,
+      "Rajshahi": 40.0,
+      "Cumilla": 28.0,
+      "Mymensingh": 20.0,
+      "Sylhet": 0.0,
+      "Barishal": 8.0,
+      "Rangpur": 20.0
+    },
+    "issuedOn": "2016-04-12",
+    "issuedIn": "Daily Report13-04-16",
+    "targetDay": "2016-04-13",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2016-04-13T00:00:00+06:00",
+      "end": "2016-04-14T00:00:00+06:00",
+      "filedAs": "2016-04-14",
+      "sourceFile": "Daily Report14-04-16.xls"
+    }
   }
 }

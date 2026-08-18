@@ -473,5 +473,24 @@
   "sourceFiles": {
     "pgcb": "Daily Report  04-03-2020.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (04.03.20).pdf"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2020-03-03T00:00:00+06:00",
+      "end": "2020-03-04T00:00:00+06:00",
+      "filedAs": "2020-03-04",
+      "sourceFile": "Daily Report  04-03-2020.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2020-03-03T08:00:00+06:00",
+      "end": "2020-03-04T08:00:00+06:00",
+      "filedAs": "2020-03-04",
+      "publishedLabel": "03-04 Mar, 2020",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (04.03.20).pdf"
+    }
   }
 }

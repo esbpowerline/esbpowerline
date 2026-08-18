@@ -745,5 +745,47 @@
   "sourceFiles": {
     "pgcb": "Daily Report  31-10-2024.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (31.10.24).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 14000.0,
+    "maxDemandDayMw": 12400.0,
+    "maxGenEveningMw": 13623.0,
+    "totalEnergyGenMkwh": 306.82226487553123,
+    "totalLoadShedMw": 357.0,
+    "areaLoadShedMw": {
+      "Dhaka": 37.0,
+      "Chattogram": 38.0,
+      "Khulna": 62.0,
+      "Rajshahi": 62.0,
+      "Cumilla": 47.0,
+      "Mymensingh": 39.0,
+      "Sylhet": 17.0,
+      "Barishal": 19.0,
+      "Rangpur": 36.0
+    },
+    "issuedOn": "2024-10-29",
+    "issuedIn": "Daily Report 30-10-2024",
+    "targetDay": "2024-10-30",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2024-10-30T00:00:00+06:00",
+      "end": "2024-10-31T00:00:00+06:00",
+      "filedAs": "2024-10-31",
+      "sourceFile": "Daily Report  31-10-2024.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2024-10-30T08:00:00+06:00",
+      "end": "2024-10-31T08:00:00+06:00",
+      "filedAs": "2024-10-31",
+      "publishedLabel": "30-31 Oct, 2024",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (31.10.24).pdf"
+    }
   }
 }

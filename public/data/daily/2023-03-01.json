@@ -647,5 +647,39 @@
   ],
   "sourceFiles": {
     "pgcb": "Daily Report 02-03-2023.xlsm"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 11800.0,
+    "maxDemandDayMw": 10700.0,
+    "maxGenEveningMw": 13269.0,
+    "totalEnergyGenMkwh": 245.63773384748697,
+    "reserveMw": 1469.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2023-02-28",
+    "issuedIn": "Daily Report-01-03-2023",
+    "targetDay": "2023-03-01",
+    "layout": "divider",
+    "issuedFrom": "source-copy"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2023-03-01T00:00:00+06:00",
+      "end": "2023-03-02T00:00:00+06:00",
+      "filedAs": "2023-03-02",
+      "sourceFile": "Daily Report 02-03-2023.xlsm"
+    }
   }
 }

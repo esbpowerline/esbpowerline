@@ -550,5 +550,24 @@
   "sourceFiles": {
     "pgcb": "Daily Report 06-06-2021.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (06.06.21).pdf"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2021-06-05T00:00:00+06:00",
+      "end": "2021-06-06T00:00:00+06:00",
+      "filedAs": "2021-06-06",
+      "sourceFile": "Daily Report 06-06-2021.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2021-06-05T08:00:00+06:00",
+      "end": "2021-06-06T08:00:00+06:00",
+      "filedAs": "2021-06-06",
+      "publishedLabel": "05-06 June, 2021",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (06.06.21).pdf"
+    }
   }
 }

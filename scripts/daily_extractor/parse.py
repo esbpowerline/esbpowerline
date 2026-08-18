@@ -16,6 +16,7 @@ from .config import (
     PETROBANGLA_GAS_DISTRIBUTION_COMPANIES,
     PETROBANGLA_GAS_PRODUCTION_COMPANIES,
     PETROBANGLA_JSON_STAGING,
+    SCRATCH_DOWNLOADS,
 )
 from .convert import pdf_to_text, xlsx_to_text
 
@@ -67,34 +68,26 @@ def _gas_from_json(path: Path) -> dict | None:
     }
 
 
-def _nearest_gas_before(energy: date) -> dict | None:
-    for path in sorted(GRID_DAILY_OUT.glob("*.json"), reverse=True):
-        try:
-            file_date = date.fromisoformat(path.stem)
-        except ValueError:
-            continue
-        if file_date >= energy:
-            continue
-        gas = _gas_from_json(path)
-        if gas:
-            return gas
-    return None
-
-
 def _apply_gas_fallback(grid_data: dict, energy: date, warnings: list[str]) -> None:
-    """Match ingest_official_daily: keep same-day gas, else carry forward prior day."""
+    """Keep gas already held for this energy day; otherwise publish nothing.
+
+    Carrying the previous day forward was the old behaviour and it fabricates a
+    day: Petrobangla files the window opening on energy day D under D+1, so the
+    newest ingested day routinely has no gas yet, and copying D-1's six company
+    rows makes the archive assert figures for a window nobody has published.
+    2026-08-19 shipped with 2026-08-18's rows byte for byte before this changed.
+
+    Zero is the honest answer and the UI already speaks it: GasTab treats an
+    all-zero table as "not published" and falls back, and the Overview KPI
+    renders "— MMCFD" rather than 0. The day fills in properly on the next run
+    once the PDF appears.
+    """
     iso = energy.isoformat()
     preserved = _gas_from_json(GRID_DAILY_OUT / f"{iso}.json")
     if preserved:
         grid_data["gasProductionData"] = preserved["gasProductionData"]
         grid_data["gasDistributionData"] = preserved["gasDistributionData"]
         warnings.append("Petrobangla unavailable — kept existing gas sections for this energy day")
-        return
-    fallback = _nearest_gas_before(energy)
-    if fallback:
-        grid_data["gasProductionData"] = fallback["gasProductionData"]
-        grid_data["gasDistributionData"] = fallback["gasDistributionData"]
-        warnings.append("Petrobangla unavailable — carried forward gas from prior energy day")
         return
     prod, dist = _zero_gas_sections()
     grid_data["gasProductionData"] = prod
@@ -104,7 +97,7 @@ def _apply_gas_fallback(grid_data: dict, energy: date, warnings: list[str]) -> N
 
 def parse_petrobangla_pdf(pdf_path: Path, energy: date) -> dict | None:
     if not PARSE_PETROBANGLA.exists():
-        return None
+        return _parse_petrobangla_archive(pdf_path, energy)
     PETROBANGLA_JSON_STAGING.mkdir(parents=True, exist_ok=True)
     out_name = f"{energy.isoformat()}.json"
     out_path = PETROBANGLA_JSON_STAGING / out_name
@@ -130,8 +123,48 @@ def parse_petrobangla_pdf(pdf_path: Path, energy: date) -> dict | None:
         if out_path.exists():
             return json.loads(out_path.read_text(encoding="utf-8"))
     except subprocess.CalledProcessError:
+        return _parse_petrobangla_archive(pdf_path, energy)
+    return _parse_petrobangla_archive(pdf_path, energy)
+
+
+def _parse_petrobangla_archive(pdf_path: Path, energy: date) -> dict | None:
+    """Pipeline B via the in-repo parser.
+
+    `PARSE_PETROBANGLA` names the grid_backlog parser, which does not exist on
+    every machine — where it is missing the archive day was simply never written
+    and the run only said "Pipeline B failed". `parse_petrobangla_archive.py` is
+    self-contained and lives in this repo; it takes the gas-day START, which for
+    energy day E is E itself (the PDF collected here is the one whose 8am-8am
+    window opens on E).
+    """
+    parser = PARSE_GRID.parent / "parse_petrobangla_archive.py"
+    if not parser.exists():
         return None
-    return None
+    out_path = SCRATCH_DOWNLOADS / f"petrobangla_{energy.isoformat()}.json"
+    try:
+        subprocess.run(
+            [sys.executable, str(parser), str(pdf_path), energy.isoformat(), str(out_path)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return None
+    if not out_path.exists():
+        return None
+    doc = json.loads(out_path.read_text(encoding="utf-8"))
+
+    # The archive parser stops short of the gas-day window fields that the
+    # re-parse-direct files carry, and every day published from this path was
+    # missing them. They are derived, not read off the page: the report's own
+    # 8am-8am period, opening on the energy day.
+    report = doc.get("report")
+    if isinstance(report, dict):
+        report.setdefault("gas_day_start", report.get("report_date_start"))
+        report.setdefault("gas_day_end", report.get("report_date_end"))
+        report.setdefault("gas_window", "8.00-8.00")
+        out_path.write_text(json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
+    return doc
 
 
 def parse_all(
@@ -172,6 +205,37 @@ def parse_all(
 
     if grid_data and not pb_gas_ok:
         _apply_gas_fallback(grid_data, energy, warnings)
+
+    # sourceFiles, observationWindows and the day's forecast. Added by the same
+    # module the admin upload route uses, so a day collected here and a day
+    # uploaded there come out identically shaped — these were previously only
+    # ever added by hand-run backfills, so every newly ingested day shipped
+    # without a window block or a forecast.
+    if grid_data:
+        try:
+            # `scripts/` is not on the path from inside this package — the grid
+            # parser next door is loaded by file location for the same reason.
+            # Without this the import raises, the except below swallows it, and
+            # every collected day quietly ships with no forecast and no window
+            # block while the run reports success.
+            import sys as _sys
+
+            if str(PARSE_GRID.parent) not in _sys.path:
+                _sys.path.insert(0, str(PARSE_GRID.parent))
+            from daily_enrich import enrich_grid_daily
+
+            warnings.extend(
+                enrich_grid_daily(
+                    grid_data,
+                    energy,
+                    pgcb_file=pgcb_xlsx.name if pgcb_xlsx else None,
+                    petrobangla=petrobangla_data,
+                )
+            )
+        except Exception as exc:  # noqa: BLE001
+            # A day is still a complete day without its forecast; failing the
+            # whole collection over an enrichment step would be the wrong trade.
+            warnings.append(f"enrichment skipped: {exc}")
 
     return ParseResult(
         energy_day=energy,

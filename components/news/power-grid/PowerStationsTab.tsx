@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, Check, ChevronDown, Clock3, Factory, Gauge, Search } from 'lucide-react';
+import { Building2, Check, ChevronDown, Clock3, Factory, Gauge, Search, Target } from 'lucide-react';
 import {
   GridCardFooter,
+  GridExplanationBlock,
   GridProvenanceTag,
   GridSourceFiles,
   GridTablePager,
@@ -366,6 +367,34 @@ export function PowerStationsTab({
       evening: groups.reduce((s, g) => s + g.evening, 0),
     };
   }, [fuelStats]);
+
+  // Stations PGCB expected to be held below what they could otherwise offer,
+  // with what each actually did. Sorted by the size of the expected shortfall,
+  // because a 669 MW derate on Adani is the story and a 2 MW one is not.
+  const derated = useMemo(() => {
+    const fc = detail?.plantForecast;
+    if (!fc?.stations?.length) return [];
+    const actualByName = new Map((detail?.plants ?? []).map((p) => [p.name, p]));
+    return fc.stations
+      .map((st) => {
+        const forecast = st.forecastEveningPeakMw;
+        const effective = st.effectiveEveningPeakMw;
+        const held = forecast != null && effective != null ? forecast - effective : null;
+        return {
+          ...st,
+          held,
+          // The station's own outturn, so a reader can see whether the
+          // anticipated constraint actually bit. Null where the actuals name
+          // the station differently — matched by name, and PGCB's spellings
+          // are not perfectly stable between the two blocks of the same sheet.
+          actualEveningMw: actualByName.get(st.name)?.eveningPeakMw ?? null,
+        };
+      })
+      .filter((st) => st.held != null && st.held > 0.05)
+      .sort((a, b) => (b.held ?? 0) - (a.held ?? 0));
+  }, [detail]);
+
+  const deratedPager = useTablePager(derated, 15);
 
   if (state === 'loading') {
     return <div className="grid-explorer-skeleton !h-64" />;
@@ -757,6 +786,177 @@ export function PowerStationsTab({
             </table>
           </div>
           <StationSourceFooter label="GenLog sheet, per-station generation log" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
+        </div>
+      )}
+
+      {detail?.plantForecast && derated.length > 0 && (
+        <div className="grid-explorer-chart-card card">
+          <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
+            <Target className="h-5 w-5 text-primary shrink-0" />
+            <div>
+              <h3 className="grid-explorer-chart-card__title">
+                Expected Station Derating
+                <CountChip>{detail.plantForecast.deratedStations} of {detail.plantForecast.stationCount}</CountChip>
+              </h3>
+              <p className="grid-explorer-chart-card__sub">
+                What PGCB expected each station to be able to offer, against what it expected to
+                be able to take — from the projection issued for this day{' '}
+                <GridProvenanceTag kind="P" />
+              </p>
+            </div>
+          </div>
+
+          {/* The two sums are shown side by side rather than as one "shortfall"
+              figure. They are station availability totals, not a system
+              forecast: on 2026-08-17 they come to 20,220 and 13,382 MW while
+              the same report forecasts 16,130 MW of generation at the evening
+              peak and the grid delivered 15,891. Printing only the 6,838 MW
+              difference would read as a shortfall claim the source never made. */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4 text-xs text-muted-foreground">
+            <span>
+              Forecast available at evening peak{' '}
+              <span className="tabular-nums font-semibold text-foreground">
+                {Math.round(detail.plantForecast.forecastAvailableEveningMw).toLocaleString('en-US')} MW
+              </span>{' '}
+              <GridProvenanceTag kind="D" />
+            </span>
+            <span>
+              Effective available{' '}
+              <span className="tabular-nums font-semibold text-foreground">
+                {Math.round(detail.plantForecast.effectiveAvailableEveningMw).toLocaleString('en-US')} MW
+              </span>{' '}
+              <GridProvenanceTag kind="D" />
+            </span>
+            <span>
+              Held back{' '}
+              <span className="tabular-nums font-semibold text-amber-600 dark:text-amber-400">
+                {Math.round(detail.plantForecast.deratedMwAtEveningPeak).toLocaleString('en-US')} MW
+              </span>{' '}
+              <GridProvenanceTag kind="D" />
+            </span>
+          </div>
+
+          <div className="grid-explorer-table-wrap">
+            <table className="grid-explorer-table table-fixed">
+              <colgroup>
+                <col className="w-[32%]" />
+                <col className="w-[10%]" />
+                <col className="w-[15%]" />
+                <col className="w-[15%]" />
+                <col className="w-[13%]" />
+                <col className="w-[15%]" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Station</th>
+                  <th className="text-left">Fuel</th>
+                  <th className="text-left">
+                    Forecast avail. <GridProvenanceTag kind="P" />
+                  </th>
+                  <th className="text-left">
+                    Effective avail. <GridProvenanceTag kind="P" />
+                  </th>
+                  <th className="text-left">
+                    Actual <GridProvenanceTag kind="P" />
+                  </th>
+                  <th className="text-left">
+                    PGCB&apos;s reason <GridProvenanceTag kind="P" />
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {deratedPager.rows.map((st) => (
+                  <tr key={st.name}>
+                    <td className="font-semibold">
+                      <span className="grid-explorer-table__truncate" title={st.name}>
+                        {st.name}
+                      </span>
+                    </td>
+                    <td className="text-muted-foreground">{st.fuel ?? '—'}</td>
+                    <td className="tabular-nums">
+                      {st.forecastEveningPeakMw == null
+                        ? '—'
+                        : Math.round(st.forecastEveningPeakMw).toLocaleString('en-US')}
+                    </td>
+                    <td className="tabular-nums">
+                      {st.effectiveEveningPeakMw == null
+                        ? '—'
+                        : Math.round(st.effectiveEveningPeakMw).toLocaleString('en-US')}
+                      <span className="text-amber-600 dark:text-amber-400 font-semibold ml-2">
+                        −{Math.round(st.held ?? 0).toLocaleString('en-US')}
+                      </span>
+                    </td>
+                    <td className="tabular-nums">
+                      {st.actualEveningMw == null
+                        ? '—'
+                        : Math.round(st.actualEveningMw).toLocaleString('en-US')}
+                    </td>
+                    <td className="text-muted-foreground">
+                      <span className="grid-explorer-table__truncate" title={st.remarks ?? ''}>
+                        {st.remarks && st.remarks !== '-' ? st.remarks : '—'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <GridTablePager
+            page={deratedPager.page}
+            totalPages={deratedPager.totalPages}
+            pageSize={deratedPager.pageSize}
+            total={deratedPager.total}
+            from={deratedPager.from}
+            to={deratedPager.to}
+            onPage={deratedPager.setPage}
+            onPageSize={deratedPager.setPageSize}
+            noun="stations"
+          />
+
+          <GridExplanationBlock
+            what={
+              <>
+                Beside each station&apos;s actuals, PGCB&apos;s daily report prints two
+                projections for the following day: what the station is expected to be able to
+                offer, and what PGCB expects to actually be able to take from it. Only stations
+                where the second is lower are listed here, largest gap first, with PGCB&apos;s own
+                remark naming the constraint. The <strong>Actual</strong> column is that
+                station&apos;s measured output at the evening peak, so the anticipated constraint
+                can be read against what happened.
+              </>
+            }
+            insight={
+              <>
+                The two availability sums are not a forecast of system output and are not
+                differenced into one headline here — they sit below both the report&apos;s own
+                summary forecast and the day&apos;s actual peak. What the per-station view does
+                show is <em>which fuel</em> the expected constraint sits in: a day where the
+                derating is concentrated in coal reads very differently from one where it is
+                spread across gas, and no other figure in this archive separates the two.
+              </>
+            }
+          />
+
+          <GridCardFooter>
+            <span>
+              Source:{' '}
+              <a
+                href="https://www.pgcb.gov.bd/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline font-semibold"
+              >
+                PGCB Daily Report
+              </a>{' '}
+              — the Forecast sheet&apos;s per-station availability columns, in the report for{' '}
+              {detail.plantForecast.issuedOn}
+            </span>
+            <GridSourceFiles files={[{ label: 'PGCB', name: detail.plantForecast.issuedIn }]} />
+            <span>As published by PGCB. Not audited.</span>
+            <span className="font-medium">
+              Reporting Period: Projection for {detail.plantForecast.targetDay}
+            </span>
+          </GridCardFooter>
         </div>
       )}
     </div>

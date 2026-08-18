@@ -564,5 +564,49 @@
   "sourceFiles": {
     "pgcb": "Daily Report 20.9.2020.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (20.09.20).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 12000.0,
+    "maxDemandDayMw": 9650.0,
+    "maxGenEveningMw": 13900.0,
+    "totalEnergyGenMkwh": 240.6359185497036,
+    "reserveMw": 1900.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2020-09-18",
+    "issuedIn": "Daily Report  19-09-2020_",
+    "targetDay": "2020-09-19",
+    "layout": "divider",
+    "issuedFrom": "converted-text",
+    "issuedFromNote": "read from a pre-converted text copy; no workbook is held for this day"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2020-09-19T00:00:00+06:00",
+      "end": "2020-09-20T00:00:00+06:00",
+      "filedAs": "2020-09-20",
+      "sourceFile": "Daily Report 20.9.2020.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2020-09-19T08:00:00+06:00",
+      "end": "2020-09-20T08:00:00+06:00",
+      "filedAs": "2020-09-20",
+      "publishedLabel": "19-20 Sep, 2020",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (20.09.20).pdf"
+    }
   }
 }

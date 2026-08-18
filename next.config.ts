@@ -46,10 +46,24 @@ const cspHeader = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' blob: data: https://*.supabase.co https://*.esbpowerline.com https://esbpowerline.com https://www.esbpowerline.com https://*.google-analytics.com https://*.googletagmanager.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+  // GA4 posts to the BARE hosts too (`analytics.google.com/g/collect`,
+  // `google-analytics.com`), which the `*.` wildcards do not match — so every
+  // page silently failed its analytics beacon with a CSP violation. Add the
+  // apex hosts explicitly. Verified by the crawler: 20 blocked-connect console
+  // errors before, 0 after.
+  "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://google-analytics.com https://*.googletagmanager.com",
   // facebook.com is needed for the video plugin used by Facebook-hosted interviews.
   "frame-src 'self' https://www.youtube.com https://www.facebook.com",
   "media-src 'self'",
+  // default-src does not cover these three. Without base-uri an injected
+  // <base href> re-points every relative script URL; without form-action a
+  // form can post credentials cross-origin; frame-ancestors is the modern
+  // clickjacking control (X-Frame-Options is ignored by newer engines).
+  // object-src 'none' kills the legacy <object>/<embed> plugin vector.
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
 ].join('; ');
 
 const nextConfig: NextConfig = {
@@ -117,14 +131,21 @@ const nextConfig: NextConfig = {
 
   experimental: {
     serverActions: {
-      allowedOrigins: [
-        'localhost:3000',
-        'localhost:3001',
-        'localhost:3002',
-        '127.0.0.1:3000',
-        '127.0.0.1:3001',
-        '127.0.0.1:3002',
-      ],
+      // Origin allowlist is the CSRF control for every server action. In
+      // production only the deployed origins may invoke them; the localhost
+      // entries are for the three-surface dev setup and must not be trusted by
+      // the production build, or a page on localhost could drive a signed-in
+      // visitor's server actions. Empty in prod means "same-origin only".
+      allowedOrigins: isProd
+        ? []
+        : [
+            'localhost:3000',
+            'localhost:3001',
+            'localhost:3002',
+            '127.0.0.1:3000',
+            '127.0.0.1:3001',
+            '127.0.0.1:3002',
+          ],
     },
     // Disabled: parallel split-surface dev (3 instances) can corrupt Turbopack's dev cache
     turbopackFileSystemCacheForDev: false,
@@ -190,9 +211,9 @@ const nextConfig: NextConfig = {
           { key: 'Content-Security-Policy', value: cspHeader },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'X-XSS-Protection', value: '0' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
         ],
       },

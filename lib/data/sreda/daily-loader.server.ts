@@ -7,6 +7,17 @@ export async function loadSredaDailyFromDisk(isoDate: string): Promise<SredaDail
   const parsed = parseIsoDate(isoDate);
   if (!parsed) return null;
 
+  // Release first: a re-published snapshot corrects a day whose static file
+  // still exists, so a file-first read would keep serving the superseded one.
+  // Fails soft — no release, or no database, means the file read below.
+  try {
+    const { getReleaseOverride } = await import('@/lib/data/releases.server');
+    const released = await getReleaseOverride('SREDA_DAILY', parsed);
+    if (released) return released as SredaDailyData;
+  } catch {
+    // Enhancement only; never break the static read.
+  }
+
   try {
     const fs = await import('node:fs/promises');
     const path = await import('node:path');
@@ -19,18 +30,21 @@ export async function loadSredaDailyFromDisk(isoDate: string): Promise<SredaDail
 }
 
 export const getLatestSredaDaily = cache(async (): Promise<SredaDailyData | null> => {
-  // A snapshot refreshed from the admin panel is newer than anything in the
-  // bundled catalogue, which is compiled at build time. Check releases first so
-  // the homepage's renewables figures follow a refresh without a deploy.
-  const { getPublishedKeys, getReleasePayload } = await import('@/lib/data/releases.server');
-  const published = await getPublishedKeys('SREDA_DAILY');
-  for (const key of [...published].sort().reverse()) {
-    const payload = await getReleasePayload('SREDA_DAILY', key);
-    if (payload) return payload as SredaDailyData;
+  // The bundled catalogue is compiled at build time, so a snapshot refreshed
+  // from the admin panel has to be merged in or the homepage's renewables
+  // figures would sit on the last shipped day forever. Merge rather than check
+  // releases first: publishing a *correction* to an old day must not make that
+  // old day the "latest". The per-date loader applies the release precedence.
+  let dates = [...sredaAvailableDates];
+  try {
+    const { getPublishedKeys } = await import('@/lib/data/releases.server');
+    const published = await getPublishedKeys('SREDA_DAILY');
+    if (published.length > 0) dates = [...new Set([...dates, ...published])].sort();
+  } catch {
+    // Fall back to the bundled catalogue.
   }
 
-  const dates = [...sredaAvailableDates].reverse();
-  for (const date of dates) {
+  for (const date of dates.reverse()) {
     const data = await loadSredaDailyFromDisk(date);
     if (data) return data;
   }

@@ -52,14 +52,18 @@ def run(
     print(f"\n=== ESB PowerLine Daily Extractor — {iso} ===")
     print("Scope: Pipeline A (PGCB GridDailyData) + Pipeline B (PetrobanglaDaily)\n")
 
-    print("[1/6] Downloading PGCB ERP + Petrobangla PDF...")
+    print("[1/6] Collecting PGCB daily report + Petrobangla PDF...")
     dl = download_for_energy_day(energy)
     for err in dl.errors:
         print(f"  WARN: {err}")
     if not dl.pgcb_xlsx:
         print("ERROR: Pipeline A requires PGCB daily report.")
         return 1
-    print(f"  PGCB: {dl.pgcb_xlsx.name} (ERP id {dl.pgcb_erp_id})")
+    # Say which store the day came from. "ERP id" was printed unconditionally,
+    # which read as though every day came from the mirror even when the source
+    # workbook was used — and the mirror is a verification copy, not a source.
+    origin = f"ERP mirror, id {dl.pgcb_erp_id}" if dl.pgcb_erp_id else "source copy"
+    print(f"  PGCB: {dl.pgcb_xlsx.name} ({origin})")
     if dl.petrobangla_pdf:
         print(f"  Petrobangla: {dl.petrobangla_pdf.name}")
     else:

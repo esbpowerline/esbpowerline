@@ -522,5 +522,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report 08-03-2021.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (08.03.21).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 11400.0,
+    "maxDemandDayMw": 9400.0,
+    "maxGenEveningMw": 16180.0,
+    "totalEnergyGenMkwh": 225.18947756237822,
+    "reserveMw": 4780.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2021-03-06",
+    "issuedIn": "Daily Report  07.03.2021",
+    "targetDay": "2021-03-07",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2021-03-07T00:00:00+06:00",
+      "end": "2021-03-08T00:00:00+06:00",
+      "filedAs": "2021-03-08",
+      "sourceFile": "Daily Report 08-03-2021.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2021-03-07T08:00:00+06:00",
+      "end": "2021-03-08T08:00:00+06:00",
+      "filedAs": "2021-03-08",
+      "publishedLabel": "07-08 March, 2021",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (08.03.21).pdf"
+    }
   }
 }

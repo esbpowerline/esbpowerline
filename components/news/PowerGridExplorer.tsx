@@ -108,6 +108,10 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
 import type { GridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { MethodologyReconciliationBanner } from '@/components/news/power-grid/MethodologyReconciliationBanner';
+import { GridDayWindows } from '@/components/news/power-grid/GridDayWindows';
+import { ForecastVsActualPanel } from '@/components/news/power-grid/ForecastVsActualPanel';
+import { petrobanglaGasDay, formatWindow } from '@/lib/data/grid/observation-window';
+import { tabAvailability, type GridTabId } from '@/lib/data/grid/tab-availability';
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
@@ -1015,6 +1019,14 @@ export function PowerGridExplorer({
     zoneGenerationData = [],
     // The workbook and gas PDF this day was built from, named exactly.
     sourceFiles,
+    // What span of time each publisher's figures on this day actually cover.
+    // Absent on days written before the field existed, in which case the page
+    // reconstructs the windows from the anchor rule rather than going silent.
+    observationWindows,
+    // PGCB's projection FOR this day, published in the previous day's report.
+    // Absent where that workbook is not held — about three quarters of the
+    // archive — which is not the same as no shortfall having been expected.
+    forecast,
     dailyOutages = [],
     hourlyLoadData = [],
     // Undefined, not [], on the layouts whose workbook carries no En-Curve
@@ -1093,6 +1105,28 @@ export function PowerGridExplorer({
   const tooltipDate = systemStats?.date && systemStats.date.split(' ').length === 3
     ? systemStats.date.split(' ').slice(1).join(' ')
     : (systemStats?.date || 'Jun 2026');
+
+  // The Petrobangla tile used to carry `tooltipDate` — the PGCB date — under a
+  // heading naming Petrobangla's report. That states something Petrobangla does
+  // not: its PDF prints a RANGE and an 8:00-to-8:00 period, and its gas day
+  // shares only 16 hours with PGCB's energy day. This is the window the figures
+  // on that tile actually cover, taken from the archive where the day carries
+  // one and reconstructed from the anchor rule where it does not.
+  const gasWindow = observationWindows?.petrobangla;
+  const gasWindowLabel = gasWindow
+    ? `${gasWindow.publishedLabel ?? selectedDate} · ${formatWindow(
+        {
+          publisher: 'Petrobangla',
+          start: gasWindow.start,
+          end: gasWindow.end,
+          anchorDay: selectedDate,
+        },
+        { offset: false },
+      )}`
+    : `${petrobanglaGasDay(selectedDate).publishedLabel} · ${formatWindow(
+        petrobanglaGasDay(selectedDate),
+        { offset: false },
+      )}`;
 
   // Ongoing & Upcoming Projects states & filters
   const [projectType, setProjectType] = useState<'ongoing' | 'upcoming'>('ongoing');
@@ -1718,6 +1752,48 @@ export function PowerGridExplorer({
   // "publishers disagree" on days where they agree to four decimals.
   const unitCostAuth = useUnitCostAuthentication(activeDataDate);
 
+  // The window strip sits above the methodology banner because it answers the
+  // more basic question: the banner explains why two totals on one page differ,
+  // and this explains what "this day" even means to each publisher. A reader
+  // who has not been told the gas day is 08:00-to-08:00 cannot make sense of
+  // either.
+  // Which tabs have anything for THIS day. The bar renders all ten whatever
+  // the date, and before this a reader on a 2015 day met several tabs that were
+  // empty because that era's workbook has no such sheet — indistinguishable, on
+  // screen, from a day on which nothing happened.
+  // Only claim a tab is empty once the day's own report is in hand. On the
+  // server pass `activeData` is whatever was prefetched — often the previous
+  // selection or nothing — and computing availability from it published a
+  // false "Petrobangla has nothing for this day" into the HTML for a day that
+  // has 2,275 MMCFD of it. Absence has to be verified before it is asserted,
+  // so until the payload matches the selection every tab renders unmarked.
+  const availabilityKnown = Boolean(activeData) && activeDataDate === selectedDate;
+  const availability = availabilityKnown ? tabAvailability(activeData) : null;
+
+  // The same verdict the tab bar dims on, listed in full so a reader who never
+  // clicks an empty tab still learns the day is thinner than the layout looks.
+  const absentTabs = availability
+    ? tabs
+        .filter((t) => {
+          const a = availability[t.id as GridTabId];
+          return a && !a.hasData;
+        })
+        .map((t) => ({
+          id: t.id as GridTabId,
+          label: t.label,
+          reason: availability[t.id as GridTabId]?.reason ?? 'Not published for this day.',
+        }))
+    : [];
+
+  const dayWindowStrip = (
+    <GridDayWindows
+      isoDate={selectedDate}
+      windows={observationWindows}
+      hasGas={hasGasProductionData}
+      absentTabs={absentTabs}
+    />
+  );
+
   const methodologyBanner = showMethodologyBanner ? (
     <MethodologyReconciliationBanner
       expanded={isMethodologyBannerExpanded}
@@ -2041,6 +2117,7 @@ export function PowerGridExplorer({
         stateFieldsPct={stateFieldsPct}
         totalCondensate={totalCondensate}
         tooltipDate={tooltipDate}
+        gasWindowLabel={gasWindowLabel}
         avgCostPerKwh={avgCostPerKwh}
         totalCapacityRenewables={totalCapacityRenewables}
         isoDate={selectedDate}
@@ -2052,6 +2129,8 @@ export function PowerGridExplorer({
         {tabs.map((t) => {
           const TabIcon = t.icon;
           const active = activeTab === t.id;
+          const avail = availability?.[t.id as GridTabId];
+          const empty = avail ? !avail.hasData : false;
           return (
             <button
               key={t.id}
@@ -2059,7 +2138,11 @@ export function PowerGridExplorer({
               role="tab"
               aria-selected={active}
               onClick={() => handleTabClick(t.id)}
-              className={cn('explorer-tab', active && 'active')}
+              // Still clickable. A reader is entitled to open the tab and read
+              // why it is empty; disabling it would hide the explanation behind
+              // a control that does nothing.
+              title={empty ? avail?.reason : undefined}
+              className={cn('explorer-tab', active && 'active', empty && 'explorer-tab--empty')}
             >
               {/*
                 The Renewables tab carried a "Monthly" badge from when it showed
@@ -2070,6 +2153,10 @@ export function PowerGridExplorer({
               */}
               <TabIcon className="h-4 w-4 shrink-0" />
               <span>{t.label}</span>
+              {empty && (
+                <span className="explorer-tab__empty-dot" aria-hidden title={avail?.reason} />
+              )}
+              {empty && <span className="sr-only">— not published for this day</span>}
             </button>
           );
         })}
@@ -2148,6 +2235,7 @@ export function PowerGridExplorer({
             </div>
           </div>
         ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
+          {dayWindowStrip}
           {methodologyBanner}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Generation Pie Chart */}
@@ -2168,7 +2256,16 @@ export function PowerGridExplorer({
 
             <div className="grid-explorer-mix-stack" aria-hidden>
               {generationData.map((item, i) => {
-                const width = totalGenMkwhr > 0 ? (item.gen / totalGenMkwhr) * 100 : 0;
+                // Quantised, not raw. The server and client reached this from
+                // payloads serialised to different precision and emitted
+                // "36.5784%" against "36.57842300028465%", which React reports
+                // as a hydration mismatch and then leaves unpatched. Four
+                // decimals is far below one device pixel on any display, so
+                // nothing is lost by fixing the precision here.
+                const width =
+                  totalGenMkwhr > 0
+                    ? Number(((item.gen / totalGenMkwhr) * 100).toFixed(4))
+                    : 0;
                 const dimmed = hoveredIndex !== null && hoveredIndex !== i;
                 return (
                   <div
@@ -2716,6 +2813,21 @@ export function PowerGridExplorer({
             <span className="font-medium">Reporting Period: 24-Hour SCADA Log (Date: {systemStats.date})</span>
           </GridCardFooter>
         </div>
+
+        {/* Last card on the tab, deliberately.
+
+            This led the tab at first, which was wrong twice over: it pushed
+            every chart below the fold, and it put a projection ahead of the
+            measurements it should be read against. A reader should see what
+            the grid did — the mix, the cost, the load curve — and only then
+            what was expected of it. Renders nothing on days whose issuing
+            workbook is absent. */}
+        <ForecastVsActualPanel
+          forecast={forecast}
+          systemStats={systemStats}
+          hourlyLoadData={hourlyLoadData}
+          chartTheme={chartTheme}
+        />
       </div>
       </GridLockedContent> )
     )}
@@ -2743,6 +2855,7 @@ export function PowerGridExplorer({
             sourceFiles={sourceFiles}
           />
 
+          {dayWindowStrip}
           {methodologyBanner}
 
           {/* The day's fuel mix as a shape rather than a total. Fetches its own
@@ -3233,6 +3346,7 @@ export function PowerGridExplorer({
 
       {!isDataMissing && activeTab === 'gas' && (
         <div className="grid-explorer-panel space-y-6">
+          {dayWindowStrip}
           {methodologyBanner}
           <GasTab
             selectedDate={selectedDate}
@@ -3272,6 +3386,7 @@ export function PowerGridExplorer({
             sourceFiles={sourceFiles}
           />
 
+          {dayWindowStrip}
           {methodologyBanner}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">

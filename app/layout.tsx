@@ -132,8 +132,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
+            // Turn off Google Signals and ad-personalization. Without this, GA
+            // fires remarketing beacons to stats.g.doubleclick.net and
+            // google.com.bd/ads, which the CSP (correctly) blocks — logging a
+            // console error on every page load and failing Lighthouse Best
+            // Practices. This site runs no ad remarketing, so the beacons are
+            // pure tracking noise; disabling them is both the privacy-preserving
+            // choice and what clears the console, with no CSP loosening.
             gtag('config', 'G-V04WZWK8WT', {
               page_path: window.location.pathname,
+              allow_google_signals: false,
+              allow_ad_personalization_signals: false,
             });
           `}
         </Script>

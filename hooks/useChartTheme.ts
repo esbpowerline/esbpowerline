@@ -68,7 +68,7 @@ function paletteFor(mode: ChartMode) {
   };
 }
 
-function readChartTheme(): ChartTheme {
+function readChartTheme(ssrSafe = false): ChartTheme {
   const fallback: ChartTheme = {
     trendStroke: '#fafafa',
     trendFill: '#fafafa',
@@ -82,7 +82,16 @@ function readChartTheme(): ChartTheme {
     ...paletteFor('dark'),
   };
 
-  if (typeof document === 'undefined') return fallback;
+  // `ssrSafe` forces the fallback even in the browser. It is used for the
+  // FIRST client render only, because that render has to reproduce the server's
+  // HTML exactly or React discards the difference instead of patching it.
+  //
+  // Without it the server emitted the dark fallback while the client's first
+  // render read the real theme off <html>, and the two disagreed on every chart
+  // colour: the fuel-mix stack came out rgb(57,135,229) on the server and
+  // #2a78d6 on the client, and React left the server's colours in place. The
+  // real theme is applied a moment later by the effect below.
+  if (ssrSafe || typeof document === 'undefined') return fallback;
 
   const isLight = document.documentElement.classList.contains('theme-white');
   const primary = hslVar('--primary') || fallback.primary;
@@ -113,7 +122,7 @@ function readChartTheme(): ChartTheme {
 }
 
 export function useChartTheme(): ChartTheme {
-  const [theme, setTheme] = useState<ChartTheme>(readChartTheme);
+  const [theme, setTheme] = useState<ChartTheme>(() => readChartTheme(true));
 
   useEffect(() => {
     const sync = () => setTheme(readChartTheme());

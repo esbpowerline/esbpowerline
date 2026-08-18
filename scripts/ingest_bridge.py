@@ -893,6 +893,25 @@ def main() -> None:
                 "Distribution is still scraped — the archive has no per-company breakdown to rebuild from."
             )
 
+    # Same enrichment the CLI collector applies, from the same module: the
+    # admin route and the collector must not produce differently shaped days.
+    try:
+        from daily_enrich import enrich_grid_daily
+
+        # `gas_archive`, not `pb_data`: the latter is only the six-row summary
+        # scraped for Pipeline A, while the window block needs the full
+        # PetrobanglaDaily record — its printed date label, its 8am-8am period
+        # and the PDF's own filename all live there.
+        for note in enrich_grid_daily(
+            payload,
+            op_date,
+            pgcb_file=(args.pgcb_name or Path(args.pgcb).name) if args.pgcb else None,
+            petrobangla=gas_archive,
+        ):
+            warnings.append(note)
+    except Exception as exc:  # noqa: BLE001
+        warnings.append(f"enrichment skipped: {exc}")
+
     stats = payload.get("systemStats") or {}
     gas_val = (gas_archive or {}).get("validation") or {}
     gas_prod = (gas_archive or {}).get("production") or {}

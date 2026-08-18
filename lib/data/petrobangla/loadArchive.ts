@@ -7,6 +7,7 @@ import type {
   PetrobanglaTimelineSummary,
 } from './types';
 import { QuarantinedDayError } from './types';
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
 
 let indexCache: PetrobanglaIndex | null = null;
 let indexDayMap: Map<string, PetrobanglaIndexDay> | null = null;
@@ -33,39 +34,38 @@ export function lookupTimelineDay(date: string): PetrobanglaTimelineDay | undefi
 }
 
 /**
- * Fetch a data file, falling back to its runtime twin.
+ * Fetch a data file from wherever its current version lives.
  *
  * Files under public/data ship with a deploy. Anything published from the admin
  * panel since exists only as a DataRelease, served by /api/data/* — and on
  * serverless the filesystem is read-only, so for those days the static path is
- * all that ever existed. Without this fallback the gas archive, the rolling
- * week and the reserve-depletion timeline would all sit on whatever shipped
- * with the last build, however many days had been published.
+ * all that ever existed. Without this the gas archive, the rolling week and the
+ * reserve-depletion timeline would all sit on whatever shipped with the last
+ * build, however many days had been published.
+ *
+ * This used to be a private static-then-404-retry, which covered a *new* day
+ * but not a *corrected* one: the stale static file answers 200, so the retry
+ * never fired. `fetchDataJson` consults the publish manifest first and so
+ * catches both; a 403 is still a tier denial and still stands, unretried.
  *
  * Locally the publish also writes to disk, which is why this gap is invisible
  * in development and only appears in production.
  */
-async function fetchDataFile(relPath: string): Promise<Response> {
-  const res = await fetch(`/data/${relPath}`);
-  if (res.ok) return res;
-  // Only a miss is retried; a 403 is a tier denial and must stand.
-  if (res.status !== 404) return res;
-  return fetch(`/api/data/${relPath}`);
-}
-
 export async function loadArchiveIndex(): Promise<PetrobanglaIndex> {
   if (indexCache) return indexCache;
-  const res = await fetchDataFile('petrobangla/_index.json');
+  const res = await fetchDataJson<PetrobanglaIndex>('petrobangla/_index.json');
   if (!res.ok) throw new Error('Failed to load Petrobangla archive index');
-  ingestIndex((await res.json()) as PetrobanglaIndex);
+  ingestIndex(res.data);
   return indexCache!;
 }
 
 export async function loadArchiveTimeline(): Promise<PetrobanglaTimelineSummary> {
   if (timelineCache) return timelineCache;
-  const res = await fetchDataFile('petrobangla/timeline-summary.json');
+  const res = await fetchDataJson<PetrobanglaTimelineSummary>(
+    'petrobangla/timeline-summary.json',
+  );
   if (!res.ok) throw new Error('Failed to load Petrobangla timeline summary');
-  ingestTimeline((await res.json()) as PetrobanglaTimelineSummary);
+  ingestTimeline(res.data);
   return timelineCache!;
 }
 
@@ -75,9 +75,9 @@ export async function loadArchiveDay(
 ): Promise<PetrobanglaDaily> {
   if (dayCache.has(date)) return dayCache.get(date)!;
 
-  const res = await fetchDataFile(`petrobangla/daily/${date}.json`);
+  const res = await fetchDataJson<PetrobanglaDaily>(`petrobangla/daily/${date}.json`);
   if (!res.ok) throw new Error(`Archive day not found: ${date}`);
-  const data = (await res.json()) as PetrobanglaDaily;
+  const data = res.data;
 
   if (data.meta.parse_status !== 'ok' && !allowPartial) {
     throw new QuarantinedDayError(date);

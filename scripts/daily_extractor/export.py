@@ -15,6 +15,7 @@ from .config import (
     PETROBANGLA_INDEX_STAGING,
     PETROBANGLA_JSON_STAGING,
     PETROBANGLA_PUBLIC,
+    PETROBANGLA_PUBLIC_ROOT,
     ROOT,
     SYNC_PETROBANGLA,
 )
@@ -80,8 +81,14 @@ def update_available_dates(iso: str) -> None:
         AVAILABLE_DATES.write_text(json.dumps(dates, indent=2), encoding="utf-8")
 
 
-def update_petrobangla_staging_index(payload: dict, json_name: str) -> None:
-    """Append or replace one day in grid_backlog petrobangla_json/_index.json."""
+def update_petrobangla_index(payload: dict, json_name: str, index_path: Path) -> None:
+    """Append or replace one day in a petrobangla `_index.json`.
+
+    Called for the staging copy and for the published one. Updating only staging
+    left the public index behind the archive it indexes — 2026-08-17 shipped as a
+    file the index never named, so the Gas tab's day list stopped a day short of
+    the data.
+    """
     report = payload.get("report", {})
     meta = payload.get("meta", {})
     production = payload.get("production", {})
@@ -100,7 +107,6 @@ def update_petrobangla_staging_index(payload: dict, json_name: str) -> None:
     if not entry["date"]:
         return
 
-    index_path = PETROBANGLA_INDEX_STAGING
     if index_path.exists():
         index = json.loads(index_path.read_text(encoding="utf-8"))
     else:
@@ -141,11 +147,12 @@ def deploy(
         staging_path = PETROBANGLA_JSON_STAGING / json_name
         staging_path.parent.mkdir(parents=True, exist_ok=True)
         staging_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
-        update_petrobangla_staging_index(petrobangla_data, json_name)
+        update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_INDEX_STAGING)
 
         PETROBANGLA_PUBLIC.mkdir(parents=True, exist_ok=True)
         pb_path = PETROBANGLA_PUBLIC / json_name
         pb_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
+        update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_PUBLIC_ROOT / "_index.json")
         written["pipeline_b"] = pb_path
 
         if run_sync:

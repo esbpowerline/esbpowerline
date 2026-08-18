@@ -20,3 +20,15 @@ lh-*.json
 *.report.json
 test-results
 scratch
+# Secrets must never ride along in a CLI deploy. Production env comes from the
+# Vercel dashboard; an uploaded .env is retrievable through the deployment files
+# API and silently overrides the dashboard at build time. Keep the example.
+# BEFORE THE NEXT DEPLOY: confirm every var in lib/env-guard.ts's FATAL list is
+# set in the Vercel project settings, or the build fails closed (which is the
+# intended safe behaviour — see AUDIT-REPORT.md "Secrets & deploy").
+.env
+.env.*
+!.env.example
+# Dead legacy static bundle (~unused, excluded from tsconfig/eslint) — uploaded
+# on every deploy otherwise and carries ~60 unsanitised innerHTML sinks.
+legacy-static

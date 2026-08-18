@@ -336,5 +336,39 @@
   ],
   "sourceFiles": {
     "pgcb": "Daily Report09-06-17.xls"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 9900.0,
+    "maxDemandDayMw": 8700.0,
+    "maxGenEveningMw": 10041.0,
+    "totalEnergyGenMkwh": 209.59,
+    "reserveMw": 141.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2017-06-07",
+    "issuedIn": "Daily Report08-06-17",
+    "targetDay": "2017-06-08",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2017-06-08T00:00:00+06:00",
+      "end": "2017-06-09T00:00:00+06:00",
+      "filedAs": "2017-06-09",
+      "sourceFile": "Daily Report09-06-17.xls"
+    }
   }
 }

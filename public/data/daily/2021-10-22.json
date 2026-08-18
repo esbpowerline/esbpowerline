@@ -508,5 +508,48 @@
   "sourceFiles": {
     "pgcb": "Daily Report  23.10.2021.xlsm",
     "petrobangla": "Daily-Gas-Intake-Offtake-Report (23.10.21).pdf"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 11000.0,
+    "maxDemandDayMw": 8500.0,
+    "maxGenEveningMw": 14404.0,
+    "totalEnergyGenMkwh": 228.0224044972208,
+    "reserveMw": 3404.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2021-10-21",
+    "issuedIn": "Daily Report 22-10-2021",
+    "targetDay": "2021-10-22",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2021-10-22T00:00:00+06:00",
+      "end": "2021-10-23T00:00:00+06:00",
+      "filedAs": "2021-10-23",
+      "sourceFile": "Daily Report  23.10.2021.xlsm"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2021-10-22T08:00:00+06:00",
+      "end": "2021-10-23T08:00:00+06:00",
+      "filedAs": "2021-10-23",
+      "publishedLabel": "22-23 Oct, 2021",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (23.10.21).pdf"
+    }
   }
 }

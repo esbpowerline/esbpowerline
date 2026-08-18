@@ -514,5 +514,39 @@
   ],
   "sourceFiles": {
     "pgcb": "Daily Report 31-03-19.xlsm"
+  },
+  "forecast": {
+    "maxDemandEveningMw": 10800.0,
+    "maxDemandDayMw": 8800.0,
+    "maxGenEveningMw": 13689.0,
+    "totalEnergyGenMkwh": 216.50244717169699,
+    "reserveMw": 2889.0,
+    "totalLoadShedMw": 0.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Khulna": 0.0,
+      "Rajshahi": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Barishal": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2019-03-29",
+    "issuedIn": "Daily Report 30-03-19",
+    "targetDay": "2019-03-30",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2019-03-30T00:00:00+06:00",
+      "end": "2019-03-31T00:00:00+06:00",
+      "filedAs": "2019-03-31",
+      "sourceFile": "Daily Report 31-03-19.xlsm"
+    }
   }
 }

@@ -7,6 +7,7 @@ import {
   canonicalDataPath,
   dataPathIsoDate,
 } from '@/lib/data/grid/daily-access';
+import { resolveDataTarget } from '@/lib/data/feed-paths';
 
 /**
  * The tier gate in middleware.ts only runs for paths this predicate claims.
@@ -83,5 +84,29 @@ describe('tier-gated daily data paths', () => {
       (dir) => !isProtectedDataJsonPath(`/data/${dir}/2021-04-13.json`),
     );
     expect(ungated).toEqual([]);
+  });
+
+  /**
+   * The /api/data/[...path] route resolves a request to a feed via
+   * resolveDataTarget, while middleware gates it via isProtectedDataJsonPath.
+   * If the two canonicalise a path differently, a request middleware never
+   * gated can still resolve and serve tier-locked data. That happened: the
+   * resolver stripped a leading `data/`/`api/data/` that middleware's regex did
+   * not, so `/api/data/data/daily/X.json` bypassed the gate. These must resolve
+   * to null so the route 404s them instead of serving history to anyone.
+   */
+  it('refuses doubled or prefixed data paths that would slip past the middleware gate', () => {
+    for (const p of [
+      'data/daily/2014-01-01.json',
+      'api/data/daily/2014-01-01.json',
+      'data/curves/2014-01-01.json',
+      'data/petrobangla/daily/2014-01-01.json',
+      '/data/daily/2014-01-01.json',
+    ]) {
+      expect(resolveDataTarget(p)).toBeNull();
+    }
+    // The legitimate relative forms the route and client actually pass still resolve.
+    expect(resolveDataTarget('daily/2014-01-01.json')?.feed).toBe('GRID_DAILY');
+    expect(resolveDataTarget('curves/2014-01-01.json')?.feed).toBe('GRID_CURVE');
   });
 });

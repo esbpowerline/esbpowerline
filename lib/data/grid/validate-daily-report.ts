@@ -97,6 +97,83 @@ export const dailyReportSchema = z.object({
     (c) => c.rows.every((r) => r.mw.length === c.fuels.length),
     { message: 'every energy-curve row must carry one value per fuel' },
   ).optional(),
+  // Zod strips keys a schema does not name. This schema gates what
+  // lib/actions/data-releases.ts writes, so a field missing here is a field
+  // silently dropped from every day published through the admin panel — the
+  // page would render the runtime day without its source citation, its
+  // observation windows or its forecast, and nothing would report an error.
+  sourceFiles: z.object({
+    pgcb: z.string().optional(),
+    petrobangla: z.string().optional(),
+  }).optional(),
+  observationWindows: z.object({
+    timezone: z.string(),
+    pgcb: z.object({
+      unit: z.string(),
+      start: z.string(),
+      end: z.string(),
+      filedAs: z.string(),
+      sourceFile: z.string().nullish(),
+    }).optional(),
+    petrobangla: z.object({
+      unit: z.string(),
+      start: z.string(),
+      end: z.string(),
+      filedAs: z.string(),
+      publishedLabel: z.string().nullish(),
+      period: z.string().nullish(),
+      sourceFile: z.string().nullish(),
+    }).optional(),
+  }).optional(),
+  forecast: z.object({
+    targetDay: z.string(),
+    issuedOn: z.string(),
+    issuedIn: z.string(),
+    layout: z.enum(['scenario', 'divider']),
+    issuedFrom: z.enum(['source-copy', 'erp-mirror', 'converted-text']).optional(),
+    issuedFromNote: z.string().optional(),
+    issuedAt: z.string().optional(),
+    hourly: z.array(z.object({
+      time: z.string(),
+      generationMw: z.number().nullable(),
+      loadShedMw: z.number().nullable(),
+      demandMw: z.number().nullable(),
+    })).optional(),
+    maxDemandEveningMw: z.number().optional(),
+    maxDemandDayMw: z.number().optional(),
+    maxDemandMw: z.number().optional(),
+    maxGenEveningMw: z.number().optional(),
+    totalEnergyGenMkwh: z.number().optional(),
+    reserveMw: z.number().optional(),
+    shortageMw: z.number().optional(),
+    maxTempC: z.number().optional(),
+    totalLoadShedMw: z.number().optional(),
+    areaLoadShedMw: z.record(z.string(), z.number()).optional(),
+    areaLoadShedUnread: z.boolean().optional(),
+  }).refine(
+    // A forecast describes the day AFTER the one that published it. A record
+    // where those are not one day apart has been filed against the wrong day,
+    // which is the whole failure this layer exists to prevent.
+    (f) => {
+      const issued = Date.parse(`${f.issuedOn}T00:00:00Z`);
+      const target = Date.parse(`${f.targetDay}T00:00:00Z`);
+      return Number.isFinite(issued) && Number.isFinite(target)
+        && target - issued === 86_400_000;
+    },
+    { message: 'a forecast must target the day after the report that issued it' },
+  ).optional(),
+  // Present on some archived days and previously unnamed here for the same
+  // reason: naming them keeps a release from dropping them.
+  regionalDemandSource: z.enum([
+    'p1-published',
+    'derived-served-plus-shed',
+    'bpdb-published',
+  ]).nullish(),
+  zoneGenerationData: z.array(z.object({
+    zone: z.string(),
+    fuels: z.record(z.string(), z.number()),
+    total: z.number(),
+  })).optional(),
 });
 
 export type DailyReportValidation = z.SafeParseReturnType<GridDailyData, GridDailyData>;

@@ -298,11 +298,18 @@ for (const day of days) {
     } else if (cited !== arc.source) {
       const citedDay = dateInFilename(cited);
       const arcDay = arc.source ? dateInFilename(arc.source) : null;
-      // A report published as "(D+1).pdf" prints the window D to D+1, so it is
-      // gas day D's document. Citing "(D).pdf" for gas day D therefore names
-      // the report for the day BEFORE — a real, different document holding
-      // different figures. One systematic offset, not many separate mistakes.
-      if (citedDay && arcDay && citedDay === day && arcDay === nextDay(day)) {
+      // Petrobangla names its file for the CLOSING morning: the report for the
+      // window that opens on gas day D is titled "D to D+1" and filed as
+      // "(D+1).pdf". So a citation dated D+1 is this gas day's real document —
+      // the correct, verifiable name — even when the archive stored the same day
+      // under an older START-keyed synthetic name (`Petrobangla_(D).pdf`). Accept
+      // it. (Confirmed against printed grand totals for 2026-08-13/17/18.)
+      if (citedDay && citedDay === nextDay(day)) {
+        // The real report for this gas day, named by its window-end — no finding.
+      } else if (citedDay && arcDay && citedDay === day && arcDay === nextDay(day)) {
+        // A citation dated D, where the day's own report is dated D+1, names the
+        // report for the day BEFORE — a real, different document. One systematic
+        // offset, not many separate mistakes.
         record('citation-offset', 'ERROR', day,
           `cites ${cited}, which prints the ${dayBefore(day)}-${day} window; this day's figures come from ${arc.source} (${arc.label})`);
       } else if (!citedDay) {

@@ -229,5 +229,38 @@
   "regionalDemandSource": null,
   "sourceFiles": {
     "pgcb": "Daily_Report01-05-14.xls"
+  },
+  "forecast": {
+    "shortageMw": 180.0,
+    "maxGenEveningMw": 6920.0,
+    "totalEnergyGenMkwh": 139.0,
+    "totalLoadShedMw": 164.0,
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 29.0,
+      "Khulna": 31.0,
+      "Rajshahi": 29.0,
+      "Cumilla": 21.0,
+      "Mymensingh": 17.0,
+      "Sylhet": 14.0,
+      "Barishal": 6.0,
+      "Rangpur": 17.0
+    },
+    "maxDemandMw": 7100.0,
+    "issuedOn": "2014-04-29",
+    "issuedIn": "Daily_Report30-04-14",
+    "targetDay": "2014-04-30",
+    "layout": "divider",
+    "issuedFrom": "erp-mirror"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2014-04-30T00:00:00+06:00",
+      "end": "2014-05-01T00:00:00+06:00",
+      "filedAs": "2014-05-01",
+      "sourceFile": "Daily_Report01-05-14.xls"
+    }
   }
 }

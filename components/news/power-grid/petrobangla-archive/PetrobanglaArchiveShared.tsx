@@ -175,6 +175,18 @@ export function ArchiveChartFooter({
   embedded?: boolean;
 }) {
   const date = day?.report.report_date_end ?? day?.report.report_date_start;
+
+  // Which key a day's file sits under is not one rule across the archive.
+  // Files up to 2026-06-21 are keyed on the window's END and files from
+  // 2026-06-22 on its START, so linking by `report_date_end` alone 404s on
+  // every day after the changeover — 56 of them. Both candidates are offered
+  // in order, and the era decides which is tried first.
+  const rawJsonKey = (() => {
+    const start = day?.report.report_date_start;
+    const end = day?.report.report_date_end;
+    if (!start && !end) return null;
+    return start && start >= '2026-06-22' ? start : (end ?? start);
+  })();
   return (
     <div
       className={cn(
@@ -198,7 +210,7 @@ export function ArchiveChartFooter({
           </span>
           {day && (
             <a
-              href={`/data/petrobangla/daily/${day.report.report_date_end}.json`}
+              href={`/data/petrobangla/daily/${rawJsonKey}.json`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline font-semibold"
@@ -211,7 +223,7 @@ export function ArchiveChartFooter({
       {embedded && day && (
         <div className="flex justify-end pt-1">
           <a
-            href={`/data/petrobangla/daily/${day.report.report_date_end}.json`}
+            href={`/data/petrobangla/daily/${rawJsonKey}.json`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-[10px] text-primary hover:underline font-semibold"

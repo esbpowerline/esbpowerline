@@ -1,5 +1,6 @@
 import { isQuarantined } from './constants';
 import { loadArchiveDay, loadArchiveIndex } from './loadArchive';
+import { fetchDataJson } from '@/lib/data/runtime-data.client';
 import type { GridAccessTier } from '@/lib/data/grid/grid-tier-access';
 import type {
   PetrobanglaDaily,
@@ -154,14 +155,14 @@ async function loadLiveWeekDays(
 
 async function fetchStaticLiveWeekBundle(): Promise<PetrobanglaLiveWeekBundle | null> {
   try {
-    let res = await fetch('/data/petrobangla/_live_week.json');
     // Rebuilt on every publish, so on a deployed site the current bundle exists
-    // only as a DataRelease — the static copy is whatever shipped with the build.
-    if (res.status === 404) {
-      res = await fetch('/api/data/petrobangla/_live_week.json');
-    }
-    if (!res.ok) return null;
-    return (await res.json()) as PetrobanglaLiveWeekBundle;
+    // only as a DataRelease — the static copy is whatever shipped with the
+    // build, and it answers 200, so the old 404-only retry never reached it.
+    // The manifest decides; a 403 is a tier denial and yields null as before.
+    const res = await fetchDataJson<PetrobanglaLiveWeekBundle>(
+      'petrobangla/_live_week.json',
+    );
+    return res.ok ? res.data : null;
   } catch {
     return null;
   }

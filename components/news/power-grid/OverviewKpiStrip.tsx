@@ -38,6 +38,10 @@ export interface OverviewKpiStripProps {
   stateFieldsPct: number;
   totalCondensate: number;
   tooltipDate: string;
+  /** The Petrobangla gas window this day's gas figures cover, printed on the
+   *  gas tile's source line. The PGCB date was there before, under a heading
+   *  naming Petrobangla's report — a claim Petrobangla never makes. */
+  gasWindowLabel: string;
   avgCostPerKwh: number;
   totalCapacityRenewables: number;
   /** Drives the capacity and trend lookups, which are keyed by day. */
@@ -60,6 +64,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   stateFieldsPct,
   totalCondensate,
   tooltipDate,
+  gasWindowLabel,
   avgCostPerKwh,
   totalCapacityRenewables,
   isoDate,
@@ -515,7 +520,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             part="I. Production"
             sourceFile={sourceFiles?.petrobangla}
             refHref="https://www.petrobangla.org.bd/"
-            dateLabel={`Date: ${tooltipDate}`}
+            dateLabel={`Gas day: ${gasWindowLabel}`}
           />
         </GridKpiTooltipBody>
       </GridKpiCell>

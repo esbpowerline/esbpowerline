@@ -44,7 +44,11 @@ export function getRequiredTierForArchivePreset(p: ArchiveRangePreset): GridAcce
 }
 
 export function isArchivePresetLockedForTier(p: ArchiveRangePreset, tier: GridAccessTier): boolean {
-  if (typeof window !== 'undefined') {
+  // A dev affordance for previewing locked presets locally. It only unlocks the
+  // UI chrome — the data itself stays gated server-side by middleware — but it
+  // has no place in production, where it let anyone reveal (and then 403 against)
+  // every paid preset. Compiled out of the production bundle entirely.
+  if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
     const hasBypass =
       window.location.search.includes('bypass_gate=true') ||
       localStorage.getItem('bypass_grid_gate') === 'true';

@@ -35,18 +35,30 @@ export async function GET(
       const filePath = path.join(uploadsDir, matchingFile);
       const fileBuffer = await fs.readFile(filePath);
       
-      let contentType = 'image/webp';
+      // Serve only known raster image types inline. An SVG here would render as
+      // markup on this origin — stored XSS from an unauthenticated route — so it
+      // is never given image/svg+xml; anything unrecognised is forced to
+      // download as an opaque octet-stream rather than being sniffed and run.
+      // nosniff stops the browser second-guessing the type we set.
+      let contentType: string | null = null;
       if (matchingFile.endsWith('.png')) contentType = 'image/png';
       else if (matchingFile.endsWith('.jpg') || matchingFile.endsWith('.jpeg')) contentType = 'image/jpeg';
-      else if (matchingFile.endsWith('.svg')) contentType = 'image/svg+xml';
+      else if (matchingFile.endsWith('.webp')) contentType = 'image/webp';
       else if (matchingFile.endsWith('.gif')) contentType = 'image/gif';
+      else if (matchingFile.endsWith('.avif')) contentType = 'image/avif';
 
-      return new NextResponse(fileBuffer, {
-        headers: {
-          'Content-Type': contentType,
-          'Cache-Control': 'public, max-age=31536000, immutable',
-        },
-      });
+      const headers: Record<string, string> = {
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'X-Content-Type-Options': 'nosniff',
+      };
+      if (contentType) {
+        headers['Content-Type'] = contentType;
+      } else {
+        headers['Content-Type'] = 'application/octet-stream';
+        headers['Content-Disposition'] = 'attachment';
+      }
+
+      return new NextResponse(fileBuffer, { headers });
     }
   } catch (error) {
     console.error('Error in uploads fallback route:', error);

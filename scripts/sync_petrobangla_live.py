@@ -86,11 +86,22 @@ def build_live_week(index: dict) -> dict:
 def main():
     ingest_hot_pdfs()
     copy_daily_files()
+    public_index = PUBLIC / "_index.json"
+    index = json.loads(public_index.read_text(encoding="utf-8")) if public_index.exists() else None
     if DESKTOP_INDEX.exists():
-        shutil.copy2(DESKTOP_INDEX, PUBLIC / "_index.json")
-        index = json.loads(DESKTOP_INDEX.read_text(encoding="utf-8"))
-    else:
-        index = json.loads((PUBLIC / "_index.json").read_text(encoding="utf-8"))
+        staged = json.loads(DESKTOP_INDEX.read_text(encoding="utf-8"))
+        # The copy is wholesale, so a staging folder holding one freshly written
+        # day would replace the whole published index with that day. The daily
+        # extractor creates exactly that folder when it deploys Pipeline B, so
+        # adopt staging only when it actually covers at least as much.
+        if index is None or len(staged.get("days", [])) >= len(index.get("days", [])):
+            shutil.copy2(DESKTOP_INDEX, public_index)
+            index = staged
+        else:
+            print(
+                f"Keeping published index ({len(index.get('days', []))} days); "
+                f"staging holds only {len(staged.get('days', []))}."
+            )
     live = build_live_week(index)
     (PUBLIC / "_live_week.json").write_text(json.dumps(live, indent=2), encoding="utf-8")
     print(f"Live week: {len(live['days'])} days, latest={live['latest_date']}")

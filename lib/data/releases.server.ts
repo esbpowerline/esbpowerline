@@ -79,10 +79,66 @@ export function getPublishedKeys(feed: DataFeed): Promise<string[]> {
   })();
 }
 
+/**
+ * Every published key, for every feed, in one query.
+ *
+ * The manifest previously asked `getPublishedKeys` once per feed — thirteen
+ * concurrent queries against a pool of two, where any that lost the race
+ * returned its soft-failure `[]` and `unstable_cache` then stored that empty
+ * answer. The manifest visibly flickered: feeds appeared and vanished between
+ * requests, which on the client means a published day intermittently reads as
+ * unpublished.
+ *
+ * One query, one cache entry. Errors are deliberately NOT caught here: a thrown
+ * error is not cached, whereas a caught one would poison the entry for the
+ * whole revalidate window. The caller decides what a failure means.
+ */
+async function readAllPublishedKeys(): Promise<Record<string, string[]>> {
+  const rows = await prisma.dataRelease.findMany({
+    where: { revokedAt: null },
+    select: { feed: true, key: true },
+    orderBy: [{ feed: 'asc' }, { key: 'asc' }],
+  });
+
+  const grouped: Record<string, string[]> = {};
+  for (const row of rows) {
+    (grouped[row.feed] ??= []).push(row.key);
+  }
+  return grouped;
+}
+
+export function getAllPublishedKeys(): Promise<Record<string, string[]>> {
+  return unstable_cache(readAllPublishedKeys, ['data-release-keys-all'], {
+    tags: [RELEASE_CACHE_TAG],
+    revalidate: RELEASE_CACHE_SECONDS,
+  })();
+}
+
 /** Published payload for one key, or null if absent/revoked. */
 export function getReleasePayload(feed: DataFeed, key: string): Promise<unknown | null> {
   return unstable_cache(() => readPayload(feed, key), ['data-release-payload', feed, key], {
     tags: [RELEASE_CACHE_TAG, feedCacheTag(feed)],
     revalidate: RELEASE_CACHE_SECONDS,
   })();
+}
+
+/**
+ * The precedence rule every server-side reader must apply, in one place:
+ * "a release always wins over a static file of the same key" (see the comment
+ * above `enum DataFeed` in prisma/schema.prisma). Returns the published payload
+ * when the key is published, or null to mean "nothing published — read the file".
+ *
+ * Checking the key list first is what makes this affordable. `getReleasePayload`
+ * caches per key, so asking it about every day of a 1,500-day export would cost
+ * a cache entry (and, on a cold instance, a query) per day; the key list is one
+ * cached entry per feed. It also keeps the common case — a day that only exists
+ * as a static file — free.
+ *
+ * Fails soft in both steps: an unreachable database yields an empty key list and
+ * a null payload, so the caller falls through to the static archive.
+ */
+export async function getReleaseOverride(feed: DataFeed, key: string): Promise<unknown | null> {
+  const published = await getPublishedKeys(feed);
+  if (!published.includes(key)) return null;
+  return getReleasePayload(feed, key);
 }
