@@ -34,6 +34,7 @@ import {
 } from '@/lib/data/grid/grid-export-charts.server';
 import { Icon, type IconName } from '@/lib/data/grid/grid-export-icons.server';
 import { F, FM, FB } from '@/lib/data/grid/grid-export-fonts.server';
+import { exportLogo } from '@/lib/data/grid/export-brand.server';
 import {
   computeInsights,
   computeSummary,
@@ -111,18 +112,17 @@ const DISPLAY_CAPS: Partial<Record<GridExportDatasetKey, number>> = {
   gas_distribution: 90,
 };
 
-// Embed the wordmark once per process (tiny PNG). Falls back to a text wordmark
-// if the asset can't be read (kept available on Vercel via outputFileTracingIncludes).
-let logoDataUri: string | null | undefined;
+/**
+ * The wordmark, from the one place that decides which mark is current.
+ *
+ * This used to read `esb-logo.png` directly, which meant the member export and
+ * the CMS exports could end up carrying different marks. `exportLogo` prefers
+ * the current `esb-logo-ng.png` and falls back to the old file, so both
+ * surfaces move together. Still falls back to a text wordmark if neither asset
+ * can be read (kept available on Vercel via outputFileTracingIncludes).
+ */
 function getLogo(): string | null {
-  if (logoDataUri !== undefined) return logoDataUri;
-  try {
-    const buf = readFileSync(join(process.cwd(), 'public', 'images', 'esb-logo.png'));
-    logoDataUri = `data:image/png;base64,${buf.toString('base64')}`;
-  } catch {
-    logoDataUri = null;
-  }
-  return logoDataUri;
+  return exportLogo()?.dataUri ?? null;
 }
 
 // ---- value formatting ------------------------------------------------------

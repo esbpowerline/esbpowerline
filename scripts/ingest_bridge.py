@@ -1,4 +1,4 @@
-"""Parse an uploaded PGCB xlsx (+ optional Petrobangla PDF) and emit JSON on stdout.
+"""Parse an uploaded PGCB report (+ optional Petrobangla PDF) and emit JSON on stdout.
 
 The admin panel shells out to this. It deliberately reuses the existing, trusted
 parsers rather than reimplementing them — `parse_pgcb_file` and
@@ -9,8 +9,13 @@ Unlike `process_single_date`, nothing is written to public/data. The caller gets
 the payload back and decides whether to publish it, so a bad parse never lands
 on disk or on the site.
 
+The grid report may be the .xlsx/.xls/.xlsm workbook PGCB files, or a .docx or
+.pdf copy of the same report; `daily_extractor.report_convert` renders all three
+into the pipe-table text `parse_pgcb_file` reads, and says in the warnings what
+it had to infer for the two that carry no sheet names.
+
 Usage:
-  python scripts/ingest_bridge.py --pgcb <file.xlsx> [--pb <file.pdf>] [--date YYYY-MM-DD]
+  python scripts/ingest_bridge.py --pgcb <file.xlsx|.docx|.pdf> [--pb <file.pdf>] [--date YYYY-MM-DD]
 
 Output (stdout, JSON):
   {"ok": true, "date": "...", "payload": {...}, "validation": {...}}
@@ -77,34 +82,16 @@ def derive_energy_day(filename: str) -> str | None:
 
 
 def xlsx_to_md(path: Path) -> str:
-    """Workbook to markdown pipe-table text, with outer pipes on every row.
+    """Workbook to pipe-table text.
 
-    `daily_extractor.convert.xlsx_to_text` joins cells with " | " and no leading
-    or trailing pipe. `parse_pgcb_file` splits on "|" and indexes parts[2..4],
-    which is only correct when a leading pipe pushes everything along by one.
-    Without it every column shifts: outage rows come back with the description
-    in the time field and empty plant/reason, and any row without trailing blank
-    cells fails the `len(parts) >= 5` guard and is dropped entirely — 24 of 26
-    outages on 2026-07-31.
-
-    The same off-by-one is documented for the monthly report parser, which is
-    why that pipeline converts to markdown first rather than using xlsx_to_text.
+    The implementation moved to `daily_extractor.report_convert`, which returns
+    (text, notes) so the docx and pdf readers can report what they inferred.
+    `backfill_daily_extremes` and `reingest_from_archive` import this name and
+    want the text alone, so the entry point stays here.
     """
-    import pandas as pd
-    from daily_extractor.convert import cell_str
+    from daily_extractor.report_convert import xlsx_to_md as _impl
 
-    xl = pd.ExcelFile(path)
-    parts: list[str] = []
-    for sheet in xl.sheet_names:
-        df = xl.parse(sheet, header=None)
-        parts.append(f"## Sheet: {sheet}")
-        for _, row in df.iterrows():
-            cells = [cell_str(v) for v in row.tolist()]
-            while cells and cells[-1] == "":
-                cells.pop()
-            if any(cells):
-                parts.append("| " + " | ".join(cells) + " |")
-    return "\n".join(parts)
+    return _impl(path)[0]
 
 
 def refine_outage_reason(outages: list) -> int:
@@ -541,6 +528,7 @@ def main() -> None:
 
     try:
         from daily_extractor.convert import pdf_to_text
+        from daily_extractor.report_convert import report_to_md
         from parse_daily_reports import parse_pgcb_file, parse_petrobangla_file
     except Exception as exc:  # noqa: BLE001
         fail(f"Could not import parsers: {exc}")
@@ -557,15 +545,23 @@ def main() -> None:
     tmpdir = Path(tempfile.mkdtemp(prefix="esb-ingest-src-"))
 
     # --- PGCB grid -------------------------------------------------------
+    #
+    # The workbook is the report as PGCB files it, but the desk is also sent
+    # Word and PDF copies of the same thing. Those go through the same parser:
+    # the reader in report_convert rebuilds the pipe-table text a workbook
+    # produces, and returns notes about what it had to infer to get there.
     try:
-        pgcb_text = xlsx_to_md(Path(args.pgcb))
+        pgcb_text, source_notes = report_to_md(
+            Path(args.pgcb), args.pgcb_name or Path(args.pgcb).name
+        )
     except Exception as exc:  # noqa: BLE001
-        fail(f"Could not read the Excel file: {exc}")
+        fail(f"Could not read the report: {exc}")
+    warnings.extend(source_notes)
 
     pgcb_txt_path = tmpdir / "pgcb.txt"
     pgcb_txt_path.write_text(pgcb_text, encoding="utf-8")
 
-    if "## Sheet: P1" not in pgcb_text:
+    if not source_notes and "## Sheet: P1" not in pgcb_text:
         warnings.append("No 'P1' sheet found — this may not be a PGCB daily report.")
 
     # The filename is the *publication* date, a day ahead of the data, so the

@@ -98,30 +98,31 @@ export function FeaturedCarousel({
   }, []);
 
   /**
-   * The hero shows two stories at once, so a slide is a PAIR, not an item.
+   * The hero shows three stories at once, so a slide is a TRIO, not an item.
    *
-   * Five featured items therefore make three slides — A+B, C+D, E+A — and the
-   * counter reads 1/3. The last pair wraps rather than leaving a hole: a hero
-   * with one empty half looks broken, and repeating the lead is the least
-   * surprising thing to put there.
+   * Five featured items therefore make two slides — A+B+C, D+E+A — and the
+   * last slide wraps rather than leaving holes: a hero with an empty column
+   * looks broken, and repeating the lead is the least surprising thing to put
+   * there.
    */
-  const pairCount = Math.max(1, Math.ceil(featured.length / 2));
+  const PER_SLIDE = 3;
+  const slideCount = Math.max(1, Math.ceil(featured.length / PER_SLIDE));
 
   const next = useCallback(() => {
-    goTo((currentRef.current + 1) % pairCount);
-  }, [pairCount, goTo]);
+    goTo((currentRef.current + 1) % slideCount);
+  }, [slideCount, goTo]);
 
   const prev = useCallback(() => {
-    goTo((currentRef.current - 1 + pairCount) % pairCount);
-  }, [pairCount, goTo]);
+    goTo((currentRef.current - 1 + slideCount) % slideCount);
+  }, [slideCount, goTo]);
 
   useEffect(() => {
     if (!isPlaying || isTransitioning) return;
-    if (pairCount < 2) return;
+    if (slideCount < 2) return;
 
     const timer = setInterval(next, AUTOPLAY_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [isPlaying, isTransitioning, next, pairCount]);
+  }, [isPlaying, isTransitioning, next, slideCount]);
 
   useEffect(() => {
     return () => {
@@ -129,15 +130,20 @@ export function FeaturedCarousel({
     };
   }, []);
 
-  const leadIndex = (current * 2) % Math.max(1, featured.length);
-  const secondIndex = (leadIndex + 1) % Math.max(1, featured.length);
-  const currentItem = featured[leadIndex];
-  // Never the same story twice. With an odd count the final pair wraps onto the
-  // lead, and with a single featured item there is no second story at all.
-  const secondaryItem = secondIndex === leadIndex ? undefined : featured[secondIndex];
-  // The two stories on screen, in order. Both are rendered by the same markup,
-  // so there is no longer a "lead" and a "second" to keep in step.
-  const pairItems = [currentItem, secondaryItem].filter(Boolean) as FeaturedItem[];
+  // The three stories on screen, in order. Wrapping the last slide can land on
+  // an index already used in the same slide, so the trio is de-duplicated: a
+  // short feed shows two cards or one rather than the same story twice.
+  const slideItems: FeaturedItem[] = [];
+  if (featured.length > 0) {
+    const seen = new Set<number>();
+    for (let offset = 0; offset < PER_SLIDE; offset += 1) {
+      const index = (current * PER_SLIDE + offset) % featured.length;
+      if (seen.has(index)) break;
+      seen.add(index);
+      slideItems.push(featured[index]);
+    }
+  }
+  const currentItem = slideItems[0];
   const shellClass = inBand ? '' : 'container container--shell';
   const sectionPad = inBand ? '' : ' py-4';
 
@@ -174,17 +180,16 @@ export function FeaturedCarousel({
               inBand ? 'py-0 featured-hero__body--band' : 'py-10 md:py-14'
             }`}
           >
-            {/* Two equal stories.
+            {/* Three equal stories.
 
                 This was a lead-plus-sidebar for several rounds — a big
                 headline beside a narrow rail — and every attempt to balance it
                 ran into the same arithmetic: the lead had fewer rows than the
-                rail and ~100px it could not fill, because every summary in the
-                feed is two lines. Two identical cards have no such asymmetry.
-                One shape, one type scale, one picture size; the only thing that
-                differs is the story. */}
-            <div className="featured-hero__pair">
-              {pairItems.map((item, i) => (
+                rail and ~100px it could not fill. Identical cards have no such
+                asymmetry. One shape, one type scale, one picture size; the
+                only thing that differs is the story. */}
+            <div className="featured-hero__stories">
+              {slideItems.map((item, i) => (
                 <Link
                   key={item.slug}
                   href={`/articles/${item.slug}`}
@@ -209,7 +214,7 @@ export function FeaturedCarousel({
                           ...heroImageStyle({ fitMode: 'fill', ...(item.heroMeta ?? {}) }),
                           objectPosition: 'center top',
                         }}
-                        sizes="(max-width: 1023px) 100vw, 480px"
+                        sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 320px"
                       />
                     ) : (
                       <NoImage className="h-full w-full" />
@@ -228,6 +233,14 @@ export function FeaturedCarousel({
 
                   <h2 className="featured-hero__story-title">{item.title}</h2>
 
+                  {/* The deck stays, three cards or not. Measured in the band:
+                      photo 93 + pill 26 + headline 82 comes to 220 in a 389px
+                      content area, so dropping the summary left the trio
+                      floating in ~170px of nothing with the snapshot panel
+                      beside it full to the edge. The photo cannot take that
+                      space back — its 3.4:1 frame is what crops the baked-in
+                      headline out of the artwork, and widening it re-exposes
+                      the strip — so the type carries it. */}
                   {item.excerpt ? (
                     <p className="featured-hero__story-deck">
                       {item.excerpt.replace(/\[&hellip;\]/g, '...').replace(/&hellip;/g, '...')}

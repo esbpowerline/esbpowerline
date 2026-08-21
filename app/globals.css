@@ -24205,17 +24205,18 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   }
 }
 
-/* ── Hero: two equal stories ──────────────────────────────────────────────
-   One shape for both. This was a lead-plus-sidebar through several rounds and
-   the asymmetry was the problem every time: the lead column had three rows to
-   the rail's four and ~100px it could not fill, because every summary in this
-   feed is two lines. Moving that gap around — foot, middle, distributed —
-   never removed it. Two identical cards have no gap to move.
+/* ── Hero: three equal stories ────────────────────────────────────────────
+   One shape for all three. This was a lead-plus-sidebar through several rounds
+   and the asymmetry was the problem every time: the lead column had three rows
+   to the rail's four and ~100px it could not fill, because every summary in
+   this feed is two lines. Moving that gap around — foot, middle, distributed —
+   never removed it. Identical cards have no gap to move.
 
-   Budget per card at 480px wide inside a 391px band:
-     photo 270 + gap 14 + pill 26 + gap 10 + headline 66 = 386
+   The columns go 1 → 3 with no 2-up step. Three stories in a two-column grid
+   leave an orphan on the second row, and a hero with one card sitting alone
+   under two others is exactly the lopsidedness this layout exists to avoid.
 */
-.featured-hero__pair {
+.featured-hero__stories {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
@@ -24223,9 +24224,9 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 }
 
 @media (min-width: 768px) {
-  .featured-hero__pair {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(1.25rem, 2.2vw, 2rem);
+  .featured-hero__stories {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.875rem, 1.6vw, 1.5rem);
   }
 }
 
@@ -24448,4 +24449,577 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   line-clamp: 3;
   overflow: hidden;
   overflow-wrap: anywhere;
+}
+
+/* ── Three across the band ────────────────────────────────────────────────
+   The columns went from two to three, so every horizontal measurement in the
+   rules above is off by a third. At 2552px the cards come to 315px each, not
+   the ~480px those budgets were written against, and the photo — which is a
+   ratio, not a fixed height — shrank with them: 93px instead of 270.
+
+   Measured in the 389px content area with the deck restored:
+     photo 93 + 16 + pill 26 + 16 + headline 82 + 16 + deck 70 = 319
+   The remaining ~70px is split above and below by the band's own centring,
+   which is roughly the slack the two-card layout carried.
+
+   The photo cannot take that space back. Its 3.4:1 frame shows the top ~52%
+   of the artwork, and that fraction is what clears the headline strip baked
+   into the foot of every banner — the fraction is fixed by the artwork, so a
+   taller frame is a frame with the strip back in it, at any card width. */
+@media (min-width: 1024px) {
+  .featured-hero__story {
+    gap: 1rem;
+  }
+
+  /* Sized to a 315px column. The rules above scale the headline off the
+     viewport, which now over-sizes it: 1.5vw is a third of a card wider than
+     it was when there were two of them. */
+  .featured-hero__story-title {
+    font-size: clamp(1rem, 1.05vw, 1.25rem);
+    line-height: 1.26;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  /* Reserve the full three lines whether the headline uses them or not. The
+     cards sit in grid tracks, so a two-line headline in one column pulls its
+     deck up while the others stay put, and three summaries starting at three
+     different heights is the lopsidedness this layout exists to avoid. */
+  .featured-hero__story-title {
+    min-height: calc(3 * 1.26em);
+  }
+
+  .featured-hero__story-deck {
+    font-size: 0.8125rem;
+    line-height: 1.65;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+
+/* ── Grid comparison: pickers and tick lists ──────────────────────────────
+   The panel used `<input type="date">`, `<input type="month">` and bare
+   checkboxes. Those are the three controls a browser styles for you and styles
+   differently in every browser, so the one screen in the CMS that is mostly
+   controls was the one that looked least like the CMS.
+
+   Everything below reuses the existing vocabulary rather than starting a new
+   one: `admin-dropdown-*` for the popovers, `cms-datetime-day-grid` and
+   `cms-datetime-grid-cell` for the calendar itself. What is genuinely new is a
+   state those pickers never had to express — a day that exists but is not in
+   our archive — and the tick controls. */
+
+.grid-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+}
+
+.grid-date-field__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-date-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 10.5rem;
+  padding: 0.5rem 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-date-menu {
+  padding: 0.625rem;
+  width: 19rem;
+  max-width: calc(100vw - 2rem);
+}
+
+.grid-date-menu__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 0.125rem 0.5rem;
+}
+
+.grid-date-menu__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  color: hsl(var(--foreground) / 0.75);
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.grid-date-menu__nav:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.55);
+  color: hsl(var(--foreground));
+}
+
+/* Disabled rather than hidden: the arrow keeps its place, so the header does
+   not reflow every time the archive runs out at one end. */
+.grid-date-menu__nav:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+/* The header label doubles as the zoom-out control: day grid -> months ->
+   years. It replaced two native <select>s, which were the last browser-drawn
+   controls in the panel and made reaching January 2014 a 153-option menu. */
+.grid-date-menu__zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  color: hsl(var(--foreground));
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  transition: background 130ms ease, border-color 130ms ease;
+}
+
+.grid-date-menu__zoom:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.55);
+  border-color: hsl(var(--border) / 0.45);
+}
+
+.grid-date-menu__zoom:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.45);
+  outline-offset: 1px;
+}
+
+/* At the year grid there is nothing further to zoom out to, so the label goes
+   quiet rather than disappearing and shifting the header. */
+.grid-date-menu__zoom:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.grid-year-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+  /* Thirteen years is five rows and fits; the cap is for the decade after
+     next, so a growing archive scrolls rather than overflowing the popover. */
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.grid-year-grid .cms-datetime-grid-cell {
+  min-height: 2.35rem;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.grid-month-grid .cms-datetime-grid-cell {
+  min-height: 2rem;
+  font-size: 11px;
+}
+
+/* A day the archive does not hold. Muted and struck rather than merely faded:
+   at 40% opacity alone it read as "disabled because of some other choice I
+   made", and the point is that the site has no such day. */
+.cms-datetime-grid-cell--absent,
+.cms-datetime-grid-cell--absent:hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: hsl(var(--muted-foreground) / 0.42) !important;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  cursor: not-allowed;
+  font-weight: 500;
+}
+
+.grid-date-menu__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid hsl(var(--border) / 0.4);
+  font-size: 10.5px;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-date-menu__jump {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.35rem;
+  transition: background 120ms ease;
+}
+
+.grid-date-menu__jump:hover {
+  background: hsl(var(--primary) / 0.1);
+}
+
+.grid-date-menu__hint {
+  margin-top: 0.4rem;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+}
+
+/* ── chips ──────────────────────────────────────────────────────────────── */
+
+.grid-chipset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.grid-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem 0.35rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--muted) / 0.28);
+  color: hsl(var(--muted-foreground));
+  font-size: 11.5px;
+  font-weight: 600;
+  transition: background 130ms ease, border-color 130ms ease, color 130ms ease;
+}
+
+.grid-chip:hover:not(:disabled) {
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.grid-chip--on {
+  background: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--primary) / 0.42);
+  color: hsl(var(--primary));
+}
+
+.grid-chip__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 0.95rem;
+  width: 0.95rem;
+  border-radius: 0.3rem;
+  border: 1.5px solid currentColor;
+  opacity: 0.55;
+  transition: opacity 130ms ease, background 130ms ease;
+}
+
+.grid-chip--on .grid-chip__box {
+  opacity: 1;
+  background: hsl(var(--primary) / 0.16);
+}
+
+.grid-chip--ghost {
+  border-style: dashed;
+  background: transparent;
+  padding-inline: 0.7rem;
+}
+
+.grid-chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ── metric picker ──────────────────────────────────────────────────────── */
+
+.grid-picker {
+  border: 1px solid hsl(var(--border) / 0.55);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+.grid-picker__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--muted) / 0.3);
+}
+
+.grid-picker__search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--background));
+}
+
+.grid-picker__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+.grid-picker__clear {
+  display: inline-flex;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-picker__clear:hover {
+  color: hsl(var(--foreground));
+}
+
+.grid-picker__count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 11.5px;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-picker__count-value {
+  font-size: 13px;
+  font-weight: 800;
+  color: hsl(var(--foreground));
+}
+
+.grid-picker__reset {
+  margin-left: 0.25rem;
+  font-size: 11px;
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+.grid-picker__reset:disabled {
+  opacity: 0.35;
+  cursor: default;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Capped and scrolled. 225 metrics at full height pushed the table that the
+   picker exists to filter completely off the screen. */
+.grid-picker__body {
+  max-height: 17rem;
+  overflow-y: auto;
+  padding: 0.375rem;
+}
+
+.grid-picker__empty {
+  padding: 1.25rem 0.5rem;
+  text-align: center;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-picker__group + .grid-picker__group {
+  margin-top: 0.5rem;
+}
+
+.grid-picker__group-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.35rem;
+  position: sticky;
+  top: -0.375rem;
+  z-index: 1;
+  background: hsl(var(--background));
+}
+
+.grid-picker__group-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-picker__group-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: hsl(var(--muted-foreground) / 0.8);
+  font-variant-numeric: tabular-nums;
+}
+
+.grid-picker__group-action {
+  font-size: 10px;
+  font-weight: 700;
+  color: hsl(var(--primary));
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.3rem;
+}
+
+.grid-picker__group-action:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.1);
+}
+
+.grid-picker__group-action:disabled {
+  opacity: 0.3;
+  cursor: default;
+  color: hsl(var(--muted-foreground));
+}
+
+.grid-picker__group-action + .grid-picker__group-action {
+  margin-left: -0.2rem;
+}
+
+.grid-picker__rows {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.15rem;
+}
+
+@media (min-width: 768px) {
+  .grid-picker__rows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .grid-picker__rows {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* The whole row is the control. The old list put a 14px checkbox next to a
+   label that did nothing when clicked, which is a small target and a
+   surprising one. */
+.grid-picker__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.3rem 0.45rem;
+  border-radius: 0.45rem;
+  text-align: left;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.grid-picker__row:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.5);
+  color: hsl(var(--foreground));
+}
+
+.grid-picker__row--on {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.grid-picker__tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1rem;
+  width: 1rem;
+  flex: 0 0 auto;
+  border-radius: 0.3rem;
+  border: 1.5px solid hsl(var(--border));
+  color: hsl(var(--primary-foreground));
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.grid-picker__row--on .grid-picker__tick {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.grid-picker__row-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grid-picker__row-unit {
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground) / 0.75);
+}
+
+/* ── the controls bar ───────────────────────────────────────────────────── */
+
+.grid-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 0.75rem;
+  background: hsl(var(--muted) / 0.22);
+}
+
+.grid-controls__swap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.1rem;
+  width: 2.1rem;
+  margin-bottom: 0.05rem;
+  border-radius: 0.6rem;
+  border: 1px solid hsl(var(--border) / 0.55);
+  color: hsl(var(--muted-foreground));
+  transition: background 130ms ease, color 130ms ease, border-color 130ms ease;
+}
+
+.grid-controls__swap:hover:not(:disabled) {
+  background: hsl(var(--background));
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.4);
+}
+
+.grid-presets {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.grid-preset {
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.45rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--background));
+  font-size: 11px;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.grid-preset:hover:not(:disabled) {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary) / 0.4);
+}
+
+.grid-preset:disabled {
+  opacity: 0.4;
+  cursor: default;
 }

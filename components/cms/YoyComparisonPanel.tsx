@@ -1,11 +1,27 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
-import { AlertTriangle, Archive, Check, Copy, Download, Loader2 } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import {
+  AlertTriangle,
+  Archive,
+  ArrowDownRight,
+  ArrowLeftRight,
+  ArrowUpRight,
+  Check,
+  Copy,
+  Download,
+  FileText,
+  FileType2,
+  Loader2,
+  Minus,
+  Scale,
+} from 'lucide-react';
 import { CmsCard, CmsFilterTabs } from '@/components/cms/CmsUI';
 import { cn } from '@/lib/utils';
 import { useTablePager, GridTablePager } from '@/components/news/power-grid/GridExplorerUI';
 import {
+  exportComparisonDocument,
+  exportSheetDocument,
   generateYoySheet,
   runBulkYoySheets,
   runComparison,
@@ -16,12 +32,34 @@ import {
 import type {
   BulkYoyPayload,
   ComparisonPayload,
+  DocFormat,
+  DocumentPayload,
   MonthlyComparisonPayload,
   MonthlySeriesPayload,
   RangeSeriesPayload,
   YoyBootstrap,
 } from '@/lib/actions/yoy-comparison';
 import type { YoyResult } from '@/lib/data/grid/yoy-comparison';
+import type { ComparisonRow } from '@/lib/data/grid/comparison';
+import {
+  createArchiveIndex,
+  formatIso,
+  priorYearIso as priorYearOf,
+  type ArchiveIndex,
+} from '@/lib/data/grid/archive-coverage';
+import { GridDatePicker } from '@/components/cms/yoy/GridDatePicker';
+import { GridMonthPicker } from '@/components/cms/yoy/GridMonthPicker';
+import { MetricPicker, SectionChips } from '@/components/cms/yoy/MetricPicker';
+import { useYoyUrl, type YoyUrl } from '@/components/cms/yoy/useYoyUrl';
+import {
+  metricLabel,
+  sectionLabel,
+  strings,
+  toBnDigits,
+  unitLabel,
+  verdictOf,
+  type Lang,
+} from '@/lib/data/grid/comparison-i18n';
 
 /**
  * Four ways to read the archive, on one page: the published year-on-year
@@ -38,6 +76,10 @@ type Mode = 'sheet' | 'compare' | 'range' | 'months';
 /** Taken off the bootstrap rather than imported: the engine is `server-only`. */
 type SectionId = YoyBootstrap['sections'][number]['id'];
 type MonthlySectionId = YoyBootstrap['monthlySections'][number]['id'];
+
+/** The valid values, so a hand-edited `?mode=` cannot put the panel nowhere. */
+const MODE_IDS = ['sheet', 'compare', 'range', 'months'] as const;
+const LANGS = ['en', 'bn'] as const;
 
 const MODES: Array<{ id: Mode; label: string }> = [
   { id: 'sheet', label: 'Year-on-year sheet' },
@@ -108,7 +150,6 @@ const btnPrimary =
   'inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40';
 const btnGhost =
   'inline-flex items-center gap-2 rounded-lg border border-border/60 px-4 py-2 text-[13px] font-semibold transition hover:bg-muted/60 disabled:opacity-40';
-const inputCls = 'rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]';
 
 function Notice({ tone, children }: { tone: 'warn' | 'info'; children: React.ReactNode }) {
   return (
@@ -200,27 +241,510 @@ function SaveToArchive({ filename, text, disabled }: { filename: string; text: s
   );
 }
 
+/* ── the comparison table ────────────────────────────────────────────────── */
+
+/**
+ * Colour says whether the day got better, not whether the number got bigger.
+ *
+ * Load shedding falling by 300 MW and generation rising by 300 MW are both good
+ * news for the grid, and the old table painted the first one red purely because
+ * the figure went down — telling the reader the opposite of what happened.
+ * `verdictOf` holds which direction is an improvement for each metric, and
+ * anything it will not judge (demand, temperature) is left uncoloured rather
+ * than given a colour that would read as praise or blame.
+ */
+const VERDICT_STYLE = {
+  up: {
+    chip: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-400',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    Icon: ArrowUpRight,
+  },
+  down: {
+    chip: 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-400',
+    text: 'text-rose-700 dark:text-rose-400',
+    Icon: ArrowDownRight,
+  },
+  none: {
+    chip: 'bg-muted/60 text-muted-foreground ring-border/50',
+    text: 'text-muted-foreground',
+    Icon: Minus,
+  },
+} as const;
+
+/** Digits swap to Bengali numerals with the language; the arrows do not. */
+function loc(text: string, lang: Lang): string {
+  return lang === 'bn' ? toBnDigits(text) : text;
+}
+
+function figure(v: number | null, lang: Lang): string {
+  if (v === null) return '—';
+  const s = Number.isInteger(v) ? String(v) : v.toFixed(2);
+  return loc(s.replace(/\B(?=(\d{3})+(?!\d))(?=[^.]*$)/g, ','), lang);
+}
+
+/**
+ * A count of rows by how they moved, for the strip above the table.
+ *
+ * Four outcomes, not three. A row where both days published a figure but the
+ * engine refused to subtract them — a total summed over six zones against one
+ * summed over nine — was landing in "no change", which is a claim, and a false
+ * one: the figures differ by 2,031 MW. It gets its own count.
+ */
+function tally(rows: ComparisonRow[]) {
+  let better = 0;
+  let worse = 0;
+  let flat = 0;
+  let unpublished = 0;
+  let incomparable = 0;
+  for (const r of rows) {
+    if (r.a === null || r.b === null) {
+      unpublished += 1;
+      continue;
+    }
+    // Both figures present and no delta means the engine declined the
+    // arithmetic; `changeOf` sets a delta in every other case.
+    if (r.delta === null) {
+      incomparable += 1;
+      continue;
+    }
+    const v = verdictOf(r.id, r.delta);
+    if (v === 'up') better += 1;
+    else if (v === 'down') worse += 1;
+    else flat += 1;
+  }
+  return { better, worse, flat, unpublished, incomparable };
+}
+
+function SummaryStrip({ rows }: { rows: ComparisonRow[] }) {
+  const { better, worse, flat, unpublished, incomparable } = tally(rows);
+  const items = [
+    { n: better, label: 'improved', cls: VERDICT_STYLE.up.chip, Icon: ArrowUpRight },
+    { n: worse, label: 'worsened', cls: VERDICT_STYLE.down.chip, Icon: ArrowDownRight },
+    { n: flat, label: 'no change', cls: VERDICT_STYLE.none.chip, Icon: Minus },
+    {
+      n: incomparable,
+      label: 'not like for like',
+      cls: 'bg-sky-500/10 text-sky-700 ring-sky-500/20 dark:text-sky-400',
+      Icon: Scale,
+    },
+    {
+      n: unpublished,
+      label: 'not published',
+      cls: 'bg-amber-500/10 text-amber-700 ring-amber-500/20 dark:text-amber-400',
+      Icon: AlertTriangle,
+    },
+  ];
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {/* A zero count is dropped: four chips reading 0 crowd out the two that
+          matter, and "0 not published" is not news. */}
+      {items.filter((x) => x.n > 0).map(({ n, label, cls, Icon }) => (
+        <span
+          key={label}
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-semibold ring-1 ring-inset',
+            cls,
+          )}
+        >
+          <Icon className="h-3 w-3" />
+          <span className="tabular-nums">{n}</span>
+          <span className="font-medium opacity-80">{label}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * One comparison, as a table both the daily and the monthly mode render.
+ *
+ * It replaced two hand-maintained copies of the same markup that had already
+ * drifted apart, and it groups the rows under their section rather than
+ * printing 230 undifferentiated lines: the section is the first thing an
+ * editor scans for, and it was previously only visible in the .txt export.
+ */
+function ComparisonTable({
+  rows,
+  a,
+  b,
+  lang,
+  sectionName,
+}: {
+  rows: ComparisonRow[];
+  a: string;
+  b: string;
+  lang: Lang;
+  sectionName: (id: string) => string;
+}) {
+  const t = strings(lang);
+  const pager = useTablePager(rows, 25);
+
+  const head = 'px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground';
+  const cell = 'px-3 py-2 align-middle';
+
+  return (
+    <>
+      <div className="max-h-[36rem] overflow-auto rounded-xl border border-border/60">
+        <table className="w-full min-w-[860px] border-separate border-spacing-0 text-[12px]">
+          <thead>
+            {/* Sticky: a 230-row comparison scrolls well past the headings, and
+                the two date columns are indistinguishable without them. */}
+            <tr className="sticky top-0 z-10 bg-muted/80 backdrop-blur">
+              <th className={cn(head, 'text-left')}>{t.metric}</th>
+              <th className={cn(head, 'text-left')}>{t.unit}</th>
+              <th className={cn(head, 'text-right')}>{a}</th>
+              <th className={cn(head, 'text-right')}>{b}</th>
+              <th className={cn(head, 'text-right')}>{t.change}</th>
+              <th className={cn(head, 'text-right')}>{t.changePct}</th>
+              <th className={cn(head, 'text-left')}>{t.note}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pager.rows.map((r, i) => {
+              // Section headings are inserted between rows, so they are worked
+              // out from the page being shown rather than the whole list —
+              // otherwise a page starting mid-section would have no heading.
+              const prev = i > 0 ? pager.rows[i - 1] : null;
+              const opensSection = !prev || prev.section !== r.section;
+              const v = verdictOf(r.id, r.delta);
+              const style = VERDICT_STYLE[v];
+              const Arrow = style.Icon;
+              const unpublished = r.a === null || r.b === null;
+
+              return (
+                <React.Fragment key={r.id}>
+                  {opensSection && (
+                    <tr>
+                      <th
+                        colSpan={7}
+                        scope="colgroup"
+                        className="border-y border-border/50 bg-muted/40 px-3 py-1.5 text-left text-[10.5px] font-bold uppercase tracking-[0.08em] text-muted-foreground"
+                      >
+                        {sectionLabel(r.section, sectionName(r.section), lang)}
+                      </th>
+                    </tr>
+                  )}
+                  <tr
+                    className={cn(
+                      'border-b border-border/30 transition-colors hover:bg-muted/30',
+                      // A row with a missing figure is tinted rather than left
+                      // to look like an ordinary row that happens to hold a
+                      // dash. It is a gap in the record, and it should read as
+                      // one at a glance.
+                      unpublished && 'bg-amber-500/[0.05]',
+                    )}
+                  >
+                    <td className={cn(cell, 'font-medium')}>{metricLabel(r.id, r.label, lang)}</td>
+                    <td className={cn(cell, 'whitespace-nowrap text-muted-foreground')}>
+                      {unitLabel(r.unit, lang)}
+                    </td>
+                    <td className={cn(cell, 'text-right tabular-nums')}>{figure(r.a, lang)}</td>
+                    <td className={cn(cell, 'text-right font-semibold tabular-nums')}>
+                      {figure(r.b, lang)}
+                    </td>
+                    <td className={cn(cell, 'text-right tabular-nums', style.text)}>
+                      {r.delta === null ? '—' : `${r.delta >= 0 ? '+' : ''}${figure(r.delta, lang)}`}
+                    </td>
+                    <td className={cn(cell, 'text-right')}>
+                      {r.pct === null ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <span
+                          className={cn(
+                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11.5px] font-semibold tabular-nums ring-1 ring-inset',
+                            style.chip,
+                          )}
+                        >
+                          <Arrow className="h-3 w-3" />
+                          {loc(`${Math.abs(r.pct).toFixed(1)}%`, lang)}
+                        </span>
+                      )}
+                    </td>
+                    <td className={cn(cell, 'text-[11.5px] text-muted-foreground')}>{r.note ?? ''}</td>
+                  </tr>
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* A colour that means "better" rather than "bigger" has to say so, or a
+          reader seeing shedding fall in green assumes the table is broken. */}
+      <p className="text-[11.5px] text-muted-foreground">
+        <span className="font-semibold text-emerald-700 dark:text-emerald-400">Green</span> is an
+        improvement for that metric and{' '}
+        <span className="font-semibold text-rose-700 dark:text-rose-400">red</span> a worsening — so
+        shedding falling is green and shedding rising is red. Demand and temperature are never
+        coloured: a change in either is neither good nor bad on its own.
+      </p>
+
+      {/* A full comparison is ~230 rows. The explorer already settled on one
+          pager for every long list, so this uses that rather than growing a
+          second set of controls that behave slightly differently. */}
+      <GridTablePager
+        page={pager.page}
+        totalPages={pager.totalPages}
+        pageSize={pager.pageSize}
+        total={pager.total}
+        from={pager.from}
+        to={pager.to}
+        onPage={pager.setPage}
+        onPageSize={pager.setPageSize}
+        noun="rows"
+      />
+    </>
+  );
+}
+
+/* ── Word and PDF ────────────────────────────────────────────────────────── */
+
+/**
+ * Both binary exports, and the one place their failures are shown.
+ *
+ * The .txt/.csv/.json buttons build a Blob from a string the panel already
+ * holds; these two have to ask the server to typeset a document, which can fail
+ * for a reason the operator needs to read — a Bengali PDF with no Bengali font
+ * being the one that actually happens.
+ */
+function DocumentButtons({
+  run,
+  disabled,
+  lang,
+}: {
+  run: (format: DocFormat) => Promise<DocumentPayload>;
+  disabled?: boolean;
+  /** Only used for the Bengali caveat below; the buttons stay in English. */
+  lang: Lang;
+}) {
+  const [busy, setBusy] = useState<DocFormat | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function go(format: DocFormat) {
+    setBusy(format);
+    setError(null);
+    try {
+      const res = await run(format);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      // Base64 to Blob rather than a data: URL — a 230-row PDF overruns the URL
+      // length limit in some browsers, and fails silently when it does.
+      const bin = atob(res.base64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: res.mime }));
+      const el = document.createElement('a');
+      el.href = url;
+      el.download = res.filename;
+      el.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => go('docx')}
+        disabled={disabled || busy !== null}
+        className={btnGhost}
+      >
+        {busy === 'docx' ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <FileText className="h-4 w-4" />
+        )}
+        {busy === 'docx' ? 'Preparing…' : 'Download .docx'}
+      </button>
+      <button
+        type="button"
+        onClick={() => go('pdf')}
+        disabled={disabled || busy !== null}
+        className={btnGhost}
+      >
+        {busy === 'pdf' ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <FileType2 className="h-4 w-4" />
+        )}
+        {busy === 'pdf' ? 'Preparing…' : 'Download .pdf'}
+      </button>
+      {error && (
+        <span className="basis-full pb-1 text-[12px] text-amber-700 dark:text-amber-400">
+          {error}
+        </span>
+      )}
+      {/* Said here rather than buried in the file, because here is where the
+          choice is made. The PDF's Bengali is readable but its ra-conjuncts
+          form wrongly — react-pdf's shaper, not the font — while Word shapes
+          the text on the reader's own machine and gets them right. */}
+      {lang === 'bn' && (
+        <span className="basis-full text-[11px] text-muted-foreground">
+          For Bengali, prefer .docx — the PDF&rsquo;s ra-conjuncts form wrongly (react-pdf&rsquo;s
+          shaper, not the font), while Word shapes the text on the reader&rsquo;s own machine.
+        </span>
+      )}
+    </>
+  );
+}
+
+/* ── the published sheet, as a table ─────────────────────────────────────── */
+
+/**
+ * The year-on-year sheet is nine rows, and it was being shown as the raw
+ * monospace block the exporter produces — columns held together by space
+ * padding, which only line up in a monospaced font and do not line up at all in
+ * Bengali, where no monospaced face exists. It read as broken output rather
+ * than as the headline nine figures of the day.
+ *
+ * So the figures are drawn, and the raw block is kept underneath for the reader
+ * who wants to see exactly what Copy and .txt will hand them.
+ *
+ * Nine rows is few enough to be generous with: the two years get real columns,
+ * the change gets a chip, and the row carries the same colour rule as every
+ * other table here — `verdictOf`, keyed on the comparison engine's own metric
+ * ids, so shedding falling is green here exactly as it is over there.
+ */
+function SheetTable({ result }: { result: Extract<YoyResult, { ok: true }> }) {
+  const bn = result.lang === 'bn';
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-border/60">
+      <table className="w-full border-separate border-spacing-0 text-[13px]">
+        <thead>
+          <tr className="bg-muted/60">
+            <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {bn ? 'বিবরণ' : 'Metric'}
+            </th>
+            <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {bn ? 'একক' : 'Unit'}
+            </th>
+            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {result.aLabel}
+            </th>
+            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {result.bLabel}
+            </th>
+            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {bn ? 'পরিবর্তন' : 'Change'}
+            </th>
+            <th className="px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {bn ? 'পরিবর্তন %' : 'Change %'}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.rows.map((r) => {
+            const v = verdictOf(r.id, r.b - r.a);
+            const style = VERDICT_STYLE[v];
+            const Arrow = style.Icon;
+            return (
+              <tr key={r.id} className="border-t border-border/40 transition-colors hover:bg-muted/25">
+                <td className="px-4 py-2.5 font-semibold">{r.label}</td>
+                <td className="whitespace-nowrap px-4 py-2.5 text-[12px] text-muted-foreground">
+                  {r.unit}
+                </td>
+                <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
+                  {r.aText}
+                </td>
+                {/* The later year is the story; the earlier one is context. */}
+                <td className="px-4 py-2.5 text-right text-[14px] font-bold tabular-nums">
+                  {r.bText}
+                </td>
+                {/* The absolute change, in the same units as the two columns
+                    before it. It was missing here while every other table in
+                    the section carried it, and a percentage on its own does not
+                    tell a desk how many megawatts moved. */}
+                <td className={cn('px-4 py-2.5 text-right tabular-nums', style.text)}>
+                  {r.deltaText}
+                </td>
+                <td className="px-4 py-2.5 text-right">
+                  <span
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold tabular-nums ring-1 ring-inset',
+                      style.chip,
+                    )}
+                  >
+                    <Arrow className="h-3.5 w-3.5" />
+                    {r.pctText}%
+                  </span>
+                  {/* The published sheet prints 0.0% against a base of zero,
+                      and this shows what the sheet shows. But 0 MW to 1,553 MW
+                      is not a 0% move, it is a move with no ratio, so it is
+                      said here rather than left to read as "no change". The
+                      colour still comes from the direction, which is real. */}
+                  {r.pct === null && (
+                    <span className="ml-2 text-[11px] text-muted-foreground">
+                      {bn ? 'আগের বছর শূন্য' : 'from zero'}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 /* ── mode 1: the published year-on-year sheet ────────────────────────────── */
 
-function SheetMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
-  const [date, setDate] = useState(bootstrap.latestDate ?? '');
+function SheetMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap; archive: ArchiveIndex; url: YoyUrl; lang: Lang }) {
+  // The sheet needs the day AND the same day a year earlier, so a link is
+  // validated against that rule, not merely against the archive.
+  const canSheet = useCallback(
+    (iso: string) => archive.has(iso) && archive.has(priorYearOf(iso)),
+    [archive],
+  );
+  const [date, setDate] = useState(() => url.day('date', bootstrap.latestDate ?? '', canSheet));
   const [result, setResult] = useState<YoyResult | null>(bootstrap.initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function generate(next: string) {
-    setDate(next);
-    setError(null);
-    if (!next) return;
-    startTransition(async () => {
-      try {
-        setResult(await generateYoySheet(next));
-      } catch (e) {
-        setResult(null);
-        setError(e instanceof Error ? e.message : String(e));
-      }
-    });
-  }
+  const generate = useCallback(
+    (next: string, forLang: Lang) => {
+      setError(null);
+      if (!next) return;
+      startTransition(async () => {
+        try {
+          setResult(await generateYoySheet(next, forLang));
+        } catch (e) {
+          setResult(null);
+          setError(e instanceof Error ? e.message : String(e));
+        }
+      });
+    },
+    [],
+  );
+
+  /**
+   * The sheet is built server-side in one language or the other, so changing
+   * either the day or the Output language has to rebuild it — there is nothing
+   * on the client to re-render into Bengali.
+   *
+   * Keyed on what the bootstrap already painted rather than on "is this the
+   * first render". A mount guard was correct until links arrived: opening
+   * `?date=2026-08-14` skipped the only effect run and left the editor looking
+   * at the sheet for a different day than the calendar showed.
+   */
+  useEffect(() => {
+    url.patch({ date });
+  }, [date, url]);
+
+  const built = useRef(`${bootstrap.latestDate ?? ''}|en`);
+  useEffect(() => {
+    const key = `${date}|${lang}`;
+    if (built.current === key) return;
+    built.current = key;
+    generate(date, lang);
+  }, [lang, date, generate, bootstrap.latestDate]);
 
   return (
     <div className="space-y-3">
@@ -230,21 +754,19 @@ function SheetMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
         following date, so a day is only ready once that report has landed.
       </p>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="yoy-date">
-            Energy day
-          </label>
-          <input
-            id="yoy-date"
-            type="date"
-            value={date}
-            min={bootstrap.earliestDate ?? undefined}
-            max={bootstrap.newestArchiveDate ?? undefined}
-            onChange={(e) => generate(e.target.value)}
-            className={inputCls}
-          />
-        </div>
+      <div className="grid-controls">
+        {/* A day needs its own figures AND the same day a year earlier, so the
+            calendar refuses anything missing either. It used to accept any day
+            in the span and answer with an error. */}
+        <GridDatePicker
+          label="Energy day"
+          id="yoy-date"
+          value={date}
+          onChange={setDate}
+          archive={archive}
+          selectable={canSheet}
+          unselectableHint="A day is offered only when the archive holds it and the same day a year earlier."
+        />
         <CopyButton text={result?.ok ? result.text : ''} disabled={!result?.ok || pending} />
         <button
           type="button"
@@ -255,6 +777,14 @@ function SheetMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
           <Download className="h-4 w-4" />
           Download .txt
         </button>
+        {/* The sheet is already typeset — fixed columns, Bengali numerals — so
+            both documents carry it as a monospaced block rather than rebuilding
+            it as a table and losing the format the desk publishes. */}
+        <DocumentButtons
+          lang={lang}
+          disabled={!result?.ok || pending || !date}
+          run={(format) => exportSheetDocument(date, format, lang)}
+        />
         <SaveToArchive
           filename={result?.ok ? result.filename : ''}
           text={result?.ok ? result.text : ''}
@@ -273,9 +803,22 @@ function SheetMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
       {result?.ok && (
         <>
-          <pre className="overflow-x-auto rounded-lg border border-border/60 bg-muted/40 p-4 text-[12px] leading-[1.65] font-mono whitespace-pre">
-            {result.text}
-          </pre>
+          <SheetTable result={result} />
+
+          {/* Kept, but folded away: this is the artefact Copy, .txt and the
+              archive folder actually hand over, and an editor checking a
+              published file needs to see it exactly as it will be written. It
+              is not what the page should open on, though — as the whole
+              preview it read as broken output. */}
+          <details className="rounded-lg border border-border/60 bg-muted/20">
+            <summary className="cursor-pointer select-none px-4 py-2.5 text-[12px] font-semibold text-muted-foreground">
+              Raw sheet — exactly what Copy, .txt and the archive folder write
+            </summary>
+            <pre className="overflow-x-auto border-t border-border/60 p-4 text-[12px] leading-[1.65] font-mono whitespace-pre">
+              {result.text}
+            </pre>
+          </details>
+
           <p className="text-[11.5px] text-muted-foreground">{result.filename}</p>
         </>
       )}
@@ -289,15 +832,25 @@ function SheetMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
 /* ── mode 2: any two days ────────────────────────────────────────────────── */
 
-function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
+function CompareMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap; archive: ArchiveIndex; url: YoyUrl; lang: Lang }) {
   const anchor = bootstrap.latestDate ?? bootstrap.newestArchiveDate ?? '';
-  const [bDate, setBDate] = useState(anchor);
-  const [aDate, setADate] = useState(anchor ? priorYearIso(anchor) : '');
-  const [sections, setSections] = useState<SectionId[]>(bootstrap.sections.map((s) => s.id));
+  const sectionIds = useMemo(() => bootstrap.sections.map((s) => s.id), [bootstrap.sections]);
+
+  const [bDate, setBDate] = useState(() => url.day('b', anchor));
+  const [aDate, setADate] = useState(() => url.day('a', anchor ? priorYearIso(anchor) : ''));
+  const [sections, setSections] = useState<SectionId[]>(() =>
+    url.list('sections', sectionIds, sectionIds),
+  );
   const [metricIds, setMetricIds] = useState<string[]>([]);
   const [payload, setPayload] = useState<ComparisonPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // One write per settled state rather than one per setter, so a swap does not
+  // put a half-swapped pair in the bar on its way through.
+  useEffect(() => {
+    url.patch({ a: aDate, b: bDate, sections: sections.join(',') });
+  }, [aDate, bDate, sections, url]);
 
   // Every run is stamped; a slower earlier request must not overwrite a newer
   // result when the editor is clicking through sections quickly.
@@ -309,7 +862,7 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
     setError(null);
     startTransition(async () => {
       try {
-        const next = await runComparison(aDate, bDate, sections, metricIds);
+        const next = await runComparison(aDate, bDate, sections, metricIds, lang);
         if (id === runId.current) setPayload(next);
       } catch (e) {
         if (id === runId.current) {
@@ -318,23 +871,39 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
         }
       }
     });
-  }, [aDate, bDate, sections, metricIds]);
+  }, [aDate, bDate, sections, metricIds, lang]);
 
   const ok = payload?.ok ? payload : null;
-  // Hooks cannot sit behind the `ok` guard below, so the pager is always
-  // constructed and simply pages an empty list until a comparison arrives.
-  const pager = useTablePager(ok?.rows ?? [], 25);
   const stem = `Grid_Compare_${aDate}_vs_${bDate}`;
+  const sectionName = useCallback(
+    (id: string) => bootstrap.sections.find((x) => x.id === id)?.label ?? id,
+    [bootstrap.sections],
+  );
 
-  const grouped = useMemo(() => {
-    const map = new Map<string, Array<{ id: string; label: string }>>();
-    for (const m of ok?.available ?? []) {
-      const list = map.get(m.section) ?? [];
-      list.push({ id: m.id, label: m.label });
-      map.set(m.section, list);
-    }
-    return map;
-  }, [ok]);
+  /**
+   * The comparisons the desk actually reaches for, one press each.
+   *
+   * They move the FIRST day and leave the second alone: the second is "the day
+   * I am writing about" and the first is whatever I am measuring it against.
+   * Each lands on the nearest archived day, because an exact year back is a
+   * gap 81 times in this archive, and offers nothing when there is none within
+   * reach rather than silently choosing something far away.
+   */
+  const presets = useMemo(
+    () =>
+      [
+        { label: 'Year before', delta: null as number | null },
+        { label: 'Month before', delta: -30 },
+        { label: 'Week before', delta: -7 },
+        { label: 'Day before', delta: -1 },
+      ].map((p) => ({
+        label: p.label,
+        to: bDate
+          ? archive.nearest(p.delta === null ? priorYearOf(bDate) : shiftIso(bDate, p.delta))
+          : null,
+      })),
+    [bDate, archive],
+  );
 
   const toggleSection = useCallback((id: SectionId) => {
     setSections((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
@@ -352,35 +921,55 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
         percentage; it is never read as zero.
       </p>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="cmp-a">
-            First day
-          </label>
-          <input
-            id="cmp-a"
-            type="date"
-            value={aDate}
-            min={bootstrap.earliestDate ?? undefined}
-            max={bootstrap.newestArchiveDate ?? undefined}
-            onChange={(e) => setADate(e.target.value)}
-            className={inputCls}
-          />
+      <div className="grid-controls">
+        <GridDatePicker
+          label="First day"
+          id="cmp-a"
+          value={aDate}
+          onChange={setADate}
+          archive={archive}
+        />
+        {/* The two days are read left to right, and getting them the wrong way
+            round inverts every sign in the table. Fixing that meant retyping
+            both dates. */}
+        <button
+          type="button"
+          className="grid-controls__swap"
+          onClick={() => {
+            setADate(bDate);
+            setBDate(aDate);
+          }}
+          title="Swap the two days"
+          aria-label="Swap the two days"
+        >
+          <ArrowLeftRight className="h-3.5 w-3.5" />
+        </button>
+        <GridDatePicker
+          label="Second day"
+          id="cmp-b"
+          value={bDate}
+          onChange={setBDate}
+          archive={archive}
+        />
+
+        <div className="grid-date-field">
+          <span className="grid-date-field__label">Jump to</span>
+          <div className="grid-presets">
+            {presets.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                className="grid-preset"
+                disabled={!p.to}
+                title={p.to ? formatIso(p.to) : 'Not in the archive'}
+                onClick={() => p.to && setADate(p.to)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div>
-          <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="cmp-b">
-            Second day
-          </label>
-          <input
-            id="cmp-b"
-            type="date"
-            value={bDate}
-            min={bootstrap.earliestDate ?? undefined}
-            max={bootstrap.newestArchiveDate ?? undefined}
-            onChange={(e) => setBDate(e.target.value)}
-            className={inputCls}
-          />
-        </div>
+
         {pending && (
           <span className="inline-flex items-center gap-1.5 pb-2 text-[12px] text-muted-foreground">
             <Loader2 className="h-3.5 w-3.5 animate-spin" /> Comparing…
@@ -390,19 +979,15 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
       <div>
         <p className="mb-1.5 text-[12px] font-semibold">Sections</p>
-        <div className="flex flex-wrap gap-x-4 gap-y-2">
-          {bootstrap.sections.map((s) => (
-            <label key={s.id} className="inline-flex items-center gap-2 text-[12px]" title={s.description}>
-              <input
-                type="checkbox"
-                checked={sections.includes(s.id)}
-                onChange={() => toggleSection(s.id)}
-                className="h-3.5 w-3.5"
-              />
-              {s.label}
-            </label>
-          ))}
-        </div>
+        <SectionChips
+          sections={bootstrap.sections}
+          selected={sections}
+          onToggle={toggleSection}
+          onAll={() => {
+            setSections(bootstrap.sections.map((x) => x.id));
+            setMetricIds([]);
+          }}
+        />
       </div>
 
       {error && <Notice tone="warn">{error}</Notice>}
@@ -410,55 +995,13 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
       {ok && (
         <>
-          <div className="rounded-lg border border-border/60 p-3">
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[12px] font-semibold">
-                Metrics {metricIds.length ? `(${metricIds.length} of ${ok.available.length})` : `(all ${ok.available.length})`}
-              </p>
-              <button
-                type="button"
-                onClick={() => setMetricIds([])}
-                disabled={!metricIds.length}
-                className="text-[12px] font-semibold text-emerald-700 disabled:opacity-40 dark:text-emerald-400"
-              >
-                Show all
-              </button>
-            </div>
-            <div className="max-h-56 space-y-3 overflow-y-auto pr-1">
-              {bootstrap.sections
-                .filter((s) => grouped.has(s.id))
-                .map((s) => (
-                  <div key={s.id}>
-                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      {s.label}
-                    </p>
-                    <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
-                      {(grouped.get(s.id) ?? []).map((m) => (
-                        <label key={m.id} className="inline-flex items-center gap-2 text-[12px]">
-                          <input
-                            type="checkbox"
-                            // No picks at all means "everything", so an untouched
-                            // list still reads as fully ticked.
-                            checked={metricIds.length === 0 || metricIds.includes(m.id)}
-                            onChange={() =>
-                              setMetricIds((prev) => {
-                                const base = prev.length ? prev : ok.available.map((x) => x.id);
-                                const next = base.includes(m.id)
-                                  ? base.filter((x) => x !== m.id)
-                                  : [...base, m.id];
-                                return next.length === ok.available.length ? [] : next;
-                              })
-                            }
-                            className="h-3.5 w-3.5"
-                          />
-                          <span className="truncate">{m.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
+          <MetricPicker
+            metrics={ok.available}
+            sections={bootstrap.sections}
+            selected={metricIds}
+            onChange={setMetricIds}
+            disabled={pending}
+          />
 
           <div className="flex flex-wrap items-end gap-3">
             <CopyButton text={ok.text} disabled={pending} />
@@ -479,8 +1022,25 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
             >
               <Download className="h-4 w-4" /> Download .json
             </button>
+            <DocumentButtons
+              lang={lang}
+              disabled={pending}
+              run={(format) =>
+                exportComparisonDocument({
+                  kind: 'days',
+                  a: aDate,
+                  b: bDate,
+                  sections,
+                  metricIds,
+                  format,
+                  lang,
+                })
+              }
+            />
             <SaveToArchive filename={`${stem}.txt`} text={ok.text} disabled={pending} />
           </div>
+
+          <SummaryStrip rows={ok.rows} />
 
           {ok.notes.map((n) => (
             <Notice key={n} tone="warn">
@@ -496,57 +1056,12 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
             </Notice>
           )}
 
-          <div className="overflow-x-auto rounded-lg border border-border/60">
-            <table className="w-full text-[12px]">
-              <thead className="bg-muted/40 text-left">
-                <tr>
-                  <th className="px-3 py-2 font-semibold">Metric</th>
-                  <th className="px-3 py-2 font-semibold">Unit</th>
-                  <th className="px-3 py-2 text-right font-semibold">{ok.a}</th>
-                  <th className="px-3 py-2 text-right font-semibold">{ok.b}</th>
-                  <th className="px-3 py-2 text-right font-semibold">Change</th>
-                  <th className="px-3 py-2 text-right font-semibold">Change %</th>
-                  <th className="px-3 py-2 font-semibold">Note</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pager.rows.map((r) => (
-                  <tr key={r.id} className="border-t border-border/40">
-                    <td className="px-3 py-1.5">{r.label}</td>
-                    <td className="px-3 py-1.5 text-muted-foreground">{r.unit}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{fmt(r.a)}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{fmt(r.b)}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">
-                      {r.delta === null ? '—' : `${r.delta >= 0 ? '+' : ''}${fmt(r.delta)}`}
-                    </td>
-                    <td
-                      className={cn(
-                        'px-3 py-1.5 text-right tabular-nums',
-                        r.pct !== null && (r.pct >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'),
-                      )}
-                    >
-                      {r.pct === null ? '—' : `${r.pct >= 0 ? '▲' : '▼'} ${Math.abs(r.pct).toFixed(1)}%`}
-                    </td>
-                    <td className="px-3 py-1.5 text-[11.5px] text-muted-foreground">{r.note ?? ''}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* A full comparison is ~230 rows. The explorer already settled on one
-              pager for every long list, so this uses that rather than growing a
-              second set of controls that behave slightly differently. */}
-          <GridTablePager
-            page={pager.page}
-            totalPages={pager.totalPages}
-            pageSize={pager.pageSize}
-            total={pager.total}
-            from={pager.from}
-            to={pager.to}
-            onPage={pager.setPage}
-            onPageSize={pager.setPageSize}
-            noun="rows"
+          <ComparisonTable
+            rows={ok.rows}
+            a={ok.a}
+            b={ok.b}
+            lang={lang}
+            sectionName={sectionName}
           />
 
           <pre className="overflow-x-auto rounded-lg border border-border/60 bg-muted/40 p-4 text-[12px] leading-[1.65] font-mono whitespace-pre">
@@ -560,10 +1075,14 @@ function CompareMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
 /* ── mode 3: ranges ──────────────────────────────────────────────────────── */
 
-function RangeMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
+function RangeMode({ bootstrap, archive, url }: { bootstrap: YoyBootstrap; archive: ArchiveIndex; url: YoyUrl }) {
   const end0 = bootstrap.newestArchiveDate ?? '';
-  const [start, setStart] = useState(end0 ? shiftIso(end0, -29) : '');
-  const [end, setEnd] = useState(end0);
+  const [start, setStart] = useState(() => url.day('from', end0 ? shiftIso(end0, -29) : ''));
+  const [end, setEnd] = useState(() => url.day('to', end0));
+
+  useEffect(() => {
+    url.patch({ from: start, to: end });
+  }, [start, end, url]);
   const [metricIds, setMetricIds] = useState<string[]>([]);
   const [series, setSeries] = useState<RangeSeriesPayload | null>(null);
   const [bulk, setBulk] = useState<BulkYoyPayload | null>(null);
@@ -609,34 +1128,42 @@ function RangeMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
         archive does not hold keep their column and leave it blank — a gap in the record, not a zero.
       </p>
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div>
-          <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="rng-start">
-            Start
-          </label>
-          <input
-            id="rng-start"
-            type="date"
-            value={start}
-            min={bootstrap.earliestDate ?? undefined}
-            max={bootstrap.newestArchiveDate ?? undefined}
-            onChange={(e) => setStart(e.target.value)}
-            className={inputCls}
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="rng-end">
-            End
-          </label>
-          <input
-            id="rng-end"
-            type="date"
-            value={end}
-            min={bootstrap.earliestDate ?? undefined}
-            max={bootstrap.newestArchiveDate ?? undefined}
-            onChange={(e) => setEnd(e.target.value)}
-            className={inputCls}
-          />
+      <div className="grid-controls">
+        {/* Boundaries, not members: the days between are allowed to be missing —
+            that is the point of the export — but a range that STARTS on a day
+            we do not hold begins with a blank column, which is only ever a
+            typo. So the two ends come out of the archive like everywhere else. */}
+        <GridDatePicker
+          label="Start"
+          id="rng-start"
+          value={start}
+          onChange={setStart}
+          archive={archive}
+        />
+        <GridDatePicker
+          label="End"
+          id="rng-end"
+          value={end}
+          onChange={setEnd}
+          archive={archive}
+        />
+
+        <div className="grid-date-field">
+          <span className="grid-date-field__label">Length</span>
+          <div className="grid-presets">
+            {[7, 30, 90, 365].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className="grid-preset"
+                disabled={!end || pending}
+                title={`The ${n} days ending ${end ? formatIso(end) : ''}`}
+                onClick={() => setStart(shiftIso(end, -(n - 1)))}
+              >
+                {n}d
+              </button>
+            ))}
+          </div>
         </div>
         <button
           type="button"
@@ -703,41 +1230,12 @@ function RangeMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
             </Notice>
           )}
 
-          <div className="rounded-lg border border-border/60 p-3">
-            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-[12px] font-semibold">
-                Metrics{' '}
-                {metricIds.length ? `(${metricIds.length} of ${seriesOk.available.length})` : `(all ${seriesOk.available.length})`}
-              </p>
-              <button
-                type="button"
-                onClick={() => build([])}
-                disabled={!metricIds.length || pending}
-                className="text-[12px] font-semibold text-emerald-700 disabled:opacity-40 dark:text-emerald-400"
-              >
-                Show all
-              </button>
-            </div>
-            <div className="grid max-h-56 gap-x-4 gap-y-1 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
-              {seriesOk.available.map((m) => (
-                <label key={m.id} className="inline-flex items-center gap-2 text-[12px]">
-                  <input
-                    type="checkbox"
-                    checked={metricIds.length === 0 || metricIds.includes(m.id)}
-                    onChange={() => {
-                      const base = metricIds.length ? metricIds : seriesOk.available.map((x) => x.id);
-                      const next = base.includes(m.id) ? base.filter((x) => x !== m.id) : [...base, m.id];
-                      build(next.length === seriesOk.available.length ? [] : next);
-                    }}
-                    className="h-3.5 w-3.5"
-                  />
-                  <span className="truncate">
-                    {m.label} <span className="text-muted-foreground">({m.unit})</span>
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
+          <MetricPicker
+            metrics={seriesOk.available.map((m) => ({ ...m, section: 'all' }))}
+            selected={metricIds}
+            onChange={build}
+            disabled={pending}
+          />
         </>
       )}
 
@@ -784,17 +1282,25 @@ function RangeMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
 type MonthView = 'compare' | 'range';
 
-function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
+const MONTH_VIEWS = ['compare', 'range'] as const;
+
+function MonthsMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap; archive: ArchiveIndex; url: YoyUrl; lang: Lang }) {
   const newest = bootstrap.months[0] ?? '';
   const oldest = bootstrap.months[bootstrap.months.length - 1] ?? '';
   const archived = useMemo(() => new Set(bootstrap.months), [bootstrap.months]);
 
-  const [view, setView] = useState<MonthView>('compare');
+  const [view, setView] = useState<MonthView>(() => url.one('view', 'compare', MONTH_VIEWS));
 
-  const [bMonth, setBMonth] = useState(newest);
-  const [aMonth, setAMonth] = useState(newest ? priorYearMonth(newest) : '');
-  const [sections, setSections] = useState<MonthlySectionId[]>(
-    bootstrap.monthlySections.map((s) => s.id),
+  const monthlyIds = useMemo(
+    () => bootstrap.monthlySections.map((s) => s.id),
+    [bootstrap.monthlySections],
+  );
+  const [bMonth, setBMonth] = useState(() => url.month('b', newest, archived));
+  const [aMonth, setAMonth] = useState(() =>
+    url.month('a', newest ? priorYearMonth(newest) : '', archived),
+  );
+  const [sections, setSections] = useState<MonthlySectionId[]>(() =>
+    url.list('msections', monthlyIds, monthlyIds),
   );
   const [metricIds, setMetricIds] = useState<string[]>([]);
   const [payload, setPayload] = useState<MonthlyComparisonPayload | null>(null);
@@ -811,7 +1317,7 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
     setError(null);
     startTransition(async () => {
       try {
-        const next = await runMonthlyComparison(aMonth, bMonth, sections, metricIds);
+        const next = await runMonthlyComparison(aMonth, bMonth, sections, metricIds, lang);
         if (id === runId.current) setPayload(next);
       } catch (e) {
         if (id === runId.current) {
@@ -820,14 +1326,17 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
         }
       }
     });
-  }, [view, aMonth, bMonth, sections, metricIds]);
+  }, [view, aMonth, bMonth, sections, metricIds, lang]);
 
   const ok = payload?.ok ? payload : null;
-  // Hooks cannot sit behind the `ok` guard, so the pager is always constructed
-  // and pages an empty list until a comparison arrives. A full monthly
-  // comparison is ~471 rows — substations alone are 203 — so it earns its keep.
-  const pager = useTablePager(ok?.rows ?? [], 25);
   const stem = `Grid_Compare_Months_${aMonth}_vs_${bMonth}`;
+  // The monthly engine has its own section vocabulary, so the table has to be
+  // told where to look; left to the daily names it would print "Load shedding"
+  // over the substation rows.
+  const sectionName = useCallback(
+    (id: string) => bootstrap.monthlySections.find((x) => x.id === id)?.label ?? id,
+    [bootstrap.monthlySections],
+  );
 
   const grouped = useMemo(() => {
     const map = new Map<string, Array<{ id: string; label: string }>>();
@@ -845,8 +1354,21 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
   }, []);
 
   /* range state */
-  const [rStart, setRStart] = useState(newest ? priorYearMonth(newest) : '');
-  const [rEnd, setREnd] = useState(newest);
+  const [rStart, setRStart] = useState(() =>
+    url.month('ms', newest ? priorYearMonth(newest) : '', archived),
+  );
+  const [rEnd, setREnd] = useState(() => url.month('me', newest, archived));
+
+  useEffect(() => {
+    url.patch({
+      view,
+      a: aMonth,
+      b: bMonth,
+      ms: rStart,
+      me: rEnd,
+      msections: sections.join(','),
+    });
+  }, [view, aMonth, bMonth, rStart, rEnd, sections, url]);
   const [rMetricIds, setRMetricIds] = useState<string[]>([]);
   const [series, setSeries] = useState<MonthlySeriesPayload | null>(null);
 
@@ -902,34 +1424,30 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
       {view === 'compare' && (
         <>
           <div className="flex flex-wrap items-end gap-3">
-            <div>
-              <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="mth-a">
-                First month
-              </label>
-              <input
-                id="mth-a"
-                type="month"
-                value={aMonth}
-                min={oldest || undefined}
-                max={newest || undefined}
-                onChange={(e) => setAMonth(e.target.value)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="mth-b">
-                Second month
-              </label>
-              <input
-                id="mth-b"
-                type="month"
-                value={bMonth}
-                min={oldest || undefined}
-                max={newest || undefined}
-                onChange={(e) => setBMonth(e.target.value)}
-                className={inputCls}
-              />
-            </div>
+            <GridMonthPicker
+              label="First month"
+              value={aMonth}
+              onChange={setAMonth}
+              months={bootstrap.months}
+            />
+            <button
+              type="button"
+              className="grid-controls__swap"
+              onClick={() => {
+                setAMonth(bMonth);
+                setBMonth(aMonth);
+              }}
+              title="Swap the two months"
+              aria-label="Swap the two months"
+            >
+              <ArrowLeftRight className="h-3.5 w-3.5" />
+            </button>
+            <GridMonthPicker
+              label="Second month"
+              value={bMonth}
+              onChange={setBMonth}
+              months={bootstrap.months}
+            />
             <span className="pb-2 text-[12px] text-muted-foreground">
               {bootstrap.months.length} month{bootstrap.months.length === 1 ? '' : 's'} archived
               {oldest && newest ? `, ${oldest} to ${newest}` : ''}.
@@ -950,23 +1468,15 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
           <div>
             <p className="mb-1.5 text-[12px] font-semibold">Sections</p>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {bootstrap.monthlySections.map((s) => (
-                <label
-                  key={s.id}
-                  className="inline-flex items-center gap-2 text-[12px]"
-                  title={s.description}
-                >
-                  <input
-                    type="checkbox"
-                    checked={sections.includes(s.id)}
-                    onChange={() => toggleSection(s.id)}
-                    className="h-3.5 w-3.5"
-                  />
-                  {s.label}
-                </label>
-              ))}
-            </div>
+            <SectionChips
+              sections={bootstrap.monthlySections}
+              selected={sections}
+              onToggle={toggleSection}
+              onAll={() => {
+                setSections(bootstrap.monthlySections.map((x) => x.id));
+                setMetricIds([]);
+              }}
+            />
           </div>
 
           {error && <Notice tone="warn">{error}</Notice>}
@@ -974,56 +1484,13 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 
           {ok && (
             <>
-              <div className="rounded-lg border border-border/60 p-3">
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-[12px] font-semibold">
-                    Metrics{' '}
-                    {metricIds.length
-                      ? `(${metricIds.length} of ${ok.available.length})`
-                      : `(all ${ok.available.length})`}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setMetricIds([])}
-                    disabled={!metricIds.length}
-                    className="text-[12px] font-semibold text-emerald-700 disabled:opacity-40 dark:text-emerald-400"
-                  >
-                    Show all
-                  </button>
-                </div>
-                <div className="max-h-56 space-y-3 overflow-y-auto pr-1">
-                  {bootstrap.monthlySections
-                    .filter((s) => grouped.has(s.id))
-                    .map((s) => (
-                      <div key={s.id}>
-                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                          {s.label}
-                        </p>
-                        <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
-                          {(grouped.get(s.id) ?? []).map((m) => (
-                            <label key={m.id} className="inline-flex items-center gap-2 text-[12px]">
-                              <input
-                                type="checkbox"
-                                checked={metricIds.length === 0 || metricIds.includes(m.id)}
-                                onChange={() =>
-                                  setMetricIds((prev) => {
-                                    const base = prev.length ? prev : ok.available.map((x) => x.id);
-                                    const next = base.includes(m.id)
-                                      ? base.filter((x) => x !== m.id)
-                                      : [...base, m.id];
-                                    return next.length === ok.available.length ? [] : next;
-                                  })
-                                }
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className="truncate">{m.label}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              </div>
+              <MetricPicker
+                metrics={ok.available}
+                sections={bootstrap.monthlySections}
+                selected={metricIds}
+                onChange={setMetricIds}
+                disabled={pending}
+              />
 
               <div className="flex flex-wrap items-end gap-3">
                 <CopyButton text={ok.text} disabled={pending} />
@@ -1044,8 +1511,25 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
                 >
                   <Download className="h-4 w-4" /> Download .json
                 </button>
+                <DocumentButtons
+                  lang={lang}
+                  disabled={pending}
+                  run={(format) =>
+                    exportComparisonDocument({
+                      kind: 'months',
+                      a: aMonth,
+                      b: bMonth,
+                      sections,
+                      metricIds,
+                      format,
+                      lang,
+                    })
+                  }
+                />
                 <SaveToArchive filename={`${stem}.txt`} text={ok.text} disabled={pending} />
               </div>
+
+              <SummaryStrip rows={ok.rows} />
 
               {ok.notes.map((n) => (
                 <Notice key={n} tone="warn">
@@ -1061,57 +1545,12 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
                 </Notice>
               )}
 
-              <div className="overflow-x-auto rounded-lg border border-border/60">
-                <table className="w-full text-[12px]">
-                  <thead className="bg-muted/40 text-left">
-                    <tr>
-                      <th className="px-3 py-2 font-semibold">Metric</th>
-                      <th className="px-3 py-2 font-semibold">Unit</th>
-                      <th className="px-3 py-2 text-right font-semibold">{ok.a}</th>
-                      <th className="px-3 py-2 text-right font-semibold">{ok.b}</th>
-                      <th className="px-3 py-2 text-right font-semibold">Change</th>
-                      <th className="px-3 py-2 text-right font-semibold">Change %</th>
-                      <th className="px-3 py-2 font-semibold">Note</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pager.rows.map((r) => (
-                      <tr key={r.id} className="border-t border-border/40">
-                        <td className="px-3 py-1.5">{r.label}</td>
-                        <td className="px-3 py-1.5 text-muted-foreground">{r.unit}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">{fmt(r.a)}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">{fmt(r.b)}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">
-                          {r.delta === null ? '—' : `${r.delta >= 0 ? '+' : ''}${fmt(r.delta)}`}
-                        </td>
-                        <td
-                          className={cn(
-                            'px-3 py-1.5 text-right tabular-nums',
-                            r.pct !== null &&
-                              (r.pct >= 0
-                                ? 'text-emerald-700 dark:text-emerald-400'
-                                : 'text-rose-700 dark:text-rose-400'),
-                          )}
-                        >
-                          {r.pct === null ? '—' : `${r.pct >= 0 ? '▲' : '▼'} ${Math.abs(r.pct).toFixed(1)}%`}
-                        </td>
-                        <td className="px-3 py-1.5 text-[11.5px] text-muted-foreground">{r.note ?? ''}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <GridTablePager
-                page={pager.page}
-                totalPages={pager.totalPages}
-                pageSize={pager.pageSize}
-                total={pager.total}
-                from={pager.from}
-                to={pager.to}
-                onPage={pager.setPage}
-                onPageSize={pager.setPageSize}
-                noun="rows"
+              <ComparisonTable
+                rows={ok.rows}
+                a={ok.a}
+                b={ok.b}
+                lang={lang}
+                sectionName={sectionName}
               />
 
               <pre className="overflow-x-auto rounded-lg border border-border/60 bg-muted/40 p-4 text-[12px] leading-[1.65] font-mono whitespace-pre">
@@ -1131,34 +1570,18 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
           </p>
 
           <div className="flex flex-wrap items-end gap-3">
-            <div>
-              <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="mrng-start">
-                Start month
-              </label>
-              <input
-                id="mrng-start"
-                type="month"
-                value={rStart}
-                min={oldest || undefined}
-                max={newest || undefined}
-                onChange={(e) => setRStart(e.target.value)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-[12px] font-semibold" htmlFor="mrng-end">
-                End month
-              </label>
-              <input
-                id="mrng-end"
-                type="month"
-                value={rEnd}
-                min={oldest || undefined}
-                max={newest || undefined}
-                onChange={(e) => setREnd(e.target.value)}
-                className={inputCls}
-              />
-            </div>
+            <GridMonthPicker
+              label="Start month"
+              value={rStart}
+              onChange={setRStart}
+              months={bootstrap.months}
+            />
+            <GridMonthPicker
+              label="End month"
+              value={rEnd}
+              onChange={setREnd}
+              months={bootstrap.months}
+            />
             <button
               type="button"
               onClick={() => buildSeries(rMetricIds)}
@@ -1209,47 +1632,12 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
                 </Notice>
               )}
 
-              <div className="rounded-lg border border-border/60 p-3">
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-[12px] font-semibold">
-                    Metrics{' '}
-                    {rMetricIds.length
-                      ? `(${rMetricIds.length} of ${seriesOk.available.length})`
-                      : `(all ${seriesOk.available.length})`}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => buildSeries([])}
-                    disabled={!rMetricIds.length || pending}
-                    className="text-[12px] font-semibold text-emerald-700 disabled:opacity-40 dark:text-emerald-400"
-                  >
-                    Show all
-                  </button>
-                </div>
-                <div className="grid max-h-56 gap-x-4 gap-y-1 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {seriesOk.available.map((m) => (
-                    <label key={m.id} className="inline-flex items-center gap-2 text-[12px]">
-                      <input
-                        type="checkbox"
-                        checked={rMetricIds.length === 0 || rMetricIds.includes(m.id)}
-                        onChange={() => {
-                          const base = rMetricIds.length
-                            ? rMetricIds
-                            : seriesOk.available.map((x) => x.id);
-                          const next = base.includes(m.id)
-                            ? base.filter((x) => x !== m.id)
-                            : [...base, m.id];
-                          buildSeries(next.length === seriesOk.available.length ? [] : next);
-                        }}
-                        className="h-3.5 w-3.5"
-                      />
-                      <span className="truncate">
-                        {m.label} <span className="text-muted-foreground">({m.unit})</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <MetricPicker
+                metrics={seriesOk.available.map((m) => ({ ...m, section: 'all' }))}
+                selected={rMetricIds}
+                onChange={buildSeries}
+                disabled={pending}
+              />
             </>
           )}
         </>
@@ -1261,28 +1649,130 @@ function MonthsMode({ bootstrap }: { bootstrap: YoyBootstrap }) {
 /* ── the panel ───────────────────────────────────────────────────────────── */
 
 export function YoyComparisonPanel({ bootstrap }: { bootstrap: YoyBootstrap }) {
-  const [mode, setMode] = useState<Mode>('sheet');
+  // Built once for the whole panel: the index binary-searches 63 runs, and
+  // rebuilding it per mode would throw that away on every tab press. It also
+  // has to exist before the URL is read, because the URL is validated against
+  // it — a link to a day we no longer hold falls back rather than erroring.
+  const archive = useMemo(() => createArchiveIndex(bootstrap.coverage), [bootstrap.coverage]);
+  const url = useYoyUrl(archive);
+
+  const [mode, setMode] = useState<Mode>(() => url.one('mode', 'sheet', MODE_IDS));
+  const [lang, setLang] = useState<Lang>(() => url.one('lang', 'en', LANGS));
+
+  // Written from the resolved state rather than at each click, so the link
+  // self-heals: arriving on `?mode=nonsense&lang=xx` shows the sheet in
+  // English AND rewrites the bar to say so, instead of leaving an address that
+  // describes a panel nobody is looking at.
+  useEffect(() => {
+    url.patch({ mode, lang });
+  }, [mode, lang, url]);
+
+  /**
+   * One sweep for the keys belonging to modes that are not mounted.
+   *
+   * Each mode corrects its own keys as it renders, which leaves a hand-edited
+   * `?a=2014-02-10` sitting in the bar while the sheet tab is open — invalid,
+   * inert, and copied into whatever link the editor shares next. The panel can
+   * check those without mounting anything, because it holds both section
+   * vocabularies and the archive index.
+   */
+  const swept = useRef(false);
+  useEffect(() => {
+    if (swept.current) return;
+    swept.current = true;
+
+    const months = new Set(bootstrap.months);
+    const dailyIds = new Set<string>(bootstrap.sections.map((x) => x.id));
+    const monthIds = new Set<string>(bootstrap.monthlySections.map((x) => x.id));
+    const drop: Partial<Record<string, string>> = {};
+
+    for (const key of ['date', 'a', 'b', 'from', 'to'] as const) {
+      const v = url.initial[key];
+      // `a` and `b` are days in one mode and months in another, so a value is
+      // kept when it is valid as either.
+      if (v && !archive.has(v) && !months.has(v)) drop[key] = '';
+    }
+    for (const key of ['ms', 'me'] as const) {
+      const v = url.initial[key];
+      if (v && !months.has(v)) drop[key] = '';
+    }
+    for (const [key, vocab] of [
+      ['sections', dailyIds],
+      ['msections', monthIds],
+    ] as const) {
+      const v = url.initial[key];
+      if (v && !v.split(',').every((x) => vocab.has(x))) drop[key] = '';
+    }
+
+    if (Object.keys(drop).length) url.patch(drop);
+  }, [url, archive, bootstrap.months, bootstrap.sections, bootstrap.monthlySections]);
 
   return (
     <CmsCard title="Grid comparison">
       <div className="space-y-4">
-        <CmsFilterTabs>
-          {MODES.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => setMode(m.id)}
-              className={cn('admin-filter-tab', mode === m.id && 'admin-filter-tab--active')}
-            >
-              {m.label}
-            </button>
-          ))}
-        </CmsFilterTabs>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <CmsFilterTabs>
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setMode(m.id)}
+                className={cn('admin-filter-tab', mode === m.id && 'admin-filter-tab--active')}
+              >
+                {m.label}
+              </button>
+            ))}
+          </CmsFilterTabs>
 
-        {mode === 'sheet' && <SheetMode bootstrap={bootstrap} />}
-        {mode === 'compare' && <CompareMode bootstrap={bootstrap} />}
-        {mode === 'range' && <RangeMode bootstrap={bootstrap} />}
-        {mode === 'months' && <MonthsMode bootstrap={bootstrap} />}
+          {/* This picks the language of the OUTPUT — the comparison being
+              previewed and the files exported from it — not the language of
+              the CMS. The panel around it stays in English, because it is the
+              desk's own working surface; what changes is the table, the text
+              block, the .docx and the .pdf, which are what leaves the building.
+
+              It changes what those say, not what the engine computed. The
+              figures, the units and the `—` rule are identical in both; the
+              labels the desk knows by heart are translated, and names PGCB and
+              Petrobangla print in English — stations, gas fields, substations —
+              stay as the archive has them rather than becoming a glossary we
+              would have to maintain.
+
+              Labelled, because an unlabelled EN/বাংলা pair beside the mode tabs
+              reads as "switch the CMS to Bengali", which is exactly what it
+              does not do. */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Output
+            </span>
+            <div
+              className="inline-flex items-center gap-1 rounded-lg border border-border/60 p-0.5"
+              role="group"
+              aria-label="Language of the preview and exports"
+            >
+              {(['en', 'bn'] as const).map((code) => (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setLang(code)}
+                  aria-pressed={lang === code}
+                  className={cn(
+                    'rounded-md px-3 py-1.5 text-[12px] font-semibold transition',
+                    lang === code
+                      ? 'bg-emerald-600 text-white'
+                      : 'text-muted-foreground hover:bg-muted/60',
+                  )}
+                >
+                  {code === 'en' ? 'English' : 'বাংলা'}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {mode === 'sheet' && <SheetMode bootstrap={bootstrap} archive={archive} url={url} lang={lang} />}
+        {mode === 'compare' && <CompareMode bootstrap={bootstrap} archive={archive} url={url} lang={lang} />}
+        {mode === 'range' && <RangeMode bootstrap={bootstrap} archive={archive} url={url} />}
+        {mode === 'months' && <MonthsMode bootstrap={bootstrap} archive={archive} url={url} lang={lang} />}
       </div>
     </CmsCard>
   );

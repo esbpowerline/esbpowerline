@@ -1,5 +1,5 @@
 import 'server-only';
-import type { ComparisonRow } from '@/lib/data/grid/comparison';
+import { countOf, type ComparisonRow } from '@/lib/data/grid/comparison';
 
 /**
  * Compare any two PGCB monthly reports.
@@ -103,6 +103,9 @@ type MonthlyMetric = {
   label: string;
   unit: string;
   value: (m: MonthlyRecord) => number | null;
+  /** For sums over a variable set: how many rows this month actually carries. */
+  basis?: (m: MonthlyRecord) => number;
+  basisNoun?: string;
 };
 
 const numberOrNull = (v: unknown): number | null =>
@@ -168,6 +171,13 @@ function fixedMetrics(): MonthlyMetric[] {
         const values = Object.values(fuels).filter((v): v is number => typeof v === 'number');
         return values.length ? values.reduce((a, b) => a + b, 0) : null;
       },
+      // Every archived month happens to print the same eight fuels, so this
+      // never fires today. It is here because the label says "sum of the
+      // split", and a sum of six fuels set against a sum of eight is a
+      // different quantity wearing the same words.
+      basis: (m) =>
+        Object.values(m.generation_by_fuel ?? {}).filter((v) => typeof v === 'number').length,
+      basisNoun: 'fuels',
     },
   ];
 }
@@ -333,7 +343,20 @@ export async function compareMonths(
   const rows = wanted.map((m) => {
     const av = m.value(a);
     const bv = m.value(b);
-    const { delta, pct, note } = changeOf(av, bv);
+    let { delta, pct, note } = changeOf(av, bv);
+    // Same rule as the daily engine: show both figures, withhold arithmetic
+    // between totals that were taken over different sets of rows.
+    if (m.basis && av !== null && bv !== null) {
+      const na = m.basis(a);
+      const nb = m.basis(b);
+      if (na !== nb) {
+        delta = null;
+        pct = null;
+        note =
+          `not like for like — ${aKey} sums ${countOf(na, m.basisNoun)}, ` +
+          `${bKey} sums ${countOf(nb, m.basisNoun)}`;
+      }
+    }
     return {
       section: m.section,
       id: m.id,
@@ -347,13 +370,27 @@ export async function compareMonths(
     } as ComparisonRow;
   });
 
-  // PGCB's monthly sheets vary by era; a whole section can be missing from an
-  // older report. Saying which is missing beats an empty section that reads as
-  // "nothing happened that month".
+  /**
+   * PGCB's monthly sheets vary by era; a whole section can be missing from an
+   * older report. Saying which beats an empty section that reads as "nothing
+   * happened that month".
+   *
+   * Measured against what was ASKED for, not against the full vocabulary. The
+   * old test read `wanted`, which is already narrowed by the section filter, so
+   * ticking only Substations produced "Neither report carries: System,
+   * Generation by fuel, Regional supply, Reliability, East / West,
+   * Interruptions" — six sections the reports carry perfectly well and the
+   * editor had merely unticked. A panel that tells you data does not exist
+   * when it does is worse than one that says nothing.
+   */
   const notes: string[] = [];
-  const emptySections = MONTHLY_SECTIONS.filter(
-    (s) => wanted.some((m) => m.section === s.id) === false && !opts?.metricIds?.length,
-  ).map((s) => s.label);
+  const askedFor = opts?.metricIds?.length
+    ? []
+    : (opts?.sections?.length ? opts.sections : MONTHLY_SECTIONS.map((x) => x.id as string));
+  const produced = new Set(all.filter((m) => askedFor.includes(m.section)).map((m) => m.section));
+  const emptySections = askedFor
+    .filter((id) => !produced.has(id as MonthlySectionId))
+    .map((id) => MONTHLY_SECTIONS.find((x) => x.id === id)?.label ?? id);
   if (emptySections.length) {
     notes.push(`Neither report carries: ${emptySections.join(', ')}.`);
   }

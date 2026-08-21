@@ -8,8 +8,14 @@ import { isIsoDate } from '@/lib/data/feed-paths';
 import { runPythonJson } from '@/lib/data/ingest-runner.server';
 
 /**
- * Parse an uploaded PGCB workbook (+ optional Petrobangla PDF) by shelling out
- * to the existing Python parsers.
+ * Parse an uploaded PGCB daily report (+ optional Petrobangla PDF) by shelling
+ * out to the existing Python parsers.
+ *
+ * The grid report may be the workbook PGCB files or a Word or PDF copy of the
+ * same document; `daily_extractor.report_convert` renders all three into the
+ * text the parser reads. The two that carry no sheet names come back with
+ * warnings saying which sections were inferred and how many rows each yielded,
+ * and those warnings surface in the review step.
  *
  * This only works where Python and the scripts live — i.e. the operator's own
  * machine running `next dev`. That is the whole point: the heavy, quirk-laden
@@ -78,7 +84,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!(pgcb instanceof File)) {
-      return NextResponse.json({ ok: false, error: 'A PGCB Excel file is required.' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: 'A PGCB daily report file is required.' }, { status: 400 });
     }
     if (pgcb.size > MAX_UPLOAD_BYTES || (pb instanceof File && pb.size > MAX_UPLOAD_BYTES)) {
       return NextResponse.json({ ok: false, error: 'Files must be under 25 MB.' }, { status: 400 });
@@ -86,20 +92,24 @@ export async function POST(request: NextRequest) {
 
     workdir = await mkdtemp(path.join(tmpdir(), 'esb-upload-'));
 
-    // Keep the original extension so pandas picks the right Excel engine — but
-    // only from a fixed allowlist. Left unconstrained, `path.extname` echoed
-    // whatever the uploader named the file (`.exe`, `.py`, an NTFS `:stream`
-    // suffix) into the temp filename. It is never executed — only passed as an
-    // argv to the Python parser — but a workbook has exactly these extensions,
-    // so anything else is a malformed upload and is rejected outright.
-    const ALLOWED_PGCB_EXT = new Set(['.xlsx', '.xls', '.xlsm']);
+    // Keep the original extension: it is what the converter dispatches on, and
+    // for a workbook it is also what lets pandas pick the right Excel engine.
+    // Only from a fixed allowlist, though. Left unconstrained, `path.extname`
+    // echoed whatever the uploader named the file (`.exe`, `.py`, an NTFS
+    // `:stream` suffix) into the temp filename. It is never executed — only
+    // passed as an argv to the Python parser — but a daily report has exactly
+    // these extensions, so anything else is a malformed upload and is rejected
+    // outright.
+    const ALLOWED_PGCB_EXT = new Set(['.xlsx', '.xls', '.xlsm', '.docx', '.pdf']);
     const rawExt = path.extname(pgcb.name).toLowerCase();
     if (rawExt && !ALLOWED_PGCB_EXT.has(rawExt)) {
       return NextResponse.json(
-        { ok: false, error: 'PGCB workbook must be .xlsx, .xls, or .xlsm.' },
+        { ok: false, error: 'The daily report must be .xlsx, .xls, .xlsm, .docx, or .pdf.' },
         { status: 400 },
       );
     }
+    // An unnamed upload is treated as a workbook, which is what it has always
+    // been; the converter reads the extension off `--pgcb-name` anyway.
     const pgcbExt = ALLOWED_PGCB_EXT.has(rawExt) ? rawExt : '.xlsx';
     const pgcbPath = path.join(workdir, `pgcb${pgcbExt}`);
     await writeFile(pgcbPath, Buffer.from(await pgcb.arrayBuffer()));
