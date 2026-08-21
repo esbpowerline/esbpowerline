@@ -1,28 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
+import type { DataFeed } from '@prisma/client';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { existsSync } from 'node:fs';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
-import { publishRelease } from '@/lib/actions/data-releases';
+import { isIsoDate } from '@/lib/data/feed-paths';
+import { runPythonJson } from '@/lib/data/ingest-runner.server';
+import { planLocalPublish, isReadable } from '@/lib/data/publish-local';
+import { writeRelease } from '@/lib/data/release-write';
+import { RELEASE_CACHE_TAG, feedCacheTag } from '@/lib/data/releases.server';
+import { revalidateDataRelease } from '@/lib/revalidate-tags';
 
 /**
- * Publish a full day: the two parsed files plus the three aggregates they feed.
+ * Publish the day the operator just reviewed: the parsed files, plus everything
+ * else the day already has on disk, plus the aggregates they feed.
  *
- * Order matters. The day files are written to public/data first because the
- * aggregate builders read that directory — and leaving them there also keeps the
- * local archive current for the next ingest, and lets a future commit fold the
- * day into the static archive so it stops costing a database read.
+ * Order matters. The reviewed payload is written to public/data first because
+ * the aggregate builder reads that directory — and leaving it there also keeps
+ * the local archive current for the next ingest, and lets a future commit fold
+ * the day into the static archive so it stops costing a database read.
  *
- * Then each artifact is published. The grid day goes first: if a later step
- * fails the site is at worst a day behind on gas, which it already renders, and
- * never the reverse.
+ * What is then published is decided by `planLocalPublish`, the same reader the
+ * publish-local route uses, rather than by a second hand-maintained list here.
+ * The list this replaces covered GRID_DAILY and GAS_DAILY only: it wrote the
+ * fuel curve to disk and never released it, and never mentioned the station
+ * detail at all. Since both are fetched through the runtime manifest, a day
+ * published from this screen arrived on the live site with an empty Energy
+ * Curve and an empty Power Stations tab until the next deployment — the exact
+ * failure the publish-local card was added to work around.
  */
-
-const execFileAsync = promisify(execFile);
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 600;
@@ -30,22 +37,6 @@ export const maxDuration = 600;
 function isServerless(): boolean {
   return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 }
-
-function resolvePython(): string | null {
-  const candidates = [
-    process.env.ESB_PYTHON,
-    path.join(process.env.LOCALAPPDATA ?? '', 'Python', 'bin', 'python.exe'),
-    'python3',
-    'python',
-  ].filter((c): c is string => Boolean(c));
-  for (const c of candidates) {
-    if (c === 'python3' || c === 'python') return c;
-    if (existsSync(c)) return c;
-  }
-  return null;
-}
-
-const ISO_RE = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
 
 /** Pages that render grid or gas figures and are cached independently of the data tags. */
 function revalidateGridPages(): void {
@@ -58,7 +49,12 @@ function revalidateGridPages(): void {
   }
 }
 
-type Step = { artifact: string; ok: boolean; detail?: string };
+type Step = {
+  artifact: string;
+  key: string;
+  status: 'published' | 'unchanged' | 'absent' | 'failed';
+  detail?: string;
+};
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -84,7 +80,7 @@ export async function POST(request: NextRequest) {
     };
 
     const date = String(body.date ?? '');
-    if (!ISO_RE.test(date)) {
+    if (!isIsoDate(date)) {
       return NextResponse.json({ ok: false, error: `Invalid date: ${date}` }, { status: 400 });
     }
     if (!body.grid) {
@@ -93,7 +89,7 @@ export async function POST(request: NextRequest) {
 
     const root = process.cwd();
 
-    // 1 — grid day to disk + released.
+    // 1 — reviewed payload to disk.
     //
     // The half-hourly fuel curve is split out first. It is ~5.7KB a day and the
     // daily directory is traced wholesale into every function that imports the
@@ -110,96 +106,156 @@ export async function POST(request: NextRequest) {
         'utf8',
       );
     }
-    await writeFile(
-      path.join(root, 'public', 'data', 'daily', `${date}.json`),
-      JSON.stringify(gridPayload, null, 2),
-      'utf8',
-    );
-    const grid = await publishRelease({
-      feed: 'GRID_DAILY',
-      key: date,
-      payload: gridPayload,
-      sourceName: body.sourceGrid,
-      parserVersion: 'ingest_bridge/1',
-    });
-    steps.push({ artifact: 'GRID_DAILY', ok: grid.ok, detail: grid.ok ? undefined : grid.error });
-    if (!grid.ok) return NextResponse.json({ ok: false, error: grid.error, steps }, { status: 500 });
 
-    // Without gas there is nothing to aggregate — the three derived files are
-    // built purely from the archive.
-    if (!body.gasArchive) {
-      return NextResponse.json({
-        ok: true,
-        date,
-        steps,
-        note: 'Grid day published. No gas PDF supplied, so the gas archive and aggregates were not touched.',
+    const dailyDir = path.join(root, 'public', 'data', 'daily');
+    await mkdir(dailyDir, { recursive: true });
+
+    // `ingest_bridge.py` parses the workbook; it does not enrich. Three fields
+    // are added afterwards by `scripts/daily_enrich.py` and by nothing in the
+    // ingest chain, so re-publishing a day that has already been enriched would
+    // overwrite it with a payload that simply lacks them — and the schema marks
+    // all three optional, so it would validate, publish, and report success.
+    //
+    // The visible loss is `forecast`: the whole next-day block, 24 hourly rows,
+    // is what Forecast vs Actual reads. Carry across whatever the day already
+    // holds and the parse did not produce, and say so in the report.
+    const ENRICHMENT_KEYS = ['sourceFiles', 'observationWindows', 'forecast'] as const;
+    const dayFile = path.join(dailyDir, `${date}.json`);
+    const preserved: string[] = [];
+    try {
+      const existing = JSON.parse(await readFile(dayFile, 'utf8')) as Record<string, unknown>;
+      for (const key of ENRICHMENT_KEYS) {
+        if (gridPayload[key] === undefined && existing[key] !== undefined) {
+          gridPayload[key] = existing[key];
+          preserved.push(key);
+        }
+      }
+    } catch {
+      // No day on disk yet — nothing to preserve, which is the normal case for
+      // a genuinely new day.
+    }
+    if (preserved.length) {
+      steps.push({
+        artifact: 'enrichment preserved',
+        key: date,
+        status: 'unchanged',
+        detail: `${preserved.join(', ')} kept from the day already on disk — the parser does not produce these`,
       });
     }
 
-    // 2 — gas day to disk + released
-    await writeFile(
-      path.join(root, 'public', 'data', 'petrobangla', 'daily', `${date}.json`),
-      JSON.stringify(body.gasArchive, null, 2),
-      'utf8',
-    );
-    const gas = await publishRelease({
-      feed: 'GAS_DAILY',
-      key: date,
-      payload: body.gasArchive,
-      sourceName: body.sourceGas,
-      parserVersion: 'parse_petrobangla_archive/2.0.0',
-    });
-    steps.push({ artifact: 'GAS_DAILY', ok: gas.ok, detail: gas.ok ? undefined : gas.error });
-    if (!gas.ok) return NextResponse.json({ ok: false, error: gas.error, steps }, { status: 500 });
+    await writeFile(dayFile, JSON.stringify(gridPayload, null, 2), 'utf8');
 
-    // 3 — rebuild the aggregates from the archive directory
-    const python = resolvePython();
-    if (!python) {
-      return NextResponse.json(
-        { ok: false, error: 'No Python interpreter found; aggregates not rebuilt.', steps },
-        { status: 503 },
+    const hasGas = Boolean(body.gasArchive);
+    if (hasGas) {
+      // mkdir was missing here: on a checkout whose gas archive had never been
+      // written, the whole publish failed at this line after the grid day had
+      // already gone live.
+      const gasDir = path.join(root, 'public', 'data', 'petrobangla', 'daily');
+      await mkdir(gasDir, { recursive: true });
+      await writeFile(
+        path.join(gasDir, `${date}.json`),
+        JSON.stringify(body.gasArchive, null, 2),
+        'utf8',
       );
     }
 
-    const { stdout } = await execFileAsync(
-      python,
-      [path.join(root, 'scripts', 'build_aggregates.py'), '--date', date],
-      { cwd: root, env: { ...process.env, PYTHONUTF8: '1' }, maxBuffer: 64 * 1024 * 1024, timeout: 540_000 },
-    );
-    const summary = JSON.parse(stdout.slice(stdout.indexOf('{')));
-    if (!summary.ok) {
-      return NextResponse.json({ ok: false, error: summary.error, steps }, { status: 500 });
-    }
-    steps.push({ artifact: 'aggregates rebuilt', ok: true, detail: `${summary.indexDays} index days` });
-
-    // 4 — publish the three rebuilt aggregates
-    const aggregates: Array<{ feed: 'GAS_INDEX' | 'GAS_LIVE_WEEK' | 'GAS_TIMELINE'; file: string[] }> = [
-      { feed: 'GAS_INDEX', file: ['petrobangla', '_index.json'] },
-      { feed: 'GAS_LIVE_WEEK', file: ['petrobangla', '_live_week.json'] },
-      { feed: 'GAS_TIMELINE', file: ['petrobangla', 'timeline-summary.json'] },
-    ];
-
-    for (const agg of aggregates) {
-      const raw = await readFile(path.join(root, 'public', 'data', ...agg.file), 'utf8');
-      const res = await publishRelease({
-        feed: agg.feed,
-        key: 'singleton',
-        payload: JSON.parse(raw),
-        sourceName: agg.file.join('/'),
-        parserVersion: 'build_aggregates/1',
-      });
-      steps.push({ artifact: agg.feed, ok: res.ok, detail: res.ok ? undefined : res.error });
-      if (!res.ok) {
-        return NextResponse.json({ ok: false, error: `${agg.feed}: ${res.error}`, steps }, { status: 500 });
+    // 2 — rebuild the aggregates, which are derived purely from the gas archive
+    // directory. Without a gas day there is nothing new to derive.
+    if (hasGas) {
+      const run = await runPythonJson<{ ok: boolean; error?: string; indexDays?: number }>(
+        [path.join(root, 'scripts', 'build_aggregates.py'), '--date', date],
+        { timeout: 540_000, label: 'Aggregate build' },
+      );
+      if (!run.ok) {
+        return NextResponse.json({ ok: false, error: run.error, steps }, { status: run.status });
       }
+      if (!run.data.ok) {
+        return NextResponse.json({ ok: false, error: run.data.error, steps }, { status: 500 });
+      }
+      steps.push({
+        artifact: 'aggregates rebuilt',
+        key: date,
+        status: 'published',
+        detail: `${run.data.indexDays ?? '?'} index days`,
+      });
     }
 
+    // 3 — publish every artefact the day has, not just the two that were parsed
+    // in the browser. Absent ones are reported, not failed: a day whose gas
+    // window Petrobangla has not filed yet simply has no gas file.
+    const artifacts = await planLocalPublish({ date, includeAggregates: hasGas });
+    const touchedFeeds = new Set<DataFeed>();
+
+    for (const artifact of artifacts) {
+      if (!isReadable(artifact)) {
+        steps.push({
+          artifact: artifact.feed,
+          key: artifact.key,
+          status: 'absent' in artifact ? 'absent' : 'failed',
+          detail: 'error' in artifact ? artifact.error : artifact.relPath,
+        });
+        continue;
+      }
+
+      const res = await writeRelease({
+        feed: artifact.feed as DataFeed,
+        key: artifact.key,
+        payload: artifact.payload,
+        sourceName:
+          artifact.feed === 'GRID_DAILY'
+            ? body.sourceGrid ?? artifact.relPath
+            : artifact.feed === 'GAS_DAILY'
+              ? body.sourceGas ?? artifact.relPath
+              : artifact.relPath,
+        parserVersion: 'ingest_bridge/1',
+        publishedById: session.user.id,
+      });
+
+      if (!res.ok) {
+        steps.push({ artifact: artifact.feed, key: artifact.key, status: 'failed', detail: res.error });
+        // The grid day is the one artefact worth stopping for: if it did not
+        // land there is nothing for the rest of the day to attach to.
+        if (artifact.feed === 'GRID_DAILY') {
+          return NextResponse.json({ ok: false, error: res.error, steps }, { status: 500 });
+        }
+        continue;
+      }
+
+      if (res.skipped === 'unchanged') {
+        steps.push({ artifact: artifact.feed, key: artifact.key, status: 'unchanged', detail: artifact.relPath });
+        continue;
+      }
+      touchedFeeds.add(artifact.feed as DataFeed);
+      steps.push({ artifact: artifact.feed, key: artifact.key, status: 'published', detail: artifact.relPath });
+    }
+
+    // Invalidate once per feed rather than per artifact: a day touches up to
+    // eleven rows and each tag expiry makes every reader re-query.
+    for (const feed of touchedFeeds) {
+      revalidateDataRelease(feedCacheTag(feed), RELEASE_CACHE_TAG);
+    }
     // Expiring the release tags refreshes the data, but the pages that render it
     // are ISR-cached (grid-explorer holds for 300s). Without this a publish would
     // not be visible for minutes — the opposite of "updates like an article".
-    revalidateGridPages();
+    if (touchedFeeds.size) revalidateGridPages();
 
-    return NextResponse.json({ ok: true, date, steps, summary });
+    const failed = steps.filter((s) => s.status === 'failed');
+
+    return NextResponse.json({
+      ok: failed.length === 0,
+      date,
+      steps,
+      note: hasGas
+        ? undefined
+        : 'Grid day published. No gas PDF supplied, so the gas archive and aggregates were not touched.',
+      summary: {
+        published: steps.filter((s) => s.status === 'published').length,
+        unchanged: steps.filter((s) => s.status === 'unchanged').length,
+        absent: steps.filter((s) => s.status === 'absent').length,
+        failed: failed.length,
+      },
+      error: failed.length ? failed.map((f) => `${f.artifact}: ${f.detail}`).join('; ') : undefined,
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json({ ok: false, error: `Publish failed: ${message}`, steps }, { status: 500 });

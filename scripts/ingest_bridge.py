@@ -507,6 +507,11 @@ def main() -> None:
     ap.add_argument("--pb")
     ap.add_argument("--date")
     ap.add_argument("--pgcb-name", default="")
+    # The admin route writes the upload to a temp file, so the name the
+    # operator actually chose has to travel separately — same reason as
+    # --pgcb-name. Without it every day published from the panel recorded
+    # its gas source as "pb.pdf", in the archive AND in the grid day.
+    ap.add_argument("--pb-name", default="")
     ap.add_argument(
         "--expect-gas-window",
         help=(
@@ -708,6 +713,11 @@ def main() -> None:
         else:
             gas_archive, gas_warnings = parse_gas_archive(Path(args.pb), op_date, tmpdir)
             warnings.extend(gas_warnings)
+            # Restore the uploaded name over the temp one before anything reads
+            # it: meta.source_filename is what daily_enrich credits as the day's
+            # Petrobangla source and what the window block cites.
+            if gas_archive and args.pb_name:
+                gas_archive.setdefault("meta", {})["source_filename"] = args.pb_name
             if printed_start is None:
                 warnings.append(
                     "The gas PDF's printed window could not be read (its date digits use a CID font on some "

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
+import { isIsoDate } from '@/lib/data/feed-paths';
+import { runPythonJson } from '@/lib/data/ingest-runner.server';
 
 /**
  * Run the complete daily ingest for one day.
@@ -21,26 +20,16 @@ import { can } from '@/lib/constants';
  * Local-only: the chain shells out to Python and writes public/data.
  */
 
-const execFileAsync = promisify(execFile);
-
 export const dynamic = 'force-dynamic';
 export const maxDuration = 800;
 
-const ISO_RE = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
-
-function resolvePython(): string | null {
-  const candidates = [
-    process.env.ESB_PYTHON,
-    path.join(process.env.LOCALAPPDATA ?? '', 'Python', 'bin', 'python.exe'),
-    'python3',
-    'python',
-  ].filter((c): c is string => Boolean(c));
-  for (const c of candidates) {
-    if (c === 'python3' || c === 'python') return c;
-    if (existsSync(c)) return c;
-  }
-  return null;
-}
+type IngestReport = {
+  ok: boolean;
+  date: string;
+  steps: Array<{ step: string; ok: boolean; seconds: number; detail?: string }>;
+  artifacts: { grid: boolean; curve: boolean; plants: boolean; gas: boolean };
+  note?: string | null;
+};
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -67,13 +56,8 @@ export async function POST(request: NextRequest) {
   }
 
   const date = String(body.date ?? '');
-  if (!ISO_RE.test(date)) {
+  if (!isIsoDate(date)) {
     return NextResponse.json({ ok: false, error: `Invalid date: ${date}` }, { status: 400 });
-  }
-
-  const python = resolvePython();
-  if (!python) {
-    return NextResponse.json({ ok: false, error: 'No Python interpreter found.' }, { status: 503 });
   }
 
   const args = [
@@ -84,30 +68,12 @@ export async function POST(request: NextRequest) {
   ];
   if (body.skipExtractor) args.push('--skip-extractor');
 
-  try {
-    const { stdout } = await execFileAsync(python, args, {
-      cwd: process.cwd(),
-      env: { ...process.env, PYTHONUTF8: '1' },
-      maxBuffer: 64 * 1024 * 1024,
-      timeout: 780_000,
-    });
-    // The chain's steps print progress before the JSON; take the last line that
-    // parses rather than assuming the whole of stdout is the payload.
-    const start = stdout.lastIndexOf('{');
-    return NextResponse.json(JSON.parse(stdout.slice(start)));
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    // A non-zero exit means one or more steps failed; the script still printed
-    // its report, so surface that rather than only the exit code.
-    const stdout = (error as { stdout?: string })?.stdout ?? '';
-    const start = stdout.lastIndexOf('{');
-    if (start >= 0) {
-      try {
-        return NextResponse.json(JSON.parse(stdout.slice(start)));
-      } catch {
-        /* fall through to the generic error */
-      }
-    }
-    return NextResponse.json({ ok: false, error: `Ingest failed: ${message}` }, { status: 500 });
+  // A non-zero exit means one or more steps failed; the script still prints its
+  // report, and the runner returns it, so the panel shows which step went wrong
+  // rather than only an exit code.
+  const run = await runPythonJson<IngestReport>(args, { timeout: 780_000, label: 'Ingest' });
+  if (!run.ok) {
+    return NextResponse.json({ ok: false, error: run.error }, { status: run.status });
   }
+  return NextResponse.json(run.data);
 }

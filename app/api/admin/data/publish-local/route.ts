@@ -5,6 +5,7 @@ import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { writeRelease } from '@/lib/data/release-write';
 import { planLocalPublish, isReadable } from '@/lib/data/publish-local';
+import { isIsoDate, isIsoMonth } from '@/lib/data/feed-paths';
 import { RELEASE_CACHE_TAG, feedCacheTag } from '@/lib/data/releases.server';
 import { revalidateDataRelease } from '@/lib/revalidate-tags';
 
@@ -28,9 +29,6 @@ import { revalidateDataRelease } from '@/lib/revalidate-tags';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 600;
-
-const ISO_RE = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
-const MONTH_RE = /^(201[1-9]|202[0-9])-(0[1-9]|1[0-2])$/;
 
 type Step = {
   artifact: string;
@@ -85,10 +83,10 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-  if (date && !ISO_RE.test(date)) {
+  if (date && !isIsoDate(date)) {
     return NextResponse.json({ ok: false, error: `Invalid date: ${date}` }, { status: 400 });
   }
-  if (month && !MONTH_RE.test(month)) {
+  if (month && !isIsoMonth(month)) {
     return NextResponse.json({ ok: false, error: `Invalid month: ${month}` }, { status: 400 });
   }
 

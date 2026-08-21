@@ -1,4 +1,5 @@
 import 'server-only';
+import { DataFeed as DataFeedEnum } from '@prisma/client';
 import type { DataFeed } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { payloadChecksum } from '@/lib/data/release-checksum';
@@ -52,6 +53,31 @@ export function validateReleasePayload(feed: DataFeed, payload: unknown): string
   return `Payload failed grid daily validation — ${issues}`;
 }
 
+/**
+ * Catch a stale Prisma client before Prisma does, and say what to do about it.
+ *
+ * `prisma generate` rewrites node_modules, but a dev server that was already
+ * running keeps the old module in Node's require cache — restarting is the only
+ * way to pick it up, and `isPrismaClientCurrent` in lib/prisma.ts cannot help
+ * because recreating the client re-reads the same stale module.
+ *
+ * Untreated, the operator gets Prisma's raw complaint — a wall of query AST
+ * with "Invalid value for argument `feed`. Expected DataFeed." at the end —
+ * which reads as "this feed is not a real feed" when the truth is "your server
+ * is older than your schema". It cost a publish on 2026-08-21: GRID_CURVE,
+ * GRID_PLANTS and the two reserve feeds all failed this way while the older
+ * feeds in the same publish went through.
+ */
+function staleClientError(feed: DataFeed): string | null {
+  const known = Object.values(DataFeedEnum as Record<string, string>);
+  if (known.includes(feed)) return null;
+  return (
+    `The running server has an out-of-date Prisma client: it does not know the ${feed} feed, ` +
+    'which is in prisma/schema.prisma and in the database. Run `npx prisma generate` and then ' +
+    'restart the dev server (npm run dev:all) — a running process keeps the old client in memory.'
+  );
+}
+
 export async function writeRelease(input: {
   feed: DataFeed;
   key: string;
@@ -63,6 +89,9 @@ export async function writeRelease(input: {
   /** Publish even when the stored checksum already matches. */
   force?: boolean;
 }): Promise<WriteResult> {
+  const stale = staleClientError(input.feed);
+  if (stale) return { ok: false, error: stale };
+
   const keyError = validateReleaseKey(input.feed, input.key);
   if (keyError) return { ok: false, error: keyError };
 

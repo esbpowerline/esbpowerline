@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { existsSync } from 'node:fs';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
+import { isIsoDate } from '@/lib/data/feed-paths';
+import { runPythonJson } from '@/lib/data/ingest-runner.server';
 
 /**
  * Parse an uploaded PGCB workbook (+ optional Petrobangla PDF) by shelling out
@@ -21,8 +20,6 @@ import { can } from '@/lib/constants';
  * only persisted if the operator presses Publish.
  */
 
-const execFileAsync = promisify(execFile);
-
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
@@ -32,27 +29,6 @@ const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 function isServerless(): boolean {
   return Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 }
-
-/**
- * `python` is a Microsoft Store stub on this machine and not on PATH, so the
- * real interpreter is looked up explicitly. ESB_PYTHON overrides.
- */
-function resolvePython(): string | null {
-  const candidates = [
-    process.env.ESB_PYTHON,
-    path.join(process.env.LOCALAPPDATA ?? '', 'Python', 'bin', 'python.exe'),
-    'python3',
-    'python',
-  ].filter((c): c is string => Boolean(c));
-
-  for (const c of candidates) {
-    if (c === 'python3' || c === 'python') return c; // resolved via PATH
-    if (existsSync(c)) return c;
-  }
-  return null;
-}
-
-const ISO_DATE_RE = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
 
 export async function POST(request: NextRequest) {
   const session = await auth();
@@ -71,14 +47,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const python = resolvePython();
-  if (!python) {
-    return NextResponse.json(
-      { ok: false, error: 'No Python interpreter found. Set ESB_PYTHON to its full path.' },
-      { status: 503 },
-    );
-  }
-
   let workdir: string | null = null;
   try {
     const form = await request.formData();
@@ -91,32 +59,22 @@ export async function POST(request: NextRequest) {
     const collect = String(form.get('collect') ?? '') === '1';
 
     if (collect) {
-      if (!ISO_DATE_RE.test(dateOverride)) {
+      if (!isIsoDate(dateOverride)) {
         return NextResponse.json(
           { ok: false, error: 'Collecting from source needs the energy day (YYYY-MM-DD).' },
           { status: 400 },
         );
       }
-      const { stdout } = await execFileAsync(
-        python,
+      // Downloads add a network leg on top of parsing; the ERP scan can walk a
+      // stretch of ids when the map is behind.
+      const run = await runPythonJson(
         [path.join(process.cwd(), 'scripts', 'ingest_bridge.py'), '--fetch', '--date', dateOverride],
-        {
-          cwd: process.cwd(),
-          env: { ...process.env, PYTHONUTF8: '1' },
-          maxBuffer: 64 * 1024 * 1024,
-          // Downloads add a network leg on top of parsing; the ERP scan can walk
-          // a stretch of ids when the map is behind.
-          timeout: 480_000,
-        },
+        { timeout: 480_000, label: 'Collector' },
       );
-      const at = stdout.indexOf('{');
-      if (at === -1) {
-        return NextResponse.json(
-          { ok: false, error: `Collector produced no JSON: ${stdout.slice(0, 400)}` },
-          { status: 500 },
-        );
+      if (!run.ok) {
+        return NextResponse.json({ ok: false, error: run.error }, { status: run.status });
       }
-      return NextResponse.json(JSON.parse(stdout.slice(at)));
+      return NextResponse.json(run.data);
     }
 
     if (!(pgcb instanceof File)) {
@@ -161,28 +119,17 @@ export async function POST(request: NextRequest) {
       '--pgcb-name',
       pgcb.name,
     ];
-    if (pbPath) args.push('--pb', pbPath);
+    // The PDF is written to the temp dir as `pb.pdf`, so the name the operator
+    // chose has to be passed alongside it — otherwise the day's gas provenance,
+    // in both the archive and the grid day, records the temp name.
+    if (pbPath && pb instanceof File) args.push('--pb', pbPath, '--pb-name', pb.name);
     if (dateOverride) args.push('--date', dateOverride);
 
-    const { stdout } = await execFileAsync(python, args, {
-      cwd: process.cwd(),
-      // cp1252 consoles die on the arrows these scripts print.
-      env: { ...process.env, PYTHONUTF8: '1' },
-      maxBuffer: 64 * 1024 * 1024,
-      timeout: 240_000,
-    });
-
-    // The bridge prints one JSON object; anything before it is parser chatter.
-    const start = stdout.indexOf('{');
-    if (start === -1) {
-      return NextResponse.json(
-        { ok: false, error: `Parser produced no JSON. Output: ${stdout.slice(0, 500)}` },
-        { status: 500 },
-      );
+    const run = await runPythonJson(args, { timeout: 240_000, label: 'Parser' });
+    if (!run.ok) {
+      return NextResponse.json({ ok: false, error: run.error }, { status: run.status });
     }
-
-    const parsed = JSON.parse(stdout.slice(start));
-    return NextResponse.json(parsed);
+    return NextResponse.json(run.data);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json({ ok: false, error: `Parse failed: ${message}` }, { status: 500 });

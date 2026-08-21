@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Upload, Download, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun } from 'lucide-react';
 import { AdminCard } from '@/components/admin/AdminUI';
 
@@ -122,6 +123,7 @@ type SredaResult =
  * which is why this one works from the deployed site too.
  */
 function SredaCard({ latestSredaDate }: { latestSredaDate: string | null }) {
+  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<SredaResult | null>(null);
 
@@ -130,7 +132,12 @@ function SredaCard({ latestSredaDate }: { latestSredaDate: string | null }) {
     setResult(null);
     try {
       const res = await fetch('/api/admin/data/sreda', { method: 'POST' });
-      setResult((await res.json()) as SredaResult);
+      const json = (await res.json()) as SredaResult;
+      setResult(json);
+      // The header figures are server-rendered, so without this the card
+      // reports a new snapshot while the banner above it still shows the old
+      // one — and the operator cannot tell whether it actually landed.
+      if (json.ok && !json.unchanged) router.refresh();
     } catch (e) {
       setResult({ ok: false, error: e instanceof Error ? e.message : String(e) });
     } finally {
@@ -234,6 +241,7 @@ function ArtifactRow({ artifacts }: { artifacts: IngestRunResult['artifacts'] })
  * is on disk for the day and publishes all of it.
  */
 function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
+  const router = useRouter();
   const [day, setDay] = useState(suggestedDay);
   const [month, setMonth] = useState('');
   const [busy, setBusy] = useState(false);
@@ -264,6 +272,7 @@ function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
       const json = (await res.json()) as IngestRunResult & { error?: string };
       setIngest(json);
       if (!json.ok && json.error) setError(json.error);
+      if (json.ok) router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -297,6 +306,10 @@ function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
         `${json.summary?.published ?? 0} published, ${json.summary?.unchanged ?? 0} already current` +
           (json.summary?.absent ? `, ${json.summary.absent} not produced yet` : ''),
       );
+      // The banner above is server-rendered from the archive and the released
+      // keys; refresh it so "grid data on the site through" moves with the
+      // publish instead of waiting for a manual reload.
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -408,15 +421,21 @@ export function DataIngestPanel({
   latestSredaDate: string | null;
 }) {
   const latestArchiveDate = status.latestGridDay;
+  const router = useRouter();
   const [pgcb, setPgcb] = useState<File | null>(null);
   const [pb, setPb] = useState<File | null>(null);
+  // Two inputs, two meanings, so two states. They shared one before: picking a
+  // day in "Collect from the publishers" silently filled in the upload card's
+  // "energy day override", so a later upload was forced onto the collected
+  // day's date regardless of which workbook was actually chosen.
+  const [collectDate, setCollectDate] = useState('');
   const [dateOverride, setDateOverride] = useState('');
 
   const [parsing, setParsing] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [result, setResult] = useState<ParseResponse | null>(null);
   const [published, setPublished] = useState<string | null>(null);
-  const [steps, setSteps] = useState<Array<{ artifact: string; ok: boolean; detail?: string }>>([]);
+  const [steps, setSteps] = useState<LocalStep[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [collecting, setCollecting] = useState(false);
 
@@ -430,7 +449,7 @@ export function DataIngestPanel({
    * is identical, only the sourcing differs — so nothing publishes unseen.
    */
   async function handleCollect() {
-    const day = dateOverride || suggestedNextDay;
+    const day = collectDate || suggestedNextDay;
     if (!day) return;
     setCollecting(true);
     setError(null);
@@ -480,9 +499,10 @@ export function DataIngestPanel({
     setPublishing(true);
     setError(null);
     try {
-      // One call publishes all five artifacts — the two day files and the three
-      // aggregates rebuilt from them — so the site never shows a new grid day
-      // beside yesterday's gas totals.
+      // One call publishes every artefact the day has — the grid day, its fuel
+      // curve and station detail, the gas day, and the aggregates rebuilt from
+      // them — so the site never shows a new grid day beside yesterday's gas
+      // totals, or beside an empty Energy Curve.
       const res = await fetch('/api/admin/data/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -497,7 +517,7 @@ export function DataIngestPanel({
       const json = (await res.json()) as {
         ok: boolean;
         error?: string;
-        steps?: Array<{ artifact: string; ok: boolean; detail?: string }>;
+        steps?: LocalStep[];
         note?: string;
       };
       setSteps(json.steps ?? []);
@@ -506,6 +526,7 @@ export function DataIngestPanel({
         return;
       }
       setPublished(result.date);
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
@@ -525,7 +546,10 @@ export function DataIngestPanel({
     <div className="space-y-4">
       <StatusBanner status={status} />
 
-      <PublishLocalCard suggestedDay={latestArchiveDate ?? ''} />
+      {/* The next missing day is what an operator opens this screen to ingest;
+          defaulting to the newest day already on the site meant every run
+          started by re-ingesting a day that was already published. */}
+      <PublishLocalCard suggestedDay={suggestedNextDay || latestArchiveDate || ''} />
 
       <SredaCard latestSredaDate={latestSredaDate} />
 
@@ -541,14 +565,14 @@ export function DataIngestPanel({
               <label className="mb-1.5 block text-[12px] font-semibold">Energy day</label>
               <input
                 type="date"
-                value={dateOverride || suggestedNextDay}
-                onChange={(e) => setDateOverride(e.target.value)}
+                value={collectDate || suggestedNextDay}
+                onChange={(e) => setCollectDate(e.target.value)}
                 className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
               />
             </div>
             <button
               onClick={handleCollect}
-              disabled={collecting || parsing || !(dateOverride || suggestedNextDay)}
+              disabled={collecting || parsing || !(collectDate || suggestedNextDay)}
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
             >
               {collecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -755,9 +779,11 @@ export function DataIngestPanel({
                 {steps.length > 0 && (
                   <ul className="mt-2 space-y-0.5">
                     {steps.map((s) => (
-                      <li key={s.artifact} className="text-[11.5px] text-muted-foreground">
-                        {s.ok ? '✓' : '✗'} {s.artifact}
-                        {s.detail ? ` — ${s.detail}` : ''}
+                      <li key={`${s.artifact}:${s.key}`} className="text-[11.5px] text-muted-foreground">
+                        {STEP_MARK[s.status]} {s.artifact} <span className="tabular-nums">{s.key}</span>
+                        {s.status === 'unchanged' ? ' — already current' : ''}
+                        {s.status === 'absent' ? ' — not produced for this day' : ''}
+                        {s.status === 'failed' && s.detail ? ` — ${s.detail}` : ''}
                       </li>
                     ))}
                   </ul>

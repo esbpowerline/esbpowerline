@@ -33,8 +33,39 @@ export const SINGLETON = 'singleton';
 
 export type FeedTarget = { feed: DataFeedName; key: string };
 
-const ISO_DATE_RE = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
-const MONTH_RE = /^(201[1-9]|202[0-9])-(0[1-9]|1[0-2])$/;
+/**
+ * Key shapes, validated as calendar dates rather than by digit pattern.
+ *
+ * The pattern these replace was `/^(201[1-9]|202[0-9])-\d{2}-\d{2}$/`, which is
+ * wrong at both ends: it accepts `2026-99-99` as a day key, and it stops
+ * accepting anything on 1 Jan 2030, at which point publishing a day and reading
+ * one both fail with "invalid date". The floor stays because the archive starts
+ * in 2013 and a typo'd year is worth catching.
+ */
+const ISO_DATE_SHAPE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const MONTH_SHAPE = /^(\d{4})-(\d{2})$/;
+const MIN_YEAR = 2010;
+const MAX_YEAR = 2100;
+
+export function isIsoDate(key: string): boolean {
+  const m = ISO_DATE_SHAPE.exec(key);
+  if (!m) return false;
+  const [, y, mo, d] = m;
+  const year = Number(y);
+  if (year < MIN_YEAR || year > MAX_YEAR) return false;
+  const date = new Date(`${key}T00:00:00Z`);
+  // Round-tripping rejects 2026-02-30, which `Date` would otherwise roll over.
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === `${y}-${mo}-${d}`;
+}
+
+export function isIsoMonth(key: string): boolean {
+  const m = MONTH_SHAPE.exec(key);
+  if (!m) return false;
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  return year >= MIN_YEAR && year <= MAX_YEAR && month >= 1 && month <= 12;
+}
+
 
 /** Feeds whose key is an ISO date, and the directory each mirrors. */
 const DATED_FEEDS: ReadonlyArray<{ dir: string; feed: DataFeedName }> = [
@@ -84,17 +115,17 @@ export function resolveDataTarget(relPath: string): FeedTarget | null {
   // as a month key, fail the month pattern, and report the path as unknown.
   const events = /^pgcb-monthly\/(.+)-events\.json$/.exec(path);
   if (events) {
-    return MONTH_RE.test(events[1]) ? { feed: 'PGCB_MONTHLY_EVENTS', key: events[1] } : null;
+    return isIsoMonth(events[1]) ? { feed: 'PGCB_MONTHLY_EVENTS', key: events[1] } : null;
   }
 
   const month = /^pgcb-monthly\/(.+)\.json$/.exec(path);
   if (month) {
-    return MONTH_RE.test(month[1]) ? { feed: 'PGCB_MONTHLY', key: month[1] } : null;
+    return isIsoMonth(month[1]) ? { feed: 'PGCB_MONTHLY', key: month[1] } : null;
   }
 
   for (const { dir, feed } of DATED_FEEDS) {
     const hit = new RegExp(`^${dir}/(.+)\\.json$`).exec(path);
-    if (hit) return ISO_DATE_RE.test(hit[1]) ? { feed, key: hit[1] } : null;
+    if (hit) return isIsoDate(hit[1]) ? { feed, key: hit[1] } : null;
   }
 
   return null;
@@ -106,11 +137,11 @@ export function dataPathFor(feed: DataFeedName, key: string): string | null {
   if (singleton) return singleton.path;
 
   const dated = DATED_FEEDS.find((f) => f.feed === feed);
-  if (dated) return ISO_DATE_RE.test(key) ? `${dated.dir}/${key}.json` : null;
+  if (dated) return isIsoDate(key) ? `${dated.dir}/${key}.json` : null;
 
-  if (feed === 'PGCB_MONTHLY') return MONTH_RE.test(key) ? `pgcb-monthly/${key}.json` : null;
+  if (feed === 'PGCB_MONTHLY') return isIsoMonth(key) ? `pgcb-monthly/${key}.json` : null;
   if (feed === 'PGCB_MONTHLY_EVENTS') {
-    return MONTH_RE.test(key) ? `pgcb-monthly/${key}-events.json` : null;
+    return isIsoMonth(key) ? `pgcb-monthly/${key}-events.json` : null;
   }
   return null;
 }
