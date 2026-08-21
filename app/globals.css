@@ -25023,3 +25023,49 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   opacity: 0.4;
   cursor: default;
 }
+
+/* ── Ingest coverage strip ────────────────────────────────────────────────
+   One square per energy day, oldest on the left. Colour is how much of the day
+   the site holds — the three artifacts a published day needs arrive from
+   different places on different schedules, and a day with the grid workbook but
+   no gas report publishes with its gas columns blank. That used to be invisible
+   until someone noticed a chart looking wrong months later. */
+
+.ingest-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.ingest-day {
+  display: inline-block;
+  height: 0.85rem;
+  width: 0.85rem;
+  flex: 0 0 auto;
+  border-radius: 0.2rem;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--muted) / 0.4);
+}
+
+.ingest-day--full {
+  background: hsl(152 55% 42% / 0.85);
+  border-color: hsl(152 55% 34%);
+}
+
+.ingest-day--most {
+  background: hsl(152 45% 55% / 0.55);
+  border-color: hsl(152 45% 45% / 0.7);
+}
+
+.ingest-day--thin {
+  background: hsl(38 92% 55% / 0.55);
+  border-color: hsl(38 80% 45% / 0.7);
+}
+
+/* Absent is drawn, not omitted: a missing day has to occupy its place in the
+   run or the strip silently closes the gap it exists to show. */
+.ingest-day--absent {
+  background: transparent;
+  border-style: dashed;
+  border-color: hsl(var(--muted-foreground) / 0.45);
+}

@@ -590,16 +590,28 @@ export function DataIngestPanel({
         <div className="space-y-4">
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-[12px] font-semibold">
-              <FileSpreadsheet className="h-3.5 w-3.5" /> PGCB daily report (.xlsx) — required
+              <FileSpreadsheet className="h-3.5 w-3.5" /> PGCB daily report — required
             </label>
             <input
               type="file"
-              accept=".xlsx,.xls"
+              accept=".xlsx,.xls,.xlsm,.docx,.pdf"
               onChange={(e) => setPgcb(e.target.files?.[0] ?? null)}
               className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px] file:mr-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1 file:text-[12px]"
             />
             <p className="mt-1 text-[11px] text-muted-foreground">
               The filename date is the publication date; the energy day is the day before. Override below if the name is unusual.
+            </p>
+            {/* The workbook is named first because it is the one that cannot go
+                wrong. A Word or PDF copy carries no sheet names, so the report's
+                sections have to be inferred from its headings — that works, and
+                is checked against a real report, but it is an inference and the
+                review step says so with a row count for every section it found. */}
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              <span className="font-semibold">.xlsx</span>, .xls or .xlsm is the workbook PGCB
+              files, and the surest option. <span className="font-semibold">.docx</span> and{' '}
+              <span className="font-semibold">.pdf</span> copies of the same report are read too —
+              their sections are worked out from the document's own headings, and the review step
+              lists what was found before you publish.
             </p>
           </div>
 
