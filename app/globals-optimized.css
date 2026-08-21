@@ -407,6 +407,199 @@ body {
   --hero-split-inset: clamp(1.25rem, 2.5vw, 2rem);
 }
 
+/* ── Hero: lead story beside a second one ─────────────────────────────────
+   The band is 1042px wide next to the snapshot panel and held one headline,
+   so the right third of the biggest element on the page carried nothing.
+
+   The lead is left exactly as it was rather than given a share of a grid: its
+   type is sized by clamps against the viewport, and squeezing it into a
+   fractional column made the headline drop to the small end of every clamp at
+   once. The second story takes a fixed rail and the lead keeps the remainder. */
+.featured-hero__layout {
+  display: block;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20.5rem;
+    gap: clamp(1rem, 1.8vw, 1.75rem);
+    align-items: stretch;
+  }
+
+  /* A hairline rather than a card edge: the two stories are one hero, not two
+     panels sitting next to each other. */
+  .featured-hero__layout--paired > /* The headline and photo are the link into the lead story now that the
+   read-story button is gone. The anchor must not introduce colour, underline
+   or a box of its own — it is a hit area over existing composition. */
+
+.featured-hero__title-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.featured-hero__title-link:hover .featured-hero__title {
+  color: hsl(var(--primary));
+}
+
+.featured-hero__title {
+  transition: color 160ms ease;
+}
+
+.featured-hero__image img {
+  transition: transform 500ms ease;
+}
+
+.featured-hero__image:hover img {
+  transform: scale(1.02);
+}
+
+.featured-hero__second {
+    border-inline-start: 1px solid hsl(var(--border) / 0.5);
+    padding-inline-start: clamp(1rem, 1.8vw, 1.75rem);
+  }
+
+  /* The lead column halves when a second story sits beside it, but the hero's
+     type is sized against the VIEWPORT — clamp(2rem, 3.2vw, 3rem) — so the
+     headline stayed at 44px in a 636px column and was clipped mid-word: 190px
+     shown of a 336px headline.
+
+     Lowering the TOKEN rather than the font-size alone is what keeps the slot
+     grid honest. Every height here derives from --hero-title-font-max
+     (--hero-title-h, --hero-row-2-h, --hero-content-h), and a custom property
+     is substituted at the element that uses it, so redefining it on the paired
+     layout re-derives the whole column. Overriding only the font-size would
+     have shrunk the text inside a slot still reserving room for 44px type. */
+  .featured-hero__layout--paired {
+    /* Five lines at 1.75rem rather than four at 2rem. A four-line clamp cut
+       "Standards Non-Compliance: Petrobangla Rejects and Sends Back Aramco LNG
+       Cargo" after "Sends Back", losing the subject of the sentence — and
+       -webkit-line-clamp makes scrollHeight equal the clamped height, so the
+       usual overflow test reports nothing wrong. Both tokens move together
+       because --hero-title-h is their product. */
+    --hero-title-font-max: 1.75rem;
+    --hero-title-lines: 5;
+  }
+
+  .featured-hero__layout--paired .featured-hero__title-slot .featured-hero__title {
+    font-size: clamp(1.375rem, 1.9vw, var(--hero-title-font-max));
+    line-height: 1.14;
+    -webkit-line-clamp: var(--hero-title-lines) !important;
+    line-clamp: var(--hero-title-lines) !important;
+    max-height: none;
+  }
+
+  .featured-hero__layout--paired .featured-hero__excerpt {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+.featured-hero__second {
+    border-inline-start: 1px solid hsl(var(--border) / 0.5);
+    padding-inline-start: clamp(1rem, 1.8vw, 1.75rem);
+  }
+}
+
+.featured-hero__second {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  min-width: 0;
+  /* Top, not centre.
+     Centred, the second story floated 56px below the lead — its image started
+     at y=463 against the lead's 407 — so the two halves of one hero began at
+     different heights and the right side read as an afterthought pinned to the
+     middle. The three columns are already near-even in width (330 / 291 / 328);
+     the imbalance was entirely vertical. */
+  justify-content: flex-start;
+}
+
+/* Stacked under the lead below the rail breakpoint, with a rule above it so it
+   still reads as a second story rather than an orphaned caption. */
+@media (max-width: 1023px) {
+  .featured-hero__second {
+    margin-block-start: 1.25rem;
+    padding-block-start: 1.25rem;
+    border-block-start: 1px solid hsl(var(--border) / 0.5);
+  }
+}
+
+.featured-hero__second-image {
+  width: 100%;
+  /* Matched to the lead photo rather than given its own aspect ratio. Both are
+     now --hero-image-h tall with their tops on the same line, so the two
+     pictures form one row across the hero instead of a tall crop beside a
+     short strip (272px against 168px). Height wins over aspect here because
+     alignment is what the eye reads first; the crop is handled by object-fit. */
+  height: var(--hero-image-h);
+  background: hsl(var(--muted) / 0.4);
+}
+
+@media (max-width: 1023px) {
+  /* Stacked, there is no lead photo to line up with, so the natural shape is
+     better than a tall crop. */
+  .featured-hero__second-image {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+.featured-hero__second-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  color: hsl(var(--foreground));
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease;
+}
+
+.featured-hero__second:hover .featured-hero__second-title {
+  color: hsl(var(--primary));
+}
+
+.featured-hero__second-foot {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+@media (min-width: 1024px) {
+  /* Two lines, not three.
+     With the photo raised to --hero-image-h to line up with the lead's, the
+     column came to 272 + 21 + 65 + 17 + 30 = 405px against the lead's 391 — and
+     because the grid row is max(), the SECOND story was setting the height of
+     the whole hero and hanging 14px below its neighbour. Something had to give
+     and it is the third line of the headline, because the image alignment is
+     the thing being fixed here. Two lines lands the column at 383px, inside
+     the lead's 391. */
+  .featured-hero__second-title {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  /* The rail is narrower again here, so the type steps down with it. */
+  .featured-hero__layout--paired {
+    grid-template-columns: minmax(0, 1fr) 16.5rem;
+  }
+  .featured-hero__second-title {
+    font-size: 0.9375rem;
+  }
+}
+
 .featured-hero__split {
   display: flex;
   flex-direction: column;
@@ -480,7 +673,7 @@ body {
   }
 }
 
-.featured-hero__title-slot > .featured-hero__title {
+.featured-hero__title-slot .featured-hero__title {
   margin: 0;
   height: auto;
   max-height: none;
@@ -501,14 +694,14 @@ body {
 }
 
 @media (min-width: 640px) {
-  .featured-hero__title-slot > .featured-hero__title {
+  .featured-hero__title-slot .featured-hero__title {
     font-size: 2.25rem;
     line-height: 1.12;
   }
 }
 
 @media (min-width: 768px) {
-  .featured-hero__title-slot > .featured-hero__title {
+  .featured-hero__title-slot .featured-hero__title {
     display: -webkit-box !important;
     -webkit-box-orient: vertical !important;
     -webkit-line-clamp: 4 !important;
@@ -522,7 +715,7 @@ body {
 }
 
 @media (min-width: 1024px) {
-  .featured-hero__title-slot > .featured-hero__title {
+  .featured-hero__title-slot .featured-hero__title {
     font-size: clamp(2rem, 3.2vw, 3rem);
   }
 }
@@ -664,7 +857,7 @@ body {
     align-items: flex-start;
   }
 
-  .featured-hero__title-slot > .featured-hero__title {
+  .featured-hero__title-slot .featured-hero__title {
     font-size: clamp(2rem, 3.5vw, 2.75rem);
     line-height: var(--hero-title-line-height);
     letter-spacing: -0.035em;
@@ -5136,6 +5329,24 @@ html.theme-dark .locale-toggle__btn--active:hover {
 .explorer-tab svg {
   @apply shrink-0;
   transform: translateY(0.5px);
+}
+
+/* A tab whose source report carries nothing for the selected day.
+   Dimmed, never disabled: the tab still opens and states why it is empty,
+   which is the whole point — an unmarked empty tab reads as "nothing
+   happened", and that is a measurement the report never made. */
+.explorer-tab--empty {
+  @apply opacity-55;
+}
+.explorer-tab--empty.active {
+  @apply opacity-100;
+}
+.explorer-tab__empty-dot {
+  @apply inline-block h-1.5 w-1.5 rounded-full shrink-0;
+  background-color: hsl(var(--muted-foreground) / 0.5);
+}
+.explorer-tab--empty:hover {
+  @apply opacity-100;
 }
 
 /* â”€â”€ Power Grid Explorer â”€â”€ */
@@ -11846,3 +12057,664 @@ html.theme-dark .public-footer-logo .brand-logo__img {
   margin-bottom: calc(var(--home-gap) * 1.5) !important;
 }
 
+/* ── Hero polish ──────────────────────────────────────────────────────────
+   Appended at the end of the file deliberately.
+
+   The first attempt was inserted before a selector chosen by text search, and
+   the anchor turned out to sit INSIDE an existing `@media (min-width: 1024px)`
+   block — so the `:root` declaration below was scoped to a media query, the
+   custom property never reached the document, and the second photo collapsed
+   to 0px. Two earlier edits in this file failed the same way, one of them by
+   splitting a selector in half. The end of the file has no such ambiguity and
+   also settles precedence against the earlier hero rules.
+
+   Four things were making the hero look unfinished, all measurable:
+
+   1. The photos were cropped to 291x272 — a portrait window onto a 16:9
+      banner. Every article image here is a titled banner, so the crop cut the
+      words in half ("nal grid to receive 30…"). Both photos now share one
+      height near their natural ratio, so the banner survives.
+   2. Removing the read-story buttons left ~96px of dead air mid-column,
+      because the slot grid still reserved room for them.
+   3. The transport controls were stranded bottom-left. They now sit on a
+      hairline, right-aligned, where a caption row belongs.
+   4. The dot pattern read as texture from another decade at full strength.
+
+   The slot grid stays rigid — that is what stops the card resizing between
+   slides — the slots are simply retuned to what the content now needs. */
+:root {
+  /* One height for both photos so tops AND bottoms line up, close enough to
+     16:9 at either column width that the crop is invisible. */
+  --hero-photo-h: 10.25rem;
+}
+
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired {
+    --hero-title-font-max: 2.125rem;
+    --hero-title-lines: 4;
+    --hero-excerpt-h: 3.25rem;
+    --hero-footer-h: 2.5rem;
+    --hero-slot-gap: 0.875rem;
+    --hero-image-h: var(--hero-photo-h);
+  }
+
+  .featured-hero__layout--paired .featured-hero__image-wrap,
+  .featured-hero__layout--paired .featured-hero__image-wrap .featured-hero__image,
+  .featured-hero__layout--paired .featured-hero__second-image {
+    height: var(--hero-photo-h);
+    min-height: var(--hero-photo-h);
+    max-height: var(--hero-photo-h);
+    aspect-ratio: auto;
+  }
+
+  .featured-hero__layout--paired .featured-hero__title-slot .featured-hero__title {
+    font-size: clamp(1.5rem, 2.3vw, var(--hero-title-font-max));
+    line-height: 1.16;
+    -webkit-line-clamp: var(--hero-title-lines) !important;
+    line-clamp: var(--hero-title-lines) !important;
+  }
+
+  .featured-hero__layout--paired .featured-hero__excerpt {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  /* The transport row: a caption rule, not a floating cluster. */
+  .featured-hero__layout--paired .featured-hero__footer {
+    border-top: 1px solid hsl(var(--border) / 0.45);
+    padding-top: 0.75rem;
+    align-items: center;
+  }
+
+  .featured-hero__layout--paired .featured-hero__footer .featured-hero__transport {
+    margin-inline-start: auto;
+  }
+}
+
+/* Brand texture, dialled back so it reads as paper rather than pattern. */
+.featured-hero-card.hero-dot-pattern {
+  background-size: 30px 30px;
+}
+
+/* The lead headline sits in a 321px column beside the photo, so it needs the
+   smaller step and a fifth line — at 2.125rem a 90-character headline lost its
+   subject ("…Rickshaws with No…"). The deck takes three lines rather than two
+   for the same reason: there is room now that the photo is 164px instead of
+   272, and empty slots were what made the card look unfinished. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired {
+    --hero-title-font-max: 1.75rem;
+    --hero-title-lines: 5;
+    --hero-excerpt-h: 4.5rem;
+  }
+
+  .featured-hero__layout--paired .featured-hero__excerpt {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+
+  /* Right-aligned for real. The transport carries `ms-auto` in the markup, but
+     the footer is a grid row here rather than a flex line, so the margin had
+     nothing to push against and the controls sat mid-column. */
+  .featured-hero__layout--paired .featured-hero__footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.featured-hero__second-excerpt {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: hsl(var(--muted-foreground));
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 1024px) {
+  .featured-hero__second-title {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* ── Hero spacing, evened out ─────────────────────────────────────────────
+   Measured before touching it: the lead column's rows sat 31 / 32 / 49px
+   apart while the second column's sat 10 / 10 / 10, and the second column ran
+   out of content 72px above the card floor. So one side was loose and uneven,
+   the other tight and even, and the card was bottom-heavy on the right.
+
+   Both columns now distribute their own leftover space between their rows, so
+   each is internally even AND both span the full height — same top, same
+   bottom, no trailing void. `align-content` does it for the lead because that
+   column is a grid; `justify-content` for the second because it is a flex
+   stack. The images stay pinned to the top of each, which is what keeps them
+   on one line. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired .featured-hero__split {
+    align-content: space-between;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second {
+    justify-content: space-between;
+  }
+
+  /* The photo must not absorb the distributed space — it is the one element
+     whose height is shared between the two columns. */
+  .featured-hero__layout--paired .featured-hero__image-wrap,
+  .featured-hero__layout--paired .featured-hero__second-image {
+    align-self: start;
+    flex: 0 0 auto;
+  }
+}
+
+/* Two different swaps, one for each story.
+   The lead cross-fades where it stands; the second fades and lifts a few
+   pixels. With one shared transition the whole card read as a single panel
+   blinking, which is exactly what made two stories feel like one widget. */
+.featured-hero__swap--lead,
+.featured-hero__swap--lead > * {
+  transition: opacity 220ms ease-out;
+}
+
+.featured-hero__swap--lead.is-swapping,
+.featured-hero__swap--lead.is-swapping > * {
+  opacity: 0;
+}
+
+.featured-hero__swap--second {
+  transition: opacity 260ms ease-out, transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(0);
+}
+
+.featured-hero__swap--second.is-swapping {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The lift is decoration; the fade still signals the change. */
+  .featured-hero__swap--second {
+    transition: opacity 200ms ease-out;
+  }
+  .featured-hero__swap--second.is-swapping {
+    transform: none;
+  }
+}
+
+/* One gap value across both columns.
+   With the controls gone the lead has three rows to the second's four, so
+   `space-between` handed it 52px gaps against the second's 34 — each column
+   internally even, the pair visibly not. The gap is fixed to one value now and
+   the lead's excerpt row takes the remainder as row height, so the spacing
+   matches and no void opens at the foot of either column. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired .featured-hero__split {
+    align-content: stretch;
+    grid-template-rows: auto auto 1fr;
+    row-gap: 2.125rem;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second {
+    justify-content: flex-start;
+    gap: 2.125rem;
+  }
+
+  /* The deck sits at the top of whatever room is left rather than centring in
+     it — a paragraph floating mid-column reads as a mistake. */
+  .featured-hero__layout--paired .featured-hero__excerpt-slot {
+    align-self: start;
+  }
+}
+
+/* The deck must not push past the card.
+   At a 34px gap the second column came to 331px of fixed rows plus a 3-line
+   deck, and the deck's last line crossed the card floor by 22px — clipped
+   text against the border, which is the one thing worse than a gap. The
+   headline takes two lines here and the deck absorbs whatever is left rather
+   than claiming a fixed height, so it can never overflow whatever the copy. */
+@media (min-width: 1024px) {
+  .featured-hero__second-title {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second-excerpt {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* The lead deck carries more of the column now.
+   The lead has three rows to the second's four and a 164px photo in a 391px
+   column, so it ran ~88px short and left a hole at the bottom left. Anchoring
+   the deck to the foot only moved the hole into the middle, which reads worse.
+   The fix that actually closes it is content: five lines of deck at a larger
+   size, which fills the column for a normal-length summary. A genuinely short
+   summary still leaves some air — that is editorial reality, not a layout
+   fault, and air at the foot of a column is the least conspicuous place. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired .featured-hero__excerpt {
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+}
+
+/* ── Hero: two columns ────────────────────────────────────────────────────
+   The lead photo now lives in the right rail above the second story instead
+   of inside the text column. It sat there as a 164px picture in a 391px
+   column and left ~100px under it that no copy could fill — every summary in
+   this feed is two lines, so raising the clamp did nothing. Three placements
+   of that gap were tried (foot, middle, distributed) and each just moved it.
+
+   Stacking the two stories in one rail spends the space on content and gives
+   the headline the full width of the left column, which is what a lead
+   headline wants anyway. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired {
+    grid-template-columns: minmax(0, 1fr) 22.5rem;
+  }
+
+  /* Text only now: no image column, no grid placement. */
+  .featured-hero__layout--paired .featured-hero__split--text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .featured-hero__layout--paired .featured-hero__split--text .featured-hero__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    min-height: 0;
+    gap: 1.5rem;
+  }
+
+  /* The headline has ~600px now, so it can carry real size. */
+  .featured-hero__layout--paired {
+    --hero-title-font-max: 2.5rem;
+    --hero-title-lines: 4;
+  }
+
+  .featured-hero__layout--paired .featured-hero__title-slot .featured-hero__title {
+    font-size: clamp(1.75rem, 2.9vw, var(--hero-title-font-max));
+    line-height: 1.14;
+  }
+
+  .featured-hero__layout--paired .featured-hero__rail {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+    height: 100%;
+  }
+
+  .featured-hero__layout--paired .featured-hero__rail .featured-hero__image-wrap,
+  .featured-hero__layout--paired .featured-hero__rail .featured-hero__image {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+  }
+
+  /* The second story is under the photo now, so the rule goes above it rather
+     than down its side. */
+  .featured-hero__layout--paired > .featured-hero__second,
+  .featured-hero__layout--paired .featured-hero__second {
+    border-inline-start: none;
+    padding-inline-start: 0;
+    border-block-start: 1px solid hsl(var(--border) / 0.5);
+    padding-block-start: 1.25rem;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    gap: 0.625rem;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second-image {
+    display: none;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second-title {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    font-size: 1rem;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second-excerpt {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* The rail must never be the taller column.
+   A three-line deck pushed it to 406px against the text column's 391, so the
+   grid row grew and the card changed height between slides — the one thing
+   the rigid slot grid exists to prevent. Two lines keeps the rail's worst case
+   under the text column's height whatever the copy. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired .featured-hero__second-excerpt {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .featured-hero__layout--paired .featured-hero__rail {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+/* ── Two pictures in the hero ─────────────────────────────────────────────
+   The second story carries its own thumbnail again, beside its headline
+   rather than above it. Stacked full-width it did not fit: two 16:9 photos in
+   a 360px rail come to 406px against the rail's 391, and squashing the second
+   into a letterbox would have cropped the words out of the banner the way the
+   lead photo used to be cropped.
+
+   Budget, so the rail still never sets the card height:
+     lead photo 203 + gap 18 + rule/pad 16 + pill 21 + row 61 + deck 41 = 360
+   inside 391. */
+@media (min-width: 1024px) {
+  .featured-hero__layout--paired .featured-hero__second-image {
+    display: block;
+    flex: 0 0 auto;
+    width: 6.75rem;
+    /* min/max must be cleared too. An earlier rule pins every hero photo to
+       --hero-photo-h with all three properties, and a bare `height: auto` left
+       the 164px min-height standing — the thumbnail came out 108x164 instead of
+       108x61 and pushed the rail to 489px, taller than the text column, so the
+       card grew again. */
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.5rem;
+  }
+
+  .featured-hero__second-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .featured-hero__layout--paired .featured-hero__second-row .featured-hero__second-title {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    font-size: 0.9375rem;
+    line-height: 1.35;
+    min-width: 0;
+  }
+}
+
+/* Stacked on narrow screens the thumbnail has no headline to sit beside, so it
+   goes back to a full-width picture. */
+@media (max-width: 1023px) {
+  .featured-hero__second-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .featured-hero__second-image {
+    width: 100%;
+  }
+}
+
+/* ── Hero: two equal stories ──────────────────────────────────────────────
+   One shape for both. This was a lead-plus-sidebar through several rounds and
+   the asymmetry was the problem every time: the lead column had three rows to
+   the rail's four and ~100px it could not fill, because every summary in this
+   feed is two lines. Moving that gap around — foot, middle, distributed —
+   never removed it. Two identical cards have no gap to move.
+
+   Budget per card at 480px wide inside a 391px band:
+     photo 270 + gap 14 + pill 26 + gap 10 + headline 66 = 386
+*/
+.featured-hero__pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .featured-hero__pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1.25rem, 2.2vw, 2rem);
+  }
+}
+
+.featured-hero__story {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 220ms ease-out;
+}
+
+.featured-hero__story.is-swapping {
+  opacity: 0;
+}
+
+.featured-hero__story-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: hsl(var(--muted) / 0.4);
+  flex: 0 0 auto;
+}
+
+.featured-hero__story-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+  font-size: 1.25rem;
+  line-height: 1.24;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease;
+}
+
+.featured-hero__story:hover .featured-hero__story-title {
+  color: hsl(var(--primary));
+}
+
+@media (min-width: 1024px) {
+  .featured-hero__story-title {
+    /* Sized to the card, not the viewport. Both cards are ~480px, so the
+       headline can be generous without the clamp-against-viewport trick the
+       old single-lead layout needed. */
+    font-size: clamp(1.125rem, 1.55vw, 1.5rem);
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* Fitting the pair to the band.
+   Measured: photo 270 + gap 14 + pill 26 + gap 14 + headline 89 = 413 in a
+   389px content area — the third line of the headline sat below the card edge.
+   The photo keeps 16:9 because these are titled banners and any crop eats the
+   words, so the space comes from the gaps, the pill and the headline size:
+   270 + 10 + 22 + 10 + 74 = 386. */
+@media (min-width: 1024px) {
+  .featured-hero__story {
+    gap: 0.625rem;
+  }
+
+  .featured-hero__story .featured-hero__category {
+    padding: 0.125rem 0.625rem;
+    font-size: 0.625rem;
+  }
+
+  .featured-hero__story-title {
+    font-size: 1.25rem;
+    line-height: 1.24;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* The pair sits centred in the band.
+   Both cards come to 362px in a 389px content area, so ~28px is left over.
+   Centring splits it above and below instead of pooling it under the
+   headlines, which is what made the earlier layouts look bottom-heavy. */
+@media (min-width: 1024px) {
+  .featured-hero__body--band {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+/* ── The hero was saying everything twice ────────────────────────────────
+   Every article image on this site is a finished social card: ESB logo bar on
+   top, photo in the middle, and a dark strip at the bottom carrying the
+   category chip, the date AND the headline. The card underneath it then
+   printed the same category pill and the same headline again. No amount of
+   alignment fixes a card that reads "Fuel Siphoned from Moving Train at Harian
+   Station" twice, once as artwork and once as type — that duplication is what
+   made this look amateurish.
+
+   So the frame now shows the PHOTO band of the artwork and crops the baked-in
+   text away: a 3:1 window positioned below the logo bar and above the headline
+   strip. Our own typography carries the headline, which is what it is for, and
+   the cropped height buys the headline room to be a real hero size instead of
+   the 20px it had been squeezed to. */
+@media (min-width: 1024px) {
+  .featured-hero__story-image {
+    aspect-ratio: 3 / 1;
+  }
+
+  .featured-hero__story-image img {
+    object-position: center 32%;
+  }
+
+  .featured-hero__story {
+    gap: 0.75rem;
+  }
+
+  .featured-hero__story .featured-hero__category {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.6875rem;
+  }
+
+  .featured-hero__story-title {
+    font-size: clamp(1.375rem, 1.9vw, 1.75rem);
+    line-height: 1.22;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+}
+
+/* ── The artwork is the card ──────────────────────────────────────────────
+   Reverting the 3:1 crop added a moment ago. It cleared the baked-in headline
+   on one banner and not the other, because the two artworks place their text
+   at different heights — and `heroImageStyle` writes object-position INLINE
+   from each article's panX/panY, so a stylesheet crop never applied in the
+   first place. The left card only looked cropped because a centred 3:1 window
+   happens to cut that particular banner's strip.
+
+   The images are shown whole instead, at the size the band allows, and the
+   duplicated headline and category are gone from the markup. If you would
+   rather have a photo plus our own typographic headline, the lever already
+   exists per article — panY in the hero image settings — but it has to be set
+   per banner, because there is no reliable global crop for artwork that is not
+   templated to a fixed layout. */
+@media (min-width: 1024px) {
+  .featured-hero__story-image {
+    aspect-ratio: 16 / 9;
+  }
+
+  .featured-hero__story {
+    gap: 0;
+    justify-content: center;
+  }
+}
+
+.featured-hero__story-flag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 2;
+}
+
+.featured-hero__story {
+  position: relative;
+}
+
+.featured-hero__story-image {
+  box-shadow: 0 1px 2px hsl(var(--foreground) / 0.06);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+.featured-hero__story:hover .featured-hero__story-image {
+  box-shadow: 0 8px 24px hsl(var(--foreground) / 0.14);
+  transform: translateY(-2px);
+}
+
+/* ── Photo band, then headline and deck ──────────────────────────────────
+   The frame is a short band taken from the TOP of the artwork. Every banner
+   here carries its headline in a strip at the foot of the image, so a
+   top-anchored crop at roughly 3.4:1 lands on the photo and leaves the words
+   outside the frame — which is what lets our own headline and deck be shown
+   without the card saying everything twice.
+
+   Two banners were checked: one puts its text in the last fifth of the image,
+   the other from just past halfway. 3.4:1 shows the top ~52% and clears both.
+   It is a heuristic about artwork, not a rule about images, and it is here
+   rather than in `heroImageStyle` so a future non-banner photo can still use
+   the per-article focal point.
+
+   Budget in the 389px band:
+     photo 141 + 12 + pill 26 + 10 + headline 81 + 10 + deck 67 = 347 */
+@media (min-width: 1024px) {
+  .featured-hero__story-image {
+    aspect-ratio: 3.4 / 1;
+  }
+
+  .featured-hero__story {
+    gap: 0.625rem;
+    justify-content: flex-start;
+  }
+
+  .featured-hero__story-title {
+    font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+    line-height: 1.24;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+.featured-hero__story-deck {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}

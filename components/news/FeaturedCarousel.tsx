@@ -3,16 +3,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 import { ArticlePlacementBadge } from '@/components/shared/ArticlePlacementBadge';
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
 import { CategoryLabel } from '@/components/i18n/CategoryLabel';
 import { useLocale } from '@/components/shared/LocaleProvider';
-import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { NoImage } from '@/components/shared/NoImage';
 import { hasArticleImage } from '@/lib/article-image';
 import { heroImageStyle } from '@/lib/hero-image';
-import { FeaturedCarouselFooter, type FeaturedCarouselFooterLabels } from '@/components/news/FeaturedCarouselFooter';
 
 /** How long each hero slide stays up before advancing. */
 const AUTOPLAY_INTERVAL_MS = 6000;
@@ -36,12 +33,10 @@ export function FeaturedCarousel({
   items,
   tickerItems,
   inBand = false,
-  footerLabels,
 }: {
   items?: FeaturedItem[];
   tickerItems?: TickerItem[];
   inBand?: boolean;
-  footerLabels?: Pick<FeaturedCarouselFooterLabels, 'readStory' | 'browseAll'>;
 }) {
   const { t } = useLocale();
   const featured: FeaturedItem[] = items ?? [];
@@ -102,21 +97,31 @@ export function FeaturedCarousel({
     }, 200);
   }, []);
 
+  /**
+   * The hero shows two stories at once, so a slide is a PAIR, not an item.
+   *
+   * Five featured items therefore make three slides — A+B, C+D, E+A — and the
+   * counter reads 1/3. The last pair wraps rather than leaving a hole: a hero
+   * with one empty half looks broken, and repeating the lead is the least
+   * surprising thing to put there.
+   */
+  const pairCount = Math.max(1, Math.ceil(featured.length / 2));
+
   const next = useCallback(() => {
-    goTo((currentRef.current + 1) % featured.length);
-  }, [featured.length, goTo]);
+    goTo((currentRef.current + 1) % pairCount);
+  }, [pairCount, goTo]);
 
   const prev = useCallback(() => {
-    goTo((currentRef.current - 1 + featured.length) % featured.length);
-  }, [featured.length, goTo]);
+    goTo((currentRef.current - 1 + pairCount) % pairCount);
+  }, [pairCount, goTo]);
 
   useEffect(() => {
     if (!isPlaying || isTransitioning) return;
-    if (featured.length < 2) return;
+    if (pairCount < 2) return;
 
     const timer = setInterval(next, AUTOPLAY_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [isPlaying, isTransitioning, next, featured.length]);
+  }, [isPlaying, isTransitioning, next, pairCount]);
 
   useEffect(() => {
     return () => {
@@ -124,7 +129,15 @@ export function FeaturedCarousel({
     };
   }, []);
 
-  const currentItem = featured[current];
+  const leadIndex = (current * 2) % Math.max(1, featured.length);
+  const secondIndex = (leadIndex + 1) % Math.max(1, featured.length);
+  const currentItem = featured[leadIndex];
+  // Never the same story twice. With an odd count the final pair wraps onto the
+  // lead, and with a single featured item there is no second story at all.
+  const secondaryItem = secondIndex === leadIndex ? undefined : featured[secondIndex];
+  // The two stories on screen, in order. Both are rendered by the same markup,
+  // so there is no longer a "lead" and a "second" to keep in step.
+  const pairItems = [currentItem, secondaryItem].filter(Boolean) as FeaturedItem[];
   const shellClass = inBand ? '' : 'container container--shell';
   const sectionPad = inBand ? '' : ' py-4';
 
@@ -142,171 +155,86 @@ export function FeaturedCarousel({
     );
   }
 
-  const storyProgress = (
-    <div className="flex min-w-0 flex-1 items-center gap-1" role="tablist" aria-label="Featured stories">
-      {featured.map((item, idx) => {
-        const isActive = idx === current;
-        const isPast = idx < current;
-        return (
-          <button
-            key={idx}
-            type="button"
-            onClick={(e) => { e.preventDefault(); goTo(idx); }}
-            role="tab"
-            className="featured-hero__progress-tab flex flex-1 items-center py-0"
-            aria-label={`Story ${idx + 1}: ${item.title}`}
-            aria-selected={isActive}
-          >
-            <span className="relative h-1 w-full overflow-hidden rounded-full bg-border/40">
-              <span
-                className={`absolute inset-y-0 left-0 rounded-full bg-muted-foreground/30 ${
-                  isPast ? 'w-full' : 'w-0'
-                }`}
-                style={
-                  isActive
-                    ? {
-                        animation: `progressFill 7.5s linear forwards`,
-                        animationPlayState: isPlaying && !isTransitioning ? 'running' : 'paused',
-                      }
-                    : undefined
-                }
-                onAnimationEnd={isActive ? () => next() : undefined}
-              />
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
 
   const heroCard = (
         <div
           className="featured-hero-card hero-dot-pattern relative overflow-hidden rounded-2xl border border-border/40"
           aria-roledescription="carousel"
           aria-label="Featured stories"
+          // The visible controls are gone, so this is the only way left to stop
+          // the rotation. Pausing on hover and focus covers both the reader who
+          // is part-way through a headline and the one tabbing to a link.
+          onMouseEnter={() => setIsPlaying(false)}
+          onMouseLeave={() => setIsPlaying(true)}
+          onFocusCapture={() => setIsPlaying(false)}
+          onBlurCapture={() => setIsPlaying(true)}
         >
           <div
             className={`featured-hero__body relative ${
               inBand ? 'py-0 featured-hero__body--band' : 'py-10 md:py-14'
             }`}
           >
-            <div className="featured-hero__split">
-              <div
-                className={`featured-hero__content min-w-0 transition-opacity duration-200 ease-out ${
-                  isTransitioning ? 'opacity-0' : 'opacity-100'
-                }`}
-              >
-                <div className="featured-hero__meta flex items-center gap-2 overflow-hidden">
-                  <div
-                    className={`featured-hero__category inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ${getCategoryBadgeClasses(currentItem.category)}`}
-                  >
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current opacity-75" />
-                    <CategoryLabel name={currentItem.category} />
-                  </div>
-                  {currentItem.isFeatured ? <ArticlePlacementBadge type="featured" /> : null}
-                  {currentItem.isBreaking ? <ArticlePlacementBadge type="breaking" /> : null}
-                </div>
+            {/* Two equal stories.
 
-                <div className="featured-hero__title-slot">
-                  <h1 className="featured-hero__title">{currentItem.title}</h1>
-                </div>
-
-                <div className="featured-hero__excerpt-slot">
-                  <p className="featured-hero__excerpt text-lg leading-relaxed text-muted-foreground md:text-xl line-clamp-3">
-                    {currentItem.excerpt ? currentItem.excerpt.replace(/\[&hellip;\]/g, '...').replace(/&hellip;/g, '...') : '\u00A0'}
-                  </p>
-                </div>
-
-                <FeaturedCarouselFooter
-                  slug={currentItem.slug}
-                  date={currentItem.date}
-                  labels={{
-                    readStory: footerLabels?.readStory ?? t('carousel.readStory'),
-                    browseAll: footerLabels?.browseAll ?? t('carousel.browseAll'),
-                    minRead: t('carousel.minRead', { minutes: currentItem.readTime }),
-                  }}
-                  transport={
-                    <div className="featured-hero__transport flex shrink-0 items-center ms-auto">
-                      <div className="featured-hero__transport-controls group/transport flex min-w-0 items-center gap-1 opacity-45 transition-opacity duration-150 hover:opacity-100 focus-within:opacity-100">
-                        <button
-                          type="button"
-                          onClick={(e) => { e.preventDefault(); prev(); }}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-                          aria-label={t('carousel.previous')}
-                        >
-                          <ChevronLeft className="h-3.5 w-3.5" />
-                        </button>
-                        <div className="featured-hero__progress-track flex min-w-[3.5rem] max-w-[5.5rem] flex-1 items-center">
-                          {storyProgress}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => { e.preventDefault(); next(); }}
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-                          aria-label={t('carousel.next')}
-                        >
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                      <span className="featured-hero__counter shrink-0 font-mono font-medium tabular-nums text-muted-foreground">
-                        {current + 1}/{featured.length}
-                      </span>
-                      <ModernTooltip
-                        label={isPlaying ? t('carousel.pause') : t('carousel.play')}
-                        hint={t('carousel.storiesMarkets')}
-                        side="top"
-                        fast
-                      >
-                        <button
-                          type="button"
-                          onClick={(e) => { e.preventDefault(); setIsPlaying(!isPlaying); }}
-                          className="featured-hero__play-btn flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-45 transition-all duration-150 hover:bg-muted/50 hover:text-foreground hover:opacity-100 focus-visible:opacity-100"
-                          aria-label={isPlaying ? t('carousel.pause') : t('carousel.play')}
-                        >
-                          {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                        </button>
-                      </ModernTooltip>
-                    </div>
-                  }
-                />
-              </div>
-
-              <div className="featured-hero__image-wrap relative">
-                <div className="featured-hero__image relative w-full overflow-hidden rounded-xl">
-                  {/* Every slide used to be mounted at once. They sit in the viewport,
-                      so opacity-0 does not defer them — all five hero photos downloaded
-                      during initial load and competed with the LCP. Mount only the
-                      visible slide and the next one, which is all the swap needs. */}
-                  {featured.map((item, idx) =>
-                    idx !== current && idx !== (current + 1) % featured.length ? null :
-                    hasArticleImage(item.imageUrl) ? (
+                This was a lead-plus-sidebar for several rounds — a big
+                headline beside a narrow rail — and every attempt to balance it
+                ran into the same arithmetic: the lead had fewer rows than the
+                rail and ~100px it could not fill, because every summary in the
+                feed is two lines. Two identical cards have no such asymmetry.
+                One shape, one type scale, one picture size; the only thing that
+                differs is the story. */}
+            <div className="featured-hero__pair">
+              {pairItems.map((item, i) => (
+                <Link
+                  key={item.slug}
+                  href={`/articles/${item.slug}`}
+                  className={`featured-hero__story group ${isTransitioning ? 'is-swapping' : ''}`}
+                >
+                  <div className="featured-hero__story-image relative overflow-hidden rounded-xl">
+                    {hasArticleImage(item.imageUrl) ? (
                       <Image
-                        key={idx}
                         src={item.imageUrl}
                         alt={item.title}
                         fill
-                        priority={idx === 0}
-                        className={`absolute inset-0 h-full w-full ${
-                          idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
-                        }`}
-                        style={heroImageStyle({ fitMode: 'fill', ...(item.heroMeta ?? {}) })}
-                        // Image column is ~460px at 1920 and ~404px at 1440 — 50vw
-                        // over-declared it by roughly 2x.
-                        sizes="(max-width: 767px) 100vw, (max-width: 1279px) 340px, 460px"
+                        priority={i === 0}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                        // Top-anchored on purpose. Every banner here carries
+                        // its headline in a strip at the foot of the image, and
+                        // the frame below is short enough to cut that strip off
+                        // — but only if the crop is taken from the top. The
+                        // article's own panY would re-centre it and bring the
+                        // words back, so filter and zoom are kept and the
+                        // position is not.
+                        style={{
+                          ...heroImageStyle({ fitMode: 'fill', ...(item.heroMeta ?? {}) }),
+                          objectPosition: 'center top',
+                        }}
+                        sizes="(max-width: 1023px) 100vw, 480px"
                       />
                     ) : (
-                      <div
-                        key={idx}
-                        className={`absolute inset-0 ${
-                          idx === current ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
-                        }`}
-                      >
-                        <NoImage className="h-full w-full" />
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
+                      <NoImage className="h-full w-full" />
+                    )}
+                  </div>
+
+                  <div className="featured-hero__story-meta flex items-center gap-2 overflow-hidden">
+                    <span
+                      className={`featured-hero__category inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wider ${getCategoryBadgeClasses(item.category)}`}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-75" />
+                      <CategoryLabel name={item.category} />
+                    </span>
+                    {item.isBreaking ? <ArticlePlacementBadge type="breaking" /> : null}
+                  </div>
+
+                  <h2 className="featured-hero__story-title">{item.title}</h2>
+
+                  {item.excerpt ? (
+                    <p className="featured-hero__story-deck">
+                      {item.excerpt.replace(/\[&hellip;\]/g, '...').replace(/&hellip;/g, '...')}
+                    </p>
+                  ) : null}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

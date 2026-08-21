@@ -44,7 +44,6 @@ import {
 import { getLatestYoutubeInterviews } from '@/lib/youtube-channel';
 import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
-import { createTranslator } from '@/lib/i18n/messages';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
 
 export const revalidate = 180;
@@ -112,11 +111,6 @@ export default async function Home() {
   const snapshotStats = dailySnapshot?.stats ?? settings.snapshot;
   const snapshotDate = (dailySnapshot?.date ?? settings.snapshotDate) as string | undefined;
   const snapshotHeaderDate = formatSnapshotHeaderDate(snapshotDate, locale);
-  const tr = createTranslator(locale);
-  const carouselFooterLabels = {
-    readStory: tr('carousel.readStory'),
-    browseAll: tr('carousel.browseAll'),
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -128,7 +122,6 @@ export default async function Home() {
                 items={carouselItems}
                 tickerItems={liveTicker ?? (settings.ticker as TickerItem[] | undefined)}
                 inBand
-                footerLabels={carouselFooterLabels}
               />
             </div>
             <aside className="home-hero-band__snapshot">
