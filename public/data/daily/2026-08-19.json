@@ -68,7 +68,7 @@
     },
     {
       "name": "HSD",
-      "gen": 0.0,
+      "gen": 0,
       "cost": 0,
       "unitCost": null,
       "color": "#ef4444"
@@ -86,13 +86,13 @@
       "zone": "Dhaka",
       "fuels": {
         "Gas": 36.943757,
-        "Coal": 0.0,
+        "Coal": 0,
         "HFO": 18.763085,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 0.2082,
-        "Imports": 0.0,
-        "Wind": 0.0
+        "Imports": 0,
+        "Wind": 0
       },
       "total": 55.915042
     },
@@ -102,10 +102,10 @@
         "Gas": 3.943328,
         "Coal": 49.259997,
         "HFO": 8.890918,
-        "HSD": 0.0,
+        "HSD": 0,
         "Hydro": 5.239611,
         "Solar": 0.097366,
-        "Imports": 0.0,
+        "Imports": 0,
         "Wind": 0.24528
       },
       "total": 67.6765
@@ -114,27 +114,27 @@
       "zone": "Cumilla",
       "fuels": {
         "Gas": 31.170164,
-        "Coal": 0.0,
+        "Coal": 0,
         "HFO": 7.89989,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 0.456445,
         "Imports": 3.888,
-        "Wind": 0.0
+        "Wind": 0
       },
       "total": 43.414499
     },
     {
       "zone": "Mymensingh",
       "fuels": {
-        "Gas": 0.0,
-        "Coal": 0.0,
+        "Gas": 0,
+        "Coal": 0,
         "HFO": 4.2684,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 0.426038,
-        "Imports": 0.0,
-        "Wind": 0.0
+        "Imports": 0,
+        "Wind": 0
       },
       "total": 4.694438
     },
@@ -142,27 +142,27 @@
       "zone": "Sylhet",
       "fuels": {
         "Gas": 36.633141,
-        "Coal": 0.0,
-        "HFO": 0.0,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "Coal": 0,
+        "HFO": 0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 0.078686,
-        "Imports": 0.0,
-        "Wind": 0.0
+        "Imports": 0,
+        "Wind": 0
       },
       "total": 36.711827
     },
     {
       "zone": "Khulna",
       "fuels": {
-        "Gas": 0.0,
-        "Coal": 26.0,
+        "Gas": 0,
+        "Coal": 26,
         "HFO": 0.627344,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 0.51408,
         "Imports": 22.610455,
-        "Wind": 0.0
+        "Wind": 0
       },
       "total": 49.751879
     },
@@ -172,11 +172,11 @@
         "Gas": 8.13381,
         "Coal": 41.897,
         "HFO": 0.718224,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 0.003547,
-        "Imports": 0.0,
-        "Wind": 0.0
+        "Imports": 0,
+        "Wind": 0
       },
       "total": 50.752581
     },
@@ -184,27 +184,27 @@
       "zone": "Rajshahi",
       "fuels": {
         "Gas": 11.722054,
-        "Coal": 0.0,
+        "Coal": 0,
         "HFO": 1.963411,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 1.3749,
         "Imports": 24.238909,
-        "Wind": 0.0
+        "Wind": 0
       },
       "total": 39.299274
     },
     {
       "zone": "Rangpur",
       "fuels": {
-        "Gas": 0.0,
+        "Gas": 0,
         "Coal": 5.179509,
         "HFO": 2.837302,
-        "HSD": 0.0,
-        "Hydro": 0.0,
+        "HSD": 0,
+        "Hydro": 0,
         "Solar": 1.216788,
-        "Imports": 0.0,
-        "Wind": 0.0
+        "Imports": 0,
+        "Wind": 0
       },
       "total": 9.233599
     }
@@ -213,7 +213,7 @@
     {
       "source": "HVDC Bheramara (India)",
       "energy": 21.7,
-      "peakFlow": 881.0,
+      "peakFlow": 881,
       "type": "C/B Interconnector (West)"
     },
     {
@@ -225,69 +225,63 @@
     {
       "source": "Tripura Cumilla (India)",
       "energy": 3.89,
-      "peakFlow": 176.0,
+      "peakFlow": 176,
       "type": "C/B Interconnector (East)"
-    },
-    {
-      "source": "Nepal (via India)",
-      "energy": 0.89,
-      "peakFlow": 38.0,
-      "type": "C/B Interconnector (Nepal)"
     }
   ],
   "regionalDemandData": [
     {
       "zone": "Dhaka",
-      "loadShed": 643.0,
-      "demand": 6368.0,
+      "loadShed": 643,
+      "demand": 6368,
       "pct": 10.1
     },
     {
       "zone": "Chattogram",
-      "loadShed": 154.0,
-      "demand": 1596.0,
+      "loadShed": 154,
+      "demand": 1596,
       "pct": 9.6
     },
     {
       "zone": "Cumilla",
-      "loadShed": 244.0,
-      "demand": 1682.0,
+      "loadShed": 244,
+      "demand": 1682,
       "pct": 14.5
     },
     {
       "zone": "Mymensingh",
-      "loadShed": 354.0,
-      "demand": 1516.0,
+      "loadShed": 354,
+      "demand": 1516,
       "pct": 23.4
     },
     {
       "zone": "Sylhet",
-      "loadShed": 134.0,
-      "demand": 759.0,
+      "loadShed": 134,
+      "demand": 759,
       "pct": 17.7
     },
     {
       "zone": "Khulna",
-      "loadShed": 274.0,
-      "demand": 2089.0,
+      "loadShed": 274,
+      "demand": 2089,
       "pct": 13.1
     },
     {
       "zone": "Barishal",
-      "loadShed": 104.0,
-      "demand": 562.0,
+      "loadShed": 104,
+      "demand": 562,
       "pct": 18.5
     },
     {
       "zone": "Rajshahi",
-      "loadShed": 159.0,
-      "demand": 1669.0,
+      "loadShed": 159,
+      "demand": 1669,
       "pct": 9.5
     },
     {
       "zone": "Rangpur",
-      "loadShed": 200.0,
-      "demand": 1215.0,
+      "loadShed": 200,
+      "demand": 1215,
       "pct": 16.5
     }
   ],
@@ -472,7 +466,7 @@
       "time": "06:39",
       "plant": "Haripur 230/132kV S/S 132kV Main Bus Sec-1 Scheduled",
       "load": "HT Outage",
-      "reason": "for 132 KV Sonargao-1 Jack bus work.",
+      "reason": "Due to CB 911 B open for 132 KV Sonargao-1 Jack bus work.",
       "full_desc": "Haripur 230/132kV S/S 132kV Main Bus Sec-1 Scheduled S/D Due to CB 911 B open for 132 KV Sonargao-1 Jack bus work."
     }
   ],
@@ -480,151 +474,151 @@
     {
       "time": "00:00",
       "generation": 15857.79,
-      "loadShed": 325.0,
+      "loadShed": 325,
       "demand": 16197.42
     },
     {
       "time": "01:00",
       "generation": 15275.21,
-      "loadShed": 428.0,
+      "loadShed": 428,
       "demand": 15722.47
     },
     {
       "time": "02:00",
       "generation": 14899.93,
-      "loadShed": 426.0,
+      "loadShed": 426,
       "demand": 15345.1
     },
     {
       "time": "03:00",
       "generation": 14576.12,
-      "loadShed": 406.0,
+      "loadShed": 406,
       "demand": 15000.39
     },
     {
       "time": "04:00",
       "generation": 14242.02,
-      "loadShed": 343.0,
+      "loadShed": 343,
       "demand": 14600.02
     },
     {
       "time": "05:00",
       "generation": 14000.78,
-      "loadShed": 333.0,
+      "loadShed": 333,
       "demand": 14348.78
     },
     {
       "time": "06:00",
       "generation": 13711.06,
-      "loadShed": 298.0,
+      "loadShed": 298,
       "demand": 14022.06
     },
     {
       "time": "07:00",
       "generation": 13902.24,
-      "loadShed": 261.0,
+      "loadShed": 261,
       "demand": 14175.24
     },
     {
       "time": "08:00",
       "generation": 13854.37,
-      "loadShed": 357.0,
+      "loadShed": 357,
       "demand": 14227.44
     },
     {
       "time": "09:00",
       "generation": 13967.08,
-      "loadShed": 329.0,
+      "loadShed": 329,
       "demand": 14310.89
     },
     {
       "time": "10:00",
       "generation": 14366.74,
-      "loadShed": 117.0,
+      "loadShed": 117,
       "demand": 14489.01
     },
     {
       "time": "11:00",
       "generation": 14183.65,
-      "loadShed": 123.0,
+      "loadShed": 123,
       "demand": 14312.19
     },
     {
       "time": "12:00",
       "generation": 14322.35,
-      "loadShed": 563.0,
+      "loadShed": 563,
       "demand": 14910.35
     },
     {
       "time": "13:00",
       "generation": 14567.64,
-      "loadShed": 1191.0,
+      "loadShed": 1191,
       "demand": 15812.64
     },
     {
       "time": "14:00",
       "generation": 14642.87,
-      "loadShed": 1067.0,
+      "loadShed": 1067,
       "demand": 15757.87
     },
     {
       "time": "15:00",
       "generation": 14596.83,
-      "loadShed": 1834.0,
+      "loadShed": 1834,
       "demand": 16513.83
     },
     {
       "time": "16:00",
       "generation": 14314.37,
-      "loadShed": 1777.0,
+      "loadShed": 1777,
       "demand": 16171.37
     },
     {
       "time": "17:00",
       "generation": 14176.5,
-      "loadShed": 1804.0,
+      "loadShed": 1804,
       "demand": 16061.5
     },
     {
       "time": "18:00",
       "generation": 14300.65,
-      "loadShed": 1434.0,
+      "loadShed": 1434,
       "demand": 15799.65
     },
     {
       "time": "19:00",
       "generation": 15426.79,
-      "loadShed": 2530.0,
+      "loadShed": 2530,
       "demand": 18070.79
     },
     {
       "time": "19:30",
       "generation": 15293.87,
-      "loadShed": 2447.0,
+      "loadShed": 2447,
       "demand": 17850.87
     },
     {
       "time": "20:00",
       "generation": 15420.4,
-      "loadShed": 1883.0,
+      "loadShed": 1883,
       "demand": 17388.4
     },
     {
       "time": "21:00",
       "generation": 15680.74,
-      "loadShed": 2266.0,
+      "loadShed": 2266,
       "demand": 18048.74
     },
     {
       "time": "22:00",
       "generation": 16180.35,
-      "loadShed": 1237.0,
+      "loadShed": 1237,
       "demand": 17473.35
     },
     {
       "time": "23:00",
       "generation": 16358.39,
-      "loadShed": 1179.0,
+      "loadShed": 1179,
       "demand": 17590.39
     }
   ],
@@ -638,339 +632,339 @@
       {
         "time": "00:00",
         "mw": [
-          114.0,
-          330.0,
-          1180.0
+          114,
+          330,
+          1180
         ],
         "mvar": [
-          21.0,
-          160.0,
-          628.0
+          21,
+          160,
+          628
         ]
       },
       {
         "time": "01:00",
         "mw": [
-          88.0,
-          220.0,
-          1060.0
+          88,
+          220,
+          1060
         ],
         "mvar": [
-          20.0,
-          154.0,
-          600.0
+          20,
+          154,
+          600
         ]
       },
       {
         "time": "02:00",
         "mw": [
-          72.0,
-          0.0,
-          962.0
+          72,
+          0,
+          962
         ],
         "mvar": [
-          20.0,
-          0.0,
-          584.0
+          20,
+          0,
+          584
         ]
       },
       {
         "time": "03:00",
         "mw": [
-          82.0,
-          190.0,
-          984.0
+          82,
+          190,
+          984
         ],
         "mvar": [
-          28.0,
-          170.0,
-          564.0
+          28,
+          170,
+          564
         ]
       },
       {
         "time": "04:00",
         "mw": [
-          76.0,
-          184.0,
-          1000.0
+          76,
+          184,
+          1000
         ],
         "mvar": [
-          28.0,
-          166.0,
-          550.0
+          28,
+          166,
+          550
         ]
       },
       {
         "time": "05:00",
         "mw": [
-          83.0,
-          204.0,
-          1060.0
+          83,
+          204,
+          1060
         ],
         "mvar": [
-          32.0,
-          164.0,
-          584.0
+          32,
+          164,
+          584
         ]
       },
       {
         "time": "06:00",
         "mw": [
-          100.0,
-          222.0,
-          1094.0
+          100,
+          222,
+          1094
         ],
         "mvar": [
-          44.0,
-          170.0,
-          610.0
+          44,
+          170,
+          610
         ]
       },
       {
         "time": "07:00",
         "mw": [
-          88.0,
-          200.0,
-          1056.0
+          88,
+          200,
+          1056
         ],
         "mvar": [
-          36.0,
-          192.0,
-          608.0
+          36,
+          192,
+          608
         ]
       },
       {
         "time": "08:00",
         "mw": [
-          123.0,
-          260.0,
-          1288.0
+          123,
+          260,
+          1288
         ],
         "mvar": [
-          55.0,
-          192.0,
-          676.0
+          55,
+          192,
+          676
         ]
       },
       {
         "time": "09:00",
         "mw": [
-          155.0,
-          344.0,
-          1442.0
+          155,
+          344,
+          1442
         ],
         "mvar": [
-          75.0,
-          208.0,
-          782.0
+          75,
+          208,
+          782
         ]
       },
       {
         "time": "10:00",
         "mw": [
-          154.0,
-          322.0,
-          1414.0
+          154,
+          322,
+          1414
         ],
         "mvar": [
-          83.0,
-          218.0,
-          874.0
+          83,
+          218,
+          874
         ]
       },
       {
         "time": "11:00",
         "mw": [
-          179.0,
-          432.0,
-          1488.0
+          179,
+          432,
+          1488
         ],
         "mvar": [
-          84.0,
-          216.0,
-          874.0
+          84,
+          216,
+          874
         ]
       },
       {
         "time": "12:00",
         "mw": [
-          135.0,
-          350.0,
-          1208.0
+          135,
+          350,
+          1208
         ],
         "mvar": [
-          63.0,
-          216.0,
-          810.0
+          63,
+          216,
+          810
         ]
       },
       {
         "time": "13:00",
         "mw": [
-          152.0,
-          330.0,
-          1304.0
+          152,
+          330,
+          1304
         ],
         "mvar": [
-          71.0,
-          236.0,
-          856.0
+          71,
+          236,
+          856
         ]
       },
       {
         "time": "14:00",
         "mw": [
-          146.0,
-          330.0,
-          1292.0
+          146,
+          330,
+          1292
         ],
         "mvar": [
-          70.0,
-          220.0,
-          852.0
+          70,
+          220,
+          852
         ]
       },
       {
         "time": "15:00",
         "mw": [
-          138.0,
-          290.0,
-          1194.0
+          138,
+          290,
+          1194
         ],
         "mvar": [
-          66.0,
-          196.0,
-          786.0
+          66,
+          196,
+          786
         ]
       },
       {
         "time": "16:00",
         "mw": [
-          130.0,
-          320.0,
-          1286.0
+          130,
+          320,
+          1286
         ],
         "mvar": [
-          55.0,
-          176.0,
-          772.0
+          55,
+          176,
+          772
         ]
       },
       {
         "time": "17:00",
         "mw": [
-          126.0,
-          330.0,
-          1342.0
+          126,
+          330,
+          1342
         ],
         "mvar": [
-          59.0,
-          192.0,
-          766.0
+          59,
+          192,
+          766
         ]
       },
       {
         "time": "18:00",
         "mw": [
-          128.0,
-          310.0,
-          1392.0
+          128,
+          310,
+          1392
         ],
         "mvar": [
-          54.0,
-          184.0,
-          734.0
+          54,
+          184,
+          734
         ]
       },
       {
         "time": "18:30",
         "mw": [
-          136.0,
-          360.0,
-          1462.0
+          136,
+          360,
+          1462
         ],
         "mvar": [
-          54.0,
-          202.0,
-          696.0
+          54,
+          202,
+          696
         ]
       },
       {
         "time": "19:00",
         "mw": [
-          101.0,
-          290.0,
-          1294.0
+          101,
+          290,
+          1294
         ],
         "mvar": [
-          29.0,
-          130.0,
-          554.0
+          29,
+          130,
+          554
         ]
       },
       {
         "time": "19:30",
         "mw": [
-          122.0,
-          350.0,
-          1458.0
+          122,
+          350,
+          1458
         ],
         "mvar": [
-          30.0,
-          120.0,
-          438.0
+          30,
+          120,
+          438
         ]
       },
       {
         "time": "20:00",
         "mw": [
-          130.0,
-          350.0,
-          1404.0
+          130,
+          350,
+          1404
         ],
         "mvar": [
-          37.0,
-          140.0,
-          568.0
+          37,
+          140,
+          568
         ]
       },
       {
         "time": "21:00",
         "mw": [
-          123.0,
-          330.0,
-          1306.0
+          123,
+          330,
+          1306
         ],
         "mvar": [
-          30.0,
-          130.0,
-          520.0
+          30,
+          130,
+          520
         ]
       },
       {
         "time": "22:00",
         "mw": [
-          102.0,
-          280.0,
-          1212.0
+          102,
+          280,
+          1212
         ],
         "mvar": [
-          5.0,
-          96.0,
-          446.0
+          5,
+          96,
+          446
         ]
       },
       {
         "time": "23:00",
         "mw": [
-          113.0,
-          328.0,
-          1222.0
+          113,
+          328,
+          1222
         ],
         "mvar": [
-          4.0,
-          112.0,
-          460.0
+          4,
+          112,
+          460
         ]
       }
     ],
@@ -978,12 +972,12 @@
       {
         "circuit": "Ishurdi-Ghorashal Ckt-1",
         "direction": "Export",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Ishurdi-Ghorashal Ckt-1",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Ishurdi-Ghorashal Ckt-2",
@@ -993,52 +987,52 @@
       {
         "circuit": "Ishurdi-Ghorashal Ckt-2",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-1",
         "direction": "Export",
-        "energyKwh": 1721000.0
+        "energyKwh": 1721000
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-1",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-2",
         "direction": "Export",
-        "energyKwh": 1726000.0
+        "energyKwh": 1726000
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-2",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-1",
         "direction": "Export",
-        "energyKwh": 14840000.0
+        "energyKwh": 14840000
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-1",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-2",
         "direction": "Export",
-        "energyKwh": 14940000.0
+        "energyKwh": 14940000
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-2",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       }
     ],
     "totals": {
       "export": 36073981.82,
-      "import": 0.0
+      "import": 0
     },
     "checks": [
       {
@@ -1051,92 +1045,93 @@
     {
       "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
       "fields": 5,
-      "gas": 0.0,
-      "condensate": 0.0,
-      "share": 0.0
+      "gas": 476,
+      "condensate": 374,
+      "share": 21.4
     },
     {
       "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
       "fields": 5,
-      "gas": 0.0,
-      "condensate": 0.0,
-      "share": 0.0
+      "gas": 139.4,
+      "condensate": 626.9,
+      "share": 6.3
     },
     {
       "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
       "fields": 9,
-      "gas": 0.0,
-      "condensate": 0.0,
-      "share": 0.0
+      "gas": 111,
+      "condensate": 81.6,
+      "share": 5
     },
     {
       "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
       "fields": 3,
-      "gas": 0.0,
-      "condensate": 0.0,
-      "share": 0.0
+      "gas": 879,
+      "condensate": 4697.5,
+      "share": 39.5
     },
     {
       "company": "Tullow (Bangora)",
       "fields": 1,
-      "gas": 0.0,
-      "condensate": 0.0,
-      "share": 0.0
+      "gas": 30,
+      "condensate": 92,
+      "share": 1.3
     },
     {
       "company": "RPGCL (R-LNG Import / LNG Terminal)",
       "fields": 0,
-      "gas": 0.0,
-      "condensate": 0.0,
-      "share": 0.0
+      "gas": 589.1,
+      "condensate": 0,
+      "share": 26.5
     }
   ],
   "gasDistributionData": [
     {
       "company": "TGTDCL (Dhaka & Mymensingh)",
-      "power": 0.0,
-      "fertilizer": 0.0,
-      "others": 0.0,
-      "total": 0.0
+      "power": 257.6,
+      "fertilizer": 60.9,
+      "others": 750.9,
+      "total": 1069.4
     },
     {
       "company": "BGDCL (Cumilla & Sylhet)",
-      "power": 0.0,
-      "fertilizer": 0.0,
-      "others": 0.0,
-      "total": 0.0
+      "power": 225.3,
+      "fertilizer": 0,
+      "others": 74.8,
+      "total": 300.1
     },
     {
       "company": "KGDCL (Chattogram)",
-      "power": 0.0,
-      "fertilizer": 0.0,
-      "others": 0.0,
-      "total": 0.0
+      "power": 14.6,
+      "fertilizer": 50.9,
+      "others": 122.7,
+      "total": 188.3
     },
     {
       "company": "JGTDSL (Sylhet region)",
-      "power": 0.0,
-      "fertilizer": 0.0,
-      "others": 0.0,
-      "total": 0.0
+      "power": 288.1,
+      "fertilizer": 29.6,
+      "others": 105.3,
+      "total": 423
     },
     {
       "company": "PGCL (Rajshahi & Rangpur)",
-      "power": 0.0,
-      "fertilizer": 0.0,
-      "others": 0.0,
-      "total": 0.0
+      "power": 78.4,
+      "fertilizer": 0,
+      "others": 30.8,
+      "total": 109.3
     },
     {
       "company": "SGCL (Barishal & Khulna)",
-      "power": 0.0,
-      "fertilizer": 0.0,
-      "others": 0.0,
-      "total": 0.0
+      "power": 69.3,
+      "fertilizer": 0,
+      "others": 6.1,
+      "total": 75.4
     }
   ],
   "sourceFiles": {
-    "pgcb": "Daily Report 20-08-2026.xlsx"
+    "pgcb": "Daily Report 20-08-2026.xlsx",
+    "petrobangla": "pb.pdf"
   },
   "observationWindows": {
     "timezone": "+06:00",
@@ -1146,171 +1141,180 @@
       "end": "2026-08-20T00:00:00+06:00",
       "filedAs": "2026-08-20",
       "sourceFile": "Daily Report 20-08-2026.xlsx"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2026-08-19T08:00:00+06:00",
+      "end": "2026-08-20T08:00:00+06:00",
+      "filedAs": "2026-08-20",
+      "publishedLabel": "19-20 Aug, 2026",
+      "period": "8.00 to 8.00",
+      "sourceFile": "pb.pdf"
     }
   },
   "forecast": {
-    "maxDemandEveningMw": 16570.0,
-    "maxDemandDayMw": 14940.0,
-    "maxGenEveningMw": 16210.0,
+    "maxDemandEveningMw": 16570,
+    "maxDemandDayMw": 14940,
+    "maxGenEveningMw": 16210,
     "totalEnergyGenMkwh": 347.4,
-    "maxTempC": 32.0,
-    "totalLoadShedMw": 0.0,
+    "maxTempC": 32,
+    "totalLoadShedMw": 0,
     "hourly": [
       {
         "time": "00:00",
-        "generationMw": 15360.0,
+        "generationMw": 15360,
         "loadShedMw": 926.35,
-        "demandMw": 16330.0
+        "demandMw": 16330
       },
       {
         "time": "01:00",
-        "generationMw": 14790.0,
+        "generationMw": 14790,
         "loadShedMw": 1060.05,
-        "demandMw": 15900.0
+        "demandMw": 15900
       },
       {
         "time": "02:00",
-        "generationMw": 13770.0,
+        "generationMw": 13770,
         "loadShedMw": 1613.95,
-        "demandMw": 15460.0
+        "demandMw": 15460
       },
       {
         "time": "03:00",
-        "generationMw": 13910.0,
+        "generationMw": 13910,
         "loadShedMw": 1069.6,
-        "demandMw": 15030.0
+        "demandMw": 15030
       },
       {
         "time": "04:00",
-        "generationMw": 13750.0,
+        "generationMw": 13750,
         "loadShedMw": 840.4,
-        "demandMw": 14630.0
+        "demandMw": 14630
       },
       {
         "time": "05:00",
-        "generationMw": 13740.0,
+        "generationMw": 13740,
         "loadShedMw": 506.15,
-        "demandMw": 14270.0
+        "demandMw": 14270
       },
       {
         "time": "06:00",
-        "generationMw": 13110.0,
+        "generationMw": 13110,
         "loadShedMw": 477.5,
-        "demandMw": 13610.0
+        "demandMw": 13610
       },
       {
         "time": "07:00",
-        "generationMw": 13220.0,
+        "generationMw": 13220,
         "loadShedMw": 506.15,
-        "demandMw": 13750.0
+        "demandMw": 13750
       },
       {
         "time": "08:00",
-        "generationMw": 13390.0,
+        "generationMw": 13390,
         "loadShedMw": 305.6,
-        "demandMw": 13710.0
+        "demandMw": 13710
       },
       {
         "time": "09:00",
-        "generationMw": 13640.0,
+        "generationMw": 13640,
         "loadShedMw": 248.3,
-        "demandMw": 13900.0
+        "demandMw": 13900
       },
       {
         "time": "10:00",
-        "generationMw": 13720.0,
+        "generationMw": 13720,
         "loadShedMw": 448.85,
-        "demandMw": 14190.0
+        "demandMw": 14190
       },
       {
         "time": "11:00",
-        "generationMw": 14140.0,
+        "generationMw": 14140,
         "loadShedMw": 267.4,
-        "demandMw": 14420.0
+        "demandMw": 14420
       },
       {
         "time": "12:00",
-        "generationMw": 14880.0,
+        "generationMw": 14880,
         "loadShedMw": 57.3,
-        "demandMw": 14940.0
+        "demandMw": 14940
       },
       {
         "time": "13:00",
-        "generationMw": 14830.0,
+        "generationMw": 14830,
         "loadShedMw": 276.95,
-        "demandMw": 15120.0
+        "demandMw": 15120
       },
       {
         "time": "14:00",
-        "generationMw": 14740.0,
-        "loadShedMw": 191.0,
-        "demandMw": 14940.0
+        "generationMw": 14740,
+        "loadShedMw": 191,
+        "demandMw": 14940
       },
       {
         "time": "15:00",
-        "generationMw": 14900.0,
+        "generationMw": 14900,
         "loadShedMw": 353.35,
-        "demandMw": 15270.0
+        "demandMw": 15270
       },
       {
         "time": "16:00",
-        "generationMw": 14410.0,
+        "generationMw": 14410,
         "loadShedMw": 487.05,
-        "demandMw": 14920.0
+        "demandMw": 14920
       },
       {
         "time": "17:00",
-        "generationMw": 14460.0,
+        "generationMw": 14460,
         "loadShedMw": 200.55,
-        "demandMw": 14670.0
+        "demandMw": 14670
       },
       {
         "time": "18:00",
-        "generationMw": 14140.0,
+        "generationMw": 14140,
         "loadShedMw": 57.3,
-        "demandMw": 14200.0
+        "demandMw": 14200
       },
       {
         "time": "18:30",
-        "generationMw": 14900.0,
-        "loadShedMw": 0.0,
-        "demandMw": 14850.0
+        "generationMw": 14900,
+        "loadShedMw": 0,
+        "demandMw": 14850
       },
       {
         "time": "19:00",
-        "generationMw": 15700.0,
-        "loadShedMw": 0.0,
-        "demandMw": 15500.0
+        "generationMw": 15700,
+        "loadShedMw": 0,
+        "demandMw": 15500
       },
       {
         "time": "19:30",
-        "generationMw": 16210.0,
+        "generationMw": 16210,
         "loadShedMw": 152.8,
-        "demandMw": 16370.0
+        "demandMw": 16370
       },
       {
         "time": "20:00",
-        "generationMw": 16030.0,
+        "generationMw": 16030,
         "loadShedMw": 257.85,
-        "demandMw": 16300.0
+        "demandMw": 16300
       },
       {
         "time": "21:00",
-        "generationMw": 16100.0,
+        "generationMw": 16100,
         "loadShedMw": 448.85,
-        "demandMw": 16570.0
+        "demandMw": 16570
       },
       {
         "time": "22:00",
-        "generationMw": 15930.0,
+        "generationMw": 15930,
         "loadShedMw": 296.05,
-        "demandMw": 16240.0
+        "demandMw": 16240
       },
       {
         "time": "23:00",
-        "generationMw": 14740.0,
+        "generationMw": 14740,
         "loadShedMw": 1518.45,
-        "demandMw": 16330.0
+        "demandMw": 16330
       }
     ],
     "issuedAt": "2026-08-19T08:59:00+06:00",
