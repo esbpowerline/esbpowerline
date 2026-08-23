@@ -426,7 +426,7 @@ Exports: `RELEASE_CACHE_TAG = 'data-releases'` (`:17`), `feedCacheTag(feed)` →
 
 ### 2.6 The manual daily ingest, step by step
 
-**`scripts/run_daily_ingest.py` (220 lines).** Docstring `:1-28`: *"`daily_data_extractor.py` is not the whole ingest… Five more steps produce the rest of what the site reads, and each one of them has been silently skipped at some point."* Paths: `PUBLIC = ROOT/public/data` (`:44`), `SOURCE_INDEX = ROOT/scratch/backfill-source-index.json` (`:45`), `PGCB_SOURCE_DIRS = [W:\PGCB\Daily Reports - D, C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D]` (`:47-50`). Every step runs via `subprocess.run` with `PYTHONUTF8=1`, 1800 s default timeout, capturing output rather than aborting (`:53-75`). CLI: `--date` (required), `--json`, `--skip-extractor` (`:110-113`). Step order is documented as load-bearing (`:13-23`).
+**`scripts/run_daily_ingest.py` (220 lines).** Docstring `:1-28`: *"`daily_data_extractor.py` is not the whole ingest… Five more steps produce the rest of what the site reads, and each one of them has been silently skipped at some point."* Paths: `PUBLIC = ROOT/public/data` (`:44`), `SOURCE_INDEX = ROOT/scratch/backfill-source-index.json` (`:45`), `PGCB_SOURCE_DIRS = [W:\Grid-Explorer\PGCB\Daily Reports - D, C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D]` (`:47-50`). Every step runs via `subprocess.run` with `PYTHONUTF8=1`, 1800 s default timeout, capturing output rather than aborting (`:53-75`). CLI: `--date` (required), `--json`, `--skip-extractor` (`:110-113`). Step order is documented as load-bearing (`:13-23`).
 
 | # | Step | Command | Line |
 |---|---|---|---|

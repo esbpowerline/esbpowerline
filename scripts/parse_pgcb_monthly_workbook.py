@@ -4,7 +4,7 @@
 This reads the rest: 19 populated sheets, ~17k non-empty cells per month.
 
 Accepts either the source workbook (.xlsx/.xls) or the padded markdown dumps in
-`W:\\PGCB\\Monthy Reports - D` (.txt). Both carry every sheet and — verified
+`W:\\Grid-Explorer\\PGCB\\Monthy Reports - D` (.txt). Both carry every sheet and — verified
 against January 2026 — the same column positions, so one set of readers serves
 both: the .txt is converted back to a cell matrix where `raw[i]` is
 `line.split("|")[i + 1]`.

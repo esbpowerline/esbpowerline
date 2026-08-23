@@ -45,7 +45,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DAILY = ROOT / "public" / "data" / "daily"
 PB_DAILY = ROOT / "public" / "data" / "petrobangla" / "daily"
 PB_PDF_DIRS = [
-    Path(r"W:\Petrobangla\Daily Gas Reports - D"),
+    Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D"),
     Path(r"C:\ESB-Grid-Archive\02-petrobangla"),
 ]
 

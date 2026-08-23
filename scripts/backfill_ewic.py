@@ -49,7 +49,7 @@ spec.loader.exec_module(pdr)
 
 DAILY = REPO / "public" / "data" / "daily"
 INDEX_CACHE = REPO / "scratch" / "backfill-source-index.json"
-MANIFEST = Path(r"W:\bd-grid-backlog\acquisition\pgcb-manifest.csv")
+MANIFEST = Path(r"W:\Grid-Explorer\bd-grid-backlog\acquisition\pgcb-manifest.csv")
 DOWNLOADS = REPO / "scratch" / "verify-downloads"
 
 # The first day any workbook carries the sheet. Earlier days are not failures.

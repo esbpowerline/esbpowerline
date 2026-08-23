@@ -43,7 +43,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 ROOT = Path(__file__).resolve().parents[1]
 PB_DAILY = ROOT / "public" / "data" / "petrobangla" / "daily"
-PDF_DIR = Path(r"W:\Petrobangla\Daily Gas Reports - D")
+PDF_DIR = Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D")
 PARSER = ROOT / "scripts" / "parse_petrobangla_archive.py"
 
 # (gas-day start, source PDF stamp). The PDF is named for the morning the

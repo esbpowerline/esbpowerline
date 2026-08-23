@@ -46,7 +46,7 @@ os.environ.setdefault("ESB_DAILY_OUTPUT_DIR", tempfile.mkdtemp(prefix="esb-backf
 REPO = Path(__file__).resolve().parent.parent
 DAILY = REPO / "public" / "data" / "daily"
 SOURCE_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
 ]
 
 from ingest_bridge import derive_energy_day, workbook_energy_day, xlsx_to_md  # noqa: E402

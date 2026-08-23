@@ -33,7 +33,7 @@ from pb_rows_extract import GRAND_RE, SUBTOTAL_RE, numbers_in, page_rows, produc
 ROOT = Path(__file__).resolve().parents[1]
 DAILY = ROOT / "public" / "data" / "daily"
 GAS = ROOT / "public" / "data" / "petrobangla" / "daily"
-PDF_DIR = Path(os.environ.get("ESB_PB_PDF_DIR", r"W:\Petrobangla\Daily Gas Reports - D"))
+PDF_DIR = Path(os.environ.get("ESB_PB_PDF_DIR", r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D"))
 NAME_RE = re.compile(r"\((\d{2})\.(\d{2})\.(\d{2})\)")
 TOL = 5.0
 

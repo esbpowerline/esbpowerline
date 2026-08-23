@@ -33,7 +33,7 @@ import re
 import sys
 from collections import defaultdict
 
-DIR = r"W:\BPDB\Annual Reports"
+DIR = r"W:\Grid-Explorer\BPDB\Annual Reports"
 
 # label -> (regex matching the printed row, unit, short key)
 METRICS = [

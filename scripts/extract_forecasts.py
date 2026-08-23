@@ -67,7 +67,7 @@ DAILY = ROOT / "public" / "data" / "daily"
 # Order is precedence: an already-converted text file is preferred because it
 # costs nothing to read, and the workbooks are opened only for days it misses.
 PARSED_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D\Daily Reports Parsed"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D\Daily Reports Parsed"),
     Path(os.path.expandvars(r"%USERPROFILE%\Desktop\PGCB\Daily Reports - D\Daily Reports Parsed")),
 ]
 # Source precedence, and it is not negotiable: the publisher's own file wins.
@@ -82,7 +82,7 @@ PARSED_DIRS = [
 # Checked before reordering: on the 535 days held in both stores the files are
 # byte-identical, so this changes provenance and not a single figure.
 SOURCE_WORKBOOK_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
 ]
 ERP_MIRROR_DIRS = [

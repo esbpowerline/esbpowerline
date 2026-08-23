@@ -60,12 +60,12 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/140.0 
 # Where a held copy counts as already-archived. Source stores first, matching
 # the precedence the ingest uses.
 HELD_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\acquired-from-erp"),
 ]
 # New downloads land here, in the source store, named as PGCB names them.
-DEST = Path(r"W:\PGCB\Daily Reports - D")
+DEST = Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D")
 INDEX_PATH = ROOT / "public" / "data" / "grid-verification" / "_pgcb-workbook-index.json"
 
 # PGCB's own filenames carry the occasional typo, and a mistyped year sails

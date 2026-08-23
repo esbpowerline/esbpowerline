@@ -23,7 +23,7 @@ recorded for Petrobangla's daily PDFs), so only its printed subtotal rows are
 recoverable; pass --subtotals-only for those years.
 
 Usage:
-  python scripts/extract_gas_reserves.py "W:/Petrobangla/Annual Reports/Annual Report 2024-25.pdf"
+  python scripts/extract_gas_reserves.py "W:/Grid-Explorer/Petrobangla/Annual Reports/Annual Report 2024-25.pdf"
 """
 from __future__ import annotations
 

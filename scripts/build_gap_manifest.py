@@ -41,7 +41,7 @@ DAILY = ROOT / "public" / "data" / "daily"
 PB_DAILY = ROOT / "public" / "data" / "petrobangla" / "daily"
 OUT = ROOT / "public" / "data" / "grid-verification" / "_gaps.json"
 PB_PDF_DIRS = [
-    Path(r"W:\Petrobangla\Daily Gas Reports - D"),
+    Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D"),
     Path(r"C:\ESB-Grid-Archive\02-petrobangla"),
 ]
 NAME_DATE = re.compile(r"\((\d{1,2})[.\s]+(\d{1,2})[.\s]+(\d{2,4})\)")

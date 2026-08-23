@@ -39,8 +39,8 @@ REPO = Path(__file__).resolve().parent.parent
 ARCHIVE = REPO / "public" / "data" / "petrobangla" / "daily"
 PARSER = REPO / "scripts" / "parse_petrobangla_archive.py"
 PDF_DIRS = [
-    Path(r"W:\Petrobangla\Daily Gas Reports - D"),
-    Path(r"W:\Petrobangla\Daily Gas Reports - D\Parsed-Structured"),
+    Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D"),
+    Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D\Parsed-Structured"),
 ]
 TOLERANCE = 5.0
 

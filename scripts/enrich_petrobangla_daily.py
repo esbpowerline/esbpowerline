@@ -1,6 +1,6 @@
 """Enrich public/data/petrobangla/daily/*.json with fields from the 2026-07 re-parse.
 
-The re-parsed JSONs (W:\\Petrobangla\\...\\Parsed-Structured\\json) carry sections the
+The re-parsed JSONs (W:\\Grid-Explorer\\Petrobangla\\...\\Parsed-Structured\\json) carry sections the
 v1 archive lacks: distribution diversity factor + adjusted demands, RPGCL refinery
 HSD/kerosene/diesel output, production remarks, and the explicit gas-day window.
 
@@ -23,7 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVE_DIR = ROOT / "public" / "data" / "petrobangla" / "daily"
 PUBLIC = ROOT / "public" / "data" / "petrobangla"
-REPARSE_DIR = Path(r"w:\Petrobangla\Daily Gas Reports - D\Parsed-Structured\json")
+REPARSE_DIR = Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D\Parsed-Structured\json")
 ENRICH_SOURCE = "reparse-2026-07"
 GT_TOLERANCE = 1.0  # MMCFD — grand totals must agree this closely to accept a match
 LIVE_WEEK_COUNT = 7

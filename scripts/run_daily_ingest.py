@@ -49,7 +49,7 @@ PUBLIC = ROOT / "public" / "data"
 SOURCE_INDEX = ROOT / "scratch" / "backfill-source-index.json"
 
 PGCB_SOURCE_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
 ]
 

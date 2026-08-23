@@ -40,7 +40,7 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = Path(__file__).resolve().parents[1]
 DAILY = ROOT / "public" / "data" / "daily"
 PB_DAILY = ROOT / "public" / "data" / "petrobangla" / "daily"
-PB_PDF_DIR = Path(r"W:\Petrobangla\Daily Gas Reports - D")
+PB_PDF_DIR = Path(r"W:\Grid-Explorer\Petrobangla\Daily Gas Reports - D")
 # Source precedence, and it is not negotiable: the publisher's own file wins.
 #
 # PGCB's ERP portal is a VERIFICATION tool, not a source. It republishes the
@@ -53,7 +53,7 @@ PB_PDF_DIR = Path(r"W:\Petrobangla\Daily Gas Reports - D")
 # Checked before reordering: on the 535 days held in both stores the files are
 # byte-identical, so this changes provenance and not a single figure.
 PGCB_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\acquired-from-erp"),
 ]

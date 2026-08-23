@@ -10,7 +10,7 @@ import path from 'node:path';
  */
 
 /** Default matches the folder the operator already keeps these sheets in. */
-export const DEFAULT_YOY_ARCHIVE_DIR = 'W:\\Grid Explorer YoY';
+export const DEFAULT_YOY_ARCHIVE_DIR = 'W:\\Grid-Explorer\\Grid Explorer YoY';
 
 /** A text sheet that needs megabytes is not a text sheet; it is a mistake or an attack. */
 export const MAX_SHEET_BYTES = 5 * 1024 * 1024;

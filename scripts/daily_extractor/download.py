@@ -287,7 +287,7 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
 
 # Where the publisher's own workbooks are kept. Searched before any mirror.
 PGCB_SOURCE_DIRS = [
-    Path(r"W:\PGCB\Daily Reports - D"),
+    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
     Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
 ]
 
