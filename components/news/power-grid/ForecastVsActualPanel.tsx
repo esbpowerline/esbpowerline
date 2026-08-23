@@ -56,6 +56,75 @@ function fmt(value: number | null | undefined, dp: number): string {
   });
 }
 
+/** "2026-08-21" → "21 Aug", parsed by parts so no timezone can shift the day. */
+function dayLabel(iso: string | null | undefined): string {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso ?? '—';
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+}
+
+function nextDay(iso: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+}
+
+/**
+ * One workbook drawn as its two halves, with the half this card uses lit.
+ *
+ * The mechanic confuses everyone once: uploading the report named for the 22nd
+ * publishes the 21st, and a finished day somehow carries a "forecast". The
+ * explanation block SAYS why, but a reader skims prose and stops at a picture —
+ * so the two workbooks are drawn, each split into the day it reports and the
+ * day it projects, with an arrow from each lit half to the column it feeds.
+ */
+function WorkbookSplit({
+  name,
+  filedNote,
+  reports,
+  projects,
+  litSide,
+  feeds,
+}: {
+  name: string;
+  filedNote: string;
+  reports: string;
+  projects: string;
+  litSide: 'reports' | 'projects';
+  feeds: string;
+}) {
+  const half = (text: string, lit: boolean) => (
+    <span
+      className={
+        lit
+          ? 'flex-1 rounded-lg border border-primary/40 bg-primary/5 px-2.5 py-1.5 text-foreground font-semibold'
+          : 'flex-1 rounded-lg border border-border/30 bg-muted/10 px-2.5 py-1.5 text-muted-foreground'
+      }
+    >
+      {text}
+    </span>
+  );
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2.5 text-[11px] leading-snug">
+      <span className="sm:w-48 shrink-0">
+        <span className="font-bold text-foreground block truncate" title={name}>
+          {name}
+        </span>
+        <span className="text-[10px] text-muted-foreground">{filedNote}</span>
+      </span>
+      <span className="flex flex-1 gap-1.5 items-stretch">
+        {half(reports, litSide === 'reports')}
+        {half(projects, litSide === 'projects')}
+      </span>
+      <span className="sm:w-40 shrink-0 text-[10px] text-primary font-semibold">→ {feeds}</span>
+    </div>
+  );
+}
+
 /** Signed difference, coloured the way the rest of the explorer colours deltas. */
 function Delta({ gap, dp, pct }: { gap: number | null; dp: number; pct: number | null }) {
   if (gap == null) {
@@ -89,6 +158,7 @@ export function ForecastVsActualPanel({
   forecast,
   systemStats,
   hourlyLoadData,
+  actualsFrom,
   chartTheme,
   className,
 }: {
@@ -96,6 +166,12 @@ export function ForecastVsActualPanel({
   systemStats: GridSystemStats;
   /** The day's measured curve, for the hour-by-hour comparison. */
   hourlyLoadData?: HourlyLoadItem[];
+  /**
+   * The workbook the day's ACTUALS came from — `sourceFiles.pgcb`, the report
+   * filed the morning after. Named in the provenance strip so both columns can
+   * point at the document that produced them; absent on days never enriched.
+   */
+  actualsFrom?: string | null;
   /** Same palette the other canvases draw with, so the axes match. */
   chartTheme: {
     primary: string;
@@ -420,6 +496,35 @@ export function ForecastVsActualPanel({
           />
         </div>
       )}
+
+      {/* The two-workbook mechanic, drawn. Prose alone did not survive contact
+          with real readers: the operator who ingests these files daily asked
+          why a finished day carries a forecast at all. */}
+      <div className="mt-5 rounded-xl border border-border/30 bg-muted/10 p-4 space-y-2.5">
+        <p className="text-xs font-bold text-foreground">
+          Where each column comes from — one workbook carries two days
+        </p>
+        <WorkbookSplit
+          name={forecast.issuedIn}
+          filedNote={
+            issuedClock
+              ? `generated ~${issuedClock} on ${dayLabel(forecast.targetDay)}`
+              : `filed on ${dayLabel(forecast.targetDay)}`
+          }
+          reports={`actuals for ${dayLabel(forecast.issuedOn)}`}
+          projects={`projection for ${dayLabel(forecast.targetDay)}`}
+          litSide="projects"
+          feeds="the Forecast column above"
+        />
+        <WorkbookSplit
+          name={actualsFrom ?? 'The next morning’s report'}
+          filedNote={`filed on ${dayLabel(nextDay(forecast.targetDay))}`}
+          reports={`actuals for ${dayLabel(forecast.targetDay)}`}
+          projects={`projection for ${dayLabel(nextDay(forecast.targetDay))}`}
+          litSide="reports"
+          feeds="the Actual column above"
+        />
+      </div>
 
       <GridExplanationBlock
         what={

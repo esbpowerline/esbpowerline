@@ -46,6 +46,7 @@ function mapCarouselArticle(
     isBreaking: boolean;
     isFeatured: boolean;
     isPinned: boolean;
+    postAsNewsDesk?: boolean;
     author?: { name: string } | null;
     titleBn?: string | null;
     excerptBn?: string | null;
@@ -76,7 +77,11 @@ function mapCarouselArticle(
     title: displayTitle,
     excerpt: displayExcerpt,
     imageUrl: normalizeArticleImageUrl(a.imageUrl) ?? '',
-    author: a.author?.name ?? 'ESB PowerLine',
+    // Same byline rule as every other card (`lib/category-content.ts`): a
+    // story posted as the desk is credited to the desk, not to whichever
+    // account uploaded it. The hero was the one surface skipping this, which
+    // put a single staff name under every slot.
+    author: a.postAsNewsDesk ? 'ESB News Desk' : (a.author?.name ?? 'ESB PowerLine'),
     readTime: a.readTime ?? 5,
     category: a.category,
     isBreaking: a.isBreaking,

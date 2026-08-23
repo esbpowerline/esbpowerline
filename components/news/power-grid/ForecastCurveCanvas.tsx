@@ -288,6 +288,7 @@ export function ForecastCurveCanvas({
         ref={svgRef}
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         role="img"
+        aria-label="PGCB's forecast load curve drawn against the measured curve, megawatts by hour"
         width={VIEW_W}
         height={VIEW_H}
         className="block w-full touch-none"

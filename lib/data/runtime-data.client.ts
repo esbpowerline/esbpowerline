@@ -55,6 +55,17 @@ async function isPublished(relPath: string): Promise<boolean> {
   return Boolean(manifest?.feeds?.[target.feed]?.includes(target.key));
 }
 
+/**
+ * Whether the manifest says this path has a runtime release. Exposed for
+ * loaders with their own fetch flow (the daily-report loader): asking first
+ * lets them skip the static request entirely for a released day, instead of
+ * collecting a guaranteed 404 in every visitor's console on the way to the
+ * fallback.
+ */
+export async function isPathPublished(relPath: string): Promise<boolean> {
+  return isPublished(relPath);
+}
+
 export type DataFetchResult<T> =
   | { ok: true; data: T; source: 'static' | 'runtime' }
   | { ok: false; status?: number; error: string };

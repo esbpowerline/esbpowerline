@@ -193,7 +193,9 @@ export default async function PowerGridExplorerPage({
   };
 
   return (
-    <div id="power-grid-page-container" className="container container--shell py-8 md:py-10">
+    // <main>, not <div>: the page had no main landmark at all, which assistive
+    // tech uses to skip the chrome — and Lighthouse fails without one.
+    <main id="power-grid-page-container" className="container container--shell py-8 md:py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
@@ -257,6 +259,6 @@ export default async function PowerGridExplorerPage({
           ))}
         </ul>
       </nav>
-    </div>
+    </main>
   );
 }

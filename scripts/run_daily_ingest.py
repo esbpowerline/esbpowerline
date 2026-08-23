@@ -21,6 +21,10 @@ The order is load-bearing:
   7. available dates      — the date list the picker and middleware read
   8. gas timeline         — only when the gas archive gained a day; the National
                             Timeline card and the reserve model both read it
+  9. reserve model        — same gate as the timeline; rebuilds the depletion
+                            model, its sensitivity artifact, then runs the
+                            36-check validator (which fails if the two artifacts
+                            were built on different archive dates)
 
 Usage:
     python scripts/run_daily_ingest.py --date 2026-08-19
@@ -122,7 +126,7 @@ def main() -> int:
             print(msg)
 
     if not args.skip_extractor:
-        say(f"[1/8] collecting {iso} …")
+        say(f"[1/9] collecting {iso} …")
         steps.append(
             run(
                 "extractor",
@@ -140,22 +144,22 @@ def main() -> int:
     if indexed:
         say(f"      indexed source workbook: {indexed}")
 
-    say("[2/8] energy curve …")
+    say("[2/9] energy curve …")
     steps.append(run("energy curve", [str(SCRIPTS / "backfill_energy_curve.py"), "--apply", "--from", iso]))
 
-    say("[3/8] split curve …")
+    say("[3/9] split curve …")
     steps.append(run("split curve", [str(SCRIPTS / "split_energy_curve.py"), "--apply"]))
 
-    say("[4/8] border imports (Nepal) …")
+    say("[4/9] border imports (Nepal) …")
     steps.append(run("border imports", [str(SCRIPTS / "backfill_border_imports.py"), "--apply", "--from", iso]))
 
-    say("[5/8] per-station detail …")
+    say("[5/9] per-station detail …")
     steps.append(run("plants", [str(SCRIPTS / "build_daily_plants.py"), "--apply", "--only", iso]))
 
-    say("[6/8] archive fallback …")
+    say("[6/9] archive fallback …")
     steps.append(run("archive fallback", [str(SCRIPTS / "rebuild_archive_fallback.py"), "--apply"]))
 
-    say("[7/8] available dates …")
+    say("[7/9] available dates …")
     steps.append(run("available dates", [str(SCRIPTS / "sync_available_dates.py"), "--apply"]))
 
     # The gas archive only gains a day when Petrobangla has published the window
@@ -163,17 +167,29 @@ def main() -> int:
     # the newest day routinely has no gas and the timeline needs no rebuild.
     gas_day = PUBLIC / "petrobangla" / "daily" / f"{iso}.json"
     if gas_day.exists():
-        say("[8/8] gas timeline …")
+        say("[8/9] gas timeline …")
         steps.append(run("gas timeline", [str(SCRIPTS / "build_petrobangla_timeline.py")], timeout=900))
+
+        # The Gas Reserve Depletion panel reads reserve-model.json; without this
+        # rebuild its "as of" and remaining balance sit at whatever day the model
+        # was last built for. The sensitivity artifact must be rebuilt with it —
+        # the validator pins both to the same archive date and fails otherwise.
+        say("[9/9] reserve model …")
+        steps.append(run("reserve model", [str(SCRIPTS / "build_reserve_model.py"), "--apply"], timeout=900))
+        if steps[-1]["ok"]:
+            steps.append(
+                run(
+                    "reserve sensitivity",
+                    [str(SCRIPTS / "reserve_sensitivity.py"), "--json",
+                     str(PUBLIC / "petrobangla" / "reserve-sensitivity.json")],
+                    timeout=900,
+                )
+            )
+            steps.append(run("reserve verify", [str(SCRIPTS / "verify_reserve_model.py")], timeout=300))
     else:
-        steps.append(
-            {
-                "step": "gas timeline",
-                "ok": True,
-                "seconds": 0,
-                "detail": "skipped — Petrobangla has not published this gas window yet",
-            }
-        )
+        skip = "skipped — Petrobangla has not published this gas window yet"
+        steps.append({"step": "gas timeline", "ok": True, "seconds": 0, "detail": skip})
+        steps.append({"step": "reserve model", "ok": True, "seconds": 0, "detail": skip})
 
     return finish(iso, steps, args.json)
 

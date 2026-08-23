@@ -16,7 +16,7 @@ import {
 import { formatNumber } from '@/lib/utils';
 import { renewableGridSharePct } from '@/lib/data/companies/sreda';
 import { useGridOverviewContext } from '@/hooks/useGridOverviewContext';
-import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
+import type { GridDailyData, GridForecast, GridSystemStats } from '@/lib/data/grid/types';
 
 type KpiId = 'gen' | 'demand' | 'gas' | 'shed' | 'capacity' | 'cost';
 
@@ -46,6 +46,44 @@ export interface OverviewKpiStripProps {
   totalCapacityRenewables: number;
   /** Drives the capacity and trend lookups, which are keyed by day. */
   isoDate: string;
+  /**
+   * PGCB's same-morning projection for this day, when its issuing workbook is
+   * held. Lets the two peak tiles say what PGCB called in advance — a signed
+   * difference, never a grade, matching the Forecast against Outturn card.
+   */
+  forecast?: GridForecast | null;
+}
+
+/**
+ * "forecast 17,360 · outturn +186 MW", under the trend line of a peak tile.
+ *
+ * Deliberately grey: the tile's trend colours movement against a baseline the
+ * grid controls; a forecast miss is PGCB predicting a system it does not fully
+ * control, and the outturn card this line points at refuses to grade that.
+ * The KPI must not quietly grade it either.
+ */
+function ForecastHint({
+  forecastMw,
+  actualMw,
+}: {
+  forecastMw: number | null | undefined;
+  actualMw: number | null | undefined;
+}) {
+  if (forecastMw == null || !Number.isFinite(forecastMw)) return null;
+  const gap =
+    actualMw != null && Number.isFinite(actualMw) ? Math.round(actualMw - forecastMw) : null;
+  return (
+    <span className="block mt-0.5">
+      forecast {formatNumber(Math.round(forecastMw))}
+      {gap != null && (
+        <>
+          {' · outturn '}
+          {gap >= 0 ? '+' : '−'}
+          {formatNumber(Math.abs(gap))} MW
+        </>
+      )}
+    </span>
+  );
 }
 
 export const OverviewKpiStrip = memo(function OverviewKpiStrip({
@@ -68,6 +106,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   avgCostPerKwh,
   totalCapacityRenewables,
   isoDate,
+  forecast,
 }: OverviewKpiStripProps) {
   const [activeKpiTooltip, setActiveKpiTooltip] = useState<KpiId | null>(null);
   const kpiStripRef = useRef<HTMLDivElement>(null);
@@ -174,12 +213,18 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         }
         value={`${formatNumber(Math.round(systemStats.eveningPeakGen))} MW`}
         hint={
-          <GridKpiTrend
-            current={systemStats.eveningPeakGen}
-            baseline={baseline?.peakSupply}
-            days={baseline?.days ?? 0}
-            polarity="up-good"
-          />
+          <>
+            <GridKpiTrend
+              current={systemStats.eveningPeakGen}
+              baseline={baseline?.peakSupply}
+              days={baseline?.days ?? 0}
+              polarity="up-good"
+            />
+            <ForecastHint
+              forecastMw={forecast?.maxGenEveningMw}
+              actualMw={systemStats.eveningPeakGen}
+            />
+          </>
         }
         active={activeKpiTooltip === 'gen'}
         // The evening peak as PGCB prints it, so it stands against the demand
@@ -223,6 +268,16 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             label="Min Base Gen:"
             value={systemStats.minGen == null ? '—' : `${formatNumber(Math.round(systemStats.minGen))} MW`}
           />
+          {/* PGCB called this number at ~10:00 the same morning, in the report
+              named for this day — the full comparison is the Forecast against
+              Outturn card at the end of this tab. */}
+          {forecast?.maxGenEveningMw != null && (
+            <GridKpiTooltipRow
+              provenance="P"
+              label="PGCB's same-morning forecast:"
+              value={`${formatNumber(Math.round(forecast.maxGenEveningMw))} MW`}
+            />
+          )}
           {/* What went unserved has its own tile; repeating it here would put the
               same figure in two briefings a thumb apart. */}
           <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
@@ -247,11 +302,17 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         }
         value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
         hint={
-          <GridKpiTrend
-            current={systemStats.eveningPeakDemand}
-            baseline={baseline?.peakDemand}
-            days={baseline?.days ?? 0}
-          />
+          <>
+            <GridKpiTrend
+              current={systemStats.eveningPeakDemand}
+              baseline={baseline?.peakDemand}
+              days={baseline?.days ?? 0}
+            />
+            <ForecastHint
+              forecastMw={forecast?.maxDemandEveningMw ?? forecast?.maxDemandMw}
+              actualMw={systemStats.eveningPeakDemand}
+            />
+          </>
         }
         active={activeKpiTooltip === 'demand'}
         align="right"
@@ -283,6 +344,13 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             label="Max System Temp:"
             value={systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
           />
+          {(forecast?.maxDemandEveningMw ?? forecast?.maxDemandMw) != null && (
+            <GridKpiTooltipRow
+              provenance="P"
+              label="PGCB's same-morning forecast:"
+              value={`${formatNumber(Math.round(forecast!.maxDemandEveningMw ?? forecast!.maxDemandMw!))} MW`}
+            />
+          )}
           <GridKpiTooltipAudit>As published by PGCB. Not audited.</GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB Daily Report"

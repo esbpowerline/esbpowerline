@@ -488,6 +488,84 @@ def fetch_sources(iso: str) -> tuple[str, str | None, list[str]]:
     return str(result.pgcb_xlsx), (str(result.petrobangla_pdf) if result.petrobangla_pdf else None), notes
 
 
+def file_source_copy(uploaded: Path, uploaded_name: str, energy: datetime.date) -> list[str]:
+    """File a durable, PGCB-named copy of an uploaded workbook in the source store.
+
+    A workbook that arrives through the admin panel used to live only in the
+    route's temp dir, deleted after the parse. Everything downstream assumes a
+    held copy exists — `forecast_for` reads tomorrow's projection out of the
+    workbook filed that day, and the curve and plants builders find their input
+    through the source index — so a panel-only workflow shipped every day
+    without its forecast and left the builders nothing to read. Filing the copy
+    here is what the CLI extractor already does; this brings the panel path to
+    parity.
+
+    Word and PDF copies of the report are parsed but not filed: the store holds
+    the workbooks PGCB actually publishes, and a converted copy would be picked
+    up later as if it were one.
+    """
+    notes: list[str] = []
+    suffix = Path(uploaded_name).suffix.lower() or uploaded.suffix.lower()
+    if suffix not in {".xlsx", ".xlsm", ".xls"}:
+        return notes
+
+    try:
+        from extract_forecasts import SOURCE_WORKBOOK_DIRS
+    except Exception:  # noqa: BLE001
+        return notes
+
+    store = next((d for d in SOURCE_WORKBOOK_DIRS if d.is_dir()), None)
+    if store is None:
+        notes.append(
+            "No source store is reachable (W: or the local archive), so no durable copy of the "
+            "workbook was filed. Tomorrow's forecast recovery and the plants builder need one."
+        )
+        return notes
+
+    filed = energy + datetime.timedelta(days=1)
+    canonical = f"Daily Report {filed.day:02d}-{filed.month:02d}-{filed.year}"
+    # PGCB's own name wins when it carries the filed date; otherwise synthesise it.
+    name = uploaded_name if Path(uploaded_name).stem else canonical + suffix
+    try:
+        from parse_daily_reports import parse_date_from_filename
+
+        if parse_date_from_filename(uploaded_name) != filed:
+            name = canonical + suffix
+    except Exception:  # noqa: BLE001
+        name = canonical + suffix
+
+    for d in SOURCE_WORKBOOK_DIRS:
+        for ext in (".xlsx", ".xlsm", ".xls"):
+            for stem in (canonical, Path(name).stem):
+                if (d / f"{stem}{ext}").exists():
+                    return notes  # already held — the store is the authority
+
+    import shutil
+
+    dest = store / name
+    try:
+        shutil.copy2(uploaded, dest)
+    except Exception as exc:  # noqa: BLE001
+        notes.append(f"Could not file a source copy of the workbook: {exc}")
+        return notes
+    notes.append(f"Filed a source copy of the workbook: {dest}")
+
+    # The source-index cache only walks the share when absent, so the new copy
+    # is invisible to the curve and plants builders until its entry is added —
+    # the same single-entry patch run_daily_ingest.ensure_source_indexed applies.
+    index_path = Path(__file__).resolve().parents[1] / "scratch" / "backfill-source-index.json"
+    if index_path.exists():
+        try:
+            index = json.loads(index_path.read_text(encoding="utf-8"))
+            if energy.isoformat() not in index:
+                index[energy.isoformat()] = str(dest)
+                index_path.write_text(json.dumps(index, indent=2), encoding="utf-8")
+                notes.append("Registered the workbook in the source index for the builders.")
+        except Exception:  # noqa: BLE001
+            pass
+    return notes
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pgcb")
@@ -523,8 +601,8 @@ def main() -> None:
         # derive_energy_day to read. The day is already known — it selected the
         # attachment — so state it rather than letting the filename path guess.
         args.pgcb_name = ""
-    elif not args.pgcb:
-        fail("--pgcb is required unless --fetch is given.")
+    elif not args.pgcb and not args.pb:
+        fail("Provide --pgcb and/or --pb (or --fetch) — at least one report to parse.")
 
     try:
         from daily_extractor.convert import pdf_to_text
@@ -533,7 +611,9 @@ def main() -> None:
     except Exception as exc:  # noqa: BLE001
         fail(f"Could not import parsers: {exc}")
 
-    iso = args.date or derive_energy_day(args.pgcb_name or Path(args.pgcb).name)
+    iso = args.date or (
+        derive_energy_day(args.pgcb_name or Path(args.pgcb).name) if args.pgcb else None
+    )
     op_date = None
     if iso:
         try:
@@ -544,90 +624,140 @@ def main() -> None:
     warnings: list[str] = list(fetch_notes)
     tmpdir = Path(tempfile.mkdtemp(prefix="esb-ingest-src-"))
 
-    # --- PGCB grid -------------------------------------------------------
-    #
-    # The workbook is the report as PGCB files it, but the desk is also sent
-    # Word and PDF copies of the same thing. Those go through the same parser:
-    # the reader in report_convert rebuilds the pipe-table text a workbook
-    # produces, and returns notes about what it had to infer to get there.
-    try:
-        pgcb_text, source_notes = report_to_md(
-            Path(args.pgcb), args.pgcb_name or Path(args.pgcb).name
-        )
-    except Exception as exc:  # noqa: BLE001
-        fail(f"Could not read the report: {exc}")
-    warnings.extend(source_notes)
-
-    pgcb_txt_path = tmpdir / "pgcb.txt"
-    pgcb_txt_path.write_text(pgcb_text, encoding="utf-8")
-
-    if not source_notes and "## Sheet: P1" not in pgcb_text:
-        warnings.append("No 'P1' sheet found — this may not be a PGCB daily report.")
-
-    # The filename is the *publication* date, a day ahead of the data, so the
-    # authority on which day this is must be the workbook's own printed date.
-    # Report it either way so the reviewer can see the derivation was right,
-    # rather than having to trust the filename arithmetic.
-    # Which day is this? The filename minus one and the load-curve sheet's own
-    # Date header normally agree — they do on 173 of 173 workbooks from 2018
-    # on, including the August 2026 reports. So a disagreement is itself the
-    # anomaly, and its SIZE says which side is wrong:
-    #
-    #   * a day or two apart -> the sheet header is stale, copied from the
-    #     previous report. "18-11-2024_.xlsm" and "18-09-2024_.xlsm" both hold
-    #     the day their filename implies while their curve sheet names the day
-    #     before, which the archive's own neighbouring entries confirm.
-    #   * a year apart -> the filename is a typo. "26-01-2021_.xlsm" holds
-    #     2022-01-25 and "21-8-20223_.xlsm" holds 2023-08-20.
-    #
-    # Either way the operator is told, because either way one of the two
-    # sources for the most important field in the file is wrong.
-    #
-    # This has to settle BEFORE the workbook is parsed: parse_pgcb_file stamps
-    # systemStats.date from whatever it is given, so deciding the day
-    # afterwards published "25 Jan 2021" inside a file keyed 2022-01-25.
-    source_grid_date = workbook_energy_day(pgcb_text)
-
-    if op_date is None:
-        if not source_grid_date:
-            fail(
-                "Could not determine the energy day from either the filename or the workbook's own "
-                "printed date. Expected a name like 'Daily Report 02-08-2026.xlsx'; pass --date to set it."
-            )
-        op_date = datetime.date.fromisoformat(source_grid_date)
-        warnings.append(
-            f"The filename gave no usable date, so the energy day was taken from the workbook itself "
-            f"({op_date.isoformat()}). Confirm it before publishing."
-        )
-    elif source_grid_date:
+    payload = None
+    source_grid_date = None
+    if args.pgcb:
+        # --- PGCB grid -------------------------------------------------------
+        #
+        # The workbook is the report as PGCB files it, but the desk is also sent
+        # Word and PDF copies of the same thing. Those go through the same parser:
+        # the reader in report_convert rebuilds the pipe-table text a workbook
+        # produces, and returns notes about what it had to infer to get there.
         try:
-            printed = datetime.date.fromisoformat(source_grid_date)
-            gap = abs((printed - op_date).days)
-            if printed != op_date:
-                if args.date:
-                    warnings.append(
-                        f"You set the energy day to {op_date.isoformat()}, but the workbook's load-curve "
-                        f"sheet is dated {printed.isoformat()}. Your override was kept — confirm it is right."
-                    )
-                elif gap > 3:
-                    warnings.append(
-                        f"The workbook's load-curve sheet is dated {printed.isoformat()}, {gap} days from "
-                        f"what the filename implies ({op_date.isoformat()}). At that distance the filename "
-                        "is the likelier typo, so the sheet's date was used. Confirm before publishing."
-                    )
-                    op_date = printed
-                else:
-                    warnings.append(
-                        f"The workbook's load-curve sheet is dated {printed.isoformat()} but the filename "
-                        f"implies {op_date.isoformat()}. These agree on every clean report, and a one-day "
-                        "gap is a stale sheet header, so the filename was used. Confirm before publishing."
-                    )
-        except ValueError:
-            pass
+            pgcb_text, source_notes = report_to_md(
+                Path(args.pgcb), args.pgcb_name or Path(args.pgcb).name
+            )
+        except Exception as exc:  # noqa: BLE001
+            fail(f"Could not read the report: {exc}")
+        warnings.extend(source_notes)
 
-    payload = parse_pgcb_file(str(pgcb_txt_path), datetime.datetime.combine(op_date, datetime.time()))
-    if not payload:
-        fail("The PGCB parser returned nothing. Is this the daily report workbook?")
+        pgcb_txt_path = tmpdir / "pgcb.txt"
+        pgcb_txt_path.write_text(pgcb_text, encoding="utf-8")
+
+        if not source_notes and "## Sheet: P1" not in pgcb_text:
+            warnings.append("No 'P1' sheet found — this may not be a PGCB daily report.")
+
+        # The filename is the *publication* date, a day ahead of the data, so the
+        # authority on which day this is must be the workbook's own printed date.
+        # Report it either way so the reviewer can see the derivation was right,
+        # rather than having to trust the filename arithmetic.
+        # Which day is this? The filename minus one and the load-curve sheet's own
+        # Date header normally agree — they do on 173 of 173 workbooks from 2018
+        # on, including the August 2026 reports. So a disagreement is itself the
+        # anomaly, and its SIZE says which side is wrong:
+        #
+        #   * a day or two apart -> the sheet header is stale, copied from the
+        #     previous report. "18-11-2024_.xlsm" and "18-09-2024_.xlsm" both hold
+        #     the day their filename implies while their curve sheet names the day
+        #     before, which the archive's own neighbouring entries confirm.
+        #   * a year apart -> the filename is a typo. "26-01-2021_.xlsm" holds
+        #     2022-01-25 and "21-8-20223_.xlsm" holds 2023-08-20.
+        #
+        # Either way the operator is told, because either way one of the two
+        # sources for the most important field in the file is wrong.
+        #
+        # This has to settle BEFORE the workbook is parsed: parse_pgcb_file stamps
+        # systemStats.date from whatever it is given, so deciding the day
+        # afterwards published "25 Jan 2021" inside a file keyed 2022-01-25.
+        source_grid_date = workbook_energy_day(pgcb_text)
+
+        if op_date is None:
+            if not source_grid_date:
+                fail(
+                    "Could not determine the energy day from either the filename or the workbook's own "
+                    "printed date. Expected a name like 'Daily Report 02-08-2026.xlsx'; pass --date to set it."
+                )
+            op_date = datetime.date.fromisoformat(source_grid_date)
+            warnings.append(
+                f"The filename gave no usable date, so the energy day was taken from the workbook itself "
+                f"({op_date.isoformat()}). Confirm it before publishing."
+            )
+        elif source_grid_date:
+            try:
+                printed = datetime.date.fromisoformat(source_grid_date)
+                gap = abs((printed - op_date).days)
+                if printed != op_date:
+                    if args.date:
+                        warnings.append(
+                            f"You set the energy day to {op_date.isoformat()}, but the workbook's load-curve "
+                            f"sheet is dated {printed.isoformat()}. Your override was kept — confirm it is right."
+                        )
+                    elif gap > 3:
+                        warnings.append(
+                            f"The workbook's load-curve sheet is dated {printed.isoformat()}, {gap} days from "
+                            f"what the filename implies ({op_date.isoformat()}). At that distance the filename "
+                            "is the likelier typo, so the sheet's date was used. Confirm before publishing."
+                        )
+                        op_date = printed
+                    else:
+                        warnings.append(
+                            f"The workbook's load-curve sheet is dated {printed.isoformat()} but the filename "
+                            f"implies {op_date.isoformat()}. These agree on every clean report, and a one-day "
+                            "gap is a stale sheet header, so the filename was used. Confirm before publishing."
+                        )
+            except ValueError:
+                pass
+
+        payload = parse_pgcb_file(str(pgcb_txt_path), datetime.datetime.combine(op_date, datetime.time()))
+        if not payload:
+            fail("The PGCB parser returned nothing. Is this the daily report workbook?")
+    else:
+        # --- Petrobangla-only upload ---------------------------------------
+        #
+        # The gas report stands on its own: its 8am-8am window names the
+        # energy day it belongs to, so the grid workbook is not needed to
+        # file it. When that grid day is already on disk the gas is attached
+        # to it — the same re-run that fills a day's zeroed gas rows — and
+        # when it is not, the archive publishes alone and the grid day picks
+        # the figures up when its own workbook arrives.
+        if op_date is None:
+            try:
+                probe_text = pdf_to_text(Path(args.pb))
+            except Exception as exc:  # noqa: BLE001
+                fail(f"Could not read the gas PDF: {exc}")
+            printed = printed_window_start(probe_text)
+            if printed is None:
+                printed = printed_window_start(pdf_header_text(Path(args.pb)))
+            if printed is None:
+                fail(
+                    "The PDF's printed window could not be read, so the gas day is unknown. "
+                    "Pass --date (the day the 8am-8am window STARTS, i.e. the energy day)."
+                )
+            op_date = printed
+            warnings.append(
+                f"Energy day {op_date.isoformat()} taken from the window printed on the PDF itself."
+            )
+        day_path = (
+            Path(__file__).resolve().parents[1]
+            / "public" / "data" / "daily" / f"{op_date.isoformat()}.json"
+        )
+        if day_path.exists():
+            try:
+                payload = json.loads(day_path.read_text(encoding="utf-8"))
+                warnings.append(
+                    f"No grid workbook uploaded — the gas will be attached to the grid day already "
+                    f"held for {op_date.isoformat()}, replacing its gas rows only."
+                )
+            except Exception as exc:  # noqa: BLE001
+                payload = None
+                warnings.append(
+                    f"The held grid day could not be read ({exc}); publishing the gas archive alone."
+                )
+        else:
+            warnings.append(
+                f"No grid day exists for {op_date.isoformat()} yet. The gas archive will publish "
+                "alone; the grid summary gains these figures when the day's workbook is ingested."
+            )
 
     # --- Petrobangla gas -------------------------------------------------
     #
@@ -652,10 +782,10 @@ def main() -> None:
             pb_data = None
             warnings.append(f"Gas summary could not be parsed: {exc}")
 
-        if pb_data:
+        if pb_data and payload is not None:
             payload["gasProductionData"] = pb_data["gasProductionData"]
             payload["gasDistributionData"] = pb_data["gasDistributionData"]
-        else:
+        elif not pb_data:
             warnings.append(
                 "The gas PDF produced no summary. The gas report lags the grid by a day: "
                 f"energy day {op_date.isoformat()} needs the PDF whose 8am-8am window STARTS that day."
@@ -697,8 +827,9 @@ def main() -> None:
             # archive achieves nothing: the grid file would still carry another
             # day's gas figures, which is the exact duplication this guard
             # exists to prevent. Blank them and let the day publish gas-less.
-            payload.pop("gasProductionData", None)
-            payload.pop("gasDistributionData", None)
+            if payload is not None:
+                payload.pop("gasProductionData", None)
+                payload.pop("gasDistributionData", None)
             warnings.append(
                 f"GAS PDF REJECTED — it covers the gas day starting {printed_start.isoformat()}, but this "
                 f"upload is energy day {op_date.isoformat()}. Its window is printed on the report itself. "
@@ -733,7 +864,11 @@ def main() -> None:
     # Match process_single_date: a day without gas still carries the zeroed
     # company rows. The site keys its "not published yet" state off these, so
     # omitting them entirely would produce a shape the UI has never seen.
-    if not payload.get("gasProductionData"):
+    if payload is None:
+        # Gas-only, no grid day held: "has gas" is about the archive being
+        # produced, since there is no grid summary for it to sit in.
+        has_gas = gas_archive is not None
+    elif not payload.get("gasProductionData"):
         payload["gasProductionData"] = [
             {"company": "BGFCL (Titas, Habiganj, Bakhrabad)", "fields": 5, "gas": 0.0, "condensate": 0.0, "share": 0.0},
             {"company": "SGFL (Sylhet, Rashidpur, Kailashtila)", "fields": 5, "gas": 0.0, "condensate": 0.0, "share": 0.0},
@@ -754,60 +889,64 @@ def main() -> None:
     else:
         has_gas = any(float(r.get("gas") or 0) > 0 for r in payload["gasProductionData"])
 
-    # A correctly-parsed day carries roughly 28-72 outage rows, every one with a
-    # plant. A handful of rows, or blank plants, is the signature of the column
-    # shift that silently emptied 34 archive days — surface it, do not publish
-    # into it unknowingly.
-    outages = payload.get("dailyOutages") or []
-    refined = refine_outage_reason(outages)
-    if refined:
-        warnings.append(f"Recovered the cause text on {refined} outage row(s) where the parser split on \" for \" first.")
-    unstructured = [o for o in outages if not str(o.get("plant") or "").strip()]
-    if outages and len(unstructured) == len(outages):
-        warnings.append(
-            f"All {len(outages)} outage rows have an empty plant — the workbook columns have shifted. "
-            "Do not publish; the outage detail is being lost."
-        )
-    elif len(outages) < 5:
-        warnings.append(
-            f"Only {len(outages)} outage rows parsed; a normal day has 28-72. Check the Event Summary section."
-        )
-
-    # The daily extremes are the one pair a workbook states twice — once for
-    # the day it reports on, once as tomorrow's projection — so they are the
-    # pair most likely to be keyed a day out. Every archived day before this
-    # fix carried the projection. A max below the day's own peak is the
-    # signature, and it is cheap to check here.
-    extremes = payload.get("systemStats") or {}
-    max_gen, min_gen = extremes.get("maxGen"), extremes.get("minGen")
-    peak = max(float(extremes.get("dayPeakGen") or 0), float(extremes.get("eveningPeakGen") or 0))
-    if max_gen is None or min_gen is None:
-        warnings.append(
-            "Max/min generation could not be read from this workbook and will publish as null. "
-            "The site renders those as — rather than a number."
-        )
-    else:
-        # PGCB's own figures disagree slightly on a few days — 2022-05-19
-        # prints an evening peak of 12907 MW and a maximum of 12887 MW, both
-        # at 19:30, with the load curve backing the lower one. Tolerate that
-        # scale of source rounding; a day carrying the next day's forecast is
-        # out by hundreds or thousands of MW, not twenty.
-        tolerance = max(50.0, peak * 0.01)
-        if peak and float(max_gen) < peak - tolerance:
+    # Freshly parsed grid only: on a Petrobangla-only upload the payload is
+    # either absent or a day already reviewed and published, and re-running
+    # the workbook checks on it would warn about nothing or mutate its rows.
+    if args.pgcb:
+        # A correctly-parsed day carries roughly 28-72 outage rows, every one with a
+        # plant. A handful of rows, or blank plants, is the signature of the column
+        # shift that silently emptied 34 archive days — surface it, do not publish
+        # into it unknowingly.
+        outages = payload.get("dailyOutages") or []
+        refined = refine_outage_reason(outages)
+        if refined:
+            warnings.append(f"Recovered the cause text on {refined} outage row(s) where the parser split on \" for \" first.")
+        unstructured = [o for o in outages if not str(o.get("plant") or "").strip()]
+        if outages and len(unstructured) == len(outages):
             warnings.append(
-                f"Max generation ({max_gen} MW) is BELOW this day's own peak ({peak} MW), which is not "
-                "physically possible. The forecast sheet's next-day figure may have been read instead."
+                f"All {len(outages)} outage rows have an empty plant — the workbook columns have shifted. "
+                "Do not publish; the outage detail is being lost."
             )
-        if float(min_gen) > float(max_gen):
-            warnings.append(f"Min generation ({min_gen} MW) exceeds max ({max_gen} MW) — the two are crossed.")
+        elif len(outages) < 5:
+            warnings.append(
+                f"Only {len(outages)} outage rows parsed; a normal day has 28-72. Check the Event Summary section."
+            )
 
-    # A flat curve means the L-Curve sheet was not read; the site charts it.
-    curve = payload.get("hourlyLoadData") or []
-    if len({round(float(h.get("generation") or 0), 3) for h in curve}) <= 3:
-        warnings.append(
-            f"The hourly load curve has only {len({round(float(h.get('generation') or 0), 3) for h in curve})} "
-            "distinct values — the L-Curve sheet was not parsed and the chart will be a placeholder."
-        )
+        # The daily extremes are the one pair a workbook states twice — once for
+        # the day it reports on, once as tomorrow's projection — so they are the
+        # pair most likely to be keyed a day out. Every archived day before this
+        # fix carried the projection. A max below the day's own peak is the
+        # signature, and it is cheap to check here.
+        extremes = payload.get("systemStats") or {}
+        max_gen, min_gen = extremes.get("maxGen"), extremes.get("minGen")
+        peak = max(float(extremes.get("dayPeakGen") or 0), float(extremes.get("eveningPeakGen") or 0))
+        if max_gen is None or min_gen is None:
+            warnings.append(
+                "Max/min generation could not be read from this workbook and will publish as null. "
+                "The site renders those as — rather than a number."
+            )
+        else:
+            # PGCB's own figures disagree slightly on a few days — 2022-05-19
+            # prints an evening peak of 12907 MW and a maximum of 12887 MW, both
+            # at 19:30, with the load curve backing the lower one. Tolerate that
+            # scale of source rounding; a day carrying the next day's forecast is
+            # out by hundreds or thousands of MW, not twenty.
+            tolerance = max(50.0, peak * 0.01)
+            if peak and float(max_gen) < peak - tolerance:
+                warnings.append(
+                    f"Max generation ({max_gen} MW) is BELOW this day's own peak ({peak} MW), which is not "
+                    "physically possible. The forecast sheet's next-day figure may have been read instead."
+                )
+            if float(min_gen) > float(max_gen):
+                warnings.append(f"Min generation ({min_gen} MW) exceeds max ({max_gen} MW) — the two are crossed.")
+
+        # A flat curve means the L-Curve sheet was not read; the site charts it.
+        curve = payload.get("hourlyLoadData") or []
+        if len({round(float(h.get("generation") or 0), 3) for h in curve}) <= 3:
+            warnings.append(
+                f"The hourly load curve has only {len({round(float(h.get('generation') or 0), 3) for h in curve})} "
+                "distinct values — the L-Curve sheet was not parsed and the chart will be a placeholder."
+            )
 
     # The same PDF produces two gas figures: the six-row summary embedded in the
     # grid file (text-scraped by parse_petrobangla_file) and the full archive
@@ -815,7 +954,7 @@ def main() -> None:
     # printed grand total). When they disagree the archive is the reliable one —
     # it has an independent check and the summary does not. Surface the gap
     # rather than publishing two contradictory totals for one day.
-    if gas_archive:
+    if gas_archive and payload is not None:
         scraped = payload.get("gasProductionData") or []
         scraped_total = round(sum(float(r.get("gas") or 0) for r in scraped), 1)
         # `grand_total` is present-but-null on the days whose PDF prints no
@@ -899,6 +1038,14 @@ def main() -> None:
                 "Distribution is still scraped — the archive has no per-company breakdown to rebuild from."
             )
 
+    # A parsed workbook is worth keeping: file it in the source store under
+    # PGCB's own name so tomorrow's forecast recovery and the curve/plants
+    # builders can find it. Uploads are the only path that did not.
+    if args.pgcb:
+        warnings.extend(
+            file_source_copy(Path(args.pgcb), args.pgcb_name or Path(args.pgcb).name, op_date)
+        )
+
     # Same enrichment the CLI collector applies, from the same module: the
     # admin route and the collector must not produce differently shaped days.
     try:
@@ -908,17 +1055,18 @@ def main() -> None:
         # scraped for Pipeline A, while the window block needs the full
         # PetrobanglaDaily record — its printed date label, its 8am-8am period
         # and the PDF's own filename all live there.
-        for note in enrich_grid_daily(
-            payload,
-            op_date,
-            pgcb_file=(args.pgcb_name or Path(args.pgcb).name) if args.pgcb else None,
-            petrobangla=gas_archive,
-        ):
-            warnings.append(note)
+        if payload is not None:
+            for note in enrich_grid_daily(
+                payload,
+                op_date,
+                pgcb_file=(args.pgcb_name or Path(args.pgcb).name) if args.pgcb else None,
+                petrobangla=gas_archive,
+            ):
+                warnings.append(note)
     except Exception as exc:  # noqa: BLE001
         warnings.append(f"enrichment skipped: {exc}")
 
-    stats = payload.get("systemStats") or {}
+    stats = (payload or {}).get("systemStats") or {}
     gas_val = (gas_archive or {}).get("validation") or {}
     gas_prod = (gas_archive or {}).get("production") or {}
     gas_dist = (gas_archive or {}).get("distribution") or {}
@@ -932,13 +1080,13 @@ def main() -> None:
             "energyDay": op_date.isoformat(),
             "sourceGridDate": source_grid_date,
             "hasGas": has_gas,
-            "sections": sorted(payload.keys()),
+            "sections": sorted(payload.keys()) if payload else [],
             "dayPeak": stats.get("dayPeakGen"),
             "eveningPeak": stats.get("eveningPeakGen"),
             "maxGen": stats.get("maxGen"),
             "minGen": stats.get("minGen"),
             "totalEnergy": stats.get("totalEnergyGen"),
-            "curvePoints": len(payload.get("hourlyLoadData") or []),
+            "curvePoints": len((payload or {}).get("hourlyLoadData") or []),
         },
         "gas": None
         if not gas_archive

@@ -83,8 +83,15 @@ export async function POST(request: NextRequest) {
     if (!isIsoDate(date)) {
       return NextResponse.json({ ok: false, error: `Invalid date: ${date}` }, { status: 400 });
     }
-    if (!body.grid) {
-      return NextResponse.json({ ok: false, error: 'Missing grid payload' }, { status: 400 });
+    // A Petrobangla-only upload reviews and publishes the gas archive with no
+    // grid payload at all — the bridge returns grid:null when no grid day is
+    // held for the window. One of the two must exist for there to be anything
+    // to publish.
+    if (!body.grid && !body.gasArchive) {
+      return NextResponse.json(
+        { ok: false, error: 'Missing grid payload and gas archive — nothing to publish' },
+        { status: 400 },
+      );
     }
 
     const root = process.cwd();
@@ -96,54 +103,56 @@ export async function POST(request: NextRequest) {
     // server loader, so leaving it inline puts it in bundles that never read it
     // — the same reason the station detail lives outside. It is fetched over
     // HTTP by the chart instead. See scripts/split_energy_curve.py.
-    const { energyCurveData, ...gridPayload } = body.grid as Record<string, unknown>;
-    if (energyCurveData) {
-      const curveDir = path.join(root, 'public', 'data', 'curves');
-      await mkdir(curveDir, { recursive: true });
-      await writeFile(
-        path.join(curveDir, `${date}.json`),
-        JSON.stringify({ date, ...(energyCurveData as object) }),
-        'utf8',
-      );
-    }
-
-    const dailyDir = path.join(root, 'public', 'data', 'daily');
-    await mkdir(dailyDir, { recursive: true });
-
-    // `ingest_bridge.py` parses the workbook; it does not enrich. Three fields
-    // are added afterwards by `scripts/daily_enrich.py` and by nothing in the
-    // ingest chain, so re-publishing a day that has already been enriched would
-    // overwrite it with a payload that simply lacks them — and the schema marks
-    // all three optional, so it would validate, publish, and report success.
-    //
-    // The visible loss is `forecast`: the whole next-day block, 24 hourly rows,
-    // is what Forecast vs Actual reads. Carry across whatever the day already
-    // holds and the parse did not produce, and say so in the report.
-    const ENRICHMENT_KEYS = ['sourceFiles', 'observationWindows', 'forecast'] as const;
-    const dayFile = path.join(dailyDir, `${date}.json`);
-    const preserved: string[] = [];
-    try {
-      const existing = JSON.parse(await readFile(dayFile, 'utf8')) as Record<string, unknown>;
-      for (const key of ENRICHMENT_KEYS) {
-        if (gridPayload[key] === undefined && existing[key] !== undefined) {
-          gridPayload[key] = existing[key];
-          preserved.push(key);
-        }
+    if (body.grid) {
+      const { energyCurveData, ...gridPayload } = body.grid as Record<string, unknown>;
+      if (energyCurveData) {
+        const curveDir = path.join(root, 'public', 'data', 'curves');
+        await mkdir(curveDir, { recursive: true });
+        await writeFile(
+          path.join(curveDir, `${date}.json`),
+          JSON.stringify({ date, ...(energyCurveData as object) }),
+          'utf8',
+        );
       }
-    } catch {
-      // No day on disk yet — nothing to preserve, which is the normal case for
-      // a genuinely new day.
-    }
-    if (preserved.length) {
-      steps.push({
-        artifact: 'enrichment preserved',
-        key: date,
-        status: 'unchanged',
-        detail: `${preserved.join(', ')} kept from the day already on disk — the parser does not produce these`,
-      });
-    }
 
-    await writeFile(dayFile, JSON.stringify(gridPayload, null, 2), 'utf8');
+      const dailyDir = path.join(root, 'public', 'data', 'daily');
+      await mkdir(dailyDir, { recursive: true });
+
+      // `ingest_bridge.py` parses the workbook; it does not enrich. Three fields
+      // are added afterwards by `scripts/daily_enrich.py` and by nothing in the
+      // ingest chain, so re-publishing a day that has already been enriched would
+      // overwrite it with a payload that simply lacks them — and the schema marks
+      // all three optional, so it would validate, publish, and report success.
+      //
+      // The visible loss is `forecast`: the whole next-day block, 24 hourly rows,
+      // is what Forecast vs Actual reads. Carry across whatever the day already
+      // holds and the parse did not produce, and say so in the report.
+      const ENRICHMENT_KEYS = ['sourceFiles', 'observationWindows', 'forecast'] as const;
+      const dayFile = path.join(dailyDir, `${date}.json`);
+      const preserved: string[] = [];
+      try {
+        const existing = JSON.parse(await readFile(dayFile, 'utf8')) as Record<string, unknown>;
+        for (const key of ENRICHMENT_KEYS) {
+          if (gridPayload[key] === undefined && existing[key] !== undefined) {
+            gridPayload[key] = existing[key];
+            preserved.push(key);
+          }
+        }
+      } catch {
+        // No day on disk yet — nothing to preserve, which is the normal case for
+        // a genuinely new day.
+      }
+      if (preserved.length) {
+        steps.push({
+          artifact: 'enrichment preserved',
+          key: date,
+          status: 'unchanged',
+          detail: `${preserved.join(', ')} kept from the day already on disk — the parser does not produce these`,
+        });
+      }
+
+      await writeFile(dayFile, JSON.stringify(gridPayload, null, 2), 'utf8');
+    }
 
     const hasGas = Boolean(body.gasArchive);
     if (hasGas) {
@@ -245,9 +254,11 @@ export async function POST(request: NextRequest) {
       ok: failed.length === 0,
       date,
       steps,
-      note: hasGas
-        ? undefined
-        : 'Grid day published. No gas PDF supplied, so the gas archive and aggregates were not touched.',
+      note: !body.grid
+        ? 'Gas archive published alone. The grid day was not uploaded; its summary gains these figures when its workbook is ingested.'
+        : hasGas
+          ? undefined
+          : 'Grid day published. No gas PDF supplied, so the gas archive and aggregates were not touched.',
       summary: {
         published: steps.filter((s) => s.status === 'published').length,
         unchanged: steps.filter((s) => s.status === 'unchanged').length,

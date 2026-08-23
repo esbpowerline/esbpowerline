@@ -66,7 +66,79 @@ function snapshotLabelOrder(label: string): number {
   return (TARGET_ORDER as Record<string, number>)[label] ?? 99;
 }
 
-function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
+/** The slice of /api/data/live-grid this panel reads. */
+type LiveGrid = {
+  asOf: string;
+  latest: {
+    totalMw: number;
+    demandMw: number | null;
+    supplyMw: number | null;
+    loadShedMw: number | null;
+    byFuel: { coalMw: number };
+    imports: { totalMw: number };
+  };
+  today: { maxDemandMw: number };
+};
+
+const LIVE_POLL_MS = 15 * 60 * 1000;
+
+/**
+ * NLDC posts hourly generation and demand/supply/load-shed pages on PGCB's
+ * portal; /api/data/live-grid parses them behind a shared 10-minute cache.
+ * This hook keeps the panel on the newest posted hour while the page is open.
+ * On any failure it simply reports null and the tiles stay on the daily
+ * figures — live is an upgrade, never a dependency.
+ */
+function useLiveGrid(): LiveGrid | null {
+  const [live, setLive] = useState<LiveGrid | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch('/api/data/live-grid');
+        if (!res.ok) return;
+        const json = (await res.json()) as LiveGrid & { ok?: false };
+        if (!cancelled && json?.asOf && json.latest) setLive(json);
+      } catch {
+        // Source down or offline — the daily tiles carry on.
+      }
+    }
+    load();
+    const interval = setInterval(load, LIVE_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  return live;
+}
+
+/**
+ * The tiles whose label reads naturally as "right now", overlaid with the
+ * newest NLDC hour. Everything else keeps its daily, report-anchored figure —
+ * a daily total or an audited peak must not be silently swapped for a
+ * different quantity just because a live number exists.
+ */
+function liveValueFor(label: string, live: LiveGrid): number | null {
+  switch (label) {
+    case 'Current Demand':
+      return live.latest.demandMw;
+    case 'Load Shedding':
+      return live.latest.loadShedMw;
+    case 'Peak Today':
+      return live.today.maxDemandMw;
+    case 'Coal Generation':
+      return live.latest.byFuel.coalMw;
+    case 'Grid Import':
+      return live.latest.imports.totalMw;
+    default:
+      return null;
+  }
+}
+
+function LocalSnapshotDashboard({ initialStats, live }: { initialStats?: any[]; live: LiveGrid | null }) {
   const { locale, t } = useLocale();
   const [stats, setStats] = useState<any[]>(() => {
     const incomingMap = new Map<string, any>();
@@ -115,6 +187,9 @@ function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
 
     const interval = setInterval(() => {
       setStats(prev => prev.map((s) => {
+        // A tile carrying a real NLDC figure is never jittered — simulation
+        // exists to suggest movement where no live source was available.
+        if (live && liveValueFor(s.label, live) !== null) return s;
         if (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
@@ -129,13 +204,22 @@ function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
       }));
     }, 24000);
     return () => clearInterval(interval);
-  }, [simulateLive]);
+  }, [simulateLive, live]);
 
   return (
     <div className="grid grid-cols-2 gap-[1px] bg-border/65 w-full h-full auto-rows-fr rounded-xl overflow-hidden border border-border/65">
       {stats.map((s, i) => {
         const Icon = s.icon;
-        
+
+        const liveVal = live ? liveValueFor(s.label, live) : null;
+        const isLive = liveVal !== null;
+        const displayValue = isLive ? liveVal : s.value;
+        const liveHour = live ? live.asOf.slice(11, 16) : '';
+        const liveTip =
+          locale === 'bn'
+            ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveHour} পর্যন্ত`
+            : `NLDC hourly · as of ${liveHour}`;
+
         const fullLabel = localizeEnergyStatLabel(s.label, locale as any);
         let shortLabel = fullLabel;
         if (locale === 'en') {
@@ -152,13 +236,18 @@ function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
-                label={simulateLive ? t('energy.simulated') : t('energy.indicative')}
+                label={isLive ? liveTip : simulateLive ? t('energy.simulated') : t('energy.indicative')}
                 alwaysShow
                 variant="chrome"
                 side="top"
               >
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
-                  {simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation' || s.label === 'Fuel Cost') ? (
+                  {isLive ? (
+                    <>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                    </>
+                  ) : simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation' || s.label === 'Fuel Cost') ? (
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
@@ -179,8 +268,8 @@ function LocalSnapshotDashboard({ initialStats }: { initialStats?: any[] }) {
               </div>
               <div className="font-bold font-sans tabular-nums text-foreground/95 group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-xs md:text-sm">
                 {s.isDecimal
-                  ? s.value.toFixed(s.label === 'Fuel Cost' || s.label === 'Energy Unserved' ? 2 : 1)
-                  : formatNumber(Math.round(s.value))}
+                  ? displayValue.toFixed(s.label === 'Fuel Cost' || s.label === 'Energy Unserved' ? 2 : 1)
+                  : formatNumber(Math.round(displayValue))}
                 {' '}
                 <span className="font-bold text-muted-foreground uppercase tracking-wider text-[8px] md:text-[9px]">
                   {s.unit}
@@ -206,6 +295,7 @@ function SnapshotSegment({
   headerDate: string;
 }) {
   const { locale, t } = useLocale();
+  const live = useLiveGrid();
   const localizedSnapshotLabel = localizeSnapshotLabel(snapshotLabel, locale);
   const parts = localizedSnapshotLabel
     .split(/\s*•\s*/)
@@ -213,6 +303,14 @@ function SnapshotSegment({
     .filter(Boolean);
   const [liveWord, ...agencies] = parts;
   const sourcesText = agencies.join(' • ');
+
+  // With live tiles on the panel, a bare "Updated <daily date>" undersells the
+  // hourly half and reads as stale next to a tile stamped with today's hour.
+  // Name both cadences; without live data the old single stamp stands. The
+  // year is dropped from the daily date in the two-stamp form — the line has
+  // to fit the meta slot, and the year says nothing "Daily Aug 22" does not.
+  const liveHour = live ? live.asOf.slice(11, 16) : null;
+  const compactHeaderDate = headerDate.replace(/,?\s*[\d০-৯]{4}\s*$/, '');
 
   return (
     <section className="home-snapshot-segment" aria-labelledby="home-snapshot-title">
@@ -229,15 +327,33 @@ function SnapshotSegment({
                 aria-hidden
               />
             </Link>
+            {/* The meta line names the two cadences with their stamps, so the
+                kicker stays short instead of repeating them and wrapping. */}
             <p className="home-snapshot-segment__kicker">
-              {locale === 'bn' ? 'দৈনিক গ্রিড পরিসংখ্যান' : 'Daily grid telemetry'}
+              {locale === 'bn' ? 'গ্রিড পরিসংখ্যান' : 'Grid telemetry'}
             </p>
           </div>
           <div className="home-snapshot-segment__meta">
-            <span className="home-snapshot-segment__updated">
-              {locale === 'bn' ? 'আপডেট ' : 'Updated '}
-              <time dateTime={snapshotDate ?? headerDate}>{headerDate}</time>
-            </span>
+            {liveHour ? (
+              // Two stacked stamps, not one long line: the meta column cannot
+              // shrink (nowrap + flex-shrink:0), so a single line overflowed
+              // the card at tighter widths.
+              <>
+                <span className="home-snapshot-segment__updated">
+                  {locale === 'bn' ? 'ঘণ্টাভিত্তিক ' : 'Hourly '}
+                  <time dateTime={live!.asOf}>{liveHour}</time>
+                </span>
+                <span className="home-snapshot-segment__updated">
+                  {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
+                  <time dateTime={snapshotDate ?? headerDate}>{compactHeaderDate}</time>
+                </span>
+              </>
+            ) : (
+              <span className="home-snapshot-segment__updated">
+                {locale === 'bn' ? 'আপডেট ' : 'Updated '}
+                <time dateTime={snapshotDate ?? headerDate}>{headerDate}</time>
+              </span>
+            )}
             <span className="home-snapshot-segment__live">
               <span className="home-snapshot-segment__live-dot" aria-hidden>
                 <span className="home-snapshot-segment__live-ping" />
@@ -249,7 +365,7 @@ function SnapshotSegment({
         </header>
 
         <div className="home-snapshot-segment__body">
-          <LocalSnapshotDashboard initialStats={snapshotStats as any[]} />
+          <LocalSnapshotDashboard initialStats={snapshotStats as any[]} live={live} />
         </div>
 
         {sourcesText ? (

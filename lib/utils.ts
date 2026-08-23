@@ -131,27 +131,39 @@ function getRelativeDuration(date: Date): string {
   return `${diffYears} ${diffYears === 1 ? 'year' : 'years'} ago`;
 }
 
+/**
+ * Article timestamps render in Bangladesh time everywhere, explicitly.
+ *
+ * Without a fixed timeZone these strings depend on where the code runs:
+ * Vercel's server renders in UTC and the visitor's browser in their own zone,
+ * so the same timestamp hydrated to different text — React error #418 on every
+ * page that server-renders an article date (caught by Lighthouse on the
+ * homepage). Dhaka time is also simply the correct reading for a Bangladeshi
+ * news site.
+ */
+const ARTICLE_TZ = 'Asia/Dhaka';
+
 export function formatArticleDate(dateStr: string | Date, clockFormat: '12' | '24' = '12'): string {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return '—';
-  const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const dateString = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: ARTICLE_TZ });
   const hour12 = clockFormat === '12';
-  const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12 });
+  const timeString = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12, timeZone: ARTICLE_TZ });
   return `Published on ${dateString} at ${timeString}`;
 }
 
 export function formatArticleHoverDate(dateStr: string | Date, clockFormat: '12' | '24' = '12'): string {
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return '—';
-  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long', timeZone: ARTICLE_TZ });
+  const hhmm = date
+    .toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: ARTICLE_TZ });
+
   let timeStr = '';
   if (clockFormat === '12') {
-    timeStr = `${hours}:${minutes}`;
+    timeStr = hhmm;
   } else {
-    timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: ARTICLE_TZ });
   }
   
   const relative = getRelativeDuration(date);

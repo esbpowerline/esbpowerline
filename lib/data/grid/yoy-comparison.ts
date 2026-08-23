@@ -103,7 +103,7 @@ const ROWS: SheetRowDef[] = [
   {
     id: 'system.totalDailyCost',
     bn: ['বিদ্যুৎ উৎপাদন খরচ', 'কোটি টাকা'],
-    en: ['Generation cost', 'crore Tk'],
+    en: ['Generation cost', 'crore BDT'],
     key: 'cost',
   },
 ];

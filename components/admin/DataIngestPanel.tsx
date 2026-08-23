@@ -1,9 +1,48 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Download, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun } from 'lucide-react';
+import { Upload, Download, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun, RefreshCw } from 'lucide-react';
 import { AdminCard } from '@/components/admin/AdminUI';
+// The CMS date-picking vocabulary, verbatim: the year-on-year panel's calendar
+// and month picker replace the browser-drawn <input type="date">/<input
+// type="month">, which looked like nothing else in the admin surface.
+import { GridDatePicker } from '@/components/cms/yoy/GridDatePicker';
+import { GridMonthPicker } from '@/components/cms/yoy/GridMonthPicker';
+import { buildCoverage, createArchiveIndex, type ArchiveIndex } from '@/lib/data/grid/archive-coverage';
+import { availableDates } from '@/lib/data/grid/available-dates';
+
+/**
+ * The archive coverage, extended through today.
+ *
+ * The YoY panel's calendar only offers days the archive holds — the right rule
+ * for reading, and the wrong one for ingesting, where the day the operator
+ * wants is precisely the one the archive does NOT hold yet. So the index is
+ * built from the archive plus every day from its end through today, and the
+ * `selectable` rule below lets any day up to today be picked: a missing
+ * historical day is exactly the kind an operator may want to backfill.
+ */
+function useIngestArchive(): { archive: ArchiveIndex; months: string[]; todayIso: string } {
+  return useMemo(() => {
+    const iso = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const todayIso = iso(new Date());
+    const days = new Set<string>(availableDates.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)));
+    const last = [...days].sort().pop();
+    if (!last || last < todayIso) {
+      const cur = last ? new Date(`${last}T00:00:00`) : new Date();
+      const end = new Date(`${todayIso}T00:00:00`);
+      while (cur < end) {
+        cur.setDate(cur.getDate() + 1);
+        days.add(iso(cur));
+      }
+    }
+    const list = [...days].sort();
+    const archive = createArchiveIndex(buildCoverage(list));
+    const months = [...new Set(list.map((d) => d.slice(0, 7)))].sort().reverse();
+    return { archive, months, todayIso };
+  }, []);
+}
 
 type ParseSummary = {
   energyDay: string;
@@ -35,7 +74,11 @@ type ParseResponse =
   | {
       ok: true;
       date: string;
-      payload: Record<string, unknown>;
+      /**
+       * The grid day — null on a Petrobangla-only upload whose grid day is not
+       * on disk yet; the gas archive then publishes alone.
+       */
+      payload: Record<string, unknown> | null;
       /** Full Petrobangla day — null when no PDF was supplied or it failed. */
       gasArchive: Record<string, unknown> | null;
       validation: {
@@ -185,6 +228,145 @@ function SredaCard({ latestSredaDate }: { latestSredaDate: string | null }) {
   );
 }
 
+type RefreshDayOutcome = {
+  date: string;
+  reason: 'missing-day' | 'missing-gas';
+  status: 'ingested' | 'source-pending' | 'partial' | 'failed';
+  detail: string;
+  steps?: Array<{ step: string; ok: boolean; seconds: number; detail?: string }>;
+  publish?: { published: number; unchanged: number; failed: number };
+};
+
+type RefreshAllResult =
+  | {
+      ok: boolean;
+      checkedThrough: string;
+      upToDate: boolean;
+      days: RefreshDayOutcome[];
+      skippedOlderGaps: number;
+      sreda: SredaResult & { unchanged?: boolean };
+      error?: string;
+    }
+  | { ok: false; error: string };
+
+const REFRESH_MARK: Record<RefreshDayOutcome['status'], { mark: string; cls: string }> = {
+  ingested: { mark: '✓', cls: 'text-emerald-600 dark:text-emerald-400' },
+  'source-pending': { mark: '…', cls: 'text-muted-foreground' },
+  partial: { mark: '△', cls: 'text-amber-600 dark:text-amber-400' },
+  failed: { mark: '✗', cls: 'text-rose-600 dark:text-rose-400' },
+};
+
+/**
+ * The one-stop refresh. Everything below this card still exists for surgery on
+ * a single day; this asks the coverage screen what is missing, fetches it from
+ * the publishers' own channels, runs the full chain, and publishes — the whole
+ * morning routine on one button.
+ */
+function RefreshAllCard() {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<RefreshAllResult | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await fetch('/api/admin/data/refresh-all', { method: 'POST' });
+      const json = (await res.json()) as RefreshAllResult;
+      setResult(json);
+      // Coverage card and status banner are server-rendered; move them with
+      // the refresh rather than waiting for a manual reload.
+      router.refresh();
+    } catch (e) {
+      setResult({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const full = result && 'days' in result ? result : null;
+
+  return (
+    <AdminCard title="Refresh data" icon={RefreshCw}>
+      <div className="space-y-3">
+        <p className="text-[12px] leading-snug text-muted-foreground">
+          One button for the daily round: checks which recent days the site is missing — a whole day,
+          or a day whose gas columns are still blank — downloads the sources from PGCB&apos;s report
+          portal and Petrobangla&apos;s listing where no copy is held, runs the full chain (grid day,
+          fuel curve, Nepal, station detail, gas archive, timeline, reserve model), publishes the
+          result to the live site, and refreshes the SREDA renewables snapshot. BPDB&apos;s daily
+          figures arrive inside PGCB&apos;s workbook, which reprints them.
+        </p>
+        <button
+          onClick={run}
+          disabled={busy}
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-[13px] font-bold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          {busy ? 'Checking the publishers…' : 'Refresh data'}
+        </button>
+        {busy && (
+          <p className="text-[11.5px] text-muted-foreground">
+            A day that needs downloading and parsing takes a few minutes — leave this open.
+          </p>
+        )}
+
+        {full && (
+          <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3">
+            {full.upToDate ? (
+              <p className="text-[12.5px] font-semibold text-emerald-700 dark:text-emerald-400">
+                Grid and gas are current through {full.checkedThrough} — nothing to ingest.
+              </p>
+            ) : (
+              <ul className="space-y-1.5">
+                {full.days.map((d) => (
+                  <li key={d.date} className="text-[12px]">
+                    <span className={`font-bold ${REFRESH_MARK[d.status].cls}`}>
+                      {REFRESH_MARK[d.status].mark}
+                    </span>{' '}
+                    <span className="font-semibold tabular-nums">{d.date}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      ({d.reason === 'missing-day' ? 'day was missing' : 'gas was missing'}) — {d.detail}
+                    </span>
+                    {d.status !== 'ingested' && d.steps && (
+                      <ul className="ml-5 mt-0.5 space-y-0.5">
+                        {d.steps
+                          .filter((s) => !s.ok)
+                          .map((s) => (
+                            <li key={s.step} className="text-[11px] text-muted-foreground">
+                              ✗ {s.step}
+                              {s.detail ? ` — ${s.detail}` : ''}
+                            </li>
+                          ))}
+                      </ul>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="border-t border-border/40 pt-2 text-[11.5px] text-muted-foreground">
+              {full.sreda.ok
+                ? full.sreda.unchanged
+                  ? 'SREDA: unchanged since the last snapshot.'
+                  : `SREDA: new snapshot published (${'date' in full.sreda ? full.sreda.date : ''}).`
+                : `SREDA: ${'error' in full.sreda ? full.sreda.error : 'failed'}`}
+              {full.skippedOlderGaps > 0 && (
+                <> · {full.skippedOlderGaps} older gap{full.skippedOlderGaps > 1 ? 's' : ''} left for manual backfill (see coverage above).</>
+              )}
+            </p>
+          </div>
+        )}
+        {result && !('days' in result) && !result.ok && (
+          <div className="rounded-lg border border-rose-500/40 bg-rose-500/[0.06] p-3 text-[12px] text-muted-foreground">
+            {result.error}
+          </div>
+        )}
+      </div>
+    </AdminCard>
+  );
+}
+
 type LocalStep = {
   artifact: string;
   key: string;
@@ -242,6 +424,7 @@ function ArtifactRow({ artifacts }: { artifacts: IngestRunResult['artifacts'] })
  */
 function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
   const router = useRouter();
+  const { archive, months, todayIso } = useIngestArchive();
   const [day, setDay] = useState(suggestedDay);
   const [month, setMonth] = useState('');
   const [busy, setBusy] = useState(false);
@@ -328,25 +511,35 @@ function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
           not have yet are skipped, not failed.
         </p>
         <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <label className="mb-1.5 block text-[12px] font-semibold">Energy day</label>
-            <input
-              type="date"
+          <div className="min-w-48">
+            <GridDatePicker
+              label="Energy day"
               value={day}
-              onChange={(e) => setDay(e.target.value)}
-              className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
+              onChange={setDay}
+              archive={archive}
+              selectable={(iso) => iso <= todayIso}
+              unselectableHint="Days after today have no report yet."
             />
           </div>
-          <div>
-            <label className="mb-1.5 block text-[12px] font-semibold">
-              Month <span className="font-normal text-muted-foreground">(optional)</span>
-            </label>
-            <input
-              type="month"
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
-            />
+          <div className="flex items-end gap-2">
+            <div className="min-w-44">
+              <GridMonthPicker
+                label="Month (optional)"
+                value={month}
+                onChange={setMonth}
+                months={months}
+              />
+            </div>
+            {month && (
+              <button
+                type="button"
+                onClick={() => setMonth('')}
+                className="rounded-lg border border-border/60 px-2.5 py-2 text-[11px] font-semibold text-muted-foreground transition hover:bg-muted"
+                title="Clear — publish the day only"
+              >
+                Clear
+              </button>
+            )}
           </div>
           <button
             onClick={runIngest}
@@ -422,6 +615,7 @@ export function DataIngestPanel({
 }) {
   const latestArchiveDate = status.latestGridDay;
   const router = useRouter();
+  const { archive, todayIso } = useIngestArchive();
   const [pgcb, setPgcb] = useState<File | null>(null);
   const [pb, setPb] = useState<File | null>(null);
   // Two inputs, two meanings, so two states. They shared one before: picking a
@@ -472,14 +666,16 @@ export function DataIngestPanel({
   }
 
   async function handleParse() {
-    if (!pgcb) return;
+    // Either file alone is a valid upload: the workbook makes a grid day, the
+    // gas PDF makes (or completes) a gas day — its printed window names the day.
+    if (!pgcb && !pb) return;
     setParsing(true);
     setError(null);
     setResult(null);
     setPublished(null);
     try {
       const body = new FormData();
-      body.append('pgcb', pgcb);
+      if (pgcb) body.append('pgcb', pgcb);
       if (pb) body.append('pb', pb);
       if (dateOverride) body.append('date', dateOverride);
 
@@ -546,6 +742,8 @@ export function DataIngestPanel({
     <div className="space-y-4">
       <StatusBanner status={status} />
 
+      <RefreshAllCard />
+
       {/* The next missing day is what an operator opens this screen to ingest;
           defaulting to the newest day already on the site meant every run
           started by re-ingesting a day that was already published. */}
@@ -561,13 +759,14 @@ export function DataIngestPanel({
             republishes nothing, it only links back to Petrobangla.
           </p>
           <div className="flex flex-wrap items-end gap-3">
-            <div>
-              <label className="mb-1.5 block text-[12px] font-semibold">Energy day</label>
-              <input
-                type="date"
+            <div className="min-w-48">
+              <GridDatePicker
+                label="Energy day"
                 value={collectDate || suggestedNextDay}
-                onChange={(e) => setCollectDate(e.target.value)}
-                className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
+                onChange={setCollectDate}
+                archive={archive}
+                selectable={(iso) => iso <= todayIso}
+                unselectableHint="Days after today have no report yet."
               />
             </div>
             <button
@@ -590,7 +789,7 @@ export function DataIngestPanel({
         <div className="space-y-4">
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-[12px] font-semibold">
-              <FileSpreadsheet className="h-3.5 w-3.5" /> PGCB daily report — required
+              <FileSpreadsheet className="h-3.5 w-3.5" /> PGCB daily report — makes the grid day
             </label>
             <input
               type="file"
@@ -617,7 +816,7 @@ export function DataIngestPanel({
 
           <div>
             <label className="mb-1.5 flex items-center gap-2 text-[12px] font-semibold">
-              <FileText className="h-3.5 w-3.5" /> Petrobangla gas report (.pdf) — optional
+              <FileText className="h-3.5 w-3.5" /> Petrobangla gas report (.pdf) — makes the gas day; can be uploaded alone
             </label>
             <input
               type="file"
@@ -629,16 +828,36 @@ export function DataIngestPanel({
               Gas lags the grid by a day: energy day E needs the report whose 8am–8am window <em>starts</em> on E.
               Without it the day publishes with empty gas figures.
             </p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              Uploaded <span className="font-semibold">alone</span>, the PDF is filed by its own printed
+              window — when that day&apos;s grid is already on the site, its empty gas rows are filled in;
+              when it is not, the gas archive publishes first and the grid follows with its workbook.
+            </p>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12px] font-semibold">Energy day override (optional)</label>
-            <input
-              type="date"
-              value={dateOverride}
-              onChange={(e) => setDateOverride(e.target.value)}
-              className="rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px]"
-            />
+            <div className="flex items-end gap-2">
+              <div className="min-w-48">
+                <GridDatePicker
+                  label="Energy day override (optional)"
+                  value={dateOverride}
+                  onChange={setDateOverride}
+                  archive={archive}
+                  selectable={(iso) => iso <= todayIso}
+                  unselectableHint="Days after today have no report yet."
+                />
+              </div>
+              {dateOverride && (
+                <button
+                  type="button"
+                  onClick={() => setDateOverride('')}
+                  className="rounded-lg border border-border/60 px-2.5 py-2 text-[11px] font-semibold text-muted-foreground transition hover:bg-muted"
+                  title="Clear the override — the day is then read from the files themselves"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
             {latestArchiveDate && (
               <p className="mt-1 text-[11px] text-muted-foreground">
                 Latest day currently on the site: <span className="font-semibold">{latestArchiveDate}</span>
@@ -648,7 +867,7 @@ export function DataIngestPanel({
 
           <button
             onClick={handleParse}
-            disabled={!pgcb || parsing}
+            disabled={(!pgcb && !pb) || parsing}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
           >
             {parsing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}

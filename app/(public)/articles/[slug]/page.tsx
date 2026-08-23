@@ -106,11 +106,26 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     },
   };
 
+  // Names the Home → News → article trail for the breadcrumb rich result.
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'News', item: `${siteUrl}/articles` },
+      { '@type': 'ListItem', position: 3, name: article.title.slice(0, 110) },
+    ],
+  };
+
   return (
     <div className="container py-10 max-w-3xl article-page--with-sticky-author fluid-article-container">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
       />
       <ArticleViewTracker articleId={article.id} />
       <Link href="/articles" className="text-sm text-primary hover:underline">← Back to news</Link>

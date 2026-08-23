@@ -218,7 +218,7 @@ const SYSTEM_METRICS: Metric[] = [
     id: 'system.totalDailyCost',
     section: 'system',
     label: 'Total generation cost',
-    unit: 'crore Tk',
+    unit: 'crore BDT',
     // Stored in taka; a crore is 1e7. Getting this wrong is how an earlier
     // sheet published a figure ten times too high.
     value: ({ day: d }) => {

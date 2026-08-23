@@ -8,6 +8,7 @@ import {
 import { runtimeDailyReportPath } from '@/lib/data/grid/date-utils';
 import { getCachedDailyReport, setCachedDailyReport } from '@/lib/data/grid/daily-cache';
 import { warnIfInvalidDailyReport } from '@/lib/data/grid/validate-daily-report';
+import { isPathPublished } from '@/lib/data/runtime-data.client';
 
 export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loader-core';
 
@@ -46,6 +47,23 @@ export async function fetchDailyReport(
     if (cached) {
       return { ok: true, data: cached, source: 'network' };
     }
+  }
+
+  // A day the manifest lists as released has no static file in this build —
+  // fetching the static path first guarantees a 404 in the console before the
+  // fallback lands. Ask the manifest and go straight to the release. Every
+  // failure below still drops through to the static/archive path unchanged.
+  try {
+    if (await isPathPublished(`daily/${parsed}.json`)) {
+      const runtime = await loadRuntimeRelease(parsed);
+      if (runtime) {
+        warnIfInvalidDailyReport(runtime, parsed);
+        setCachedDailyReport(parsed, runtime);
+        return { ok: true, data: runtime, source: 'network' };
+      }
+    }
+  } catch {
+    /* manifest unreachable — degrade to the static-first flow below */
   }
 
   try {

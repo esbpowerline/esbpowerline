@@ -12,11 +12,13 @@ import { ModernTooltip } from '@/components/shared/ModernTooltip';
 
 /* ── Data cadence badges (title / KPI labels) ── */
 
+// The 600-weight tones in light mode: the 500s sat at ~3:1 against the card at
+// 10px, which Lighthouse rightly fails — small text needs 4.5:1.
 const BADGE_TONE: Record<string, string> = {
-  daily: 'text-emerald-500',
-  live: 'text-emerald-500',
-  archive: 'text-sky-500',
-  monthly: 'text-orange-500',
+  daily: 'text-emerald-600 dark:text-emerald-400',
+  live: 'text-emerald-600 dark:text-emerald-400',
+  archive: 'text-sky-600 dark:text-sky-400',
+  monthly: 'text-orange-600 dark:text-orange-400',
 };
 
 const BADGE_LABEL: Record<string, string> = {
@@ -558,7 +560,7 @@ export function GridKpiTrend({
   // Under half a percent the arrow would be noise dressed as a signal.
   const flat = Math.abs(pct) < 0.5;
   const good = polarity === 'neutral' ? null : (diff > 0) === (polarity === 'up-good');
-  const tone = flat || good == null ? 'text-muted-foreground' : good ? 'text-emerald-500' : 'text-destructive';
+  const tone = flat || good == null ? 'text-muted-foreground' : good ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive';
   const arrow = flat ? '→' : diff > 0 ? '▲' : '▼';
   return (
     <span

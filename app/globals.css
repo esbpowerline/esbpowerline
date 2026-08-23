@@ -936,6 +936,19 @@ html.theme-midnight .featured-hero__timestamp {
 
 .featured-hero__progress-tab {
   min-width: 0.75rem;
+  /* The visible control is a 4px progress bar; the button itself must still
+     offer the 24px minimum tap target. Negative margins keep the row's
+     visual height unchanged. */
+  min-height: 24px;
+  margin-block: -10px;
+}
+
+/* Same 24px floor for the category-carousel dots: the dot stays 6px tall, the
+   invisible hit area around it grows. */
+.home-page .category-carousel-dots button::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
 }
 
 .featured-hero__image {
@@ -5834,12 +5847,24 @@ html.theme-dark .locale-toggle__btn--active:hover {
    riding the text baseline — the mark is a 15px box against 10px caps, and on
    the baseline it hung four pixels below the badge next to it. */
 .grid-explorer-kpi__label {
-  @apply text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 leading-tight;
+  @apply text-[10px] uppercase font-bold tracking-wider leading-tight;
+  /* 10px text: muted-foreground/80 fell under the 4.5:1 small-text contrast
+     floor in light mode. Stated on the foreground token so both themes pass. */
+  color: hsl(var(--foreground) / 0.72);
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   row-gap: 0.15rem;
   min-height: 1rem;
+}
+
+/* Same floor for the 9px trend line: its muted "vs 6-day avg" suffix and the
+   hint text both sat below 4.5:1. Colored trend values are handled where
+   they are set (GridKpiTrend uses the 600-weight tones). */
+.grid-explorer-kpi__hint,
+.grid-explorer-kpi__hint .text-muted-foreground,
+.grid-explorer-kpi__trend .text-muted-foreground {
+  color: hsl(var(--foreground) / 0.66);
 }
 
 .grid-explorer-kpi__value {
@@ -5853,6 +5878,48 @@ html.theme-dark .locale-toggle__btn--active:hover {
 .grid-explorer-kpi > div {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* The page strip's six tiles (Peak Supply … Cost of Power) and the four-tile
+   strips inside the tabs (Generation, Imports, Regional, Stations, Renewables)
+   read centred as a stack: icon on top, then label, value and trend line, each
+   centred on the tile's axis. Centring the row layout instead left the icon
+   dangling at the edge of a text block whose width the long forecast line
+   sets, which read as misaligned. The tooltip panel is untouched: it is
+   absolutely positioned and states its own text-left. Desktop only — below
+   the fold breakpoint the page strip's lead tile is a full-width hero with
+   its own two-column layout, and centring it would fight that design. */
+@media (min-width: 40.0625rem) {
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi,
+  .grid-explorer-kpi-strip--four .grid-explorer-kpi {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi__icon,
+  .grid-explorer-kpi-strip--four .grid-explorer-kpi__icon {
+    margin-top: 0;
+  }
+
+  /* :first-of-type keeps this off the hover briefing panel, which is also a
+     direct div child of the tile (it renders after the content block) —
+     width:100% was collapsing it from its own fixed width down to the tile's.
+     Selecting on the panel's `absolute` class instead does not survive this
+     build: the pipeline expands `.absolute` inside :not() into variants for
+     every class composed from it, and those variants still match the panel. */
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi > div:first-of-type,
+  .grid-explorer-kpi-strip--four .grid-explorer-kpi > div:first-of-type {
+    flex: 0 1 auto;
+    width: 100%;
+    text-align: center;
+  }
+
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi__label,
+  .grid-explorer-kpi-strip--four .grid-explorer-kpi__label {
+    justify-content: center;
+  }
 }
 
 /* ── The first screen on a phone ───────────────────────────────────────────
@@ -8106,7 +8173,19 @@ html.theme-dark .reserve-verdict--blue { color: hsl(210 85% 68%); }
 .grid-explorer-card-footer {
   @apply flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5;
   @apply mt-auto pt-2 -mb-4 border-t border-border/40;
-  @apply text-[10px] text-muted-foreground/80;
+  @apply text-[10px];
+  /* Footer text is 10px: muted-foreground/80 measured under 4.5:1 on the card
+     in light mode, which fails WCAG small-text contrast. */
+  color: hsl(var(--foreground) / 0.68);
+}
+
+/* Source links in card footers are 10px text an inch apart — enlarge the tap
+   area to the 24px minimum without moving the visual line. */
+.grid-explorer-card-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-block: -7px;
 }
 
 .grid-explorer-chart-card:hover {
@@ -24438,62 +24517,281 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   }
 }
 
-.featured-hero__story-deck {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: hsl(var(--muted-foreground));
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-}
+/* ── Photo and headline, nothing else ─────────────────────────────────────
+   The deck and the category pill are gone from the trio, on the judgement
+   that two elements read cleaner than four: the whole artwork, then our
+   headline. The rows they occupied go back to the photo, which returns to
+   its full 16:9 — the 3.4:1 top-crop existed to hide the banner's baked-in
+   text behind a deck-carrying layout, and with nothing under the headline
+   the whole card reads as one piece instead of a cropped strip over prose.
 
-/* ── Three across the band ────────────────────────────────────────────────
-   The columns went from two to three, so every horizontal measurement in the
-   rules above is off by a third. At 2552px the cards come to 315px each, not
-   the ~480px those budgets were written against, and the photo — which is a
-   ratio, not a fixed height — shrank with them: 93px instead of 270.
-
-   Measured in the 389px content area with the deck restored:
-     photo 93 + 16 + pill 26 + 16 + headline 82 + 16 + deck 70 = 319
-   The remaining ~70px is split above and below by the band's own centring,
-   which is roughly the slack the two-card layout carried.
-
-   The photo cannot take that space back. Its 3.4:1 frame shows the top ~52%
-   of the artwork, and that fraction is what clears the headline strip baked
-   into the foot of every banner — the fraction is fixed by the artwork, so a
-   taller frame is a frame with the strip back in it, at any card width. */
+   The trio no longer draws cards at all. Three floating image-over-text
+   tiles read as every news site's default; what replaced them is a page of
+   three editorial columns divided by hairlines, each set chip → folio number
+   → artwork → headline → byline, with the byline pinned to the column's
+   foot so the band's spare height becomes deliberate space INSIDE each
+   column instead of dead air around the trio. Hover is typographic — the
+   headline takes the accent and an underline sweeps across it — plus the
+   quiet image zoom; the tile-era lift-and-shadow is switched off because
+   nothing is a tile any more. */
 @media (min-width: 1024px) {
+  .featured-hero__story-image {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Columns divided by rules drawn in the gap, not by padding. The first cut
+     put the gutter inside each column as padding and zeroed it on the outer
+     edges — which made the middle column's photo measurably narrower than
+     its neighbours, since all three grid tracks are equal but the middle
+     paid the gutter twice. Equal gaps keep the three photos identical; the
+     hairline is painted halfway across each gap instead. */
+  .featured-hero__stories {
+    --hero-col-gap: clamp(1.5rem, 2.4vw, 2.25rem);
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: var(--hero-col-gap);
+  }
+
   .featured-hero__story {
     gap: 1rem;
+    justify-content: flex-start;
+    height: 100%;
   }
 
-  /* Sized to a 315px column. The rules above scale the headline off the
-     viewport, which now over-sizes it: 1.5vw is a third of a card wider than
-     it was when there were two of them. */
+  .featured-hero__story + .featured-hero__story::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(var(--hero-col-gap) / -2);
+    width: 1px;
+    background: hsl(var(--border) / 0.55);
+  }
+
+  /* The rail stays at the top; the columns take all remaining height so the
+     byline's margin-top:auto has something to push against. */
+  .featured-hero__body--band {
+    justify-content: flex-start;
+  }
+
+  /* The headline is the main type on the card, so it carries the card.
+     Clamped to three lines, and the three lines are reserved whether used or
+     not: cards sit in grid tracks, and headlines starting level is what keeps
+     the trio looking deliberate. */
   .featured-hero__story-title {
-    font-size: clamp(1rem, 1.05vw, 1.25rem);
-    line-height: 1.26;
+    font-size: clamp(1.1875rem, 1.3vw, 1.5rem);
+    line-height: 1.25;
     -webkit-line-clamp: 3;
     line-clamp: 3;
+    min-height: calc(3 * 1.25em);
   }
 
-  /* Reserve the full three lines whether the headline uses them or not. The
-     cards sit in grid tracks, so a two-line headline in one column pulls its
-     deck up while the others stay put, and three summaries starting at three
-     different heights is the lopsidedness this layout exists to avoid. */
-  .featured-hero__story-title {
-    min-height: calc(3 * 1.26em);
+  /* Nothing is a tile: no lift, no travelling shadow. The image keeps its
+     resting shadow and the inner zoom; movement belongs to the type. */
+  .featured-hero__story:hover .featured-hero__story-image {
+    transform: none;
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.06);
   }
+}
 
-  .featured-hero__story-deck {
-    font-size: 0.8125rem;
-    line-height: 1.65;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+/* The folio number: a typographic marker, not a badge. It wears its
+   category's tint (the colour class comes from the markup) at half voice,
+   and speaks up when its column is hovered. */
+.featured-hero__story-index {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+  transition: opacity 200ms ease;
+}
+
+.featured-hero__story:hover .featured-hero__story-index {
+  opacity: 1;
+}
+
+/* The byline row: author and read time in small caps at the column's foot.
+   margin-top:auto is the whole trick — it converts the band's leftover
+   height into space between headline and byline, per column. */
+.featured-hero__story-byline {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  /* Spread, not strung: the three segments sit at the photo's left edge, its
+     centre, and its right edge, so the row covers exactly the width of the
+     picture above it. The author keeps the category tint from its class. */
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+  padding-top: 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground) / 0.85);
+  white-space: nowrap;
+}
+
+.featured-hero__story-byline-author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── The rail: eyebrow and slide progress ────────────────────────────────
+   The rotation used to be invisible until it moved, and then it just blinked.
+   The bars make it legible: one per slide, the active one filling across the
+   slide's six seconds — the same 6000ms as AUTOPLAY_INTERVAL_MS in
+   FeaturedCarousel.tsx, and the two must move together. Hovering the card
+   pauses the autoplay, so the fill pauses with it; each bar is also the way
+   back to its slide, which quietly restores the manual navigation the old
+   arrow buttons used to provide. */
+.featured-hero__rail {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.125rem;
+}
+
+.featured-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.featured-hero__eyebrow-dot {
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
+}
+
+.featured-hero__progress {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* ── Category above the photo ────────────────────────────────────────────
+   The section chip returned by request, first as a glass pill on the artwork
+   and then — also by request — off it: a row of its own above the picture,
+   wearing the site's normal category tints, with Breaking beside it when a
+   story carries that flag. It costs the card one slim row, which the band's
+   slack covers with room to spare. */
+.featured-hero__story-topline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.featured-hero__progress-bar {
+  position: relative;
+  width: 2.25rem;
+  height: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: hsl(var(--muted-foreground) / 0.22);
+  overflow: hidden;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.featured-hero__progress-bar:hover {
+  background: hsl(var(--muted-foreground) / 0.4);
+}
+
+.featured-hero__progress-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: hsl(var(--primary));
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.featured-hero__progress-bar.is-active .featured-hero__progress-fill {
+  animation: featured-hero-progress 6000ms linear forwards;
+}
+
+.featured-hero__progress-bar.is-active:not(.is-playing) .featured-hero__progress-fill {
+  animation-play-state: paused;
+}
+
+@keyframes featured-hero-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ── The slide change, made worth watching ───────────────────────────────
+   It was a 200ms opacity blink: everything vanished, everything reappeared.
+   Now the outgoing trio breathes out — a 420ms drift up with the faintest
+   shrink and softening (the exit duration is mirrored in goTo's timeout in
+   FeaturedCarousel.tsx) — and the incoming columns arrive one after another:
+   each remounts (the key carries the slide index) and plays a 900ms rise
+   from below, sharpening from a slight blur as it settles, staggered 140ms
+   apart. Slow enough to watch, fast enough to never be waited on: the full
+   changeover is ~1.6s of a 6s slide. First paint gets the same entrance,
+   which turns page load into the reveal it should have been. */
+/* No scale() anywhere in the choreography. Scaling the whole column resized
+   the photos mid-flight — three pictures visibly different sizes during the
+   stagger, each nudging back to true as it settled. Pure translate keeps
+   every photo pixel-identical from first frame to rest. */
+.featured-hero__story {
+  animation: featured-hero-story-in 1150ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--story-i, 0) * 170ms);
+  transition:
+    opacity 560ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 560ms cubic-bezier(0.4, 0, 0.2, 1),
+    filter 560ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.featured-hero__story.is-swapping {
+  opacity: 0;
+  transform: translateY(-18px);
+  filter: blur(3px);
+}
+
+@keyframes featured-hero-story-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(5px);
+  }
+  55% {
+    filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-hero__story {
+    animation: none;
+    transition: opacity 200ms ease-in;
+  }
+  .featured-hero__story.is-swapping {
+    transform: none;
+    filter: none;
+  }
+  .featured-hero__progress-bar.is-active .featured-hero__progress-fill {
+    animation: none;
+    transform: scaleX(1);
   }
 }
 
