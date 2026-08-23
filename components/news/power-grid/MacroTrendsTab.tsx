@@ -111,7 +111,7 @@ function GridBrentDieselTooltip({
   const brentBdtL = (d.globalOil * exRate) / 158.987;
   const difference = d.bdDiesel - brentBdtL;
   return (
-    <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+    <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
       <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
         <span>Benchmark Oil Price ({d.year})</span>
         <span className="text-[9px] uppercase font-bold text-blue-500 tracking-wider">Oil</span>
@@ -305,7 +305,7 @@ function GridLngTariffTooltip({
   const globalGasBdtCm = (d.globalGas * exRate) / 28.3;
   const difference = d.bdGas - globalGasBdtCm;
   return (
-    <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+    <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
       <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
         <span>Benchmark Gas Price ({d.year})</span>
         <span className="text-[9px] uppercase font-bold text-violet-500 tracking-wider">Gas</span>
@@ -925,7 +925,7 @@ export function MacroTrendsTab({
                             if (!active || !payload?.length) return null;
                             const d = payload[0].payload;
                             return (
-                              <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 select-none bg-card">
+                              <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 select-none bg-card">
                                 <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-3 flex items-center justify-between gap-2">
                                   <span>{d.fiscal_year} Financials</span>
                                   <span className="text-[10px] uppercase font-bold text-primary tracking-wider inline-flex items-center gap-1"><GridProvenanceTag kind="P" />{d.percentage}% of Budget</span>
@@ -1104,7 +1104,7 @@ export function MacroTrendsTab({
                             const d = payload[0].payload;
                             const deficit = (d.cost - d.tariff).toFixed(2);
                             return (
-                              <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-80 select-none bg-card">
+                              <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-80 select-none bg-card">
                                 <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                   <span>{d.year} Financials</span>
                                   <span className="text-[10px] uppercase font-bold text-primary tracking-wider">Deficit Gap</span>
@@ -1187,7 +1187,7 @@ export function MacroTrendsTab({
                               const d = payload[0].payload;
                               const deficit = (d.cost - d.tariff).toFixed(2);
                               return (
-                                <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                                <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                   <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                     <span>{d.year} Financials</span>
                                     <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Deficit Gap</span>
@@ -1291,7 +1291,7 @@ export function MacroTrendsTab({
                               const domesticPct = total > 0 ? ((d.domestic / total) * 100).toFixed(1) : '0';
                               const lngPct = total > 0 ? ((d.lng / total) * 100).toFixed(1) : '0';
                               return (
-                                <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                                <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                   <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                     <span>Gas Supply {d.year}</span>
                                     <span className="text-[9px] uppercase font-bold text-purple-500 tracking-wider">LNG Reliance</span>
@@ -2343,7 +2343,7 @@ export function MacroTrendsTab({
                               if (!active || !payload?.length) return null;
                               const d = payload[0].payload;
                               return (
-                                <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                                <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                   <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                     <span>Macro Variables {d.year}</span>
                                     <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Economy</span>
@@ -2420,7 +2420,7 @@ export function MacroTrendsTab({
                               if (!active || !payload?.length) return null;
                               const d = payload[0].payload;
                               return (
-                                <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                                <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                   <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                     <span>Fuel Import Cost {d.year}</span>
                                     <span className="text-[9px] uppercase font-bold text-purple-500 tracking-wider">Commodities</span>
@@ -2598,7 +2598,7 @@ export function MacroTrendsTab({
                                 if (!active || !payload?.length) return null;
                                 const d = payload[0].payload;
                                 return (
-                                  <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                                  <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                     <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                       <span>BPDB {d.year} Financials</span>
                                       <span className="text-[9px] md:text-[10px] uppercase font-bold text-emerald-500 tracking-wider">Audited Ledger</span>
@@ -2721,7 +2721,7 @@ export function MacroTrendsTab({
                                 const profitLabel = d.netProfit >= 0 ? 'Net Profit' : 'Net Loss';
                                 const profitColorClass = d.netProfit >= 0 ? 'text-emerald-500 font-semibold' : 'text-destructive font-semibold';
                                 return (
-                                  <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                                  <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                     <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                       <span>Petrobangla {d.year} Financials</span>
                                       <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Audited Ledger</span>
@@ -2885,7 +2885,7 @@ export function MacroTrendsTab({
                             const globalSolarBdt = (d.globalSolar * exRate) / 100;
                             const premium = d.bdSolar - globalSolarBdt;
                             return (
-                              <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                              <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                 <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                                   <span>Solar PV Benchmarks ({d.year})</span>
                                   <span className="text-[9px] uppercase font-bold text-teal-500 tracking-wider">Solar</span>
@@ -3080,7 +3080,7 @@ export function MacroTrendsTab({
                             if (!active || !payload?.length) return null;
                             const d = payload[0].payload;
                             return (
-                              <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-80 max-w-[calc(100vw-2rem)] select-none bg-card space-y-3">
+                              <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-80 max-w-[calc(100vw-2rem)] select-none bg-card space-y-3">
                                 <div className="font-bold text-foreground border-b border-border/40 pb-1.5 flex items-center justify-between gap-2">
                                   <span>FY {d.fiscal_year} Loss Analysis</span>
                                   <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Power Cell</span>

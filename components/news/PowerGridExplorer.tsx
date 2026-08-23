@@ -1940,7 +1940,7 @@ export function PowerGridExplorer({
                       const row = payload[0].payload;
                       const pct = ((row.gen / totalGenMkwhr) * 100).toFixed(2);
                       return (
-                        <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                        <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                           <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                             <span>{row.name} Share</span>
                             <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Operational Mix</span>
@@ -2083,7 +2083,7 @@ export function PowerGridExplorer({
                         const row = payload[0].payload;
                         const cr = formatBdtAmount(row.cost / 10000000);
                         return (
-                          <div className="p-4 md:p-5 text-card-foreground border border-border/80 rounded-2xl shadow-2xl text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
+                          <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                             <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
                               <span>{row.name} Daily Cost</span>
                               {/* Was "Financial Audit" — nothing here is audited. */}

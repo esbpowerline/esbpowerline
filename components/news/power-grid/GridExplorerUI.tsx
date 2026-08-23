@@ -701,7 +701,7 @@ export function GridKpiTooltipPanel({
         // Stated rather than inherited: the panel is a portal-less child of the
         // tile, so a tile that ever set its own text alignment would drag eight
         // label/value rows along with it.
-        'absolute text-left text-card-foreground border border-border/80 p-4 md:p-5 rounded-2xl shadow-2xl z-[110] top-[calc(100%+12px)] pointer-events-none bg-card transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto',
+        'grid-hover-panel absolute text-left text-card-foreground p-3.5 md:p-4 z-[110] top-[calc(100%+12px)] pointer-events-none transition-all duration-200 ease-out opacity-0 scale-95 translate-y-2 group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0 group-focus-within:pointer-events-auto',
         widthClass,
         pos,
         active && 'opacity-100 scale-100 translate-y-0 pointer-events-auto',
@@ -710,17 +710,14 @@ export function GridKpiTooltipPanel({
       onClick={(e) => e.stopPropagation()}
     >
       <div
-        className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/80 z-[-1]"
+        className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-t border-l border-border/60 z-[-1]"
         style={{ backgroundColor: 'hsl(var(--card))' }}
       />
-      <div
-        className={cn(
-          'font-bold text-xs uppercase tracking-wider border-b border-border/60 pb-1.5 mb-2 flex items-center gap-1.5',
-          accent,
-        )}
-      >
-        <Icon className="h-3.5 w-3.5 shrink-0" />
-        {title}
+      <div className={cn('grid-kpi-tip__head', accent)}>
+        <span className="grid-kpi-tip__icon" aria-hidden>
+          <Icon className="h-3 w-3" />
+        </span>
+        <span className="grid-kpi-tip__title">{title}</span>
       </div>
       {children}
     </div>
@@ -728,7 +725,7 @@ export function GridKpiTooltipPanel({
 }
 
 export function GridKpiTooltipBody({ children }: { children: ReactNode }) {
-  return <div className="space-y-2 text-[11px] md:text-xs leading-relaxed">{children}</div>;
+  return <div className="space-y-2 text-[11px] md:text-xs leading-normal">{children}</div>;
 }
 
 export function GridKpiTooltipRow({
@@ -748,7 +745,7 @@ export function GridKpiTooltipRow({
         {provenance && <GridProvenanceTag kind={provenance} />}
         {label}
       </span>
-      <span className={cn('font-bold text-foreground text-right tabular-nums', valueClass)}>
+      <span className={cn('font-semibold text-foreground text-right tabular-nums', valueClass)}>
         {value}
       </span>
     </div>
@@ -763,7 +760,7 @@ export function GridKpiTooltipRow({
  */
 export function GridKpiTooltipAudit({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold', className)}>
+    <div className={cn('pt-1.5 border-t border-border/30 text-[9px] text-muted-foreground/90 font-medium leading-snug', className)}>
       {children}
     </div>
   );

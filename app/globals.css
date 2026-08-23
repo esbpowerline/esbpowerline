@@ -22420,19 +22420,80 @@ iframe::-webkit-scrollbar-track {
   @apply text-border shrink-0;
 }
 
+/* ── KPI hover-panel skin ───────────────────────────────────────────────────
+   One skin for every hover briefing — the KPI tooltips and the title info
+   panels alike — so the panels read as one family. Layered shadow instead of
+   the old shadow-2xl blob: a contact line, a mid drop and a wide ambient,
+   which is what makes a floating card look lifted rather than smeared. */
+.grid-hover-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.05),
+    0 10px 28px -6px rgb(0 0 0 / 0.16),
+    0 28px 64px -18px rgb(0 0 0 / 0.28);
+}
+
+.dark .grid-hover-panel {
+  border-color: hsl(var(--border) / 0.5);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 10px 28px -6px rgb(0 0 0 / 0.45),
+    0 28px 64px -18px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 hsl(var(--card-foreground) / 0.04);
+}
+
+/* The briefing head: accent-tinted icon chip, spaced small-caps title, and a
+   hairline that starts in the accent and fades out — inherits `currentColor`
+   from the accent class on the head, so every briefing's rule matches its own
+   icon without a colour list living here. */
+.grid-kpi-tip__head {
+  @apply relative flex items-center gap-2 pb-2 mb-2;
+}
+
+.grid-kpi-tip__head::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, currentColor 50%, transparent),
+    hsl(var(--border) / 0.6) 55%,
+    transparent
+  );
+}
+
+.grid-kpi-tip__icon {
+  @apply flex h-5 w-5 items-center justify-center rounded-md shrink-0;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.grid-kpi-tip__title {
+  @apply text-[10px] font-bold uppercase tracking-[0.14em] leading-none min-w-0;
+}
+
 /* The exact source document named inside a KPI briefing. */
 .grid-kpi-source-file {
-  @apply font-mono text-[9px] rounded border border-border/50 bg-muted/30 px-1 py-0.5
+  @apply font-mono text-[9px] rounded-md border border-border/40 bg-muted/40 px-1 py-0.5
          text-foreground/90 break-all leading-snug;
 }
 
-/* KPI citation block — document · part, file, and the host it came from. */
+/* KPI citation block — document · part, file, and the host it came from.
+   Divider weight matches the audit foot, so a panel with both reads as one
+   evenly ruled column rather than two different hairlines. */
 .grid-kpi-cite {
-  @apply pt-1.5 mt-1 border-t border-border/25 text-[9px] text-muted-foreground space-y-1;
+  @apply pt-1.5 mt-1.5 border-t border-border/30 text-[9px] text-muted-foreground space-y-1;
 }
 
+/* Wraps rather than squeezes: a long date label (the gas-day window spells out
+   both clock times) drops to its own right-aligned line, instead of crushing
+   the document name into a one-word-per-line column beside it. */
 .grid-kpi-cite__head {
-  @apply flex justify-between gap-2 items-baseline;
+  @apply flex flex-wrap justify-between items-baseline gap-x-2 gap-y-0.5;
 }
 
 .grid-kpi-cite__doc {
@@ -22444,7 +22505,7 @@ iframe::-webkit-scrollbar-track {
 }
 
 .grid-kpi-cite__date {
-  @apply shrink-0 text-muted-foreground/80;
+  @apply shrink-0 text-muted-foreground/80 ml-auto text-right;
 }
 
 .grid-kpi-cite__row {
