@@ -57,42 +57,74 @@ const NS =
   'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ' +
   'xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
 
-function headerXml(brand: ExportBrand, hasLogo: boolean, logoPx: { w: number; h: number }): string {
+function headerXml(
+  brand: ExportBrand,
+  hasLogo: boolean,
+  logoPx: { w: number; h: number },
+  textWidth: number,
+): string {
   const mark = hasLogo
     ? inlineImage('rIdHeaderLogo', 100, 'ESB PowerLine', logoPx.w, logoPx.h)
     : `<w:r><w:rPr><w:b/><w:color w:val="${BRAND.greenHex}"/><w:sz w:val="24"/></w:rPr>` +
       '<w:t>ESB POWERLINE</w:t></w:r>';
 
+  // The download date, top right: Gregorian, Bangla and transliterated Hijri.
+  // The Arabic-script Hijri line is deliberately left off — three calendars
+  // date the file; the fourth was the same one twice.
+  const dates = brand.stampLines
+    .filter((l) => l.script !== 'arabic')
+    .map(
+      (l) =>
+        `<w:p><w:pPr><w:jc w:val="right"/><w:spacing w:after="20"/></w:pPr>` +
+        `<w:r><w:rPr><w:color w:val="${BRAND.secondaryHex}"/><w:sz w:val="14"/><w:szCs w:val="14"/></w:rPr>` +
+        `<w:t xml:space="preserve">${esc(l.text)}</w:t></w:r></w:p>`,
+    )
+    .join('');
+  const dateColW = 5200;
+  const markColW = Math.max(textWidth - dateColW, 3000);
+
   return (
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr ${NS}>` +
-    // The mark, then the document's own name over the rule.
-    `<w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${mark}</w:p>` +
+    // The mark on the left, the dates on the right, in a borderless table —
+    // then the document's own name over the rule.
+    '<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>' +
+    ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']
+      .map((side) => `<w:${side} w:val="none"/>`)
+      .join('') +
+    '</w:tblBorders></w:tblPr>' +
+    `<w:tblGrid><w:gridCol w:w="${markColW}"/><w:gridCol w:w="${dateColW}"/></w:tblGrid>` +
+    '<w:tr>' +
+    `<w:tc><w:tcPr><w:tcW w:w="${markColW}" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>` +
+    `<w:p><w:pPr><w:spacing w:after="0"/></w:pPr>${mark}</w:p></w:tc>` +
+    `<w:tc><w:tcPr><w:tcW w:w="${dateColW}" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>` +
+    (dates || '<w:p/>') +
+    '</w:tc></w:tr></w:tbl>' +
     '<w:p><w:pPr><w:pBdr>' +
     `<w:bottom w:val="single" w:sz="12" w:space="4" w:color="${BRAND.greenHex}"/>` +
     '</w:pBdr><w:spacing w:after="120"/></w:pPr>' +
-    `<w:r><w:rPr><w:caps/><w:color w:val="${BRAND.secondaryHex}"/><w:sz w:val="15"/>` +
+    `<w:r><w:rPr><w:caps/><w:b/><w:color w:val="${BRAND.secondaryHex}"/><w:sz w:val="16"/><w:szCs w:val="16"/>` +
     `<w:spacing w:val="30"/></w:rPr><w:t xml:space="preserve">${esc(brand.kind)}</w:t></w:r>` +
-    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="15"/></w:rPr>` +
+    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr>` +
     `<w:t xml:space="preserve">   ${esc(brand.covers)}</w:t></w:r>` +
     '</w:p></w:hdr>'
   );
 }
 
-function footerXml(brand: ExportBrand): string {
+function footerXml(brand: ExportBrand, rightTabPos: number): string {
   return (
     `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ${NS}>` +
     '<w:p><w:pPr><w:pBdr>' +
     `<w:top w:val="single" w:sz="6" w:space="4" w:color="${BRAND.hairHex}"/>` +
-    '</w:pBdr><w:tabs><w:tab w:val="right" w:pos="9360"/></w:tabs></w:pPr>' +
-    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="14"/></w:rPr>` +
+    `</w:pBdr><w:tabs><w:tab w:val="right" w:pos="${rightTabPos}"/></w:tabs></w:pPr>` +
+    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="15"/><w:szCs w:val="15"/></w:rPr>` +
     `<w:t xml:space="preserve">${esc(footerNote(brand))}</w:t></w:r>` +
     '<w:r><w:tab/></w:r>' +
     // PAGE and NUMPAGES as real fields, so Word repaginates them itself.
-    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="14"/></w:rPr>` +
+    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="15"/><w:szCs w:val="15"/></w:rPr>` +
     '<w:fldChar w:fldCharType="begin"/></w:r>' +
     '<w:r><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>' +
     '<w:r><w:fldChar w:fldCharType="end"/></w:r>' +
-    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="14"/></w:rPr>` +
+    `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="15"/><w:szCs w:val="15"/></w:rPr>` +
     '<w:t xml:space="preserve"> / </w:t></w:r>' +
     '<w:r><w:fldChar w:fldCharType="begin"/></w:r>' +
     '<w:r><w:instrText xml:space="preserve"> NUMPAGES </w:instrText></w:r>' +
@@ -112,28 +144,25 @@ function footerXml(brand: ExportBrand): string {
 export function provenanceTable(brand: ExportBrand, hasQr: boolean): string {
   const label = (t: string) =>
     `<w:p><w:pPr><w:spacing w:after="20"/></w:pPr><w:r><w:rPr><w:caps/><w:b/>` +
-    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="13"/><w:spacing w:val="30"/></w:rPr>` +
+    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="13"/><w:szCs w:val="13"/><w:spacing w:val="30"/></w:rPr>` +
     `<w:t>${esc(t)}</w:t></w:r></w:p>`;
   const value = (t: string, bold = false) =>
     `<w:p><w:pPr><w:spacing w:after="20"/></w:pPr><w:r><w:rPr>${bold ? '<w:b/>' : ''}` +
-    `<w:color w:val="${BRAND.inkHex}"/><w:sz w:val="18"/></w:rPr>` +
+    `<w:color w:val="${BRAND.inkHex}"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>` +
     `<w:t xml:space="preserve">${esc(t)}</w:t></w:r></w:p>`;
 
   const note = (t: string) =>
     `<w:p><w:pPr><w:spacing w:after="40"/></w:pPr><w:r><w:rPr><w:i/>` +
-    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="14"/></w:rPr>` +
+    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="14"/><w:szCs w:val="14"/></w:rPr>` +
     `<w:t xml:space="preserve">${esc(t)}</w:t></w:r></w:p>`;
 
   const left =
     label(brand.periodLabel) +
     value(brand.periodValue, true) +
     (brand.periodNote ? note(brand.periodNote) : '') +
-    label(brand.retrievedLabel) +
-    // Word resolves a face per script from the reader's own system, so every
-    // line prints here — including the Arabic one the PDF has to leave out.
-    brand.stampLines.map((l) => value(l.text)).join('') +
-    // How the figures were arrived at, and what a blank means: the two things
-    // a reader needs before quoting a number off this page.
+    // The download date itself lives in the running head, top right, so the
+    // block below the letterhead carries only what the figures ARE: the
+    // period, how they were arrived at, and what a blank means.
     note(brand.method);
 
   const right = hasQr
@@ -196,8 +225,15 @@ export async function packBrandedDocx({ body, pageXml, brand }: DocxOptions): Pr
       `<w:body>${provenanceTable(brand, Boolean(qr))}${body}${sectPr}</w:body></w:document>`,
   );
 
-  zip.file('word/header1.xml', headerXml(brand, Boolean(logo), { w: logoW, h: logoH }));
-  zip.file('word/footer1.xml', footerXml(brand));
+  // The header's date column and the footer's page-number tab must sit at the
+  // text width of THIS page — portrait and landscape differ, and a fixed
+  // position leaves them floating mid-line.
+  const pageW = Number(/<w:pgSz[^>]*\bw:w="(\d+)"/.exec(pageXml)?.[1] ?? 11906);
+  const marL = Number(/\bw:left="(\d+)"/.exec(pageXml)?.[1] ?? 720);
+  const marR = Number(/\bw:right="(\d+)"/.exec(pageXml)?.[1] ?? 720);
+  const textWidth = pageW - marL - marR;
+  zip.file('word/header1.xml', headerXml(brand, Boolean(logo), { w: logoW, h: logoH }, textWidth));
+  zip.file('word/footer1.xml', footerXml(brand, textWidth));
 
   const docRels = [
     '<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>',
@@ -261,8 +297,11 @@ export async function packBrandedDocx({ body, pageXml, brand }: DocxOptions): Pr
       '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
       '<w:docDefaults><w:rPrDefault><w:rPr>' +
       // `w:cs` is the complex-script face: it is what Word uses for the Bengali
-      // rows, and why the .docx renders Bengali where the PDF cannot.
-      '<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Nirmala UI"/><w:sz w:val="20"/>' +
+      // rows, and why the .docx renders Bengali where the PDF cannot. `w:szCs`
+      // must track `w:sz`, or Bengali prints a size larger than the Latin text
+      // beside it — Word sizes the two scripts independently.
+      '<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Nirmala UI"/>' +
+      '<w:sz w:val="20"/><w:szCs w:val="20"/>' +
       '</w:rPr></w:rPrDefault></w:docDefaults>' +
       '<w:style w:type="table" w:styleId="TableGrid"><w:name w:val="Table Grid"/></w:style>' +
       '</w:styles>',
