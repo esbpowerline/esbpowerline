@@ -38,7 +38,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/cms', label: 'Dashboard', icon: LayoutGrid },
       { href: '/cms/analytics', label: 'Performance', icon: Activity },
       { href: '/cms/calendar', label: 'Editorial Calendar', icon: CalendarDays },
-      { href: '/cms/yoy-sheet', label: 'Year-on-year sheet', icon: GitCompare },
+      { href: '/cms/yoy-sheet', label: 'Grid Comparison', icon: GitCompare },
     ],
   },
   {
@@ -76,7 +76,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/cms/articles/drafts': 'Drafts',
   '/cms/articles/scheduled': 'Scheduled',
   '/cms/calendar': 'Editorial Calendar',
-  '/cms/yoy-sheet': 'Year-on-year sheet',
+  '/cms/yoy-sheet': 'Grid Comparison',
   '/cms/media': 'Media Library',
   '/cms/categories': 'Categories',
   '/cms/tags': 'Tags',

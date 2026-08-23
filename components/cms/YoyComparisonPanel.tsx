@@ -82,7 +82,7 @@ const MODE_IDS = ['sheet', 'compare', 'range', 'months'] as const;
 const LANGS = ['en', 'bn'] as const;
 
 const MODES: Array<{ id: Mode; label: string }> = [
-  { id: 'sheet', label: 'Year-on-year sheet' },
+  { id: 'sheet', label: 'YoY Sheet' },
   { id: 'compare', label: 'Compare two days' },
   { id: 'range', label: 'Range export' },
   { id: 'months', label: 'Compare months' },
