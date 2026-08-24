@@ -42,7 +42,7 @@ import {
   staleRowsFor,
   monthLabel,
 } from '@/lib/data/pgcb-monthly-verification';
-import { CustomDropdown } from '@/components/news/power-grid/shared';
+import { CustomDropdown, TakaIcon } from '@/components/news/power-grid/shared';
 import {
   GridChartFrame,
   GridRechartsLegend,
@@ -744,7 +744,7 @@ export function MacroTrendsTab({
             label: "ADP Allocation",
             value: "18,409.52 Cr",
             desc: "FY 2025-26 budget",
-            Icon: DollarSign,
+            Icon: TakaIcon,
             iconColor: "text-lime-600 dark:text-lime-400 bg-lime-500/10 border-lime-500/20",
             tooltipTitle: "National Development Budget",
             tooltipDesc: "Capital expenditure allocation under the Annual Development Programme (ADP) specifically earmarked for the Power Division. Funded by government resources and foreign development partners (JICA, ADB, WB).",
@@ -797,7 +797,7 @@ export function MacroTrendsTab({
               { id: 'budget', label: 'National Budget & Infra', icon: Landmark },
               { id: 'reports', label: 'Annual Reports', icon: FileText },
               { id: 'system_loss', label: 'Sector Glance & Losses', icon: Activity },
-              { id: 'insights', label: 'Analyst & Investor Insights', icon: DollarSign },
+              { id: 'insights', label: 'Analyst & Investor Insights', icon: TakaIcon },
               { id: 'verification', label: 'Published vs Derived', icon: ShieldCheck }
             ].map((t) => {
               const SubIcon = t.icon;
@@ -1165,7 +1165,7 @@ export function MacroTrendsTab({
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <DollarSign className="h-5 w-5 shrink-0 text-primary" />
+                      <TakaIcon className="h-5 w-5 shrink-0 text-primary" />
                       <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">Wholesale Tariff vs. Unit Production Cost</h3>
                         <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
@@ -3260,7 +3260,7 @@ export function MacroTrendsTab({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="card p-4 space-y-4">
                   <div className="flex items-center gap-2 pb-2.5 border-b border-border/40">
-                    <DollarSign className="h-5 w-5 shrink-0 text-amber-500" />
+                    <TakaIcon className="h-5 w-5 shrink-0 text-amber-500" />
                     <div>
                       <h4 className="font-display font-bold text-sm text-foreground">Listed IPPs Receivables &amp; Working Capital Risk</h4>
                       <p className="text-[10px] text-muted-foreground">Analysis for Summit Power, Baraka, United Power equity holders</p>

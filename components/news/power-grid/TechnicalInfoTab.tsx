@@ -13,7 +13,7 @@ import { useEffect, useState, useRef } from 'react';
 import {
   Zap, Activity, Cable, FileText, MapPin, Search, ChevronLeft, ChevronRight,
   ChevronDown, Check, Info, Map, Network, History, Database, TrendingUp,
-  CheckSquare, DollarSign, Globe,
+  CheckSquare, Globe,
 } from 'lucide-react';
 import { cn, formatNumber, formatBdtAmount } from '@/lib/utils';
 import { substationsData } from '@/lib/data/infrastructure/substations';
@@ -326,7 +326,7 @@ export function TechnicalInfoTab({
                   colorClass: "text-purple-500",
                   items: [
                     { id: 'opgw_map', label: 'OPGW Fiber Network Map', icon: Map, activeClass: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 shadow-sm font-semibold", hoverClass: "hover:bg-purple-500/5 hover:text-purple-600 dark:hover:text-purple-400" },
-                    { id: 'opgw_lease', label: 'Optical Fiber Leasing', icon: DollarSign, activeClass: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 shadow-sm font-semibold", hoverClass: "hover:bg-purple-500/5 hover:text-purple-600 dark:hover:text-purple-400" }
+                    { id: 'opgw_lease', label: 'Optical Fiber Leasing', icon: TakaIcon, activeClass: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 shadow-sm font-semibold", hoverClass: "hover:bg-purple-500/5 hover:text-purple-600 dark:hover:text-purple-400" }
                   ]
                 }
               ].map((g, idx) => (
@@ -2159,7 +2159,7 @@ export function TechnicalInfoTab({
                 <div className="space-y-4 relative z-10">
                   <div className="flex items-start gap-4">
                     <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500 border border-emerald-500/20 shrink-0">
-                      <DollarSign className="h-6 w-6 shrink-0" />
+                      <TakaIcon className="h-6 w-6 shrink-0" />
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-lg font-bold text-foreground">Optical Fiber Leasing</h3>
@@ -2245,7 +2245,7 @@ export function TechnicalInfoTab({
                     <div>
                       <div className="flex items-center gap-2 mb-4">
                         <div className="p-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl">
-                          <DollarSign className="h-4 w-4 shrink-0" />
+                          <TakaIcon className="h-4 w-4 shrink-0" />
                         </div>
                         <h4 className="font-bold text-foreground uppercase tracking-wider text-xs">Dark Fiber Lease Rate</h4>
                       </div>

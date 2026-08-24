@@ -66,6 +66,22 @@ function snapshotLabelOrder(label: string): number {
   return (TARGET_ORDER as Record<string, number>)[label] ?? 99;
 }
 
+/** "2026-08-24" out of an ISO date or datetime; null when the value is neither. */
+function normalizeIsoDay(value: string | undefined | null): string | null {
+  if (!value) return null;
+  const match = /^(\d{4}-\d{2}-\d{2})/.exec(value.replace(/^"|"$/g, ''));
+  return match ? match[1] : null;
+}
+
+/** "Aug 24" — day without the year, which the meta slot has no room for. */
+function formatCompactDay(isoDay: string, locale: string): string {
+  const [y, m, d] = isoDay.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(locale === 'bn' ? 'bn-BD' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 /** The slice of /api/data/live-grid this panel reads. */
 type LiveGrid = {
   asOf: string;
@@ -78,6 +94,8 @@ type LiveGrid = {
     imports: { totalMw: number };
   };
   today: { maxDemandMw: number };
+  /** buildLiveGridSnapshot's check: printed total === sum of fuels + imports. */
+  reconciles?: boolean;
 };
 
 const LIVE_POLL_MS = 15 * 60 * 1000;
@@ -129,16 +147,22 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
       return live.latest.loadShedMw;
     case 'Peak Today':
       return live.today.maxDemandMw;
+    // Both of these come off the generation table, which is the table the
+    // reconciliation covers. When the printed total stops matching its own
+    // components, that table is mis-parsed or mis-published, so the tile
+    // falls back to the daily report rather than showing a confident green
+    // dot over a number we cannot vouch for. The demand-side tiles above
+    // are unaffected -- they are parsed from the other page.
     case 'Coal Generation':
-      return live.latest.byFuel.coalMw;
+      return live.reconciles === false ? null : live.latest.byFuel.coalMw;
     case 'Grid Import':
-      return live.latest.imports.totalMw;
+      return live.reconciles === false ? null : live.latest.imports.totalMw;
     default:
       return null;
   }
 }
 
-function LocalSnapshotDashboard({ initialStats, live }: { initialStats?: any[]; live: LiveGrid | null }) {
+function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStats?: any[]; live: LiveGrid | null; liveStamp?: string | null }) {
   const { locale, t } = useLocale();
   const [stats, setStats] = useState<any[]>(() => {
     const incomingMap = new Map<string, any>();
@@ -214,11 +238,11 @@ function LocalSnapshotDashboard({ initialStats, live }: { initialStats?: any[]; 
         const liveVal = live ? liveValueFor(s.label, live) : null;
         const isLive = liveVal !== null;
         const displayValue = isLive ? liveVal : s.value;
-        const liveHour = live ? live.asOf.slice(11, 16) : '';
+        const liveWhen = liveStamp ?? (live ? live.asOf.slice(11, 16) : '');
         const liveTip =
           locale === 'bn'
-            ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveHour} পর্যন্ত`
-            : `NLDC hourly · as of ${liveHour}`;
+            ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveWhen} পর্যন্ত`
+            : `NLDC hourly · as of ${liveWhen}`;
 
         const fullLabel = localizeEnergyStatLabel(s.label, locale as any);
         let shortLabel = fullLabel;
@@ -309,7 +333,19 @@ function SnapshotSegment({
   // Name both cadences; without live data the old single stamp stands. The
   // year is dropped from the daily date in the two-stamp form — the line has
   // to fit the meta slot, and the year says nothing "Daily Aug 22" does not.
+  // The hourly stamp used to print the time alone. Directly under "Daily
+  // Aug 23" that reads as 23 Aug 21:00, when the reading is in fact the
+  // 24th: NLDC's newest posted hour normally belongs to the day AFTER the
+  // newest daily report, because a day's report is only published the next
+  // morning. So name the day whenever the two cadences disagree -- or
+  // whenever we cannot tell that they agree, the safe side of the ambiguity.
   const liveHour = live ? live.asOf.slice(11, 16) : null;
+  const liveDay = live ? normalizeIsoDay(live.asOf) : null;
+  const dailyDay = normalizeIsoDay(snapshotDate);
+  const liveStamp =
+    liveHour && liveDay && (!dailyDay || liveDay !== dailyDay)
+      ? `${formatCompactDay(liveDay, locale)}, ${liveHour}`
+      : liveHour;
   const compactHeaderDate = headerDate.replace(/,?\s*[\d০-৯]{4}\s*$/, '');
 
   return (
@@ -341,17 +377,17 @@ function SnapshotSegment({
               <>
                 <span className="home-snapshot-segment__updated">
                   {locale === 'bn' ? 'ঘণ্টাভিত্তিক ' : 'Hourly '}
-                  <time dateTime={live!.asOf}>{liveHour}</time>
+                  <time dateTime={live!.asOf}>{liveStamp}</time>
                 </span>
                 <span className="home-snapshot-segment__updated">
                   {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
-                  <time dateTime={snapshotDate ?? headerDate}>{compactHeaderDate}</time>
+                  <time dateTime={dailyDay ?? undefined}>{compactHeaderDate}</time>
                 </span>
               </>
             ) : (
               <span className="home-snapshot-segment__updated">
                 {locale === 'bn' ? 'আপডেট ' : 'Updated '}
-                <time dateTime={snapshotDate ?? headerDate}>{headerDate}</time>
+                <time dateTime={dailyDay ?? undefined}>{headerDate}</time>
               </span>
             )}
             <span className="home-snapshot-segment__live">
@@ -365,7 +401,11 @@ function SnapshotSegment({
         </header>
 
         <div className="home-snapshot-segment__body">
-          <LocalSnapshotDashboard initialStats={snapshotStats as any[]} live={live} />
+          <LocalSnapshotDashboard
+            initialStats={snapshotStats as any[]}
+            live={live}
+            liveStamp={liveStamp}
+          />
         </div>
 
         {sourcesText ? (

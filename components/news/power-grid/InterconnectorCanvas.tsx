@@ -123,6 +123,22 @@ export function InterconnectorCanvas({
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
+    // Measured directly first, then observed -- the same fix the forecast
+    // canvas carries, for the same failure. `width` starts at 0 and `model`
+    // returns null until it is set, so the whole drawing hangs on the observer
+    // firing. A ResizeObserver's first callback is delivered on an animation
+    // frame, and landing straight on this tab (a reload, or a ?tab=regional
+    // link) does not reliably produce one -- the host measured 1430x352 while
+    // the canvas held zero children and no amount of resizing recovered it.
+    // The card then showed its header, its totals and its circuit bars with an
+    // empty well where the chart belongs, which reads as "the flow animation
+    // is gone" because every other part of the card is present.
+    const measure = () => {
+      const box = el.getBoundingClientRect();
+      if (box.width > 0) setWidth(box.width);
+      if (box.height > 0) setHeight(box.height);
+    };
+    measure();
     const ro = new ResizeObserver(([e]) => {
       setWidth(e.contentRect.width);
       setHeight(e.contentRect.height);

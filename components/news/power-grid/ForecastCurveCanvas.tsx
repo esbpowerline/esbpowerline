@@ -97,6 +97,7 @@ export function ForecastCurveCanvas({
   gridColor,
   issuedClock,
   eveningPeakTime,
+  nowMinutes,
 }: {
   points: ForecastCurvePoint[];
   forecastColor: string;
@@ -110,6 +111,12 @@ export function ForecastCurveCanvas({
   issuedClock?: string | null;
   /** PGCB's own stamp for the evening peak hour, where the day states one. */
   eveningPeakTime?: string | null;
+  /**
+   * Minutes past midnight, Dhaka, for a day still running. Draws the now-rule
+   * and dims the hours ahead of it. Omitted on a settled day, where every hour
+   * is behind and a "now" would be meaningless.
+   */
+  nowMinutes?: number | null;
 }) {
   const uid = useId().replace(/:/g, '');
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -304,7 +311,35 @@ export function ForecastCurveCanvas({
             <stop offset="0%" stopColor={overColor} stopOpacity={0.3} />
             <stop offset="100%" stopColor={overColor} stopOpacity={0.12} />
           </linearGradient>
+          {/* Night faded into day rather than stopped at a hard edge, as on the
+              load curve: the grid does not change character at exactly 06:00,
+              and a day's shape means little without knowing which end is the
+              small hours. */}
+          <linearGradient id={`fc-night-${uid}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={axisColor} stopOpacity={0.07} />
+            <stop offset="100%" stopColor={axisColor} stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id={`fc-dusk-${uid}`} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor={axisColor} stopOpacity={0} />
+            <stop offset="100%" stopColor={axisColor} stopOpacity={0.07} />
+          </linearGradient>
         </defs>
+
+        {/* Circadian ground, drawn under everything. */}
+        <rect
+          x={PAD.left}
+          y={PAD.top}
+          width={Math.max(0, model.x(6 * 60) - PAD.left)}
+          height={VIEW_H - PAD.top - PAD.bottom}
+          fill={`url(#fc-night-${uid})`}
+        />
+        <rect
+          x={model.x(18 * 60)}
+          y={PAD.top}
+          width={Math.max(0, VIEW_W - PAD.right - model.x(18 * 60))}
+          height={VIEW_H - PAD.top - PAD.bottom}
+          fill={`url(#fc-dusk-${uid})`}
+        />
 
         {model.ticks.map((t) => (
           <g key={t}>
@@ -314,8 +349,9 @@ export function ForecastCurveCanvas({
               y1={model.y(t)}
               y2={model.y(t)}
               stroke={gridColor}
-              strokeOpacity={0.45}
+              strokeOpacity={0.3}
               strokeWidth={0.7}
+              strokeDasharray="3 6"
             />
             <text x={PAD.left - 7} y={model.y(t) + 3.5} textAnchor="end" fontSize={9.5} fill={axisColor}>
               {formatMw(t)}
@@ -323,6 +359,11 @@ export function ForecastCurveCanvas({
           </g>
         ))}
 
+        {/* The ink wipes in west to east so the day arrives in the order it
+            happened. The axis above is outside this group deliberately: the
+            frame is not news, the day is -- the same rule the interconnector
+            canvas states for its own wipe. */}
+        <g className="forecast-curve__ink">
         {/* Everything left of this line is hindsight, not forecast. */}
         {model.issuedMins != null && (
           <g>
@@ -365,6 +406,50 @@ export function ForecastCurveCanvas({
         )}
         {model.actual && (
           <path d={model.actual} fill="none" stroke={actualColor} strokeWidth={2.4} strokeLinecap="round" />
+        )}
+
+        {/* Now.
+
+            Everything on this chart is stated in Dhaka wall-clock and the day
+            is still running, so without this the reader has no way to tell
+            which part of the curve is a record and which is still a claim.
+            The hours ahead are veiled and the rule is labelled, so "the
+            forecast is running 400 MW high" can be read as "so far".
+
+            The veil sits above the ink and below the axis furniture: it must
+            dim the curves it covers, not the tick labels beside them. */}
+        {nowMinutes != null && nowMinutes > 0 && nowMinutes < 1440 && (
+          <g className="forecast-curve__now">
+            <rect
+              x={model.x(nowMinutes)}
+              y={PAD.top}
+              width={Math.max(0, VIEW_W - PAD.right - model.x(nowMinutes))}
+              height={model.plotH}
+              fill={gridColor}
+              fillOpacity={0.22}
+            />
+            <line
+              x1={model.x(nowMinutes)}
+              x2={model.x(nowMinutes)}
+              y1={PAD.top - 6}
+              y2={PAD.top + model.plotH}
+              stroke={axisColor}
+              strokeWidth={1.1}
+              strokeDasharray="4 3"
+              strokeOpacity={0.85}
+            />
+            <circle cx={model.x(nowMinutes)} cy={PAD.top - 6} r={2.6} fill={axisColor} />
+            <text
+              x={model.x(nowMinutes) - 6}
+              y={PAD.top - 10}
+              textAnchor="end"
+              fontSize={9.5}
+              fontWeight={700}
+              fill={axisColor}
+            >
+              now
+            </text>
+          </g>
         )}
 
         {/* The evening peak — the moment the whole report is planned around. */}
@@ -474,6 +559,7 @@ export function ForecastCurveCanvas({
             )}
           </g>
         )}
+        </g>
       </svg>
 
       {/* HTML over the SVG: crisp type and the card's own styles, rather than
@@ -520,7 +606,7 @@ export function ForecastCurveCanvas({
         </div>
       )}
 
-      <figcaption className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
+      <figcaption className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded" style={{ background: forecastColor }} />
           Forecast
@@ -537,6 +623,15 @@ export function ForecastCurveCanvas({
           <span className="h-2 w-3 rounded-sm" style={{ background: overColor, opacity: 0.45 }} />
           Grid beat forecast
         </span>
+        {nowMinutes != null && (
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              className="h-2 w-3 rounded-sm"
+              style={{ background: gridColor, opacity: 0.45 }}
+            />
+            Still ahead of now
+          </span>
+        )}
         <span className="inline-flex items-center gap-1.5">
           <span
             className="h-2 w-2 rounded-sm border"

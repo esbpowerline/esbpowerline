@@ -9395,8 +9395,12 @@ button.grid-explorer-link {
      the glyph advance, so a P box measured 14.43px against a D box at 15.02px —
      two marks that sit directly above one another in the hover panels and read
      as misaligned at that difference. */
-  width: 0.95rem;
-  height: 0.95rem;
+  /* A whole 16px, not 15.1875. The border is 1px and the D's is dashed: at a
+     fractional box size Chrome lays the dashes out across a sub-pixel edge and
+     the box itself reads as lopsided before the letter inside it is even
+     considered. */
+  width: 1rem;
+  height: 1rem;
   padding: 0;
   border: 1px solid currentColor;
   border-radius: 3px;
@@ -9415,15 +9419,32 @@ button.grid-explorer-link {
   flex: none;
 }
 
+/* Optical centring, which is not the same as geometric centring.
+   
+   Flex centres the glyph's ADVANCE box. Inter's ink does not fill its advance
+   evenly: measured through canvas TextMetrics at the exact face this renders in
+   (Inter 800, 10px), P advances 6.52px while its ink runs to 7.00, and D
+   advances 7.23px while its ink runs to 8.00. So both letters are drawn with
+   their ink hanging past the right of the box they were centred by -- D by
+   0.77px, which is why D is the one that reads as shoved right inside its
+   dashed box while P looks acceptable.
+
+   Correcting with padding rather than a transform keeps it to one rule and no
+   extra element: with border-box sizing, padding-right shrinks the content box
+   from the right, and centring inside it moves the glyph left by half. The
+   values are the measured overhangs. Vertical centring needs no correction --
+   the same measurement puts the ink centre exactly on the box centre. */
 .grid-provenance-tag--p {
   color: hsl(var(--primary));
   background: hsl(var(--primary) / 0.08);
+  padding-right: 0.48px;
 }
 
 .grid-provenance-tag--d {
   color: hsl(var(--muted-foreground));
   background: hsl(var(--muted-foreground) / 0.08);
   border-style: dashed;
+  padding-right: 0.77px;
 }
 
 /* Recharts hover cursor â€” theme-friendly */
@@ -23020,14 +23041,23 @@ iframe::-webkit-scrollbar-track {
   70%, 100% { transform: scale(3.4); opacity: 0; }
 }
 
+/* The wipe, the late fade and the peak ring are entrance flourishes: the chart
+   says exactly the same thing without them, so reduced motion drops them.
+
+   The travelling dots are NOT in that category, and hiding them here was the
+   bug. They are the only thing on the drawing that states which way the power
+   crosses -- the corridors are drawn as bars either way, and nothing else
+   encodes the direction. Removing them under reduced motion did not remove an
+   animation, it removed a reading from the chart, which is the one thing a
+   motion preference must never do. Essential motion is exempt for exactly this
+   reason, so the file of dots keeps running; scrubbing still pauses it, which
+   is where a reader who wants it still has one. */
 @media (prefers-reduced-motion: reduce) {
   .xgrid__svg.is-playing .xgrid__wipe,
   .xgrid__svg.is-playing .xgrid__late,
-  .xgrid__svg.is-playing .xgrid__flow,
   .xgrid__svg.is-playing .xgrid__peak-ring {
     animation: none !important;
   }
-  .xgrid__flow { opacity: 0 !important; }
 }
 
 @media (max-width: 40rem) {
@@ -25427,4 +25457,148 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   background: transparent;
   border-style: dashed;
   border-color: hsl(var(--muted-foreground) / 0.45);
+}
+
+/* ── live forecast card, regional bars, forecast curve ─────────────────────
+   Three drawings that arrive rather than appear. The rule they share with the
+   interconnector canvas: the frame is not news, the day is — so axes, tracks
+   and headers are static and only the ink moves. */
+
+.forecast-curve__ink {
+  animation: forecast-curve-wipe 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes forecast-curve-wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+.live-forecast-card {
+  animation: grid-panel-in 320ms ease both;
+}
+
+/* The four headline figures land left to right, in the order they are read.
+   --i carries the index; without it four identical animations fire at once and
+   the row reads as a single block flashing rather than as figures arriving. */
+.live-forecast-stat {
+  animation: live-forecast-stat-in 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+
+@keyframes live-forecast-stat-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Bars that state a percentage grow from the axis to it, so the drawing is
+   read as a measurement being taken rather than a block that was always there.
+   transform, not width: width animates layout, and these sit inside a table
+   that would reflow on every frame. */
+.grid-bar-fill {
+  transform-origin: left center;
+  animation: grid-bar-grow 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes grid-bar-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Motion here is decoration over figures that are already legible, so it is
+   the first thing dropped when the reader has asked for less of it. */
+@media (prefers-reduced-motion: reduce) {
+  .forecast-curve__ink,
+  .live-forecast-card,
+  .live-forecast-stat,
+  .grid-bar-fill {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+}
+
+/* ── forecast day switch ───────────────────────────────────────────────────
+   A track with a sliding thumb, sized so both halves are equal whatever their
+   labels say. The predecessor was two chips that read as a pair of captions;
+   the affordance has to be in the shape, not in the wording. */
+
+.forecast-switch {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0;
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--muted) / 0.5);
+  min-width: 12.5rem;
+}
+
+.forecast-switch__thumb {
+  position: absolute;
+  z-index: 0;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / 2);
+  border-radius: 9px;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--primary) / 0.25);
+  box-shadow: 0 1px 3px hsl(var(--foreground) / 0.08);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.forecast-switch__opt {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9px;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: color 160ms ease;
+}
+
+/* The inactive half keeps enough contrast to be read as a place to go. Faded
+   to a hint it looked disabled, which is the opposite of the point. */
+.forecast-switch__opt:hover { color: hsl(var(--foreground)); }
+.forecast-switch__opt.is-active { color: hsl(var(--primary)); }
+
+.forecast-switch__opt:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.5);
+  outline-offset: 2px;
+}
+
+.forecast-switch__day {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.forecast-switch__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  line-height: 1.1;
+}
+
+.forecast-switch__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: hsl(var(--destructive));
+  box-shadow: 0 0 0 2px hsl(var(--destructive) / 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .forecast-switch__thumb { transition-duration: 1ms; }
 }

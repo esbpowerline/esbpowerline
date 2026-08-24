@@ -35,6 +35,7 @@
     "db:studio": "prisma studio",
     "check:releases": "tsx --conditions react-server scripts/check-releases.ts",
     "publish:local": "tsx --conditions react-server scripts/publish-local.ts",
+    "build:forecast": "python scripts/build_forward_forecast.py",
     "verify:data": "node scripts/verify-data.mjs",
     "verify:source": "node scripts/verify-source.mjs",
     "verify:reserves": "python scripts/verify_reserve_model.py",

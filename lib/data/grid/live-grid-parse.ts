@@ -167,7 +167,12 @@ export type LiveGridSnapshot = {
     maxDemandAt: string;
     maxLoadShedMw: number;
   };
-  /** The last 24 posted hours, oldest first, for sparklines. */
+  /**
+   * The last 24 POSTED rows, oldest first, for sparklines -- not 24 hours.
+   * NLDC drops an hour from the page now and then (00:00 was missing on
+   * 2026-08-24), so this window can span more wall-clock than it has rows.
+   * Fine for a sparkline; do not average it and call the result daily.
+   */
   hours: LiveGridHour[];
   /** |total − sum of components| ≤ 1 MW on the latest row. */
   reconciles: boolean;

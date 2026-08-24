@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useId, useState, useRef, RefObject, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  Zap, Activity, Cable, TrendingUp, FileText, BarChart3, MapPin, DollarSign, Droplet, Globe, Sun,
+  Zap, Activity, Cable, TrendingUp, FileText, BarChart3, MapPin, Droplet, Globe, Sun,
   ChevronLeft, ChevronRight, ChevronDown, Check, Info, Network, CheckSquare, Calendar, RotateCcw, History, Factory,
   AlertTriangle
 } from 'lucide-react';
@@ -62,7 +62,7 @@ import { InterconnectorCanvas } from '@/components/news/power-grid/Interconnecto
 import { totalCapacityRenewables } from '@/lib/data/companies/sreda';
 import { macroTariffData } from '@/lib/data/macro/tariff';
 
-import { CustomDropdown } from '@/components/news/power-grid/shared';
+import { CustomDropdown, TakaIcon } from '@/components/news/power-grid/shared';
 import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
 import {
   GenerationKpiStrip,
@@ -72,12 +72,12 @@ import {
 } from '@/components/news/power-grid/TabKpiStrips';
 import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
 import { BpdbAccountsPanel } from '@/components/news/power-grid/BpdbAccountsPanel';
-import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, GridTablePager, useTablePager } from '@/components/news/power-grid/GridExplorerUI';
+import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
 import type { GridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { MethodologyReconciliationBanner } from '@/components/news/power-grid/MethodologyReconciliationBanner';
 import { GridDayWindows } from '@/components/news/power-grid/GridDayWindows';
-import { ForecastVsActualPanel } from '@/components/news/power-grid/ForecastVsActualPanel';
+import { ForecastSection } from '@/components/news/power-grid/ForecastSection';
 import { petrobanglaGasDay, formatWindow } from '@/lib/data/grid/observation-window';
 import { tabAvailability, type GridTabId } from '@/lib/data/grid/tab-availability';
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
@@ -1017,7 +1017,6 @@ export function PowerGridExplorer({
   // Overview calculations
   // The outage log runs to thirty-odd entries on a normal day and more on a bad
   // one. Paged like every other long list rather than left as a scroll well.
-  const outagePager = useTablePager(dailyOutages, 25);
 
   const totalGenMkwhr = generationData.reduce((sum, item) => sum + item.gen, 0);
   const totalCostBdt = generationData.reduce((sum, item) => sum + (item.cost ?? 0), 0);
@@ -2044,7 +2043,7 @@ export function PowerGridExplorer({
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
               <div className="flex items-center gap-2.5 min-w-0">
-                <DollarSign className="h-5 w-5 shrink-0 text-amber-500" />
+                <TakaIcon className="h-5 w-5 shrink-0 text-amber-500" />
                 <div className="min-w-0">
                   <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
                   {/* The bars are PGCB's published per-fuel costs; this header adds
@@ -2145,7 +2144,7 @@ export function PowerGridExplorer({
             <div className="grid grid-cols-2 gap-3 mt-6 pt-4 pb-4 border-t border-border/50">
               <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[5.5rem] text-center">
                 <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1.5">
-                  <DollarSign className="h-4 w-4 shrink-0 text-primary" />
+                  <TakaIcon className="h-4 w-4 shrink-0 text-primary" />
                   Avg Production Cost <GridProvenanceTag kind="D" />
                 </div>
                 {/* Published total cost ÷ published headline generation. Note the
@@ -2191,7 +2190,11 @@ export function PowerGridExplorer({
             the grid did — the load curve, the mix, the cost — and only then
             what was expected of it. Renders nothing on days whose issuing
             workbook is absent. */}
-        <ForecastVsActualPanel
+        {/* One card, two vintages: the running day checked against NLDC's
+            hourly page, or the settled day checked against the audited
+            workbook. The section picks the default and owns the switch; with
+            no live half it renders the settled card exactly as before. */}
+        <ForecastSection
           forecast={forecast}
           systemStats={systemStats}
           hourlyLoadData={hourlyLoadData}
@@ -3015,7 +3018,7 @@ export function PowerGridExplorer({
                                     printed beside it. The footer states the
                                     method, so the drawing has to match it. */}
                                 <div
-                                  className="h-full bg-amber-500 rounded"
+                                  className="h-full bg-amber-500 rounded grid-bar-fill"
                                   style={{ width: `${Math.min(rd.pct, 100)}%` }}
                                 />
                               </div>
@@ -3122,7 +3125,7 @@ export function PowerGridExplorer({
                   min-h-0 lets the scroll container shrink instead of forcing the
                   full list height. */}
               <div className="space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
-                {outagePager.rows.map((o, idx) => (
+                {dailyOutages.map((o, idx) => (
                   <div key={idx} className="p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
                     <div className="flex justify-between font-bold text-foreground">
                       <span>{o.plant}</span>
@@ -3148,17 +3151,6 @@ export function PowerGridExplorer({
                   </div>
                 ))}
               </div>
-              <GridTablePager
-                page={outagePager.page}
-                totalPages={outagePager.totalPages}
-                pageSize={outagePager.pageSize}
-                total={outagePager.total}
-                from={outagePager.from}
-                to={outagePager.to}
-                onPage={outagePager.setPage}
-                onPageSize={outagePager.setPageSize}
-                noun="outages"
-              />
 
               {/* Card Metadata Footer */}
               <GridCardFooter>
@@ -3354,7 +3346,7 @@ export function PowerGridExplorer({
                       <div key={c.circuit} className="flex items-center gap-3 text-[11px]">
                         <span className="w-44 shrink-0 text-muted-foreground truncate">{c.circuit}</span>
                         <span className="flex-1 h-3 rounded-sm bg-muted/30 overflow-hidden">
-                          <span className="block h-full rounded-sm" style={{ width: `${c.pct}%`, background: chartTheme.categorical(c.corridorIndex) }} />
+                          <span className="block h-full rounded-sm grid-bar-fill" style={{ width: `${c.pct}%`, background: chartTheme.categorical(c.corridorIndex) }} />
                         </span>
                         <span className="w-24 shrink-0 text-right font-semibold tabular-nums">{(c.energyKwh / 1e6).toFixed(2)} MKWh</span>
                       </div>

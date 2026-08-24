@@ -160,6 +160,7 @@ export function ForecastVsActualPanel({
   hourlyLoadData,
   actualsFrom,
   chartTheme,
+  toggle,
   className,
 }: {
   forecast?: GridForecast | null;
@@ -180,6 +181,12 @@ export function ForecastVsActualPanel({
     axisTick: string;
     gridStroke: string;
   };
+  /**
+   * The day switch, when a live half exists to switch to. Owned by
+   * ForecastSection so the two vintages share one control; absent on days
+   * that have no live comparison, which must not grow a dead button.
+   */
+  toggle?: React.ReactNode;
   className?: string;
 }) {
   // "10:06" from the stored instant, without a date library and without
@@ -313,7 +320,7 @@ export function ForecastVsActualPanel({
             </p>
           </div>
         </div>
-        <span className="grid-explorer-chip">Forecast</span>
+        {toggle ?? <span className="grid-explorer-chip">Forecast</span>}
       </div>
 
       <div className="grid-explorer-table-wrap">

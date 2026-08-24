@@ -128,6 +128,7 @@ export default async function Home() {
               <HomeSnapshotPanel
                 snapshotStats={snapshotStats}
                 snapshotLabel={snapshotLabel}
+                snapshotDate={snapshotDate}
                 snapshotHeaderDate={snapshotHeaderDate}
                 layout="segment"
               />
