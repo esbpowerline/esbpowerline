@@ -21,17 +21,20 @@ The order is load-bearing:
   5. plants               — per-station detail, keyed off the source workbook
   6. forecast             — PGCB's projection for the day, from the report filed
                             that morning; anchored onto the day it describes
-  7. archive fallback     — the bundled last-resort copy
-  8. available dates      — the date list the picker and middleware read
-  9. gas timeline         — only when the gas archive gained a day; the National
+  7. forward forecast     — the same projection for the day still RUNNING, which
+                            the archive cannot supply until tomorrow. Only when
+                            this energy day + 1 is today in Dhaka
+  8. archive fallback     — the bundled last-resort copy
+  9. available dates      — the date list the picker and middleware read
+ 10. gas timeline         — only when the gas archive gained a day; the National
                             Timeline card and the reserve model both read it
- 10. reserve model        — same gate as the timeline; rebuilds the depletion
+ 11. reserve model        — same gate as the timeline; rebuilds the depletion
                             model, its sensitivity artifact, then runs the
                             36-check validator (which fails if the two artifacts
                             were built on different archive dates)
- 11. publish              — writes the DataRelease rows the live site reads
+ 12. publish              — writes the DataRelease rows the live site reads
 
-Two failure modes this chain used to have, both of which reported success:
+Three failure modes this chain used to have, all of which reported success:
 
   * Steps that exit 0 having written nothing. The curve and plants builders
     treat a missing source workbook as "nothing to do", so a day could ship
@@ -43,6 +46,11 @@ Two failure modes this chain used to have, both of which reported success:
     That is how the National Timeline and the rolling week sat four days
     behind an archive that was fully up to date. Pass --no-publish to rebuild
     without touching the releases.
+  * Never publishing the forward forecast at all. Nothing ran
+    build_forward_forecast.py, so public/data/forecast/ held two files a
+    fortnight apart and the "Today against Forecast" card rendered nothing
+    from 2026-08-25 to 08-28 — silently, because the card declines to draw
+    half a comparison. Step 7 now runs it as part of the daily routine.
 
 Usage:
     python scripts/run_daily_ingest.py --date 2026-08-19
@@ -56,7 +64,7 @@ import json
 import subprocess
 import sys
 import time
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -231,6 +239,76 @@ def ensure_source_workbook(day: date) -> tuple[str | None, str | None]:
     return str(held), None
 
 
+# Dhaka is UTC+6 year-round, the same assumption build_forward_forecast makes.
+DHAKA = timezone(timedelta(hours=6))
+
+
+def run_forward_forecast(day: date) -> dict:
+    """Publish PGCB's projection for the day this ingest's workbook was filed on.
+
+    The archive anchors a forecast to the day it DESCRIBES, so the projection
+    for a day only reaches the site once that day is itself archived — by which
+    time the live hours it should have been read against are gone. The forward
+    half is written out separately for that reason, and nothing was running it:
+    `public/data/forecast/` held two files a fortnight apart, so the Grid
+    Explorer's "Today against Forecast" card rendered nothing at all from
+    2026-08-25 to 08-28 and said nothing about it.
+
+    The target is this energy day + 1 — the day the workbook we just ingested
+    was filed on, which is where its Forecast sheet's projection belongs. That
+    is only worth publishing while it is still today: a backfill of an old day
+    must not write a "forward" forecast for a day that has long since settled,
+    and the archive already carries that day's forecast anyway.
+
+    Exit 1 means PGCB has not filed that morning's workbook yet, which is the
+    ordinary state of an ingest run before ~09:00 Dhaka. That is a skip, not a
+    failure. Exit 2 — the workbook disagreeing about which day it is — is real.
+    """
+    target = day + timedelta(days=1)
+    today = datetime.now(DHAKA).date()
+    if target != today:
+        return {
+            "step": "forward forecast",
+            "ok": True,
+            "seconds": 0,
+            "detail": (
+                f"skipped — {target} is not today in Dhaka ({today}); the forward "
+                "forecast is only for the day still running"
+            ),
+        }
+
+    started = time.time()
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(SCRIPTS / "build_forward_forecast.py")],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=900,
+            env={**__import__("os").environ, "PYTHONUTF8": "1"},
+        )
+    except Exception as e:  # noqa: BLE001
+        return {"step": "forward forecast", "ok": False,
+                "seconds": round(time.time() - started, 1), "detail": str(e)}
+
+    out = (proc.stdout or "").strip().splitlines()
+    err = (proc.stderr or "").strip().splitlines()
+    tail = out[-1] if out else (err[-1] if err else "")
+    if proc.returncode == 1:
+        return {
+            "step": "forward forecast",
+            "ok": True,
+            "seconds": round(time.time() - started, 1),
+            "detail": f"nothing to write yet — {tail}",
+        }
+    return {
+        "step": "forward forecast",
+        "ok": proc.returncode == 0,
+        "seconds": round(time.time() - started, 1),
+        "detail": tail,
+    }
+
+
 def publish_releases(iso: str, aggregates: bool) -> dict:
     """Publish what the chain just wrote, so the live site serves it.
 
@@ -298,7 +376,7 @@ def main() -> int:
             print(msg)
 
     if not args.skip_extractor:
-        say(f"[1/11] collecting {iso} …")
+        say(f"[1/12] collecting {iso} …")
         steps.append(
             run(
                 "extractor",
@@ -326,10 +404,10 @@ def main() -> int:
     if prior:
         say(f"      forecast issued in: {prior}")
 
-    say("[2/11] energy curve …")
+    say("[2/12] energy curve …")
     steps.append(run("energy curve", [str(SCRIPTS / "backfill_energy_curve.py"), "--apply", "--from", iso]))
 
-    say("[3/11] split curve …")
+    say("[3/12] split curve …")
     steps.append(run("split curve", [str(SCRIPTS / "split_energy_curve.py"), "--apply"]))
     # Both curve steps exit 0 with nothing to do when no source workbook was
     # found, which is how days have shipped with no fuel curve under a clean
@@ -339,10 +417,10 @@ def main() -> int:
 
     # After the curve, not before it: Nepal is the fourth interconnector and it
     # is derived from the curve stack, so running this first finds nothing.
-    say("[4/11] border imports (Nepal) …")
+    say("[4/12] border imports (Nepal) …")
     steps.append(run("border imports", [str(SCRIPTS / "backfill_border_imports.py"), "--apply", "--from", iso]))
 
-    say("[5/11] per-station detail …")
+    say("[5/12] per-station detail …")
     steps.append(run("plants", [str(SCRIPTS / "build_daily_plants.py"), "--apply", "--only", iso]))
     gate(steps, PUBLIC / "plants" / f"{iso}.json", "plants",
          "no station detail written — the day's source workbook was not readable")
@@ -350,13 +428,17 @@ def main() -> int:
     # Anchors each held workbook's projection onto the day it DESCRIBES, so this
     # fills the day's `forecast` key from the report filed that morning. Without
     # it the archive keeps only what happened, never what was expected.
-    say("[6/11] forecast …")
+    say("[6/12] forecast …")
     steps.append(run("forecast", [str(SCRIPTS / "extract_forecasts.py"), "--apply"]))
 
-    say("[7/11] archive fallback …")
+    # The forward half of the same projection, for the day still running.
+    say("[7/12] forward forecast …")
+    steps.append(run_forward_forecast(day))
+
+    say("[8/12] archive fallback …")
     steps.append(run("archive fallback", [str(SCRIPTS / "rebuild_archive_fallback.py"), "--apply"]))
 
-    say("[8/11] available dates …")
+    say("[9/12] available dates …")
     steps.append(run("available dates", [str(SCRIPTS / "sync_available_dates.py"), "--apply"]))
 
     # The gas archive only gains a day when Petrobangla has published the window
@@ -364,14 +446,14 @@ def main() -> int:
     # the newest day routinely has no gas and the timeline needs no rebuild.
     gas_day = PUBLIC / "petrobangla" / "daily" / f"{iso}.json"
     if gas_day.exists():
-        say("[9/11] gas timeline …")
+        say("[10/12] gas timeline …")
         steps.append(run("gas timeline", [str(SCRIPTS / "build_petrobangla_timeline.py")], timeout=900))
 
         # The Gas Reserve Depletion panel reads reserve-model.json; without this
         # rebuild its "as of" and remaining balance sit at whatever day the model
         # was last built for. The sensitivity artifact must be rebuilt with it —
         # the validator pins both to the same archive date and fails otherwise.
-        say("[10/11] reserve model …")
+        say("[11/12] reserve model …")
         steps.append(run("reserve model", [str(SCRIPTS / "build_reserve_model.py"), "--apply"], timeout=900))
         if steps[-1]["ok"]:
             steps.append(
@@ -399,7 +481,7 @@ def main() -> int:
             "detail": "skipped (--no-publish) — the live site still serves its existing releases",
         })
     else:
-        say("[11/11] publish …")
+        say("[12/12] publish …")
         steps.append(publish_releases(iso, aggregates=gas_day.exists()))
 
     return finish(iso, steps, args.json)
