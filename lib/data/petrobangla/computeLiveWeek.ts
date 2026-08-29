@@ -18,7 +18,7 @@ export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeek
   return {
     latestGas,
     latestLabel: latest.report.report_date_label,
-    latestDate: latest.report.report_date_end,
+    latestDate: gasDayStart(latest),
     latestGasDelta: prev ? latestGas - prev.production.grand_total.gas_mmcfd : null,
     weekAvgGas: gases.reduce((a, b) => a + b, 0) / gases.length,
     powerFulfillmentPct: powerFulfillmentPct(latest),
@@ -35,6 +35,25 @@ export function computeLiveWeekKpis(bundle: PetrobanglaLiveWeekBundle): LiveWeek
 }
 
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
+
+/**
+ * The day a gas report belongs to: the start of its 08:00–08:00 window.
+ *
+ * The rolling week used to key on `report_date_end`, so the newest report read
+ * as 27 Aug on this panel and 26 Aug on the National Timeline — one day, two
+ * dates, depending on which card you looked at. Everything else in the archive
+ * keys on the start: the filename, `_index.json`, `timeline-summary.json` and
+ * `petrobangla-day.server.ts`'s `windowStart`. This makes the panel agree.
+ *
+ * `gas_day_start` first, for the reason `windowStart` gives: it comes from the
+ * "08:00 hrs to 08:00 hrs" line that defines the window, where
+ * `report_date_start` is transcribed from the letterhead and Petrobangla
+ * mistypes that on 89 of the 2,297 archived files. The header is the fallback
+ * only, for a document old enough not to carry the window at all.
+ */
+export function gasDayStart(day: PetrobanglaDaily): string {
+  return day.report.gas_day_start ?? day.report.report_date_start;
+}
 
 /** X-axis label — disambiguate when Petrobangla reuses the same gas-day label on adjacent files. */
 export function formatLiveWeekAxisLabel(date: string, label?: string, duplicateGasLabel = false): string {
@@ -58,9 +77,9 @@ export function liveWeekTimelinePoints(bundle: PetrobanglaLiveWeekBundle) {
     const gasLabel = d.report.report_date_label?.split(',')[0]?.trim() ?? '';
     const duplicateGasLabel = Boolean(gasLabel && (labelCounts[gasLabel] ?? 0) > 1);
     return {
-      date: d.report.report_date_end,
+      date: gasDayStart(d),
       label: d.report.report_date_label,
-      axisLabel: formatLiveWeekAxisLabel(d.report.report_date_end, d.report.report_date_label, duplicateGasLabel),
+      axisLabel: formatLiveWeekAxisLabel(gasDayStart(d), d.report.report_date_label, duplicateGasLabel),
       totalGas: d.production.grand_total.gas_mmcfd,
       powerDemand: gt.power_demand_mmcfd,
       powerSupply: gt.power_supply_mmcfd,

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Droplet, Loader2, Lock } from 'lucide-react';
 import { cn, formatNumber } from '@/lib/utils';
-import { computeLiveWeekKpis } from '@/lib/data/petrobangla/computeLiveWeek';
+import { computeLiveWeekKpis, gasDayStart } from '@/lib/data/petrobangla/computeLiveWeek';
 import { getDistributionGrandTotal, getRpgclGas } from '@/lib/data/petrobangla/compute';
 import {
   formatLiveWeekDate,
@@ -103,7 +103,9 @@ export function PetrobanglaLiveWeekPanel({
     const days = activeTimelineDays.length ? activeTimelineDays : (activeBundle?.days.map(d => {
       const gt = getDistributionGrandTotal(d);
       return {
-        date: d.report.report_date_end,
+        // Same key the timeline days this falls back FROM are stamped with, so
+        // the period KPIs do not shift by a day when the timeline is missing.
+        date: gasDayStart(d),
         total_gas: d.production.grand_total.gas_mmcfd,
         power_demand: gt.power_demand_mmcfd,
         power_supply: gt.power_supply_mmcfd,
