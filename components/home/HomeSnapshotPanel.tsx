@@ -139,6 +139,19 @@ function useLiveGrid(): LiveGrid | null {
  * a daily total or an audited peak must not be silently swapped for a
  * different quantity just because a live number exists.
  */
+/**
+ * The labels `liveValueFor` can fill from NLDC alone. Kept beside it so the two
+ * cannot drift: a tile listed here survives with no daily figure behind it, and
+ * one that stops being live-backed must stop surviving.
+ */
+const LIVE_BACKED = new Set([
+  'Current Demand',
+  'Load Shedding',
+  'Peak Today',
+  'Coal Generation',
+  'Grid Import',
+]);
+
 function liveValueFor(label: string, live: LiveGrid): number | null {
   switch (label) {
     case 'Current Demand':
@@ -174,15 +187,27 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
       }
     }
 
-    const merged = initialStatsData.map((item) => {
-      const matched = incomingMap.get(item.label);
-      return {
-        ...item,
-        value: matched && typeof matched.value === 'number' ? matched.value : item.value,
-        unit: matched ? matched.unit || item.unit : item.unit,
-        isDecimal: matched ? typeof matched.isDecimal === 'boolean' ? matched.isDecimal : item.isDecimal : item.isDecimal,
-      };
-    });
+    // `initialStatsData` is a template: the order, the units and the icons.
+    // Its numbers are placeholders, and a tile the archive does not supply must
+    // not fall through to one. It did — the data layer drops Gas Supply on a
+    // day Petrobangla has not filed, and Energy Unserved whenever the report
+    // omits it, and both then rendered a fixed figure (2,610 MMcfd, 89 MW)
+    // under a LIVE badge, sourced to PGCB and Petrobangla.
+    //
+    // A tile survives only if the server sent a real value for it, or the live
+    // NLDC overlay can fill it — `liveValueFor` covers Current Demand, which is
+    // live-only and has no daily counterpart at all.
+    const merged = initialStatsData
+      .filter((item) => incomingMap.has(item.label) || LIVE_BACKED.has(item.label))
+      .map((item) => {
+        const matched = incomingMap.get(item.label);
+        return {
+          ...item,
+          value: matched && typeof matched.value === 'number' ? matched.value : item.value,
+          unit: matched ? matched.unit || item.unit : item.unit,
+          isDecimal: matched ? typeof matched.isDecimal === 'boolean' ? matched.isDecimal : item.isDecimal : item.isDecimal,
+        };
+      });
 
     const sorted = [...merged].sort((a, b) => snapshotLabelOrder(a.label) - snapshotLabelOrder(b.label));
 

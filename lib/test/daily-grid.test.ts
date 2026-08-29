@@ -23,6 +23,22 @@ import {
 import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
 import { buildHomeSnapshotFromDaily, gwhToAvgMw, POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
 
+/**
+ * Petrobangla's six company rows for a filed day, summing to 2,388 MMCFD.
+ *
+ * Stated separately because the Gas Supply tile is national production, while
+ * `systemStats.totalGasSuppliedPower` (894.75, below) is the power sector's
+ * slice — about a third of it. The two were once interchangeable in that tile.
+ */
+const GAS_PRODUCTION = [
+  { company: 'BGFCL', fields: 5, gas: 476.4, condensate: 358.5, share: 20 },
+  { company: 'SGFL', fields: 5, gas: 138.9, condensate: 71.2, share: 5.8 },
+  { company: 'BAPEX', fields: 8, gas: 78.3, condensate: 40.1, share: 3.3 },
+  { company: 'Chevron', fields: 3, gas: 800.1, condensate: 210.4, share: 33.5 },
+  { company: 'Tullow', fields: 1, gas: 41.7, condensate: 8.9, share: 1.7 },
+  { company: 'R-LNG', fields: 0, gas: 852.6, condensate: 0, share: 35.7 },
+];
+
 const sampleReport = {
   systemStats: {
     date: '29 Jun 2026',
@@ -268,6 +284,8 @@ describe('home-snapshot', () => {
   it('builds twelve daily metrics with MW units (GWh converted to avg MW)', () => {
     const stats = buildHomeSnapshotFromDaily({
       ...sampleReport,
+      // A day Petrobangla has filed; the test below covers one it has not.
+      gasProductionData: GAS_PRODUCTION,
       borderImportsData: [
         { source: 'HVDC Bheramara (India)', energy: 21.74, peakFlow: 902.3, type: 'West' },
         { source: 'Adani Godda (India)', energy: 36.56, peakFlow: 1489.6, type: 'North' },
@@ -305,6 +323,30 @@ describe('home-snapshot', () => {
     expect(stats[10].value).toBe(1806);
     expect(stats[10].unit).toBe(POWER_UNIT);
     expect(stats[11].value).toBe(5.56);
+    // National production, not the power sector's slice of it.
+    expect(stats[7].label).toBe('Gas Supply');
+    expect(stats[7].value).toBe(2388);
+  });
+
+  it('drops Gas Supply on a day Petrobangla has not filed, rather than substituting', () => {
+    // The fallback used to be `totalGasSuppliedPower` — the power sector's
+    // slice. Under one unchanged label the tile read 2,366 MMcfd on
+    // 2026-08-26 and 856 two days later, a 64% "collapse" that was only a
+    // change of source. Petrobangla files a day or two behind PGCB, so this is
+    // the ordinary state of the newest day, not an edge case.
+    const filed = buildHomeSnapshotFromDaily(
+      { ...sampleReport, gasProductionData: GAS_PRODUCTION } as never,
+      sredaSample,
+    );
+    const unfiled = buildHomeSnapshotFromDaily({ ...sampleReport } as never, sredaSample);
+
+    expect(filed.find((s) => s.label === 'Gas Supply')?.value).toBe(2388);
+    expect(unfiled.find((s) => s.label === 'Gas Supply')).toBeUndefined();
+    expect(unfiled).toHaveLength(filed.length - 1);
+    // Every other tile is unchanged: only the gas row goes.
+    expect(unfiled.map((s) => s.label)).toEqual(
+      filed.map((s) => s.label).filter((l) => l !== 'Gas Supply'),
+    );
   });
 });
 

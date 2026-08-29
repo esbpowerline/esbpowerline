@@ -89,7 +89,16 @@ export function buildHomeSnapshotFromDaily(
   const s = data.systemStats;
   const peakDemand = Math.max(s.eveningPeakDemand, s.dayPeakDemand ?? 0);
   const peakGeneration = Math.max(s.eveningPeakGen, s.dayPeakGen);
-  const gasSupply = sumGasProductionMmcf(data) ?? Math.round(s.totalGasSuppliedPower);
+  // National gas production, and nothing else.
+  //
+  // This used to fall back to `totalGasSuppliedPower` when Petrobangla had not
+  // filed the window yet, which is a different quantity entirely: the power
+  // sector's slice, about a third of the national total. The tile read 2,366
+  // MMcfd on 26 August and 856 on the 28th — a 64% "collapse" that was only a
+  // change of source, under one unchanged label. Absent is absent, the same
+  // stance Energy Unserved takes below and the same one the Grid Explorer's
+  // own Gas Supply KPI takes when it prints "—".
+  const gasSupply = sumGasProductionMmcf(data);
 
   const pgcbStats: HomeSnapshotStat[] = [
     { label: 'Evening Peak Demand', value: Math.round(s.eveningPeakDemand), unit: POWER_UNIT, icon: 'Activity' },
@@ -120,7 +129,9 @@ export function buildHomeSnapshotFromDaily(
       isDecimal: true,
       icon: 'Gauge',
     },
-    { label: 'Gas Supply', value: gasSupply, unit: 'MMcfd', icon: 'Flame' },
+    ...(gasSupply == null
+      ? []
+      : [{ label: 'Gas Supply', value: gasSupply, unit: 'MMcfd', icon: 'Flame' as const }]),
     {
       label: 'Coal Generation',
       value: fuelDailyAvgMw(data, 'Coal'),

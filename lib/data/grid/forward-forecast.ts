@@ -135,10 +135,18 @@ export function compareForecastToLive(
   }
 
   // PGCB stamps the report with the time it was generated -- around 09:00 on
-  // every 2025+ layout. Everything before that hour is a record, not a
+  // every 2025+ layout. Everything at or before that moment is a record, not a
   // forecast, so it is marked here and kept out of every summary figure below.
+  //
+  // Compared in minutes, and inclusively. Comparing hour numbers with `<` let
+  // the stamp's own hour through: a report generated at 09:13 was scored
+  // against the 09:00 reading, which had already been taken thirteen minutes
+  // earlier. On 2026-08-29 that single row was both the widest "gap" on the
+  // card and a third of the mean. Minutes also handle the 18:30/19:30 rows,
+  // which an hour number cannot place at all.
   const issuedClock = forecast.issuedAt ? forecast.issuedAt.slice(11, 16) : null;
-  const issuedHour = issuedClock ? Number(issuedClock.slice(0, 2)) : null;
+  const issuedMinutes =
+    issuedClock && HOUR_RE.test(issuedClock) ? minutesOfRow(issuedClock) : null;
 
   const rows: ForecastVsLiveRow[] = forecastHours.map((f) => {
     const actual = actualByHour.get(f.time) ?? null;
@@ -156,8 +164,7 @@ export function compareForecastToLive(
       demandGapMw: gap(actualDemandMw, forecastDemandMw),
       forecastLoadShedMw: finite(f.loadShedMw),
       actualLoadShedMw: actual ? finite(actual.loadShedMw) : null,
-      beforeIssue:
-        issuedHour != null && Number.isFinite(issuedHour) && Number(f.time.slice(0, 2)) < issuedHour,
+      beforeIssue: issuedMinutes != null && minutesOfRow(f.time) <= issuedMinutes,
     };
   });
   rows.sort((a, b) => a.time.localeCompare(b.time));
