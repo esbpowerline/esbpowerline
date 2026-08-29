@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import path from 'node:path';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import {
@@ -82,9 +83,21 @@ export async function POST(request: NextRequest) {
 
   try {
     if (!existsSync(dir)) {
-      // Only ever create the archive folder itself, never a path the request
-      // supplied — by this point the filename is known to contain no directories.
-      await mkdir(dir, { recursive: true });
+      // Create the archive folder, but only inside a parent that already exists.
+      //
+      // `recursive: true` alone creates every missing ancestor, which is not the
+      // "only the folder itself" this used to claim — and the difference is the
+      // whole failure. W: was remapped to another volume, so the archive tree
+      // was gone; the first save then built `W:\Grid-Explorer\Grid Explorer YoY`
+      // fresh on the new drive and reported success with a green path. The
+      // operator's sheets were going somewhere new and nothing said so.
+      //
+      // A missing parent means the share is not the one this folder belongs to.
+      // That is a drive problem, and it should read as one.
+      if (!existsSync(path.dirname(dir))) {
+        return NextResponse.json({ ok: false, error: describeMissingDir(dir) }, { status: 503 });
+      }
+      await mkdir(dir);
     }
   } catch {
     return NextResponse.json({ ok: false, error: describeMissingDir(dir) }, { status: 503 });
