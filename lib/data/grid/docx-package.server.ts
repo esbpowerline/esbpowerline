@@ -102,8 +102,8 @@ function headerXml(
     '<w:p><w:pPr><w:pBdr>' +
     `<w:bottom w:val="single" w:sz="12" w:space="4" w:color="${BRAND.greenHex}"/>` +
     '</w:pBdr><w:spacing w:after="120"/></w:pPr>' +
-    `<w:r><w:rPr><w:caps/><w:b/><w:color w:val="${BRAND.secondaryHex}"/><w:sz w:val="16"/><w:szCs w:val="16"/>` +
-    `<w:spacing w:val="30"/></w:rPr><w:t xml:space="preserve">${esc(brand.kind)}</w:t></w:r>` +
+    `<w:r><w:rPr><w:b/><w:caps/><w:color w:val="${BRAND.secondaryHex}"/><w:spacing w:val="30"/>` +
+    `<w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr><w:t xml:space="preserve">${esc(brand.kind)}</w:t></w:r>` +
     `<w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr>` +
     `<w:t xml:space="preserve">   ${esc(brand.covers)}</w:t></w:r>` +
     '</w:p></w:hdr>'
@@ -143,8 +143,8 @@ function footerXml(brand: ExportBrand, rightTabPos: number): string {
  */
 export function provenanceTable(brand: ExportBrand, hasQr: boolean): string {
   const label = (t: string) =>
-    `<w:p><w:pPr><w:spacing w:after="20"/></w:pPr><w:r><w:rPr><w:caps/><w:b/>` +
-    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="13"/><w:szCs w:val="13"/><w:spacing w:val="30"/></w:rPr>` +
+    `<w:p><w:pPr><w:spacing w:after="20"/></w:pPr><w:r><w:rPr><w:b/><w:caps/>` +
+    `<w:color w:val="${BRAND.mutedHex}"/><w:spacing w:val="30"/><w:sz w:val="13"/><w:szCs w:val="13"/></w:rPr>` +
     `<w:t>${esc(t)}</w:t></w:r></w:p>`;
   const value = (t: string, bold = false) =>
     `<w:p><w:pPr><w:spacing w:after="20"/></w:pPr><w:r><w:rPr>${bold ? '<w:b/>' : ''}` +
@@ -165,8 +165,14 @@ export function provenanceTable(brand: ExportBrand, hasQr: boolean): string {
     // period, how they were arrived at, and what a blank means.
     note(brand.method);
 
+  // The image run must be wrapped in a paragraph. A `w:tc` may only contain
+  // block-level content, so a bare `w:r` inside a cell is not merely untidy —
+  // Word rejects the whole document with "Word experienced an error trying to
+  // open the file" and offers the Text Recovery converter. Every .docx this
+  // package produced carried the QR straight in the cell, which is why none of
+  // them opened, while the PDF and .txt of the same comparison were fine.
   const right = hasQr
-    ? inlineImage('rIdQr', 200, 'Open this comparison', 108, 108) +
+    ? `<w:p><w:pPr><w:jc w:val="center"/></w:pPr>${inlineImage('rIdQr', 200, 'Open this comparison', 108, 108)}</w:p>` +
       `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/>` +
       `<w:sz w:val="12"/></w:rPr><w:t xml:space="preserve">${esc(brand.qrCaption)}</w:t></w:r></w:p>`
     : '';

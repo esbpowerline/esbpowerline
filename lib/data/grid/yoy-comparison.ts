@@ -571,6 +571,12 @@ export async function buildYoyComparison(isoDate: string, lang: Lang = 'bn'): Pr
         'Petrobangla’s 08:00–08:00 gas day opens at 08:00 that morning.',
       ];
 
+  // 28 metric + 17 unit + 10 + 11 for the two years + 12 change + 12 change %.
+  // Kept as one constant so the header rule and the closing rule cannot drift
+  // apart from the columns, which is how the old block came to rule 77 across
+  // 78 columns of content.
+  const RULE = 28 + 17 + 10 + 11 + 12 + 12;
+
   const lines: string[] = bengali
     ? [
         heading,
@@ -580,8 +586,9 @@ export async function buildYoyComparison(isoDate: string, lang: Lang = 'bn'): Pr
         padEndCp('বিবরণ', 28) + padEndCp('একক', 17)
           + padStartCp(toBnDigits(String(prior.year)), 10)
           + padStartCp(toBnDigits(String(day.year)), 11)
-          + padStartCp('পরিবর্তন', 12),
-        '-'.repeat(77),
+          + padStartCp('পরিবর্তন', 12)
+          + padStartCp('পরিবর্তন %', 12),
+        '-'.repeat(RULE),
       ]
     : [
         heading,
@@ -591,8 +598,9 @@ export async function buildYoyComparison(isoDate: string, lang: Lang = 'bn'): Pr
         padEndCp('Metric', 28) + padEndCp('Unit', 17)
           + padStartCp(String(prior.year), 10)
           + padStartCp(String(day.year), 11)
-          + padStartCp('Change', 12),
-        '-'.repeat(77),
+          + padStartCp('Change', 12)
+          + padStartCp('Change %', 12),
+        '-'.repeat(RULE),
       ];
 
   for (const row of rows) {
@@ -600,11 +608,17 @@ export async function buildYoyComparison(isoDate: string, lang: Lang = 'bn'): Pr
     lines.push(
       padEndCp(row.label, 28) + padEndCp(row.unit, 17)
       + padStartCp(row.aText, 10) + padStartCp(row.bText, 11)
-      + padStartCp(`   ${arrow} ${row.pctText}%`, 12),
+      // The absolute change, then the percentage. The sheet printed only the
+      // percentage, which cannot be read back into figures: "▲ 1892%" on load
+      // shedding says nothing about whether that was 74 MW or 74,000. The
+      // table, the .docx and the .pdf have carried both columns all along —
+      // the text block was the one place they disagreed.
+      + padStartCp(row.deltaText, 12)
+      + padStartCp(`${arrow} ${row.pctText}%`, 12),
     );
   }
 
-  lines.push('-'.repeat(77), '', ...footer);
+  lines.push('-'.repeat(RULE), '', ...footer);
 
   return {
     ok: true,
