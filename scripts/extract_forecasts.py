@@ -412,6 +412,30 @@ def candidates() -> dict[date, list[Path]]:
     return out
 
 
+def same_forecast(stored, fresh) -> bool:
+    """Are these the same forecast, ignoring how JSON spelled the numbers?
+
+    `==` already treats 18310 and 18310.0 as equal; what it does not survive is
+    a float that has been through a JSON round trip. Comparing the canonical
+    serialisation of both sides settles number *type* and key order at once.
+    """
+    if stored is None:
+        return False
+
+    def canon(v):
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, (int, float)):
+            return round(float(v), 6)
+        if isinstance(v, dict):
+            return {k: canon(x) for k, x in sorted(v.items())}
+        if isinstance(v, list):
+            return [canon(x) for x in v]
+        return v
+
+    return canon(stored) == canon(fresh)
+
+
 def forecast_for(filed: date, paths: list[Path]) -> tuple[dict | None, str | None, Path | None]:
     for path in paths:
         try:
@@ -497,11 +521,20 @@ def main() -> int:
             samples.append((target.isoformat(), layout, forecast))
         if args.apply:
             doc = json.loads(out_path.read_text(encoding="utf-8"))
+            # Re-extracting a day that already carries the same forecast must not
+            # touch the file. Python reads 18310 and 18310.0 as equal but json
+            # writes them differently, so an unconditional write rewrote every
+            # whole number as a float and turned an idempotent step into a diff
+            # on days nobody had re-ingested. This runs on every daily ingest now,
+            # so that churn would land in every data commit.
+            if same_forecast(doc.get("forecast"), forecast):
+                tally["already current"] += 1
+                continue
             doc["forecast"] = forecast
             with out_path.open("w", encoding="utf-8") as fh:
                 json.dump(doc, fh, ensure_ascii=False, indent=2)
 
-    written = sum(v for k, v in tally.items() if k.startswith("extracted"))
+    written = sum(v for k, v in tally.items() if k.startswith("extracted")) - tally["already current"]
     print()
     print("=== forecast extraction ===")
     for k, v in sorted(tally.items(), key=lambda kv: -kv[1]):
