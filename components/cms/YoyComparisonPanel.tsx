@@ -90,14 +90,33 @@ const MODES: Array<{ id: Mode; label: string }> = [
 
 /* ── shared bits ─────────────────────────────────────────────────────────── */
 
-function download(filename: string, text: string, mime = 'text/plain;charset=utf-8') {
-  const blob = new Blob([text], { type: mime });
+/**
+ * Hand the browser a file.
+ *
+ * Two details that look like ceremony and are not. The anchor has to be in the
+ * document: Firefox ignores `click()` on a detached one, so the button did
+ * nothing there and said nothing about it. And the object URL must outlive the
+ * click — revoking it on the next line races the download the click just
+ * started, which is how a large export intermittently produced no file. One
+ * turn of the event loop is enough for the browser to have taken the blob.
+ */
+function saveBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  a.rel = 'noopener';
+  a.style.display = 'none';
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 0);
+}
+
+function download(filename: string, text: string, mime = 'text/plain;charset=utf-8') {
+  saveBlob(filename, new Blob([text], { type: mime }));
 }
 
 /** One day earlier by a year, so the compare tab opens on something sensible. */
@@ -206,12 +225,26 @@ function SaveToArchive({ filename, text, disabled }: { filename: string; text: s
       });
       const raw = await res.text();
       let message = raw.trim();
+      // The route reports whether it replaced a file. These sheets are named per
+      // day, so saving under a date already filed silently clobbers it — the
+      // server computes that flag and nothing was showing it.
+      let overwrote = false;
       try {
-        const parsed = JSON.parse(raw) as { message?: string; error?: string; path?: string };
+        const parsed = JSON.parse(raw) as {
+          message?: string;
+          error?: string;
+          path?: string;
+          overwrote?: boolean;
+        };
         message = parsed.message ?? parsed.error ?? parsed.path ?? message;
+        overwrote = parsed.overwrote === true;
       } catch {
         // Not JSON — an HTML error page means the route is not there at all.
         if (message.startsWith('<')) message = `Archive route returned ${res.status} ${res.statusText}.`;
+      }
+      if (res.ok && overwrote) {
+        setState({ tone: 'warn', message: `Replaced the sheet already filed at ${message}` });
+        return;
       }
       setState({ tone: res.ok ? 'ok' : 'warn', message: message || `Saved ${filename}` });
     } catch (e) {
@@ -531,15 +564,12 @@ function DocumentButtons({
       }
       // Base64 to Blob rather than a data: URL — a 230-row PDF overruns the URL
       // length limit in some browsers, and fails silently when it does.
+      // Decoded by hand rather than with `fetch('data:…')`, which would be
+      // neater but is blocked here: our connect-src does not list `data:`.
       const bin = atob(res.base64);
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
-      const url = URL.createObjectURL(new Blob([bytes], { type: res.mime }));
-      const el = document.createElement('a');
-      el.href = url;
-      el.download = res.filename;
-      el.click();
-      URL.revokeObjectURL(url);
+      saveBlob(res.filename, new Blob([bytes], { type: res.mime }));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

@@ -307,5 +307,14 @@ export async function packBrandedDocx({ body, pageXml, brand }: DocxOptions): Pr
       '</w:styles>',
   );
 
-  return zip.generateAsync({ type: 'nodebuffer' }) as Promise<Buffer>;
+  // JSZip stores uncompressed unless told otherwise, and a .docx is mostly XML:
+  // a 232-row comparison packed to 641 KB stored and 32 KB deflated — 20x. That
+  // whole file crosses a server action as base64 (855 KB of it) and is decoded
+  // a character at a time in the browser before the download starts, so the
+  // default was most of what made these exports feel slow. Word reads either.
+  return zip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  }) as Promise<Buffer>;
 }
