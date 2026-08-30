@@ -89,6 +89,13 @@ const nextConfig: NextConfig = {
       './agent-tools/**/*',
     ],
     '/admin/**': ['./public/data/**/*', './public/uploads/**/*'],
+    // Plain `/cms/**`, extglobs deliberately avoided. This build runs on
+    // Turbopack, whose tracer matches these route keys with a Rust glob engine
+    // that has no `!(...)`: a key of `/cms!(/yoy-sheet)` — the obvious way to
+    // hold one page out — compiles to a pattern that matches NOTHING, so every
+    // CMS route silently loses its exclusion. It reads as correct, the build
+    // still succeeds, and `/cms/media` quietly goes from 78MB to 311MB. The
+    // year-on-year sheet is given its archive by the include below instead.
     '/cms/**': ['./public/data/**/*', './public/uploads/**/*'],
     // The upload routes reach the same unresolvable `path.join(process.cwd(),
     // 'public', 'data', …)` through their auth chain, so they traced the whole
@@ -112,6 +119,26 @@ const nextConfig: NextConfig = {
   // The grid export route reads daily JSON + the logo from disk at runtime; force
   // them into that function's bundle so exports work on Vercel serverless.
   outputFileTracingIncludes: {
+    // The year-on-year sheet reads the same two archives as the export route,
+    // for the same reason: the sheet pairs a day with the same day a year
+    // earlier, and the free comparison beside it reads gas from the Petrobangla
+    // day that covers the energy day. `pgcb-monthly` is deliberately NOT here —
+    // the Months tab falls back to published releases, and the 31MB it would add
+    // buys a tab this page is not primarily for.
+    //
+    // This include and the `/cms/**` exclude above BOTH match this route, and
+    // the include wins — measured, because the two tracers disagree and only
+    // one of them runs here. `collect-build-traces.js` applies excludes last,
+    // which would cancel this; that file is the webpack path and never executes
+    // in a Turbopack build. Under Turbopack the page traces at 195MB with all
+    // 4,543 daily files present, the same size as grid-export below. If this
+    // build is ever moved back off Turbopack, re-measure the .nft.json before
+    // trusting this pair.
+    '/cms/yoy-sheet': [
+      './public/data/daily/**',
+      './public/data/petrobangla/daily/**',
+      './public/data/petrobangla/_index.json',
+    ],
     '/api/members/grid-export': [
       './public/data/daily/**',
       './public/data/petrobangla/daily/**',
