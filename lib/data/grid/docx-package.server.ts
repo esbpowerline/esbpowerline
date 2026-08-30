@@ -141,7 +141,7 @@ function footerXml(brand: ExportBrand, rightTabPos: number): string {
  * to tell them apart at a glance — a sheet comparing 19 August, downloaded on
  * the 21st, has been read as data for the 21st.
  */
-export function provenanceTable(brand: ExportBrand, hasQr: boolean): string {
+export function provenanceTable(brand: ExportBrand, hasQr: boolean, textWidth = 10466): string {
   const label = (t: string) =>
     `<w:p><w:pPr><w:spacing w:after="20"/></w:pPr><w:r><w:rPr><w:b/><w:caps/>` +
     `<w:color w:val="${BRAND.mutedHex}"/><w:spacing w:val="30"/><w:sz w:val="13"/><w:szCs w:val="13"/></w:rPr>` +
@@ -151,9 +151,13 @@ export function provenanceTable(brand: ExportBrand, hasQr: boolean): string {
     `<w:color w:val="${BRAND.inkHex}"/><w:sz w:val="18"/><w:szCs w:val="18"/></w:rPr>` +
     `<w:t xml:space="preserve">${esc(t)}</w:t></w:r></w:p>`;
 
+  // 8pt, not 7pt. These two lines carry the caveats a reader has to actually
+  // read — that both halves come from the same 08:00-08:00 energy day, and that
+  // a blank is an unpublished figure rather than a zero — and at `w:sz` 14 they
+  // set a full step below the period value above them and were skimmed past.
   const note = (t: string) =>
     `<w:p><w:pPr><w:spacing w:after="40"/></w:pPr><w:r><w:rPr><w:i/>` +
-    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="14"/><w:szCs w:val="14"/></w:rPr>` +
+    `<w:color w:val="${BRAND.mutedHex}"/><w:sz w:val="16"/><w:szCs w:val="16"/></w:rPr>` +
     `<w:t xml:space="preserve">${esc(t)}</w:t></w:r></w:p>`;
 
   const left =
@@ -171,21 +175,34 @@ export function provenanceTable(brand: ExportBrand, hasQr: boolean): string {
   // open the file" and offers the Text Recovery converter. Every .docx this
   // package produced carried the QR straight in the cell, which is why none of
   // them opened, while the PDF and .txt of the same comparison were fine.
+  // The code itself is flushed right, to the page margin; only its caption is
+  // centred under it. Centring the code as well left it floating in the middle
+  // of a column wider than the image, out of line with the running head and the
+  // date stamp above it, which are both set to the same right edge.
   const right = hasQr
-    ? `<w:p><w:pPr><w:jc w:val="center"/></w:pPr>${inlineImage('rIdQr', 200, 'Open this comparison', 108, 108)}</w:p>` +
+    ? `<w:p><w:pPr><w:jc w:val="right"/></w:pPr>${inlineImage('rIdQr', 200, 'Open this comparison', 108, 108)}</w:p>` +
       `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:color w:val="${BRAND.mutedHex}"/>` +
       `<w:sz w:val="12"/></w:rPr><w:t xml:space="preserve">${esc(brand.qrCaption)}</w:t></w:r></w:p>`
     : '';
+
+  // Split across the FULL text width of whatever page this is, rather than the
+  // fixed 7600/2200 this used to declare. That pair summed to 9800 on a portrait
+  // page 10466 wide and fell 5,598 short of the landscape one, so the block sat
+  // narrower than the rule under it and the running head above it — and since
+  // `tblW` is auto, Word quietly re-fitted it to a third set of widths that
+  // matched neither. The QR column is sized to the 108px code plus its caption.
+  const qrColW = Math.round(textWidth * 0.224);
+  const textColW = textWidth - qrColW;
 
   return (
     '<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/>' +
     `<w:tblBorders><w:top w:val="none"/><w:bottom w:val="single" w:sz="6" w:space="4" w:color="${BRAND.hairHex}"/>` +
     '<w:left w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/>' +
     '</w:tblBorders></w:tblPr>' +
-    '<w:tblGrid><w:gridCol w:w="7600"/><w:gridCol w:w="2200"/></w:tblGrid>' +
+    `<w:tblGrid><w:gridCol w:w="${textColW}"/><w:gridCol w:w="${qrColW}"/></w:tblGrid>` +
     '<w:tr>' +
-    `<w:tc><w:tcPr><w:tcW w:w="7600" w:type="dxa"/></w:tcPr>${left}</w:tc>` +
-    '<w:tc><w:tcPr><w:tcW w:w="2200" w:type="dxa"/></w:tcPr>' +
+    `<w:tc><w:tcPr><w:tcW w:w="${textColW}" w:type="dxa"/></w:tcPr>${left}</w:tc>` +
+    `<w:tc><w:tcPr><w:tcW w:w="${qrColW}" w:type="dxa"/></w:tcPr>` +
     (right || '<w:p/>') +
     '</w:tc>' +
     '</w:tr></w:tbl><w:p/>'
@@ -225,19 +242,19 @@ export async function packBrandedDocx({ body, pageXml, brand }: DocxOptions): Pr
     pageXml +
     '</w:sectPr>';
 
-  zip.file(
-    'word/document.xml',
-    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${NS}>` +
-      `<w:body>${provenanceTable(brand, Boolean(qr))}${body}${sectPr}</w:body></w:document>`,
-  );
-
-  // The header's date column and the footer's page-number tab must sit at the
-  // text width of THIS page — portrait and landscape differ, and a fixed
-  // position leaves them floating mid-line.
+  // The header's date column, the footer's page-number tab and the provenance
+  // block must all sit at the text width of THIS page — portrait and landscape
+  // differ, and a fixed position leaves them floating mid-line.
   const pageW = Number(/<w:pgSz[^>]*\bw:w="(\d+)"/.exec(pageXml)?.[1] ?? 11906);
   const marL = Number(/\bw:left="(\d+)"/.exec(pageXml)?.[1] ?? 720);
   const marR = Number(/\bw:right="(\d+)"/.exec(pageXml)?.[1] ?? 720);
   const textWidth = pageW - marL - marR;
+
+  zip.file(
+    'word/document.xml',
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ${NS}>` +
+      `<w:body>${provenanceTable(brand, Boolean(qr), textWidth)}${body}${sectPr}</w:body></w:document>`,
+  );
   zip.file('word/header1.xml', headerXml(brand, Boolean(logo), { w: logoW, h: logoH }, textWidth));
   zip.file('word/footer1.xml', footerXml(brand, textWidth));
 

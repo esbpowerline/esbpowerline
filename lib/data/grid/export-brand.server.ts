@@ -153,7 +153,7 @@ export type ExportBrand = {
   covers: string;
   /** "Energy days compared" — the label over the period. */
   periodLabel: string;
-  /** "Tuesday, 19 August 2025  →  Wednesday, 19 August 2026" */
+  /** "Tuesday, 19 August 2025 → Wednesday, 19 August 2026" */
   periodValue: string;
   /** One line saying what that period is, e.g. "A full year apart". */
   periodNote: string | null;
@@ -288,7 +288,9 @@ export function buildBrand(
     // drew a stray mark between the two dates. "বনাম" is the word the
     // published sheet already uses for it.
     periodValue: period
-      ? `${spellDate(period[0], lang)}${lang === 'bn' ? '  বনাম  ' : '  →  '}${spellDate(period[1], lang)}`
+      // Single spaces around the separator. Doubled, the arrow read as a gap
+      // between two headings rather than as one line joining two dates.
+      ? `${spellDate(period[0], lang)}${lang === 'bn' ? ' বনাম ' : ' → '}${spellDate(period[1], lang)}`
       : covers,
     periodNote: notes.length ? notes.join('  ') : null,
     retrievedLabel: t.retrieved,

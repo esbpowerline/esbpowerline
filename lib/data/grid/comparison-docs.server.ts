@@ -300,7 +300,19 @@ export type SheetDoc = {
   }>;
 };
 
-const SHEET_COLS = [3400, 1900, 1700, 1700, 1700, 1600];
+/**
+ * Column widths in twentieths of a point, summing to the portrait text width
+ * (11906 page - 720 - 720 margins = 10466, less the table's own indent).
+ *
+ * They used to sum to 12000, which is 1,534 twips WIDER than the page they sit
+ * on. `tblW` is auto, so Word did not complain — it silently re-fitted the six
+ * columns to whatever it liked, which is why the file on disk never matched the
+ * widths declared here and why Metric came out narrower than Unit. These are
+ * the proportions the fitted document settles at, now stated rather than left
+ * for the reader's word processor to guess: Word, LibreOffice and Google Docs
+ * each guess differently.
+ */
+const SHEET_COLS = [2930, 1684, 1504, 1505, 1516, 1437];
 
 /**
  * The sheet as a table, the same one the panel previews.

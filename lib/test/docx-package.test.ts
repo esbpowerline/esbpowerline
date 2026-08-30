@@ -115,6 +115,30 @@ describe('the branded .docx package', () => {
     }
   });
 
+  it('fits every table to the text width of its own page', async () => {
+    // The provenance block used to declare a fixed 7600 + 2200 whatever page it
+    // was on: 666 twips short on portrait, 5,598 short on landscape. `tblW` is
+    // auto, so Word hid it by re-fitting the table to a third set of widths,
+    // and the block sat out of line with the rule and running head above it in
+    // every renderer that took the declared grid at its word.
+    for (const [pageXml, pageW] of [
+      ['<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>', 16838],
+      ['<w:pgSz w:w="11906" w:h="16838"/>', 11906],
+    ] as const) {
+      process.env.NEXT_PUBLIC_SITE_URL ??= 'https://esbpowerline.com';
+      const brand = buildBrand('Test document', 'covers', '/cms/yoy-sheet?x=1', undefined, 'en', [
+        '2026-08-25',
+        '2026-08-26',
+      ]);
+      const buf = await packBrandedDocx({ body: '<w:p/>', pageXml, brand });
+      const zip = await JSZip.loadAsync(buf);
+      const doc = (await zip.file('word/document.xml')!.async('string')) as string;
+      const grid = [...doc.matchAll(/<w:gridCol w:w="(\d+)"\/>/g)].map((m) => Number(m[1]));
+      // The default margins packBrandedDocx falls back to are 720 a side.
+      expect(grid.reduce((a, b) => a + b, 0)).toBe(pageW - 720 - 720);
+    }
+  });
+
   it('compresses the package', async () => {
     // Stored rather than deflated made a 232-row comparison 641 KB instead of
     // 32 KB, and that file crosses a server action as base64.
