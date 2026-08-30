@@ -328,12 +328,17 @@ describe('home-snapshot', () => {
     expect(stats[7].value).toBe(2388);
   });
 
-  it('drops Gas Supply on a day Petrobangla has not filed, rather than substituting', () => {
+  it('holds Gas Supply as a dash on a day Petrobangla has not filed, rather than substituting', () => {
     // The fallback used to be `totalGasSuppliedPower` — the power sector's
     // slice. Under one unchanged label the tile read 2,366 MMcfd on
     // 2026-08-26 and 856 two days later, a 64% "collapse" that was only a
     // change of source. Petrobangla files a day or two behind PGCB, so this is
     // the ordinary state of the newest day, not an edge case.
+    //
+    // Dropping the tile fixed the figure and broke the grid: the snapshot is a
+    // fixed 2x6, so the panel reflowed to eleven tiles on the newest day, every
+    // day, until the gas landed. The tile now keeps its slot with a null value
+    // and names the source it is waiting on.
     const filed = buildHomeSnapshotFromDaily(
       { ...sampleReport, gasProductionData: GAS_PRODUCTION } as never,
       sredaSample,
@@ -341,12 +346,29 @@ describe('home-snapshot', () => {
     const unfiled = buildHomeSnapshotFromDaily({ ...sampleReport } as never, sredaSample);
 
     expect(filed.find((s) => s.label === 'Gas Supply')?.value).toBe(2388);
-    expect(unfiled.find((s) => s.label === 'Gas Supply')).toBeUndefined();
-    expect(unfiled).toHaveLength(filed.length - 1);
-    // Every other tile is unchanged: only the gas row goes.
-    expect(unfiled.map((s) => s.label)).toEqual(
-      filed.map((s) => s.label).filter((l) => l !== 'Gas Supply'),
+    expect(filed.find((s) => s.label === 'Gas Supply')?.awaiting).toBeUndefined();
+
+    const pending = unfiled.find((s) => s.label === 'Gas Supply');
+    // Null, never 0 — a zero here asserts the country produced no gas.
+    expect(pending?.value).toBeNull();
+    expect(pending?.awaiting).toBe('Petrobangla');
+    // and never the power-sector slice it used to borrow
+    expect(pending?.value).not.toBe(sampleReport.systemStats.totalGasSuppliedPower);
+
+    // The grid keeps its shape: same tiles, same order, on both days.
+    expect(unfiled).toHaveLength(filed.length);
+    expect(unfiled.map((s) => s.label)).toEqual(filed.map((s) => s.label));
+  });
+
+  it('holds Energy Unserved the same way when the report omits it', () => {
+    const omitted = buildHomeSnapshotFromDaily(
+      { ...sampleReport, systemStats: { ...sampleReport.systemStats, totalEnergyUnserved: null } } as never,
+      sredaSample,
     );
+    const tile = omitted.find((s) => s.label === 'Energy Unserved');
+    expect(tile).toBeDefined();
+    expect(tile?.value).toBeNull();
+    expect(tile?.awaiting).toBe('PGCB');
   });
 });
 

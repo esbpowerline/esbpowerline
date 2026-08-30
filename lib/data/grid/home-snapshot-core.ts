@@ -10,10 +10,25 @@ export function gwhToAvgMw(gwh: number): number {
 
 export interface HomeSnapshotStat {
   label: string;
-  value: number;
+  /**
+   * `null` when the source has not published the figure — never 0, and never a
+   * stand-in from a neighbouring quantity. The tile still renders; it prints a
+   * dash and names who owes the number.
+   */
+  value: number | null;
   unit: string;
   isDecimal?: boolean;
   icon: string;
+  /**
+   * The upstream this tile is waiting on, set only when `value` is null.
+   *
+   * Dropping the tile outright was the previous stance, and it was right about
+   * the figure and wrong about the grid: the snapshot is a fixed 2x6 and losing
+   * a tile reflows the other eleven, so the panel silently changed shape on the
+   * newest day — every day, until Petrobangla filed. Naming the gap keeps the
+   * layout still and tells the reader why, which "absent" never did.
+   */
+  awaiting?: string;
 }
 
 /** Daily PGCB / Petrobangla / SREDA metrics — homepage snapshot (12 tiles). */
@@ -111,17 +126,17 @@ export function buildHomeSnapshotFromDaily(
       icon: 'TrendingUp',
     },
     { label: 'Load Shedding', value: peakLoadShedMw(data), unit: POWER_UNIT, icon: 'Activity' },
-    // Dropped rather than shown as zero on days whose report does not publish
-    // unserved energy — a homepage tile reading "0 MW" would assert that no
-    // load was shed, which is not what an absent figure means.
-    ...(s.totalEnergyUnserved == null
-      ? []
-      : [{
-          label: 'Energy Unserved',
-          value: gwhToAvgMw(s.totalEnergyUnserved),
-          unit: POWER_UNIT,
-          icon: 'Gauge',
-        }]),
+    // Never shown as zero on days whose report does not publish unserved
+    // energy — a homepage tile reading "0 MW" would assert that no load was
+    // shed, which is not what an absent figure means. It now holds its place
+    // as a dash instead of vanishing.
+    {
+      label: 'Energy Unserved',
+      value: s.totalEnergyUnserved == null ? null : gwhToAvgMw(s.totalEnergyUnserved),
+      unit: POWER_UNIT,
+      icon: 'Gauge',
+      ...(s.totalEnergyUnserved == null ? { awaiting: 'PGCB' } : {}),
+    },
     {
       label: 'Fuel Cost',
       value: parseFloat(s.avgProductionCost.toFixed(2)),
@@ -129,9 +144,16 @@ export function buildHomeSnapshotFromDaily(
       isDecimal: true,
       icon: 'Gauge',
     },
-    ...(gasSupply == null
-      ? []
-      : [{ label: 'Gas Supply', value: gasSupply, unit: 'MMcfd', icon: 'Flame' as const }]),
+    // Petrobangla files its 08:00-08:00 window a day or two behind PGCB, so the
+    // newest day routinely has grid figures and no gas. That is the ordinary
+    // state, not an outage, and `awaiting` is what says so on the tile.
+    {
+      label: 'Gas Supply',
+      value: gasSupply,
+      unit: 'MMcfd',
+      icon: 'Flame' as const,
+      ...(gasSupply == null ? { awaiting: 'Petrobangla' } : {}),
+    },
     {
       label: 'Coal Generation',
       value: fuelDailyAvgMw(data, 'Coal'),

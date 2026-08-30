@@ -201,9 +201,16 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
       .filter((item) => incomingMap.has(item.label) || LIVE_BACKED.has(item.label))
       .map((item) => {
         const matched = incomingMap.get(item.label);
+        // A tile the server sent with `awaiting` set is one whose source has
+        // not filed yet. It keeps its place in the grid and carries a null
+        // value, which the render turns into a dash — falling through to
+        // `item.value` here would put the template's placeholder back, which
+        // is the whole class of bug this panel had.
+        const awaiting = matched?.awaiting as string | undefined;
         return {
           ...item,
-          value: matched && typeof matched.value === 'number' ? matched.value : item.value,
+          value: awaiting ? null : matched && typeof matched.value === 'number' ? matched.value : item.value,
+          awaiting,
           unit: matched ? matched.unit || item.unit : item.unit,
           isDecimal: matched ? typeof matched.isDecimal === 'boolean' ? matched.isDecimal : item.isDecimal : item.isDecimal,
         };
@@ -239,6 +246,9 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
         // A tile carrying a real NLDC figure is never jittered — simulation
         // exists to suggest movement where no live source was available.
         if (live && liveValueFor(s.label, live) !== null) return s;
+        // Nor is one whose source has not filed: there is no figure to move,
+        // and `null + variation` is NaN.
+        if (s.value === null) return s;
         if (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
@@ -263,11 +273,18 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
         const liveVal = live ? liveValueFor(s.label, live) : null;
         const isLive = liveVal !== null;
         const displayValue = isLive ? liveVal : s.value;
+        // Live wins over waiting: a tile the daily report has not filed can
+        // still be carried by NLDC, and then it is not waiting for anything.
+        const awaiting = isLive ? undefined : (s.awaiting as string | undefined);
         const liveWhen = liveStamp ?? (live ? live.asOf.slice(11, 16) : '');
         const liveTip =
           locale === 'bn'
             ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveWhen} পর্যন্ত`
             : `NLDC hourly · as of ${liveWhen}`;
+        const awaitingTip =
+          locale === 'bn'
+            ? `${awaiting} এখনও এই দিনের হিসাব প্রকাশ করেনি`
+            : `${awaiting} has not published this day yet`;
 
         const fullLabel = localizeEnergyStatLabel(s.label, locale as any);
         let shortLabel = fullLabel;
@@ -285,7 +302,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
-                label={isLive ? liveTip : simulateLive ? t('energy.simulated') : t('energy.indicative')}
+                label={isLive ? liveTip : awaiting ? awaitingTip : simulateLive ? t('energy.simulated') : t('energy.indicative')}
                 alwaysShow
                 variant="chrome"
                 side="top"
@@ -316,12 +333,32 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                 <span className="inline md:hidden">{shortLabel}</span>
               </div>
               <div className="font-bold font-sans tabular-nums text-foreground/95 group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-xs md:text-sm">
-                {s.isDecimal
-                  ? displayValue.toFixed(s.label === 'Fuel Cost' || s.label === 'Energy Unserved' ? 2 : 1)
-                  : formatNumber(Math.round(displayValue))}
+                {displayValue === null ? (
+                  // An em dash, in the muted weight the rest of the site uses
+                  // for an unpublished figure. Deliberately not "0" and not the
+                  // last day's number: the tile is holding a place, not
+                  // reporting one.
+                  <span className="text-muted-foreground/70">—</span>
+                ) : s.isDecimal ? (
+                  displayValue.toFixed(s.label === 'Fuel Cost' || s.label === 'Energy Unserved' ? 2 : 1)
+                ) : (
+                  formatNumber(Math.round(displayValue))
+                )}
                 {' '}
-                <span className="font-bold text-muted-foreground uppercase tracking-wider text-[8px] md:text-[9px]">
-                  {s.unit}
+                <span
+                  className={`font-bold uppercase tracking-wider text-[8px] md:text-[9px] ${
+                    displayValue === null ? 'text-muted-foreground/50' : 'text-muted-foreground'
+                  }`}
+                >
+                  {/* The source name does not fit: the tile is a twelfth of a
+                      480px panel, and "AWAITING PETROBANGLA" ran past its right
+                      edge and clipped mid-word. The word alone fits, and the
+                      tooltip on the dot beside it names the source. */}
+                  {displayValue === null && awaiting
+                    ? locale === 'bn'
+                      ? 'অপেক্ষমাণ'
+                      : 'awaiting'
+                    : s.unit}
                 </span>
               </div>
             </div>
