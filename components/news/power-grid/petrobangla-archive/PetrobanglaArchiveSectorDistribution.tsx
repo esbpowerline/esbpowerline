@@ -44,14 +44,22 @@ const SECTOR_COLORS = {
   powerDemand: PB_ARCHIVE_COLORS.powerDemand,
 } as const;
 
+// null where Petrobangla published nothing for the day. These used to be
+// `?? 0`, which drew an unpublished window as a real zero — a national gas
+// collapse on the chart and "0.0" in the screen-reader table. Null is not zero.
 type SectorRow = {
   date: string;
-  powerSupply: number;
-  powerDemand: number;
-  fertSupply: number;
-  fertDemand: number;
-  others: number;
+  powerSupply: number | null;
+  powerDemand: number | null;
+  fertSupply: number | null;
+  fertDemand: number | null;
+  others: number | null;
 };
+
+const mmcfd = (v: number | null) => (v === null ? '—' : `${formatNumber(v, 1)} MMCFD`);
+const pct = (v: number | null) => (v === null ? '—' : `${v.toFixed(1)}%`);
+const ratio = (num: number | null, den: number | null) =>
+  num === null || den === null || den <= 0 ? null : (num / den) * 100;
 
 function SectorTooltip({
   active,
@@ -64,13 +72,18 @@ function SectorTooltip({
   const d = payload[0]?.payload;
   if (!d) return null;
 
-  const total = d.powerSupply + d.fertSupply + d.others;
-  const powerShare = total > 0 ? (d.powerSupply / total) * 100 : 0;
-  const fertShare = total > 0 ? (d.fertSupply / total) * 100 : 0;
-  const othersShare = total > 0 ? (d.others / total) * 100 : 0;
+  // A share of the day needs every sector published; one missing row makes the
+  // total — and therefore every share — unknowable, not smaller.
+  const total =
+    d.powerSupply === null || d.fertSupply === null || d.others === null
+      ? null
+      : d.powerSupply + d.fertSupply + d.others;
+  const powerShare = ratio(d.powerSupply, total);
+  const fertShare = ratio(d.fertSupply, total);
+  const othersShare = ratio(d.others, total);
 
-  const powerFulfillment = d.powerDemand > 0 ? (d.powerSupply / d.powerDemand) * 100 : 0;
-  const fertFulfillment = d.fertDemand > 0 ? (d.fertSupply / d.fertDemand) * 100 : 0;
+  const powerFulfillment = ratio(d.powerSupply, d.powerDemand);
+  const fertFulfillment = ratio(d.fertSupply, d.fertDemand);
 
   return (
     <GridChartTooltipShell title={formatTooltipDate(d.date)} accent={SECTOR_COLORS.powerSupply}>
@@ -92,13 +105,13 @@ function SectorTooltip({
           Power supply
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right font-semibold" style={{ color: SECTOR_COLORS.powerSupply }}>
-          {formatNumber(d.powerSupply, 1)} MMCFD
+          {mmcfd(d.powerSupply)}
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
-          {powerShare.toFixed(1)}%
+          {pct(powerShare)}
         </span>
-        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: powerFulfillment >= 80 ? SERIES_COLORS.retailDiesel : powerFulfillment >= 50 ? SERIES_COLORS.bdGasTariff : STATUS_COLORS.critical }}>
-          {powerFulfillment.toFixed(1)}%
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: powerFulfillment === null ? undefined : powerFulfillment >= 80 ? SERIES_COLORS.retailDiesel : powerFulfillment >= 50 ? SERIES_COLORS.bdGasTariff : STATUS_COLORS.critical }}>
+          {pct(powerFulfillment)}
         </span>
 
         {/* Fertilizer Sector Row */}
@@ -107,13 +120,13 @@ function SectorTooltip({
           Fertilizer
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right font-semibold" style={{ color: SECTOR_COLORS.fertSupply }}>
-          {formatNumber(d.fertSupply, 1)} MMCFD
+          {mmcfd(d.fertSupply)}
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
-          {fertShare.toFixed(1)}%
+          {pct(fertShare)}
         </span>
-        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: fertFulfillment >= 80 ? SERIES_COLORS.retailDiesel : fertFulfillment >= 50 ? SERIES_COLORS.bdGasTariff : STATUS_COLORS.critical }}>
-          {fertFulfillment.toFixed(1)}%
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: fertFulfillment === null ? undefined : fertFulfillment >= 80 ? SERIES_COLORS.retailDiesel : fertFulfillment >= 50 ? SERIES_COLORS.bdGasTariff : STATUS_COLORS.critical }}>
+          {pct(fertFulfillment)}
         </span>
 
         {/* Others/Industry Row */}
@@ -122,17 +135,17 @@ function SectorTooltip({
           Others / Industry
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right font-semibold" style={{ color: SECTOR_COLORS.others }}>
-          {formatNumber(d.others, 1)} MMCFD
+          {mmcfd(d.others)}
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
-          {othersShare.toFixed(1)}%
+          {pct(othersShare)}
         </span>
         <span className="grid-chart-tooltip__value tabular-nums text-right font-medium text-muted-foreground/40">
           —
         </span>
       </div>
       <div className="grid-chart-tooltip__foot mt-2 pt-1.5 border-t border-border/20 text-[9px] text-muted-foreground leading-normal space-y-0.5">
-        <div><strong>Calculation:</strong> Share = Sector Supply / Total Supply ({formatNumber(total, 1)} MMCFD).</div>
+        <div><strong>Calculation:</strong> Share = Sector Supply / Total Supply ({total === null ? 'not fully published' : `${formatNumber(total, 1)} MMCFD`}).</div>
         <div>Fulfillment = Supply / Demand (Others is assumed 100% allocation).</div>
       </div>
     </GridChartTooltipShell>
@@ -161,11 +174,11 @@ export function PetrobanglaArchiveSectorDistribution({
   const chartData = useMemo(() => {
     return filterTimelineDays(rangeDays).map((d) => ({
       date: d.date,
-      powerSupply: d.power_supply ?? 0,
-      powerDemand: d.power_demand ?? 0,
-      fertSupply: d.fertilizer_supply ?? 0,
-      fertDemand: d.fertilizer_demand ?? 0,
-      others: d.others_mmcfd ?? 0,
+      powerSupply: d.power_supply ?? null,
+      powerDemand: d.power_demand ?? null,
+      fertSupply: d.fertilizer_supply ?? null,
+      fertDemand: d.fertilizer_demand ?? null,
+      others: d.others_mmcfd ?? null,
     }));
   }, [rangeDays]);
 

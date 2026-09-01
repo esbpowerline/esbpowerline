@@ -38,13 +38,18 @@ const POWER_GAP_COLORS = {
   fulfillment: PB_ARCHIVE_COLORS.lng,
 } as const;
 
+// null where Petrobangla published nothing. Formerly `?? 0`: an unpublished
+// day drew as zero demand, zero supply, zero gap, 0% fulfillment — four false
+// claims from one missing row. Null is not zero.
 type PowerGapRow = {
   date: string;
-  demand: number;
-  supply: number;
-  gap: number;
-  fulfillment: number;
+  demand: number | null;
+  supply: number | null;
+  gap: number | null;
+  fulfillment: number | null;
 };
+
+const mmcfd = (v: number | null) => (v === null ? '—' : `${formatNumber(v, 1)} MMCFD`);
 
 function PowerGapTooltip({
   active,
@@ -68,7 +73,7 @@ function PowerGapTooltip({
           <GridProvenanceTag kind="P" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: POWER_GAP_COLORS.demand }}>
-          {formatNumber(d.demand, 1)} MMCFD
+          {mmcfd(d.demand)}
         </span>
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: POWER_GAP_COLORS.supply }} />
@@ -76,7 +81,7 @@ function PowerGapTooltip({
           <GridProvenanceTag kind="P" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: POWER_GAP_COLORS.supply }}>
-          {formatNumber(d.supply, 1)} MMCFD
+          {mmcfd(d.supply)}
         </span>
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: POWER_GAP_COLORS.gap }} />
@@ -84,7 +89,7 @@ function PowerGapTooltip({
           <GridProvenanceTag kind="D" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: POWER_GAP_COLORS.gap }}>
-          {formatNumber(d.gap, 1)} MMCFD
+          {mmcfd(d.gap)}
         </span>
         <span className="grid-chart-tooltip__label flex items-center gap-1.5">
           <span className="grid-chart-tooltip__dot shrink-0" style={{ background: fulfillmentColor }} />
@@ -92,7 +97,7 @@ function PowerGapTooltip({
           <GridProvenanceTag kind="D" />
         </span>
         <span className="grid-chart-tooltip__value" style={{ color: fulfillmentColor }}>
-          {d.fulfillment.toFixed(1)}%
+          {d.fulfillment === null ? '—' : `${d.fulfillment.toFixed(1)}%`}
         </span>
       </div>
       <div className="grid-chart-tooltip__foot mt-2 pt-1.5 border-t border-border/20 text-[9px] text-muted-foreground leading-normal space-y-0.5">
@@ -129,10 +134,10 @@ export function PetrobanglaArchivePowerGap({
   const chartData = useMemo(() => {
     return filterTimelineDays(rangeDays).map((d) => ({
       date: d.date,
-      demand: d.power_demand ?? 0,
-      supply: d.power_supply ?? 0,
-      gap: (d.power_demand ?? 0) - (d.power_supply ?? 0),
-      fulfillment: d.power_fulfillment_pct ?? 0,
+      demand: d.power_demand ?? null,
+      supply: d.power_supply ?? null,
+      gap: d.power_demand == null || d.power_supply == null ? null : d.power_demand - d.power_supply,
+      fulfillment: d.power_fulfillment_pct ?? null,
     }));
   }, [rangeDays]);
 
