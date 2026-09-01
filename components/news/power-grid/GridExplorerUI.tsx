@@ -680,6 +680,7 @@ export function GridKpiTooltipPanel({
   align = 'center',
   active,
   widthClass = 'w-[18rem] md:w-[20rem]',
+  loading = false,
   children,
 }: {
   title: string;
@@ -688,6 +689,13 @@ export function GridKpiTooltipPanel({
   align?: 'left' | 'center' | 'right';
   active: boolean;
   widthClass?: string;
+  /**
+   * The figures behind this panel have not been loaded. Tiles already swap
+   * their headline for a placeholder in that state, but the panel underneath
+   * kept rendering its rows off the same skeleton object — printing 0.0 MMCFD
+   * and 0% beside a "published" provenance dot. A skeleton says so instead.
+   */
+  loading?: boolean;
   children: ReactNode;
 }) {
   const pos =
@@ -719,7 +727,13 @@ export function GridKpiTooltipPanel({
         </span>
         <span className="grid-kpi-tip__title">{title}</span>
       </div>
-      {children}
+      {loading ? (
+        <p className="text-[11px] md:text-xs text-muted-foreground py-1">
+          Loading the day's figures…
+        </p>
+      ) : (
+        children
+      )}
     </div>
   );
 }

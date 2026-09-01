@@ -30,42 +30,11 @@ import { buildHomeSnapshotFromDaily, gwhToAvgMw, POWER_UNIT } from '@/lib/data/g
  * `systemStats.totalGasSuppliedPower` (894.75, below) is the power sector's
  * slice — about a third of it. The two were once interchangeable in that tile.
  */
-const GAS_PRODUCTION = [
-  { company: 'BGFCL', fields: 5, gas: 476.4, condensate: 358.5, share: 20 },
-  { company: 'SGFL', fields: 5, gas: 138.9, condensate: 71.2, share: 5.8 },
-  { company: 'BAPEX', fields: 8, gas: 78.3, condensate: 40.1, share: 3.3 },
-  { company: 'Chevron', fields: 3, gas: 800.1, condensate: 210.4, share: 33.5 },
-  { company: 'Tullow', fields: 1, gas: 41.7, condensate: 8.9, share: 1.7 },
-  { company: 'R-LNG', fields: 0, gas: 852.6, condensate: 0, share: 35.7 },
-];
-
-const sampleReport = {
-  systemStats: {
-    date: '29 Jun 2026',
-    dayPeakGen: 14308,
-    eveningPeakGen: 16180.9,
-    dayPeakDemand: 14575.8,
-    eveningPeakDemand: 16740.5,
-    minGen: 13739.5,
-    maxGen: 15788,
-    totalEnergyGen: 354.94,
-    totalEnergyUnserved: 2.14,
-    totalEnergyDemand: 357.08,
-    maxTemp: 32.2,
-    totalGasSuppliedPower: 894.75,
-    avgProductionCost: 6.498,
-    totalDailyCost: 2299089200,
-  },
-  generationData: [
-    { name: 'Gas', gen: 126.19, cost: 1, unitCost: 3.45, color: '#0ea5e9' },
-    { name: 'Coal', gen: 129.21, cost: 1, unitCost: 6.62, color: '#64748b' },
-    { name: 'HFO', gen: 30.41, cost: 1, unitCost: 18.06, color: '#f97316' },
-    { name: 'Hydro', gen: 2.21, cost: 1, unitCost: 0.1, color: '#06b6d4' },
-    { name: 'Solar', gen: 3.75, cost: 1, unitCost: 15.77, color: '#eab308' },
-    { name: 'Imports', gen: 63.06, cost: 1, unitCost: 6.34, color: '#a855f7' },
-    { name: 'HSD (Diesel)', gen: 0, cost: 0, unitCost: 0, color: '#ef4444' },
-  ],
-};
+import {
+  SAMPLE_GAS_PRODUCTION as GAS_PRODUCTION,
+  SAMPLE_SYSTEM_ONLY_REPORT as sampleReport,
+  SAMPLE_SREDA,
+} from '@/lib/test/fixtures/daily-report';
 
 describe('date-utils', () => {
   it('converts legacy PGCB dates to ISO', () => {
@@ -269,17 +238,7 @@ describe('fetchDailyReport client integration', () => {
 });
 
 describe('home-snapshot', () => {
-  const sredaSample = {
-    date: '2026-06-29',
-    lastUpdate: '2026-06-29 16:16:30',
-    sourceUrl: 'https://ndre.sreda.gov.bd/',
-    totalRenewableMw: 1805.84,
-    renewableTech: [],
-    reGridSharePct: 5.56,
-    totalInstalledMw: 32456,
-    generationMix: [],
-    scrapedAt: '2026-06-30T00:00:00.000Z',
-  };
+  const sredaSample = SAMPLE_SREDA;
 
   it('builds twelve daily metrics with MW units (GWh converted to avg MW)', () => {
     const stats = buildHomeSnapshotFromDaily({
@@ -294,7 +253,7 @@ describe('home-snapshot', () => {
     } as never, sredaSample);
     expect(stats).toHaveLength(12);
     expect(stats.map((s) => s.label)).toEqual([
-      'Evening Peak Demand',
+      'Current Demand',
       'Peak Generation',
       'Peak Today',
       'Daily Generation',
@@ -307,7 +266,11 @@ describe('home-snapshot', () => {
       'RE Installed',
       'RE Grid Share',
     ]);
-    expect(stats[0].value).toBe(16741);
+    // Current Demand is instantaneous and only NLDC publishes it, so a daily
+    // report yields a held place, not a figure. It used to carry the evening
+    // peak under a label the panel never listened for; see the invariant below.
+    expect(stats[0].value).toBeNull();
+    expect(stats[0].awaiting).toBe('NLDC');
     expect(stats[0].unit).toBe(POWER_UNIT);
     expect(stats[1].value).toBe(16181);
     expect(stats[1].unit).toBe(POWER_UNIT);

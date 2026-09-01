@@ -9,7 +9,8 @@ import { formatSnapshotHeaderDate, localizeSnapshotLabel, localizeEnergyStatLabe
 import { formatNumber } from '@/lib/utils';
 import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
-import { DAILY_SNAPSHOT_LABELS, POWER_UNIT, type DailySnapshotLabel } from '@/lib/data/grid/home-snapshot-core';
+import { POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
+import { LIVE_BACKED_LABELS, mergeHomeSnapshot, type SnapshotSlot } from '@/lib/data/grid/home-snapshot-merge';
 
 const IconMap: Record<string, any> = {
   Zap,
@@ -33,37 +34,11 @@ const ICON_STYLES: Record<string, { color: string; bg: string }> = {
   TrendingUp: { color: 'text-primary dark:text-primary-foreground', bg: 'bg-primary/10' },
 };
 
-interface LocalStat {
-  label: string;
-  value: number;
-  unit: string;
-  isDecimal?: boolean;
-  icon: any;
-  iconClass?: string;
-  iconBgClass?: string;
-}
-
-const initialStatsData: Omit<LocalStat, 'icon'>[] = [
-  { label: 'Current Demand', value: 16740, unit: POWER_UNIT },
-  { label: 'Peak Generation', value: 16181, unit: POWER_UNIT },
-  { label: 'Peak Today', value: 16741, unit: POWER_UNIT },
-  { label: 'Daily Generation', value: 14788, unit: POWER_UNIT },
-  { label: 'Load Shedding', value: 0, unit: POWER_UNIT },
-  { label: 'Energy Unserved', value: 89, unit: POWER_UNIT },
-  { label: 'Fuel Cost', value: 6.5, unit: 'Tk/kWh', isDecimal: true },
-  { label: 'Gas Supply', value: 2610, unit: 'MMcfd' },
-  { label: 'Coal Generation', value: 5383, unit: POWER_UNIT },
-  { label: 'Grid Import', value: 2570, unit: POWER_UNIT },
-  { label: 'RE Installed', value: 1806, unit: POWER_UNIT },
-  { label: 'RE Grid Share', value: 5.56, unit: '%', isDecimal: true },
-];
-
-const TARGET_ORDER: Record<DailySnapshotLabel, number> = Object.fromEntries(
-  DAILY_SNAPSHOT_LABELS.map((label, index) => [label, index]),
-) as Record<DailySnapshotLabel, number>;
-
-function snapshotLabelOrder(label: string): number {
-  return (TARGET_ORDER as Record<string, number>)[label] ?? 99;
+/** A merged slot plus the resolved lucide icon and its Tailwind classes. */
+interface LocalStat extends SnapshotSlot {
+  Icon: any;
+  iconClass: string;
+  iconBgClass: string;
 }
 
 /** "2026-08-24" out of an ISO date or datetime; null when the value is neither. */
@@ -140,18 +115,11 @@ function useLiveGrid(): LiveGrid | null {
  * different quantity just because a live number exists.
  */
 /**
- * The labels `liveValueFor` can fill from NLDC alone. Kept beside it so the two
- * cannot drift: a tile listed here survives with no daily figure behind it, and
- * one that stops being live-backed must stop surviving.
+ * Must stay in agreement with `liveBacked` in `SNAPSHOT_SLOTS`: every label
+ * this returns a figure for is marked live-backed there, and vice versa. The
+ * survival rule reads `LIVE_BACKED_LABELS` off that spec, so a tile listed
+ * there but missing from this switch would keep its slot forever waiting.
  */
-const LIVE_BACKED = new Set([
-  'Current Demand',
-  'Load Shedding',
-  'Peak Today',
-  'Coal Generation',
-  'Grid Import',
-]);
-
 function liveValueFor(label: string, live: LiveGrid): number | null {
   switch (label) {
     case 'Current Demand':
@@ -177,64 +145,21 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
 
 function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStats?: any[]; live: LiveGrid | null; liveStamp?: string | null }) {
   const { locale, t } = useLocale();
-  const [stats, setStats] = useState<any[]>(() => {
-    const incomingMap = new Map<string, any>();
-    if (initialStats && initialStats.length > 0) {
-      for (const s of initialStats) {
-        if (s && s.label && s.label in TARGET_ORDER) {
-          incomingMap.set(s.label, s);
-        }
-      }
-    }
-
-    // `initialStatsData` is a template: the order, the units and the icons.
-    // Its numbers are placeholders, and a tile the archive does not supply must
-    // not fall through to one. It did — the data layer drops Gas Supply on a
-    // day Petrobangla has not filed, and Energy Unserved whenever the report
-    // omits it, and both then rendered a fixed figure (2,610 MMcfd, 89 MW)
-    // under a LIVE badge, sourced to PGCB and Petrobangla.
-    //
-    // A tile survives only if the server sent a real value for it, or the live
-    // NLDC overlay can fill it — `liveValueFor` covers Current Demand, which is
-    // live-only and has no daily counterpart at all.
-    const merged = initialStatsData
-      .filter((item) => incomingMap.has(item.label) || LIVE_BACKED.has(item.label))
-      .map((item) => {
-        const matched = incomingMap.get(item.label);
-        // A tile the server sent with `awaiting` set is one whose source has
-        // not filed yet. It keeps its place in the grid and carries a null
-        // value, which the render turns into a dash — falling through to
-        // `item.value` here would put the template's placeholder back, which
-        // is the whole class of bug this panel had.
-        const awaiting = matched?.awaiting as string | undefined;
-        return {
-          ...item,
-          value: awaiting ? null : matched && typeof matched.value === 'number' ? matched.value : item.value,
-          awaiting,
-          unit: matched ? matched.unit || item.unit : item.unit,
-          isDecimal: matched ? typeof matched.isDecimal === 'boolean' ? matched.isDecimal : item.isDecimal : item.isDecimal,
-        };
-      });
-
-    const sorted = [...merged].sort((a, b) => snapshotLabelOrder(a.label) - snapshotLabelOrder(b.label));
-
-    return sorted.map((s) => {
-      const iconKey = s.label === 'Current Demand' || s.label === 'Load Shedding' ? 'Activity' :
-                      s.label === 'Peak Generation' ? 'Zap' :
-                      s.label === 'RE Grid Share' ? 'Leaf' :
-                      s.label === 'Energy Unserved' || s.label === 'Fuel Cost' ? 'Gauge' :
-                      s.label === 'Gas Supply' || s.label === 'Coal Generation' ? 'Flame' :
-                      s.label === 'Grid Import' ? 'Cable' :
-                      s.label === 'RE Installed' ? 'Sun' : 'TrendingUp';
-      const style = ICON_STYLES[iconKey] || ICON_STYLES.TrendingUp;
+  // `mergeHomeSnapshot` folds the server's stats onto the twelve declared slots
+  // and is the only thing that decides a tile's figure. It has no specimen
+  // numbers to fall back to, so a tile nobody filed arrives here as null with
+  // the owing source named, and renders as "— awaiting".
+  const [stats, setStats] = useState<LocalStat[]>(() =>
+    mergeHomeSnapshot(initialStats as never).map((slot) => {
+      const style = ICON_STYLES[slot.icon] || ICON_STYLES.TrendingUp;
       return {
-        ...s,
-        icon: IconMap[iconKey] || Zap,
+        ...slot,
+        Icon: IconMap[slot.icon] || Zap,
         iconClass: style.color,
         iconBgClass: style.bg,
       };
-    });
-  });
+    }),
+  );
 
   const simulateLive = isSimulatedTelemetryEnabled();
 
@@ -268,14 +193,14 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
   return (
     <div className="grid grid-cols-2 gap-[1px] bg-border/65 w-full h-full auto-rows-fr rounded-xl overflow-hidden border border-border/65">
       {stats.map((s, i) => {
-        const Icon = s.icon;
+        const Icon = s.Icon;
 
         const liveVal = live ? liveValueFor(s.label, live) : null;
         const isLive = liveVal !== null;
         const displayValue = isLive ? liveVal : s.value;
         // Live wins over waiting: a tile the daily report has not filed can
         // still be carried by NLDC, and then it is not waiting for anything.
-        const awaiting = isLive ? undefined : (s.awaiting as string | undefined);
+        const awaiting = isLive ? undefined : s.awaiting;
         const liveWhen = liveStamp ?? (live ? live.asOf.slice(11, 16) : '');
         const liveTip =
           locale === 'bn'

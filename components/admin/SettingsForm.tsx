@@ -69,102 +69,94 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
   const [ctaSecondaryLabel, setCtaSecondaryLabel] = useState(professionals.secondaryLabel ?? professionalsDefault.secondaryLabel);
   const [ctaSecondaryHref, setCtaSecondaryHref] = useState(professionals.secondaryHref ?? professionalsDefault.secondaryHref);
 
-  // 2. Live Markets Ticker
+  // A cleared numeric field becomes null, not 0. `parseFloat('') || 0` read
+  // "I do not have this figure" as "the figure is zero" on every input below.
+  const numOrNull = (raw: string) => (raw.trim() === '' ? null : Number.isFinite(parseFloat(raw)) ? parseFloat(raw) : null);
+
+  // The seeds below are scaffolding, never content.
+  //
+  // Every one of these lists used to ship pre-filled with invented figures and
+  // invented facts: spot LNG at $11.85/mmbtu, "Generation Capacity 28,420 MW",
+  // a "400 kV Rooppur-Baghabari, Under Construction, 2400 MW" line, and four
+  // interviews attributing remarks to named holders of real offices - the
+  // Chairman of SREDA, the Managing Director of PGCB, a Member of BERC -
+  // behind YouTube IDs that pointed at unrelated videos. An administrator who
+  // opened Settings on an unconfigured site and pressed Save published all of
+  // it, and `app/(public)/page.tsx` reads `settings.snapshot` and
+  // `settings.ticker` as the fallback when the data pipeline has nothing, so
+  // there was a live path from this form to the homepage.
+  //
+  // The rows remain because the editors have no add-row control and an empty
+  // list would be uneditable. What they no longer carry is a value. A blank
+  // field publishes nothing; a fabricated one publishes a claim.
+
+  // 2. Live Markets Ticker - instrument names and units are structural; the
+  // quote and the day's change are the administrator's to enter.
   const [ticker, setTicker] = useState<any[]>(
     (settings.ticker as any[]) ?? [
-      { id: 'lng', name: 'LNG (Spot)', value: 11.85, unit: '/mmbtu', change: 1.4, prefix: '$' },
-      { id: 'coal', name: 'Coal (API2)', value: 102.5, unit: '/t', change: -0.8, prefix: '$' },
-      { id: 'fx', name: 'USD/BDT', value: 117.65, unit: '', change: 0.12, prefix: '৳' },
-      { id: 'solar', name: 'Solar Module', value: 0.118, unit: '/W', change: -2.1, prefix: '$' },
-      { id: 'tariff', name: 'Bulk Tariff', value: 8.95, unit: 'Tk/kWh', change: 0.0, prefix: '' },
-      { id: 'gas', name: 'Petrobangla Gas', value: 1380, unit: 'MMcfd', change: -3.2, prefix: '' },
+      { id: 'lng', name: 'LNG (Spot)', value: null, unit: '/mmbtu', change: null, prefix: '$' },
+      { id: 'coal', name: 'Coal (API2)', value: null, unit: '/t', change: null, prefix: '$' },
+      { id: 'fx', name: 'USD/BDT', value: null, unit: '', change: null, prefix: '৳' },
+      { id: 'solar', name: 'Solar Module', value: null, unit: '/W', change: null, prefix: '$' },
+      { id: 'tariff', name: 'Bulk Tariff', value: null, unit: 'Tk/kWh', change: null, prefix: '' },
+      { id: 'gas', name: 'Petrobangla Gas', value: null, unit: 'MMcfd', change: null, prefix: '' },
     ]
   );
 
   // 3. System Snapshot Stats
   const [snapshot, setSnapshot] = useState<any[]>(
     (settings.snapshot as any[]) ?? [
-      { label: 'Generation Capacity', value: 28420, unit: 'MW', icon: 'Zap', color: '#3b82f6' },
-      { label: 'Current Demand', value: 15230, unit: 'MW', icon: 'Activity', color: '#ef4444' },
-      { label: 'Renewable Share', value: 4.8, unit: '%', isDecimal: true, icon: 'Leaf', color: '#10b981' },
-      { label: 'System Loss', value: 7.6, unit: '%', isDecimal: true, icon: 'Gauge', color: '#f59e0b' },
-      { label: 'Gas Supply', value: 1380, unit: 'MMcfd', icon: 'Flame', color: '#8b5cf6' },
-      { label: 'Peak Today', value: 16850, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
-      { label: 'India Grid Import', value: 1160, unit: 'MW', icon: 'Cable', color: '#06b6d4' },
-      { label: 'Solar Installed', value: 1020, unit: 'MW', icon: 'Sun', color: '#f59e0b' },
+      { label: 'Generation Capacity', value: null, unit: 'MW', icon: 'Zap', color: '#3b82f6' },
+      { label: 'Current Demand', value: null, unit: 'MW', icon: 'Activity', color: '#ef4444' },
+      { label: 'Renewable Share', value: null, unit: '%', isDecimal: true, icon: 'Leaf', color: '#10b981' },
+      { label: 'System Loss', value: null, unit: '%', isDecimal: true, icon: 'Gauge', color: '#f59e0b' },
+      { label: 'Gas Supply', value: null, unit: 'MMcfd', icon: 'Flame', color: '#8b5cf6' },
+      { label: 'Peak Today', value: null, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
+      { label: 'India Grid Import', value: null, unit: 'MW', icon: 'Cable', color: '#06b6d4' },
+      { label: 'Solar Installed', value: null, unit: 'MW', icon: 'Sun', color: '#f59e0b' },
     ]
   );
 
   // 4. Featured Interviews
   const [interviews, setInterviews] = useState<any[]>(
-    (settings.interviews as any[]) ?? [
-      {
-        id: 'i1',
-        title: 'Powering the Future: SREDA’s 2030 Renewable Roadmap',
-        guest: 'Dr. Shahana Rahman',
-        role: 'Chairman, SREDA',
-        duration: '24:15',
-        date: 'Jun 11',
-        thumbnail: '/images/yt_tm_1.jpg',
-        youtubeId: 'dQw4w9wgxcQ',
-        excerpt: 'Inside the new solar + wind tender pipeline and grid integration challenges.',
-      },
-      {
-        id: 'i2',
-        title: 'Grid Modernization at PGCB: 400kV Backbone Update',
-        guest: 'Engr. Nasir Uddin',
-        role: 'Managing Director, PGCB',
-        duration: '18:40',
-        date: 'Jun 9',
-        thumbnail: '/images/yt_tm_2.jpg',
-        youtubeId: '3JZ_2t4vV3c',
-        excerpt: 'How the new transmission corridors are unlocking southern generation.',
-      },
-      {
-        id: 'i3',
-        title: 'Tariff Reform & Consumer Protection — A BERC Perspective',
-        guest: 'Barrister M. Rahman',
-        role: 'Member, BERC',
-        duration: '31:05',
-        date: 'Jun 5',
-        thumbnail: '/images/yt_tm_3.jpg',
-        youtubeId: '9bZkp7q19f0',
-        excerpt: 'Balancing cost recovery with affordability in the new bulk supply tariff.',
-      },
-      {
-        id: 'i4',
-        title: 'Rooppur Nuclear: First Fuel Loading & Safety First',
-        guest: 'Dr. A. K. M. Fazle Kabir',
-        role: 'Project Director, Rooppur NPP',
-        duration: '27:30',
-        date: 'Jun 3',
-        thumbnail: '/images/yt_tm_1.jpg',
-        youtubeId: 'jNQXAC9IVRw',
-        excerpt: 'Milestones, fuel cycle, and what it means for Bangladesh’s baseload.',
-      },
-    ]
+    (settings.interviews as any[]) ??
+      // Blank slots, not example interviews. These carried four invented
+      // conversations with named office-holders; nothing here now asserts that
+      // anyone said anything.
+      ['i1', 'i2', 'i3', 'i4'].map((id) => ({
+        id,
+        title: '',
+        guest: '',
+        role: '',
+        duration: '',
+        date: '',
+        thumbnail: '',
+        youtubeId: '',
+        excerpt: '',
+      }))
   );
 
   // 5. Grid Explorer Data
   const [gridMix, setGridMix] = useState<any[]>(
+    // Fuel categories are structural. The share and the installed capacity
+    // were invented and are now the administrator's to source and enter.
     (settings.gridMix as any[]) ?? [
-      { name: 'Gas (CCGT + GT)', value: 52, mw: 14780 },
-      { name: 'Coal', value: 18, mw: 5110 },
-      { name: 'HFO / Diesel', value: 12, mw: 3410 },
-      { name: 'Hydro', value: 2, mw: 570 },
-      { name: 'Solar + Wind', value: 5, mw: 1420 },
-      { name: 'Imports', value: 8, mw: 2270 },
-      { name: 'Nuclear (Rooppur-1)', value: 3, mw: 850 },
+      { name: 'Gas (CCGT + GT)', value: null, mw: null },
+      { name: 'Coal', value: null, mw: null },
+      { name: 'HFO / Diesel', value: null, mw: null },
+      { name: 'Hydro', value: null, mw: null },
+      { name: 'Solar + Wind', value: null, mw: null },
+      { name: 'Imports', value: null, mw: null },
+      { name: 'Nuclear (Rooppur-1)', value: null, mw: null },
     ]
   );
 
   const [gridLines, setGridLines] = useState<any[]>(
-    (settings.gridLines as any[]) ?? [
-      { name: '400 kV Patuakhali–Gopalganj', status: 'Commissioned', capacity: '1800 MW', owner: 'PGCB', load: 74 },
-      { name: '400 kV Rooppur–Baghabari', status: 'Under Construction', capacity: '2400 MW', owner: 'PGCB', load: 0 },
-      { name: '230 kV Barisal–Khulna', status: 'Commissioned', capacity: '650 MW', owner: 'PGCB', load: 82 },
-      { name: '400 kV Bheramara HVDC (India)', status: 'Operational', capacity: '1000 MW', owner: 'PGCB/POWERGRID', load: 90 },
-    ]
+    // Every field here is a claim about a specific transmission asset - its
+    // name, its commissioning status, its rating, its loading. All four rows
+    // were invented, so all four are blank.
+    (settings.gridLines as any[]) ??
+      Array.from({ length: 4 }, () => ({ name: '', status: '', capacity: '', owner: '', load: null }))
   );
 
   const [coverageSlots, setCoverageSlots] = useState<CoverageSlot[]>(
@@ -172,12 +164,10 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
   );
 
   const [gridProjects, setGridProjects] = useState<any[]>(
-    (settings.gridProjects as any[]) ?? [
-      { name: 'SREDA 1800 MW Solar+Wind', status: 'Tender', mw: '1800', date: 'Q3 2026' },
-      { name: 'Matarbari Phase-2 Coal', status: 'Construction', mw: '1200', date: '2027' },
-      { name: 'Payra 1320 MW Expansion', status: 'Planned', mw: '1320', date: '2028' },
-      { name: 'BREB 500k SHS + Mini-grid', status: 'Ongoing', mw: '—', date: '2026-27' },
-    ]
+    // As above: named projects with tender status and commissioning dates,
+    // none of them sourced.
+    (settings.gridProjects as any[]) ??
+      Array.from({ length: 4 }, () => ({ name: '', status: '', mw: '', date: '' }))
   );
 
   // Homepage sidebar panel visibility toggles (both default ON)
@@ -515,19 +505,19 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
               {ticker.map((item, idx) => (
                 <div key={item.id} className="grid grid-cols-12 gap-3 items-center hover:bg-muted/10 p-1 rounded-xl">
                   <div className="col-span-3">
-                    <Input value={item.name} onChange={(e) => updateTickerField(idx, 'name', e.target.value)} />
+                    <Input value={item.name ?? ''} onChange={(e) => updateTickerField(idx, 'name', e.target.value)} />
                   </div>
                   <div className="col-span-2">
-                    <Input type="number" step="0.001" value={item.value} onChange={(e) => updateTickerField(idx, 'value', parseFloat(e.target.value) || 0)} />
+                    <Input type="number" step="0.001" placeholder="—" value={item.value ?? ''} onChange={(e) => updateTickerField(idx, 'value', numOrNull(e.target.value))} />
                   </div>
                   <div className="col-span-2">
-                    <Input value={item.unit} onChange={(e) => updateTickerField(idx, 'unit', e.target.value)} placeholder="none" />
+                    <Input value={item.unit ?? ''} onChange={(e) => updateTickerField(idx, 'unit', e.target.value)} placeholder="none" />
                   </div>
                   <div className="col-span-2">
-                    <Input type="number" step="0.1" value={item.change} onChange={(e) => updateTickerField(idx, 'change', parseFloat(e.target.value) || 0)} />
+                    <Input type="number" step="0.1" placeholder="—" value={item.change ?? ''} onChange={(e) => updateTickerField(idx, 'change', numOrNull(e.target.value))} />
                   </div>
                   <div className="col-span-2">
-                    <Input value={item.prefix} onChange={(e) => updateTickerField(idx, 'prefix', e.target.value)} placeholder="none" />
+                    <Input value={item.prefix ?? ''} onChange={(e) => updateTickerField(idx, 'prefix', e.target.value)} placeholder="none" />
                   </div>
                   <div className="col-span-1 font-mono text-xs text-muted-foreground select-none pl-1">
                     {item.id}
@@ -558,16 +548,16 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
               {snapshot.map((stat, idx) => (
                 <div key={idx} className="grid grid-cols-12 gap-3 items-center hover:bg-muted/10 p-1 rounded-xl">
                   <div className="col-span-3">
-                    <Input value={stat.label} onChange={(e) => updateSnapshotField(idx, 'label', e.target.value)} />
+                    <Input value={stat.label ?? ''} onChange={(e) => updateSnapshotField(idx, 'label', e.target.value)} />
                   </div>
                   <div className="col-span-2">
-                    <Input type="number" step="0.1" value={stat.value} onChange={(e) => updateSnapshotField(idx, 'value', parseFloat(e.target.value) || 0)} />
+                    <Input type="number" step="0.1" placeholder="—" value={stat.value ?? ''} onChange={(e) => updateSnapshotField(idx, 'value', numOrNull(e.target.value))} />
                   </div>
                   <div className="col-span-2">
-                    <Input value={stat.unit} onChange={(e) => updateSnapshotField(idx, 'unit', e.target.value)} />
+                    <Input value={stat.unit ?? ''} onChange={(e) => updateSnapshotField(idx, 'unit', e.target.value)} />
                   </div>
                   <div className="col-span-2">
-                    <Input value={stat.color} onChange={(e) => updateSnapshotField(idx, 'color', e.target.value)} />
+                    <Input value={stat.color ?? ''} onChange={(e) => updateSnapshotField(idx, 'color', e.target.value)} />
                   </div>
                   <div className="col-span-2">
                     <select 
@@ -624,15 +614,15 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label>Interview Title</Label>
-                    <Input value={iv.title} onChange={(e) => updateInterviewField(idx, 'title', e.target.value)} className="mt-1" />
+                    <Input value={iv.title ?? ''} onChange={(e) => updateInterviewField(idx, 'title', e.target.value)} className="mt-1" />
                   </div>
                   <div>
                     <Label>Guest Name</Label>
-                    <Input value={iv.guest} onChange={(e) => updateInterviewField(idx, 'guest', e.target.value)} className="mt-1" />
+                    <Input value={iv.guest ?? ''} onChange={(e) => updateInterviewField(idx, 'guest', e.target.value)} className="mt-1" />
                   </div>
                   <div>
                     <Label>Guest Role / Designation</Label>
-                    <Input value={iv.role} onChange={(e) => updateInterviewField(idx, 'role', e.target.value)} className="mt-1" />
+                    <Input value={iv.role ?? ''} onChange={(e) => updateInterviewField(idx, 'role', e.target.value)} className="mt-1" />
                     <p className="mt-1 text-xs text-muted-foreground">Shown in full in the player modal.</p>
                   </div>
                   <div>
@@ -674,27 +664,27 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   ) : (
                     <div>
                       <Label>YouTube Video ID (embed)</Label>
-                      <Input value={iv.youtubeId} onChange={(e) => updateInterviewField(idx, 'youtubeId', e.target.value)} className="mt-1" />
+                      <Input value={iv.youtubeId ?? ''} onChange={(e) => updateInterviewField(idx, 'youtubeId', e.target.value)} className="mt-1" />
                       <p className="mt-1 text-xs text-muted-foreground">Just the id, not the full URL.</p>
                     </div>
                   )}
                   <div>
                     <Label>Thumbnail Image URL</Label>
-                    <Input value={iv.thumbnail} onChange={(e) => updateInterviewField(idx, 'thumbnail', e.target.value)} className="mt-1" />
+                    <Input value={iv.thumbnail ?? ''} onChange={(e) => updateInterviewField(idx, 'thumbnail', e.target.value)} className="mt-1" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label>Duration (e.g. 24:15)</Label>
-                      <Input value={iv.duration} onChange={(e) => updateInterviewField(idx, 'duration', e.target.value)} className="mt-1" />
+                      <Input value={iv.duration ?? ''} onChange={(e) => updateInterviewField(idx, 'duration', e.target.value)} className="mt-1" />
                     </div>
                     <div>
                       <Label>Date / Display Label</Label>
-                      <Input value={iv.date} onChange={(e) => updateInterviewField(idx, 'date', e.target.value)} className="mt-1" />
+                      <Input value={iv.date ?? ''} onChange={(e) => updateInterviewField(idx, 'date', e.target.value)} className="mt-1" />
                     </div>
                   </div>
                   <div className="md:col-span-2">
                     <Label>Excerpt Summary</Label>
-                    <Textarea value={iv.excerpt} onChange={(e) => updateInterviewField(idx, 'excerpt', e.target.value)} className="mt-1" rows={2} />
+                    <Textarea value={iv.excerpt ?? ''} onChange={(e) => updateInterviewField(idx, 'excerpt', e.target.value)} className="mt-1" rows={2} />
                   </div>
                 </div>
               </div>
@@ -757,13 +747,13 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 {gridMix.map((mix, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-3 items-center hover:bg-muted/10 p-0.5 rounded-lg">
                     <div className="col-span-5">
-                      <Input value={mix.name} onChange={(e) => updateGridMixField(idx, 'name', e.target.value)} />
+                      <Input value={mix.name ?? ''} onChange={(e) => updateGridMixField(idx, 'name', e.target.value)} />
                     </div>
                     <div className="col-span-3">
-                      <Input type="number" value={mix.value} onChange={(e) => updateGridMixField(idx, 'value', parseInt(e.target.value) || 0)} />
+                      <Input type="number" placeholder="—" value={mix.value ?? ''} onChange={(e) => updateGridMixField(idx, 'value', numOrNull(e.target.value))} />
                     </div>
                     <div className="col-span-4">
-                      <Input type="number" value={mix.mw} onChange={(e) => updateGridMixField(idx, 'mw', parseInt(e.target.value) || 0)} />
+                      <Input type="number" placeholder="—" value={mix.mw ?? ''} onChange={(e) => updateGridMixField(idx, 'mw', numOrNull(e.target.value))} />
                     </div>
                   </div>
                 ))}
@@ -784,19 +774,19 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 {gridLines.map((line, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-3 items-center hover:bg-muted/10 p-0.5 rounded-lg">
                     <div className="col-span-4">
-                      <Input value={line.name} onChange={(e) => updateGridLinesField(idx, 'name', e.target.value)} />
+                      <Input value={line.name ?? ''} onChange={(e) => updateGridLinesField(idx, 'name', e.target.value)} />
                     </div>
                     <div className="col-span-3">
-                      <Input value={line.status} onChange={(e) => updateGridLinesField(idx, 'status', e.target.value)} />
+                      <Input value={line.status ?? ''} onChange={(e) => updateGridLinesField(idx, 'status', e.target.value)} />
                     </div>
                     <div className="col-span-2">
-                      <Input value={line.capacity} onChange={(e) => updateGridLinesField(idx, 'capacity', e.target.value)} />
+                      <Input value={line.capacity ?? ''} onChange={(e) => updateGridLinesField(idx, 'capacity', e.target.value)} />
                     </div>
                     <div className="col-span-2">
-                      <Input value={line.owner} onChange={(e) => updateGridLinesField(idx, 'owner', e.target.value)} />
+                      <Input value={line.owner ?? ''} onChange={(e) => updateGridLinesField(idx, 'owner', e.target.value)} />
                     </div>
                     <div className="col-span-1">
-                      <Input type="number" value={line.load} onChange={(e) => updateGridLinesField(idx, 'load', parseInt(e.target.value) || 0)} />
+                      <Input type="number" placeholder="—" value={line.load ?? ''} onChange={(e) => updateGridLinesField(idx, 'load', numOrNull(e.target.value))} />
                     </div>
                   </div>
                 ))}
@@ -816,16 +806,16 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 {gridProjects.map((proj, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-3 items-center hover:bg-muted/10 p-0.5 rounded-lg">
                     <div className="col-span-5">
-                      <Input value={proj.name} onChange={(e) => updateGridProjectsField(idx, 'name', e.target.value)} />
+                      <Input value={proj.name ?? ''} onChange={(e) => updateGridProjectsField(idx, 'name', e.target.value)} />
                     </div>
                     <div className="col-span-2">
-                      <Input value={proj.status} onChange={(e) => updateGridProjectsField(idx, 'status', e.target.value)} />
+                      <Input value={proj.status ?? ''} onChange={(e) => updateGridProjectsField(idx, 'status', e.target.value)} />
                     </div>
                     <div className="col-span-2">
-                      <Input value={proj.mw} onChange={(e) => updateGridProjectsField(idx, 'mw', e.target.value)} />
+                      <Input value={proj.mw ?? ''} onChange={(e) => updateGridProjectsField(idx, 'mw', e.target.value)} />
                     </div>
                     <div className="col-span-3">
-                      <Input value={proj.date} onChange={(e) => updateGridProjectsField(idx, 'date', e.target.value)} />
+                      <Input value={proj.date ?? ''} onChange={(e) => updateGridProjectsField(idx, 'date', e.target.value)} />
                     </div>
                   </div>
                 ))}

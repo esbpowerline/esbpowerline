@@ -163,7 +163,10 @@ export function computeArchiveKpisPreview(
     lngGasMmcfd: 0,
     domesticGas: 0,
     domesticDeltaBaseline: 0,
-    activeWells: indexDay.plant_count, // dummy fallback
+    // Not `indexDay.plant_count`. The index carries no well count, and a plant
+    // count is a different census entirely — it was standing in here under the
+    // label "Producing wells". The preview is a skeleton; this field says so.
+    activeWells: null,
     bibiyanaGas: 0,
     bibiyanaDomesticSharePct: 0,
   };

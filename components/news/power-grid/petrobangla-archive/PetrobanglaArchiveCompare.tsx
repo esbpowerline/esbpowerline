@@ -243,6 +243,13 @@ export function PetrobanglaArchiveCompare({
     if (!left || !right) return;
     const lk = computeArchiveKpis(left);
     const rk = computeArchiveKpis(right);
+    // A comparison the reader will paste elsewhere, so a figure neither day
+    // published must travel as a dash and its delta must not be computed at
+    // all. Subtracting two unknowns produces a number that looks measured.
+    const cell = (v: number | null, digits = 1) => (v == null ? '—' : v.toFixed(digits));
+    const delta = (a: number | null, b: number | null, digits = 1, suffix = '') =>
+      a == null || b == null ? '—' : `${(b - a).toFixed(digits)}${suffix}`;
+
     const md = [
       `# Petrobangla Archive Comparison`,
       ``,
@@ -252,7 +259,7 @@ export function PetrobanglaArchiveCompare({
       `| Power fulfillment | ${lk.powerFulfillmentPct.toFixed(1)}% | ${rk.powerFulfillmentPct.toFixed(1)}% | ${(rk.powerFulfillmentPct - lk.powerFulfillmentPct).toFixed(1)}pp |`,
       `| LNG share | ${lk.lngSharePct.toFixed(1)}% | ${rk.lngSharePct.toFixed(1)}% | ${(rk.lngSharePct - lk.lngSharePct).toFixed(1)}pp |`,
       `| Bibiyana (MMCFD) | ${lk.bibiyanaGas.toFixed(1)} | ${rk.bibiyanaGas.toFixed(1)} | ${(rk.bibiyanaGas - lk.bibiyanaGas).toFixed(1)} |`,
-      `| Active wells | ${lk.activeWells} | ${rk.activeWells} | ${rk.activeWells - lk.activeWells} |`,
+      `| Active wells | ${cell(lk.activeWells, 0)} | ${cell(rk.activeWells, 0)} | ${delta(lk.activeWells, rk.activeWells, 0)} |`,
       ``,
       `Sources: /data/petrobangla/daily/${leftDate}.json · /data/petrobangla/daily/${rightDate}.json`,
     ].join('\n');

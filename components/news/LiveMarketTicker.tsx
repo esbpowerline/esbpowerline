@@ -10,20 +10,25 @@ import { tickerDurationMs, TICKER_SPEED_FACTOR } from '@/lib/ticker-speed';
 export interface TickerItem {
   id: string;
   name: string;
-  value: number;
+  /** Null where no quote has been supplied for the instrument. Never a specimen. */
+  value: number | null;
   unit: string;
-  change: number;
+  /** The published daily delta. Null when unknown — not 0, which reads flat. */
+  change: number | null;
   prefix: string;
 }
 
-const defaultItems: TickerItem[] = [
-  { id: 'lng', name: 'LNG (Spot)', value: 15.82, unit: '/mmbtu', change: 0.8, prefix: '$' },
-  { id: 'coal', name: 'Coal (API2)', value: 116.7, unit: '/t', change: 1.2, prefix: '$' },
-  { id: 'fx', name: 'USD/BDT', value: 123.50, unit: '', change: 0.05, prefix: '৳' },
-  { id: 'solar', name: 'Solar Module', value: 0.10, unit: '/W', change: -0.5, prefix: '$' },
-  { id: 'tariff', name: 'Bulk Tariff', value: 8.95, unit: 'Tk/kWh', change: 0.0, prefix: '' },
-  { id: 'gas', name: 'Petrobangla Gas', value: 1350, unit: 'MMcfd', change: -1.2, prefix: '' },
-];
+/**
+ * There is no default price list any more.
+ *
+ * Six were hard-coded here — LNG at $15.82/mmbtu, coal at $116.7/t, USD/BDT at
+ * 123.50 — and rendered on the site chrome whenever no items were passed,
+ * which is every request the settings row is empty. The comment beneath them
+ * said the values were "real (derived server-side from the daily archives +
+ * published prices)". They were neither derived nor published; they were
+ * written by hand and then scrolled across the top of every page as market
+ * data. A ticker with nothing to quote now renders nothing at all.
+ */
 
 export function LiveMarketTicker({
   initialItems: propItems,
@@ -41,14 +46,20 @@ export function LiveMarketTicker({
   labelClassName?: string;
 }) {
   const { locale, t } = useLocale();
-  const sourceItems = propItems?.length ? propItems : defaultItems;
+  // Only instruments that actually carry a quote. An item with a null value
+  // has nothing to say, and a scrolling bar of dashes says it badly.
+  const sourceItems = useMemo(
+    () => (propItems ?? []).filter((item) => typeof item.value === 'number'),
+    [propItems],
+  );
   const localizedSeed = useMemo(
     () => sourceItems.map((item) => localizeTickerItem(item, locale)),
     [sourceItems, locale],
   );
 
-  // Values are real (derived server-side from the daily archives + published
-  // prices) — no client-side simulation; the change % is a true daily delta.
+  // Values are whatever the caller supplied — server-derived from the daily
+  // archives, or entered in Settings. Nothing is simulated client-side and
+  // nothing is defaulted; the change % is a true daily delta or it is absent.
   const [items, setItems] = useState<TickerItem[]>(localizedSeed);
   const [marketOpen] = useState(true);
 
@@ -113,30 +124,39 @@ export function LiveMarketTicker({
   const labelSize = compact ? 'text-[10px] md:text-[11px]' : 'text-[11px] md:text-xs';
 
   const renderItem = (item: TickerItem, idx: number) => {
-    const isPositive = item.change >= 0;
+    const change = item.change;
+    const isPositive = (change ?? 0) >= 0;
     return (
       <div key={`${item.id}-${idx}`} className="flex shrink-0 items-center gap-2 text-neutral-800 dark:text-neutral-200 transition-colors duration-150 hover:text-neutral-950 dark:hover:text-white">
         <span className={cn('font-semibold text-neutral-900 dark:text-neutral-50', textSize)}>{item.name}</span>
         <span className={cn('font-mono font-bold tabular-nums text-neutral-900 dark:text-neutral-50', textSize)}>
           {item.prefix}
-          {item.value.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
+          {item.value?.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
           {item.unit && <span className="ml-0.5 text-neutral-500 dark:text-neutral-400 font-normal">{item.unit}</span>}
         </span>
-        <span
-          className={cn(
-            'inline-flex items-center rounded-sm px-1 py-[0.5px] text-[9px] md:text-[9.5px] font-sans font-bold tracking-tight',
-            isPositive
-              ? 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15'
-              : 'bg-rose-500/8 text-rose-600 dark:text-rose-400 border border-rose-500/15',
-          )}
-        >
-          <span className="text-[7px] md:text-[7.5px] mr-[2px]">{isPositive ? '▲' : '▼'}</span>
-          {Math.abs(item.change)}%
-        </span>
+        {/* No delta badge without a delta. A green 0.0% reads as "unchanged
+            today", which is a measurement, not a blank. */}
+        {change !== null && (
+          <span
+            className={cn(
+              'inline-flex items-center rounded-sm px-1 py-[0.5px] text-[9px] md:text-[9.5px] font-sans font-bold tracking-tight',
+              isPositive
+                ? 'bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 border border-emerald-500/15'
+                : 'bg-rose-500/8 text-rose-600 dark:text-rose-400 border border-rose-500/15',
+            )}
+          >
+            <span className="text-[7px] md:text-[7.5px] mr-[2px]">{isPositive ? '▲' : '▼'}</span>
+            {Math.abs(change)}%
+          </span>
+        )}
         <span className="ml-4 text-neutral-300 dark:text-neutral-700 select-none">•</span>
       </div>
     );
   };
+
+  // Nothing to quote: no bar. A "COMMODITIES" label with a live green pulse and
+  // an empty track beside it claims a feed that is not there.
+  if (items.length === 0) return null;
 
   const track = (
     <div

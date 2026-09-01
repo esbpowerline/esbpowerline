@@ -7,11 +7,8 @@ import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { localizeEnergyStatLabel } from '@/lib/i18n/homepage-copy';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
-import {
-  DAILY_SNAPSHOT_LABELS,
-  POWER_UNIT,
-  type DailySnapshotLabel,
-} from '@/lib/data/grid/home-snapshot-core';
+import type { HomeSnapshotStat } from '@/lib/data/grid/home-snapshot-core';
+import { mergeHomeSnapshot, type SnapshotSlot } from '@/lib/data/grid/home-snapshot-merge';
 
 const IconMap: Record<string, any> = {
   Zap,
@@ -24,12 +21,9 @@ const IconMap: Record<string, any> = {
   TrendingUp,
 };
 
-interface Stat {
-  label: string;
-  value: number;
-  unit: string;
-  isDecimal?: boolean;
-  icon: any;
+/** A merged slot plus the resolved lucide icon and its Tailwind classes. */
+interface Stat extends SnapshotSlot {
+  Icon: any;
   iconClass?: string;
   iconBgClass?: string;
   hoverBgClass?: string;
@@ -90,62 +84,40 @@ const ICON_STYLES: Record<
   },
 };
 
-const initial: Stat[] = [
-  { label: 'Current Demand', value: 16740, unit: POWER_UNIT, icon: 'Activity' },
-  { label: 'Peak Generation', value: 16181, unit: POWER_UNIT, icon: 'Zap' },
-  { label: 'Peak Today', value: 16741, unit: POWER_UNIT, icon: 'TrendingUp' },
-  { label: 'Daily Generation', value: 14788, unit: POWER_UNIT, icon: 'TrendingUp' },
-  { label: 'Load Shedding', value: 0, unit: POWER_UNIT, icon: 'Activity' },
-  { label: 'Energy Unserved', value: 89, unit: POWER_UNIT, icon: 'Gauge' },
-  { label: 'Fuel Cost', value: 6.5, unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' },
-  { label: 'Gas Supply', value: 2610, unit: 'MMcfd', icon: 'Flame' },
-  { label: 'Coal Generation', value: 5383, unit: POWER_UNIT, icon: 'Flame' },
-  { label: 'Grid Import', value: 2570, unit: POWER_UNIT, icon: 'Cable' },
-  { label: 'RE Installed', value: 1806, unit: POWER_UNIT, icon: 'Sun' },
-  { label: 'RE Grid Share', value: 5.56, unit: '%', isDecimal: true, icon: 'Leaf' },
-];
+/**
+ * The specimen table that used to live here — "Current Demand: 16740",
+ * "Gas Supply: 2610" and ten more — was the layout template, and any tile the
+ * server did not supply fell through to it and rendered as fact. It is gone:
+ * `mergeHomeSnapshot` owns the twelve slots, their order, their units and their
+ * icons, and it has no number of its own to leak.
+ */
 
-const TARGET_ORDER: Record<DailySnapshotLabel, number> = Object.fromEntries(
-  DAILY_SNAPSHOT_LABELS.map((label, index) => [label, index]),
-) as Record<DailySnapshotLabel, number>;
-
-function snapshotLabelOrder(label: string): number {
-  return (TARGET_ORDER as Record<string, number>)[label] ?? 99;
-}
-
-function mergeSnapshotStats(incoming?: Stat[]): Stat[] {
-  const incomingMap = new Map<string, Stat>();
-  if (incoming && incoming.length > 0) {
-    for (const s of incoming) {
-      if (s && s.label && s.label in TARGET_ORDER) {
-        incomingMap.set(s.label, s);
-      }
-    }
+/**
+ * A published figure, or an em dash in the muted weight the site uses for one
+ * nobody has filed. Deliberately not "0" and not the previous day's number: an
+ * absent figure is not a zero, and the unit slot says "awaiting" so the tile
+ * reads as a held place rather than a reported one.
+ */
+function StatValue({ stat, unitClass }: { stat: Stat; unitClass: string }) {
+  const { locale } = useLocale();
+  if (stat.value === null) {
+    return (
+      <>
+        <span className="text-muted-foreground/70">—</span>{' '}
+        <span className={`${unitClass} text-muted-foreground/50`}>
+          {locale === 'bn' ? 'অপেক্ষমাণ' : 'awaiting'}
+        </span>
+      </>
+    );
   }
-
-  const result: Stat[] = [];
-  for (const item of initial) {
-    const matched = incomingMap.get(item.label);
-    if (matched) {
-      result.push({
-        ...item,
-        value: typeof matched.value === 'number' ? matched.value : item.value,
-        unit: matched.unit || item.unit,
-        isDecimal: typeof matched.isDecimal === 'boolean' ? matched.isDecimal : item.isDecimal,
-      });
-    } else {
-      result.push({ ...item });
-    }
-  }
-  return result;
-}
-
-function sortStats(stats: Stat[]): Stat[] {
-  return [...stats].sort((a, b) => {
-    const orderA = snapshotLabelOrder(a.label);
-    const orderB = snapshotLabelOrder(b.label);
-    return orderA - orderB;
-  });
+  return (
+    <>
+      {stat.isDecimal
+        ? stat.value.toFixed(stat.label === 'Fuel Cost' || stat.label === 'Energy Unserved' ? 2 : 1)
+        : formatNumber(Math.round(stat.value))}{' '}
+      <span className={unitClass}>{stat.unit}</span>
+    </>
+  );
 }
 
 function getLabelElements(label: string, locale: string) {
@@ -180,28 +152,25 @@ export function EnergyDashboard({
   fillHeight = false,
   variant = 'default',
 }: {
-  initialStats?: Stat[];
+  initialStats?: HomeSnapshotStat[];
   compact?: boolean;
   fillHeight?: boolean;
   variant?: 'default' | 'segment';
 }) {
   const { locale, t } = useLocale();
-  const [stats, setStats] = useState<Stat[]>(() => {
-    const raw = mergeSnapshotStats(initialStats);
-    const sorted = sortStats(raw);
-    return sorted.map(s => {
-      const iconKey = typeof s.icon === 'string' ? s.icon : 'Zap';
-      const style = ICON_STYLES[iconKey] || ICON_STYLES.Zap;
+  const [stats, setStats] = useState<Stat[]>(() =>
+    mergeHomeSnapshot(initialStats).map((slot) => {
+      const style = ICON_STYLES[slot.icon] || ICON_STYLES.Zap;
       return {
-        ...s,
-        icon: typeof s.icon === 'string' ? (IconMap[s.icon] || Zap) : s.icon,
-        iconClass: s.iconClass ?? style.color,
-        iconBgClass: s.iconBgClass ?? style.bg,
+        ...slot,
+        Icon: IconMap[slot.icon] || Zap,
+        iconClass: style.color,
+        iconBgClass: style.bg,
         hoverBgClass: style.hoverBg,
         hoverTextClass: style.hoverText,
       };
-    });
-  });
+    }),
+  );
 
   const simulateLive = isSimulatedTelemetryEnabled();
 
@@ -210,6 +179,9 @@ export function EnergyDashboard({
 
     const interval = setInterval(() => {
       setStats(prev => prev.map((s) => {
+        // Nothing to jitter on a tile whose source has not filed, and
+        // `null + variation` is NaN.
+        if (s.value === null) return s;
         if (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
@@ -237,7 +209,7 @@ export function EnergyDashboard({
       }
     >
       {stats.map((s, i) => {
-        const Icon = s.icon;
+        const Icon = s.Icon;
         return (
           <div
             key={i}
@@ -252,13 +224,21 @@ export function EnergyDashboard({
             {/* Live SCADA Radar Ping */}
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
-                label={simulateLive ? t('energy.simulated') : t('energy.indicative')}
+                label={
+                  s.awaiting
+                    ? locale === 'bn'
+                      ? `${s.awaiting} এখনও এই দিনের হিসাব প্রকাশ করেনি`
+                      : `${s.awaiting} has not published this day yet`
+                    : simulateLive
+                      ? t('energy.simulated')
+                      : t('energy.indicative')
+                }
                 alwaysShow
                 variant="chrome"
                 side="top"
               >
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
-                  {simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation' || s.label === 'Fuel Cost') ? (
+                  {s.value !== null && simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation' || s.label === 'Fuel Cost') ? (
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
@@ -280,15 +260,10 @@ export function EnergyDashboard({
                     {getLabelElements(s.label, locale)}
                   </div>
                   <div className="energy-dashboard__stat-value font-bold font-sans tabular-nums text-foreground/95 group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap">
-                    {s.isDecimal
-                      ? s.value.toFixed(
-                          s.label === 'Fuel Cost' ? 2 : s.label === 'Energy Unserved' ? 2 : 1,
-                        )
-                      : formatNumber(Math.round(s.value))}
-                    {' '}
-                    <span className="energy-dashboard__stat-unit font-bold text-muted-foreground/90 uppercase tracking-wider">
-                      {s.unit}
-                    </span>
+                    <StatValue
+                      stat={s}
+                      unitClass="energy-dashboard__stat-unit font-bold text-muted-foreground/90 uppercase tracking-wider"
+                    />
                   </div>
                 </div>
               </div>
@@ -299,11 +274,10 @@ export function EnergyDashboard({
                   {localizeEnergyStatLabel(s.label, locale)}
                 </div>
                 <div className="font-bold font-sans tabular-nums text-foreground/90 group-hover:text-primary transition-colors duration-150 leading-none stat-value mt-1">
-                  {s.isDecimal ? s.value.toFixed(1) : formatNumber(Math.round(s.value))}
-                  {' '}
-                  <span className="font-bold uppercase tracking-wider text-sm align-baseline font-normal text-muted-foreground">
-                    {s.unit}
-                  </span>
+                  <StatValue
+                    stat={s}
+                    unitClass="font-bold uppercase tracking-wider text-sm align-baseline font-normal text-muted-foreground"
+                  />
                 </div>
               </>
             )}

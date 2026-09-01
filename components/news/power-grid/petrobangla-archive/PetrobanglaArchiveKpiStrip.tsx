@@ -20,6 +20,12 @@ import {
 import { cn, formatNumber } from '@/lib/utils';
 import { ARCHIVE_BASELINE_DATE, ARCHIVE_BASELINE_GAS, ARCHIVE_INSIGHTS, PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import type { ArchiveKpis, AudienceMode } from '@/lib/data/petrobangla/types';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+} from '@/lib/data/grid/chart-palette';
 
 interface Props {
   kpis: ArchiveKpis;
@@ -84,14 +90,15 @@ export function PetrobanglaArchiveKpiStrip({
           </p>
         </div>
         <GridKpiTooltipPanel
+          loading={preview}
           title="Supply stress"
           icon={Gauge}
           accent={stressClass}
           active={activeTooltip === 'stress'}
         >
             <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Stress score" provenance="D" value={kpis.stressScore} valueClass={stressClass} dotColor={kpis.stressColor === 'green' ? '#10b981' : kpis.stressColor === 'amber' ? '#f59e0b' : '#ef4444'} />
-            <GridKpiTooltipGridRow label="Power fulfillment" provenance="D" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} dotColor="#ef4444" />
+            <GridKpiTooltipGridRow label="Stress score" provenance="D" value={kpis.stressScore} valueClass={stressClass} dotColor={kpis.stressColor === 'green' ? STATUS_COLORS.good : kpis.stressColor === 'amber' ? STATUS_COLORS.warning : STATUS_COLORS.critical} />
+            <GridKpiTooltipGridRow label="Power fulfillment" provenance="D" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} dotColor={STATUS_COLORS.critical} />
             <GridKpiTooltipGridRow label="Domestic share" provenance="D" value={`${domesticSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.domestic} />
             <GridKpiTooltipGridRow label="LNG import share" provenance="D" value={`${kpis.lngSharePct.toFixed(1)}%`} dotColor={PB_ARCHIVE_COLORS.lng} />
             <GridKpiTooltipGridRow
@@ -124,6 +131,7 @@ export function PetrobanglaArchiveKpiStrip({
           </p>
         </div>
         <GridKpiTooltipPanel
+          loading={preview}
           title="National gas"
           icon={Droplet}
           accent="text-sky-500"
@@ -171,6 +179,7 @@ export function PetrobanglaArchiveKpiStrip({
           </p>
         </div>
         <GridKpiTooltipPanel
+          loading={preview}
           title="Power fulfillment"
           icon={Flame}
           accent="text-red-500"
@@ -178,9 +187,9 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'power'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Fulfillment rate" provenance="D" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} valueClass="text-red-500" dotColor="#ef4444" />
+            <GridKpiTooltipGridRow label="Fulfillment rate" provenance="D" value={`${kpis.powerFulfillmentPct.toFixed(1)}%`} valueClass="text-red-500" dotColor={STATUS_COLORS.critical} />
             <GridKpiTooltipGridRow label="Plants received" provenance="P" value={`${formatNumber(kpis.powerSupply, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.powerSupply} />
-            <GridKpiTooltipGridRow label="Plants requested" provenance="P" value={`${formatNumber(kpis.powerDemand, 1)} MMCFD`} dotColor="#f59e0b" />
+            <GridKpiTooltipGridRow label="Plants requested" provenance="P" value={`${formatNumber(kpis.powerDemand, 1)} MMCFD`} dotColor={STATUS_COLORS.warning} />
             <GridKpiTooltipGridRow label="Unmet demand" provenance="D" value={`${formatNumber(powerShortfall, 1)} MMCFD`} valueClass="text-destructive" dotColor={PB_ARCHIVE_COLORS.shortage} />
             <GridKpiTooltipGridRow
               label="Jan 2020 benchmark" provenance="D"
@@ -208,6 +217,7 @@ export function PetrobanglaArchiveKpiStrip({
           </p>
         </div>
         <GridKpiTooltipPanel
+          loading={preview}
           title="LNG share"
           icon={Layers}
           accent="text-purple-500"
@@ -240,6 +250,7 @@ export function PetrobanglaArchiveKpiStrip({
           </p>
         </div>
         <GridKpiTooltipPanel
+          loading={preview}
           title="Domestic output"
           icon={Activity}
           accent="text-sky-600"
@@ -270,7 +281,7 @@ export function PetrobanglaArchiveKpiStrip({
         <AlertTriangle className="grid-explorer-kpi__icon text-amber-500 shrink-0" />
         <div className="min-w-0">
           <div className="grid-explorer-kpi__label">Active wells<GridProvenanceTag kind="P" className="ml-1.5" /></div>
-          <div className="grid-explorer-kpi__value">{preview ? pending : Math.round(kpis.activeWells)}</div>
+          <div className="grid-explorer-kpi__value">{preview || kpis.activeWells == null ? pending : Math.round(kpis.activeWells)}</div>
           {mode !== 'simple' && (
             <p className="text-[9px] text-muted-foreground mt-1">
               {preview
@@ -280,6 +291,7 @@ export function PetrobanglaArchiveKpiStrip({
           )}
         </div>
         <GridKpiTooltipPanel
+          loading={preview}
           title="Active wells"
           icon={AlertTriangle}
           accent="text-amber-500"
@@ -287,7 +299,7 @@ export function PetrobanglaArchiveKpiStrip({
           active={activeTooltip === 'wells'}
         >
           <div className="grid-chart-tooltip__grid text-[11px] md:text-xs">
-            <GridKpiTooltipGridRow label="Producing wells" provenance="P" value={Math.round(kpis.activeWells)} dotColor="#f59e0b" />
+            <GridKpiTooltipGridRow label="Producing wells" provenance="P" value={kpis.activeWells == null ? pending : Math.round(kpis.activeWells)} dotColor={STATUS_COLORS.warning} />
             <GridKpiTooltipGridRow label="Bibiyana output" provenance="P" value={`${formatNumber(kpis.bibiyanaGas, 1)} MMCFD`} dotColor={PB_ARCHIVE_COLORS.domestic} />
             <GridKpiTooltipGridRow
               label="Bibiyana decline" provenance="P"
@@ -298,7 +310,7 @@ export function PetrobanglaArchiveKpiStrip({
               label="Concentration risk" provenance="D"
               value={`${kpis.bibiyanaDomesticSharePct.toFixed(0)}% of domestic from one field`}
               valueClass={kpis.bibiyanaDomesticSharePct > 45 ? 'text-amber-500' : undefined}
-              dotColor="#f59e0b"
+              dotColor={STATUS_COLORS.warning}
             />
           </div>
           <div className="pt-1.5 border-t border-border/40 text-[9px] text-muted-foreground font-semibold mt-2">

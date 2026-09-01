@@ -181,7 +181,14 @@ export interface ArchiveKpis {
   lngGasMmcfd: number;
   domesticGas: number;
   domesticDeltaBaseline: number;
-  activeWells: number;
+  /**
+   * Producing wells, from the report's own grand-total row. Null on the
+   * index-only preview, which has no well figure at all — it briefly stood in
+   * `plant_count` here, a count of plants published for a different purpose,
+   * and the tooltip printed it as "Producing wells" with a "published"
+   * provenance tag.
+   */
+  activeWells: number | null;
   bibiyanaGas: number;
   bibiyanaDomesticSharePct: number;
 }
