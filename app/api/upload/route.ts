@@ -44,8 +44,11 @@ export async function POST(request: NextRequest) {
       name: file.name,
       url: stored.url,
       type: file.type.startsWith('image/') ? 'image' : 'file',
-      mimeType: file.type,
-      size: file.size,
+      // What the store holds, not what arrived: raster uploads are normalised
+      // (capped, stripped, WebP), so the original file's mime and size would
+      // describe an object that does not exist.
+      mimeType: stored.mimeType,
+      size: stored.size,
     });
 
     return NextResponse.json({ url: stored.url, storage: stored.storage });
