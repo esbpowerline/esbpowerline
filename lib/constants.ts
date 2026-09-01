@@ -30,58 +30,88 @@ export const USER_ROLE_LABELS: Record<Role, string> = {
   SUBSCRIBER: 'Member',
 };
 
-export const PERMISSIONS: Record<string, number> = {
+/**
+ * Explicit grant sets, replacing the numeric thresholds that used to gate
+ * every action (`roleLevel >= required`). One axis cannot express "may approve
+ * a dataset but not publish an article" — the moment a DATA_VERIFIER or
+ * NEWS_EDITOR role exists, a level either grants too much or too little. The
+ * grant sets below are generated from the old thresholds and are
+ * BEHAVIOR-IDENTICAL to them (pinned by lib/test/permission-matrix.test.ts,
+ * which recomputes the thresholds and diffs); any deliberate policy change
+ * from here on is a visible diff on one line of this table.
+ *
+ * One tightening rides along, deliberately: an action name missing from this
+ * table now denies everyone. The old `?? 100` fallback let SUPER_ADMIN pass a
+ * check against a typo'd action; every action string in use was verified
+ * present before the switch.
+ */
+export const PERMISSION_MATRIX: Record<string, readonly Role[]> = {
   // Article permissions
-  'article.create':       10,
-  'article.edit_own':     20,
-  'article.review':     60,
-  'article.edit_any':     80,
-  'article.delete_own':   40,
-  'article.delete_any':   80,
-  'article.publish':      40,
-  'article.feature':      60,
-  'article.breaking':     60,
+  'article.create':       ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR', 'CONTRIBUTOR'],
+  'article.edit_own':     ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR', 'CONTRIBUTOR'],
+  'article.review':       ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
+  'article.edit_any':     ['SUPER_ADMIN', 'ADMIN'],
+  'article.delete_own':   ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'],
+  'article.delete_any':   ['SUPER_ADMIN', 'ADMIN'],
+  'article.publish':      ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'],
+  'article.feature':      ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
+  'article.breaking':     ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
 
   // Media
-  'media.upload':         20,
-  'media.delete_own':     40,
-  'media.delete_any':     80,
+  'media.upload':         ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR', 'CONTRIBUTOR'],
+  'media.delete_own':     ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'],
+  'media.delete_any':     ['SUPER_ADMIN', 'ADMIN'],
 
   // Comments
-  'comment.create':       5,
-  'comment.moderate_own': 40,
-  'comment.moderate_any': 60,
-  'comment.delete_any':   80,
+  'comment.create':       ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR', 'CONTRIBUTOR', 'SUBSCRIBER'],
+  'comment.moderate_own': ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR'],
+  'comment.moderate_any': ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
+  'comment.delete_any':   ['SUPER_ADMIN', 'ADMIN'],
 
   // Admin panel (SUPER_ADMIN + ADMIN only)
-  'admin.access':         80,
+  'admin.access':         ['SUPER_ADMIN', 'ADMIN'],
 
   // Users
-  'user.view':            80,
-  'user.create':          80,
-  'user.edit':            80,
-  'user.delete':          100,
-  'user.change_role':     80,
+  'user.view':            ['SUPER_ADMIN', 'ADMIN'],
+  'user.create':          ['SUPER_ADMIN', 'ADMIN'],
+  'user.edit':            ['SUPER_ADMIN', 'ADMIN'],
+  'user.delete':          ['SUPER_ADMIN'],
+  'user.change_role':     ['SUPER_ADMIN', 'ADMIN'],
 
   // Settings / Admin
-  'settings.view':        80,
-  'settings.edit':        80,
-  'logs.view':            80,
+  'settings.view':        ['SUPER_ADMIN', 'ADMIN'],
+  'settings.edit':        ['SUPER_ADMIN', 'ADMIN'],
+  'logs.view':            ['SUPER_ADMIN', 'ADMIN'],
 
   // Categories
-  'category.manage':      60,
+  'category.manage':      ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
 
   // Analytics
-  'analytics.view_own':   20,
-  'analytics.view_all':   60,
+  'analytics.view_own':   ['SUPER_ADMIN', 'ADMIN', 'EDITOR', 'AUTHOR', 'CONTRIBUTOR'],
+  'analytics.view_all':   ['SUPER_ADMIN', 'ADMIN', 'EDITOR'],
 
   // Ads
-  'ads.manage':           80,
+  'ads.manage':           ['SUPER_ADMIN', 'ADMIN'],
 
   // Grid/gas data releases. Publishing writes straight to the live homepage
   // numbers, so it sits at the admin level rather than with editorial roles.
-  'data.publish':         80,
-  'data.revoke':          80,
+  'data.publish':         ['SUPER_ADMIN', 'ADMIN'],
+  'data.revoke':          ['SUPER_ADMIN', 'ADMIN'],
+};
+
+/** The thresholds the matrix was generated from — kept only so the pin test
+ *  can prove the translation was faithful. Nothing else may read this. */
+export const LEGACY_PERMISSION_LEVELS: Record<string, number> = {
+  'article.create': 10, 'article.edit_own': 20, 'article.review': 60,
+  'article.edit_any': 80, 'article.delete_own': 40, 'article.delete_any': 80,
+  'article.publish': 40, 'article.feature': 60, 'article.breaking': 60,
+  'media.upload': 20, 'media.delete_own': 40, 'media.delete_any': 80,
+  'comment.create': 5, 'comment.moderate_own': 40, 'comment.moderate_any': 60,
+  'comment.delete_any': 80, 'admin.access': 80, 'user.view': 80,
+  'user.create': 80, 'user.edit': 80, 'user.delete': 100, 'user.change_role': 80,
+  'settings.view': 80, 'settings.edit': 80, 'logs.view': 80,
+  'category.manage': 60, 'analytics.view_own': 20, 'analytics.view_all': 60,
+  'ads.manage': 80, 'data.publish': 80, 'data.revoke': 80,
 };
 
 /** Optimized 10-category editorial structure */
@@ -174,9 +204,7 @@ export const ARTICLE_STATUSES = ['published', 'draft', 'scheduled', 'archived', 
 
 export function can(userRole: Role | undefined, action: string): boolean {
   if (!userRole) return false;
-  const roleLevel = ROLES[userRole]?.level ?? 0;
-  const required = PERMISSIONS[action] ?? 100;
-  return roleLevel >= required;
+  return PERMISSION_MATRIX[action]?.includes(userRole) ?? false;
 }
 
 /** Platform admin panel — not editorial CMS */
