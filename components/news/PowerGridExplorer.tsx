@@ -9,10 +9,6 @@ import {
   ChevronLeft, ChevronRight, ChevronDown, Check, Info, Network, CheckSquare, Calendar, RotateCcw, History, Factory,
   AlertTriangle
 } from 'lucide-react';
-import {
-  ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis,
-  Tooltip, Line, CartesianGrid, Area, ComposedChart,
-} from 'recharts';
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
 import { useChartTheme, type ChartTheme } from '@/hooks/useChartTheme';
 import {
@@ -26,17 +22,12 @@ import {
   GridLiveBadge,
   GridStatusBadge,
   GRID_CHART_MARGIN,
-  GRID_EXPLORER_CHART_MARGIN,
   GRID_X_AXIS_PADDING,
-  GRID_Y_AXIS_WIDTH,
   BDT_TO_CRORE,
-  formatAxisCrore,
   formatAxisMw,
   formatAxisMwCompact,
   gridChartAxisTick,
-  gridChartXAxisProps,
   gridChartYAxisProps,
-  GridRechartsTooltip,
 } from '@/components/news/PowerGridChartUI';
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { shouldUseArchiveFallback } from '@/lib/data/grid/daily-access';
@@ -51,7 +42,7 @@ import {
 import { availableDates, getLatestAvailableDate, isDateAvailable } from '@/lib/data/grid/available-dates';
 import { GRID_DEMO_DATE } from '@/lib/data/grid/public-sample-dates';
 import { coverageLabel } from '@/lib/data/grid/coverage';
-import { axisTickStyle, chartGridProps } from '@/lib/data/grid/chart-axis';
+import { axisTickStyle } from '@/lib/data/grid/chart-axis';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { UnitCostBadge } from '@/components/news/power-grid/UnitCostBadge';
@@ -62,7 +53,7 @@ import { InterconnectorCanvas } from '@/components/news/power-grid/Interconnecto
 import { totalCapacityRenewables } from '@/lib/data/companies/sreda';
 import { macroTariffData } from '@/lib/data/macro/tariff';
 
-import { CustomDropdown, TakaIcon } from '@/components/news/power-grid/shared';
+import { CustomDropdown } from '@/components/news/power-grid/shared';
 import { OverviewKpiStrip } from '@/components/news/power-grid/OverviewKpiStrip';
 import {
   GenerationKpiStrip,
@@ -73,6 +64,8 @@ import {
 import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
 import { BpdbAccountsPanel } from '@/components/news/power-grid/BpdbAccountsPanel';
 import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
+import { GenerationMixCard } from '@/components/news/power-grid/GenerationMixCard';
+import { DailyCostCard } from '@/components/news/power-grid/DailyCostCard';
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
 import type { GridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { MethodologyReconciliationBanner } from '@/components/news/power-grid/MethodologyReconciliationBanner';
@@ -202,29 +195,6 @@ function ShedActiveBar({ x = 0, y = 0, width = 0, height = 0, fill }: {
     </g>
   );
 }
-
-/**
- * Stands in for the cost chart on days whose report carries no per-fuel
- * "Production Cost (Tk.)" block. Roughly half the archive is in that state: the
- * archive rebuild nulls the split rather than guess it when no source workbook
- * is confirmed for the day. The day's own total is still measured, so show it —
- * the absence is in the breakdown, not in the cost.
- */
-function GridUnpublishedCostNote({ totalDailyCostBdt }: { totalDailyCostBdt?: number | null }) {
-  return (
-    <div className="h-full flex flex-col items-center justify-center text-center gap-2 px-6 rounded-xl border border-dashed border-border/60 bg-muted/10">
-      <Info className="h-5 w-5 shrink-0 text-muted-foreground/70" />
-      <p className="text-sm font-semibold text-foreground">Per-fuel cost not published for this day</p>
-      <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
-        PGCB&apos;s report for this date carries no production-cost breakdown by fuel.
-        {totalDailyCostBdt
-          ? ` The published day total — ${formatBdtAmount(totalDailyCostBdt / 10000000)} Cr Tk. — is shown above.`
-          : ''}
-      </p>
-    </div>
-  );
-}
-
 
 
 export function PowerGridExplorer({
@@ -1905,328 +1875,34 @@ export function PowerGridExplorer({
           </GridCardFooter>
         </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Generation Pie Chart */}
-          <div className="grid-explorer-chart-card card">
-            <div className="grid-explorer-chart-card__head">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <Zap className="h-5 w-5 shrink-0 text-primary" />
-                <div className="min-w-0">
-                  <h3 className="grid-explorer-chart-card__title">Daily Generation Mix Snapshot<DailyBadge /></h3>
-                  {/* The total here is our sum of the fuel rows, not PGCB's own
-                      headline figure — the two are different numbers, which is
-                      what the reconciliation banner above exists to explain. */}
-                  <p className="grid-explorer-chart-card__sub">Energy share by fuel type (Total: {totalGenMkwhr.toFixed(1)} MKWh <GridProvenanceTag kind="D" />) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
-                </div>
-              </div>
-              <span className="grid-explorer-chip">Fuel Type</span>
-            </div>
+          {/* Generation Pie Chart — the card's JSX lives in GenerationMixCard,
+              moved verbatim; hover state stays here because the mix stack,
+              donut and legend all read it. */}
+          <GenerationMixCard
+            generationData={generationData}
+            pieGenerationData={pieGenerationData}
+            totalGenMkwhr={totalGenMkwhr}
+            hasGenerationChartData={hasGenerationChartData}
+            chartsReady={chartsReady}
+            chartTheme={chartTheme}
+            hoveredIndex={hoveredIndex}
+            setHoveredIndex={setHoveredIndex}
+            sourceFiles={sourceFiles}
+            systemStats={systemStats}
+          />
 
-            <div className="grid-explorer-mix-stack" aria-hidden>
-              {generationData.map((item, i) => {
-                // Quantised, not raw. The server and client reached this from
-                // payloads serialised to different precision and emitted
-                // "36.5784%" against "36.57842300028465%", which React reports
-                // as a hydration mismatch and then leaves unpatched. Four
-                // decimals is far below one device pixel on any display, so
-                // nothing is lost by fixing the precision here.
-                const width =
-                  totalGenMkwhr > 0
-                    ? Number(((item.gen / totalGenMkwhr) * 100).toFixed(4))
-                    : 0;
-                const dimmed = hoveredIndex !== null && hoveredIndex !== i;
-                return (
-                  <div
-                    key={item.name}
-                    className={cn('grid-explorer-mix-stack__seg', dimmed && 'grid-explorer-mix-stack__seg--dim')}
-                    style={{ width: `${width}%`, backgroundColor: chartTheme.fuel(item.name) }}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="grid-explorer-donut-wrap">
-              {!chartsReady ? (
-                <div className="grid-explorer-skeleton min-h-[12.5rem] w-[12.5rem] rounded-full mx-auto" aria-hidden />
-              ) : !hasGenerationChartData ? (
-                <div className="grid-explorer-chart-empty min-h-[12.5rem]" role="status">
-                  <div className="grid-explorer-chart-empty__title">No generation data</div>
-                  <p>No fuel mix recorded for this reporting date.</p>
-                </div>
-              ) : (
-                <PieChart width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                  <Pie
-                    data={pieGenerationData}
-                    dataKey="gen"
-                    nameKey="name"
-                    cx={100}
-                    cy={100}
-                    innerRadius={55}
-                    outerRadius={82}
-                    paddingAngle={2}
-                    cornerRadius={4}
-                    stroke="hsl(var(--card))"
-                    strokeWidth={2}
-                    onMouseEnter={(_, i) => setHoveredIndex(i)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    {pieGenerationData.map((entry, idx) => {
-                      const dimmed = hoveredIndex !== null && hoveredIndex !== idx;
-                      return (
-                        <Cell
-                          key={idx}
-                          fill={chartTheme.fuel(entry.name)}
-                          fillOpacity={dimmed ? 0.3 : 1}
-                          style={{ transition: 'fill-opacity 200ms ease' }}
-                        />
-                      );
-                    })}
-                  </Pie>
-                  <GridRechartsTooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null;
-                      const row = payload[0].payload;
-                      const pct = ((row.gen / totalGenMkwhr) * 100).toFixed(2);
-                      return (
-                        <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
-                          <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
-                            <span>{row.name} Share</span>
-                            <span className="text-[9px] md:text-[10px] uppercase font-bold text-primary tracking-wider">Operational Mix</span>
-                          </div>
-                          <div className="space-y-2 text-[11px] md:text-xs">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Energy Output:</span>
-                              <span className="font-bold text-foreground tabular-nums">{row.gen.toFixed(2)} MKWh</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />System Share:</span>
-                              <span className="font-bold text-foreground">{pct}%</span>
-                            </div>
-                          </div>
-                          {/* The denominator is our sum of the fuel rows, not
-                              PGCB's headline — say which total the share is of. */}
-                          <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                            Share = this fuel&apos;s published energy ÷ the sum of the published fuel rows, calculated here.
-                          </div>
-                          <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                            <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB Daily Operations Report</a>, zone-wise generation summary</div>
-                            <div>Reproduced as published. Not audited by ESB PowerLine.</div>
-                          </div>
-                        </div>
-                      );
-                    }}
-
-                  />
-                  <g className="pointer-events-none select-none">
-                    <text
-                      x={100}
-                      y={92}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-foreground font-sans font-bold"
-                      style={{ fontSize: '24px', letterSpacing: '-0.02em' }}
-                    >
-                      {totalGenMkwhr.toFixed(0)}
-                    </text>
-                    <text
-                      x={100}
-                      y={114}
-                      textAnchor="middle"
-                      dominantBaseline="central"
-                      className="fill-muted-foreground font-sans font-semibold uppercase"
-                      style={{ fontSize: '10px', letterSpacing: '0.1em' }}
-                    >
-                      MKWh Gen
-                    </text>
-                  </g>
-                </PieChart>
-              )}
-            </div>
-
-            {/* Custom Legend. Rendered only when there is a legend to draw and a
-                denominator to divide by: on a day whose fuel rows are all zero
-                the share is 0/0, and every row printed "NaN%". */}
-            {pieGenerationData.length > 0 && totalGenMkwhr > 0 ? (
-            <>
-            <div className="grid-chart-legend">
-              {pieGenerationData.map((item, i) => {
-                const dimmed = hoveredIndex !== null && hoveredIndex !== i;
-                return (
-                  <button
-                    key={item.name}
-                    type="button"
-                    className={cn('grid-chart-legend__item', dimmed && 'grid-chart-legend__item--dim')}
-                    onMouseEnter={() => setHoveredIndex(i)}
-                    onMouseLeave={() => setHoveredIndex(null)}
-                  >
-                    <span className="grid-chart-legend__swatch" style={{ backgroundColor: chartTheme.fuel(item.name) }} />
-                    <span className="grid-chart-legend__name">{item.name}</span>
-                    <span className="grid-chart-legend__meta">{((item.gen / totalGenMkwhr) * 100).toFixed(1)}%</span>
-                    <span className="grid-chart-legend__val">{item.gen.toFixed(1)} MKWh</span>
-                  </button>
-                );
-              })}
-            </div>
-            {/* The share is ours; the MKWh beside it is PGCB's own row — said
-                once for the column rather than sixteen times down the legend.
-                Two marks per row put a badge on every figure in the card's
-                densest block, which is where the notation stops being read. */}
-            <p className="grid-chart-legend__key">
-              <span>Share <GridProvenanceTag kind="D" /></span>
-              <span aria-hidden>·</span>
-              <span>Energy <GridProvenanceTag kind="P" /></span>
-            </p>
-            </>
-            ) : null}
-
-            {/* Card Metadata Footer */}
-            <GridCardFooter>
-              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet, zone-wise generation summary</span>
-              {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
-              <span>Per-fuel energy as published; total and shares are ours. Not independently audited.</span>
-              <span className="font-medium">Reporting Date: {systemStats.date}</span>
-            </GridCardFooter>
-          </div>
-
-          {/* Cost Bar Chart */}
-          <div className="grid-explorer-chart-card card">
-            <div className="grid-explorer-chart-card__head">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <TakaIcon className="h-5 w-5 shrink-0 text-amber-500" />
-                <div className="min-w-0">
-                  <h3 className="grid-explorer-chart-card__title">Daily Fuel &amp; Import Cost<DailyBadge /></h3>
-                  {/* The bars are PGCB's published per-fuel costs; this header adds
-                      them up, which is not the same as PGCB's own "Total :" row —
-                      on 08 Aug 2026 the two differ by 3 Tk. */}
-                  <p className="grid-explorer-chart-card__sub">Cost in Crore BDT by fuel type ({hasPublishedFuelCost ? <>Total: {formatBdtAmount(totalCostBdt / 10000000)} Cr Tk. <GridProvenanceTag kind="D" /></> : 'per-fuel split not published for this day'}) • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelCost')}</span></p>
-                </div>
-              </div>
-              <span className="grid-explorer-chip">Cost Analysis</span>
-            </div>
-
-            <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
-              {!hasPublishedFuelCost ? (
-                <GridUnpublishedCostNote totalDailyCostBdt={systemStats.totalDailyCost} />
-              ) : chartsReady ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart accessibilityLayer={false} data={dailyCostChartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                    <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
-                    <XAxis
-                      {...gridChartXAxisProps(chartTheme, { dataKey: 'name' })}
-                      tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }}
-                    />
-                    <YAxis
-                      width={GRID_Y_AXIS_WIDTH.single}
-                      tick={{ fontSize: 11, fill: chartTheme.axisTick }}
-                      axisLine={false}
-                      tickLine={false}
-                      tickMargin={4}
-                      domain={[0, 'auto']}
-                      allowDecimals={false}
-                      tickFormatter={formatAxisCrore}
-                    />
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const row = payload[0].payload;
-                        const cr = formatBdtAmount(row.cost / 10000000);
-                        return (
-                          <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
-                            <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
-                              <span>{row.name} Daily Cost</span>
-                              {/* Was "Financial Audit" — nothing here is audited. */}
-                              <span className="text-[9px] md:text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Published Cost</span>
-                            </div>
-                            <div className="space-y-2 text-[11px] md:text-xs">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Total Daily Cost:</span>
-                                <span className="font-bold text-foreground">{cr} Crore BDT</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Average Unit Rate:</span>
-                                <span className="font-bold text-foreground tabular-nums">{formatUnitRate(row.unitCost)} Tk/KWh</span>
-                              </div>
-                            </div>
-                            {/* The old note stated the calculation backwards — cost
-                                was said to be derived from a unit rate, when the
-                                cost is what PGCB publishes and the rate is what we
-                                divide out of it. */}
-                            <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                              PGCB publishes this fuel&apos;s cost and its generation. Unit rate = cost ÷ (gen × 10⁶), calculated here.
-                            </div>
-                            <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                              <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB daily report</a>, &ldquo;Cost of the Consumed Fuel&rdquo; block</div>
-                              <div>Restates BPDB fuel economics. Not audited by ESB PowerLine.</div>
-                            </div>
-                          </div>
-                        );
-                      }}
-                      cursor={{ fill: chartTheme.hoverFill, radius: 8 }}
-                    />
-                    <Bar
-                      dataKey="costCrore"
-                      name="Daily Cost (Cr Tk)"
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={40}
-                    >
-                      {dailyCostChartData.map((entry, idx) => {
-                        const isDimmed = hoveredCostIndex !== null && hoveredCostIndex !== idx;
-                        return (
-                          <Cell
-                            key={idx}
-                            fill={chartTheme.fuel(entry.name)}
-                            fillOpacity={isDimmed ? 0.35 : 1}
-                            style={{ transition: 'fill-opacity 200ms ease', cursor: 'pointer' }}
-                            onMouseEnter={() => setHoveredCostIndex(idx)}
-                            onMouseLeave={() => setHoveredCostIndex(null)}
-                          />
-                        );
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="grid-explorer-skeleton" />
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-6 pt-4 pb-4 border-t border-border/50">
-              <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[5.5rem] text-center">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1.5">
-                  <TakaIcon className="h-4 w-4 shrink-0 text-primary" />
-                  Avg Production Cost <GridProvenanceTag kind="D" />
-                </div>
-                {/* Published total cost ÷ published headline generation. Note the
-                    KPI strip's "Average Bulk Cost" divides by the summed fuel
-                    rows instead, so the two rates differ where those disagree. */}
-                <div className="text-2xl font-bold text-primary tabular-nums leading-none">
-                  {formatUnitRate(systemStats.avgProductionCost)}{' '}
-                  <span className="text-xs font-medium text-muted-foreground">Tk/KWh</span>
-                </div>
-              </div>
-              <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[5.5rem] text-center">
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider leading-snug inline-flex items-center gap-1.5">
-                  <Droplet className="h-4 w-4 shrink-0 text-sky-500" />
-                  Total Gas to Power <GridProvenanceTag kind="P" />
-                </div>
-                <div className="text-2xl font-bold text-sky-500 tabular-nums leading-none">
-                  {systemStats.totalGasSuppliedPower.toFixed(2)}{' '}
-                  <span className="text-xs font-medium text-muted-foreground">MMCFD</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Card Metadata Footer */}
-            <GridCardFooter className="mt-0 pt-4">
-              {/* Every figure on this card is read from PGCB's daily report. The
-                  footer used to credit BPDB's reports and BPC's fuel gazettes,
-                  neither of which this pipeline opens, and name auditors whose
-                  reports it has never seen. */}
-              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet, production-cost block and gas-supplied line</span>
-              {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
-              <span>Restates BPDB fuel economics. Unit rates are ours. Not independently audited.</span>
-              <span className="font-medium">Reporting Date: {systemStats.date}</span>
-            </GridCardFooter>
-          </div>
+          {/* Cost Bar Chart — likewise DailyCostCard, moved verbatim. */}
+          <DailyCostCard
+            dailyCostChartData={dailyCostChartData}
+            hasPublishedFuelCost={hasPublishedFuelCost}
+            totalCostBdt={totalCostBdt}
+            chartsReady={chartsReady}
+            chartTheme={chartTheme}
+            hoveredCostIndex={hoveredCostIndex}
+            setHoveredCostIndex={setHoveredCostIndex}
+            sourceFiles={sourceFiles}
+            systemStats={systemStats}
+          />
         </div>
 
 

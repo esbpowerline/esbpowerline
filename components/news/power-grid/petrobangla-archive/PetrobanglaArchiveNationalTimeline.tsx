@@ -30,6 +30,7 @@ import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { PetrobanglaTimelineDay, PetrobanglaTimelineSummary } from '@/lib/data/petrobangla/types';
 import { ArchiveBadge, ArchiveChartFooter, ArchiveInsightCallout, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 
 export function PetrobanglaArchiveNationalTimeline({
   timeline,
@@ -92,7 +93,7 @@ export function PetrobanglaArchiveNationalTimeline({
         >
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+              <ComposedChart role="img" aria-label="National Gas Timeline, chart" accessibilityLayer={false} data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                 <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                 <XAxis
                   {...gridChartXAxisProps(chartTheme, {
@@ -205,6 +206,21 @@ export function PetrobanglaArchiveNationalTimeline({
           )}
         </div>
       </ArchiveRangeLockedOverlay>
+      {chartsReady && (
+        <ChartDataTable
+          caption="National Gas Timeline — domestic gas vs imported LNG and grand total, by day"
+          categoryHeader="Date"
+          categories={chartData.map((d) => d.date)}
+          series={[
+            { label: 'Domestic gas', unit: 'MMCFD', values: columnOf(chartData, 'domestic') },
+            { label: 'Imported LNG', unit: 'MMCFD', values: columnOf(chartData, 'lng') },
+            { label: 'Grand total', unit: 'MMCFD', values: columnOf(chartData, 'total') },
+            ...(showMa
+              ? [{ label: '7-day MA', unit: 'MMCFD', values: columnOf(chartData, 'totalMa') }]
+              : []),
+          ]}
+        />
+      )}
       {chartsReady && (
         <GridChartExternalLegend
           items={legendItems}

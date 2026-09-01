@@ -29,6 +29,7 @@ import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { ArchiveBadge, ArchiveChartFooter, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 
 const POWER_GAP_COLORS = {
   demand: PB_ARCHIVE_COLORS.powerDemand,
@@ -175,7 +176,7 @@ export function PetrobanglaArchivePowerGap({
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg gas-reserve-archive-chart-block__plot">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart role="img" aria-label="Power Gas Gap, chart" data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.dualAxis}>
+              <ComposedChart role="img" aria-label="Power Gas Gap, chart" accessibilityLayer={false} data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.dualAxis}>
                 <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                 <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
                 <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
@@ -228,6 +229,17 @@ export function PetrobanglaArchivePowerGap({
             <div className="grid-explorer-skeleton" />
           )}
         </div>
+        <ChartDataTable
+          caption="Power Gas Gap — power sector gas demand vs supply, shortage and fulfillment, by day"
+          categoryHeader="Date"
+          categories={chartData.map((d) => d.date)}
+          series={[
+            { label: 'Power demand', unit: 'MMCFD', values: columnOf(chartData, 'demand') },
+            { label: 'Power supply', unit: 'MMCFD', values: columnOf(chartData, 'supply') },
+            { label: 'Shortage', unit: 'MMCFD', values: columnOf(chartData, 'gap') },
+            { label: 'Fulfillment', unit: '%', values: columnOf(chartData, 'fulfillment') },
+          ]}
+        />
         <GridChartExternalLegend items={legendItems} position="bottom" />
         </div>
       </ArchiveRangeLockedOverlay>

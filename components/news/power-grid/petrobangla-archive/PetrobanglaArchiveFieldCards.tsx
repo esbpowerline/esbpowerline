@@ -13,6 +13,7 @@ import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { AudienceMode, PetrobanglaDaily, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { ArchiveBadge, ArchiveInsightCallout, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 
 type SortKey = 'largest' | 'decline' | 'depleted';
 
@@ -210,7 +211,12 @@ export function PetrobanglaArchiveFieldCards({
                 </div>
                 <div className="h-10 mb-2">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart role="img" aria-label="Field Lifeline Cards, chart" data={c.series}>
+                    <LineChart
+                      role="img"
+                      aria-label={`${c.fieldName} gas production sparkline, chart`}
+                      accessibilityLayer={false}
+                      data={c.series}
+                    >
                       <Line
                         type="monotone"
                         dataKey="gas"
@@ -220,6 +226,14 @@ export function PetrobanglaArchiveFieldCards({
                       />
                     </LineChart>
                   </ResponsiveContainer>
+                  <ChartDataTable
+                    caption={`${c.fieldName} — daily gas production`}
+                    categoryHeader="Date"
+                    categories={c.series.map((p) => p.date)}
+                    series={[
+                      { label: c.fieldName, unit: 'MMCFD', values: columnOf(c.series, 'gas') },
+                    ]}
+                  />
                 </div>
                 <div className="flex items-center gap-1.5 text-lg font-bold tabular-nums">
                   <span>

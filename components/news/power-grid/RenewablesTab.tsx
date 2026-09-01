@@ -76,6 +76,7 @@ import {
   useNarrowChartCard,
   type GridChartLegendItem,
 } from '@/components/news/PowerGridChartUI';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import {
   CountChip,
@@ -869,7 +870,7 @@ export function RenewablesTab({
                   <p className="grid-explorer-chart-caption">Energy by source (MKWh)</p>
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                      <ComposedChart role="img" aria-label="Renewable energy by source, monthly, chart" accessibilityLayer={false} data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         {monthlyXAxis}
                         <YAxis
@@ -895,6 +896,17 @@ export function RenewablesTab({
                       </ComposedChart>
                     </ResponsiveContainer>
                   </div>
+                  <ChartDataTable
+                    caption="Renewable energy by source, monthly, chart"
+                    categoryHeader="Month"
+                    categories={monthlySeries.map((d) => monthLabel(d.month))}
+                    decimals={2}
+                    series={[
+                      { label: 'Hydro', unit: 'MKWh', values: columnOf(monthlySeries, 'Hydro') },
+                      { label: 'Wind', unit: 'MKWh', values: columnOf(monthlySeries, 'Wind') },
+                      { label: 'Solar', unit: 'MKWh', values: columnOf(monthlySeries, 'Solar') },
+                    ]}
+                  />
                 </div>
                 <div>
                   <p className="grid-explorer-chart-caption">
@@ -903,7 +915,7 @@ export function RenewablesTab({
                   </p>
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                      <ComposedChart role="img" aria-label="Renewable share of generation, monthly, chart" accessibilityLayer={false} data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         {monthlyXAxis}
                         <YAxis
@@ -936,12 +948,21 @@ export function RenewablesTab({
                       </ComposedChart>
                     </ResponsiveContainer>
                   </div>
+                  <ChartDataTable
+                    caption="Renewable share of generation, monthly, chart"
+                    categoryHeader="Month"
+                    categories={monthlySeries.map((d) => monthLabel(d.month))}
+                    decimals={2}
+                    series={[
+                      { label: 'Share of generation', unit: '%', values: columnOf(monthlySeries, 'sharePct') },
+                    ]}
+                  />
                 </div>
               </div>
             ) : (
             <div className="grid-explorer-chart-area grid-explorer-chart-area--lg w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" accessibilityLayer={false} data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                   <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {monthlyXAxis}
                   <YAxis
@@ -1018,6 +1039,20 @@ export function RenewablesTab({
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
+            )}
+            {!isNarrowTimeline && (
+              <ChartDataTable
+                caption="Renewable Generation Timeline, chart"
+                categoryHeader="Month"
+                categories={monthlySeries.map((d) => monthLabel(d.month))}
+                decimals={2}
+                series={[
+                  { label: 'Hydro', unit: 'MKWh', values: columnOf(monthlySeries, 'Hydro') },
+                  { label: 'Wind', unit: 'MKWh', values: columnOf(monthlySeries, 'Wind') },
+                  { label: 'Solar', unit: 'MKWh', values: columnOf(monthlySeries, 'Solar') },
+                  { label: 'Share of generation', unit: '%', values: columnOf(monthlySeries, 'sharePct') },
+                ]}
+              />
             )}
 
             <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[11px] text-muted-foreground">

@@ -6,6 +6,7 @@ import { fieldSparklines } from '@/lib/data/petrobangla/computeLiveWeek';
 import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import type { PetrobanglaDaily, PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 import { LiveBadge } from './pbLiveShared';
 
 const HIGHLIGHT_FIELDS = new Set(['Bibiyana', 'R-LNG Terminal', 'Titas']);
@@ -55,7 +56,7 @@ export function PbLiveFieldSnapshot({
                     <td className="text-left">
                       <div className="h-6 w-20">
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart role="img" aria-label="Daily Field Snapshot, chart" data={series}>
+                          <LineChart role="img" aria-label={`${f.field} gas production, 7-day sparkline, chart`} accessibilityLayer={false} data={series}>
                             <Line
                               type="monotone"
                               dataKey="v"
@@ -66,6 +67,14 @@ export function PbLiveFieldSnapshot({
                           </LineChart>
                         </ResponsiveContainer>
                       </div>
+                      <ChartDataTable
+                        caption={`${f.field} gas production, MMCFD, over the live week`}
+                        categoryHeader="Day"
+                        categories={series.map((_, i) => i + 1)}
+                        series={[
+                          { label: 'Gas', unit: 'MMCFD', values: columnOf(series, 'v') },
+                        ]}
+                      />
                     </td>
                   )}
                   <td className="text-left tabular-nums text-muted-foreground">{formatNumber(f.capacity_mmcfd, 0)}</td>

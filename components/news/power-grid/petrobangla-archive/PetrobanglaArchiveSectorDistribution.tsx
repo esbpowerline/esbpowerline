@@ -35,6 +35,7 @@ import {
   STATUS_COLORS,
   CHART_INK,
 } from '@/lib/data/grid/chart-palette';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 
 const SECTOR_COLORS = {
   powerSupply: PB_ARCHIVE_COLORS.domestic,
@@ -205,7 +206,7 @@ export function PetrobanglaArchiveSectorDistribution({
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg gas-reserve-archive-chart-block__plot">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart role="img" aria-label="Who Gets the Gas, chart" data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+              <ComposedChart role="img" aria-label="Who Gets the Gas, chart" accessibilityLayer={false} data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                 <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                 <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
                 <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
@@ -220,6 +221,17 @@ export function PetrobanglaArchiveSectorDistribution({
             <div className="grid-explorer-skeleton" />
           )}
         </div>
+        <ChartDataTable
+          caption="Who Gets the Gas — sector allocation of power, fertilizer and other supply vs power demand, by day"
+          categoryHeader="Date"
+          categories={chartData.map((d) => d.date)}
+          series={[
+            { label: 'Power supply', unit: 'MMCFD', values: columnOf(chartData, 'powerSupply') },
+            { label: 'Fertilizer supply', unit: 'MMCFD', values: columnOf(chartData, 'fertSupply') },
+            { label: 'Others/Industry', unit: 'MMCFD', values: columnOf(chartData, 'others') },
+            { label: 'Power demand', unit: 'MMCFD', values: columnOf(chartData, 'powerDemand') },
+          ]}
+        />
         <GridChartExternalLegend items={legendItems} position="bottom" />
         </div>
       </ArchiveRangeLockedOverlay>

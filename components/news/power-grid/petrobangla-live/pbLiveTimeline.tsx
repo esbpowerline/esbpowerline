@@ -27,6 +27,7 @@ import { decimateTimelineDays } from '@/lib/data/petrobangla/compute';
 import type { PetrobanglaLiveWeekBundle, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { LiveBadge } from './pbLiveShared';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 
 function LiveWeekTooltip({
   active,
@@ -154,7 +155,7 @@ export function PbLiveTimeline({
         >
         {chartsReady ? (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart role="img" aria-label="{dayCount}-day timeline, chart" data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+            <ComposedChart role="img" aria-label={`${dayCount}-day timeline, chart`} accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
               <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'axisLabel', minTickGap: 30 })} />
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [0, 'auto'] })} />
@@ -194,6 +195,16 @@ export function PbLiveTimeline({
           <div className="grid-explorer-skeleton" />
         )}
         </div>
+        <ChartDataTable
+          caption={`${dayCount}-day timeline: national gas, power demand and power supply, by gas day`}
+          categoryHeader="Gas day"
+          categories={data.map((d) => d.axisLabel)}
+          series={[
+            { label: 'National gas', unit: 'MMCFD', values: columnOf(data, 'totalGas') },
+            { label: 'Power demand', unit: 'MMCFD', values: columnOf(data, 'powerDemand') },
+            { label: 'Power supply', unit: 'MMCFD', values: columnOf(data, 'powerSupply') },
+          ]}
+        />
         <GridChartExternalLegend
           position="bottom"
           items={[
