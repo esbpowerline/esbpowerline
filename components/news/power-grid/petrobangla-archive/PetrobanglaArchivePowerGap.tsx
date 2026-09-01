@@ -175,7 +175,7 @@ export function PetrobanglaArchivePowerGap({
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg gas-reserve-archive-chart-block__plot">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.dualAxis}>
+              <ComposedChart role="img" aria-label="Power Gas Gap, chart" data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.dualAxis}>
                 <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                 <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
                 <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />

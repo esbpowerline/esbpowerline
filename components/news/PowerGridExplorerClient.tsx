@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { PowerGridExplorerErrorBoundary } from '@/components/news/PowerGridExplorerErrorBoundary';
 import { readGridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import type { GridDailyData } from '@/lib/data/grid/types';
+import type { LedgerDay } from '@/lib/data/grid/verification-ledger';
 
 const PowerGridExplorer = dynamic(
   () => import('@/components/news/PowerGridExplorer').then((mod) => mod.PowerGridExplorer),
@@ -23,6 +24,7 @@ export function PowerGridExplorerClient(props: {
   latestDate?: string;
   /** Days published without a deploy; absent from the compiled catalog. */
   runtimeDates?: string[];
+  verificationLedger?: Record<string, LedgerDay>;
 }) {
   const searchParams = useSearchParams();
 
@@ -38,6 +40,7 @@ export function PowerGridExplorerClient(props: {
         urlBoot={urlBoot}
         serverLatestDate={props.latestDate}
         runtimeDates={props.runtimeDates}
+        verificationLedger={props.verificationLedger}
       />
     </PowerGridExplorerErrorBoundary>
   );

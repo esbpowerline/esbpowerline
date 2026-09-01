@@ -94,6 +94,13 @@ import { cn, formatNumber } from '@/lib/utils';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+  resolveFuelColor,
+} from '@/lib/data/grid/chart-palette';
 
 /** The fuels PGCB reports that SREDA also counts as renewable. */
 const RENEWABLE_FUELS = ['Solar', 'Hydro', 'Wind'] as const;
@@ -114,10 +121,18 @@ const FUEL_ICON: Record<string, typeof Sun> = {
   Biomass: Factory,
 };
 
+/**
+ * These three are fuels, and they were the clearest case of the palette being
+ * bypassed: Hydro sat at #06b6d4, which is the very value chart-palette.ts
+ * opens by warning about — 6.4 delta-E from Gas #0ea5e9, two cyans a
+ * colour-blind reader cannot separate. resolveFuelColor returns the validated
+ * hue and accepts PGCB's alternate spellings, so this map is now a lookup
+ * against the one place a fuel colour is decided.
+ */
 const FUEL_COLOR: Record<string, string> = {
-  Solar: '#eab308',
-  Hydro: '#06b6d4',
-  Wind: '#22c55e',
+  Solar: resolveFuelColor('Solar'),
+  Hydro: resolveFuelColor('Hydro'),
+  Wind: resolveFuelColor('Wind'),
 };
 
 const ORG_FULL_NAME: Record<string, string> = {
@@ -375,7 +390,7 @@ export function RenewablesTab({
       { id: 'Hydro', label: 'Hydro', color: FUEL_COLOR.Hydro, variant: 'area', provenance: 'P' },
       { id: 'Wind', label: 'Wind', color: FUEL_COLOR.Wind, variant: 'area', provenance: 'P' },
       { id: 'Solar', label: 'Solar', color: FUEL_COLOR.Solar, variant: 'area', provenance: 'P' },
-      { id: 'share', label: 'Share of generation', color: '#a855f7', variant: 'line', provenance: 'D' },
+      { id: 'share', label: 'Share of generation', color: SERIES_COLORS.renewableShare, variant: 'line', provenance: 'D' },
     ],
     [],
   );
@@ -471,11 +486,11 @@ export function RenewablesTab({
                 {formatNumber(Math.round(d.total))} MKWh
               </span>
               <span className="grid-chart-tooltip__label flex items-center gap-1.5">
-                <span className="grid-chart-tooltip__dot shrink-0" style={{ background: '#a855f7' }} />
+                <span className="grid-chart-tooltip__dot shrink-0" style={{ background: SERIES_COLORS.renewableShare }} />
                 <GridProvenanceTag kind="D" />
                 Share
               </span>
-              <span className="grid-chart-tooltip__value" style={{ color: '#a855f7' }}>
+              <span className="grid-chart-tooltip__value" style={{ color: SERIES_COLORS.renewableShare }}>
                 {d.sharePct == null ? '—' : `${d.sharePct.toFixed(2)}%`}
               </span>
             </div>
@@ -775,7 +790,7 @@ export function RenewablesTab({
                 ))}
                 <div className="min-w-0 rounded-lg border border-primary/25 bg-primary/5 p-3">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: '#a855f7' }} />
+                    <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: SERIES_COLORS.renewableShare }} />
                     Share of generation
                     <GridProvenanceTag kind="D" />
                   </div>
@@ -854,7 +869,7 @@ export function RenewablesTab({
                   <p className="grid-explorer-chart-caption">Energy by source (MKWh)</p>
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                      <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         {monthlyXAxis}
                         <YAxis
@@ -883,12 +898,12 @@ export function RenewablesTab({
                 </div>
                 <div>
                   <p className="grid-explorer-chart-caption">
-                    <span className="grid-explorer-chart-caption__swatch" style={{ background: '#a855f7' }} />
+                    <span className="grid-explorer-chart-caption__swatch" style={{ background: SERIES_COLORS.renewableShare }} />
                     Renewables as a share of all generation (%)
                   </p>
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                      <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         {monthlyXAxis}
                         <YAxis
@@ -912,10 +927,10 @@ export function RenewablesTab({
                         <Line
                           type="monotone"
                           dataKey="sharePct"
-                          stroke="#a855f7"
+                          stroke={SERIES_COLORS.renewableShare}
                           strokeWidth={2}
                           dot={false}
-                          activeDot={{ r: 4, strokeWidth: 0, fill: '#a855f7' }}
+                          activeDot={{ r: 4, strokeWidth: 0, fill: SERIES_COLORS.renewableShare }}
                           legendType="none"
                         />
                       </ComposedChart>
@@ -926,7 +941,7 @@ export function RenewablesTab({
             ) : (
             <div className="grid-explorer-chart-area grid-explorer-chart-area--lg w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                <ComposedChart role="img" aria-label="Renewable Generation Timeline, chart" data={monthlySeries} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                   <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                   {monthlyXAxis}
                   <YAxis
@@ -994,10 +1009,10 @@ export function RenewablesTab({
                     yAxisId="share"
                     type="monotone"
                     dataKey="sharePct"
-                    stroke="#a855f7"
+                    stroke={SERIES_COLORS.renewableShare}
                     strokeWidth={2}
                     dot={false}
-                    activeDot={{ r: 4, strokeWidth: 0, fill: '#a855f7' }}
+                    activeDot={{ r: 4, strokeWidth: 0, fill: SERIES_COLORS.renewableShare }}
                     legendType="none"
                   />
                 </ComposedChart>

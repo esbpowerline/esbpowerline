@@ -38,6 +38,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { formatNumber } from '@/lib/utils';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { minutesOf, monotonePath, type Pt } from '@/components/news/power-grid/svgChart';
+import { LOAD_CURVE_COLORS } from '@/lib/data/grid/chart-palette';
 
 export type LoadCurveRow = {
   time: string;
@@ -63,7 +64,9 @@ export type LoadCurvePeaks = {
  * the demand amber — close enough to read as "look at this one", far enough
  * from the two curve colours that it is not mistaken for either of them.
  */
-const HALF_HOUR_MARK = '#c98a1a';
+// The half-hour tick. Takes the palette's amber rather than restating it, so
+// the mark and the demand series it sits under cannot drift apart.
+const HALF_HOUR_MARK = LOAD_CURVE_COLORS.demand.dark;
 
 /** True for a reading that is not on a whole hour. */
 function isHalfHour(time: string): boolean {
@@ -864,9 +867,11 @@ export function LoadCurveCanvas({
           {data.map((d) => (
             <tr key={d.time}>
               <th scope="row">{d.time}</th>
-              <td>{d.generation ?? '—'}</td>
-              <td>{d.demand ?? '—'}</td>
-              <td>{d.loadShed ?? '—'}</td>
+              {/* Spoken aloud, an em dash is silence or "dash" — neither of
+                  which says the source published nothing. The word does. */}
+              <td>{d.generation ?? 'not published'}</td>
+              <td>{d.demand ?? 'not published'}</td>
+              <td>{d.loadShed ?? 'not published'}</td>
             </tr>
           ))}
         </tbody>

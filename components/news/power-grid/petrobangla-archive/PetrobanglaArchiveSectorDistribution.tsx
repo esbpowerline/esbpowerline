@@ -29,6 +29,12 @@ import type { ArchiveRangePreset } from '@/lib/data/petrobangla/archiveRange';
 import type { PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
 import { ArchiveBadge, ArchiveChartFooter, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+} from '@/lib/data/grid/chart-palette';
 
 const SECTOR_COLORS = {
   powerSupply: PB_ARCHIVE_COLORS.domestic,
@@ -90,7 +96,7 @@ function SectorTooltip({
         <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
           {powerShare.toFixed(1)}%
         </span>
-        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: powerFulfillment >= 80 ? '#10b981' : powerFulfillment >= 50 ? '#f59e0b' : '#ef4444' }}>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: powerFulfillment >= 80 ? SERIES_COLORS.retailDiesel : powerFulfillment >= 50 ? SERIES_COLORS.bdGasTariff : STATUS_COLORS.critical }}>
           {powerFulfillment.toFixed(1)}%
         </span>
 
@@ -105,7 +111,7 @@ function SectorTooltip({
         <span className="grid-chart-tooltip__value tabular-nums text-right text-muted-foreground/80">
           {fertShare.toFixed(1)}%
         </span>
-        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: fertFulfillment >= 80 ? '#10b981' : fertFulfillment >= 50 ? '#f59e0b' : '#ef4444' }}>
+        <span className="grid-chart-tooltip__value tabular-nums text-right font-bold" style={{ color: fertFulfillment >= 80 ? SERIES_COLORS.retailDiesel : fertFulfillment >= 50 ? SERIES_COLORS.bdGasTariff : STATUS_COLORS.critical }}>
           {fertFulfillment.toFixed(1)}%
         </span>
 
@@ -186,7 +192,7 @@ export function PetrobanglaArchiveSectorDistribution({
       )}
       {!compact && (
         <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border flex items-center gap-2.5">
-          <PieChart className="h-5 w-5 shrink-0 text-primary" />
+          <PieChart role="img" aria-label="Sector Gas Allocation, chart" className="h-5 w-5 shrink-0 text-primary" />
           <div className="flex-1 min-w-0">
             <h3 className="grid-explorer-chart-card__title">Who Gets the Gas<ArchiveBadge /></h3>
             <p className="grid-explorer-chart-card__sub">Sector allocation — power, fertilizer, industry/others</p>
@@ -199,7 +205,7 @@ export function PetrobanglaArchiveSectorDistribution({
         <div className="grid-explorer-chart-area grid-explorer-chart-area--lg gas-reserve-archive-chart-block__plot">
           {chartsReady ? (
             <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+              <ComposedChart role="img" aria-label="Who Gets the Gas, chart" data={chartData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                 <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                 <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
                 <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />

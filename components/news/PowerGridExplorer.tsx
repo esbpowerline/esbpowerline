@@ -76,6 +76,13 @@ import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles } from '
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
 import type { GridExplorerUrlBoot } from '@/lib/grid-explorer-url';
 import { MethodologyReconciliationBanner } from '@/components/news/power-grid/MethodologyReconciliationBanner';
+import { SourceProvenanceNote } from '@/components/news/power-grid/SourceProvenanceNote';
+import { assessFreshness } from '@/lib/data/grid/ingest-freshness';
+import {
+  describeDayProvenance,
+  provenanceNeedsDisclosure,
+  type LedgerDay,
+} from '@/lib/data/grid/verification-ledger';
 import { GridDayWindows } from '@/components/news/power-grid/GridDayWindows';
 import { ForecastSection } from '@/components/news/power-grid/ForecastSection';
 import { petrobanglaGasDay, formatWindow } from '@/lib/data/grid/observation-window';
@@ -139,6 +146,8 @@ interface PowerGridExplorerProps {
    * the server passes them in and they are merged into the picker.
    */
   runtimeDates?: string[];
+  /** verify:source verdicts by day, for the provenance disclosure. */
+  verificationLedger?: Record<string, LedgerDay>;
 }
 // Allowlisted in middleware via the same module, so the demo click is actually served.
 const DEMO_DATE = GRID_DEMO_DATE;
@@ -224,6 +233,7 @@ export function PowerGridExplorer({
   prefetchedDailyReports,
   serverLatestDate,
   runtimeDates,
+  verificationLedger,
 }: PowerGridExplorerProps = {}) {
   const chartTheme = useChartTheme();
   // Resolved once per theme change so every reference below — marks, legend,
@@ -1158,6 +1168,43 @@ export function PowerGridExplorer({
     />
   );
 
+  // What re-reading this day's source found, said before the figures rather
+  // than after. Shown only when there is something a reader should weigh:
+  // a day never re-checked, one read by a reconstructed parser, or one whose
+  // published figures are known to disagree with the document they cite.
+  // How far behind the archive is. Ingestion is manual, so the newest day
+  // held is not necessarily the newest day that exists — and the badge on it
+  // says LATEST either way. State the lag rather than let the badge imply
+  // there is none.
+  const freshness = assessFreshness(latestDate ?? null);
+  const provenance = describeDayProvenance(selectedDate, verificationLedger?.[selectedDate]);
+  const provenanceNote = (
+    <>
+      {freshness?.note ? (
+        <aside
+          className={cn(
+            'mb-4 flex items-start gap-2.5 rounded-xl border px-3 py-2.5',
+            freshness.level === 'stale'
+              ? 'border-amber-500/25 bg-amber-500/[0.04]'
+              : 'border-border/30 bg-muted/10',
+          )}
+          aria-label="Archive freshness"
+        >
+          <Activity className="mt-[1px] h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden />
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold leading-tight">
+              Archive is {freshness.daysBehind} days behind
+            </p>
+            <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">{freshness.note}</p>
+          </div>
+        </aside>
+      ) : null}
+      {provenanceNeedsDisclosure(provenance) ? (
+        <SourceProvenanceNote provenance={provenance} />
+      ) : null}
+    </>
+  );
+
   const methodologyBanner = showMethodologyBanner ? (
     <MethodologyReconciliationBanner
       expanded={isMethodologyBannerExpanded}
@@ -1601,6 +1648,7 @@ export function PowerGridExplorer({
           </div>
         ) : ( <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}><div className="grid-explorer-panel space-y-6">
           {dayWindowStrip}
+          {provenanceNote}
           {methodologyBanner}
         {/* 24-Hour System Load Curve — leads the tab. The KPI strip above has
             just told the reader the size of the deficit; the next question is
@@ -2229,6 +2277,7 @@ export function PowerGridExplorer({
           />
 
           {dayWindowStrip}
+          {provenanceNote}
           {methodologyBanner}
 
           {/* The day's fuel mix as a shape rather than a total. Fetches its own
@@ -2720,6 +2769,7 @@ export function PowerGridExplorer({
       {!isDataMissing && activeTab === 'gas' && (
         <div className="grid-explorer-panel space-y-6">
           {dayWindowStrip}
+          {provenanceNote}
           {methodologyBanner}
           <GasTab
             selectedDate={selectedDate}
@@ -2760,6 +2810,7 @@ export function PowerGridExplorer({
           />
 
           {dayWindowStrip}
+          {provenanceNote}
           {methodologyBanner}
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">

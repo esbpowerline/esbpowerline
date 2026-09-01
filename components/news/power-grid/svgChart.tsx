@@ -1,4 +1,10 @@
 'use client';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+} from '@/lib/data/grid/chart-palette';
 
 /**
  * Shared primitives for the hand-drawn SVG charts.
@@ -54,7 +60,7 @@ export function inkOn(hex: string): string {
   const h = hex.replace('#', '');
   const n = h.length === 3 ? h.split('').map((c) => c + c).join('') : h;
   const [r, g, b] = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16));
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 150 ? '#0b1220' : '#ffffff';
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 150 ? CHART_INK.primaryInk.light : CHART_INK.surface.light;
 }
 
 /**

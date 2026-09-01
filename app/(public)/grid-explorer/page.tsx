@@ -7,6 +7,7 @@ import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
 import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
 import { getLatestAvailableDate, availableDates } from '@/lib/data/grid/available-dates';
 import { getRuntimeOnlyDates } from '@/lib/data/grid/available-dates.server';
+import { getLedgerSummaries } from '@/lib/data/grid/verification-ledger.server';
 import { Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -111,6 +112,10 @@ export default async function PowerGridExplorerPage({
     // server hands them down and the picker merges the two.
     getRuntimeOnlyDates(),
   ]);
+  // What verify:source found, per day. Small (three scalars x 55 days) and
+  // read once per process; the reader is told which side of the verified
+  // line the day in front of them falls on.
+  const verificationLedger = getLedgerSummaries();
   const grid = normalizeGridSettings(settings);
   const latestDate =
     runtimeDates.length > 0
@@ -238,6 +243,7 @@ export default async function PowerGridExplorerPage({
           prefetchedDailyReports={prefetchedDailyReports}
           latestDate={latestDate ?? undefined}
           runtimeDates={runtimeDates}
+          verificationLedger={verificationLedger}
         />
       </Suspense>
 

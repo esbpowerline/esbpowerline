@@ -210,7 +210,7 @@ export function PetrobanglaArchiveFieldCards({
                 </div>
                 <div className="h-10 mb-2">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={c.series}>
+                    <LineChart role="img" aria-label="Field Lifeline Cards, chart" data={c.series}>
                       <Line
                         type="monotone"
                         dataKey="gas"

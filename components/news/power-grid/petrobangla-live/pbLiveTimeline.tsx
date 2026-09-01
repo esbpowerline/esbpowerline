@@ -154,7 +154,7 @@ export function PbLiveTimeline({
         >
         {chartsReady ? (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+            <ComposedChart role="img" aria-label="{dayCount}-day timeline, chart" data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
               <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'axisLabel', minTickGap: 30 })} />
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [0, 'auto'] })} />

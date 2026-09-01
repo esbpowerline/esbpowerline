@@ -48,6 +48,7 @@ import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
 import { GridCardFooter, GridProvenanceTag, GridSourceFiles } from './GridExplorerUI';
 import { PetrobanglaMacroGasSection } from './PetrobanglaMacroGasSection';
 import { ReserveTrajectoryCanvas } from './ReserveTrajectoryCanvas';
+import { SERIES_COLORS } from '@/lib/data/grid/chart-palette';
 
 interface Props {
   selectedDate: string;
@@ -136,7 +137,7 @@ function GasReserveDepletionContent({ selectedDate, systemStatsDate, pgcbGasTota
       // Amber has no token in the chart theme, so it is stated once here rather
       // than repeated down the file; red comes from the theme so it tracks the
       // rest of the site in both modes.
-      reserves: '#f59e0b',
+      reserves: SERIES_COLORS.bdGasTariff,
       decline: chartTheme.destructive,
       flat: chartTheme.axisTick,
       palette: (i: number) => chartTheme.categorical(i),

@@ -41,6 +41,12 @@ import type {
   PgcbOutageEvent,
   PgcbSystemStat,
 } from '@/lib/data/companies/pgcb';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+} from '@/lib/data/grid/chart-palette';
 
 /* ------------------------------------------------------------------ utils */
 
@@ -64,8 +70,8 @@ const AREA_ALIAS: Record<string, string> = {
 };
 const canonicalArea = (k: string) => AREA_ALIAS[k.toLowerCase()] ?? k.toLowerCase();
 
-const SERIES_A = '#3b82f6';
-const SERIES_B = '#ea580c';
+const SERIES_A = SERIES_COLORS.installedCapacity;
+const SERIES_B = SERIES_COLORS.peakGeneration;
 
 function fmt(n: number | null | undefined, digits = 0): string {
   if (n === null || n === undefined || Number.isNaN(n)) return '—';

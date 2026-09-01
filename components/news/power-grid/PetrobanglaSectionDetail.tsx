@@ -11,6 +11,13 @@ import { loadArchiveDay, loadArchiveIndex } from '@/lib/data/petrobangla/loadArc
 import { resolveArchiveGasDay } from '@/lib/data/petrobangla/compute';
 import { formatNumber } from '@/lib/utils';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+  categoricalSlot,
+} from '@/lib/data/grid/chart-palette';
 
 /** Loads the archive day backing a grid date — same resolution as PetrobanglaGasKpiStrip. */
 export function usePetrobanglaArchiveDay(selectedDate: string): {
@@ -140,13 +147,18 @@ export function distributionCompanyForLabel(
  * dark steps drop to 600 (both validated for lightness, chroma, CVD separation
  * and surface contrast; identity is never color-alone — rows are text-labeled).
  */
+// Six producers in one frame, so the accents come from CATEGORICAL_SLOTS in
+// order — the validated eight-hue ramp, which is what that ramp is for. They
+// were a hand-picked mix of Tailwind 500s that had been through no CVD or
+// contrast check; three of them collided with hues this file uses elsewhere
+// for gas source and price series.
 export const PRODUCER_COLORS: Record<string, { dot: string; bar: string; shell: string; tint: string; accent: string }> = {
-  BGFCL: { dot: 'bg-sky-500 dark:bg-sky-600', bar: 'bg-sky-500 dark:bg-sky-600', shell: 'border-sky-500/40 dark:border-sky-600/45', tint: 'bg-sky-500/5 dark:bg-sky-600/10', accent: '#0ea5e9' },
-  SGFL: { dot: 'bg-amber-500 dark:bg-amber-600', bar: 'bg-amber-500 dark:bg-amber-600', shell: 'border-amber-500/40 dark:border-amber-600/45', tint: 'bg-amber-500/5 dark:bg-amber-600/10', accent: '#f59e0b' },
-  BAPEX: { dot: 'bg-emerald-500 dark:bg-emerald-600', bar: 'bg-emerald-500 dark:bg-emerald-600', shell: 'border-emerald-500/40 dark:border-emerald-600/45', tint: 'bg-emerald-500/5 dark:bg-emerald-600/10', accent: '#10b981' },
-  CHEVRON: { dot: 'bg-violet-500', bar: 'bg-violet-500', shell: 'border-violet-500/40 dark:border-violet-500/45', tint: 'bg-violet-500/5 dark:bg-violet-500/10', accent: '#8b5cf6' },
-  TULLOW: { dot: 'bg-rose-500', bar: 'bg-rose-500', shell: 'border-rose-500/40 dark:border-rose-500/45', tint: 'bg-rose-500/5 dark:bg-rose-500/10', accent: '#f43f5e' },
-  RPGCL: { dot: 'bg-teal-600', bar: 'bg-teal-600', shell: 'border-teal-600/40 dark:border-teal-600/45', tint: 'bg-teal-600/5 dark:bg-teal-600/10', accent: '#0d9488' },
+  BGFCL: { dot: 'bg-sky-500 dark:bg-sky-600', bar: 'bg-sky-500 dark:bg-sky-600', shell: 'border-sky-500/40 dark:border-sky-600/45', tint: 'bg-sky-500/5 dark:bg-sky-600/10', accent: categoricalSlot(0)},
+  SGFL: { dot: 'bg-amber-500 dark:bg-amber-600', bar: 'bg-amber-500 dark:bg-amber-600', shell: 'border-amber-500/40 dark:border-amber-600/45', tint: 'bg-amber-500/5 dark:bg-amber-600/10', accent: categoricalSlot(1)},
+  BAPEX: { dot: 'bg-emerald-500 dark:bg-emerald-600', bar: 'bg-emerald-500 dark:bg-emerald-600', shell: 'border-emerald-500/40 dark:border-emerald-600/45', tint: 'bg-emerald-500/5 dark:bg-emerald-600/10', accent: categoricalSlot(2)},
+  CHEVRON: { dot: 'bg-violet-500', bar: 'bg-violet-500', shell: 'border-violet-500/40 dark:border-violet-500/45', tint: 'bg-violet-500/5 dark:bg-violet-500/10', accent: categoricalSlot(3)},
+  TULLOW: { dot: 'bg-rose-500', bar: 'bg-rose-500', shell: 'border-rose-500/40 dark:border-rose-500/45', tint: 'bg-rose-500/5 dark:bg-rose-500/10', accent: categoricalSlot(4)},
+  RPGCL: { dot: 'bg-teal-600', bar: 'bg-teal-600', shell: 'border-teal-600/40 dark:border-teal-600/45', tint: 'bg-teal-600/5 dark:bg-teal-600/10', accent: categoricalSlot(5)},
 };
 
 export function producerKeyFromLabel(label: string): string {

@@ -55,7 +55,7 @@ export function PbLiveFieldSnapshot({
                     <td className="text-left">
                       <div className="h-6 w-20">
                         <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={series}>
+                          <LineChart role="img" aria-label="Daily Field Snapshot, chart" data={series}>
                             <Line
                               type="monotone"
                               dataKey="v"

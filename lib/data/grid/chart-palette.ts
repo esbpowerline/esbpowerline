@@ -202,3 +202,89 @@ export const LOAD_CURVE_COLORS = {
 export function pick(color: ModalColor, mode: ChartMode = 'light'): string {
   return color[mode];
 }
+
+/**
+ * Named series colours for the charts that plot something other than fuel.
+ *
+ * Eleven components carried 155 raw hex literals — Tailwind's default ramp,
+ * not this file's — and none of them had been through the CVD or contrast
+ * validation recorded above. Two of those literals were `#0ea5e9` and
+ * `#06b6d4`, which is precisely the pair this file opens by documenting: 6.4
+ * ΔE apart, two indistinguishable cyans. The palette declared itself "the one
+ * place a chart colour is decided" and the largest charts in the product had
+ * never asked it.
+ *
+ * Every entry below resolves to a `CATEGORICAL_SLOTS` index, so these inherit
+ * the validation rather than adding a new unvalidated set. Slots repeat across
+ * charts on purpose — what has to be distinguishable is the series *within one
+ * frame*, and no chart here draws more than four. Where two series appear
+ * together their slots differ; that is the invariant the test asserts.
+ */
+const SERIES_SLOT = {
+  // Macro trends — oil
+  brent: 0,
+  retailDiesel: 2,
+  // Macro trends — gas
+  globalLng: 6,
+  bdGasTariff: 3,
+  // Macro trends — budget vs build-out
+  powerBudget: 6,
+  installedCapacity: 0,
+  peakGeneration: 1,
+  // Macro trends — supply mix
+  domesticGas: 0,
+  importedLng: 6,
+  // Longitudinal — transmission by voltage
+  kv400: 6,
+  kv230: 0,
+  kv132: 2,
+  // Longitudinal — additions
+  gridLinesAdded: 0,
+  genCapacityAdded: 1,
+  // Longitudinal — indexed growth
+  budgetIndex: 3,
+  genCapacityIndex: 6,
+  peakDemandIndex: 1,
+  transmissionIndex: 2,
+  // Renewables
+  renewableShare: 6,
+} as const;
+
+export type SeriesName = keyof typeof SERIES_SLOT;
+
+/** A validated colour for a named non-fuel series. */
+export function seriesColor(name: SeriesName, mode: ChartMode = 'light'): string {
+  return CATEGORICAL_SLOTS[SERIES_SLOT[name]][mode];
+}
+
+/**
+ * The light-mode value, for the many call sites that interpolate a colour into
+ * a style prop or an SVG attribute and have no `mode` to hand. Charts render
+ * on the card surface, which the palette validated against in light mode.
+ */
+export const SERIES_COLORS = Object.fromEntries(
+  (Object.keys(SERIES_SLOT) as SeriesName[]).map((k) => [k, seriesColor(k)]),
+) as Record<SeriesName, string>;
+
+/** Groups that share a frame. Each group's slots must be distinct. */
+export const SERIES_GROUPS: Readonly<Record<string, readonly SeriesName[]>> = {
+  macroOil: ['brent', 'retailDiesel'],
+  macroGas: ['globalLng', 'bdGasTariff'],
+  macroBudget: ['powerBudget', 'installedCapacity', 'peakGeneration'],
+  macroSupplyMix: ['domesticGas', 'importedLng'],
+  transmissionVoltage: ['kv400', 'kv230', 'kv132'],
+  additions: ['gridLinesAdded', 'genCapacityAdded'],
+  indexedGrowth: ['budgetIndex', 'genCapacityIndex', 'peakDemandIndex', 'transmissionIndex'],
+} as const;
+
+/** Slot index for a named series — exported so the group test can check it. */
+export function seriesSlotIndex(name: SeriesName): number {
+  return SERIES_SLOT[name];
+}
+
+/**
+ * Neutral for a category the payload names but the palette does not — a zone
+ * with no assigned colour, an "other" bucket. Deliberately grey: an unmapped
+ * series must not borrow a hue that means something.
+ */
+export const SERIES_UNMAPPED = { light: '#898781', dark: '#898781' } as const;

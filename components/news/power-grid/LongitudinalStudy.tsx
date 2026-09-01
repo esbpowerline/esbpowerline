@@ -23,6 +23,12 @@ import {
   GridProvenanceTag,
 } from '@/components/news/power-grid/GridExplorerUI';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+} from '@/lib/data/grid/chart-palette';
 
 /**
  * Which series on these four charts is somebody else's figure and which is ours.
@@ -224,12 +230,12 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         <GridChartFrame
           className="mt-4"
           legend={[
-            { id: '400', label: '400kV Ultra-High', color: '#8b5cf6', variant: 'line' },
-            { id: '230', label: '230kV Corridor', color: '#3b82f6', variant: 'line' },
-            { id: '132', label: '132kV Corridor', color: '#10b981', variant: 'line' },
+            { id: '400', label: '400kV Ultra-High', color: SERIES_COLORS.kv400, variant: 'line' },
+            { id: '230', label: '230kV Corridor', color: SERIES_COLORS.kv230, variant: 'line' },
+            { id: '132', label: '132kV Corridor', color: SERIES_COLORS.kv132, variant: 'line' },
           ]}
         >
-          <LineChart accessibilityLayer={false} data={displayData3Years} margin={GRID_CHART_MARGIN.legend}>
+          <LineChart role="img" aria-label="Network Evolution by Voltage Level, chart" accessibilityLayer={false} data={displayData3Years} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis width={GRID_Y_AXIS_WIDTH.splitUnit} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
@@ -240,9 +246,9 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   source={<a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Statistics Division</a>}
                 />
               } />
-              <Line type="monotone" dataKey="Transmission_400kV_ckm" name="400kV Ultra-High" stroke="#8b5cf6" strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="Transmission_230kV_ckm" name="230kV Corridor" stroke="#3b82f6" strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="Transmission_132kV_ckm" name="132kV Corridor" stroke="#10b981" strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Transmission_400kV_ckm" name="400kV Ultra-High" stroke={SERIES_COLORS.kv400} strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Transmission_230kV_ckm" name="230kV Corridor" stroke={SERIES_COLORS.kv230} strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Transmission_132kV_ckm" name="132kV Corridor" stroke={SERIES_COLORS.kv132} strokeWidth={2.5} connectNulls dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
           </LineChart>
         </GridChartFrame>
 
@@ -252,9 +258,9 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
           className="mt-1.5 pt-3 border-t-0"
           what={
             <ul className="list-disc pl-4 space-y-1">
-              <li><strong className="text-[#8b5cf6]">400kV (Ultra-High Voltage Backbone):</strong> The backbone transmission lines built to import electricity (e.g., cross-border interconnections) and evacuate power from mega-generation stations (e.g., Payra, Rampal, Rooppur). This was zero prior to FY2014.</li>
-              <li><strong className="text-[#3b82f6]">230kV Corridor:</strong> Regional transmission corridors linking major generation hubs to city gate stations.</li>
-              <li><strong className="text-[#10b981]">132kV Corridor:</strong> Municipal transmission corridors delivering power to distribution grids. It remains the largest network by total physical length.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv400 }}>400kV (Ultra-High Voltage Backbone):</strong> The backbone transmission lines built to import electricity (e.g., cross-border interconnections) and evacuate power from mega-generation stations (e.g., Payra, Rampal, Rooppur). This was zero prior to FY2014.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv230 }}>230kV Corridor:</strong> Regional transmission corridors linking major generation hubs to city gate stations.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv132 }}>132kV Corridor:</strong> Municipal transmission corridors delivering power to distribution grids. It remains the largest network by total physical length.</li>
             </ul>
           }
           insight={
@@ -287,12 +293,12 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         <GridChartFrame
           className="mt-4"
           legend={[
-            { id: '132a', label: '132kV Base', color: '#10b981', variant: 'area' },
-            { id: '230a', label: '230kV Main', color: '#3b82f6', variant: 'area' },
-            { id: '400a', label: '400kV Ultra', color: '#8b5cf6', variant: 'area' },
+            { id: '132a', label: '132kV Base', color: SERIES_COLORS.kv132, variant: 'area' },
+            { id: '230a', label: '230kV Main', color: SERIES_COLORS.kv230, variant: 'area' },
+            { id: '400a', label: '400kV Ultra', color: SERIES_COLORS.kv400, variant: 'area' },
           ]}
         >
-          <AreaChart accessibilityLayer={false} data={displayData3Years} margin={GRID_CHART_MARGIN.legend}>
+          <AreaChart role="img" aria-label="Cumulative Grid Build-out, chart" accessibilityLayer={false} data={displayData3Years} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis width={GRID_Y_AXIS_WIDTH.splitUnit} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
@@ -304,9 +310,9 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   source={<a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB System Planning Maps</a>}
                 />
               } />
-              <Area type="monotone" dataKey="Transmission_132kV_ckm" name="132kV Base" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.3} isAnimationActive={false} />
-              <Area type="monotone" dataKey="Transmission_230kV_ckm" name="230kV Main" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.4} isAnimationActive={false} />
-              <Area type="monotone" dataKey="Transmission_400kV_ckm" name="400kV Ultra" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.5} isAnimationActive={false} />
+              <Area type="monotone" dataKey="Transmission_132kV_ckm" name="132kV Base" stackId="1" stroke={SERIES_COLORS.kv132} fill={SERIES_COLORS.kv132} fillOpacity={0.3} isAnimationActive={false} />
+              <Area type="monotone" dataKey="Transmission_230kV_ckm" name="230kV Main" stackId="1" stroke={SERIES_COLORS.kv230} fill={SERIES_COLORS.kv230} fillOpacity={0.4} isAnimationActive={false} />
+              <Area type="monotone" dataKey="Transmission_400kV_ckm" name="400kV Ultra" stackId="1" stroke={SERIES_COLORS.kv400} fill={SERIES_COLORS.kv400} fillOpacity={0.5} isAnimationActive={false} />
           </AreaChart>
         </GridChartFrame>
 
@@ -315,14 +321,14 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
           className="mt-1.5 pt-3 border-t-0"
           what={
             <ul className="list-disc pl-4 space-y-1">
-              <li><strong className="text-[#10b981]">132kV Base Grid:</strong> The regional transmission standard, delivering power to municipal substations. It remains the largest network by total physical length, starting from ~6,000 ckm in 2011.</li>
-              <li><strong className="text-[#3b82f6]">230kV Main Grid:</strong> The primary inter-district transmission highway carrying medium loads between cities.</li>
-              <li><strong className="text-[#8b5cf6]">400kV Ultra Backbone:</strong> The modern bulk evacuation channels built since FY2014 to transport energy from remote mega power hubs and cross-border imports.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv132 }}>132kV Base Grid:</strong> The regional transmission standard, delivering power to municipal substations. It remains the largest network by total physical length, starting from ~6,000 ckm in 2011.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv230 }}>230kV Main Grid:</strong> The primary inter-district transmission highway carrying medium loads between cities.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv400 }}>400kV Ultra Backbone:</strong> The modern bulk evacuation channels built since FY2014 to transport energy from remote mega power hubs and cross-border imports.</li>
             </ul>
           }
           insight={
             <>
-              Although the total carrying capacity has nearly doubled (from 8,396 ckm in 2011 to 15,688 ckm in 2025), the grid remains structurally fragile. The high-capacity <strong className="text-[#8b5cf6]">400kV Ultra Backbone</strong> accounts for only ~20% of the total network. Over 50% of power transport is still dependent on the older, lower-voltage <strong className="text-[#10b981]">132kV Base Grid</strong>. This reliance on low-voltage transmission over long distances leads to high technical system losses, line overloads, and localized grid instability when major power plants trip.
+              Although the total carrying capacity has nearly doubled (from 8,396 ckm in 2011 to 15,688 ckm in 2025), the grid remains structurally fragile. The high-capacity <strong style={{ color: SERIES_COLORS.kv400 }}>400kV Ultra Backbone</strong> accounts for only ~20% of the total network. Over 50% of power transport is still dependent on the older, lower-voltage <strong style={{ color: SERIES_COLORS.kv132 }}>132kV Base Grid</strong>. This reliance on low-voltage transmission over long distances leads to high technical system losses, line overloads, and localized grid instability when major power plants trip.
             </>
           }
         />
@@ -350,11 +356,11 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         <GridChartFrame
           className="mt-4"
           legend={[
-            { id: 'grid', label: 'Grid Lines Added', color: '#3b82f6', variant: 'bar', provenance: 'D' },
-            { id: 'gen', label: 'Gen Cap. Added', color: '#f97316', variant: 'line', provenance: 'D' },
+            { id: 'grid', label: 'Grid Lines Added', color: SERIES_COLORS.kv230, variant: 'bar', provenance: 'D' },
+            { id: 'gen', label: 'Gen Cap. Added', color: SERIES_COLORS.genCapacityAdded, variant: 'line', provenance: 'D' },
           ]}
         >
-          <ComposedChart accessibilityLayer={false} data={displayData2Years} margin={GRID_CHART_MARGIN.dualAxis} barCategoryGap="18%">
+          <ComposedChart role="img" aria-label="Transmission Expansion Pace, chart" accessibilityLayer={false} data={displayData2Years} margin={GRID_CHART_MARGIN.dualAxis} barCategoryGap="18%">
               <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.splitUnitDual} tick={gridChartSplitUnitTick(chartTheme, 'ckm')} axisLine={false} tickLine={false} tickMargin={6} domain={[0, 'auto']} allowDecimals={false} />
@@ -366,8 +372,8 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   source={<a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB &amp; BPDB Progress Reports</a>}
                 />
               } cursor={{ fill: chartTheme.gridStroke, opacity: 0.1 }} />
-              <Bar yAxisId="left" dataKey="Transmission_Added_ckm" name="Grid Lines Added" fill="#3b82f6" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
-              <Line yAxisId="right" type="monotone" dataKey="Generation_Added_MW" name="Gen Cap. Added" stroke="#f97316" strokeWidth={2.5} dot={{ stroke: '#f97316', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Bar yAxisId="left" dataKey="Transmission_Added_ckm" name="Grid Lines Added" fill={SERIES_COLORS.kv230} radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+              <Line yAxisId="right" type="monotone" dataKey="Generation_Added_MW" name="Gen Cap. Added" stroke={SERIES_COLORS.genCapacityAdded} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.genCapacityAdded, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
           </ComposedChart>
         </GridChartFrame>
 
@@ -376,8 +382,8 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
           className="mt-1.5 pt-3 border-t-0"
           what={
             <ul className="list-disc pl-4 space-y-1">
-              <li><strong className="text-[#3b82f6]">Grid Lines Added (ckm):</strong> Represents the net circuit-kilometers of transmission lines commissioned by PGCB in each fiscal year.</li>
-              <li><strong className="text-[#f97316]">Gen Capacity Added (MW):</strong> Represents the net generation capacity added to the national grid in megawatts each fiscal year.</li>
+              <li><strong style={{ color: SERIES_COLORS.kv230 }}>Grid Lines Added (ckm):</strong> Represents the net circuit-kilometers of transmission lines commissioned by PGCB in each fiscal year.</li>
+              <li><strong style={{ color: SERIES_COLORS.genCapacityAdded }}>Gen Capacity Added (MW):</strong> Represents the net generation capacity added to the national grid in megawatts each fiscal year.</li>
             </ul>
           }
           insight={
@@ -410,13 +416,13 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
         <GridChartFrame
           className="mt-4"
           legend={[
-            { id: 'budget', label: 'Budget Index', color: '#f59e0b', variant: 'line', provenance: 'D' },
-            { id: 'gen', label: 'Gen. Cap. Index', color: '#6366f1', variant: 'line', provenance: 'D' },
-            { id: 'demand', label: 'Peak Demand Index', color: '#f97316', variant: 'line', provenance: 'D' },
-            { id: 'tx', label: 'Transmission Index', color: '#10b981', variant: 'dashed', provenance: 'D' },
+            { id: 'budget', label: 'Budget Index', color: SERIES_COLORS.budgetIndex, variant: 'line', provenance: 'D' },
+            { id: 'gen', label: 'Gen. Cap. Index', color: SERIES_COLORS.genCapacityIndex, variant: 'line', provenance: 'D' },
+            { id: 'demand', label: 'Peak Demand Index', color: SERIES_COLORS.genCapacityAdded, variant: 'line', provenance: 'D' },
+            { id: 'tx', label: 'Transmission Index', color: SERIES_COLORS.kv132, variant: 'dashed', provenance: 'D' },
           ]}
         >
-          <LineChart accessibilityLayer={false} data={displayData2Years} margin={GRID_CHART_MARGIN.legend}>
+          <LineChart role="img" aria-label="Long-term Trajectories (Indexed), chart" accessibilityLayer={false} data={displayData2Years} margin={GRID_CHART_MARGIN.legend}>
               <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
               <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'Fiscal_Year' })} />
               <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={gridChartAxisTick(chartTheme)} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} allowDecimals={false} tickFormatter={(v) => `${Math.round(v)}%`} />
@@ -428,10 +434,10 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                   source="Ministry of Finance Budget Briefs & PGCB / BPDB Reports"
                 />
               } />
-              <Line type="monotone" dataKey="Budget_Index" name="Budget Index" stroke="#f59e0b" strokeWidth={2.5} dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="Generation_Index" name="Gen. Cap. Index" stroke="#6366f1" strokeWidth={2.5} dot={{ r: 3.5 }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="Demand_Index" name="Peak Demand Index" stroke="#f97316" strokeWidth={2.5} dot={{ r: 3.5 }} isAnimationActive={false} />
-              <Line type="monotone" dataKey="Transmission_Index" name="Transmission Index" stroke="#10b981" strokeWidth={2.5} strokeDasharray="5 5" dot={{ r: 3.5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Budget_Index" name="Budget Index" stroke={SERIES_COLORS.budgetIndex} strokeWidth={2.5} dot={{ r: 3.5 }} activeDot={{ r: 5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Generation_Index" name="Gen. Cap. Index" stroke={SERIES_COLORS.genCapacityIndex} strokeWidth={2.5} dot={{ r: 3.5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Demand_Index" name="Peak Demand Index" stroke={SERIES_COLORS.genCapacityAdded} strokeWidth={2.5} dot={{ r: 3.5 }} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Transmission_Index" name="Transmission Index" stroke={SERIES_COLORS.kv132} strokeWidth={2.5} strokeDasharray="5 5" dot={{ r: 3.5 }} isAnimationActive={false} />
           </LineChart>
         </GridChartFrame>
 
@@ -445,10 +451,10 @@ export function LongitudinalStudyCharts({ chartTheme, isTruncated = false, allow
                 This chart indexes all metrics to <strong>FY2011 = 100</strong> to compare their relative growth rates. It highlights a critical structural decoupling in Bangladesh&apos;s energy infrastructure:
               </p>
               <ul className="list-disc pl-4 space-y-1">
-                <li><strong className="text-[#f59e0b]">Fiscal Allocation:</strong> The Power Division budget has skyrocketed by <strong className="tabular-nums">594.8%</strong>, representing massive capital injection.</li>
-                <li><strong className="text-[#6366f1]">Installed Generation:</strong> Total generation capacity has increased by <strong className="tabular-nums">380.0%</strong>, leading to substantial generation surplus.</li>
-                <li><strong className="text-[#f97316]">Peak Demand:</strong> Peak load utilized by the grid grew by <strong className="tabular-nums">337.1%</strong>, demonstrating solid consumption demand.</li>
-                <li><strong className="text-[#10b981]">Transmission Lines:</strong> The transmission network has lagged far behind, expanding by only <strong className="tabular-nums">186.8%</strong>. This gap explains why Bangladesh experiences load shedding and grid vulnerability despite having surplus generation capacity.</li>
+                <li><strong style={{ color: SERIES_COLORS.budgetIndex }}>Fiscal Allocation:</strong> The Power Division budget has skyrocketed by <strong className="tabular-nums">594.8%</strong>, representing massive capital injection.</li>
+                <li><strong style={{ color: SERIES_COLORS.genCapacityIndex }}>Installed Generation:</strong> Total generation capacity has increased by <strong className="tabular-nums">380.0%</strong>, leading to substantial generation surplus.</li>
+                <li><strong style={{ color: SERIES_COLORS.genCapacityAdded }}>Peak Demand:</strong> Peak load utilized by the grid grew by <strong className="tabular-nums">337.1%</strong>, demonstrating solid consumption demand.</li>
+                <li><strong style={{ color: SERIES_COLORS.kv132 }}>Transmission Lines:</strong> The transmission network has lagged far behind, expanding by only <strong className="tabular-nums">186.8%</strong>. This gap explains why Bangladesh experiences load shedding and grid vulnerability despite having surplus generation capacity.</li>
               </ul>
             </div>
           }

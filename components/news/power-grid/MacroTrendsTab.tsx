@@ -64,6 +64,13 @@ import {
   useNarrowChartCard,
 } from '@/components/news/PowerGridChartUI';
 import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
+import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
+import {
+  SERIES_COLORS,
+  SERIES_UNMAPPED,
+  STATUS_COLORS,
+  CHART_INK,
+} from '@/lib/data/grid/chart-palette';
 
 const GasReserveDepletionTab = dynamic(
   () => import('@/components/news/power-grid/GasReserveDepletionTab').then((m) => m.GasReserveDepletionTab),
@@ -84,72 +91,10 @@ const TREND_TOGGLE_CLASS = cn(
   'flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-150 shadow-sm',
 );
 
-/**
- * Tooltip for Brent Crude vs. Retail Diesel.
- *
- * Lifted out of the card so the wide chart and the two narrow ones share one
- * definition. The card renders a different element tree below
- * GRID_DUAL_AXIS_MIN_WIDTH, and a tooltip copied into each tree is a tooltip
- * that drifts: every field here — the exchange rate, the derived Tk/L
- * equivalent, the subsidy gap and both provenance tags — has to survive the
- * split, and sharing the component is what makes that true by construction
- * rather than by review.
- */
-function GridBrentDieselTooltip({
-  active,
-  payload,
-  exchangeRates,
-}: {
-  active?: boolean;
-  payload?: ReadonlyArray<{ payload: { year: string; globalOil: number; bdDiesel: number } }>;
-  exchangeRates: Record<string, number>;
-}) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
-  const exRate = exchangeRates[d.year] || 122.0;
-  // 1 bbl = 158.987 L
-  const brentBdtL = (d.globalOil * exRate) / 158.987;
-  const difference = d.bdDiesel - brentBdtL;
-  return (
-    <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
-      <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
-        <span>Benchmark Oil Price ({d.year})</span>
-        <span className="text-[9px] uppercase font-bold text-blue-500 tracking-wider">Oil</span>
-      </div>
-      <div className="space-y-2 text-[11px] md:text-xs">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Brent Crude:</span>
-          <span className="font-bold text-blue-500 tabular-nums">${d.globalOil.toFixed(2)} / Bbl</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-          <span className="font-semibold text-foreground tabular-nums">{exRate.toFixed(2)} Tk/$</span>
-        </div>
-        <div className="flex justify-between border-t border-border/20 pt-1">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Brent Cost (Tk/L equivalent):</span>
-          <span className="font-bold text-blue-400 tabular-nums">{brentBdtL.toFixed(2)} Tk/L</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />BD Retail Diesel:</span>
-          <span className="font-bold text-emerald-500 tabular-nums">{d.bdDiesel.toFixed(2)} Tk/L</span>
-        </div>
-        <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Margin / Subsidy Gap:</span>
-          <span className={cn("font-bold", difference >= 0 ? "text-emerald-500" : "text-destructive")}>
-            {difference >= 0 ? `+${difference.toFixed(2)} Tk/L (Premium)` : `${difference.toFixed(2)} Tk/L (Subsidized)`}
-          </span>
-        </div>
-      </div>
-      <div className="mt-2.5 pt-1.5 border-t border-border/30 text-[8px] text-muted-foreground leading-normal font-medium">
-        <strong>Formula:</strong> <code>(Brent USD * Exchange Rate) / 158.987 L</code>
-      </div>
-      <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-        <div><strong>Series from:</strong> OPEC Bulletin, World Bank Pink Sheet, BPC</div>
-        <div><strong>Ref:</strong> <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPC Pricing Gazettes</a></div>
-      </div>
-    </div>
-  );
-}
+import {
+  GridBrentDieselCard,
+  GridLngTariffCard,
+} from '@/components/news/power-grid/GlobalVsDomesticCards';
 
 type GridAccessLike = {
   isStaff: boolean;
@@ -177,289 +122,6 @@ type GridAccessLike = {
  * provenance tags are identical in either layout. The legend becomes a caption
  * per plot — one series each, which the brief prefers to a legend.
  */
-function GridBrentDieselCard({
-  data,
-  exchangeRates,
-  chartTheme,
-  ready,
-}: {
-  data: ReadonlyArray<{ year: string; globalOil: number; bdDiesel: number }>;
-  exchangeRates: Record<string, number>;
-  chartTheme: ChartTheme;
-  ready: boolean;
-}) {
-  const [cardRef, isNarrow] = useNarrowChartCard();
-
-  const tooltip = (
-    <Tooltip
-      content={({ active, payload }) => (
-        <GridBrentDieselTooltip
-          active={active}
-          payload={payload as unknown as React.ComponentProps<typeof GridBrentDieselTooltip>['payload']}
-          exchangeRates={exchangeRates}
-        />
-      )}
-    />
-  );
-
-  const xAxis = (
-    <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={28} />
-  );
-
-  return (
-    <div ref={cardRef} className="grid-explorer-chart-card card">
-      <div className="grid-explorer-chart-card__head">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <DollarSign className="h-5 w-5 shrink-0 text-blue-500" />
-          <div className="min-w-0">
-            <h3 className="grid-explorer-chart-card__title">Brent Crude vs. Retail Diesel</h3>
-            <p className="grid-explorer-chart-card__sub">Brent Crude (USD/Bbl) vs. Domestic Retail Diesel (Tk/L) — <span className="text-primary font-semibold text-xs">Tracked since 1975</span></p>
-          </div>
-        </div>
-        <span className="grid-explorer-chip bg-blue-500/5 text-blue-500 border-blue-500/10">Petroleum</span>
-      </div>
-
-      {!ready ? (
-        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
-          <div className="grid-explorer-skeleton" />
-        </div>
-      ) : isNarrow ? (
-        <div className="mt-4 flex flex-col gap-3">
-          <div>
-            <p className="grid-explorer-chart-caption">
-              <span className="grid-explorer-chart-caption__swatch" style={{ background: '#3b82f6' }} />
-              Brent Crude ($/bbl)
-            </p>
-            <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
-                  {xAxis}
-                  <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
-                  {tooltip}
-                  <Line type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div>
-            <p className="grid-explorer-chart-caption">
-              <span className="grid-explorer-chart-caption__swatch" style={{ background: '#10b981' }} />
-              BD Retail Diesel (Tk/L)
-            </p>
-            <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
-                  {xAxis}
-                  <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
-                  {tooltip}
-                  <Area type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill="#10b981" fillOpacity={0.05} stroke="#10b981" strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-              <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
-              <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Brent Crude ($/bbl)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
-              <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'Retail Diesel (Tk/L)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
-              {tooltip}
-              <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-              <Line yAxisId="left" type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke="#3b82f6" strokeWidth={2.5} dot={{ fill: '#3b82f6', r: 3 }} />
-              <Area yAxisId="right" type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill="#10b981" fillOpacity={0.05} stroke="#10b981" strokeWidth={2.5} dot={{ fill: '#10b981', r: 3 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Card Metadata Footer */}
-      <GridCardFooter>
-        <span>Source: OPEC Bulletin Historical Spot Prices &amp; <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Official Pricing Gazettes</a></span>
-        <span>As published. Not independently audited.</span>
-        <span className="font-medium">Reporting Period: Global Comparison (1975 - 2026)</span>
-      </GridCardFooter>
-    </div>
-  );
-}
-
-/** Tooltip for Global LNG Benchmark vs. Gas Tariff. Shared by both layouts for
- *  the same reason as the Brent one — see GridBrentDieselTooltip. */
-function GridLngTariffTooltip({
-  active,
-  payload,
-  exchangeRates,
-}: {
-  active?: boolean;
-  payload?: ReadonlyArray<{ payload: { year: string; globalGas: number; bdGas: number } }>;
-  exchangeRates: Record<string, number>;
-}) {
-  if (!active || !payload?.length) return null;
-  const d = payload[0].payload;
-  const exRate = exchangeRates[d.year] || 122.0;
-  // 1 MMBtu = 28.3 CM (Cubic Meters)
-  const globalGasBdtCm = (d.globalGas * exRate) / 28.3;
-  const difference = d.bdGas - globalGasBdtCm;
-  return (
-    <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
-      <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
-        <span>Benchmark Gas Price ({d.year})</span>
-        <span className="text-[9px] uppercase font-bold text-violet-500 tracking-wider">Gas</span>
-      </div>
-      <div className="space-y-2 text-[11px] md:text-xs">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Global LNG (US/JKM):</span>
-          <span className="font-bold text-violet-500 tabular-nums">${d.globalGas.toFixed(2)} / MMBtu</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Exchange Rate:</span>
-          <span className="font-semibold text-foreground tabular-nums">{exRate.toFixed(2)} Tk/$</span>
-        </div>
-        <div className="flex justify-between border-t border-border/20 pt-1">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Global Gas (Tk/CM equivalent):</span>
-          <span className="font-bold text-violet-400 tabular-nums">{globalGasBdtCm.toFixed(2)} Tk/CM</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />BD Avg Gas Tariff:</span>
-          <span className="font-bold text-amber-500 tabular-nums">{d.bdGas.toFixed(2)} Tk/CM</span>
-        </div>
-        <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
-          <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Subsidization Gap:</span>
-          <span className={cn("font-bold", difference >= 0 ? "text-emerald-500" : "text-destructive")}>
-            {difference >= 0 ? `+${difference.toFixed(2)} Tk/CM` : `${difference.toFixed(2)} Tk/CM (Subsidized)`}
-          </span>
-        </div>
-      </div>
-      <div className="mt-2.5 pt-1.5 border-t border-border/30 text-[8px] text-muted-foreground leading-normal font-medium">
-        <strong>Formula:</strong> <code>(Global LNG USD * Exchange Rate) / 28.3 CM</code>
-      </div>
-      <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-        <div><strong>Series from:</strong> World Bank Pink Sheet, JKM Index, Petrobangla</div>
-        <div><strong>Ref:</strong> <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Petrobangla Audited Reports</a></div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Global LNG Benchmark vs. Gas Tariff — the second dual-axis card on
- * macro/global, split on the same terms as GridBrentDieselCard. Measured 204px
- * of a 362px card (56.4%) combined.
- */
-function GridLngTariffCard({
-  data,
-  exchangeRates,
-  chartTheme,
-  ready,
-}: {
-  data: ReadonlyArray<{ year: string; globalGas: number; bdGas: number }>;
-  exchangeRates: Record<string, number>;
-  chartTheme: ChartTheme;
-  ready: boolean;
-}) {
-  const [cardRef, isNarrow] = useNarrowChartCard();
-
-  const tooltip = (
-    <Tooltip
-      content={({ active, payload }) => (
-        <GridLngTariffTooltip
-          active={active}
-          payload={payload as unknown as React.ComponentProps<typeof GridLngTariffTooltip>['payload']}
-          exchangeRates={exchangeRates}
-        />
-      )}
-    />
-  );
-
-  const xAxis = (
-    <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={28} />
-  );
-
-  return (
-    <div ref={cardRef} className="grid-explorer-chart-card card">
-      <div className="grid-explorer-chart-card__head">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <Droplet className="h-5 w-5 shrink-0 text-violet-500" />
-          <div className="min-w-0">
-            <h3 className="grid-explorer-chart-card__title">Global LNG Benchmark vs. Gas Tariff</h3>
-            <p className="grid-explorer-chart-card__sub">Global Gas/LNG (USD/MMBtu) vs. BD Avg Tariff (Tk/CM) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
-          </div>
-        </div>
-        <span className="grid-explorer-chip bg-violet-500/5 text-violet-500 border-violet-500/10">Natural Gas</span>
-      </div>
-
-      {!ready ? (
-        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
-          <div className="grid-explorer-skeleton" />
-        </div>
-      ) : isNarrow ? (
-        <div className="mt-4 flex flex-col gap-3">
-          <div>
-            <p className="grid-explorer-chart-caption">
-              <span className="grid-explorer-chart-caption__swatch" style={{ background: '#8b5cf6' }} />
-              Global LNG ($/MMBtu)
-            </p>
-            <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
-                  {xAxis}
-                  <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
-                  {tooltip}
-                  <Line type="monotone" dataKey="globalGas" name="Global LNG ($/MMBtu)" stroke="#8b5cf6" strokeWidth={2.5} dot={{ fill: '#8b5cf6', r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div>
-            <p className="grid-explorer-chart-caption">
-              <span className="grid-explorer-chart-caption__swatch" style={{ background: '#f59e0b' }} />
-              BD Avg Gas Tariff (Tk/CM)
-            </p>
-            <div className="grid-explorer-chart-area grid-explorer-chart-area--h-compact">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.default}>
-                  <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
-                  {xAxis}
-                  <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
-                  {tooltip}
-                  <Area type="monotone" dataKey="bdGas" name="BD Avg Gas Tariff (Tk/CM)" fill="#f59e0b" fillOpacity={0.05} stroke="#f59e0b" strokeWidth={2.5} dot={{ fill: '#f59e0b', r: 3 }} />
-                </ComposedChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart accessibilityLayer={false} data={data} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
-              <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
-              <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
-              <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} label={{ value: 'Global LNG ($/MMBtu)', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
-              <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'BD Avg Gas Tariff (Tk/CM)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
-              {tooltip}
-              <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-              <Line yAxisId="left" type="monotone" dataKey="globalGas" name="Global LNG ($/MMBtu)" stroke="#8b5cf6" strokeWidth={2.5} dot={{ fill: '#8b5cf6', r: 3 }} />
-              <Area yAxisId="right" type="monotone" dataKey="bdGas" name="BD Avg Gas Tariff (Tk/CM)" fill="#f59e0b" fillOpacity={0.05} stroke="#f59e0b" strokeWidth={2.5} dot={{ fill: '#f59e0b', r: 3 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Card Metadata Footer */}
-      <GridCardFooter>
-        <span>Source: World Bank Pink Sheets &amp; <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Annual Reports</a></span>
-        <span>As published. Not independently audited.</span>
-        <span className="font-medium">Reporting Period: Global Comparison (2010 - 2026)</span>
-      </GridCardFooter>
-    </div>
-  );
-}
-
 type MacroSubTabId =
   | 'overview' | 'budget' | 'monthly' | 'pricing' | 'global'
   | 'reports' | 'reserves' | 'system_loss' | 'insights' | 'verification';
@@ -871,12 +533,12 @@ export function MacroTrendsTab({
                 <GridChartFrame
                   className="mt-4"
                   legend={[
-                    { id: 'budget', label: 'Power Budget (Cr Tk)', color: '#a855f7', variant: 'bar' },
-                    { id: 'cap', label: 'Installed Cap. (MW)', color: '#06b6d4', variant: 'line' },
-                    { id: 'peak', label: 'Peak Gen. (MW)', color: '#f97316', variant: 'line' },
+                    { id: 'budget', label: 'Power Budget (Cr Tk)', color: SERIES_COLORS.powerBudget, variant: 'bar' },
+                    { id: 'cap', label: 'Installed Cap. (MW)', color: SERIES_COLORS.installedCapacity, variant: 'line' },
+                    { id: 'peak', label: 'Peak Gen. (MW)', color: SERIES_COLORS.peakGeneration, variant: 'line' },
                   ]}
                 >
-                  <ComposedChart
+                  <ComposedChart role="img" aria-label="National Budget vs Capacity and Peak Generation, chart"
                     accessibilityLayer={false}
                     data={localNationalBudgetMergedData}
                     margin={GRID_CHART_MARGIN.dualAxis}
@@ -884,8 +546,8 @@ export function MacroTrendsTab({
                   >
                         <defs>
                           <linearGradient id="budget-grad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#a855f7" stopOpacity={0.85} />
-                            <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.5} />
+                            <stop offset="0%" stopColor={SERIES_COLORS.powerBudget} stopOpacity={0.85} />
+                            <stop offset="100%" stopColor={SERIES_COLORS.powerBudget} stopOpacity={0.5} />
                           </linearGradient>
                         </defs>
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
@@ -934,8 +596,8 @@ export function MacroTrendsTab({
                                   <div>
                                     <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Fiscal Allocation</div>
                                     <div className="flex justify-between items-center text-xs">
-                                      <span className="text-[#a855f7] inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Power &amp; Energy Budget:</span>
-                                      <span className="font-bold text-[#a855f7]">{d.power_energy_allocation_crore_tk} Cr Tk</span>
+                                      <span className="inline-flex items-center gap-1" style={{ color: SERIES_COLORS.powerBudget }}><GridProvenanceTag kind="P" />Power &amp; Energy Budget:</span>
+                                      <span className="font-bold" style={{ color: SERIES_COLORS.powerBudget }}>{d.power_energy_allocation_crore_tk} Cr Tk</span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs mt-1">
                                       <span className="inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Total National Budget:</span>
@@ -946,11 +608,11 @@ export function MacroTrendsTab({
                                     <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">Grid Infrastructure</div>
                                     <div className="flex justify-between items-center text-xs">
                                       <span className="inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Installed Capacity:</span>
-                                      <span className="font-bold text-[#06b6d4]">{d.installed_capacity_mw} MW</span>
+                                      <span className="font-bold" style={{ color: SERIES_COLORS.installedCapacity }}>{d.installed_capacity_mw} MW</span>
                                     </div>
                                     <div className="flex justify-between items-center text-xs mt-1">
                                       <span>Peak Generation:</span>
-                                      <span className="font-bold text-[#f97316]">{d.peak_generation_mw} MW</span>
+                                      <span className="font-bold" style={{ color: SERIES_COLORS.peakGeneration }}>{d.peak_generation_mw} MW</span>
                                     </div>
                                   </div>
                                 </div>
@@ -959,16 +621,16 @@ export function MacroTrendsTab({
                           }}
                         />
                         <Bar yAxisId="left" dataKey="power_energy_allocation_crore_tk" name="Power Budget (Cr Tk)" fill="url(#budget-grad)" radius={[4, 4, 0, 0]} maxBarSize={36} />
-                        <Line yAxisId="right" type="monotone" dataKey="installed_capacity_mw" name="Installed Cap. (MW)" stroke="#06b6d4" strokeWidth={2.5} dot={{ stroke: '#06b6d4', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} />
-                        <Line yAxisId="right" type="monotone" dataKey="peak_generation_mw" name="Peak Gen. (MW)" stroke="#f97316" strokeWidth={2.5} dot={{ stroke: '#f97316', strokeWidth: 2, fill: '#ffffff', r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Line yAxisId="right" type="monotone" dataKey="installed_capacity_mw" name="Installed Cap. (MW)" stroke={SERIES_COLORS.installedCapacity} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.installedCapacity, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Line yAxisId="right" type="monotone" dataKey="peak_generation_mw" name="Peak Gen. (MW)" stroke={SERIES_COLORS.peakGeneration} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.peakGeneration, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
                 
                 <div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
                   <p><strong>What is being shown?</strong></p>
                   <ul className="list-disc pl-4 space-y-1">
-                    <li><strong className="text-[#a855f7]">Power Sector Budget (Crore BDT):</strong> The total fiscal allocation dedicated specifically to the Ministry of Power, Energy and Mineral Resources each fiscal year.</li>
-                    <li><strong className="text-[#06b6d4]">Installed Capacity</strong> vs <strong className="text-[#f97316]">Peak Generation (MW)</strong>: The physical manifestation of those budgets—showing how much total capacity was built versus how much was actually utilized during peak hours.</li>
+                    <li><strong style={{ color: SERIES_COLORS.powerBudget }}>Power Sector Budget (Crore BDT):</strong> The total fiscal allocation dedicated specifically to the Ministry of Power, Energy and Mineral Resources each fiscal year.</li>
+                    <li><strong style={{ color: SERIES_COLORS.installedCapacity }}>Installed Capacity</strong> vs <strong style={{ color: SERIES_COLORS.peakGeneration }}>Peak Generation (MW)</strong>: The physical manifestation of those budgets—showing how much total capacity was built versus how much was actually utilized during peak hours.</li>
                   </ul>
                   <p className="mt-2 pt-2 border-t border-border/30">
                     <strong>Analytical Insight:</strong> While fiscal allocation to the power sector has historically risen, the proposed FY2026-27 budget allocation dropped sharply to 17,345 Crore BDT (~1.85% of total national budget). This contraction signals a major policy pivot: the government is shifting focus away from massive capacity expansions to reviewing existing power purchase agreements (PPAs), reducing subsidies, and eliminating high capacity payments for underutilized plants.
@@ -1079,7 +741,7 @@ export function MacroTrendsTab({
                     { id: 'cost', label: 'BPDB Gen. Cost (Tk/kWh)', color: chartTheme.destructive, variant: 'line' },
                   ]}
                 >
-                  <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_CHART_MARGIN.legend} barCategoryGap="20%">
+                  <ComposedChart role="img" aria-label="Historical Pricing and Tariff Comparison, chart" accessibilityLayer={false} data={localMacroTariffData} margin={GRID_CHART_MARGIN.legend} barCategoryGap="20%">
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         <XAxis
                           dataKey="year"
@@ -1177,7 +839,7 @@ export function MacroTrendsTab({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={localMacroTariffData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
+                        <ComposedChart role="img" aria-label="Wholesale Tariff vs. Unit Production Cost, chart" accessibilityLayer={false} data={localMacroTariffData} margin={GRID_EXPLORER_CHART_MARGIN.default}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
                           <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v} Tk` })} tick={{ fontSize: 11, fill: chartTheme.axisTick }} />
@@ -1269,11 +931,11 @@ export function MacroTrendsTab({
                   <GridChartFrame
                     className="mt-4"
                     legend={[
-                      { id: 'domestic', label: 'Domestic gas', color: '#0ea5e9', variant: 'area' },
-                      { id: 'lng', label: 'Imported LNG', color: '#a855f7', variant: 'area' },
+                      { id: 'domestic', label: 'Domestic gas', color: SERIES_COLORS.domesticGas, variant: 'area' },
+                      { id: 'lng', label: 'Imported LNG', color: SERIES_COLORS.powerBudget, variant: 'area' },
                     ]}
                   >
-                    <ComposedChart accessibilityLayer={false} data={localMacroGasData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                    <ComposedChart role="img" aria-label="Gas Supply Transition: Domestic vs. Imported LNG, chart" accessibilityLayer={false} data={localMacroGasData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis {...gridChartXAxisProps(chartTheme)} tick={{ fontSize: 11, fill: chartTheme.axisTick, dy: 4 }} />
                           <YAxis
@@ -1321,8 +983,8 @@ export function MacroTrendsTab({
                               );
                             }}
                           />
-                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.22} strokeWidth={2} legendType="none" />
-                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke="#a855f7" fill="#a855f7" fillOpacity={0.28} strokeWidth={2} legendType="none" />
+                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke={SERIES_COLORS.domesticGas} fill={SERIES_COLORS.domesticGas} fillOpacity={0.22} strokeWidth={2} legendType="none" />
+                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke={SERIES_COLORS.powerBudget} fill={SERIES_COLORS.powerBudget} fillOpacity={0.28} strokeWidth={2} legendType="none" />
                         </ComposedChart>
                   </GridChartFrame>
                   ) : (
@@ -1477,7 +1139,7 @@ export function MacroTrendsTab({
                         key,
                         name: key.charAt(0).toUpperCase() + key.slice(1),
                         value,
-                        color: REGIONAL_ZONE_COLORS[key.toLowerCase()] ?? '#94a3b8',
+                        color: REGIONAL_ZONE_COLORS[key.toLowerCase()] ?? SERIES_UNMAPPED.light,
                       }))
                       .sort((a, b) => b.value - a.value)
                   : [];
@@ -1640,7 +1302,7 @@ export function MacroTrendsTab({
                           <div className="lg:col-span-6 flex items-center justify-center w-full min-w-0">
                             <div className="grid-explorer-donut-wrap grid-explorer-donut-wrap--centered !mb-0 w-full">
                               {macroChartsReady ? (
-                                <PieChart width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                                <PieChart role="img" aria-label="Energy Fuel Mix, chart" width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
                                   <Pie
                                     data={
                                       currentMonthlyData
@@ -1783,7 +1445,7 @@ export function MacroTrendsTab({
                             <div className="grid-explorer-chart-area grid-explorer-chart-area--lg grid-explorer-chart-area--split !min-h-[16rem] !h-[16rem] mt-16">
                               {macroChartsReady ? (
                                 <ResponsiveContainer width="100%" height="100%">
-                                  <BarChart
+                                  <BarChart role="img" aria-label="Regional Maximum Peak Supply, chart"
                                     accessibilityLayer={false}
                                     data={regionalChartData}
                                     margin={GRID_EXPLORER_CHART_MARGIN.default}
@@ -1955,7 +1617,7 @@ export function MacroTrendsTab({
                   {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
                       {monthlyTrendMetric === 'peaks' ? (
-                        <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart role="img" aria-label="PGCB 13-Year Historical Growth Trends, chart" accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis
                             dataKey="date_key"
@@ -2064,11 +1726,11 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Area type="monotone" dataKey="max_evening_peak_demand" name="Estimated Peak Demand" stroke="#f97316" fill="rgba(249, 115, 22, 0.05)" strokeWidth={1.5} />
+                          <Area type="monotone" dataKey="max_evening_peak_demand" name="Estimated Peak Demand" stroke={SERIES_COLORS.peakGeneration} fill="rgba(249, 115, 22, 0.05)" strokeWidth={1.5} />
                           <Line type="monotone" dataKey="max_evening_peak_gen" name="Maximum Peak Generation" stroke={chartTheme.primary} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
                         </ComposedChart>
                       ) : monthlyTrendMetric === 'energy' ? (
-                        <ComposedChart accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart role="img" aria-label="PGCB 13-Year Historical Growth Trends, chart" accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis
                             dataKey="date_key"
@@ -2145,10 +1807,10 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Area type="monotone" dataKey="total_net_generation" name="Total Monthly Energy Generation (MKWh)" stroke="#f59e0b" fill="rgba(245, 158, 11, 0.1)" strokeWidth={2.5} />
+                          <Area type="monotone" dataKey="total_net_generation" name="Total Monthly Energy Generation (MKWh)" stroke={SERIES_COLORS.bdGasTariff} fill="rgba(245, 158, 11, 0.1)" strokeWidth={2.5} />
                         </ComposedChart>
                       ) : (
-                        <ComposedChart accessibilityLayer={false} data={pgcbFuelTrendData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart role="img" aria-label="PGCB 13-Year Historical Growth Trends, chart" accessibilityLayer={false} data={pgcbFuelTrendData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                           <XAxis
                             dataKey="date_key"
@@ -2333,7 +1995,7 @@ export function MacroTrendsTab({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart role="img" aria-label="Macro Pressure Variables (2021 - 2026), chart" accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                           <XAxis dataKey="year" tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} Tk`} />
@@ -2371,13 +2033,22 @@ export function MacroTrendsTab({
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
                           <Bar yAxisId="left" dataKey="exchangeRate" name="USD Exchange Rate (BDT)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={25} />
-                          <Line yAxisId="right" type="monotone" dataKey="inflation" name="Inflation Rate (%)" stroke="#f97316" strokeWidth={3} dot={{ fill: '#f97316', r: 4 }} />
+                          <Line yAxisId="right" type="monotone" dataKey="inflation" name="Inflation Rate (%)" stroke={SERIES_COLORS.peakGeneration} strokeWidth={3} dot={{ fill: SERIES_COLORS.peakGeneration, r: 4 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     ) : (
                       <div className="grid-explorer-skeleton" />
                     )}
                   </div>
+      <ChartDataTable
+        caption="Macro Pressure Variables (2021 - 2026), chart"
+        categoryHeader='Year'
+        categories={localMacroEconomicData.map((d) => d.year)}
+        series={[
+          { label: "USD Exchange Rate (BDT)", values: columnOf(localMacroEconomicData, 'exchangeRate') },
+          { label: "Inflation Rate (%)", values: columnOf(localMacroEconomicData, 'inflation') },
+        ]}
+      />
 
                   {/* Card Explanation Block */}
                   <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
@@ -2410,7 +2081,7 @@ export function MacroTrendsTab({
                   <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                     {macroChartsReady ? (
                       <ResponsiveContainer width="100%" height="100%">
-                        <ComposedChart accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                        <ComposedChart role="img" aria-label="Global Fuel Commodity Import Costs, chart" accessibilityLayer={false} data={localMacroEconomicData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                           <CartesianGrid {...chartGridProps(chartTheme.gridStroke, 'left')} />
                           <XAxis dataKey="year" tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                           <YAxis yAxisId="left" width={GRID_Y_AXIS_WIDTH.dual} tick={{ fontSize: 11, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={(v) => `${v} $/MMBtu`} />
@@ -2447,14 +2118,23 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Area yAxisId="left" type="monotone" dataKey="spotLng" name="Spot LNG (USD/MMBtu)" stroke="#a855f7" fill="rgba(168, 85, 247, 0.15)" strokeWidth={2} />
-                          <Line yAxisId="right" type="monotone" dataKey="importCoal" name="Import Coal (USD/Ton)" stroke="#94a3b8" strokeWidth={2.5} dot={{ fill: '#94a3b8', r: 3 }} />
+                          <Area yAxisId="left" type="monotone" dataKey="spotLng" name="Spot LNG (USD/MMBtu)" stroke={SERIES_COLORS.powerBudget} fill="rgba(168, 85, 247, 0.15)" strokeWidth={2} />
+                          <Line yAxisId="right" type="monotone" dataKey="importCoal" name="Import Coal (USD/Ton)" stroke={SERIES_UNMAPPED.light} strokeWidth={2.5} dot={{ fill: SERIES_UNMAPPED.light, r: 3 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     ) : (
                       <div className="grid-explorer-skeleton" />
                     )}
                   </div>
+      <ChartDataTable
+        caption="Global Fuel Commodity Import Costs, chart"
+        categoryHeader='Year'
+        categories={localMacroEconomicData.map((d) => d.year)}
+        series={[
+          { label: "Spot LNG (USD/MMBtu)", values: columnOf(localMacroEconomicData, 'spotLng') },
+          { label: "Import Coal (USD/Ton)", values: columnOf(localMacroEconomicData, 'importCoal') },
+        ]}
+      />
 
                   {/* Card Explanation Block */}
                   <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
@@ -2589,7 +2269,7 @@ export function MacroTrendsTab({
                     <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                       {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart accessibilityLayer={false} data={localBpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                          <ComposedChart role="img" aria-label="BPDB Annual Cost, Revenue and Subsidy Profile (Crore BDT), chart" accessibilityLayer={false} data={localBpdbAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                             <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                             <YAxis width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={formatAxisCrore} />
@@ -2633,16 +2313,27 @@ export function MacroTrendsTab({
                               }}
                             />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                            <Bar dataKey="revenue" name="Operating Revenue" fill="#0ea5e9" stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="subsidy" name="Govt Subsidy" fill="#10b981" stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="cost" name="Gen &amp; Purchase Cost" fill="#f97316" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Line type="monotone" dataKey="loss" name="Net Loss (after subsidy)" stroke="#a855f7" strokeWidth={3} dot={{ fill: '#a855f7', r: 4 }} />
+                            <Bar dataKey="revenue" name="Operating Revenue" fill={SERIES_COLORS.domesticGas} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar dataKey="subsidy" name="Govt Subsidy" fill={SERIES_COLORS.retailDiesel} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar dataKey="cost" name="Gen &amp; Purchase Cost" fill={SERIES_COLORS.peakGeneration} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Line type="monotone" dataKey="loss" name="Net Loss (after subsidy)" stroke={SERIES_COLORS.powerBudget} strokeWidth={3} dot={{ fill: SERIES_COLORS.powerBudget, r: 4 }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       ) : (
                         <div className="grid-explorer-skeleton" />
                       )}
                     </div>
+      <ChartDataTable
+        caption="BPDB Annual Cost, Revenue and Subsidy Profile (Crore BDT), chart"
+        categoryHeader='Year'
+        categories={localBpdbAuditedFinancials.map((d) => d.year)}
+        series={[
+          { label: "Operating Revenue", values: columnOf(localBpdbAuditedFinancials, 'revenue') },
+          { label: "Govt Subsidy", values: columnOf(localBpdbAuditedFinancials, 'subsidy') },
+          { label: "Gen &amp; Purchase Cost", values: columnOf(localBpdbAuditedFinancials, 'cost') },
+          { label: "Net Loss (after subsidy)", values: columnOf(localBpdbAuditedFinancials, 'loss') },
+        ]}
+      />
 
                     {/* Card Metadata Footer */}
                     <GridCardFooter>
@@ -2710,7 +2401,7 @@ export function MacroTrendsTab({
                     <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                       {macroChartsReady ? (
                         <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart accessibilityLayer={false} data={localPetrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                          <ComposedChart role="img" aria-label="Petrobangla Annual Revenue and LNG Import Costs, chart" accessibilityLayer={false} data={localPetrobanglaAuditedFinancials} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                             <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                             <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                             <YAxis width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} domain={[0, 'auto']} tickFormatter={formatAxisCrore} />
@@ -2752,15 +2443,25 @@ export function MacroTrendsTab({
                               }}
                             />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                            <Bar dataKey="revenue" name="Gas Sales Revenue" fill="#0ea5e9" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="lngCost" name="LNG Import Cost" fill="#a855f7" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Line type="monotone" dataKey="netProfit" name="Net Income / Loss" stroke="#eab308" strokeWidth={3} dot={{ fill: '#eab308', r: 4 }} />
+                            <Bar dataKey="revenue" name="Gas Sales Revenue" fill={SERIES_COLORS.domesticGas} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar dataKey="lngCost" name="LNG Import Cost" fill={SERIES_COLORS.powerBudget} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Line type="monotone" dataKey="netProfit" name="Net Income / Loss" stroke={STATUS_COLORS.warning} strokeWidth={3} dot={{ fill: STATUS_COLORS.warning, r: 4 }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       ) : (
                         <div className="grid-explorer-skeleton" />
                       )}
                     </div>
+      <ChartDataTable
+        caption="Petrobangla Annual Revenue and LNG Import Costs, chart"
+        categoryHeader='Year'
+        categories={localPetrobanglaAuditedFinancials.map((d) => d.year)}
+        series={[
+          { label: "Gas Sales Revenue", values: columnOf(localPetrobanglaAuditedFinancials, 'revenue') },
+          { label: "LNG Import Cost", values: columnOf(localPetrobanglaAuditedFinancials, 'lngCost') },
+          { label: "Net Income / Loss", values: columnOf(localPetrobanglaAuditedFinancials, 'netProfit') },
+        ]}
+      />
 
                     {/* Card Metadata Footer */}
                     <GridCardFooter>
@@ -2872,7 +2573,7 @@ export function MacroTrendsTab({
                 <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4 grid-explorer-chart-area--h-standard">
                   {macroChartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
+                      <ComposedChart role="img" aria-label="Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff, chart" accessibilityLayer={false} data={localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
                         <CartesianGrid {...chartGridProps(chartTheme.gridStroke)} />
                         <XAxis dataKey="year" tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} />
                         <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
@@ -2926,8 +2627,8 @@ export function MacroTrendsTab({
                           }}
                         />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                        <Line type="monotone" dataKey="globalSolarBdt" name="Global Solar LCOE (Tk/KWh)" stroke="#14b8a6" strokeWidth={2.5} dot={{ fill: '#14b8a6', r: 3 }} />
-                        <Line type="monotone" dataKey="bdSolar" name="BD Solar Tariff (Tk/KWh)" stroke="#f43f5e" strokeWidth={2.5} dot={{ fill: '#f43f5e', r: 3 }} />
+                        <Line type="monotone" dataKey="globalSolarBdt" name="Global Solar LCOE (Tk/KWh)" stroke={SERIES_COLORS.transmissionIndex} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.transmissionIndex, r: 3 }} />
+                        <Line type="monotone" dataKey="bdSolar" name="BD Solar Tariff (Tk/KWh)" stroke={STATUS_COLORS.critical} strokeWidth={2.5} dot={{ fill: STATUS_COLORS.critical, r: 3 }} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   ) : (
@@ -3055,7 +2756,7 @@ export function MacroTrendsTab({
                 <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">
                   {chartsReady ? (
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart
+                      <ComposedChart role="img" aria-label="Historical System Loss Trends (TandD), chart"
                         data={[...localSystemLossData].reverse()}
                         margin={{ top: 10, right: 5, left: -5, bottom: 5 }}
                       >
@@ -3152,8 +2853,8 @@ export function MacroTrendsTab({
                           wrapperStyle={{ fontSize: '11px' }}
                         />
                         <Area type="monotone" dataKey="total_td" name="Total T&amp;D Loss" stroke={chartTheme.destructive} fill={chartTheme.destructive} fillOpacity={0.06} strokeWidth={2.5} />
-                        <Line type="monotone" dataKey="distribution" name="Distribution Loss" stroke="#a855f7" strokeWidth={2} dot={{ r: 2 }} />
-                        <Line type="monotone" dataKey="transmission" name="Transmission Loss" stroke="#10b981" strokeWidth={2} dot={{ r: 2 }} />
+                        <Line type="monotone" dataKey="distribution" name="Distribution Loss" stroke={SERIES_COLORS.powerBudget} strokeWidth={2} dot={{ r: 2 }} />
+                        <Line type="monotone" dataKey="transmission" name="Transmission Loss" stroke={SERIES_COLORS.retailDiesel} strokeWidth={2} dot={{ r: 2 }} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   ) : (

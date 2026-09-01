@@ -448,7 +448,16 @@ export function countOf(n: number, noun = 'rows'): string {
   return `${n} ${n === 1 ? one : noun}`;
 }
 
-function changeOf(a: number | null, b: number | null): { delta: number | null; pct: number | null; note?: string } {
+/**
+ * The rule that stops a gap becoming a number.
+ *
+ * Exported for the tests below it in `comparison-change.test.ts`. This is the
+ * single most consequential function in the engine — everything the doctrine
+ * says about not manufacturing a headline out of a missing cell reduces to
+ * these five lines — and it was reachable only through the full builder, so
+ * nothing pinned it directly.
+ */
+export function changeOf(a: number | null, b: number | null): { delta: number | null; pct: number | null; note?: string } {
   if (a === null && b === null) return { delta: null, pct: null, note: 'neither day publishes this' };
   if (a === null) return { delta: null, pct: null, note: 'not published on the first day' };
   if (b === null) return { delta: null, pct: null, note: 'not published on the second day' };
