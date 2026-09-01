@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { safeJsonLd } from '@/lib/json-ld';
 import Script from 'next/script';
 
-import { Inter, Noto_Sans_Bengali, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { Inter, Noto_Sans_Bengali, Space_Grotesk, JetBrains_Mono, Source_Serif_4 } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { ProvidersShell } from './ProvidersShell';
@@ -13,6 +13,10 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swa
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-display', display: 'swap' });
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' });
 const notoSansBengali = Noto_Sans_Bengali({ subsets: ['bengali'], variable: '--font-bengali', display: 'swap' });
+// Masthead only. The design directive (Phase B §B8) retires the illustrated
+// banner for a typographic nameplate — serious publications are typography —
+// and none of the loaded faces is a serif. One face, two weights, latin subset.
+const sourceSerif = Source_Serif_4({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-masthead', display: 'swap' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com'),
@@ -74,6 +78,7 @@ const bodyClass = [
   spaceGrotesk.variable,
   jetbrainsMono.variable,
   notoSansBengali.variable,
+  sourceSerif.variable,
   'min-h-screen bg-background text-foreground antialiased font-sans',
 ].join(' ');
 

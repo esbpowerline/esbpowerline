@@ -312,6 +312,76 @@ html[data-site-theme='white'],
   --category-nav-seam: calc(12.75rem + 1px);
 }
 
+/*
+ * DESIGN TOKENS — the non-colour half of the system. lib/design-tokens.ts is
+ * the documented source; these are its rendered form. Change them together.
+ * One type scale, a 4-base space scale, three container widths, one motion
+ * duration. New public-surface work draws from these; the audit measured what
+ * ad-hoc values produce (telemetry at 9–10px under commodity prices set larger).
+ */
+:root {
+  --type-11: 0.6875rem;  --type-12: 0.78125rem; --type-14: 0.875rem;
+  --type-16: 1rem;       --type-19: 1.1875rem;  --type-24: 1.5rem;
+  --type-32: 2rem;       --type-44: 2.75rem;
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --container-article: 680px; --container-section: 1080px; --container-data: 1280px;
+  --radius-control: 4px;
+  --motion-fast: 150ms ease-out;
+}
+
+/*
+ * Masthead — wordmark, rule, date line. Replaces the illustrated banner
+ * (see components/shared/Masthead.tsx for the incident). Height budget: the
+ * whole band is ~64px against the illustration's ~78px, and it is typography,
+ * so it renders identically in every site theme without image swaps.
+ */
+.masthead {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+.masthead__wordmark {
+  margin: 0;
+  font-family: var(--font-masthead), Georgia, 'Times New Roman', serif;
+  font-size: var(--type-32);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.masthead__rule {
+  width: 100%;
+  max-width: 28rem;
+  border-top: 1px solid hsl(var(--border));
+}
+.masthead__dateline {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: var(--space-3);
+  row-gap: 0;
+  font-size: var(--type-11);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+}
+.masthead__tagline::after {
+  content: '·';
+  margin-left: var(--space-3);
+}
+@media (max-width: 640px) {
+  .masthead__wordmark { font-size: var(--type-24); }
+  .masthead__tagline::after { content: none; }
+  .masthead__tagline { display: none; } /* one line of chrome on phones */
+}
+
 .article-card:hover .article-card__image {
   transform: scale(1.03);
 }
@@ -2772,12 +2842,6 @@ html.locale-bn .article-card h3 {
   isolation: isolate;
 }
 
-.public-market-strip__grid {
-  display: grid;
-  grid-template-columns: 1fr !important;
-  gap: 0;
-}
-
 .public-market-strip__lane {
   display: flex;
   align-items: center;
@@ -2807,13 +2871,10 @@ html.locale-bn .article-card h3 {
 }
 
 .public-market-strip__lane--energy {
-  border-bottom: 1px solid hsl(var(--border) / 0.4) !important;
   background-color: color-mix(in srgb, hsl(38 90% 50%) 3%, transparent) !important;
 }
 
-.public-market-strip__lane--dse {
-  background-color: color-mix(in srgb, hsl(200 90% 50%) 3%, transparent) !important;
-}
+/* The DSE lane is gone — one ticker of chrome, per the design directive. */
 
 .market-ticker-label {
   display: inline-flex;

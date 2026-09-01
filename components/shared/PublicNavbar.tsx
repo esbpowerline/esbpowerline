@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ThemeBanner } from '@/components/shared/ThemeBanner';
+import { Masthead } from '@/components/shared/Masthead';
 
 import { Search, Menu, X, Newspaper, BookOpen, BarChart3, Home } from 'lucide-react';
 import { useMemo, useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
@@ -204,7 +204,7 @@ export function PublicNavbar({
         <div className="container container--shell px-0">
           <div className="site-banner-frame border-l border-r border-b border-border/40 overflow-hidden">
             <PublicNavLink href="/" className="w-full block transition-opacity hover:opacity-95">
-              <ThemeBanner />
+              <Masthead />
             </PublicNavLink>
             <PublicMarketStrip energyItems={tickerItems} />
           </div>
@@ -340,17 +340,12 @@ export function PublicNavbar({
                       style={colors.useCustom ? categoryUnderlineStyle(c.color) : undefined}
                       aria-hidden
                     />
+                    {/* Text only. Each cell used to carry a decorative icon —
+                        an atom for "Renewables & Nuclear" adds nothing the
+                        word does not, and ten of them made the strip read as a
+                        toolbar. The mobile menu keeps its icons: there they
+                        are tap targets, not decoration. */}
                     <span className="category-nav-cell__stack">
-                      <CategoryIconDisplay
-                        icon={c.icon}
-                        iconImageUrl={c.iconImageUrl}
-                        name={c.name}
-                        size={10}
-                        className={`relative z-[1] h-2.5 w-2.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                          colors.useCustom ? 'category-nav--custom' : colors.text
-                        }`}
-                        style={colors.useCustom ? categoryTextStyle(c.color) : undefined}
-                      />
                       <span className="category-nav-label relative z-[1] font-sans">
                         {c.name}
                       </span>
