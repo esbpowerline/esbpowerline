@@ -56,8 +56,11 @@ function isAllowedMediaUrl(url: string): boolean {
  * rather than as a side effect of looking at a page.
  */
 /** How many media rows a library view loads at once. Each one becomes an image
- *  request from the browser, so this is an egress budget, not just a page size. */
-export const MEDIA_PAGE_SIZE = 60;
+ *  request from the browser, so this is an egress budget, not just a page size.
+ *  Not exported: this is a 'use server' file, and Turbopack refuses non-async
+ *  exports here — the stray `export` broke `next build` with 12 cascading
+ *  "module has no exports" errors (found 2026-09-01; nothing imported it). */
+const MEDIA_PAGE_SIZE = 60;
 
 async function backfillMissingMediaSizes(items: any[]) {
   for (const m of items) {
