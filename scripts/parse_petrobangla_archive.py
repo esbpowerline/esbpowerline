@@ -413,7 +413,15 @@ def main():
 
     ed = datetime.date.fromisoformat(energy_iso)
     end = ed + datetime.timedelta(days=1)
-    label = f"{ed.day:02d}-{end.day:02d} {ed.strftime('%b')}, {ed.year}"
+    # Within one month the month is written once ("30-31 Jul, 2026"); across a
+    # month boundary both are spelled out, matching ingest_bridge.window_label.
+    # The one-form version labelled the 31 Aug -> 01 Sep 2026 window
+    # "31-01 Aug, 2026", and that string reached the day file, the gas archive,
+    # the index and the live week before verify:source caught it.
+    if ed.month == end.month:
+        label = f"{ed.day:02d}-{end.day:02d} {ed.strftime('%b')}, {ed.year}"
+    else:
+        label = f"{ed.day:02d} {ed.strftime('%b')} - {end.day:02d} {end.strftime('%b')}, {end.year}"
     doc_json = {
         '$schema': 'petrobangla-daily/v1',
         'meta': dict(schema_version='1.0.0', parser_version='2.0.0-reconstructed',
