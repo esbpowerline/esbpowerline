@@ -9,6 +9,10 @@ import { isIsoDate } from '@/lib/data/feed-paths';
 import { runPythonJson } from '@/lib/data/ingest-runner.server';
 import { planLocalPublish, isReadable } from '@/lib/data/publish-local';
 import { writeRelease } from '@/lib/data/release-write';
+import {
+  verifyDayBeforePublish,
+  describeBlockingFindings,
+} from '@/lib/data/verify-gate.server';
 import { RELEASE_CACHE_TAG, feedCacheTag } from '@/lib/data/releases.server';
 import { revalidateDataRelease } from '@/lib/revalidate-tags';
 
@@ -189,7 +193,49 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 3 — publish every artefact the day has, not just the two that were parsed
+    // 3 — the review gate, enforced.
+    //
+    // `DataDraft.validation` is documented as the reconciliation output "the
+    // reviewer must see before approving", and this route read the permission
+    // and never read the validation — so no server-side condition existed under
+    // which a publish could be refused for failing its own checks. It runs now,
+    // against the files just written, and an ERROR stops the publish before a
+    // single release row is upserted.
+    //
+    // Only ERROR blocks. A WARN means the source disagrees with itself, which
+    // is a true fact about the document and must reach the site rather than be
+    // withheld; INFO is an ordinary incomplete day.
+    const verdict = await verifyDayBeforePublish(date);
+    if (!verdict.ok) {
+      if (!verdict.report) {
+        // The gate could not run. Fail closed: an unverifiable publish is the
+        // state this finding exists to prevent.
+        steps.push({ artifact: 'verify:data', key: date, status: 'failed', detail: verdict.error });
+        return NextResponse.json({ ok: false, error: verdict.error, steps }, { status: 500 });
+      }
+      const detail = describeBlockingFindings(verdict.blocking);
+      steps.push({ artifact: 'verify:data', key: date, status: 'failed', detail });
+      return NextResponse.json(
+        {
+          ok: false,
+          date,
+          error:
+            `Publish refused — ${verdict.blocking.length} ERROR finding(s) from verify:data. ` +
+            'An ERROR means the archive asserts something no source stated. Fix the day and re-publish.',
+          findings: verdict.blocking,
+          steps,
+        },
+        { status: 422 },
+      );
+    }
+    steps.push({
+      artifact: 'verify:data',
+      key: date,
+      status: 'published',
+      detail: `0 ERROR, ${verdict.report.counts.WARN} WARN, ${verdict.report.counts.INFO} INFO`,
+    });
+
+    // 4 — publish every artefact the day has, not just the two that were parsed
     // in the browser. Absent ones are reported, not failed: a day whose gas
     // window Petrobangla has not filed yet simply has no gas file.
     const artifacts = await planLocalPublish({ date, includeAggregates: hasGas });

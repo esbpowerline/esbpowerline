@@ -76,6 +76,44 @@ const SHOW = VERBOSE ? Infinity : 6;
 // float reassociation in the parser rather than a misread figure.
 const EPS_ABS = Number(arg('eps', 0.05));
 
+/**
+ * How far apart two figures may be before it means anything.
+ *
+ * A flat 0.05 is right for a figure read straight off the sheet. It is wrong
+ * for one we derive by summing several, and every gas indicator is derived.
+ *
+ * Petrobangla prints each company row to one decimal, so each carries up to
+ * 0.05 of rounding. Six rows compound to 0.3 before a parser has done anything
+ * wrong; `gasDomestic` subtracts the LNG row from that sum and so inherits
+ * seven roundings, 0.35. Against a flat 0.05, 2026-08-08 and 2026-08-09 were
+ * both graded INDICATOR — "a published figure disagrees with its source, fix
+ * now" — on deltas of exactly 0.1 against totals near 2,350. Those were the two
+ * most alarming verdicts in the ledger and both were arithmetic noise.
+ *
+ * The bound below is not a threshold chosen to quieten them. It is the
+ * arithmetic: how far two correct sums of the same rounded inputs can legally
+ * land apart. A misread digit moves a figure by at least 0.1 in the row and
+ * usually far more, which stays comfortably outside it — the assertion in
+ * `verify-source-tolerance.test.mjs` pins exactly that.
+ */
+const PRINTED_STEP_MMCFD = 0.1;
+const HALF_STEP = PRINTED_STEP_MMCFD / 2;
+
+/** Terms summed to derive each indicator, for the compounding bound. */
+const DERIVED_TERMS = {
+  gasTotalProduction: 6, // six company rows
+  gasDomestic: 7, // those six, less the LNG row
+  gasLng: 1, // a single row, but still a one-decimal print
+};
+
+const toleranceFor = (path) => {
+  const terms = DERIVED_TERMS[path];
+  return terms ? terms * HALF_STEP : EPS_ABS;
+};
+
+/** True when two numbers are the same figure once rounding is accounted for. */
+const agreesWithinRounding = (path, a, b) => Math.abs(a - b) <= toleranceFor(path);
+
 // ── what the diff deliberately ignores ────────────────────────────────────
 // Machine-specific or run-specific, and carrying no claim about the grid.
 // `parser_version` is excluded because a refetch always stamps the current
@@ -165,8 +203,9 @@ const diff = (a, b, base = '', out = []) => {
   }
 
   if (typeof a === 'number' && typeof b === 'number') {
-    const d = Math.abs(a - b);
-    if (d > EPS_ABS) out.push({ path: base, kind: 'value', published: a, source: b, delta: b - a });
+    if (!agreesWithinRounding(base, a, b)) {
+      out.push({ path: base, kind: 'value', published: a, source: b, delta: b - a });
+    }
     return out;
   }
 
@@ -333,15 +372,35 @@ for (let i = 0; i < days.length; i++) {
   const valueDiffs = bodyDiffs.filter((d) => d.kind === 'value');
   const shapeDiffs = bodyDiffs.filter((d) => d.kind === 'shape');
 
-  const verdict = indDiffs.length
+  /**
+   * An indicator the source states and the archive has not ingested.
+   *
+   * `INDICATOR` means "a figure we printed disagrees with its source — fix
+   * now", and it was being applied to days where nothing had been printed at
+   * all. 2026-08-30 is the ordinary case: Petrobangla files its 08:00-08:00
+   * window a day or two behind PGCB, so the newest day routinely has grid
+   * figures and no gas, and the homepage says exactly that — "Gas Supply —
+   * awaiting Petrobangla". Nothing is wrong on the site. Grading it as the
+   * ledger's most serious verdict buried the days that genuinely were.
+   *
+   * It is still worth reporting: the source now has the figure, so the day can
+   * be completed. That is a different job from correcting something false, and
+   * it gets its own verdict rather than borrowing one.
+   */
+  const unfiled = indDiffs.filter((d) => d.published === null && d.source !== null);
+  const realIndDiffs = indDiffs.filter((d) => !(d.published === null && d.source !== null));
+
+  const verdict = realIndDiffs.length
     ? 'INDICATOR'
     : hash && !hash.match
       ? 'HASH'
-      : valueDiffs.length
-        ? 'DRIFT'
-        : shapeDiffs.length
-          ? 'SHAPE'
-          : 'MATCH';
+      : unfiled.length
+        ? 'UNFILED'
+        : valueDiffs.length
+          ? 'DRIFT'
+          : shapeDiffs.length
+            ? 'SHAPE'
+            : 'MATCH';
 
   const r = {
     day,
@@ -352,8 +411,14 @@ for (let i = 0; i < days.length; i++) {
     // rather than the ledger implying the whole day was checked.
     gasVerified: gasFetchedOk,
     hash,
-    counts: { indicator: indDiffs.length, value: valueDiffs.length, shape: shapeDiffs.length },
-    indicatorDiffs: indDiffs,
+    counts: {
+      indicator: realIndDiffs.length,
+      unfiled: unfiled.length,
+      value: valueDiffs.length,
+      shape: shapeDiffs.length,
+    },
+    indicatorDiffs: realIndDiffs,
+    unfiledDiffs: unfiled,
     valueDiffs: valueDiffs.slice(0, 40),
     shapeDiffs: shapeDiffs.slice(0, 40),
   };
@@ -377,7 +442,7 @@ for (let i = 0; i < days.length; i++) {
 }
 
 // ── report ────────────────────────────────────────────────────────────────
-const order = { INDICATOR: 0, HASH: 1, DRIFT: 2, SHAPE: 3, MATCH: 4, UNFETCHED: 5 };
+const order = { INDICATOR: 0, HASH: 1, UNFILED: 2, DRIFT: 3, SHAPE: 4, MATCH: 5, UNFETCHED: 6 };
 const groups = new Map();
 for (const r of results) {
   if (!groups.has(r.verdict)) groups.set(r.verdict, []);

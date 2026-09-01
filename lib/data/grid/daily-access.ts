@@ -52,8 +52,15 @@ export function isSameOriginDailyAccess(
  *
  * This list lives here rather than inline in middleware.ts so the next split has
  * one obvious place to register itself and a test that fails if it doesn't.
+ *
+ * It did not, again: `forecast` was added as a fourth per-day directory and
+ * never registered, so the test that exists for exactly this had been failing.
+ * A forecast is derived from the same gated readings and the historical run of
+ * them is the backtest — the analytical use the tier is for. Forward-dated
+ * files are unaffected, because the gate is a window on the date in the
+ * filename, and a day that has not happened yet is never outside it.
  */
-export const TIER_GATED_DAILY_DIRS = ['daily', 'plants', 'curves'] as const;
+export const TIER_GATED_DAILY_DIRS = ['daily', 'plants', 'curves', 'forecast'] as const;
 
 const DAILY_JSON_RE = new RegExp(
   `^/data/(${TIER_GATED_DAILY_DIRS.join('|')})/\\d{4}-\\d{2}-\\d{2}\\.json$`,

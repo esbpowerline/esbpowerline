@@ -44,6 +44,9 @@ const TO = arg('to', '9999-99-99');
 const ONLY = arg('check');
 const VERBOSE = has('verbose');
 const ERRORS_ONLY = has('errors-only');
+// Machine-readable mode, for the publish gate. Prints one JSON object and
+// nothing else, so a caller does not have to parse the human report.
+const JSON_OUT = has('json');
 const SHOW = VERBOSE ? Infinity : 8;
 
 const findings = [];
@@ -387,6 +390,24 @@ if (runs('shed-coverage')) {
 }
 
 // ── report ────────────────────────────────────────────────────────────────
+if (JSON_OUT) {
+  const bySeverity = (sev) => findings.filter((f) => f.severity === sev);
+  process.stdout.write(
+    JSON.stringify({
+      days: days.length,
+      from: days[0] ?? null,
+      to: days[days.length - 1] ?? null,
+      counts: {
+        ERROR: bySeverity('ERROR').length,
+        WARN: bySeverity('WARN').length,
+        INFO: bySeverity('INFO').length,
+      },
+      findings,
+    }),
+  );
+  process.exit(bySeverity('ERROR').length ? 1 : 0);
+}
+
 const order = { ERROR: 0, WARN: 1, INFO: 2 };
 const shown = findings.filter((f) => !ERRORS_ONLY || f.severity === 'ERROR');
 const groups = new Map();

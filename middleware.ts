@@ -5,6 +5,7 @@ import {
   roleHomePath,
   resolveWorkspaceUrl,
   hostContextFromHeaders,
+  isStaffRole,
 } from '@/lib/auth-routing';
 import { isCronAuthorized } from '@/lib/api/cron-auth';
 import { isProxyProtectedApi } from '@/lib/api/protected-routes';
@@ -81,6 +82,20 @@ function apiRoleAllowed(pathname: string, role: Role): boolean {
   }
   if (pathname === '/api/upload' || pathname.startsWith('/api/upload/')) {
     return can(role, 'media.upload');
+  }
+  // Coarse outer gate for the staff API surface: an active staff session, and
+  // nothing finer. Each handler still enforces its own permission — the publish
+  // routes want `data.publish`, the CMS routes `article.create` — and that
+  // stays where it can see the request body. What this adds is a floor: an
+  // anonymous request, or a SUBSCRIBER, never reaches a handler at all, even
+  // one someone forgets to guard.
+  if (
+    pathname === '/api/admin' ||
+    pathname.startsWith('/api/admin/') ||
+    pathname === '/api/cms' ||
+    pathname.startsWith('/api/cms/')
+  ) {
+    return isStaffRole(role);
   }
   return false;
 }
