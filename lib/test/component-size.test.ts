@@ -29,10 +29,10 @@ import path from 'node:path';
  * what raising it here and never again is for.
  */
 const BUDGETS: Record<string, number> = {
-  'components/news/PowerGridExplorer.tsx': 3811,
-  'components/news/power-grid/MacroTrendsTab.tsx': 3096,
+  'components/news/PowerGridExplorer.tsx': 3487,
+  'components/news/power-grid/MacroTrendsTab.tsx': 3018,
   'components/news/power-grid/TechnicalInfoTab.tsx': 2335,
-  'components/news/power-grid/LongitudinalStudy.tsx': 479,
+  'components/news/power-grid/LongitudinalStudy.tsx': 252,
   'components/admin/SettingsForm.tsx': 863,
   'components/news/power-grid/GlobalVsDomesticCards.tsx': 432,
 };
