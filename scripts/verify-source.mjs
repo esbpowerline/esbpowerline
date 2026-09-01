@@ -172,6 +172,45 @@ const indicators = (payload) => {
 };
 
 // ── diff ──────────────────────────────────────────────────────────────────
+
+/** Properties that can identify a row across a re-parse, in preference order. */
+const IDENTITY_PROPS = ['zone', 'company', 'field', 'id', 'name'];
+
+/**
+ * Pair two arrays of objects by a shared unique key, or return null when no
+ * property qualifies. Qualifying is strict: the property must exist as a
+ * string/number on every element of BOTH arrays, be unique within each, and
+ * yield identical key sets — a row present on one side only means the arrays
+ * genuinely differ, and positional diffing reports that honestly.
+ */
+const alignByIdentity = (a, b) => {
+  if (!a.length || a.length !== b.length) return null;
+  if (!a.every((x) => x && typeof x === 'object' && !Array.isArray(x))) return null;
+  if (!b.every((x) => x && typeof x === 'object' && !Array.isArray(x))) return null;
+
+  for (const prop of IDENTITY_PROPS) {
+    const keyOf = (x) => x[prop];
+    const ok = (arr) =>
+      arr.every((x) => typeof keyOf(x) === 'string' || typeof keyOf(x) === 'number') &&
+      new Set(arr.map(keyOf)).size === arr.length;
+    if (!ok(a) || !ok(b)) continue;
+
+    const aKeys = a.map(keyOf);
+    const bKeys = b.map(keyOf);
+    if ([...aKeys].sort().join(' ') !== [...bKeys].sort().join(' ')) continue;
+
+    const bByKey = new Map(b.map((x) => [keyOf(x), x]));
+    return {
+      prop,
+      pairs: a.map((left) => ({ key: keyOf(left), left, right: bByKey.get(keyOf(left)) })),
+      reordered: aKeys.join(' ') !== bKeys.join(' '),
+      aOrder: aKeys,
+      bOrder: bKeys,
+    };
+  }
+  return null;
+};
+
 const diff = (a, b, base = '', out = []) => {
   if (ignored(base)) return out;
 
@@ -191,6 +230,28 @@ const diff = (a, b, base = '', out = []) => {
     if (a.length !== b.length) {
       out.push({ path: `${base}.length`, kind: 'shape', published: a.length, source: b.length });
     }
+
+    // Rows with an identity are compared by identity, not position. On
+    // 2026-04-28 the re-parse returned the nine zones in a different order than
+    // the committed day; index-wise diffing then reported 12 "value" diffs —
+    // Khulna 1459 vs Cumilla 859 and so on — on a day whose (zone, demand)
+    // pairs agreed exactly. Every such day landed in the ledger as DRIFT, which
+    // is the triage class, and a channel where a permutation reads the same as
+    // a wrong figure cannot carry signal. Order still gets recorded (kind
+    // 'order'), it just does not impersonate a changed value. Alignment only
+    // engages when every row on both sides carries the same unique key set —
+    // anything else falls back to positional diffing rather than guessing.
+    const keyed = alignByIdentity(a, b);
+    if (keyed) {
+      for (const { key, left, right } of keyed.pairs) {
+        diff(left, right, `${base}[${keyed.prop}=${key}]`, out);
+      }
+      if (keyed.reordered) {
+        out.push({ path: `${base}.order`, kind: 'order', published: keyed.aOrder, source: keyed.bOrder });
+      }
+      return out;
+    }
+
     for (let i = 0; i < Math.max(a.length, b.length); i++) diff(a[i], b[i], `${base}[${i}]`, out);
     return out;
   }
@@ -371,6 +432,9 @@ for (let i = 0; i < days.length; i++) {
 
   const valueDiffs = bodyDiffs.filter((d) => d.kind === 'value');
   const shapeDiffs = bodyDiffs.filter((d) => d.kind === 'shape');
+  // A permutation of identical rows asserts no different figure, so it gates no
+  // verdict — but it is still recorded, because hiding it would be its own lie.
+  const orderDiffs = bodyDiffs.filter((d) => d.kind === 'order');
 
   /**
    * An indicator the source states and the archive has not ingested.
@@ -416,11 +480,13 @@ for (let i = 0; i < days.length; i++) {
       unfiled: unfiled.length,
       value: valueDiffs.length,
       shape: shapeDiffs.length,
+      order: orderDiffs.length,
     },
     indicatorDiffs: realIndDiffs,
     unfiledDiffs: unfiled,
     valueDiffs: valueDiffs.slice(0, 40),
     shapeDiffs: shapeDiffs.slice(0, 40),
+    orderDiffs: orderDiffs.slice(0, 10),
   };
   results.push(r);
   ledger.days[day] = r;

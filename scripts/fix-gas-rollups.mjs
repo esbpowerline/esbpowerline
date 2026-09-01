@@ -25,6 +25,17 @@
  * and when the corrected total then equals the document's field sum. A day with
  * an unrecognised field name, or one where the arithmetic does not close, is
  * reported and left alone — a rollup that cannot be derived must not be guessed.
+ *
+ * The 12 standing refusals ("Sylhet Sylhet", "Meghna Meghna", "Rupganj * Bhola M")
+ * are characterised and PERMANENTLY unfixable from what is on disk. The
+ * 2.0.0-reconstructed parser merged a company-header row into a field row: on the
+ * eleven Sylhet days the row reads gas=2.0, wells=0, cap=0 while every clean
+ * neighbour shows Sylhet at 6.2-7.3 with wells=1, cap=6 — the 2.0 is the ordinal
+ * of "2. SGFL", not a measurement. The true reading exists only in the PDFs,
+ * which lived under C:\Users\user\Desktop (a profile that no longer exists), and
+ * Petrobangla's site does not serve 2020-2022 documents. Do not map the doubled
+ * names into FIELD_COMPANY to make the refusals go away: that would publish a
+ * column-shift artifact as a national figure.
  */
 import fs from 'node:fs';
 import path from 'node:path';
