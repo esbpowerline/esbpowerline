@@ -60,7 +60,7 @@ export async function upsertAuthUserWithClient(
     password: input.password,
     email_confirm: true,
     user_metadata: metadata,
-    app_metadata: { role: input.role },
+    app_metadata: { role: input.role, status: input.status ?? 'ACTIVE' },
   });
 
   if (!createError) {
@@ -78,11 +78,20 @@ export async function upsertAuthUserWithClient(
     throw new Error(`Supabase user exists but could not be found: ${input.email}`);
   }
 
+  const { data: current } = await admin.auth.admin.getUserById(userId);
+  const currentAppMeta = current.user?.app_metadata ?? {};
+
   const { error: updateError } = await admin.auth.admin.updateUserById(userId, {
     password: input.password,
     email_confirm: true,
     user_metadata: metadata,
-    app_metadata: { role: input.role },
+    // Spread the existing app_metadata so grid_plan (and any other service-role claim)
+    // survives — a bare { role } here would drop the tier the edge middleware gates on.
+    app_metadata: {
+      ...currentAppMeta,
+      role: input.role,
+      status: input.status ?? currentAppMeta.status ?? 'ACTIVE',
+    },
   });
   if (updateError) throw updateError;
 
@@ -100,10 +109,18 @@ export async function syncAuthUserMetadataWithClient(
     throw new Error(`Supabase user not found for metadata sync: ${input.email}`);
   }
 
+  const { data: current } = await admin.auth.admin.getUserById(userId);
+  const currentAppMeta = current.user?.app_metadata ?? {};
+
   const metadata = buildMetadata(input);
   const { error } = await admin.auth.admin.updateUserById(userId, {
     user_metadata: metadata,
-    app_metadata: { role: input.role },
+    // Spread — see upsertAuthUserWithClient. A bare { role } would wipe grid_plan/status.
+    app_metadata: {
+      ...currentAppMeta,
+      role: input.role,
+      status: input.status ?? currentAppMeta.status ?? 'ACTIVE',
+    },
   });
   if (error) throw error;
 
@@ -121,10 +138,21 @@ export async function syncAuthUserStatusWithClient(
 
   const { data: existing } = await admin.auth.admin.getUserById(userId);
   const meta = existing.user?.user_metadata ?? {};
+  const appMeta = existing.user?.app_metadata ?? {};
 
+  // Status must land in app_metadata, not only user_metadata: user_metadata is writable by
+  // the user themselves via supabase.auth.updateUser(), so a suspended user holding a
+  // still-valid token could clear their own suspension flag. app_metadata only accepts
+  // service-role writes. The live profiles table has no status column (the Prisma Profile
+  // model never had one), so before this mirror existed, user_metadata.status was the ONLY
+  // per-request suspension signal the edge gate could see.
   const { error } = await admin.auth.admin.updateUserById(userId, {
     user_metadata: {
       ...meta,
+      status,
+    },
+    app_metadata: {
+      ...appMeta,
       status,
     },
   });

@@ -11,6 +11,16 @@ function metadataStatus(user: User): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
+// The authoritative status signal. user_metadata is writable by the user themselves
+// (supabase.auth.updateUser), so on its own it let a suspended user with a still-valid
+// token clear their suspension at the edge; profiles has no status column to back it up.
+// app_metadata accepts service-role writes only — syncAuthUserStatusWithClient mirrors
+// suspension here. Both are still checked: either saying inactive means inactive.
+function appMetadataStatus(user: User): string | undefined {
+  const value = user.app_metadata?.status;
+  return typeof value === 'string' ? value : undefined;
+}
+
 type ProfileGateRow = { role: string | null; status?: string | null };
 
 async function loadProfileRow(
@@ -57,6 +67,11 @@ export async function resolveEdgeSession(
   supabase: SupabaseClient | null,
 ): Promise<EdgeSession> {
   if (!user || !supabase) return { active: false, role: null, gridPlan: 'none' };
+
+  const appStatus = appMetadataStatus(user);
+  if (appStatus && INACTIVE_STATUSES.has(appStatus)) {
+    return { active: false, role: null, gridPlan: 'none' };
+  }
 
   const metaStatus = metadataStatus(user);
   if (metaStatus && INACTIVE_STATUSES.has(metaStatus)) {

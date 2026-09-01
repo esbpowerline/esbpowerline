@@ -45,7 +45,19 @@ export async function syncSupabaseGridPlan(email: string, gridPlan: string): Pro
 /** Mirror account status to Supabase Auth + profiles (e.g. suspend). */
 export async function syncSupabaseAuthUserStatus(email: string, status: UserStatus): Promise<void> {
   const admin = createServiceRoleClient();
-  if (!admin) return;
+  if (!admin) {
+    // A suspension that cannot reach Supabase leaves the account fully privileged at the
+    // edge while the admin UI reports success. Fail loudly instead: updateUser() catches
+    // this, rolls the Prisma write back and surfaces the error, so the two stores never
+    // silently disagree about whether someone is suspended.
+    if (status === 'SUSPENDED') {
+      throw new Error(
+        'Supabase service role not configured — refusing to report a suspension that did not propagate',
+      );
+    }
+    console.warn('[syncSupabaseAuthUserStatus] Supabase service role not configured — skipping sync');
+    return;
+  }
   await syncAuthUserStatusWithClient(admin, email, status);
 }
 
