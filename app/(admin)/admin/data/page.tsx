@@ -5,14 +5,17 @@ import { getIngestStatus } from '@/lib/data/grid/ingest-status.server';
 import { getIngestCoverage } from '@/lib/data/grid/ingest-coverage.server';
 import { IngestCoverageCard } from '@/components/admin/IngestCoverageCard';
 import { getLatestSredaDaily } from '@/lib/data/sreda/daily-loader.server';
+import { getRecentReleaseRevisions } from '@/lib/data/release-history.server';
+import { ReleaseHistoryCard } from '@/components/admin/ReleaseHistoryCard';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminDataPage() {
-  const [status, sreda, coverage] = await Promise.all([
+  const [status, sreda, coverage, revisions] = await Promise.all([
     getIngestStatus(),
     getLatestSredaDaily(),
     getIngestCoverage(),
+    getRecentReleaseRevisions(),
   ]);
 
   return (
@@ -27,6 +30,7 @@ export default async function AdminDataPage() {
           know which day that should be. */}
       <IngestCoverageCard coverage={coverage} />
       <DataIngestPanel status={status} latestSredaDate={sreda?.date ?? null} />
+      <ReleaseHistoryCard revisions={revisions} />
     </AdminSectionStack>
   );
 }
