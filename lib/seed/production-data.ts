@@ -120,12 +120,8 @@ export function productionSiteSettings() {
   ] as const;
 }
 
-export function productionDashboardStats() {
-  return [
-    { statName: 'Total Installed Capacity', value: 28420, unit: 'MW', source: 'BPDB', lastVerified: '2026-06-13' },
-    { statName: 'Current Generation', value: 16030, unit: 'MW', source: 'NLDC', lastVerified: '2026-07-15' },
-    { statName: 'Renewable Share', value: 4.8, unit: '%', source: 'SREDA', lastVerified: '2026-06-10' },
-    { statName: 'System Loss', value: 7.6, unit: '%', source: 'BPDB', lastVerified: '2026-06-01' },
-    { statName: 'Peak Demand (Est.)', value: 16956, unit: 'MW', source: 'PGCB', lastVerified: '2026-07-15' },
-  ];
-}
+// productionDashboardStats() lived here until 2026-09-01: five hardcoded
+// national figures (28,420 MW installed capacity among them) seeded into
+// DashboardStat and rendered as a live "Sector Snapshot". The table and its
+// manual-override flag are retired; the card reads getLatestHomeSnapshot() —
+// the same loaders and absence semantics as the public homepage.

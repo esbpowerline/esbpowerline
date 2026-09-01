@@ -1,6 +1,6 @@
 import 'server-only';
 import { DataFeed as DataFeedEnum } from '@prisma/client';
-import type { DataFeed } from '@prisma/client';
+import type { DataFeed, RevisionKind } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { payloadChecksum } from '@/lib/data/release-checksum';
 import { validateDailyReport } from '@/lib/data/grid/validate-daily-report';
@@ -20,7 +20,16 @@ import { isValidFeedKey, dataPathFor, SINGLETON, type DataFeedName } from '@/lib
  */
 
 export type WriteResult =
-  | { ok: true; key: string; checksum: string; replaced: boolean; skipped?: 'unchanged' }
+  | {
+      ok: true;
+      key: string;
+      checksum: string;
+      replaced: boolean;
+      skipped?: 'unchanged';
+      /** False when the append-only history row could not be written (see
+       *  appendRevision) — the publish stands, but it is unaudited. */
+      revisionRecorded?: boolean;
+    }
   | { ok: false; error: string };
 
 /**
@@ -78,6 +87,91 @@ function staleClientError(feed: DataFeed): string | null {
   );
 }
 
+/**
+ * Append one row to the release's history, superseding the previous one.
+ *
+ * Fails SOFT, and loudly: the publish itself must not start failing on a
+ * machine where migration 0012 has not been applied yet, and the release
+ * layer's doctrine is fail-open (an Upstash outage once 500'd the whole site).
+ * But an unrecorded revision is not silent either — it is logged and surfaced
+ * as `revisionRecorded: false` so the operator sees an unaudited publish.
+ * Rows here are never updated after creation except `supersededAt`.
+ */
+async function appendRevision(input: {
+  releaseId: string;
+  payload: unknown;
+  checksum: string;
+  previousChecksum: string | null;
+  reason: string;
+  kind: RevisionKind;
+  publishedById?: string | null;
+}): Promise<boolean> {
+  try {
+    await prisma.$transaction(async (tx) => {
+      const last = await tx.dataReleaseRevision.findFirst({
+        where: { releaseId: input.releaseId },
+        orderBy: { revision: 'desc' },
+        select: { id: true, revision: true },
+      });
+      const now = new Date();
+      if (last) {
+        await tx.dataReleaseRevision.update({
+          where: { id: last.id },
+          data: { supersededAt: now },
+        });
+      }
+      await tx.dataReleaseRevision.create({
+        data: {
+          releaseId: input.releaseId,
+          revision: (last?.revision ?? 0) + 1,
+          payload: input.payload as object,
+          checksum: input.checksum,
+          previousChecksum: input.previousChecksum,
+          reason: input.reason,
+          kind: input.kind,
+          publishedById: input.publishedById ?? undefined,
+          publishedAt: now,
+        },
+      });
+    });
+    return true;
+  } catch (error) {
+    console.error(
+      '[appendRevision] revision NOT recorded — this publish is unaudited. ' +
+        'If migration 0012_data_release_revisions has not been applied, run npm run db:migrate. ',
+      error instanceof Error ? error.message : error,
+    );
+    return false;
+  }
+}
+
+/**
+ * Record a revocation in the history. Called by `revokeRelease` after it sets
+ * `revokedAt` — the payload is copied onto the revision so the history shows
+ * exactly what was withdrawn, not merely that something was.
+ */
+export async function recordRevocation(
+  feed: DataFeed,
+  key: string,
+  publishedById?: string | null,
+  reason?: string,
+): Promise<boolean> {
+  const row = await prisma.dataRelease.findUnique({
+    where: { feed_key: { feed, key } },
+    select: { id: true, payload: true, checksum: true },
+  });
+  if (!row) return false;
+  return appendRevision({
+    releaseId: row.id,
+    payload: row.payload,
+    checksum: row.checksum,
+    previousChecksum: row.checksum,
+    reason: reason?.trim() || 'revoked — loader falls back to the static archive',
+    kind: 'REVOKE',
+    publishedById,
+  });
+}
+
 export async function writeRelease(input: {
   feed: DataFeed;
   key: string;
@@ -86,6 +180,9 @@ export async function writeRelease(input: {
   sourceUrl?: string;
   parserVersion?: string;
   publishedById?: string | null;
+  /** Why this is being published — carried verbatim onto the revision row.
+   *  Defaults describe the mechanism; a human correction deserves a real one. */
+  reason?: string;
   /** Publish even when the stored checksum already matches. */
   force?: boolean;
 }): Promise<WriteResult> {
@@ -114,7 +211,7 @@ export async function writeRelease(input: {
       return { ok: true, key: input.key, checksum, replaced: true, skipped: 'unchanged' };
     }
 
-    await prisma.dataRelease.upsert({
+    const row = await prisma.dataRelease.upsert({
       where: { feed_key: { feed: input.feed, key: input.key } },
       create: {
         feed: input.feed,
@@ -137,9 +234,29 @@ export async function writeRelease(input: {
         revokedAt: null,
         publishedAt: new Date(),
       },
+      select: { id: true },
     });
 
-    return { ok: true, key: input.key, checksum, replaced: Boolean(existing) };
+    const kind: RevisionKind = !existing ? 'PUBLISH' : existing.revokedAt ? 'RESTORE' : 'CORRECT';
+    const reason =
+      input.reason?.trim() ||
+      (kind === 'PUBLISH'
+        ? `published${input.sourceName ? ` from ${input.sourceName}` : ''}`
+        : kind === 'RESTORE'
+          ? 're-published after revoke'
+          : `payload replaced${input.sourceName ? ` from ${input.sourceName}` : ''}`);
+
+    const revisionRecorded = await appendRevision({
+      releaseId: row.id,
+      payload: input.payload,
+      checksum,
+      previousChecksum: existing?.checksum ?? null,
+      reason,
+      kind,
+      publishedById: input.publishedById,
+    });
+
+    return { ok: true, key: input.key, checksum, replaced: Boolean(existing), revisionRecorded };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return { ok: false, error: `Publish failed: ${message}` };

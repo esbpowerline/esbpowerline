@@ -301,7 +301,13 @@ export async function runIngestionPipeline(): Promise<IngestPipelineResult> {
 
       if (powerGridData) {
         result.pgcb = true;
-        dbPayload.generation_capacity = '28420';
+        // generation_capacity is deliberately NOT written here. It used to be
+        // hardcoded as '28420' — a national installed-capacity figure no source
+        // in this pipeline ever produced, republished as fresh on every ingest
+        // run. The settings-form and ticker instances of the same constant were
+        // removed in the 2026-08 audit; this was the survivor (found 2026-09-01,
+        // master-prompt §3.5). Nothing reads the key. Capacity belongs to an
+        // entity observation with a source document, or it is absent.
         dbPayload.current_demand = String(
           Math.round(Number(powerGridData.eveningPeakDemand ?? powerGridData.eveningPeakGen)),
         );

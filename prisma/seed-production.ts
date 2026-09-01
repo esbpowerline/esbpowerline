@@ -8,7 +8,6 @@ import { createScriptPrismaClient } from './client';
 import { MASTER_ADMIN_EMAIL, MASTER_ADMIN_NAME } from '../lib/staff-accounts';
 import {
   productionCategoryRows,
-  productionDashboardStats,
   productionSiteSettings,
 } from '../lib/seed/production-data';
 import { upsertSupabaseAuthUser } from '../lib/supabase/sync-auth-user';
@@ -52,20 +51,6 @@ async function seedSiteSettings() {
   return upserted;
 }
 
-async function seedDashboardStats() {
-  let created = 0;
-  for (const stat of productionDashboardStats()) {
-    const existing = await prisma.dashboardStat.findUnique({
-      where: { statName: stat.statName },
-    });
-    if (existing) continue;
-    await prisma.dashboardStat.create({
-      data: { ...stat, isManualOverride: false },
-    });
-    created += 1;
-  }
-  return created;
-}
 
 async function seedMasterAdmin() {
   const password = process.env.MASTER_ADMIN_PASSWORD?.trim();
@@ -126,7 +111,6 @@ async function main() {
 
   const categoriesCreated = await seedCategories();
   const settingsUpserted = await seedSiteSettings();
-  const statsCreated = await seedDashboardStats();
   const adminCreated = await seedMasterAdmin();
 
   await prisma.auditLog.create({
@@ -139,7 +123,6 @@ async function main() {
 
   console.log(`✓ Categories: ${categoriesCreated} created, rest updated/skipped`);
   console.log(`✓ Site settings: ${settingsUpserted} upserted`);
-  console.log(`✓ Dashboard stats: ${statsCreated} created`);
   console.log(adminCreated ? '✓ Master admin bootstrapped' : '✓ Master admin unchanged');
 
   console.log('\n✅ Production bootstrap complete.');

@@ -6,6 +6,7 @@ import {
 } from '@/components/admin/AdminUI';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { getAdminOverview, getAuthorPublishingStats } from '@/lib/actions/analytics';
+import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { AuthorProductivityPanel } from '@/components/admin/AuthorProductivityPanel';
 import { formatNumber } from '@/lib/utils';
 import {
@@ -21,10 +22,11 @@ import { Suspense } from 'react';
 import { AdminLoading } from '@/components/admin/AdminUI';
 
 async function AdminDashboardData() {
-  const [stats, authorStats, session] = await Promise.all([
+  const [stats, authorStats, session, gridSnapshot] = await Promise.all([
     getAdminOverview(),
     getAuthorPublishingStats(),
     auth(),
+    getLatestHomeSnapshot(),
   ]);
   const role = session?.user?.role;
 
@@ -85,11 +87,19 @@ async function AdminDashboardData() {
         <div className="lg:col-span-1 space-y-6">
           <AdminCard title="Sector Snapshot" icon={Zap}>
             <AdminListStack>
-              {stats.dashboardStats.length > 0 ? stats.dashboardStats.map((s) => (
+              {/* The same figures the homepage serves, from the same loader —
+                  never a parallel store. DashboardStat used to sit here: a
+                  hand-maintained table with a manual-override flag, i.e. a
+                  documented path to publishing a number nothing produced. A
+                  null value renders as a dash naming who owes it, exactly as
+                  the public tile does. */}
+              {gridSnapshot ? gridSnapshot.stats.slice(0, 4).map((s) => (
                 <AdminMetricRow
-                  key={s.id}
-                  label={s.statName}
-                  value={`${s.value}${s.unit ? ` ${s.unit}` : ''}`}
+                  key={s.label}
+                  label={`${s.label} (${gridSnapshot.date})`}
+                  value={s.value !== null
+                    ? `${s.isDecimal ? s.value.toFixed(2) : formatNumber(s.value)} ${s.unit}`
+                    : `— awaiting ${s.awaiting ?? 'source'}`}
                 />
               )) : (
                 <>

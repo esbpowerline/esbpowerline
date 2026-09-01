@@ -150,7 +150,6 @@ const getCachedAdminOverview = unstable_cache(async () => {
     publishedCount,
     topArticles,
     recentLogs,
-    dashboardStats,
     publishedThisMonth,
     addedThisMonth,
     pendingComments,
@@ -171,7 +170,10 @@ const getCachedAdminOverview = unstable_cache(async () => {
       orderBy: { timestamp: 'desc' },
       take: 8,
     }),
-    prisma.dashboardStat.findMany({ orderBy: { lastVerified: 'desc' }, take: 4 }),
+    // dashboardStat was read here for the Sector Snapshot card. Retired: the
+    // card now renders getLatestHomeSnapshot() — the same figures, loaders and
+    // absence semantics as the public homepage, instead of a hand-maintained
+    // parallel table with a manual-override flag.
     prisma.article.count({ where: { status: 'PUBLISHED', publishedAt: { gte: monthStart } } }),
     prisma.article.count({
       where: { status: { not: 'TRASH' }, editorTrash: false, createdAt: { gte: monthStart } },
@@ -187,7 +189,6 @@ const getCachedAdminOverview = unstable_cache(async () => {
     publishedCount,
     topArticles,
     recentLogs,
-    dashboardStats,
     publishedThisMonth,
     addedThisMonth,
     pendingComments,

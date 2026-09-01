@@ -361,21 +361,11 @@ model Edge {
   target Node @relation("EdgeTarget", fields: [targetId], references: [id], onDelete: Cascade)
 }
 
-model DashboardStat {
-  id                String    @id @default(cuid())
-  statName          String    @unique
-  value             Float     @default(0)
-  calculatedValue   Float?
-  isManualOverride  Boolean   @default(false)
-  unit              String?
-  formula           String?
-  lastCalculated    DateTime?
-  source            String?
-  sourceUrl         String?
-  lastVerified      String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-}
+// DashboardStat was retired 2026-09-01 (migration 0013). It was a parallel
+// database of national figures — value @default(0), a manual-override flag,
+// verification recorded as a free string — feeding the admin Sector Snapshot.
+// A dashboard consumes authoritative data; that card now renders
+// getLatestHomeSnapshot(), the same loaders the public homepage uses.
 
 // ============================================
 // SUPPORTING (Logs, Newsletter, Ads, Settings, Pages)
@@ -577,6 +567,45 @@ model DataRelease {
   publishedById String?
   updatedAt     DateTime @updatedAt
 
+  revisions DataReleaseRevision[]
+
   @@unique([feed, key])
   @@index([feed, revokedAt])
+}
+
+enum RevisionKind {
+  PUBLISH  // first publish of this feed+key
+  CORRECT  // payload replaced with different bytes
+  REVOKE   // withdrawn; loader falls back to the static archive
+  RESTORE  // re-published after a revoke
+}
+
+/// Append-only history of every DataRelease. The current row above answers
+/// "what does the site serve"; this table answers "what did we publish last
+/// Tuesday, and why did it change" — which @@unique([feed, key]) alone cannot:
+/// a correction used to overwrite the previous truth in place, and 2,262 days
+/// were corrected in the last week of August 2026 alone. Rows here are never
+/// updated or deleted except supersededAt, which is set exactly once.
+model DataReleaseRevision {
+  id               String       @id @default(cuid())
+  releaseId        String
+  release          DataRelease  @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  /// 1, 2, 3 … per release. Assigned in the publish transaction, never reused.
+  revision         Int
+  /// The full payload as it stood at this revision — not a diff, so a revision
+  /// can be served or compared without replaying history.
+  payload          Json
+  checksum         String
+  /// Checksum this revision replaced; null on revision 1.
+  previousChecksum String?
+  /// Why this changed, human-written. Backfilled rows say so explicitly.
+  reason           String
+  kind             RevisionKind
+  publishedById    String?
+  publishedAt      DateTime     @default(now())
+  /// Set when the next revision lands; null marks the current revision.
+  supersededAt     DateTime?
+
+  @@unique([releaseId, revision])
+  @@index([releaseId, publishedAt])
 }

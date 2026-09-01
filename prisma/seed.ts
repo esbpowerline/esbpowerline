@@ -35,7 +35,6 @@ async function main() {
   await prisma.media.deleteMany();
   await prisma.edge.deleteMany();
   await prisma.node.deleteMany();
-  await prisma.dashboardStat.deleteMany();
   await prisma.memberDownload.deleteMany();
   await prisma.savedItem.deleteMany();
   await prisma.comment.deleteMany();
@@ -417,18 +416,8 @@ async function main() {
     console.log('✓ Demo member library seeded');
   }
 
-  // === DASHBOARD STATS (energy numbers) ===
-  const stats = [
-    { statName: 'Total Installed Capacity', value: 28420, unit: 'MW', source: 'BPDB', lastVerified: '2026-06-13' },
-    { statName: 'Current Generation', value: 15230, unit: 'MW', source: 'NLDC', lastVerified: '2026-06-14' },
-    { statName: 'Renewable Share', value: 4.8, unit: '%', source: 'SREDA', lastVerified: '2026-06-10' },
-    { statName: 'System Loss', value: 7.6, unit: '%', source: 'BPDB', lastVerified: '2026-06-01' },
-    { statName: 'Peak Demand (Est.)', value: 15680, unit: 'MW', source: 'PGCB', lastVerified: '2026-06-13' },
-  ];
-  for (const s of stats) {
-    await prisma.dashboardStat.create({ data: { ...s, isManualOverride: false } });
-  }
-  console.log('✓ Dashboard stats seeded');
+  // Dashboard stats are no longer seeded: DashboardStat was retired 2026-09-01
+  // (migration 0013). The Sector Snapshot reads the grid archive instead.
 
   // === NODES + EDGES (subset from BD_PWR_TREE for the explorer) ===
   const nodes = [

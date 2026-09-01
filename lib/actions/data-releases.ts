@@ -6,7 +6,7 @@ import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { RELEASE_CACHE_TAG, feedCacheTag } from '@/lib/data/releases.server';
 import { revalidateDataRelease } from '@/lib/revalidate-tags';
-import { writeRelease } from '@/lib/data/release-write';
+import { recordRevocation, writeRelease } from '@/lib/data/release-write';
 
 /**
  * Publishing a day to the live site without a deployment.
@@ -58,6 +58,8 @@ export async function revokeRelease(feed: DataFeed, key: string): Promise<Publis
       data: { revokedAt: new Date() },
       select: { checksum: true },
     });
+
+    await recordRevocation(feed, key, session.user.id);
 
     revalidateDataRelease(feedCacheTag(feed), RELEASE_CACHE_TAG);
 
