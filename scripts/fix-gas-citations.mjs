@@ -1,173 +1,143 @@
 /**
- * Repair the Petrobangla citation on the daily archive.
+ * Repoint each grid day's Petrobangla citation at the document it was actually
+ * parsed from.
  *
- * `verify:data` reports two defects in `sourceFiles.petrobangla`. Both are about
- * which document a day names, and neither changes a published figure:
+ * `verify:data` reports 45 ERRORs of two shapes, and both are citation faults,
+ * not figure faults:
  *
- *   backfill — 41 days carry real gas and name no Petrobangla report at all.
- *   offset   — ~1,380 days name the report for the day BEFORE their figures.
+ *   citation-offset (42)       the day cites `petrobangla_<D>.pdf`, a synthetic
+ *                              start-keyed name, while its figures came from
+ *                              `Daily-Gas-Intake-Offtake-Report (<D+1>.pdf)`.
+ *                              Petrobangla names a report for the morning the
+ *                              gas day CLOSES, so the D-named file is a real,
+ *                              different document — the day before's.
  *
- * The offset comes from the report's own date convention. Petrobangla publishes
- * a file "(D+1).pdf" that prints the window "D to D+1", so that file is gas day
- * D's document. The archive stores it under D+1, and the daily builder took the
- * filename's date to be the gas day — which lands one day early, on a report
- * that exists and holds different figures. The PGCB citation on the same line
- * is unaffected: it already names its workbook correctly.
+ *   provenance-agreement (3)   the day names an opaque filename (a UUID, or a
+ *                              bare `11-08-26.pdf`) that carries no date to
+ *                              reconcile and is not the report for the window.
  *
- * A citation is only ever rewritten to a document that supports the numbers the
- * day already publishes. The guard is the archive window's own field rows: if
- * they do not sum to the day's gas total within GAS_TOLERANCE, the day is left
- * exactly as it is and reported as unresolved. Nothing here edits a figure.
+ * The archive under `public/data/petrobangla/daily/` records, per gas day,
+ * the `meta.source_filename` the parser actually read. That is the provenance
+ * of record; the grid day's `sourceFiles.petrobangla` is a citation that
+ * drifted from it.
  *
- * Files are patched as text rather than re-serialised: they are CRLF with no
- * trailing newline, and `core.autocrlf` is on, so a JSON round-trip would
- * rewrite all 4,529 of them instead of the ones that changed.
+ * SAFETY: a citation is only rewritten when the grid day's own gas rows sum to
+ * the archive entry's printed grand total. If they disagree, the day has a
+ * figure problem rather than a naming one, and it is reported and left alone —
+ * repointing the citation there would paper over the real fault.
  *
- * Usage:
- *   node scripts/fix-gas-citations.mjs                  # dry run, both classes
- *   node scripts/fix-gas-citations.mjs --only backfill  # just the 41
- *   node scripts/fix-gas-citations.mjs --only offset    # just the ~1,380
- *   node scripts/fix-gas-citations.mjs --apply
+ *   node scripts/fix-gas-citations.mjs           # report
+ *   node scripts/fix-gas-citations.mjs --write   # apply
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
 const DAILY = 'public/data/daily';
 const GAS = 'public/data/petrobangla/daily';
+const WRITE = process.argv.includes('--write');
+/** Rows and printed total are both rounded in the source; allow the rounding. */
+const TOLERANCE_MMCFD = 1.0;
 
-// Our six company rows are a rollup of the document's 23 field rows, so they
-// agree to rounding. 1.0 MMCFD is ~0.04% of a typical day and comfortably above
-// the observed spread; days that miss it are reported, never rewritten.
-const GAS_TOLERANCE = 1.0;
-
-const argv = process.argv.slice(2);
-const has = (n) => argv.includes(`--${n}`);
-const arg = (n, f = null) => {
-  const i = argv.indexOf(`--${n}`);
-  return i >= 0 && argv[i + 1] && !argv[i + 1].startsWith('--') ? argv[i + 1] : f;
-};
-const APPLY = has('apply');
-const ONLY = arg('only');
-const runs = (n) => !ONLY || ONLY === n;
-
-const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
-
-// Index the archive on the window start each report states. The filename is not
-// a usable key: through 2026-06 a report is stored under the day its window
-// ends, and only the reconstructed 2026-08 files under the day it starts.
-const byGasDay = new Map();
-for (const f of fs.readdirSync(GAS)) {
-  if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(f)) continue;
+const archive = new Map();
+for (const file of fs.readdirSync(GAS)) {
+  if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(file)) continue;
   let a;
   try {
-    a = JSON.parse(fs.readFileSync(path.join(GAS, f), 'utf8'));
+    a = JSON.parse(fs.readFileSync(path.join(GAS, file), 'utf8'));
   } catch {
     continue;
   }
   const start = a?.report?.gas_day_start;
-  if (!start || byGasDay.has(start)) continue;
-  const fields = a.production?.fields;
-  byGasDay.set(start, {
+  if (!start || archive.has(start)) continue;
+  archive.set(start, {
     source: a.meta?.source_filename ?? null,
-    label: a.report?.report_date_label ?? null,
-    fieldSum: fields?.length ? fields.reduce((x, r) => x + (num(r.gas_mmcfd) ?? 0), 0) : null,
+    printed: typeof a.production?.grand_total?.gas_mmcfd === 'number'
+      ? a.production.grand_total.gas_mmcfd
+      : null,
   });
 }
 
-const jsonString = (s) => JSON.stringify(s);
-
-/** Insert or replace `"petrobangla": "<file>"` inside the sourceFiles object. */
-const patch = (raw, source) => {
-  const m = raw.match(/"sourceFiles"\s*:\s*\{([^}]*)\}/);
-  if (!m) return null;
-  const body = m[1];
-  const eol = body.includes('\r\n') ? '\r\n' : '\n';
-  let next;
-  if (/"petrobangla"\s*:/.test(body)) {
-    next = body.replace(/("petrobangla"\s*:\s*)"(?:[^"\\]|\\.)*"/, `$1${jsonString(source)}`);
-  } else {
-    // Match the indentation of the key already present, and follow the file's
-    // own ordering, which puts pgcb first.
-    const indent = body.match(/(?:\r?\n)([ \t]+)"/)?.[1] ?? '    ';
-    const trimmedEnd = body.replace(/\s*$/, '');
-    const closingIndent = body.match(/(?:\r?\n)([ \t]*)$/)?.[1] ?? '  ';
-    next = `${trimmedEnd},${eol}${indent}"petrobangla": ${jsonString(source)}${eol}${closingIndent}`;
-  }
-  if (next === body) return null;
-  return raw.slice(0, m.index) + `"sourceFiles": {${next}}` + raw.slice(m.index + m[0].length);
+const dateInName = (name) => {
+  const m = /\((\d{2})\.(\d{2})\.(\d{2})\)/.exec(name ?? '');
+  return m ? `20${m[3]}-${m[2]}-${m[1]}` : null;
 };
 
-const days = fs
-  .readdirSync(DAILY)
-  .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
-  .map((f) => f.slice(0, -5))
-  .sort();
-
-const changed = { backfill: [], offset: [] };
+const fixed = [];
 const skipped = [];
+const mismatched = [];
 
-for (const day of days) {
-  const file = path.join(DAILY, `${day}.json`);
-  const raw = fs.readFileSync(file, 'utf8');
+for (const file of fs.readdirSync(DAILY).sort()) {
+  if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(file)) continue;
+  const day = file.slice(0, -5);
+
   let d;
   try {
-    d = JSON.parse(raw);
+    d = JSON.parse(fs.readFileSync(path.join(DAILY, file), 'utf8'));
   } catch {
     continue;
   }
 
-  const gas = d.gasProductionData?.length
-    ? d.gasProductionData.reduce((x, r) => x + (num(r.gas) ?? 0), 0)
-    : 0;
-  if (!gas) continue;
+  const cited = d.sourceFiles?.petrobangla;
+  if (!cited) continue;
 
-  const cited = d.sourceFiles?.petrobangla ?? null;
-  const arc = byGasDay.get(day);
-  if (!arc?.source) {
-    if (!cited) skipped.push([day, 'no archive window starts on this day']);
+  const entry = archive.get(day);
+  if (!entry?.source) {
+    skipped.push(`${day}  no archive window opens on this day`);
     continue;
   }
-  if (cited === arc.source) continue;
+  if (cited === entry.source) continue;
 
-  const kind = cited ? 'offset' : 'backfill';
-  if (!runs(kind)) continue;
+  // Already the real report, named by its window-end? Then it is correct.
+  const citedDate = dateInName(cited);
+  const nextDay = new Date(Date.UTC(+day.slice(0, 4), +day.slice(5, 7) - 1, +day.slice(8) + 1))
+    .toISOString()
+    .slice(0, 10);
+  if (citedDate === nextDay) continue;
 
-  // The guard: only cite a document whose own rows carry this day's figures.
-  if (arc.fieldSum == null || Math.abs(gas - arc.fieldSum) > GAS_TOLERANCE) {
-    skipped.push([
-      day,
-      `${arc.source} field rows ${arc.fieldSum?.toFixed(1) ?? 'n/a'} do not match published gas ${gas.toFixed(1)}`,
-    ]);
+  const rows = d.gasProductionData ?? [];
+  const sum = rows.reduce((a, r) => a + (r.gas ?? 0), 0);
+
+  if (entry.printed == null || Math.abs(sum - entry.printed) > TOLERANCE_MMCFD) {
+    mismatched.push(
+      `${day}  rows sum ${sum.toFixed(1)} but ${entry.source} prints ${entry.printed ?? 'nothing'} — figures disagree, left alone`,
+    );
     continue;
   }
 
-  const next = patch(raw, arc.source);
-  if (!next) {
-    skipped.push([day, 'could not locate sourceFiles to patch']);
-    continue;
+  fixed.push(`${day}  ${cited}  ->  ${entry.source}   (${sum.toFixed(1)} MMcfd confirmed)`);
+
+  if (WRITE) {
+    // Surgical: replace the one string and leave every other byte alone.
+    // Re-serialising the object reformats nested arrays, which would turn a
+    // one-field correction into a 2 KB diff on each of 44 files and bury the
+    // change nobody could then review.
+    const full = path.join(DAILY, file);
+    const raw = fs.readFileSync(full, 'utf8');
+    const needle = JSON.stringify(cited);
+    const at = raw.indexOf('"petrobangla"');
+    const idx = at >= 0 ? raw.indexOf(needle, at) : -1;
+    if (idx < 0) {
+      console.error(`  ! ${day}: could not locate the citation string to replace`);
+    } else {
+      fs.writeFileSync(
+        full,
+        raw.slice(0, idx) + JSON.stringify(entry.source) + raw.slice(idx + needle.length),
+      );
+    }
   }
-  if (APPLY) fs.writeFileSync(file, next);
-  changed[kind].push([day, cited, arc.source]);
 }
 
-const show = (label, rows) => {
-  if (!runs(label)) return;
-  console.log(`\n${label}: ${rows.length} day(s)`);
-  for (const [day, from, to] of rows.slice(0, 8)) {
-    console.log(`  ${day}  ${from ? `${from}  ->  ` : '(none)  ->  '}${to}`);
-  }
-  if (rows.length > 8) console.log(`  … ${rows.length - 8} more`);
-};
+console.log(`\n${fixed.length} citations repointed at the document their figures came from:`);
+for (const line of fixed) console.log('  ' + line);
 
-console.log(APPLY ? 'fix-gas-citations — APPLYING' : 'fix-gas-citations — dry run (pass --apply to write)');
-show('backfill', changed.backfill);
-show('offset', changed.offset);
-
+if (mismatched.length) {
+  console.log(`\n${mismatched.length} left alone — the figures, not the name, are the problem:`);
+  for (const line of mismatched) console.log('  ' + line);
+}
 if (skipped.length) {
-  console.log(`\nleft unchanged: ${skipped.length} day(s)`);
-  for (const [day, why] of skipped.slice(0, 12)) console.log(`  ${day}  ${why}`);
-  if (skipped.length > 12) console.log(`  … ${skipped.length - 12} more`);
+  console.log(`\n${skipped.length} skipped (no archive window):`);
+  for (const line of skipped.slice(0, 10)) console.log('  ' + line);
+  if (skipped.length > 10) console.log(`  … ${skipped.length - 10} more`);
 }
 
-const total = changed.backfill.length + changed.offset.length;
-console.log(`\n${APPLY ? 'rewrote' : 'would rewrite'} ${total} citation(s); no published figure is touched.`);
+console.log(WRITE ? '\nWritten.' : '\nDry run — pass --write to apply.');

@@ -1,443 +1,655 @@
 {
   "systemStats": {
     "date": "28 Jun 2026",
-    "dayPeakGen": 14669.72,
-    "eveningPeakGen": 16082.14,
-    "dayPeakDemand": null,
-    "eveningPeakDemand": 16487.88,
-    "minGen": null,
-    "maxGen": null,
-    "totalEnergyGen": 352.9664129,
-    "totalEnergyUnserved": null,
-    "totalEnergyDemand": null,
-    "maxTemp": null,
-    "totalGasSuppliedPower": 921.67,
-    "avgProductionCost": 6.452,
-    "totalDailyCost": 2277177949
+    "dayPeakGen": 14398.75,
+    "eveningPeakGen": 16038.59,
+    "dayPeakDemand": 17136.65,
+    "eveningPeakDemand": 18354.59,
+    "minGen": 13712.44,
+    "maxGen": 16038.59,
+    "totalEnergyGen": 350.52263338,
+    "totalEnergyUnserved": 62.264,
+    "totalEnergyDemand": 412.787,
+    "maxTemp": 36,
+    "totalGasSuppliedPower": 891.07,
+    "avgProductionCost": 6.44,
+    "totalDailyCost": 2257271078,
+    "peakTimes": {
+      "dayPeakGen": "12:00",
+      "dayPeakDemand": "12:00",
+      "eveningPeakGen": "21:00",
+      "eveningPeakDemand": "21:00",
+      "minGen": "03:00",
+      "maxGen": "21:00"
+    }
   },
   "generationData": [
     {
       "name": "Gas",
-      "gen": 128.74,
-      "cost": null,
-      "unitCost": null,
+      "gen": 126.64,
+      "cost": 417708532,
+      "unitCost": 3.2985,
       "color": "#0ea5e9"
     },
     {
       "name": "Coal",
-      "gen": 126.57,
-      "cost": null,
-      "unitCost": null,
+      "gen": 123.87,
+      "cost": 817832436,
+      "unitCost": 6.6021,
       "color": "#64748b"
     },
     {
       "name": "HFO",
-      "gen": 35.26,
-      "cost": null,
-      "unitCost": null,
+      "gen": 32.48,
+      "cost": 570815654,
+      "unitCost": 17.5768,
       "color": "#f97316"
     },
     {
       "name": "Hydro",
       "gen": 2.1,
-      "cost": null,
-      "unitCost": null,
+      "cost": 7993684,
+      "unitCost": 3.81,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 1.79,
-      "cost": null,
-      "unitCost": null,
+      "gen": 3.68,
+      "cost": 57991606,
+      "unitCost": 15.7545,
       "color": "#eab308"
     },
     {
       "name": "Imports",
-      "gen": 58.16,
-      "cost": null,
-      "unitCost": null,
+      "gen": 61.02,
+      "cost": 371348759,
+      "unitCost": 6.0857,
       "color": "#a855f7"
     },
     {
-      "name": "HSD (Diesel)",
-      "gen": 0.0,
-      "cost": null,
-      "unitCost": null,
+      "name": "HSD",
+      "gen": 0.5,
+      "cost": 10141795,
+      "unitCost": 20.2,
       "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.23,
+      "cost": 3438609,
+      "unitCost": 14.71,
+      "color": "#22c55e"
+    }
+  ],
+  "zoneGenerationData": [
+    {
+      "zone": "Dhaka",
+      "fuels": {
+        "Gas": 41.446941,
+        "Coal": 0,
+        "HFO": 12.627438,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 0.169306,
+        "Imports": 0,
+        "Wind": 0
+      },
+      "total": 54.243685
+    },
+    {
+      "zone": "Chattogram",
+      "fuels": {
+        "Gas": 5.175745,
+        "Coal": 47.41818,
+        "HFO": 6.411575,
+        "HSD": 0,
+        "Hydro": 2.09808,
+        "Solar": 0.083063,
+        "Imports": 0,
+        "Wind": 0.23376
+      },
+      "total": 61.420402
+    },
+    {
+      "zone": "Cumilla",
+      "fuels": {
+        "Gas": 28.166469,
+        "Coal": 0,
+        "HFO": 3.089445,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 0.329945,
+        "Imports": 3.83712,
+        "Wind": 0
+      },
+      "total": 35.422979
+    },
+    {
+      "zone": "Mymensingh",
+      "fuels": {
+        "Gas": 0,
+        "Coal": 0,
+        "HFO": 3.00456,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 0.355252,
+        "Imports": 0,
+        "Wind": 0
+      },
+      "total": 3.359812
+    },
+    {
+      "zone": "Sylhet",
+      "fuels": {
+        "Gas": 26.997812,
+        "Coal": 0,
+        "HFO": 0,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 0.051991,
+        "Imports": 0,
+        "Wind": 0
+      },
+      "total": 27.049803
+    },
+    {
+      "zone": "Khulna",
+      "fuels": {
+        "Gas": 0,
+        "Coal": 11.040005,
+        "HFO": 0.60376,
+        "HSD": 0.502069,
+        "Hydro": 0,
+        "Solar": 0.5904,
+        "Imports": 21.695273,
+        "Wind": 0
+      },
+      "total": 34.431507
+    },
+    {
+      "zone": "Barishal",
+      "fuels": {
+        "Gas": 6.85324,
+        "Coal": 59.869364,
+        "HFO": 1.403136,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 0.003261,
+        "Imports": 0,
+        "Wind": 0
+      },
+      "total": 68.129001
+    },
+    {
+      "zone": "Rajshahi",
+      "fuels": {
+        "Gas": 17.997172,
+        "Coal": 0,
+        "HFO": 2.727909,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 1.277254,
+        "Imports": 35.487772,
+        "Wind": 0
+      },
+      "total": 57.490107
+    },
+    {
+      "zone": "Rangpur",
+      "fuels": {
+        "Gas": 0,
+        "Coal": 5.5472,
+        "HFO": 2.607665,
+        "HSD": 0,
+        "Hydro": 0,
+        "Solar": 0.820472,
+        "Imports": 0,
+        "Wind": 0
+      },
+      "total": 8.975337
     }
   ],
   "borderImportsData": [
     {
       "source": "HVDC Bheramara (India)",
-      "energy": 19.36,
-      "peakFlow": 892.0,
+      "energy": 20.78,
+      "peakFlow": 798,
       "type": "C/B Interconnector (West)"
     },
     {
       "source": "Adani Godda (India)",
-      "energy": 34.26,
-      "peakFlow": 1427.64,
+      "energy": 35.49,
+      "peakFlow": 1474.73,
       "type": "C/B Interconnector (North)"
     },
     {
       "source": "Tripura Cumilla (India)",
-      "energy": 3.62,
-      "peakFlow": 156.0,
+      "energy": 3.84,
+      "peakFlow": 172,
       "type": "C/B Interconnector (East)"
     }
   ],
   "regionalDemandData": [
     {
       "zone": "Dhaka",
-      "loadShed": 30.0,
-      "demand": 5991.27,
-      "pct": 0.5
+      "loadShed": 385,
+      "demand": 6205,
+      "pct": 6.2
     },
     {
       "zone": "Chattogram",
-      "loadShed": 0.0,
-      "demand": 1537.2,
-      "pct": 0.0
+      "loadShed": 122,
+      "demand": 1562,
+      "pct": 7.8
     },
     {
       "zone": "Cumilla",
-      "loadShed": 48.0,
-      "demand": 1541.0,
-      "pct": 3.1
+      "loadShed": 257,
+      "demand": 1748,
+      "pct": 14.7
     },
     {
       "zone": "Mymensingh",
-      "loadShed": 93.0,
-      "demand": 1217.0,
-      "pct": 7.6
+      "loadShed": 420,
+      "demand": 1513,
+      "pct": 27.8
     },
     {
       "zone": "Sylhet",
-      "loadShed": 96.0,
-      "demand": 672.0,
-      "pct": 14.3
+      "loadShed": 211,
+      "demand": 827,
+      "pct": 25.5
     },
     {
       "zone": "Khulna",
-      "loadShed": 0.0,
-      "demand": 1856.4,
-      "pct": 0.0
+      "loadShed": 298,
+      "demand": 2105,
+      "pct": 14.2
     },
     {
       "zone": "Barishal",
-      "loadShed": 0.0,
-      "demand": 491.0,
-      "pct": 0.0
+      "loadShed": 133,
+      "demand": 593,
+      "pct": 22.4
     },
     {
       "zone": "Rajshahi",
-      "loadShed": 0.0,
-      "demand": 1513.6,
-      "pct": 0.0
+      "loadShed": 288,
+      "demand": 1925,
+      "pct": 15
     },
     {
       "zone": "Rangpur",
-      "loadShed": 0.0,
-      "demand": 975.0,
-      "pct": 0.0
+      "loadShed": 102,
+      "demand": 1108,
+      "pct": 9.2
     }
   ],
+  "regionalDemandSource": "p1-published",
   "dailyOutages": [
     {
-      "time": "10:31 - Panchagarh 132/33kV S/S T-2(417T) HT Scheduled S/D Due to Red Hot Maintenance work on",
-      "plant": "",
+      "time": "08:31",
+      "plant": "Shyampur 230/132kV S/S 230 kV APR (D04)",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Shyampur 230/132kV S/S 230 kV APR (D04) is restored.",
+      "full_desc": "Shyampur 230/132kV S/S 230 kV APR (D04) is restored."
     },
     {
-      "time": "10:31 - Panchagarh 132/33kV S/S T-2(417T) LT Scheduled S/D Due to Red Hot Maintenance work on",
-      "plant": "",
+      "time": "08:47",
+      "plant": "Kaliakoir 400/230/132kV S/S 400kV Bus 1 Project Work S/D",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Due to Project work",
+      "full_desc": "Kaliakoir 400/230/132kV S/S 400kV Bus 1 Project Work S/D Due to Project work"
     },
     {
-      "time": "12:56 - Bhulta-Haripur 132 kV Ckt-1 Tripped from Bhulta 132/33kV end showing Impedance Relay",
-      "plant": "",
+      "time": "08:52",
+      "plant": "Barishal 132/33kV S/S Bus B",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Barishal 132/33kV S/S Bus B is restored.",
+      "full_desc": "Barishal 132/33kV S/S Bus B is restored."
     },
     {
-      "time": "17:40 - Lalmonirhat 132/33kV S/S T-2 (415T) LT Forced S/D Due to T-2 33 kV riser DS (R phase)",
-      "plant": "",
+      "time": "09:33 - 17:58",
+      "plant": "Chowmuhani-Feni 132 kV Ckt-2 Project Work",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Due to Project work at feni 230kv end . FES1 Is not close due to problem at Daganbhuiyan end  . Feni 230kv s/s done local grounding . and from Feni 230/132kV end Due to 132kv daghunbuiya circuit-2 s/d due to project work at breaker wiring mismatch",
+      "full_desc": "Chowmuhani-Feni 132 kV Ckt-2 Project Work S/D from Daganbhuiyan 132/33kV end Due to Project work at feni 230kv end . FES1 Is not close due to problem at Daganbhuiyan end  . Feni 230kv s/s done local grounding . and from Feni 230/132kV end Due to 132kv daghunbuiya circuit-2 s/d due to project work at breaker wiring mismatch"
     },
     {
-      "time": "19:57 - Gopalganj 132/33kV S/S T2 LT Tripped showing Instantineous earth fault relays.",
-      "plant": "",
+      "time": "10:02",
+      "plant": "Khulna (S)-Satkhira 132kV Ckt-1",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Khulna (S)-Satkhira 132kV Ckt-1 is restored.",
+      "full_desc": "Khulna (S)-Satkhira 132kV Ckt-1 is restored."
     },
     {
-      "time": "19:56 - Gopalganj 132/33kV S/S T1 LT Tripped showing Instantineous Earth fault relays Due to Deu",
-      "plant": "",
+      "time": "10:11 - 15:23",
+      "plant": "Madunaghat 132/33kV S/S TR-1(507T) LT Scheduled S/D",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Due to High temperature maintenance",
+      "full_desc": "Madunaghat 132/33kV S/S TR-1(507T) LT Scheduled S/D Due to High temperature maintenance"
     },
     {
-      "time": "23:24 - Chhatak 132/33kV S/S T-1 LT Scheduled S/D Due to For 33kV T-1 Bus DS Red Hot Maintenance",
-      "plant": "",
+      "time": "10:11 - 15:23",
+      "plant": "Madunaghat 132/33kV S/S TR-1(507T) HT Scheduled S/D",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Madunaghat 132/33kV S/S TR-1(507T) HT Scheduled S/D",
+      "full_desc": "Madunaghat 132/33kV S/S TR-1(507T) HT Scheduled S/D"
     },
     {
-      "time": "23:24 - Chhatak 132/33kV S/S T-1 HT Scheduled S/D Due to For 33kV T-1 Bus DS Red Hot Maintenance",
-      "plant": "",
+      "time": "10:38 - 12:19",
+      "plant": "Barishal 132/33kV S/S 132 kv Summit power Scheduled S/D",
       "load": "HT Outage",
-      "reason": "",
-      "full_desc": ""
+      "reason": "Due to Summit end work, B phase mct post",
+      "full_desc": "Barishal 132/33kV S/S 132 kv Summit power Scheduled S/D Due to Summit end work, B phase mct post"
+    },
+    {
+      "time": "11:09 - 13:25",
+      "plant": "Kishoreganj 132/33kV S/S Tr-1 (404T) LT Forced S/D",
+      "load": "HT Outage",
+      "reason": "Due to BPDB 33/11 kv transformer installation work.",
+      "full_desc": "Kishoreganj 132/33kV S/S Tr-1 (404T) LT Forced S/D Due to BPDB 33/11 kv transformer installation work."
+    },
+    {
+      "time": "11:09 - 13:23",
+      "plant": "Kishoreganj 132/33kV S/S Tr-1 (404T) HT Forced S/D",
+      "load": "HT Outage",
+      "reason": "Kishoreganj 132/33kV S/S Tr-1 (404T) HT Forced S/D",
+      "full_desc": "Kishoreganj 132/33kV S/S Tr-1 (404T) HT Forced S/D"
+    },
+    {
+      "time": "11:13 - 16:19",
+      "plant": "Joypurhat 132/33kV S/S Patnitola Ckt.-1 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Joypurhat 132/33kV S/S Patnitola Ckt.-1 Project Work S/D",
+      "full_desc": "Joypurhat 132/33kV S/S Patnitola Ckt.-1 Project Work S/D"
+    },
+    {
+      "time": "11:14 - 16:20",
+      "plant": "Joypurhat 132/33kV S/S Patnitola Ckt.-2 Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Joypurhat 132/33kV S/S Patnitola Ckt.-2 Project Work S/D",
+      "full_desc": "Joypurhat 132/33kV S/S Patnitola Ckt.-2 Project Work S/D"
+    },
+    {
+      "time": "11:16 - 17:27",
+      "plant": "Korerhat 400/230/132kV S/S ATR-3(7303T)-Three Ph LT Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to Due to project work",
+      "full_desc": "Korerhat 400/230/132kV S/S ATR-3(7303T)-Three Ph LT Project Work S/D Due to Due to project work"
+    },
+    {
+      "time": "11:18 - 17:25",
+      "plant": "Korerhat 400/230/132kV S/S ATR-3(7303T)-Three Ph HT Project Work S/D",
+      "load": "HT Outage",
+      "reason": "Due to For project work",
+      "full_desc": "Korerhat 400/230/132kV S/S ATR-3(7303T)-Three Ph HT Project Work S/D Due to For project work"
+    },
+    {
+      "time": "12:00",
+      "plant": "Payra 1320 MW Synchronized",
+      "load": "1320 MW",
+      "reason": "Payra 1320 MW Synchronized",
+      "full_desc": "Payra 1320 MW Synchronized"
+    },
+    {
+      "time": "12:00",
+      "plant": "Ashuganj 450 MW CCPP(South) Synchronized",
+      "load": "450 MW",
+      "reason": "Ashuganj 450 MW CCPP(South) Synchronized",
+      "full_desc": "Ashuganj 450 MW CCPP(South) Synchronized"
+    },
+    {
+      "time": "12:00",
+      "plant": "Meghnaghat CCPP(Summit)-2 Synchronized",
+      "load": "HT Outage",
+      "reason": "Meghnaghat CCPP(Summit)-2 Synchronized",
+      "full_desc": "Meghnaghat CCPP(Summit)-2 Synchronized"
+    },
+    {
+      "time": "12:00",
+      "plant": "Barisal 307 MW Synchronized",
+      "load": "307 MW",
+      "reason": "Barisal 307 MW Synchronized",
+      "full_desc": "Barisal 307 MW Synchronized"
+    },
+    {
+      "time": "12:58 - 16:35",
+      "plant": "Haripur 230/132kV S/S 132kV Main Bus Sec-2 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to busbar protection work.",
+      "full_desc": "Haripur 230/132kV S/S 132kV Main Bus Sec-2 Scheduled S/D Due to busbar protection work."
+    },
+    {
+      "time": "15:13 - 15:36",
+      "plant": "Niamatpur 132/33kV S/S Transformer-1(407T) LT Tripped showing Master trip relay relays",
+      "load": "18.0MW",
+      "reason": "Due to Rajshahi 1 feeder fault",
+      "full_desc": "Niamatpur 132/33kV S/S Transformer-1(407T) LT Tripped showing Master trip relay relays Due to Rajshahi 1 feeder fault"
+    },
+    {
+      "time": "15:41 - 17:05",
+      "plant": "Khulna(C )-Khulna (S)  132kV Ckt-2 Scheduled",
+      "load": "45.0MW",
+      "reason": "Due to Relay test by spmd, khulna",
+      "full_desc": "Khulna(C )-Khulna (S)  132kV Ckt-2 Scheduled S/D from Khulna (C) end Due to Relay test by spmd, khulna"
+    },
+    {
+      "time": "15:58",
+      "plant": "Bogura(New)-Naogaon 132 kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Bogura(New)-Naogaon 132 kV Ckt-1 Project Work S/D from Bogura 230/132kV end.",
+      "full_desc": "Bogura(New)-Naogaon 132 kV Ckt-1 Project Work S/D from Bogura 230/132kV end."
+    },
+    {
+      "time": "17:01 - 17:03",
+      "plant": "Khulna(C )-Khulna (S)  132kV Ckt-2 Tripped from Khulna(S) 230/132kV end showing None relays Due to ALDC Khulna, Tripping",
+      "load": "HT Outage",
+      "reason": "Due to ALDC Khulna, Tripping for Testing.",
+      "full_desc": "Khulna(C )-Khulna (S)  132kV Ckt-2 Tripped from Khulna(S) 230/132kV end showing None relays Due to ALDC Khulna, Tripping for Testing."
+    },
+    {
+      "time": "05:14 - 06:16",
+      "plant": "Jashore 132/33kV S/S T-1 LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to T1A CB Y-phase red hot maintenance",
+      "full_desc": "Jashore 132/33kV S/S T-1 LT Scheduled S/D Due to T1A CB Y-phase red hot maintenance"
+    },
+    {
+      "time": "05:14 - 06:16",
+      "plant": "Jashore 132/33kV S/S T-1 HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to T1A CB Y-phase red hot maintenance",
+      "full_desc": "Jashore 132/33kV S/S T-1 HT Scheduled S/D Due to T1A CB Y-phase red hot maintenance"
+    },
+    {
+      "time": "06:28",
+      "plant": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to High temperature maintenance",
+      "full_desc": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 LT Scheduled S/D Due to High temperature maintenance"
+    },
+    {
+      "time": "06:29",
+      "plant": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to High temperature maintenance",
+      "full_desc": "Payra 400/132/33kV S/S 400/132/33 kV Auto Transformer-01 HT Scheduled S/D Due to High temperature maintenance"
+    },
+    {
+      "time": "06:35",
+      "plant": "Jashore 132/33kV S/S T-2 HT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to T2A CB  Y-phase red hot maintenance",
+      "full_desc": "Jashore 132/33kV S/S T-2 HT Scheduled S/D Due to T2A CB  Y-phase red hot maintenance"
+    },
+    {
+      "time": "06:36",
+      "plant": "Jashore 132/33kV S/S T-2 LT Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to T2A CB  Y-phase red hot maintenance",
+      "full_desc": "Jashore 132/33kV S/S T-2 LT Scheduled S/D Due to T2A CB  Y-phase red hot maintenance"
+    },
+    {
+      "time": "07:34",
+      "plant": "Muradnagar 132/33kV S/S 132 KV Muradnagar- Cumilla(N) Ckt-01 Scheduled S/D",
+      "load": "HT Outage",
+      "reason": "Due to Line maintenance work.",
+      "full_desc": "Muradnagar 132/33kV S/S 132 KV Muradnagar- Cumilla(N) Ckt-01 Scheduled S/D Due to Line maintenance work."
     }
   ],
   "hourlyLoadData": [
     {
       "time": "00:00",
-      "generation": 15036.92,
-      "loadShed": null,
-      "demand": null
+      "generation": 14714.36,
+      "loadShed": 3280,
+      "demand": 18141.96
     },
     {
       "time": "01:00",
-      "generation": 14432.56,
-      "loadShed": null,
-      "demand": null
+      "generation": 13945.1,
+      "loadShed": 3324,
+      "demand": 17419.1
     },
     {
       "time": "02:00",
-      "generation": 14192.59,
-      "loadShed": null,
-      "demand": null
+      "generation": 13740.07,
+      "loadShed": 3400,
+      "demand": 17293.07
     },
     {
       "time": "03:00",
-      "generation": 14068.36,
-      "loadShed": null,
-      "demand": null
+      "generation": 13712.44,
+      "loadShed": 3342,
+      "demand": 17204.44
     },
     {
       "time": "04:00",
-      "generation": 14229.24,
-      "loadShed": null,
-      "demand": null
+      "generation": 13714.9,
+      "loadShed": 3264,
+      "demand": 17125.9
     },
     {
       "time": "05:00",
-      "generation": 14213.52,
-      "loadShed": null,
-      "demand": null
+      "generation": 13737.05,
+      "loadShed": 3078,
+      "demand": 16954.05
     },
     {
       "time": "06:00",
-      "generation": 13786.88,
-      "loadShed": null,
-      "demand": null
+      "generation": 13720.15,
+      "loadShed": 2919,
+      "demand": 16770.15
     },
     {
       "time": "07:00",
-      "generation": 13577.73,
-      "loadShed": null,
-      "demand": null
+      "generation": 13790.58,
+      "loadShed": 2721,
+      "demand": 16633.58
     },
     {
       "time": "08:00",
-      "generation": 13732.52,
-      "loadShed": null,
-      "demand": null
+      "generation": 13766.52,
+      "loadShed": 2689,
+      "demand": 16576.52
     },
     {
       "time": "09:00",
-      "generation": 13960.18,
-      "loadShed": null,
-      "demand": null
+      "generation": 14152.08,
+      "loadShed": 2635,
+      "demand": 16906.08
     },
     {
       "time": "10:00",
-      "generation": 14122.2,
-      "loadShed": null,
-      "demand": null
+      "generation": 14255.26,
+      "loadShed": 2599,
+      "demand": 16971.26
     },
     {
       "time": "11:00",
-      "generation": 14254.77,
-      "loadShed": null,
-      "demand": null
+      "generation": 14158.19,
+      "loadShed": 1907,
+      "demand": 16151.01
     },
     {
       "time": "12:00",
-      "generation": 14669.72,
-      "loadShed": null,
-      "demand": null
+      "generation": 14398.75,
+      "loadShed": 2620,
+      "demand": 17136.65
     },
     {
       "time": "13:00",
-      "generation": 14500.25,
-      "loadShed": null,
-      "demand": null
+      "generation": 14450.08,
+      "loadShed": 2351,
+      "demand": 16906.88
     },
     {
       "time": "14:00",
-      "generation": 14363.22,
-      "loadShed": null,
-      "demand": null
+      "generation": 14640.85,
+      "loadShed": 2361,
+      "demand": 17108.1
     },
     {
       "time": "15:00",
-      "generation": 14100.7,
-      "loadShed": null,
-      "demand": null
+      "generation": 14577.97,
+      "loadShed": 2888,
+      "demand": 17595.93
     },
     {
       "time": "16:00",
-      "generation": 14454.63,
-      "loadShed": null,
-      "demand": null
+      "generation": 14410.68,
+      "loadShed": 2530,
+      "demand": 17054.53
     },
     {
       "time": "17:00",
-      "generation": 14268.46,
-      "loadShed": null,
-      "demand": null
+      "generation": 14364.83,
+      "loadShed": 2378,
+      "demand": 16849.83
     },
     {
       "time": "18:00",
-      "generation": 14221.5,
-      "loadShed": null,
-      "demand": null
+      "generation": 14274.87,
+      "loadShed": 1989,
+      "demand": 16353.87
     },
     {
       "time": "19:00",
-      "generation": 15661.83,
-      "loadShed": null,
-      "demand": null
+      "generation": 15607.55,
+      "loadShed": 1977,
+      "demand": 17673.52
+    },
+    {
+      "time": "19:30",
+      "generation": 15775.23,
+      "loadShed": 2033,
+      "demand": 17899.23
     },
     {
       "time": "20:00",
-      "generation": 15879.06,
-      "loadShed": null,
-      "demand": null
+      "generation": 15666.01,
+      "loadShed": 1983,
+      "demand": 17738.01
     },
     {
       "time": "21:00",
-      "generation": 15913.88,
-      "loadShed": null,
-      "demand": null
+      "generation": 16038.59,
+      "loadShed": 2216,
+      "demand": 18354.59
     },
     {
       "time": "22:00",
-      "generation": 15821.11,
-      "loadShed": null,
-      "demand": null
+      "generation": 15850.18,
+      "loadShed": 1799,
+      "demand": 17730.14
     },
     {
       "time": "23:00",
-      "generation": 15990.53,
-      "loadShed": null,
-      "demand": null
+      "generation": 15725.99,
+      "loadShed": 2014,
+      "demand": 17830.62
     }
   ],
-  "gasProductionData": [
-    {
-      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
-      "fields": 5,
-      "gas": 479.1,
-      "condensate": 370.4,
-      "share": 17.8
-    },
-    {
-      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
-      "fields": 5,
-      "gas": 139.4,
-      "condensate": 648.6,
-      "share": 5.2
-    },
-    {
-      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
-      "fields": 9,
-      "gas": 89.9,
-      "condensate": 43.9,
-      "share": 3.3
-    },
-    {
-      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
-      "fields": 3,
-      "gas": 895.7,
-      "condensate": 4816.9,
-      "share": 33.3
-    },
-    {
-      "company": "Tullow (Bangora)",
-      "fields": 1,
-      "gas": 31.0,
-      "condensate": 96.0,
-      "share": 1.2
-    },
-    {
-      "company": "RPGCL (R-LNG Import / LNG Terminal)",
-      "fields": 0,
-      "gas": 1052.2,
-      "condensate": 0.0,
-      "share": 39.2
-    }
-  ],
-  "gasDistributionData": [
-    {
-      "company": "TGTDCL (Dhaka & Mymensingh)",
-      "power": 268.4,
-      "fertilizer": 72.9,
-      "others": 1074.3,
-      "total": 1415.6
-    },
-    {
-      "company": "BGDCL (Cumilla & Sylhet)",
-      "power": 205.5,
-      "fertilizer": 0.0,
-      "others": 86.4,
-      "total": 291.9
-    },
-    {
-      "company": "KGDCL (Chattogram)",
-      "power": 38.1,
-      "fertilizer": 37.7,
-      "others": 168.0,
-      "total": 243.8
-    },
-    {
-      "company": "JGTDSL (Sylhet region)",
-      "power": 220.2,
-      "fertilizer": 40.0,
-      "others": 111.3,
-      "total": 371.5
-    },
-    {
-      "company": "PGCL (Rajshahi & Rangpur)",
-      "power": 121.4,
-      "fertilizer": 0.0,
-      "others": 28.9,
-      "total": 150.3
-    },
-    {
-      "company": "SGCL (Barishal & Khulna)",
-      "power": 54.0,
-      "fertilizer": 0.0,
-      "others": 4.6,
-      "total": 58.6
-    }
-  ],
-  "sourceFiles": {
-    "pgcb": "Daily Report 29-06-2026.xlsx",
-    "petrobangla": "Daily-Gas-Intake-Offtake-Report (29.06.26).pdf"
-  },
   "ewicData": {
     "corridors": [
       "Ishurdi-Ghorashal",
@@ -448,339 +660,339 @@
       {
         "time": "00:00",
         "mw": [
-          154.0,
-          520.0,
-          1628.0
+          154,
+          520,
+          1628
         ],
         "mvar": [
-          41.0,
-          122.0,
-          544.0
+          41,
+          122,
+          544
         ]
       },
       {
         "time": "01:00",
         "mw": [
-          140.0,
-          500.0,
-          1614.0
+          140,
+          500,
+          1614
         ],
         "mvar": [
-          33.0,
-          106.0,
-          456.0
+          33,
+          106,
+          456
         ]
       },
       {
         "time": "02:00",
         "mw": [
-          128.0,
-          480.0,
-          1598.0
+          128,
+          480,
+          1598
         ],
         "mvar": [
-          25.0,
-          120.0,
-          436.0
+          25,
+          120,
+          436
         ]
       },
       {
         "time": "03:00",
         "mw": [
-          140.0,
-          500.0,
-          1620.0
+          140,
+          500,
+          1620
         ],
         "mvar": [
-          18.0,
-          100.0,
-          416.0
+          18,
+          100,
+          416
         ]
       },
       {
         "time": "04:00",
         "mw": [
-          148.0,
-          524.0,
-          1626.0
+          148,
+          524,
+          1626
         ],
         "mvar": [
-          20.0,
-          114.0,
-          426.0
+          20,
+          114,
+          426
         ]
       },
       {
         "time": "05:00",
         "mw": [
-          140.0,
-          512.0,
-          1574.0
+          140,
+          512,
+          1574
         ],
         "mvar": [
-          15.0,
-          122.0,
-          430.0
+          15,
+          122,
+          430
         ]
       },
       {
         "time": "06:00",
         "mw": [
-          137.0,
-          502.0,
-          1574.0
+          137,
+          502,
+          1574
         ],
         "mvar": [
-          14.0,
-          120.0,
-          412.0
+          14,
+          120,
+          412
         ]
       },
       {
         "time": "07:00",
         "mw": [
-          140.0,
-          498.0,
-          1574.0
+          140,
+          498,
+          1574
         ],
         "mvar": [
-          11.0,
-          102.0,
-          390.0
+          11,
+          102,
+          390
         ]
       },
       {
         "time": "08:00",
         "mw": [
-          158.0,
-          556.0,
-          1694.0
+          158,
+          556,
+          1694
         ],
         "mvar": [
-          21.0,
-          144.0,
-          470.0
+          21,
+          144,
+          470
         ]
       },
       {
         "time": "09:00",
         "mw": [
-          186.0,
-          570.0,
-          1846.0
+          186,
+          570,
+          1846
         ],
         "mvar": [
-          41.0,
-          124.0,
-          526.0
+          41,
+          124,
+          526
         ]
       },
       {
         "time": "10:00",
         "mw": [
-          199.0,
-          580.0,
-          1950.0
+          199,
+          580,
+          1950
         ],
         "mvar": [
-          50.0,
-          120.0,
-          604.0
+          50,
+          120,
+          604
         ]
       },
       {
         "time": "11:00",
         "mw": [
-          199.0,
-          652.0,
-          1996.0
+          199,
+          652,
+          1996
         ],
         "mvar": [
-          50.0,
-          188.0,
-          626.0
+          50,
+          188,
+          626
         ]
       },
       {
         "time": "12:00",
         "mw": [
-          179.0,
-          700.0,
-          1942.0
+          179,
+          700,
+          1942
         ],
         "mvar": [
-          25.0,
-          210.0,
-          578.0
+          25,
+          210,
+          578
         ]
       },
       {
         "time": "13:00",
         "mw": [
-          187.0,
-          650.0,
-          1930.0
+          187,
+          650,
+          1930
         ],
         "mvar": [
-          34.0,
-          190.0,
-          574.0
+          34,
+          190,
+          574
         ]
       },
       {
         "time": "14:00",
         "mw": [
-          190.0,
-          634.0,
-          1956.0
+          190,
+          634,
+          1956
         ],
         "mvar": [
-          35.0,
-          190.0,
-          562.0
+          35,
+          190,
+          562
         ]
       },
       {
         "time": "15:00",
         "mw": [
-          190.0,
-          632.0,
-          1948.0
+          190,
+          632,
+          1948
         ],
         "mvar": [
-          42.0,
-          172.0,
-          604.0
+          42,
+          172,
+          604
         ]
       },
       {
         "time": "16:00",
         "mw": [
-          187.0,
-          616.0,
-          1932.0
+          187,
+          616,
+          1932
         ],
         "mvar": [
-          45.0,
-          176.0,
-          612.0
+          45,
+          176,
+          612
         ]
       },
       {
         "time": "17:00",
         "mw": [
-          180.0,
-          594.0,
-          1900.0
+          180,
+          594,
+          1900
         ],
         "mvar": [
-          39.0,
-          172.0,
-          582.0
+          39,
+          172,
+          582
         ]
       },
       {
         "time": "18:00",
         "mw": [
-          167.0,
-          560.0,
-          1770.0
+          167,
+          560,
+          1770
         ],
         "mvar": [
-          34.0,
-          176.0,
-          600.0
+          34,
+          176,
+          600
         ]
       },
       {
         "time": "18:30",
         "mw": [
-          171.0,
-          524.0,
-          1770.0
+          171,
+          524,
+          1770
         ],
         "mvar": [
-          44.0,
-          180.0,
-          600.0
+          44,
+          180,
+          600
         ]
       },
       {
         "time": "19:00",
         "mw": [
-          157.0,
-          500.0,
-          1662.0
+          157,
+          500,
+          1662
         ],
         "mvar": [
-          38.0,
-          174.0,
-          576.0
+          38,
+          174,
+          576
         ]
       },
       {
         "time": "19:30",
         "mw": [
-          141.0,
-          456.0,
-          1710.0
+          141,
+          456,
+          1710
         ],
         "mvar": [
-          25.0,
-          146.0,
-          548.0
+          25,
+          146,
+          548
         ]
       },
       {
         "time": "20:00",
         "mw": [
-          141.0,
-          474.0,
-          1714.0
+          141,
+          474,
+          1714
         ],
         "mvar": [
-          21.0,
-          160.0,
-          550.0
+          21,
+          160,
+          550
         ]
       },
       {
         "time": "21:00",
         "mw": [
-          110.0,
-          420.0,
-          1552.0
+          110,
+          420,
+          1552
         ],
         "mvar": [
-          12.0,
-          170.0,
-          478.0
+          12,
+          170,
+          478
         ]
       },
       {
         "time": "22:00",
         "mw": [
-          98.0,
-          416.0,
-          1520.0
+          98,
+          416,
+          1520
         ],
         "mvar": [
-          11.0,
-          154.0,
-          470.0
+          11,
+          154,
+          470
         ]
       },
       {
         "time": "23:00",
         "mw": [
-          114.0,
-          492.0,
-          1566.0
+          114,
+          492,
+          1566
         ],
         "mvar": [
-          16.0,
-          188.0,
-          510.0
+          16,
+          188,
+          510
         ]
       }
     ],
@@ -793,62 +1005,62 @@
       {
         "circuit": "Ishurdi-Ghorashal Ckt-1",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Ishurdi-Ghorashal Ckt-2",
         "direction": "Export",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Ishurdi-Ghorashal Ckt-2",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-1",
         "direction": "Export",
-        "energyKwh": 3265000.0
+        "energyKwh": 3265000
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-1",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-2",
         "direction": "Export",
-        "energyKwh": 3274000.0
+        "energyKwh": 3274000
       },
       {
         "circuit": "Sirajganj-Sreepur Ckt-2",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-1",
         "direction": "Export",
-        "energyKwh": 21190000.0
+        "energyKwh": 21190000
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-1",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-2",
         "direction": "Export",
-        "energyKwh": 21240000.0
+        "energyKwh": 21240000
       },
       {
         "circuit": "Gopalganj-Aminbazar Ckt-2",
         "direction": "Import",
-        "energyKwh": 0.0
+        "energyKwh": 0
       }
     ],
     "totals": {
       "export": 50578163.66,
-      "import": 0.0
+      "import": 0
     },
     "checks": [
       {
@@ -861,188 +1073,97 @@
       }
     ]
   },
-  "forecast": {
-    "maxDemandEveningMw": 17920.0,
-    "maxDemandDayMw": 16050.0,
-    "maxGenEveningMw": 15650.0,
-    "totalEnergyGenMkwh": 343.71,
-    "maxTempC": 36.8,
-    "totalLoadShedMw": 2397.0,
-    "hourly": [
-      {
-        "time": "00:00",
-        "generationMw": 14780.0,
-        "loadShedMw": 2502.1,
-        "demandMw": 17400.0
-      },
-      {
-        "time": "01:00",
-        "generationMw": 14220.0,
-        "loadShedMw": 2530.75,
-        "demandMw": 16870.0
-      },
-      {
-        "time": "02:00",
-        "generationMw": 14110.0,
-        "loadShedMw": 2358.85,
-        "demandMw": 16580.0
-      },
-      {
-        "time": "03:00",
-        "generationMw": 14030.0,
-        "loadShedMw": 2186.95,
-        "demandMw": 16320.0
-      },
-      {
-        "time": "04:00",
-        "generationMw": 13990.0,
-        "loadShedMw": 2062.8,
-        "demandMw": 16150.0
-      },
-      {
-        "time": "05:00",
-        "generationMw": 13570.0,
-        "loadShedMw": 2253.8,
-        "demandMw": 15930.0
-      },
-      {
-        "time": "06:00",
-        "generationMw": 13270.0,
-        "loadShedMw": 2005.5,
-        "demandMw": 15370.0
-      },
-      {
-        "time": "07:00",
-        "generationMw": 13640.0,
-        "loadShedMw": 1575.75,
-        "demandMw": 15290.0
-      },
-      {
-        "time": "08:00",
-        "generationMw": 13710.0,
-        "loadShedMw": 1508.9,
-        "demandMw": 15290.0
-      },
-      {
-        "time": "09:00",
-        "generationMw": 13690.0,
-        "loadShedMw": 1680.8,
-        "demandMw": 15450.0
-      },
-      {
-        "time": "10:00",
-        "generationMw": 13360.0,
-        "loadShedMw": 1948.2,
-        "demandMw": 15400.0
-      },
-      {
-        "time": "11:00",
-        "generationMw": 13760.0,
-        "loadShedMw": 1699.9,
-        "demandMw": 15540.0
-      },
-      {
-        "time": "12:00",
-        "generationMw": 14200.0,
-        "loadShedMw": 1766.75,
-        "demandMw": 16050.0
-      },
-      {
-        "time": "13:00",
-        "generationMw": 14340.0,
-        "loadShedMw": 1719.0,
-        "demandMw": 16140.0
-      },
-      {
-        "time": "14:00",
-        "generationMw": 14330.0,
-        "loadShedMw": 1843.15,
-        "demandMw": 16260.0
-      },
-      {
-        "time": "15:00",
-        "generationMw": 14240.0,
-        "loadShedMw": 2177.4,
-        "demandMw": 16520.0
-      },
-      {
-        "time": "16:00",
-        "generationMw": 14230.0,
-        "loadShedMw": 2081.9,
-        "demandMw": 16410.0
-      },
-      {
-        "time": "17:00",
-        "generationMw": 14220.0,
-        "loadShedMw": 1804.95,
-        "demandMw": 16110.0
-      },
-      {
-        "time": "18:00",
-        "generationMw": 15100.0,
-        "loadShedMw": 668.5,
-        "demandMw": 15800.0
-      },
-      {
-        "time": "18:30",
-        "generationMw": 15200.0,
-        "loadShedMw": 668.5,
-        "demandMw": 15900.0
-      },
-      {
-        "time": "19:00",
-        "generationMw": 15230.0,
-        "loadShedMw": 1976.85,
-        "demandMw": 17300.0
-      },
-      {
-        "time": "19:30",
-        "generationMw": 15340.0,
-        "loadShedMw": 2444.8,
-        "demandMw": 17900.0
-      },
-      {
-        "time": "20:00",
-        "generationMw": 15410.0,
-        "loadShedMw": 2397.05,
-        "demandMw": 17920.0
-      },
-      {
-        "time": "21:00",
-        "generationMw": 15650.0,
-        "loadShedMw": 2053.25,
-        "demandMw": 17800.0
-      },
-      {
-        "time": "22:00",
-        "generationMw": 15360.0,
-        "loadShedMw": 2139.2,
-        "demandMw": 17600.0
-      },
-      {
-        "time": "23:00",
-        "generationMw": 15270.0,
-        "loadShedMw": 2034.15,
-        "demandMw": 17400.0
-      }
-    ],
-    "issuedAt": "2026-06-28T10:13:00+06:00",
-    "areaLoadShedMw": {
-      "Dhaka": 500.0,
-      "Chattogram": 160.0,
-      "Cumilla": 300.0,
-      "Mymensingh": 377.0,
-      "Sylhet": 180.0,
-      "Khulna": 280.0,
-      "Barishal": 140.0,
-      "Rajshahi": 270.0,
-      "Rangpur": 190.0
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
     },
-    "issuedOn": "2026-06-27",
-    "issuedIn": "Daily Report 28-06-2026",
-    "targetDay": "2026-06-28",
-    "layout": "scenario",
-    "issuedFrom": "erp-mirror"
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 0,
+      "condensate": 0,
+      "share": 0
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 0,
+      "fertilizer": 0,
+      "others": 0,
+      "total": 0
+    }
+  ],
+  "sourceFiles": {
+    "pgcb": "Daily Report 29-06-2026.xlsx",
+    "petrobangla": "Daily-Gas-Intake-Offtake-Report (29.06.26).pdf"
   },
   "observationWindows": {
     "timezone": "+06:00",
@@ -1052,15 +1173,189 @@
       "end": "2026-06-29T00:00:00+06:00",
       "filedAs": "2026-06-29",
       "sourceFile": "Daily Report 29-06-2026.xlsx"
-    },
-    "petrobangla": {
-      "unit": "gas day",
-      "start": "2026-06-28T08:00:00+06:00",
-      "end": "2026-06-29T08:00:00+06:00",
-      "filedAs": "2026-06-29",
-      "publishedLabel": "28-29 Jun, 2026",
-      "period": "8.00 to 8.00",
-      "sourceFile": "Daily-Gas-Intake-Offtake-Report (29.06.26).pdf"
     }
+  },
+  "forecast": {
+    "maxDemandEveningMw": 17920,
+    "maxDemandDayMw": 16050,
+    "maxGenEveningMw": 15650,
+    "totalEnergyGenMkwh": 343.71,
+    "maxTempC": 36.8,
+    "totalLoadShedMw": 2397,
+    "hourly": [
+      {
+        "time": "00:00",
+        "generationMw": 14780,
+        "loadShedMw": 2502.1,
+        "demandMw": 17400
+      },
+      {
+        "time": "01:00",
+        "generationMw": 14220,
+        "loadShedMw": 2530.75,
+        "demandMw": 16870
+      },
+      {
+        "time": "02:00",
+        "generationMw": 14110,
+        "loadShedMw": 2358.85,
+        "demandMw": 16580
+      },
+      {
+        "time": "03:00",
+        "generationMw": 14030,
+        "loadShedMw": 2186.95,
+        "demandMw": 16320
+      },
+      {
+        "time": "04:00",
+        "generationMw": 13990,
+        "loadShedMw": 2062.8,
+        "demandMw": 16150
+      },
+      {
+        "time": "05:00",
+        "generationMw": 13570,
+        "loadShedMw": 2253.8,
+        "demandMw": 15930
+      },
+      {
+        "time": "06:00",
+        "generationMw": 13270,
+        "loadShedMw": 2005.5,
+        "demandMw": 15370
+      },
+      {
+        "time": "07:00",
+        "generationMw": 13640,
+        "loadShedMw": 1575.75,
+        "demandMw": 15290
+      },
+      {
+        "time": "08:00",
+        "generationMw": 13710,
+        "loadShedMw": 1508.9,
+        "demandMw": 15290
+      },
+      {
+        "time": "09:00",
+        "generationMw": 13690,
+        "loadShedMw": 1680.8,
+        "demandMw": 15450
+      },
+      {
+        "time": "10:00",
+        "generationMw": 13360,
+        "loadShedMw": 1948.2,
+        "demandMw": 15400
+      },
+      {
+        "time": "11:00",
+        "generationMw": 13760,
+        "loadShedMw": 1699.9,
+        "demandMw": 15540
+      },
+      {
+        "time": "12:00",
+        "generationMw": 14200,
+        "loadShedMw": 1766.75,
+        "demandMw": 16050
+      },
+      {
+        "time": "13:00",
+        "generationMw": 14340,
+        "loadShedMw": 1719,
+        "demandMw": 16140
+      },
+      {
+        "time": "14:00",
+        "generationMw": 14330,
+        "loadShedMw": 1843.15,
+        "demandMw": 16260
+      },
+      {
+        "time": "15:00",
+        "generationMw": 14240,
+        "loadShedMw": 2177.4,
+        "demandMw": 16520
+      },
+      {
+        "time": "16:00",
+        "generationMw": 14230,
+        "loadShedMw": 2081.9,
+        "demandMw": 16410
+      },
+      {
+        "time": "17:00",
+        "generationMw": 14220,
+        "loadShedMw": 1804.95,
+        "demandMw": 16110
+      },
+      {
+        "time": "18:00",
+        "generationMw": 15100,
+        "loadShedMw": 668.5,
+        "demandMw": 15800
+      },
+      {
+        "time": "18:30",
+        "generationMw": 15200,
+        "loadShedMw": 668.5,
+        "demandMw": 15900
+      },
+      {
+        "time": "19:00",
+        "generationMw": 15230,
+        "loadShedMw": 1976.85,
+        "demandMw": 17300
+      },
+      {
+        "time": "19:30",
+        "generationMw": 15340,
+        "loadShedMw": 2444.8,
+        "demandMw": 17900
+      },
+      {
+        "time": "20:00",
+        "generationMw": 15410,
+        "loadShedMw": 2397.05,
+        "demandMw": 17920
+      },
+      {
+        "time": "21:00",
+        "generationMw": 15650,
+        "loadShedMw": 2053.25,
+        "demandMw": 17800
+      },
+      {
+        "time": "22:00",
+        "generationMw": 15360,
+        "loadShedMw": 2139.2,
+        "demandMw": 17600
+      },
+      {
+        "time": "23:00",
+        "generationMw": 15270,
+        "loadShedMw": 2034.15,
+        "demandMw": 17400
+      }
+    ],
+    "issuedAt": "2026-06-28T10:13:00+06:00",
+    "areaLoadShedMw": {
+      "Dhaka": 500,
+      "Chattogram": 160,
+      "Cumilla": 300,
+      "Mymensingh": 377,
+      "Sylhet": 180,
+      "Khulna": 280,
+      "Barishal": 140,
+      "Rajshahi": 270,
+      "Rangpur": 190
+    },
+    "issuedOn": "2026-06-27",
+    "issuedIn": "Daily Report 28-06-2026",
+    "targetDay": "2026-06-28",
+    "layout": "scenario",
+    "issuedFrom": "source-copy"
   }
 }
