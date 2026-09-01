@@ -211,12 +211,18 @@ export async function getCalendarArticles(opts?: { authorId?: string; allAuthors
       where: { status: 'SCHEDULED', editorTrash: false, ...authorFilter },
       orderBy: { publishedAt: 'asc' },
       include: { author: { select: { name: true } } },
+      // Same reason as `getArticles` below: `include` alone selects Article.*,
+      // which drags both full HTML bodies across for a calendar that renders
+      // only titles and dates. This query also had no `take`.
+      omit: { content: true, contentBn: true },
+      take: 200,
     }),
     prisma.article.findMany({
       where: { status: 'PUBLISHED', editorTrash: false, ...authorFilter },
       orderBy: { publishedAt: 'desc' },
       take: 10,
       include: { author: { select: { name: true } } },
+      omit: { content: true, contentBn: true },
     }),
   ]);
   return { scheduled, published };
@@ -263,6 +269,9 @@ export async function getEditorialCalendarEvents(opts?: {
       ],
     },
     include: { author: { select: { name: true } } },
+    // A month of articles, of which the mapper below reads nine scalar fields.
+    // Both body columns were coming back and being discarded.
+    omit: { content: true, contentBn: true },
     orderBy: { publishedAt: 'asc' },
   });
 

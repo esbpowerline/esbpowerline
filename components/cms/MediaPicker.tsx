@@ -1,4 +1,5 @@
 'use client';
+import { mediaThumbnailUrl, MEDIA_THUMB_WIDTH, MEDIA_PREVIEW_WIDTH } from '@/lib/media-thumbnail';
 
 import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Upload, X, Check } from 'lucide-react';
@@ -79,7 +80,7 @@ export function MediaPicker({
       <span className="admin-stat-label">{label}</span>
       {value ? (
         <div className="relative rounded-xl overflow-hidden border border-border/60 group">
-          <img src={value} alt="" className="w-full aspect-video object-cover" />
+          <img src={mediaThumbnailUrl(value, MEDIA_PREVIEW_WIDTH, 80) ?? value} alt="" className="w-full aspect-video object-cover" />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <Button type="button" size="sm" variant="secondary" onClick={() => setOpen(true)}>Change</Button>
             <button
@@ -169,7 +170,13 @@ export function MediaPicker({
                           selected ? 'border-sky-500 ring-2 ring-sky-500/30' : 'border-transparent hover:border-border',
                         )}
                       >
-                        <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
+                        <img
+                          src={mediaThumbnailUrl(m.url, MEDIA_THUMB_WIDTH) ?? m.url}
+                          alt={m.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
                         {selected && (
                           <span className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-sky-500 text-white flex items-center justify-center">
                             <Check className="h-3 w-3" />

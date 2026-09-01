@@ -24,10 +24,37 @@ export const RELEASE_CACHE_TAG = 'data-releases';
  * outside the server action (the local ingest bridge writes over SQL), or a
  * publish handled by a different serverless instance from the one serving a
  * read. Without it, `unstable_cache` holds a value indefinitely and a missing
- * day stays missing forever. A minute costs at most one query per feed per
- * minute, which is nothing next to the risk of serving a stale archive.
+ * day stays missing forever.
+ *
+ * A minute was chosen when the cost looked like "one query per feed per
+ * minute". It is not: the query is `select { payload }`, and a payload is a
+ * whole dataset — the gas timeline alone is ~1.6 MB — re-read per key, per
+ * serverless instance, per region, with `/api/data/*` on `no-store` so no CDN
+ * layer absorbs any of it. `grid-export.server.ts` calls `getReleaseOverride`
+ * once per day in an export range, so one wide export is one full payload per
+ * published day.
+ *
+ * The two environments want different numbers, and for a stated reason:
+ *
+ *   development — the local ingest bridge writes releases over raw SQL,
+ *     bypassing the server action, so tag invalidation never fires and this
+ *     backstop is the only thing that surfaces a freshly ingested day. Keep it
+ *     short or the operator publishes and sees nothing.
+ *
+ *   production — every publish goes through `/api/admin/data/publish`, which
+ *     calls `revalidateDataRelease` on the way out. Tag invalidation is the
+ *     refresh path there, and this is genuinely only a backstop, so it can be
+ *     long. Ten minutes bounds the worst case if an invalidation is ever missed
+ *     and cuts the redundant payload reads by an order of magnitude.
+ *
+ * `RELEASE_CACHE_SECONDS` overrides both, for anyone who needs to tune it
+ * without a deploy.
  */
-const RELEASE_CACHE_SECONDS = 60;
+const RELEASE_CACHE_SECONDS = (() => {
+  const override = Number.parseInt(process.env.RELEASE_CACHE_SECONDS ?? '', 10);
+  if (Number.isFinite(override) && override > 0) return override;
+  return process.env.NODE_ENV === 'production' ? 600 : 60;
+})();
 
 /** Cache tag for one feed, so publishing a gas day does not bust the grid list. */
 export function feedCacheTag(feed: DataFeed): string {

@@ -18,6 +18,7 @@ import { getSupabaseEnv, SUPABASE_AUTH_SETUP_MESSAGE } from '@/utils/supabase/en
 import { upsertSupabaseAuthUser } from '@/lib/supabase/sync-auth-user';
 import prisma from '@/lib/prisma';
 import { getDevBootstrapPassword } from '@/lib/dev-login-hints';
+import { friendlyAuthError } from '@/lib/auth-error-copy';
 
 export type AuthActionResult = {
   error?: string;
@@ -34,13 +35,6 @@ function safeCallbackUrl(raw: string) {
   if (!raw.startsWith('/')) return null;
   if (raw.startsWith('//')) return null;
   return raw;
-}
-
-function friendlyAuthError(message: string) {
-  if (message === 'Invalid login credentials') {
-    return 'Invalid email or password. Check your credentials and try again.';
-  }
-  return message;
 }
 
 /** Attach to staff login form: useActionState(loginAction, {}) */
@@ -66,7 +60,10 @@ export async function loginAction(
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      return { error: friendlyAuthError(error.message) };
+      const { message, detail } = friendlyAuthError(error.message);
+      // The visitor gets what they can act on; the operator gets the rest.
+      if (detail) console.error('[loginAction] unhandled auth error:', detail);
+      return { error: message };
     }
 
     const {
@@ -179,7 +176,12 @@ export async function signupAction(
       status: 'ACTIVE',
     });
   } catch (error: any) {
-    return { error: error.message };
+    // Same rule as sign-in: never hand an upstream provider's message to the
+    // form. `upsertSupabaseAuthUser` wraps Supabase admin calls, which is where
+    // the billing-restriction text came from.
+    const { message, detail } = friendlyAuthError(error);
+    if (detail) console.error('[registerAction] unhandled auth error:', detail);
+    return { error: message };
   }
 
   revalidatePath('/', 'layout');

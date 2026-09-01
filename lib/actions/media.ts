@@ -37,58 +37,58 @@ function isAllowedMediaUrl(url: string): boolean {
   }
 }
 
+/**
+ * Fill in a missing `size` for locally-stored media only.
+ *
+ * This used to resolve remote sizes too, and it was the single largest
+ * consumer of the project's Supabase egress quota. For every row whose size
+ * was null it issued a HEAD against the object, and if that carried no
+ * `content-length` it followed with a **full GET and buffered the body**. It
+ * ran under `Promise.all` across the entire library, on every render of
+ * /cms/media and /admin/media, and it never converged: when the update at the
+ * end failed - or when the fetch itself failed, which is exactly what happens
+ * once the quota is spent - `size` stayed null and the whole library was
+ * downloaded again on the next page view.
+ *
+ * A file's size is known for certain at the moment it is uploaded, which is
+ * where it is now recorded (`uploadMediaBuffer`). Remote rows predating that
+ * are backfilled by `scripts/backfill-media-sizes.ts`, run once, deliberately,
+ * rather than as a side effect of looking at a page.
+ */
+/** How many media rows a library view loads at once. Each one becomes an image
+ *  request from the browser, so this is an egress budget, not just a page size. */
+export const MEDIA_PAGE_SIZE = 60;
+
 async function backfillMissingMediaSizes(items: any[]) {
-  await Promise.all(
-    items.map(async (m) => {
-      if (m.size !== null && m.size > 0) return;
+  for (const m of items) {
+    if (m.size !== null && m.size > 0) continue;
+    if (!m.url.startsWith('/')) continue;
 
-      let size: number | null = null;
-      if (m.url.startsWith('/')) {
-        const cwd = process.cwd();
-        const publicDir = `${cwd}/public`;
-        const localPath = `${publicDir}${m.url}`;
-        if (existsSync(localPath)) {
-          try {
-            size = statSync(localPath).size;
-          } catch (e) {
-            console.error('Error getting local file size:', e);
-          }
-        }
-      } else if (m.url.startsWith('http://') || m.url.startsWith('https://')) {
-        try {
-          const res = await fetch(m.url, { method: 'HEAD' });
-          const len = res.headers.get('content-length');
-          if (len) {
-            size = parseInt(len, 10);
-          } else {
-            const getRes = await fetch(m.url, { method: 'GET' });
-            const getLen = getRes.headers.get('content-length');
-            if (getLen) {
-              size = parseInt(getLen, 10);
-            } else {
-              const blob = await getRes.blob();
-              size = blob.size;
-            }
-          }
-        } catch (err) {
-          console.warn(`[backfillMissingMediaSizes] Failed to resolve remote size for ${m.url}:`, err);
-        }
-      }
+    const localPath = `${process.cwd()}/public${m.url}`;
+    if (!existsSync(localPath)) continue;
 
-      if (size !== null && size > 0) {
+    try {
+      const size = statSync(localPath).size;
+      if (size > 0) {
         m.size = size;
-        await prisma.media.update({
-          where: { id: m.id },
-          data: { size },
-        }).catch((err) => console.error('Failed to save size to db:', err));
+        await prisma.media
+          .update({ where: { id: m.id }, data: { size } })
+          .catch((err) => console.error('Failed to save size to db:', err));
       }
-    })
-  );
+    } catch (e) {
+      console.error('Error getting local file size:', e);
+    }
+  }
 }
 
-export async function getMedia() {
+/** Newest-first media rows. Bounded: the library grows without limit and every
+ *  row rendered is an image the browser will request. */
+export async function getMedia(limit = MEDIA_PAGE_SIZE) {
   await requireAuth();
-  const items = await prisma.media.findMany({ orderBy: { createdAt: 'desc' } });
+  const items = await prisma.media.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: limit,
+  });
   await backfillMissingMediaSizes(items);
   return items;
 }
@@ -235,7 +235,7 @@ export async function getMediaLibrary(): Promise<MediaLibraryItem[]> {
   const user = await requireAuth();
 
   const [items, usageMap, users] = await Promise.all([
-    prisma.media.findMany({ orderBy: { createdAt: 'desc' } }),
+    prisma.media.findMany({ orderBy: { createdAt: 'desc' }, take: MEDIA_PAGE_SIZE }),
     getMediaUsageMap(),
     prisma.user.findMany({
       select: { id: true, name: true, role: true },

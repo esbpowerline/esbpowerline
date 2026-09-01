@@ -20,6 +20,7 @@ import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { heroImageStyle } from '@/lib/hero-image';
 import { getSavedSiteTheme, type SiteTheme } from '@/lib/site-theme';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
+import { mediaThumbnailUrl, MEDIA_THUMB_WIDTH, MEDIA_PREVIEW_WIDTH } from '@/lib/media-thumbnail';
 
 function formatBytes(bytes: number | null | undefined) {
   if (bytes === null || bytes === undefined) return '—';
@@ -215,7 +216,7 @@ function ReplaceMediaModal({
             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Real-time Image Preview (Edit & Confirm)</span>
             <div className="relative aspect-video w-full rounded-xl border border-border/60 bg-neutral-950 overflow-hidden shadow-inner flex items-center justify-center">
               <img
-                src={newUrl || normalizeArticleImageUrl(item.url) || item.url}
+                src={newUrl || mediaThumbnailUrl(item.url, MEDIA_PREVIEW_WIDTH, 80) || normalizeArticleImageUrl(item.url) || item.url}
                 alt="Staged replacement preview"
                 style={heroImageStyle({
                   fitMode: fitMode as any,
@@ -615,7 +616,7 @@ function ImageLightbox({
           isWhiteTheme ? "border-slate-200 bg-slate-200/30" : "border-border/40 bg-muted/20"
         )}>
           <img
-            src={normalizeArticleImageUrl(item.url) ?? item.url}
+            src={mediaThumbnailUrl(item.url, MEDIA_PREVIEW_WIDTH, 80) ?? normalizeArticleImageUrl(item.url) ?? item.url}
             alt={item.name}
             className="max-w-[90vw] max-h-[70vh] object-contain transition-all duration-300 transform scale-100 ease-out select-none"
             draggable={false}
@@ -916,9 +917,13 @@ function MediaCard({
       <div className="media-library-card__preview">
         {item.type === 'image' ? (
           <img
-            src={normalizeArticleImageUrl(item.url) ?? item.url}
+            src={mediaThumbnailUrl(item.url, MEDIA_THUMB_WIDTH) ?? normalizeArticleImageUrl(item.url) ?? item.url}
             alt={item.altText ?? item.name}
             className="media-library-card__image"
+            /* Below the fold there may be hundreds of these; without this the
+               browser requests every one the moment the grid mounts. */
+            loading="lazy"
+            decoding="async"
             onLoad={handleLoad}
           />
         ) : (

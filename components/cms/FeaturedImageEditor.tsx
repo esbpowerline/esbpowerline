@@ -1,4 +1,5 @@
 'use client';
+import { mediaThumbnailUrl, MEDIA_THUMB_WIDTH, MEDIA_PREVIEW_WIDTH } from '@/lib/media-thumbnail';
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -243,7 +244,13 @@ export function FeaturedImageEditor({
                       selected ? 'border-sky-500 ring-2 ring-sky-500/30' : 'border-transparent hover:border-border',
                     )}
                   >
-                    <img src={m.url} alt={m.name} className="w-full h-full object-cover" />
+                    <img
+                      src={mediaThumbnailUrl(m.url, MEDIA_THUMB_WIDTH) ?? m.url}
+                      alt={m.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </button>
                 );
               })}
@@ -261,7 +268,7 @@ export function FeaturedImageEditor({
         <div className="featured-image-editor">
           <div className="featured-image-editor__frame relative rounded-xl overflow-hidden border border-border/60 group">
             <img
-              src={value}
+              src={mediaThumbnailUrl(value, MEDIA_PREVIEW_WIDTH, 80) ?? value}
               alt={meta.alt ?? ''}
               className={cn(
                 'featured-image-editor__img featured-image-editor__img--smooth',
