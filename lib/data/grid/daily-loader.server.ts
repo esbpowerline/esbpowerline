@@ -1,6 +1,5 @@
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { parseIsoDate, type DailyLoadResult } from '@/lib/data/grid/daily-loader-core';
-import { getArchiveFallback } from '@/lib/data/grid/archive-fallback';
 import { warnIfInvalidDailyReport } from '@/lib/data/grid/validate-daily-report';
 import { shouldUseArchiveFallback } from '@/lib/data/grid/daily-access';
 
@@ -8,14 +7,21 @@ export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loa
 
 /**
  * Map an HTTP-ish status to a load result, using the bundled archive fallback
- * for missing files/network failures. Server-only: statically pulls in the
- * large archive-fallback module (clients lazy-load it instead).
+ * for missing files/network failures.
+ *
+ * The fallback module is 975 KB of generated code and the happy path (release
+ * or file found) never reads it, so it is imported only on the branch that
+ * needs it — that is why this function is async. Be precise about what this
+ * buys: file tracing follows dynamic imports too, so the module still ships in
+ * the function bundle; what is saved is parsing and evaluating 975 KB of JS on
+ * every cold start that never touches the fallback. Removing it from the
+ * bundle entirely is the archive-out-of-git decision (docs/archive-out-of-git.md).
  */
-export function resolveDailyLoadFromStatus(
+export async function resolveDailyLoadFromStatus(
   isoDate: string,
   httpStatus: number | null,
   data?: GridDailyData,
-): DailyLoadResult {
+): Promise<DailyLoadResult> {
   const parsed = parseIsoDate(isoDate);
   if (!parsed) {
     return { ok: false, error: `Invalid date: ${isoDate}` };
@@ -27,6 +33,7 @@ export function resolveDailyLoadFromStatus(
   }
 
   if (shouldUseArchiveFallback(httpStatus)) {
+    const { getArchiveFallback } = await import('@/lib/data/grid/archive-fallback');
     const fallback = getArchiveFallback(parsed);
     if (fallback) {
       return { ok: true, data: fallback, source: 'archive' };
@@ -64,7 +71,7 @@ export async function loadDailyReportFromDisk(isoDate: string): Promise<DailyLoa
     const { getReleaseOverride } = await import('@/lib/data/releases.server');
     const released = await getReleaseOverride('GRID_DAILY', parsed);
     if (released) {
-      const result = resolveDailyLoadFromStatus(isoDate, 200, released as GridDailyData);
+      const result = await resolveDailyLoadFromStatus(isoDate, 200, released as GridDailyData);
       if (result.ok && result.source === 'network') {
         return { ok: true, data: result.data, source: 'disk' };
       }
@@ -80,7 +87,7 @@ export async function loadDailyReportFromDisk(isoDate: string): Promise<DailyLoa
     const filePath = path.join(process.cwd(), 'public', 'data', 'daily', `${parsed}.json`);
     const raw = await fs.readFile(filePath, 'utf8');
     const data = JSON.parse(raw) as GridDailyData;
-    const result = resolveDailyLoadFromStatus(isoDate, 200, data);
+    const result = await resolveDailyLoadFromStatus(isoDate, 200, data);
     if (result.ok && result.source === 'network') {
       return { ok: true, data: result.data, source: 'disk' };
     }

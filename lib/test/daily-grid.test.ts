@@ -128,8 +128,8 @@ describe('daily-loader-core status handling', () => {
     expect(shouldUseArchiveFallback(429)).toBe(false);
   });
 
-  it('returns ok:false for 403 without archive masquerade', () => {
-    const result = resolveDailyLoadFromStatus('2026-06-15', 403);
+  it('returns ok:false for 403 without archive masquerade', async () => {
+    const result = await resolveDailyLoadFromStatus('2026-06-15', 403);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.status).toBe(403);
@@ -137,14 +137,14 @@ describe('daily-loader-core status handling', () => {
     }
   });
 
-  it('returns ok:false for 429', () => {
-    const result = resolveDailyLoadFromStatus('2026-06-15', 429);
+  it('returns ok:false for 429', async () => {
+    const result = await resolveDailyLoadFromStatus('2026-06-15', 429);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.status).toBe(429);
   });
 
-  it('returns archive data for known fallback date on 404', () => {
-    const result = resolveDailyLoadFromStatus('2026-06-29', 404);
+  it('returns archive data for known fallback date on 404', async () => {
+    const result = await resolveDailyLoadFromStatus('2026-06-29', 404);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.source).toBe('archive');
@@ -152,8 +152,8 @@ describe('daily-loader-core status handling', () => {
     }
   });
 
-  it('returns network payload on 200', () => {
-    const result = resolveDailyLoadFromStatus('2026-06-29', 200, sampleReport as any);
+  it('returns network payload on 200', async () => {
+    const result = await resolveDailyLoadFromStatus('2026-06-29', 200, sampleReport as any);
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.source).toBe('network');
   });
