@@ -334,6 +334,11 @@ model Node {
   kpiUnit           String?
   lastUpdated       String?
   description       String?
+  /// Nullable link to the domain entity this node draws (B2, phase 1). A node
+  /// with no entity is honestly a diagram node; one with a link stops being
+  /// the place a power station's capacity lives as a string in kpiValue.
+  entityType        String?
+  entityId          String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -342,6 +347,8 @@ model Node {
 
   edgesFrom Edge[] @relation("EdgeSource")
   edgesTo   Edge[] @relation("EdgeTarget")
+
+  @@index([entityType, entityId])
 }
 
 model Edge {
@@ -608,4 +615,226 @@ model DataReleaseRevision {
 
   @@unique([releaseId, revision])
   @@index([releaseId, publishedAt])
+}
+
+// ============================================
+// DOMAIN MODEL (B2, phase 1 — additive)
+// ============================================
+// What the country has, not what the interface draws. Node above holds
+// positions, colours and icons; a power station's capacity used to live there
+// as a string. These tables are the entities and the observation layer that
+// answers: where did this value come from · when was it published · which
+// document supports it · was it later corrected · reported or derived · what
+// verified it. Phase 1 creates them and links Node by (entityType, entityId);
+// nothing reads them yet, so the explorer is unchanged.
+
+enum OrganizationKind {
+  OWNER
+  OPERATOR
+  REGULATOR
+  UTILITY
+}
+
+enum FuelKind {
+  GAS
+  COAL
+  HSD
+  HFO
+  HYDRO
+  SOLAR
+  WIND
+  NUCLEAR
+  IMPORT
+}
+
+enum ProjectStatus {
+  PLANNED
+  CONSTRUCTION
+  COMMISSIONED
+  CANCELLED
+}
+
+enum ContractKind {
+  PPA
+  TARIFF
+  SUPPLY
+}
+
+enum Publisher {
+  PGCB
+  PETROBANGLA
+  SREDA
+  BPDB
+}
+
+/// REPORTED: the document states it. DERIVED: computed here from reported
+/// figures. The doctrine's reported/derived split, stored rather than implied.
+enum ObservationBasis {
+  REPORTED
+  DERIVED
+}
+
+model Organization {
+  id        String           @id @default(cuid())
+  name      String           @unique
+  shortName String?
+  kind      OrganizationKind
+  country   String           @default("BD")
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  plants    PowerPlant[]
+  gasFields GasField[]
+  contracts Contract[]
+}
+
+model PowerPlant {
+  id               String    @id @default(cuid())
+  name             String    @unique
+  organizationId   String?
+  fuel             FuelKind
+  /// Nameplate as a figure with a source, or null — never a default.
+  capacityMw       Decimal?  @db.Decimal(10, 2)
+  commissionedOn   DateTime?
+  retiredOn        DateTime?
+  latitude         Float?
+  longitude        Float?
+  sourceDocumentId String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  sourceDocument SourceDocument? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  units          GeneratingUnit[]
+  contracts      Contract[]
+  projects       PowerProject[]
+
+  @@index([organizationId])
+  @@index([fuel])
+}
+
+model GeneratingUnit {
+  id             String    @id @default(cuid())
+  plantId        String
+  name           String
+  capacityMw     Decimal?  @db.Decimal(10, 2)
+  commissionedOn DateTime?
+  retiredOn      DateTime?
+
+  plant PowerPlant @relation(fields: [plantId], references: [id], onDelete: Cascade)
+
+  @@unique([plantId, name])
+}
+
+model Substation {
+  id        String @id @default(cuid())
+  name      String @unique
+  voltageKv Int
+  latitude  Float?
+  longitude Float?
+
+  linesFrom TransmissionLine[] @relation("LineFrom")
+  linesTo   TransmissionLine[] @relation("LineTo")
+}
+
+model TransmissionLine {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  fromSubstationId String
+  toSubstationId   String
+  voltageKv        Int
+  circuitKm        Decimal? @db.Decimal(10, 2)
+
+  from Substation @relation("LineFrom", fields: [fromSubstationId], references: [id], onDelete: Restrict)
+  to   Substation @relation("LineTo", fields: [toSubstationId], references: [id], onDelete: Restrict)
+
+  @@index([fromSubstationId])
+  @@index([toSubstationId])
+}
+
+model Interconnector {
+  id                  String   @id @default(cuid())
+  name                String   @unique
+  counterpartyCountry String
+  capacityMw          Decimal? @db.Decimal(10, 2)
+}
+
+/// Seeded from the FIELD_COMPANY map in scripts/fix-gas-rollups.mjs, itself
+/// read off days where the rollup and the document agree exactly.
+model GasField {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  operatorId    String?
+  capacityMmcfd Decimal? @db.Decimal(10, 2)
+
+  operator Organization? @relation(fields: [operatorId], references: [id], onDelete: SetNull)
+
+  @@index([operatorId])
+}
+
+model PowerProject {
+  id             String        @id @default(cuid())
+  name           String        @unique
+  status         ProjectStatus
+  becomesPlantId String?
+
+  becomesPlant PowerPlant? @relation(fields: [becomesPlantId], references: [id], onDelete: SetNull)
+
+  @@index([becomesPlantId])
+}
+
+model Contract {
+  id             String       @id @default(cuid())
+  kind           ContractKind
+  organizationId String
+  plantId        String?
+  effectiveFrom  DateTime
+  effectiveTo    DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  plant        PowerPlant?  @relation(fields: [plantId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([plantId])
+}
+
+/// One fetched document: the bytes parsed are the bytes hashed. The same
+/// content_sha256 that verify:source pins, promoted to a row.
+model SourceDocument {
+  id            String    @id @default(cuid())
+  publisher     Publisher
+  filename      String
+  contentSha256 String
+  windowStart   DateTime
+  windowEnd     DateTime
+  fetchedAt     DateTime  @default(now())
+  parserVersion String?
+
+  observations Observation[]
+  plants       PowerPlant[]
+
+  @@unique([publisher, contentSha256])
+  @@index([publisher, windowStart])
+}
+
+/// A figure, its subject, its window and its document. Nothing here may be
+/// stored without a sourceDocumentId — an observation nobody published is
+/// not an observation.
+model Observation {
+  id               String           @id @default(cuid())
+  sourceDocumentId String
+  subjectType      String
+  subjectId        String
+  metric           String
+  value            Decimal          @db.Decimal(14, 4)
+  unit             String
+  windowStart      DateTime
+  windowEnd        DateTime
+  basis            ObservationBasis
+  createdAt        DateTime         @default(now())
+
+  sourceDocument SourceDocument @relation(fields: [sourceDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([subjectType, subjectId, metric, windowStart])
+  @@index([sourceDocumentId])
 }
