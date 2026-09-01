@@ -45,6 +45,11 @@
     "test:watch": "vitest",
     "test:qa": "vitest run lib/test/role-isolation.test.ts lib/test/article-submit.test.ts lib/test/staff-accounts.test.ts lib/test/env-auth.test.ts lib/test/seed-credentials.test.ts lib/test/server-auth.test.ts lib/test/password-reset.test.ts lib/test/security-audit.test.ts lib/test/daily-grid.test.ts lib/test/editorial-limits.test.ts",
     "ingest:sreda": "tsx lib/data/sreda/ingest-sreda.ts",
+    "ingest:run": "tsx --conditions react-server scripts/run-ingest.ts",
+    "ingest:daemon": "node scripts/ingest-daemon.mjs",
+    "ingest:daemon:watch": "node scripts/ingest-daemon.mjs --watch",
+    "fix:gas-citations": "node scripts/fix-gas-citations.mjs",
+    "backfill:media-sizes": "tsx scripts/backfill-media-sizes.ts",
     "diagnose:prod": "tsx scripts/diagnose-production-state.ts",
     "supabase:sync-passwords": "npm run supabase:seed-staff && npm run supabase:seed-member"
   },
