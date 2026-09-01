@@ -23,23 +23,32 @@ import type { DayProvenance } from '@/lib/data/grid/verification-ledger';
  */
 export function SourceProvenanceNote({ provenance }: { provenance: DayProvenance }) {
   const alarming = provenance.verdict === 'INDICATOR' || provenance.verdict === 'HASH';
+  // A duplicate-suspect day outranks the quiet "not re-checked" state: its figures are
+  // byte-identical to a neighbour's (the confirmed June-2026 shift signature) and the
+  // workbook that could rule on it is no longer served. Louder than grey, short of the
+  // rose reserved for a proven disagreement with a source.
+  const suspect = provenance.duplicateSuspect !== null;
   const unchecked = !provenance.verified;
 
-  const Icon = alarming ? ShieldAlert : unchecked ? ShieldQuestion : ShieldCheck;
+  const Icon = alarming ? ShieldAlert : suspect ? ShieldAlert : unchecked ? ShieldQuestion : ShieldCheck;
 
   const tone = alarming
     ? 'border-rose-500/25 bg-rose-500/[0.04] text-rose-700 dark:text-rose-300'
-    : unchecked
-      ? 'border-border/30 bg-muted/10 text-muted-foreground'
-      : 'border-emerald-500/20 bg-emerald-500/[0.03] text-muted-foreground';
+    : suspect
+      ? 'border-amber-500/30 bg-amber-500/[0.05] text-amber-800 dark:text-amber-300'
+      : unchecked
+        ? 'border-border/30 bg-muted/10 text-muted-foreground'
+        : 'border-emerald-500/20 bg-emerald-500/[0.03] text-muted-foreground';
 
   const heading = alarming
     ? 'This day disagrees with its source'
-    : unchecked
-      ? 'Not re-checked against the source document'
-      : provenance.reconstructed
-        ? 'Verified — read by a reconstructed parser'
-        : 'Verified against the source document';
+    : suspect
+      ? `Unverified — identical to ${provenance.duplicateSuspect}`
+      : unchecked
+        ? 'Not re-checked against the source document'
+        : provenance.reconstructed
+          ? 'Verified — read by a reconstructed parser'
+          : 'Verified against the source document';
 
   return (
     <aside

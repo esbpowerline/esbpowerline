@@ -77,12 +77,13 @@ const dateInFilename = (name) => {
 const zoneShed = (z) => num(z.loadShedding) ?? num(z.loadShed) ?? 0;
 const stable = (v) => JSON.stringify(v ?? null);
 
-const days = fs
+const allDays = fs
   .readdirSync(DAILY)
   .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
   .map((f) => f.slice(0, -5))
-  .filter((d) => d >= FROM && d <= TO)
   .sort();
+
+const days = allDays.filter((d) => d >= FROM && d <= TO);
 
 if (!days.length) {
   console.error(`No days in range ${FROM}..${TO}`);
@@ -157,6 +158,42 @@ const noSourceDays = (() => {
 
 let prev = null;
 let prevDay = null;
+// Trailing zone-demand shortfalls (see check 1) — the archive's own recent
+// behaviour is the baseline a day is judged against.
+const zoneShortfalls = [];
+
+// A bounded range starts with prev = null, which silently disabled every
+// previous-day comparison — carry-forward and duplicate-day — for the FIRST
+// in-range day. The publish gate runs `--from date --to date`, so for the gate
+// that was EVERY day: the one place those checks matter most never ran them.
+// Seed prev from the preceding archive day; no checks run on the seed itself.
+if (days[0] !== allDays[0]) {
+  const seedDay = allDays[allDays.indexOf(days[0]) - 1];
+  try {
+    // Not read(): a malformed seed day is outside the range and must not add
+    // findings — in a gate run that would block a publish for another day's
+    // corruption. An unreadable seed just means no previous-day comparisons.
+    prev = JSON.parse(fs.readFileSync(path.join(DAILY, `${seedDay}.json`), 'utf8'));
+    prevDay = seedDay;
+  } catch {
+    /* run without a seed */
+  }
+}
+
+// Declared duplicate pairs — a published statement, not a silencer. The same
+// file feeds DUPLICATE_SUSPECT_DAYS in lib/data/grid/verification-ledger.ts,
+// so the reader-facing UNVERIFIED marker and this check can never disagree
+// about which days are declared.
+const duplicateSuspects = (() => {
+  try {
+    const j = JSON.parse(
+      fs.readFileSync('public/data/grid-verification/duplicate-suspect-days.json', 'utf8'),
+    );
+    return new Set((j.pairs ?? []).flat());
+  } catch {
+    return new Set();
+  }
+})();
 
 for (const day of days) {
   const d = read(DAILY, day);
@@ -166,15 +203,63 @@ for (const day of days) {
   const hourly = d.hourlyLoadData ?? [];
   const gasProd = d.gasProductionData ?? null;
 
-  // 1. Zone demand should reconcile with the national evening peak it is taken at.
-  if (runs('zone-demand') && zones.length && num(ss.eveningPeakDemand)) {
+  // 1. Zone demand against the national evening peak it is taken at.
+  //
+  //    The nine zone rows are demand delivered at substations; the evening peak
+  //    is measured generation-side. They have never been equal and never will
+  //    be: the shortfall is the system's own loss, declining secularly — median
+  //    8.3% in 2014 down to 3.6% in 2026, measured across all 4,545 days on
+  //    2026-09-01. Warning on a twelve-year physical trend produced 3,783
+  //    WARNs nobody read, and the days that genuinely were wrong — 2014-01-15,
+  //    where Dhaka, Chattogram and Mymensingh print 0 MW while six zones
+  //    report — looked identical to the structural constant. A channel where a
+  //    defect reads the same as physics cannot carry signal.
+  //
+  //    So a day is judged against the archive's own trailing median, not
+  //    against a loss model we would have to invent. Structural shortfall is
+  //    counted as INFO; WARN is reserved for what the series itself cannot
+  //    explain: zones summing ABOVE the generation-side peak (arithmetically
+  //    impossible for delivered demand), or a shortfall leaving the band
+  //    around the trailing median. The band is ±3.5pp: the within-year p10-p90
+  //    spread reaches 4.2pp (2019), so a narrower band re-floods the channel
+  //    with seasonality.
+  if ((runs('zone-demand') || runs('zone-zero')) && zones.length && num(ss.eveningPeakDemand)) {
+    const reporting = zones.filter((z) => (num(z.demand) ?? 0) > 0);
+    const zeroed = zones.filter((z) => num(z.demand) === 0);
+
+    // A zone printing 0 MW beside reporting neighbours is absence dressed as a
+    // measurement — the gas archive's disease (check 4) in a second table.
+    // Reported, never bulk-repaired: only the workbook can say whether PGCB
+    // printed a dash or the parser dropped the cell.
+    if (runs('zone-zero') && zeroed.length && reporting.length) {
+      record('zone-zero', 'WARN', day,
+        `${zeroed.map((z) => z.zone).join(', ')} print 0 MW while ${reporting.length} zone(s) report — absent or dropped, not measured`);
+    }
+
     const sum = zones.reduce((a, z) => a + (num(z.demand) ?? 0), 0);
     const gap = sum - ss.eveningPeakDemand;
-    const pct = Math.abs(gap) / ss.eveningPeakDemand;
-    // 2% absorbs PGCB's own rounding across nine printed zone figures.
-    if (pct > 0.02) {
+    const short = -gap / ss.eveningPeakDemand; // positive when zones sum under the peak
+
+    const baseline = zoneShortfalls.length >= 15
+      ? [...zoneShortfalls].sort((a, b) => a - b)[Math.floor(zoneShortfalls.length / 2)]
+      : null;
+
+    if (gap > ss.eveningPeakDemand * 0.02) {
+      // 2% absorbs PGCB's own rounding across nine printed zone figures.
       record('zone-demand', 'WARN', day,
-        `zones sum ${sum.toFixed(0)} vs evening peak demand ${ss.eveningPeakDemand.toFixed(0)} (${gap > 0 ? '+' : ''}${gap.toFixed(0)} MW, ${(pct * 100).toFixed(1)}%)`);
+        `zones sum ${sum.toFixed(0)} EXCEEDS evening peak demand ${ss.eveningPeakDemand.toFixed(0)} by ${gap.toFixed(0)} MW`);
+    } else if (baseline !== null && Math.abs(short - baseline) > 0.035) {
+      record('zone-demand', 'WARN', day,
+        `zones sum ${sum.toFixed(0)} vs evening peak ${ss.eveningPeakDemand.toFixed(0)} — shortfall ${(short * 100).toFixed(1)}% vs trailing median ${(baseline * 100).toFixed(1)}%`);
+    } else if (short > 0.02) {
+      record('zone-demand', 'INFO', day,
+        `zones sum ${(short * 100).toFixed(1)}% under evening peak — delivered vs generation-side, the system's own loss`);
+    }
+
+    // A day with zeroed rows would drag the baseline toward the defect.
+    if (!zeroed.length) {
+      zoneShortfalls.push(short);
+      if (zoneShortfalls.length > 60) zoneShortfalls.shift();
     }
   }
 
@@ -236,14 +321,47 @@ for (const day of days) {
     }
   }
 
+  // 3b. Duplicate-day: the June-2026 shift, detectable without a single PDF.
+  //
+  //     Five days in June 2026 each held the FOLLOWING day's actuals, live on
+  //     the site, invisible to code review — found only by re-reading source
+  //     documents against the database. But the defect has a cheap signature:
+  //     a day whose eveningPeakGen, totalEnergyGen, eveningPeakDemand and
+  //     dayPeakGen all exactly equal its neighbour's. Four independent
+  //     quantities do not coincide; two matching days mean at most one of them
+  //     is its own. Six historical pairs carry this signature and cannot be
+  //     ruled on (their workbooks are unobtainable) — those are DECLARED in
+  //     duplicate-suspect-days.json and published as UNVERIFIED, so they count
+  //     as INFO. An undeclared match is an ERROR: we are about to publish, or
+  //     have published, a day that is probably another day.
+  if (runs('duplicate-day') && prev) {
+    const tuple = ['eveningPeakGen', 'totalEnergyGen', 'eveningPeakDemand', 'dayPeakGen'];
+    const here = tuple.map((k) => num(ss[k]));
+    const there = tuple.map((k) => num(prev.systemStats?.[k]));
+    if (here.every((v) => v !== null) && there.every((v) => v !== null) &&
+        here.every((v, i) => v === there[i])) {
+      const declared = duplicateSuspects.has(day) && duplicateSuspects.has(prevDay);
+      record('duplicate-day', declared ? 'INFO' : 'ERROR', day,
+        declared
+          ? `identical to ${prevDay} across all four headline stats — declared in duplicate-suspect-days.json, published as UNVERIFIED`
+          : `identical to ${prevDay} across eveningPeakGen, totalEnergyGen, eveningPeakDemand and dayPeakGen — the June-2026 shift signature; at most one of these days is its own`);
+    }
+  }
+
   // 4. How a day says "no gas".
   //
-  //    Omitting the sections is the rule 48c7152a states, but it only starts
+  //    Omitting the sections is the rule 48c7152a states, but it only started
   //    being followed on 2026-08-14 — before that, six rows of 0.0 is how the
-  //    archive has always represented an unpublished window. That is a legacy
-  //    convention, not a corrupted day, so it is INFO and counted rather than
-  //    demanded back. What WOULD be wrong is a partially zeroed table, where
-  //    some companies report and others silently do not.
+  //    archive represented an unpublished window. On 2026-09-01
+  //    scripts/migrate-zero-gas-days.mjs moved 2,211 such days to omission.
+  //    Any all-zero table still here is one the migration REFUSED, and each
+  //    refusal class needs verify:source, not deletion: 49 days are all-zero
+  //    yet name a Petrobangla PDF (a document claims those zeros), and 793
+  //    days have a zero production table beside a fully reporting distribution
+  //    table (the intake page likely failed to parse — same family as the
+  //    "Sylhet Sylhet" row-merge days). So INFO, counted, never demanded back.
+  //    What WOULD be wrong is a partially zeroed table, where some companies
+  //    report and others silently do not.
   if (runs('zero-gas') && gasProd?.length) {
     const zeros = gasProd.filter((r) => (num(r.gas) ?? 0) === 0).length;
     if (zeros === gasProd.length) {

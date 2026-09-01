@@ -31,11 +31,44 @@ export interface LedgerDay {
   counts?: { indicator?: number; value?: number; shape?: number };
 }
 
+import duplicateSuspectDeclaration from '@/public/data/grid-verification/duplicate-suspect-days.json';
+
+/**
+ * Day-pairs whose figures are byte-identical to their neighbour across four
+ * independent stats — eveningPeakGen, totalEnergyGen, eveningPeakDemand and
+ * dayPeakGen all matching exactly. That is the signature of the confirmed
+ * 2026-06-25..29 shift, where five published days each held the FOLLOWING day's
+ * actuals and the workbooks proved it. These pairs cannot be proven either way:
+ * PGCB does not serve workbooks this old and no local copy is known. At most one
+ * day of each pair is its own day, and nobody can currently say which — so both
+ * are marked, because silence is the one unacceptable outcome.
+ *
+ * The pairs live in duplicate-suspect-days.json — a published declaration also
+ * read by verify-data's duplicate-day check, so the reader-facing UNVERIFIED
+ * marker and the check can never disagree about which days are declared.
+ * Remove a pair only when its workbook has been located and verify:source has
+ * ruled which day it describes.
+ */
+export const DUPLICATE_SUSPECT_DAYS: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(
+    (duplicateSuspectDeclaration.pairs as [string, string][]).flatMap(([a, b]) => [
+      [a, b],
+      [b, a],
+    ]),
+  ),
+);
+
 export interface DayProvenance {
   /** The day this describes. */
   day: string;
   /** False when `verify:source` has never refetched this day at all. */
   verified: boolean;
+  /**
+   * Set to the partner day when this day's figures are byte-identical to a
+   * neighbour's and the source workbook cannot be obtained to rule which of the
+   * two is genuine.
+   */
+  duplicateSuspect: string | null;
   verdict: SourceVerdict | null;
   /** True when the parser that produced this day was a reconstruction. */
   reconstructed: boolean;
@@ -67,21 +100,29 @@ const VERDICT_COPY: Record<SourceVerdict, string> = {
  * entitled to know which side of that line the day in front of them is on.
  */
 export function describeDayProvenance(day: string, entry: LedgerDay | undefined): DayProvenance {
+  const duplicateSuspect = DUPLICATE_SUSPECT_DAYS[day] ?? null;
+  const duplicateSentence = duplicateSuspect
+    ? `This day's headline figures are identical to ${duplicateSuspect}'s — the signature of a filing shift. At most one of the two days is genuine, and the source workbook needed to rule on it is no longer served by PGCB.`
+    : null;
+
   if (!entry) {
     return {
       day,
       verified: false,
+      duplicateSuspect,
       verdict: null,
       reconstructed: false,
       parserVersion: null,
       gasVerified: false,
-      summary:
-        'This day has not been re-checked against its source document. The figures are as parsed from the report named above.',
+      summary: duplicateSentence
+        ? `${duplicateSentence} Treat both days as unverified.`
+        : 'This day has not been re-checked against its source document. The figures are as parsed from the report named above.',
     };
   }
 
   const reconstructed = Boolean(entry.parserVersion?.includes('reconstructed'));
   const parts = [VERDICT_COPY[entry.verdict] ?? 'Checked against its source document.'];
+  if (duplicateSentence) parts.unshift(duplicateSentence);
 
   if (reconstructed) {
     parts.push(
@@ -95,6 +136,7 @@ export function describeDayProvenance(day: string, entry: LedgerDay | undefined)
   return {
     day,
     verified: true,
+    duplicateSuspect,
     verdict: entry.verdict,
     reconstructed,
     parserVersion: entry.parserVersion,
@@ -105,5 +147,11 @@ export function describeDayProvenance(day: string, entry: LedgerDay | undefined)
 
 /** True when a day's state warrants telling the reader before they read the figures. */
 export function provenanceNeedsDisclosure(p: DayProvenance): boolean {
-  return !p.verified || p.reconstructed || p.verdict === 'INDICATOR' || p.verdict === 'HASH';
+  return (
+    !p.verified ||
+    p.reconstructed ||
+    p.duplicateSuspect !== null ||
+    p.verdict === 'INDICATOR' ||
+    p.verdict === 'HASH'
+  );
 }
