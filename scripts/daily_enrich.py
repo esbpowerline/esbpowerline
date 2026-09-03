@@ -44,6 +44,17 @@ def _iso(d: date) -> str:
     return d.isoformat()
 
 
+def _document_name(value: str | None) -> str | None:
+    """The publisher's file name, stripped of whatever path led to it.
+
+    Handles a Windows path on POSIX too (PurePath would not): days are ingested
+    on both, and the citation must read the same either way.
+    """
+    if not value:
+        return None
+    return value.replace("\\", "/").rsplit("/", 1)[-1]
+
+
 def observation_windows(
     energy: date,
     pgcb_file: str | None,
@@ -77,7 +88,7 @@ def observation_windows(
             "filedAs": end,
             "publishedLabel": report.get("report_date_label"),
             "period": report.get("period"),
-            "sourceFile": (petrobangla.get("meta") or {}).get("source_filename"),
+            "sourceFile": _document_name((petrobangla.get("meta") or {}).get("source_filename")),
         }
     return out
 
@@ -208,7 +219,13 @@ def enrich_grid_daily(
     source_files = dict(payload.get("sourceFiles") or {})
     if pgcb_file:
         source_files["pgcb"] = pgcb_file
-    pb_name = (petrobangla or {}).get("meta", {}).get("source_filename")
+    # The document's NAME, never the path it happened to be parsed from. The
+    # archive parser records source_filename as whatever it was handed, and on
+    # the Pi that is an absolute path — 2026-09-01 rebuilt there cited
+    # "/home/pi/esb-ingest/repo/scratch/.../Daily-Gas-...pdf" (2026-09-03).
+    # A citation is a claim about which document PUBLISHED the figures; the
+    # reader cannot check a path on a machine they do not have.
+    pb_name = _document_name((petrobangla or {}).get("meta", {}).get("source_filename"))
     # Only credited when the day actually carries gas figures. 833 archived days
     # named a Petrobangla PDF while showing no gas at all.
     has_gas = any(float(r.get("gas") or 0) > 0 for r in payload.get("gasProductionData") or [])

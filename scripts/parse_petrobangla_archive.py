@@ -425,7 +425,12 @@ def main():
     doc_json = {
         '$schema': 'petrobangla-daily/v1',
         'meta': dict(schema_version='1.0.0', parser_version='2.0.0-reconstructed',
-                     source_pdf=pdf, source_filename=pdf.split('\\')[-1],
+                     # Split on both separators: this ran on Windows only until
+                     # the Pi took over the daily poll, and on POSIX the
+                     # backslash-only split left the whole absolute path as the
+                     # document's NAME, which then propagated into the day's
+                     # sourceFiles citation (2026-09-01, 2026-09-03).
+                     source_pdf=pdf, source_filename=pdf.replace('\\', '/').rsplit('/', 1)[-1],
                      parsed_at=None, page_count=doc.page_count,
                      parse_status=('ok' if not dist_warnings else 'partial'),
                      warnings=dist_warnings,
