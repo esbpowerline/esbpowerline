@@ -15,7 +15,7 @@ import {
 import {
   CmsPageHeader, CmsStatCard, CmsCard, CmsActionPill, CmsCreateCapsule,
   CmsListRow, CmsMetricRow, CmsActivityItem,
-  CmsSectionStack, CmsStatGrid, CmsCardGrid, CmsActionsGrid,
+  CmsSectionStack, CmsStatGrid, CmsActionsGrid,
   CmsListStack, CmsScheduleList, CmsCardFooter,
 } from '@/components/cms/CmsUI';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
@@ -63,30 +63,45 @@ async function CmsDashboardData() {
         }))}
       />
 
+      {/* One strip, not two.
+          Promotion counts used to sit in a second `cols={3}` grid below the
+          four headline tiles, and because its members are conditional a normal
+          day rendered two tiles stretched across the full width — a "14" and
+          an "8" each marooned in half a screen. They belong in the same flow
+          as the other counts: same tile, same size, wrapping where the row
+          runs out. The grid is `auto-fit` with a capped track now, so however
+          many of these are present the tiles stay tile-sized. */}
       <CmsStatGrid>
-        <CmsStatCard title="My Articles" value={formatNumber(articlesCount)} icon={FileText} accent="sky" change={`${published} live`} />
-        <CmsStatCard title="Total Views" value={formatNumber(totalViews)} icon={Eye} accent="violet" />
+        <CmsStatCard title="My Articles" value={formatNumber(articlesCount)} icon={FileText} change={`${published} live`} />
+        <CmsStatCard title="Total Views" value={formatNumber(totalViews)} icon={Eye} />
         <CmsStatCard title="Drafts" value={formatNumber(drafts)} icon={PenLine} accent="amber" change={scheduled > 0 ? `${scheduled} scheduled` : undefined} />
         <CmsStatCard title="Published" value={formatNumber(published)} icon={Clock} accent="emerald" change={archived > 0 ? `${archived} archived` : undefined} />
+        {featured > 0 && <CmsStatCard title="Featured" value={formatNumber(featured)} icon={Star} accent="amber" />}
+        {breaking > 0 && <CmsStatCard title="Breaking" value={formatNumber(breaking)} icon={Flame} accent="red" />}
+        {pendingNotices > 0 && (
+          <CmsStatCard title="Notices" value={formatNumber(pendingNotices)} icon={MessageSquare} accent="red" change="Action needed" />
+        )}
       </CmsStatGrid>
 
-      {(featured > 0 || breaking > 0 || pendingNotices > 0) && (
-        <CmsStatGrid cols={3}>
-          {featured > 0 && <CmsStatCard title="Featured" value={formatNumber(featured)} icon={Star} accent="amber" />}
-          {breaking > 0 && <CmsStatCard title="Breaking" value={formatNumber(breaking)} icon={Flame} accent="red" />}
-          {pendingNotices > 0 && <CmsStatCard title="Notices" value={formatNumber(pendingNotices)} icon={MessageSquare} accent="rose" change="Action needed" />}
-        </CmsStatGrid>
-      )}
-
-      <CmsCardGrid cols={3}>
-        <CmsCard title="Recent Articles" icon={Layers} className="lg:col-span-2">
+      {/* Main column + right rail, not two independent 3-column rows.
+          The old shape put a tall panel beside a short one twice over, so the
+          right-hand side carried two visible voids: the Pipeline card either
+          stretched to the height of Recent Articles with a lake of empty space
+          inside it, or sat at its natural height leaving the gap outside it.
+          Neither is fixable by tuning alignment — a short card simply does not
+          belong in a row with a long list. Stacking the four short panels into
+          their own rail lets each keep its natural height and the column ends
+          where its content does. */}
+      <div className="admin-dash-split">
+        <div className="admin-dash-main">
+        <CmsCard title="Recent Articles" icon={Layers}>
           <CmsListStack>
             {articles.slice(0, 8).map((a) => (
               <CmsListRow
                 key={a.id}
                 title={a.title}
                 href={`/cms/articles/${a.id}/edit`}
-                meta={a.status}
+                badge={<StatusBadge status={a.status} />}
                 value={`${formatNumber(a.views)} views`}
               />
             ))}
@@ -99,21 +114,7 @@ async function CmsDashboardData() {
           </CmsListStack>
         </CmsCard>
 
-        <CmsCard title="Pipeline" icon={Zap}>
-          <CmsListStack>
-            <CmsMetricRow label="Drafts" value={formatNumber(drafts)} />
-            <CmsMetricRow label="Scheduled" value={formatNumber(scheduled)} highlight={scheduled > 0} />
-            <CmsMetricRow label="Published" value={formatNumber(published)} />
-            <CmsMetricRow label="Archived" value={formatNumber(archived)} />
-          </CmsListStack>
-          <CmsCardFooter href="/cms/calendar" className="admin-card-footer--link">
-            Open editorial calendar →
-          </CmsCardFooter>
-        </CmsCard>
-      </CmsCardGrid>
-
-      <CmsCardGrid cols={3}>
-        <CmsCard title="Top Performers" icon={BarChart3} className="lg:col-span-2">
+        <CmsCard title="Top Performers" icon={BarChart3}>
           <CmsListStack>
             {topByViews.map((a, i) => (
               <CmsListRow
@@ -129,6 +130,37 @@ async function CmsDashboardData() {
               <p className="text-[13px] text-muted-foreground py-2">Publish stories to track performance.</p>
             )}
           </CmsListStack>
+        </CmsCard>
+
+        <CmsCard title="Recently Published" icon={Send}>
+          <div>
+            {calendar.published.slice(0, 6).map((a) => (
+              <CmsActivityItem
+                key={a.id}
+                badge={<StatusBadge status="PUBLISHED" />}
+                date={a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : '—'}
+                message={
+                  <Link href={`/cms/articles/${a.id}/edit`} className="hover:text-sky-400">
+                    {a.title}
+                  </Link>
+                }
+              />
+            ))}
+          </div>
+        </CmsCard>
+        </div>
+
+        <aside className="admin-dash-rail">
+        <CmsCard title="Pipeline" icon={Zap}>
+          <CmsListStack>
+            <CmsMetricRow label="Drafts" value={formatNumber(drafts)} />
+            <CmsMetricRow label="Scheduled" value={formatNumber(scheduled)} highlight={scheduled > 0} />
+            <CmsMetricRow label="Published" value={formatNumber(published)} />
+            <CmsMetricRow label="Archived" value={formatNumber(archived)} />
+          </CmsListStack>
+          <CmsCardFooter href="/cms/calendar" className="admin-card-footer--link">
+            Open editorial calendar →
+          </CmsCardFooter>
         </CmsCard>
 
         <CmsCard title="Coming Up" icon={Calendar}>
@@ -148,25 +180,6 @@ async function CmsDashboardData() {
             )}
           </CmsScheduleList>
         </CmsCard>
-      </CmsCardGrid>
-
-      <CmsCardGrid cols={2}>
-        <CmsCard title="Recently Published" icon={Send}>
-          <div>
-            {calendar.published.slice(0, 6).map((a) => (
-              <CmsActivityItem
-                key={a.id}
-                badge={<StatusBadge status="PUBLISHED" />}
-                date={a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : '—'}
-                message={
-                  <Link href={`/cms/articles/${a.id}/edit`} className="hover:text-sky-400">
-                    {a.title}
-                  </Link>
-                }
-              />
-            ))}
-          </div>
-        </CmsCard>
 
         <CmsCard title="Quick Actions" icon={Zap}>
           <CmsActionsGrid>
@@ -183,7 +196,8 @@ async function CmsDashboardData() {
             <CmsActionPill href="/cms/tags" label="Browse tags" icon={Hash} description="Topic coverage" />
           </CmsActionsGrid>
         </CmsCard>
-      </CmsCardGrid>
+        </aside>
+      </div>
     </CmsSectionStack>
   );
 }

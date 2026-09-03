@@ -10437,12 +10437,15 @@ html[data-editor-guidance='pro'] .editor-settings-section__hint {
   box-shadow: 0 1px 6px hsl(var(--admin-rose) / 0.06);
 }
 
+/* Opaque white, not 85%. The translucency was the light theme's half of the
+   glassmorphism the staff surface has now dropped: it let the page's radial
+   tints bleed up through every panel, so no two cards on a screen were quite
+   the same white. Shadow comes from --sh-1 (staff-surface.css). */
 .theme-white .admin-stat-card,
 .theme-white .admin-card,
 .theme-white .admin-table-shell,
 .theme-white .admin-form-card {
-  background: hsl(0 0% 100% / 0.85);
-  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.04);
+  background: hsl(0 0% 100%);
 }
 
 .theme-white .admin-dropdown-panel {

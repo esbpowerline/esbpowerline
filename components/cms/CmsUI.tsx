@@ -66,7 +66,10 @@ export function CmsStatCard({
   value,
   change,
   icon: Icon,
-  accent = 'rose',
+  // Neutral by default. It used to default to `rose`, which after the accent
+  // consolidation reads as the destructive colour — so an un-accented count
+  // like "Total Views" came out alarm-red.
+  accent = 'sky',
   className,
 }: {
   title: string;
@@ -87,11 +90,11 @@ export function CmsStatCard({
         )}
       </div>
       <div className="admin-stat-value">{value}</div>
-      {change ? (
-        <p className="admin-stat-change">{change}</p>
-      ) : (
-        <p className="admin-stat-change opacity-0 select-none" aria-hidden="true">&nbsp;</p>
-      )}
+      {/* No invisible `&nbsp;` filler any more — `.admin-stat-card` is a
+          three-row grid, so a tile without a sub-label still aligns with one
+          that has it. The placeholder was also read out by screen readers as
+          an empty paragraph. */}
+      {change && <p className="admin-stat-change">{change}</p>}
     </div>
   );
 }
@@ -199,20 +202,26 @@ export function CmsListRow({
   title,
   href,
   meta,
+  badge,
   value,
 }: {
   rank?: number;
   title: string;
   href?: string;
   meta?: string;
+  /** A rendered status pill. Preferred over `meta` for a status: the raw
+   *  string was set in 10px uppercase grey, which read as a caption rather
+   *  than the state of the story. */
+  badge?: React.ReactNode;
   value?: string | number;
 }) {
   const content = (
     <>
       {rank !== undefined && <span className="admin-rank">{rank}</span>}
       <span className="flex-1 min-w-0 truncate admin-list-title">{title}</span>
+      {badge && <span className="shrink-0">{badge}</span>}
       {meta && <span className="admin-list-meta hidden sm:inline">{meta}</span>}
-      {value !== undefined && <span className="admin-list-value tabular-nums">{value}</span>}
+      {value !== undefined && <span className="admin-list-value">{value}</span>}
     </>
   );
 

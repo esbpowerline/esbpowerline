@@ -647,6 +647,71 @@
   --shell-tight: 0.4375rem;
   --shell-header-h: 3.125rem;
   --shell-sidebar-w: 17rem;
+
+  /* ── Design tokens (2026-09-04 overhaul) ───────────────────────────────
+     Everything below is the shared vocabulary for BOTH staff surfaces —
+     `.admin-shell cms-shell` is the CMS root and `.admin-shell` the admin
+     one, so a primitive fixed here is fixed in both. Written because the
+     surface had no scale at all: `--shell-gap` was card padding AND grid gap
+     AND header gap, so nothing grouped visually; radii ran 12/16/20px with no
+     relationship; and six accent hues each carried their own hover glow, which
+     is six things competing to be the most important thing on screen.
+
+     Rules this encodes, and they are the whole point:
+       * Surfaces are OPAQUE. Every card used to be `hsl(var(--card)/0.65)`
+         over `backdrop-filter: blur(8px)` — glassmorphism, which on a dense
+         data surface costs a compositor layer per card and buys nothing,
+         because the cards sit on an almost-solid background anyway.
+       * ONE accent (`--staff-accent`). Green/amber/red are reserved for
+         status meaning — published / needs attention / destructive — so a
+         colour on this surface always answers "what state is this in?".
+       * Static things do not move. Stat cards used to lift 2px on hover and
+         content cards grew a 12% black shadow; both made the dashboard feel
+         loose and implied the whole card was clickable when it was not. */
+
+  /* Radii: a tight 3-step scale. Dense editorial tooling reads as precise at
+     8–14px; the old 20px on a stat card holding a 30px number read as a toy. */
+  --r-sm: 0.5rem;
+  --r-md: 0.625rem;
+  --r-lg: 0.875rem;
+  --r-pill: 9999px;
+
+  /* Spacing: 4px-based. Padding and gaps must be able to differ — that
+     difference is what makes a card read as one object. */
+  --sp-1: 0.25rem;
+  --sp-2: 0.375rem;
+  --sp-3: 0.5rem;
+  --sp-4: 0.75rem;
+  --sp-5: 1rem;
+  --sp-6: 1.25rem;
+  --sp-7: 1.75rem;
+
+  /* Surfaces + hairlines. `--line` is deliberately stronger than the old
+     `border/0.4`: at 40% the card edges dissolved and the layout lost its
+     bones, which is why the panels felt like floating text. */
+  --surface: var(--card);
+  --surface-raised: var(--card);
+  --line: hsl(var(--border) / 0.85);
+  --line-soft: hsl(var(--border) / 0.5);
+  --hover-wash: hsl(var(--foreground) / 0.035);
+
+  /* Elevation: rest and menu. Nothing else gets a shadow. */
+  --sh-1: 0 1px 2px hsl(var(--foreground) / 0.05);
+  --sh-2: 0 12px 32px -12px hsl(var(--foreground) / 0.22), 0 2px 8px hsl(var(--foreground) / 0.06);
+
+  /* The single accent, and the three semantics. */
+  --staff-accent: var(--admin-blue);
+  --staff-ok: var(--admin-green);
+  --staff-warn: var(--admin-yellow);
+  --staff-bad: var(--admin-red);
+
+  /* Type scale. The surface previously mixed 10/11/12/13/14px arbitrarily and
+     10px meta text was below comfortable reading size at a desk. */
+  --fs-micro: 11px;
+  --fs-meta: 11.5px;
+  --fs-body: 13px;
+  --fs-title: 13.5px;
+  --fs-h2: 15px;
   background:
     radial-gradient(ellipse 80% 50% at 0% 0%, hsl(var(--admin-rose) / 0.06), transparent 50%),
     radial-gradient(ellipse 60% 40% at 100% 100%, hsl(var(--admin-violet) / 0.05), transparent 50%),
@@ -1116,29 +1181,66 @@
   margin-bottom: 0;
 }
 
+/* `auto-fit` with a max track, not `repeat(n, 1fr)`.
+   The dashboard renders its second strip as a 3-column grid whose members are
+   conditional, so with two of them present each tile stretched to ~46% of the
+   page — a 14 and an 8 marooned in half a screen of white each. Capping the
+   track means a partly-filled strip keeps tile-sized tiles and simply leaves
+   the remainder empty, which is what the eye expects. */
 .admin-stat-grid {
   display: grid;
-  gap: var(--shell-gap);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 15rem));
 }
 
 @media (min-width: 1024px) {
   .admin-stat-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 17rem));
   }
 
-  .admin-stat-grid--cols-3 {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
+  .admin-stat-grid--cols-3,
   .admin-stat-grid--cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 17rem));
   }
 }
 
 .admin-card-grid {
   display: grid;
-  gap: var(--shell-gap);
+  gap: var(--sp-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+/* Dashboard: one reading column and a rail of short panels.
+   The rail is a fixed-ish track rather than a fraction, so the main column
+   gets the growth on a wide screen — headlines are what benefit from width,
+   and a key/value list stretched to 600px just spreads a label and a number
+   to opposite ends of the desk. */
+.admin-dash-split {
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.admin-dash-main,
+.admin-dash-rail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .admin-dash-split {
+    grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+  }
+}
+
+/* Action pills go 2-up at 1440px, which is right in a full-width card and
+   wrong in a 22rem rail — "Editorial calendar" broke onto three lines. The
+   rail overrides it back to one per row. */
+.admin-dash-rail .admin-actions-grid {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -1345,10 +1447,16 @@
 
 /* â”€â”€ Large screens: tighter rhythm, more content in view (admin + editorial) â”€â”€ */
 
+/* Rows are separated by hairlines, not gaps. A list of eight headlines
+   floating on 7px of air had no scanline for the eye to follow, which is why
+   the recent-articles panel read as a paragraph rather than a table. */
 .admin-list-stack {
   display: flex;
   flex-direction: column;
-  gap: var(--shell-tight);
+}
+
+.admin-list-stack > * + * {
+  border-top: 1px solid var(--line-soft);
 }
 
 .admin-dense-list {
@@ -1545,13 +1653,27 @@
   gap: var(--shell-tight);
 }
 
+/* `margin-top: auto` pins the footer to the bottom of a flex card body, so a
+   short card in a row of tall ones keeps its link on the baseline instead of
+   leaving a lake of empty space under it (the Pipeline card, every load). */
 .admin-card-footer {
-  margin-top: var(--shell-gap);
-  padding-top: var(--shell-gap);
-  border-top: 1px solid hsl(var(--border) / 0.35);
-  font-size: 12px;
-  line-height: 1.45;
+  margin-top: auto;
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line-soft);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
   color: hsl(var(--muted-foreground));
+}
+
+a.admin-card-footer {
+  display: block;
+  font-weight: 550;
+  color: hsl(var(--staff-accent));
+  transition: color 130ms ease;
+}
+
+a.admin-card-footer:hover {
+  color: hsl(var(--staff-accent) / 0.78);
 }
 
 .admin-card-footer:hover {
@@ -1658,134 +1780,139 @@
   }
 }
 
+/* The page icon was a rose→violet gradient disc, which fought the blue nav
+   and the blue links on the same screen for no reason — it carried no meaning,
+   it was just decoration in a third hue. One accent, a square-ish tile to
+   match the card radii, no gradient. */
 .admin-page-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, hsl(var(--admin-rose) / 0.15), hsl(var(--admin-violet) / 0.1));
-  border: 1px solid hsl(var(--admin-rose) / 0.2);
-  color: hsl(var(--admin-rose));
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--r-md);
+  background: hsl(var(--staff-accent) / 0.1);
+  border: 1px solid hsl(var(--staff-accent) / 0.18);
+  color: hsl(var(--staff-accent));
 }
 
 .admin-page-title {
-  font-size: 1.625rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
+  font-size: 1.375rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 .admin-page-desc {
-  margin-top: 0.375rem;
-  font-size: 13px;
-  line-height: 1.5;
+  margin-top: 0.1875rem;
+  font-size: var(--fs-body);
+  line-height: 1.45;
   color: hsl(var(--muted-foreground));
-  max-width: 36rem;
+  max-width: 46rem;
   overflow-wrap: anywhere;
 }
 
 .admin-page-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--sp-3);
 }
 
+/* Stat card.
+   Three fixed grid rows — label, value, delta — so a tile WITH a sub-label and
+   one without still align on every baseline. The old version was a flex column
+   and equalised itself by rendering an invisible `&nbsp;`, which is why the
+   dashboard's second row of tiles never lined up with the first. */
+/* Rows: label, value, then the delta takes the slack. Putting the slack in
+   the MIDDLE row pushed the value down in tiles that had no sub-label, so the
+   figures in one strip sat on two different baselines. */
 .admin-stat-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
   text-align: left;
-  padding: var(--shell-gap);
-  border-radius: 1.25rem;
-  border: 1px solid hsl(var(--border) / 0.4);
-  background: hsl(var(--card) / 0.7);
-  backdrop-filter: blur(8px);
-  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  padding: var(--sp-5);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
+/* No lift, no glow. A KPI tile is a readout, not a button. */
 .admin-stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px -10px hsl(var(--foreground) / 0.08);
-  border-color: hsl(var(--border) / 0.7);
+  border-color: hsl(var(--staff-accent) / 0.4);
 }
 
-.admin-stat-card[data-accent="rose"]:hover { border-color: hsl(346 77% 58% / 0.35); box-shadow: 0 12px 30px -10px hsl(346 77% 58% / 0.15); }
-.admin-stat-card[data-accent="violet"]:hover { border-color: hsl(262 72% 62% / 0.35); box-shadow: 0 12px 30px -10px hsl(262 72% 62% / 0.15); }
-.admin-stat-card[data-accent="emerald"]:hover { border-color: hsl(160 84% 39% / 0.35); box-shadow: 0 12px 30px -10px hsl(160 84% 39% / 0.15); }
-.admin-stat-card[data-accent="amber"]:hover { border-color: hsl(38 92% 50% / 0.35); box-shadow: 0 12px 30px -10px hsl(38 92% 50% / 0.15); }
-.admin-stat-card[data-accent="sky"]:hover { border-color: hsl(199 89% 48% / 0.35); box-shadow: 0 12px 30px -10px hsl(199 89% 48% / 0.15); }
-.admin-stat-card[data-accent="red"]:hover { border-color: hsl(0 72% 51% / 0.35); box-shadow: 0 12px 30px -10px hsl(0 72% 51% / 0.15); }
-
-.admin-stat-card[data-accent="rose"] .admin-stat-icon { color: hsl(346 77% 58%); background: hsl(346 77% 58% / 0.12); }
-.admin-stat-card[data-accent="violet"] .admin-stat-icon { color: hsl(262 72% 62%); background: hsl(262 72% 62% / 0.12); }
-.admin-stat-card[data-accent="emerald"] .admin-stat-icon { color: hsl(160 84% 39%); background: hsl(160 84% 39% / 0.12); }
-.admin-stat-card[data-accent="amber"] .admin-stat-icon { color: hsl(38 92% 50%); background: hsl(38 92% 50% / 0.12); }
-.admin-stat-card[data-accent="sky"] .admin-stat-icon { color: hsl(199 89% 48%); background: hsl(199 89% 48% / 0.12); }
-.admin-stat-card[data-accent="red"] .admin-stat-icon { color: hsl(0 72% 51%); background: hsl(0 72% 51% / 0.12); }
+/* The accent now tints ONE thing — the icon — and only where it carries
+   meaning. Six full accent systems (border glow + shadow + icon per hue) meant
+   a dashboard of six equally loud tiles. */
+.admin-stat-card .admin-stat-icon { color: hsl(var(--staff-accent)); background: hsl(var(--staff-accent) / 0.1); }
+.admin-stat-card[data-accent="emerald"] .admin-stat-icon { color: hsl(var(--staff-ok)); background: hsl(var(--staff-ok) / 0.11); }
+.admin-stat-card[data-accent="amber"] .admin-stat-icon { color: hsl(var(--staff-warn)); background: hsl(var(--staff-warn) / 0.13); }
+.admin-stat-card[data-accent="red"] .admin-stat-icon,
+.admin-stat-card[data-accent="rose"] .admin-stat-icon { color: hsl(var(--staff-bad)); background: hsl(var(--staff-bad) / 0.11); }
 
 .admin-stat-label {
-  font-size: 11px;
+  font-size: var(--fs-micro);
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
-  color: hsl(var(--muted-foreground) / 0.8);
-  margin-top: 0.25rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.2;
 }
 
 .admin-stat-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.875rem;
-  height: 1.875rem;
-  border-radius: 9999px;
-  transition: transform 200ms ease;
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: var(--r-sm);
+  flex-shrink: 0;
 }
 
-.admin-stat-card:hover .admin-stat-icon {
-  transform: scale(1.08);
-}
-
+/* Sans, not mono. Mono numerals read as a terminal readout; this is an
+   editorial desk. `tabular-nums` keeps the columns steady without it. */
 .admin-stat-value {
-  margin-top: 0.5rem;
-  font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", monospace;
-  font-size: 1.875rem;
-  font-weight: 700;
+  margin-top: var(--sp-4);
+  font-size: 1.75rem;
+  font-weight: 650;
   letter-spacing: -0.03em;
-  line-height: 1;
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 
 .admin-stat-change {
-  margin-top: 0.375rem;
-  font-size: 11px;
-  color: hsl(var(--muted-foreground) / 0.85);
+  margin-top: var(--sp-2);
+  align-self: start;
+  font-size: var(--fs-micro);
+  line-height: 1.3;
+  color: hsl(var(--muted-foreground) / 0.9);
 }
 
-/* Content cards */
+/* Content cards.
+   Opaque, hairline, one resting shadow, and NO hover reaction: a panel of
+   figures is not interactive, and the old 12%-black hover shadow made every
+   pass of the mouse across the dashboard flash four panels. */
 .admin-card {
-  border-radius: 1.25rem;
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.65);
-  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
   overflow: hidden;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
-.admin-card:hover {
-  border-color: hsl(var(--border) / 0.75);
-  box-shadow: 0 4px 20px hsl(0 0% 0% / 0.12);
-}
-
+/* Header sits on its own hairline so the card's title bar reads as a distinct
+   band rather than text floating above a list. */
 .admin-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--shell-gap);
-  padding: var(--shell-gap) var(--shell-gap) 0;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .admin-card-header__title {
@@ -1816,25 +1943,40 @@
 }
 
 .admin-card-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: 620;
   letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
+/* Symmetric. The old top padding was 0.75× the others, so every card was
+   subtly top-heavy against its own bottom edge. `flex: 1` lets two cards in
+   one row match height with their footers pinned. */
 .admin-card-body {
-  padding: calc(var(--shell-gap) * 0.75) var(--shell-gap) var(--shell-gap);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
 }
 
 /* Action pills */
+/* These ARE interactive, so unlike the cards they keep a hover reaction —
+   but a wash and a border, not a lift. `all 180ms` also animated layout
+   properties; only the two that change are transitioned now. */
 .admin-action-pill {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0.875rem;
-  border-radius: 1rem;
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.55);
-  transition: all 180ms ease;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.admin-action-pill:hover {
+  border-color: hsl(var(--staff-accent) / 0.45);
+  background: var(--hover-wash);
 }
 
 .admin-action-pill:hover {
@@ -1971,15 +2113,22 @@
 }
 
 /* List rows */
+/* Full-bleed to the card edge (negative inset matches --sp-5 body padding),
+   so the hover wash reads as a row of the list and not a floating pill. */
 .admin-list-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem var(--shell-gap);
-  margin: 0 calc(var(--shell-gap) * -1);
-  border-radius: 0.75rem;
-  font-size: 13px;
-  transition: background 150ms ease;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  margin: 0 calc(var(--sp-5) * -1);
+  font-size: var(--fs-body);
+  line-height: 1.35;
+  transition: background 130ms ease;
+}
+
+a.admin-list-row:hover,
+.admin-list-row:hover {
+  background: var(--hover-wash);
 }
 
 .admin-list-row:hover {
@@ -1992,17 +2141,23 @@
   justify-content: center;
   width: 1.375rem;
   height: 1.375rem;
-  border-radius: 9999px;
-  font-size: 10px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-micro);
   font-weight: 600;
-  background: hsl(var(--muted) / 0.6);
+  background: hsl(var(--muted) / 0.7);
   color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
 
 .admin-list-title {
   font-weight: 500;
-  transition: color 150ms ease;
+  color: hsl(var(--foreground) / 0.92);
+  transition: color 130ms ease;
+}
+
+a.admin-list-row:hover .admin-list-title {
+  color: hsl(var(--staff-accent));
 }
 
 .admin-list-row:hover .admin-list-title {
@@ -2016,11 +2171,16 @@
   min-width: 0;
 }
 
+/* 10px was below comfortable reading size at a desk, and the row's status was
+   set in it. Meta is now a quiet uppercase tag. */
 .admin-list-meta {
-  font-size: 10px;
-  font-weight: 500;
-  color: hsl(var(--muted-foreground) / 0.9);
+  font-size: var(--fs-micro);
+  font-weight: 550;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground) / 0.75);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .admin-list-stat {
@@ -2032,20 +2192,24 @@
   min-width: 3.25rem;
 }
 
+/* Dropped from 700/foreground to 550/muted: a view count is context, and at
+   full weight in full black it outshouted the headline it belonged to. */
 .admin-list-value {
-  font-size: 12px;
-  font-weight: 700;
-  color: hsl(var(--foreground));
-  line-height: 1.1;
+  font-size: var(--fs-meta);
+  font-weight: 550;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .admin-list-value-label {
-  font-size: 9px;
+  font-size: var(--fs-micro);
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: hsl(var(--muted-foreground) / 0.85);
-  line-height: 1;
+  color: hsl(var(--muted-foreground) / 0.75);
+  line-height: 1.1;
 }
 
 /* Activity feed */
@@ -2119,13 +2283,22 @@
 }
 
 /* Metric rows */
+/* Label quiet, figure strong and tabular — a key/value row should let the eye
+   run down the numbers column. Before, both sides were the same muted 12px. */
 .admin-metric-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.375rem 0;
-  font-size: 12px;
+  align-items: baseline;
+  gap: var(--sp-4);
+  padding: var(--sp-3) 0;
+  font-size: var(--fs-body);
   color: hsl(var(--muted-foreground));
+}
+
+.admin-metric-row > :last-child {
+  font-weight: 600;
+  color: hsl(var(--foreground) / 0.9);
+  font-variant-numeric: tabular-nums;
 }
 
 .admin-metric-row span:last-child {
@@ -2139,41 +2312,55 @@
   border-top: 1px solid hsl(var(--border) / 0.5);
 }
 
-/* Table shell */
+/* Table shell.
+   The density pass: rows were 0.875rem top AND bottom around two stacked
+   lines, so an article row stood ~71px tall and eleven of them filled a
+   1000px screen. At 0.625rem the same row is ~56px and fourteen fit, which on
+   a list of 167 stories is the difference between scanning and scrolling.
+   Header stays sticky so those labels survive the scroll. */
 .admin-table-shell {
-  border-radius: 1.25rem;
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.65);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
   overflow-x: auto;
 }
 
 .admin-table-shell table thead tr {
-  border-bottom: 1px solid hsl(var(--border) / 0.5);
-  background: hsl(var(--muted) / 0.25);
+  border-bottom: 1px solid var(--line);
+  background: hsl(var(--muted) / 0.4);
 }
 
 .admin-table-shell table thead th {
-  height: 2.75rem;
-  padding: 0 1rem;
-  font-size: 11px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 2.375rem;
+  padding: 0 var(--sp-5);
+  font-size: var(--fs-micro);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.045em;
   text-transform: uppercase;
-  color: hsl(var(--muted-foreground) / 0.85);
+  color: hsl(var(--muted-foreground));
+  background: inherit;
+  white-space: nowrap;
 }
 
 .admin-table-shell table tbody tr {
-  border-bottom: 1px solid hsl(var(--border) / 0.35);
-  transition: background 150ms ease;
+  border-bottom: 1px solid var(--line-soft);
+  transition: background 130ms ease;
 }
 
+/* Neutral wash. The hover was tinted with `--admin-rose`, so running the
+   mouse down a list of stories flushed each row pink — a colour that means
+   nothing here and clashes with the accent everywhere else. */
 .admin-table-shell table tbody tr:hover {
-  background: hsl(var(--admin-rose) / 0.04);
+  background: var(--hover-wash);
 }
 
 .admin-table-shell table tbody td {
-  padding: 0.875rem 1rem;
-  font-size: 13px;
+  padding: var(--sp-4) var(--sp-5);
+  font-size: var(--fs-body);
   vertical-align: middle;
 }
 

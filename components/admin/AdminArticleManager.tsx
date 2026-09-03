@@ -19,6 +19,24 @@ import { ArticleStatusFilter } from '@/components/admin/ArticleStatusFilter';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { Input } from '@/components/ui/input';
 import { cn, formatNumber } from '@/lib/utils';
+
+/**
+ * A date for a desk in Dhaka: "3 Sep", or "3 Sep 2025" once the year differs
+ * from the current one. Fixed to en-GB rather than the runtime locale so the
+ * server and the browser cannot disagree and trip hydration — which is also
+ * why the bare `toLocaleDateString()` this replaces rendered US M/D/YYYY.
+ */
+function formatDeskDate(value: string | Date | null | undefined): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  });
+}
 import { bulkArticleAction, bulkOwnArticleAction, type BulkArticleAction, type OwnBulkAction } from '@/lib/actions/articles';
 import { requestArticleRevision } from '@/lib/actions/notices';
 import { AdminSecureActionDialog } from '@/components/admin/AdminSecureActionDialog';
@@ -699,7 +717,12 @@ export function AdminArticleManager({
                       {isSelected && <Check className="h-3 w-3" />}
                     </button>
                   </TableCell>
-                  <TableCell className="max-w-[280px]">
+                  {/* The title column was capped at 280px while Author took a
+                      fixed 120 for a name that truncates to the same
+                      "Mehedi Hasan Ham…" on every row — so the one column a
+                      reader actually scans was the one being squeezed. Title
+                      now takes the table's slack. */}
+                  <TableCell className="w-[36%] min-w-[15rem] max-w-[34rem]">
                     {canEditArticle(a, currentUserId, canEditAny) ? (
                       <Link href={`${editBase}/${a.id}/edit`} className="font-medium hover:text-primary line-clamp-1 text-[13px]">
                         {a.title}
@@ -708,22 +731,26 @@ export function AdminArticleManager({
                       <span className="font-medium line-clamp-1 text-[13px]">{a.title}</span>
                     )}
                     <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[180px]">{a.slug}</span>
+                      <span className="text-[11px] text-muted-foreground/80 font-mono truncate">{a.slug}</span>
                       {a.status === 'PUBLISHED' && (
                         <LiveArticleLink slug={a.slug} className="text-muted-foreground hover:text-primary shrink-0" />
                       )}
                     </div>
                   </TableCell>
                   {showAuthorColumn && (
-                    <TableCell className="text-muted-foreground text-[12px] max-w-[120px] truncate hidden md:table-cell">
+                    <TableCell className="text-muted-foreground text-[12px] w-[9rem] max-w-[9rem] truncate hidden md:table-cell">
                       {authorName(a) || '—'}
                     </TableCell>
                   )}
                   <TableCell className="text-[12px] whitespace-nowrap max-w-[130px] truncate hidden sm:table-cell">{a.category}</TableCell>
                   <TableCell><StatusBadge status={a.status} /></TableCell>
                   <TableCell className="tabular-nums text-[12px] hidden sm:table-cell">{formatNumber(a.views)}</TableCell>
-                  <TableCell className="text-muted-foreground text-[11px] whitespace-nowrap hidden md:table-cell">
-                    {a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : '—'}
+                  {/* `toLocaleDateString()` on the server rendered US
+                      M/D/YYYY — "9/3/2026" for the 3rd of September, which on
+                      a Bangladeshi desk reads as March. Day-month-year, short
+                      month, and the year dropped inside the current one. */}
+                  <TableCell className="text-muted-foreground text-[11.5px] whitespace-nowrap tabular-nums hidden md:table-cell">
+                    {formatDeskDate(a.updatedAt)}
                   </TableCell>
                   {showBulkFlags && (
                     <TableCell className="hidden lg:table-cell">
