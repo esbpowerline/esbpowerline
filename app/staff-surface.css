@@ -1222,20 +1222,25 @@
   align-items: start;
 }
 
-/* Dashboard: one reading column and a rail of short panels.
-   The rail is a fixed-ish track rather than a fraction, so the main column
-   gets the growth on a wide screen — headlines are what benefit from width,
-   and a key/value list stretched to 600px just spreads a label and a number
-   to opposite ends of the desk. */
-.admin-dash-split {
+/* One reading column and a rail of short panels — the standard two-column
+   page shape for this surface (dashboard, analytics, anything with a long
+   list beside summary panels).
+   The rail is a bounded track rather than a fraction, so the main column
+   takes the growth on a wide screen: headlines benefit from width, while a
+   key/value list stretched to 600px just pushes a label and a number to
+   opposite ends of the desk.
+   Both axes use the SAME gap. Pages that hand-rolled this shape reached for
+   a Tailwind `space-y-6` inside a 12px grid, so cards sat 12px apart
+   horizontally and 24px vertically — the uneven rhythm this replaces. */
+.admin-split {
   display: grid;
   gap: var(--sp-4);
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
-.admin-dash-main,
-.admin-dash-rail {
+.admin-split__main,
+.admin-split__rail {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
@@ -1243,15 +1248,14 @@
 }
 
 @media (min-width: 1024px) {
-  .admin-dash-split {
+  .admin-split {
     grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
   }
 }
 
 /* Action pills go 2-up at 1440px, which is right in a full-width card and
-   wrong in a 22rem rail — "Editorial calendar" broke onto three lines. The
-   rail overrides it back to one per row. */
-.admin-dash-rail .admin-actions-grid {
+   wrong in a 22rem rail — "Editorial calendar" broke onto three lines. */
+.admin-split__rail .admin-actions-grid {
   grid-template-columns: minmax(0, 1fr);
 }
 

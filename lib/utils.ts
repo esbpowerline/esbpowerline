@@ -175,6 +175,29 @@ export function truncate(text: string, length = 120): string {
   return text.slice(0, length).trim() + '...';
 }
 
+/**
+ * A date for a desk in Dhaka: "3 Sept", or "3 Sept 2025" once the year is not
+ * the current one.
+ *
+ * The staff surface printed dates through a bare `toLocaleDateString()`, which
+ * resolves to the RUNTIME locale — US month-first on both the Vercel server
+ * and most browsers here, so 3 September rendered "9/3/2026" and read as March
+ * to everyone using it. Pinning en-GB also keeps the server and the client in
+ * agreement, which a runtime locale cannot promise: the same call on two sides
+ * of a hydration boundary is a mismatch waiting to happen.
+ */
+export function formatDeskDate(value: string | Date | null | undefined): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return d.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  });
+}
+
 /** Subcontinental grouping (en-IN): 15,000 · 13,40,606 */
 export function formatNumber(num: number, maxFractionDigits = 0): string {
   if (!Number.isFinite(num)) return '—';

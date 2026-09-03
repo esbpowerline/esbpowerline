@@ -1,3 +1,4 @@
+import { formatDeskDate } from '@/lib/utils';
 import { auth } from '@/lib/auth';
 import { getArticles } from '@/lib/actions/articles';
 import { can } from '@/lib/constants';
@@ -31,7 +32,7 @@ export default async function CMSDraftsPage() {
               title={a.title}
               href={`/cms/articles/${a.id}/edit`}
               meta={a.category}
-              value={new Date(a.updatedAt).toLocaleDateString()}
+              value={formatDeskDate(a.updatedAt)}
             />
           ))}
           {drafts.length === 0 && (

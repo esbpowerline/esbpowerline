@@ -6,7 +6,7 @@ import { formatNumber } from '@/lib/utils';
 import { publicArticleUrl } from '@/lib/public-site-url';
 import {
   CmsPageHeader, CmsStatCard, CmsCard, CmsListRow, CmsMetricRow,
-  CmsSectionStack, CmsStatGrid, CmsCardGrid, CmsListStack, CmsScheduleList,
+  CmsSectionStack, CmsStatGrid, CmsListStack, CmsScheduleList,
 } from '@/components/cms/CmsUI';
 import { BarChart3, Eye, FileText, Heart, CheckCircle, Clock, Users, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -85,9 +85,14 @@ export default async function CMSAnalyticsPage() {
         <CmsStatCard title="Likes" value={formatNumber(totals.likes)} icon={Heart} accent="violet" change={`${benchmarks.yourViewsShare}% of newsroom views`} />
       </CmsStatGrid>
 
-      <CmsCardGrid cols={3}>
-        {/* Main Details (Left 2/3 Column) */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* The shared split, not a hand-rolled 2/3 + 1/3.
+          This page put `space-y-6` inside a 12px grid, so its cards sat 24px
+          apart vertically and 12px horizontally — the same gap measured two
+          different ways depending on which direction you looked. It also left
+          the right column ending 632px above the left, because the three
+          tallest panels were all on one side. */}
+      <div className="admin-split">
+        <div className="admin-split__main">
           <CmsCard title="Editor leaderboard" icon={Users}>
             <p className="text-[12px] text-muted-foreground admin-card-lead">
               Published stories ranked by total views. {vsLabel}.
@@ -140,25 +145,9 @@ export default async function CMSAnalyticsPage() {
             </CmsListStack>
           </CmsCard>
 
-          <CmsCard title="Recently Published" icon={Clock}>
-            <CmsListStack>
-              {stats.recentPublished.map((a) => (
-                <CmsListRow
-                  key={a.id}
-                  title={a.title}
-                  href={`/cms/articles/${a.id}/edit`}
-                  value={`${formatNumber(a.views)} views`}
-                />
-              ))}
-              {stats.recentPublished.length === 0 && (
-                <p className="text-[13px] text-muted-foreground py-2">No published articles yet.</p>
-              )}
-            </CmsListStack>
-          </CmsCard>
         </div>
 
-        {/* Sidebar Summary (Right 1/3 Column) */}
-        <div className="lg:col-span-1 space-y-6">
+        <aside className="admin-split__rail">
           <CmsCard title="Benchmarks" icon={BarChart3}>
             <CmsListStack>
               <CmsMetricRow label="Your avg views" value={formatNumber(benchmarks.yourAvgViews)} />
@@ -179,8 +168,24 @@ export default async function CMSAnalyticsPage() {
               )}
             </CmsListStack>
           </CmsCard>
-        </div>
-      </CmsCardGrid>
+
+          <CmsCard title="Recently Published" icon={Clock}>
+            <CmsListStack>
+              {stats.recentPublished.map((a) => (
+                <CmsListRow
+                  key={a.id}
+                  title={a.title}
+                  href={`/cms/articles/${a.id}/edit`}
+                  value={`${formatNumber(a.views)} views`}
+                />
+              ))}
+              {stats.recentPublished.length === 0 && (
+                <p className="text-[13px] text-muted-foreground py-2">No published articles yet.</p>
+              )}
+            </CmsListStack>
+          </CmsCard>
+        </aside>
+      </div>
     </CmsSectionStack>
   );
 }

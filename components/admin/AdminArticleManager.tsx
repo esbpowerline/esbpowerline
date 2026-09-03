@@ -18,25 +18,8 @@ import { AdminSelectMenu, type AdminSelectOption } from '@/components/admin/Admi
 import { ArticleStatusFilter } from '@/components/admin/ArticleStatusFilter';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { Input } from '@/components/ui/input';
-import { cn, formatNumber } from '@/lib/utils';
+import { cn, formatNumber, formatDeskDate } from '@/lib/utils';
 
-/**
- * A date for a desk in Dhaka: "3 Sep", or "3 Sep 2025" once the year differs
- * from the current one. Fixed to en-GB rather than the runtime locale so the
- * server and the browser cannot disagree and trip hydration — which is also
- * why the bare `toLocaleDateString()` this replaces rendered US M/D/YYYY.
- */
-function formatDeskDate(value: string | Date | null | undefined): string {
-  if (!value) return '—';
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return '—';
-  const sameYear = d.getFullYear() === new Date().getFullYear();
-  return d.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    ...(sameYear ? {} : { year: 'numeric' }),
-  });
-}
 import { bulkArticleAction, bulkOwnArticleAction, type BulkArticleAction, type OwnBulkAction } from '@/lib/actions/articles';
 import { requestArticleRevision } from '@/lib/actions/notices';
 import { AdminSecureActionDialog } from '@/components/admin/AdminSecureActionDialog';

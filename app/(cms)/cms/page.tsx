@@ -5,7 +5,7 @@ import { getMyNotices } from '@/lib/actions/notices';
 import { getCalendarArticles } from '@/lib/actions/articles';
 import { EditorialNoticesPanel } from '@/components/cms/EditorialNoticesPanel';
 import { publicArticleUrl } from '@/lib/public-site-url';
-import { formatNumber } from '@/lib/utils';
+import { formatNumber, formatDeskDate } from '@/lib/utils';
 import { can, isAdminRole } from '@/lib/constants';
 import { isEditorLead } from '@/lib/cms-nav';
 import {
@@ -92,8 +92,8 @@ async function CmsDashboardData() {
           belong in a row with a long list. Stacking the four short panels into
           their own rail lets each keep its natural height and the column ends
           where its content does. */}
-      <div className="admin-dash-split">
-        <div className="admin-dash-main">
+      <div className="admin-split">
+        <div className="admin-split__main">
         <CmsCard title="Recent Articles" icon={Layers}>
           <CmsListStack>
             {articles.slice(0, 8).map((a) => (
@@ -132,25 +132,25 @@ async function CmsDashboardData() {
           </CmsListStack>
         </CmsCard>
 
-        <CmsCard title="Recently Published" icon={Send}>
-          <div>
-            {calendar.published.slice(0, 6).map((a) => (
-              <CmsActivityItem
-                key={a.id}
-                badge={<StatusBadge status="PUBLISHED" />}
-                date={a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : '—'}
-                message={
-                  <Link href={`/cms/articles/${a.id}/edit`} className="hover:text-sky-400">
-                    {a.title}
-                  </Link>
-                }
-              />
-            ))}
-          </div>
+
+        <CmsCard title="Quick Actions" icon={Zap}>
+          <CmsActionsGrid>
+            <CmsActionPill href="/cms/articles/new" label="New story" icon={PenLine} description="Start from scratch" accent="emerald" />
+            <CmsActionPill href="/cms/articles/drafts" label="Continue drafts" icon={FileText} description={`${drafts} in progress`} />
+            <CmsActionPill href="/cms/media" label="Media Library" icon={ImageIcon} description="Upload assets" />
+            <CmsActionPill href="/cms/calendar" label="Editorial calendar" icon={Calendar} description="Schedule posts" />
+            {can(role, 'analytics.view_own') && (
+              <CmsActionPill href="/cms/analytics" label="Performance" icon={BarChart3} description="Views & engagement" />
+            )}
+            {can(role, 'comment.moderate_any') && (
+              <CmsActionPill href="/cms/comments" label="Moderate comments" icon={MessageSquare} description="Review reader discussion" />
+            )}
+            <CmsActionPill href="/cms/tags" label="Browse tags" icon={Hash} description="Topic coverage" />
+          </CmsActionsGrid>
         </CmsCard>
         </div>
 
-        <aside className="admin-dash-rail">
+        <aside className="admin-split__rail">
         <CmsCard title="Pipeline" icon={Zap}>
           <CmsListStack>
             <CmsMetricRow label="Drafts" value={formatNumber(drafts)} />
@@ -171,7 +171,7 @@ async function CmsDashboardData() {
                   {a.title}
                 </Link>
                 <span className="text-muted-foreground shrink-0 tabular-nums text-[11px]">
-                  {a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'TBD'}
+                  {a.publishedAt ? formatDeskDate(a.publishedAt) : 'TBD'}
                 </span>
               </div>
             ))}
@@ -181,20 +181,22 @@ async function CmsDashboardData() {
           </CmsScheduleList>
         </CmsCard>
 
-        <CmsCard title="Quick Actions" icon={Zap}>
-          <CmsActionsGrid>
-            <CmsActionPill href="/cms/articles/new" label="New story" icon={PenLine} description="Start from scratch" accent="emerald" />
-            <CmsActionPill href="/cms/articles/drafts" label="Continue drafts" icon={FileText} description={`${drafts} in progress`} />
-            <CmsActionPill href="/cms/media" label="Media Library" icon={ImageIcon} description="Upload assets" />
-            <CmsActionPill href="/cms/calendar" label="Editorial calendar" icon={Calendar} description="Schedule posts" />
-            {can(role, 'analytics.view_own') && (
-              <CmsActionPill href="/cms/analytics" label="Performance" icon={BarChart3} description="Views & engagement" />
-            )}
-            {can(role, 'comment.moderate_any') && (
-              <CmsActionPill href="/cms/comments" label="Moderate comments" icon={MessageSquare} description="Review reader discussion" />
-            )}
-            <CmsActionPill href="/cms/tags" label="Browse tags" icon={Hash} description="Topic coverage" />
-          </CmsActionsGrid>
+
+        <CmsCard title="Recently Published" icon={Send}>
+          <div>
+            {calendar.published.slice(0, 6).map((a) => (
+              <CmsActivityItem
+                key={a.id}
+                badge={<StatusBadge status="PUBLISHED" />}
+                date={formatDeskDate(a.publishedAt)}
+                message={
+                  <Link href={`/cms/articles/${a.id}/edit`} className="hover:text-sky-400">
+                    {a.title}
+                  </Link>
+                }
+              />
+            ))}
+          </div>
         </CmsCard>
         </aside>
       </div>
