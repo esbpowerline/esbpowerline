@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { createClient } from '@/utils/supabase/server';
 import prisma from '@/lib/prisma';
 import type { Role } from '@/lib/constants';
@@ -114,8 +115,14 @@ async function resolveAppUser(
   };
 }
 
-/** Server-side session from Supabase Auth (replaces NextAuth `auth()`). */
-export async function auth(): Promise<AuthSession> {
+/**
+ * Server-side session from Supabase Auth (replaces NextAuth `auth()`).
+ *
+ * Memoised per request: layout, page and a server action in one render each
+ * called this, and each call is a Supabase Auth round trip plus a profiles
+ * read plus a Prisma lookup. `cache()` collapses them to one.
+ */
+export const auth = cache(async function auth(): Promise<AuthSession> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -127,6 +134,6 @@ export async function auth(): Promise<AuthSession> {
   if (!appUser) return null;
 
   return { user: appUser };
-}
+});
 
 export { roleHomePath as getRedirectForRole } from '@/lib/auth-routing';

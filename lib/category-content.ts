@@ -163,6 +163,10 @@ export async function getCategoryBySlug(slug: string): Promise<PublicCategory | 
 export const getPublishedArticlesByCategory = unstable_cache(async function getPublishedArticlesByCategory(
   categoryName: string,
   locale?: string,
+  // The homepage renders a handful of cards per category row and was pulling
+  // sixty per category, for every category, every regeneration (cost audit,
+  // 2026-09-03). Category pages keep the default.
+  limit = 60,
 ): Promise<PublicArticleCard[]> {
   const articles = await prisma.article.findMany({
     where: {
@@ -171,7 +175,7 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
     },
     select: ARTICLE_CARD_SELECT,
     orderBy: { publishedAt: 'desc' },
-    take: 60,
+    take: limit,
   });
   return articles
     .filter((a) => {

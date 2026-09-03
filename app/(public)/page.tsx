@@ -90,7 +90,7 @@ export default async function Home() {
 
   const categoriesWithArticles = await Promise.all(
     categories.map(async (cat) => {
-      let articles = await getPublishedArticlesByCategory(cat.name, locale);
+      let articles = await getPublishedArticlesByCategory(cat.name, locale, 24);
       return {
         ...cat,
         articles,

@@ -67,7 +67,7 @@
       ]
     },
     {
-      "source": "/api/((?!admin|auth|members|analytics|contact|upload).*)",
+      "source": "/api/((?!admin|auth|members|analytics|contact|upload|data).*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, s-maxage=60, stale-while-revalidate=300" }
       ]

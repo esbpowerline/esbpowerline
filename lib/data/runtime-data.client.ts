@@ -27,7 +27,10 @@ type Manifest = { generatedAt: string; feeds: Partial<Record<DataFeedName, strin
 const MANIFEST_URL = '/api/data-manifest';
 /** Long enough that a tab does not re-request it constantly, short enough that
  *  an editor watching the site sees their publish without a reload. */
-const MANIFEST_TTL_MS = 30_000;
+// Two minutes, not thirty seconds: a publish must still surface promptly for
+// a member watching the day land, but every tab was re-fetching the manifest
+// twice a minute for no change.
+const MANIFEST_TTL_MS = 120_000;
 
 let manifestPromise: Promise<Manifest | null> | null = null;
 let manifestFetchedAt = 0;
@@ -82,7 +85,10 @@ export async function fetchDataJson<T>(
 
   if (published) {
     try {
-      const res = await fetch(runtimeDataUrl(relPath), { ...init, cache: 'no-store' });
+      // `default`, not `no-store`: the route sets max-age=0, so the browser
+      // revalidates by ETag and only re-downloads a changed body. no-store
+      // re-pulled a 1.6 MB timeline on every tab switch.
+      const res = await fetch(runtimeDataUrl(relPath), { ...init, cache: 'default' });
       if (res.ok) return { ok: true, data: (await res.json()) as T, source: 'runtime' };
       // A revoked release between manifest and read: fall through to static.
       if (res.status === 403) return { ok: false, status: 403, error: 'tier_locked' };
@@ -97,7 +103,7 @@ export async function fetchDataJson<T>(
     if (res.status === 403) return { ok: false, status: 403, error: 'tier_locked' };
     if (res.status === 404 && !published) {
       // Published a moment ago, before the manifest caught up.
-      const runtime = await fetch(runtimeDataUrl(relPath), { cache: 'no-store' });
+      const runtime = await fetch(runtimeDataUrl(relPath), { cache: 'default' });
       if (runtime.ok) return { ok: true, data: (await runtime.json()) as T, source: 'runtime' };
     }
     return { ok: false, status: res.status, error: `HTTP ${res.status}` };
