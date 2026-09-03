@@ -3939,6 +3939,40 @@ html.locale-bn .public-nav-bar__hub-link span {
   padding-bottom: calc(var(--home-gap) * 0.45);
 }
 
+/* Folded away inside a Grid Explorer tab — see `gridImmersive` in
+   PublicNavbar. Animated on max-height rather than removed from the DOM, so the
+   ribbon returns without a reflow and a reader who lands mid-tab is not handed
+   a navbar that changes shape under them. The grid rows inside would otherwise
+   keep their own height, hence the padding and max-height going together. */
+.public-nav-bar__categories-shell {
+  overflow: hidden;
+  max-height: 12rem;
+  transition:
+    max-height 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 200ms ease,
+    padding-top 260ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding-bottom 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Both paddings, not just the bottom: this one element carries
+   `__categories-shell` and `__categories` together, and the latter's
+   padding-top survived the fold. Under border-box a max-height of 0 still
+   floors at the sum of the paddings, which left a 3.375px sliver of navbar
+   behind. */
+.public-nav-bar__categories-shell.public-nav-bar__categories--folded {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-nav-bar__categories-shell {
+    transition: none;
+  }
+}
+
 /* Category row â€” full shell width; matches homepage editorial canvas */
 .public-nav-bar__categories {
   padding-top: calc(var(--home-gap) * 0.2);
@@ -5325,18 +5359,21 @@ html.theme-dark .locale-toggle__btn--active:hover {
   margin-top: -1px;
 }
 
-/* A row, so the cadence badge and the P/D mark centre on the label instead of
-   riding the text baseline — the mark is a 15px box against 10px caps, and on
-   the baseline it hung four pixels below the badge next to it. */
+/* Plain text, not a flex row.
+   It was a flex row so the cadence badge and the P/D mark would centre on the
+   label rather than ride the baseline. The mark has since moved to the value,
+   where it belongs, and the badge is a `<sup>` — as a flex item its superscript
+   was discarded, so "Daily" sat on the baseline here while the same component
+   rode raised against every `<h3>` in the explorer. Back to normal flow, and it
+   raises again. */
 .grid-explorer-kpi__label {
   @apply text-[10px] uppercase font-bold tracking-wider leading-tight;
-  /* 10px text: muted-foreground/80 fell under the 4.5:1 small-text contrast
-     floor in light mode. Stated on the foreground token so both themes pass. */
-  color: hsl(var(--foreground) / 0.72);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  row-gap: 0.15rem;
+  /* A tint rather than plain grey: the label names the quantity and now carries
+     no marks of its own, so a little colour separates it from the figure
+     beneath without competing with it. Mixed toward the foreground rather than
+     stated as a light accent — 10px uppercase is small text, and
+     muted-foreground/80 already fell under the 4.5:1 floor here once. */
+  color: color-mix(in srgb, hsl(var(--primary)) 26%, hsl(var(--foreground) / 0.82));
   min-height: 1rem;
 }
 
@@ -5351,6 +5388,13 @@ html.theme-dark .locale-toggle__btn--active:hover {
 
 .grid-explorer-kpi__value {
   @apply font-bold tabular-nums text-lg tracking-tight text-foreground leading-none mt-1;
+}
+
+/* The mark sits against the figure, raised off its baseline so a 15px box does
+   not sink below an 18px number. */
+.grid-explorer-kpi__mark {
+  margin-left: 0.35rem;
+  vertical-align: 0.28em;
 }
 
 /* The text block sat at its natural width — 131px of content in a 237px tile,
@@ -5397,7 +5441,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
   .grid-explorer-kpi-strip--four .grid-explorer-kpi__icon {
     position: absolute;
     top: 0.5rem;
-    right: 0.45rem;
+    left: 0.45rem;
     height: 13px;
     width: 13px;
     margin-top: 0;
@@ -5426,9 +5470,16 @@ html.theme-dark .locale-toggle__btn--active:hover {
        buys its own clearance through its size and inset instead. */
   }
 
-  .grid-explorer-kpi-strip--six .grid-explorer-kpi__label,
-  .grid-explorer-kpi-strip--four .grid-explorer-kpi__label {
-    justify-content: center;
+  /* The label is plain text now, so it centres with text-align from the block
+     above rather than with a flex property that no longer applies. */
+
+  /* Two lines reserved, always. "Evening Peak Generation" is the longest of the
+     six and wraps; without this the tile beneath it started its figure a line
+     lower than the other five, which is the same horizontal-scan break that
+     `justify-content: center` used to cause for the labels. Costs no tile
+     height — the row is already sized by the tallest tile. */
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi__label {
+    min-height: 2.5em;
   }
 }
 
@@ -5441,7 +5492,7 @@ html.theme-dark .locale-toggle__btn--active:hover {
 @media (min-width: 1280px) and (max-width: 1365px) {
   .grid-explorer-kpi-strip--six .grid-explorer-kpi__icon {
     top: 0.45rem;
-    right: 0.2rem;
+    left: 0.2rem;
     height: 11px;
     width: 11px;
   }

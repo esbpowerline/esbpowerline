@@ -109,6 +109,36 @@ export function PublicNavbar({
   const prevPathname = useRef(pathname);
   const activeScrollIdRef = useRef<number | null>(null);
 
+  /**
+   * The category ribbon folds away inside a Grid Explorer tab.
+   *
+   * The explorer's deeper tabs — Technical Information most of all — are dense
+   * enough to want the whole viewport, and the ten-category ribbon is
+   * navigation for the newsroom, not for the tab a reader is reading. It folds
+   * on any tab but Overview and comes back on Overview, on leaving the page,
+   * and whenever the mobile menu is open, so the ribbon is never hidden while
+   * someone is trying to navigate with it.
+   *
+   * `esb-grid-tab-change` has been dispatched by the explorer since it was
+   * written and nothing has ever listened to it. This is its first listener.
+   */
+  const [gridImmersive, setGridImmersive] = useState(false);
+
+  useEffect(() => {
+    function onTabChange(event: Event) {
+      const tab = (event as CustomEvent<{ tab?: string }>).detail?.tab;
+      setGridImmersive(Boolean(tab) && tab !== 'overview');
+    }
+    window.addEventListener('esb-grid-tab-change', onTabChange);
+    return () => window.removeEventListener('esb-grid-tab-change', onTabChange);
+  }, []);
+
+  // Leaving the explorer restores it: the flag is about a tab, and no other
+  // page has tabs to be inside of.
+  useEffect(() => {
+    if (!pathname.startsWith('/grid-explorer')) setGridImmersive(false);
+  }, [pathname]);
+
   useEffect(() => {
     const targetPaths = ['/grid-explorer', '/articles', '/magazine', '/about', '/contact'];
     const isTarget = targetPaths.some(p => pathname.startsWith(p));
@@ -314,7 +344,12 @@ export function PublicNavbar({
             </div>
           </div>
 
-          <div className="public-nav-bar__categories-shell public-nav-bar__categories hidden lg:block">
+          <div
+            className={`public-nav-bar__categories-shell public-nav-bar__categories hidden lg:block${
+              gridImmersive && !mobileOpen ? ' public-nav-bar__categories--folded' : ''
+            }`}
+            aria-hidden={gridImmersive && !mobileOpen ? true : undefined}
+          >
             <div
               className="category-nav-ribbon category-nav-ribbon--desktop grid divide-x divide-border/40"
               style={{ gridTemplateColumns: `repeat(${navCategories.length}, minmax(0, 1fr))` }}

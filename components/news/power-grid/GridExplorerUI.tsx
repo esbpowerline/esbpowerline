@@ -653,13 +653,20 @@ export function GridKpiCell({
     >
       <Icon className={cn('grid-explorer-kpi__icon shrink-0', iconClassName)} />
       <div className="min-w-0">
-        {/* The mark sits with the cadence badge, not against the number: both
-            say what kind of figure this is rather than what it reads. */}
-        <GridKpiLabel>
-          {label}
-          {provenance && <GridProvenanceTag kind={provenance} className="ml-2" />}
-        </GridKpiLabel>
-        <div className="grid-explorer-kpi__value">{value}</div>
+        {/* Only the cadence badge rides the label now. It is a <sup>, and the
+            label was a flex container, which made it a flex item and threw the
+            superscript away — the whole point of the badge everywhere else on
+            the explorer, where it sits raised against an <h3>. The label is
+            plain text again so it behaves the same here. */}
+        <GridKpiLabel>{label}</GridKpiLabel>
+        {/* The P/D mark belongs to the number, not to the name of the number.
+            On the label it read as a claim about the words; against the value
+            it says what this particular figure is, which is how the rest of the
+            explorer marks one. */}
+        <div className="grid-explorer-kpi__value">
+          {value}
+          {provenance && <GridProvenanceTag kind={provenance} className="grid-explorer-kpi__mark" />}
+        </div>
         {hint && (
           <p className="grid-explorer-kpi__hint text-[9px] text-muted-foreground mt-1 leading-snug tabular-nums">
             {hint}

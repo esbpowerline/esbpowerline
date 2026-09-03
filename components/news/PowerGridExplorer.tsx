@@ -750,12 +750,23 @@ export function PowerGridExplorer({
   };
 
   const handleTabClick = (tabId: typeof activeTab) => {
+    const foldsCategoryRibbon = (tabId !== 'overview') !== (activeTab !== 'overview');
     setActiveTab(tabId);
     if (tabScrollTimerRef.current) clearTimeout(tabScrollTimerRef.current);
-    tabScrollTimerRef.current = setTimeout(() => {
-      tabScrollTimerRef.current = null;
-      triggerScrollToElement('grid-status-overview-header');
-    }, 50);
+    // The navbar folds its category ribbon away on any tab but Overview
+    // (PublicNavbar, `gridImmersive`), which changes the navbar's height and so
+    // the scroll target. `triggerScrollToElement` measures that height once and
+    // animates against a fixed distance, so scrolling while the ribbon is still
+    // folding lands short and then jumps as the document settles. Wait for the
+    // 260ms fold when it is happening; keep the old 50ms when it is not. The
+    // fold is itself the immediate feedback, so the wait does not read as lag.
+    tabScrollTimerRef.current = setTimeout(
+      () => {
+        tabScrollTimerRef.current = null;
+        triggerScrollToElement('grid-status-overview-header');
+      },
+      foldsCategoryRibbon ? 300 : 50,
+    );
   };
 
   useEffect(() => {

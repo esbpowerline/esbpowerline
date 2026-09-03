@@ -220,9 +220,13 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         icon={Zap}
         label={
           <>
-            {/* PGCB's word. "Peak Supply" renamed the figure the tooltip
-                below calls Evening Peak Gen — the source never says supply. */}
-            Peak Generation
+            {/* P1's own row, in full. "Peak Supply" invented a word the source
+                never uses; "Peak Generation" was closer but still not what the
+                sheet says, and it left the reader to guess which of the two
+                peaks PGCB prints this is. The parser matches
+                `^(day|evening)\s+peak\s+(generation|demand)` — this is the
+                evening one, and the tile now says so. */}
+            Evening Peak Generation
             <DailyBadge />
           </>
         }
@@ -313,7 +317,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         iconClassName="text-amber-500"
         label={
           <>
-            Peak Demand
+            {/* P1's row, in full — the same reasoning as the generation tile
+                beside it. The value is `eveningPeakDemand`. */}
+            Evening Peak Demand
             <DailyBadge />
           </>
         }
@@ -622,7 +628,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         iconClassName="text-emerald-500"
         label={
           <>
-            Cost of Power
+            {/* P1's block title. "Cost of Power" was ours, and it named a rate
+                while the tile now headlines the printed total. */}
+            Production Cost
             <DailyBadge />
           </>
         }
@@ -660,9 +668,12 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             }
             valueClass="text-primary"
           />
+          {/* The parenthetical said "(bill ÷ energy)". The note at the foot of
+              this panel already explains that this rate is ours and how it is
+              worked out, so the label repeated it a thumb away. */}
           <GridKpiTooltipRow
             provenance="D"
-            label="Avg production cost (bill ÷ energy):"
+            label="Average production cost:"
             value={derivedUnitCost == null ? 'not published for this day' : `${derivedUnitCost.toFixed(3)} Tk/kWh`}
           />
           {/* Shown only when it disagrees with the published rate. Agreement is
