@@ -44,6 +44,13 @@ echo "=== $(date -Is) — trailing $DAYS days ==="
 export ESB_PGCB_ARCHIVE="$STATE/pgcb-archive"
 export ESB_DAILY_REPORTS_ROOT="$STATE/daily-reports"
 export ESB_SOURCE_INDEX="$STATE/source-index.json"
+# daily_extractor/config.py defaults these three to ~/Desktop, which is how a
+# grid_backlog folder appeared on the desktop of a machine nobody had ever run
+# the extractor on interactively (2026-09-03). Working directories belong with
+# the rest of the run state.
+export ESB_GRID_BACKLOG="$STATE/grid-backlog"
+export ESB_PETROBANGLA_JSON_STAGING="$STATE/grid-backlog/petrobangla_json"
+export ESB_PETROBANGLA_HOT_FOLDER="$STATE/petrobangla-inbox"
 export PYTHONUTF8=1
 export PATH="$HOME/.local/node/bin:$PATH"
 export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/esb_deploy_key -o IdentitiesOnly=yes"
