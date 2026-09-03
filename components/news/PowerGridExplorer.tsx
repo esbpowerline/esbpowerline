@@ -45,6 +45,9 @@ import { coverageLabel } from '@/lib/data/grid/coverage';
 import { axisTickStyle } from '@/lib/data/grid/chart-axis';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
+import { pendingDays, isBeyondToday, type PendingDay } from '@/lib/data/grid/pending-days';
+import { backlogBadge } from '@/lib/data/grid/backlog-badge';
+import { PendingDayPanel, FutureDatePanel } from '@/components/news/power-grid/PendingDayPanel';
 import { UnitCostBadge } from '@/components/news/power-grid/UnitCostBadge';
 import { useUnitCostAuthentication, type UnitCostFact } from '@/components/news/power-grid/useUnitCostAuthentication';
 import { EnergyCurveChart } from '@/components/news/power-grid/EnergyCurveChart';
@@ -219,6 +222,15 @@ export function PowerGridExplorer({
     runtimeDates && runtimeDates.length > 0 ? runtimeDates[runtimeDates.length - 1] : serverLatestDate,
   );
   
+  const latestDate = gridAccess.latestDate || serverLatestDate || getLatestAvailableDate() || '2026-07-03';
+
+  // Days the calendar has reached that PGCB has not filed. `latestDate` stays
+  // the newest day actually HELD — every tier bound is anchored to it and must
+  // not move — so these are carried alongside rather than folded into it.
+  // Empty whenever the archive is behind; see pending-days.ts for why.
+  const pending = useMemo(() => pendingDays(latestDate), [latestDate]);
+  const pendingByDate = useMemo(() => new Map(pending.map((p) => [p.date, p])), [pending]);
+
   // Date Selection States
   const availableDatesList = useMemo<string[]>(() => {
     const valid = /^(201[1-9]|202[0-9])-\d{2}-\d{2}$/;
@@ -226,10 +238,14 @@ export function PowerGridExplorer({
     for (const d of runtimeDates ?? []) {
       if (valid.test(d)) merged.add(d);
     }
+    // Without the pending days the picker stops at the newest day held, and a
+    // reader who knows today's date reads that as a site that stopped updating.
+    for (const p of pending) {
+      if (valid.test(p.date)) merged.add(p.date);
+    }
     return [...merged].sort();
-  }, [runtimeDates]);
+  }, [runtimeDates, pending]);
 
-  const latestDate = gridAccess.latestDate || serverLatestDate || getLatestAvailableDate() || '2026-07-03';
   const bootDate = urlBoot?.date ?? latestDate;
 
   useMemo(() => {
@@ -238,6 +254,18 @@ export function PowerGridExplorer({
   }, [prefetchedDailyReports]);
 
   const [selectedDate, setSelectedDate] = useState<string>(bootDate);
+  const pendingForSelected: PendingDay | null = pendingByDate.get(selectedDate) ?? null;
+  // Deep links only; the picker cannot produce a date past today.
+  const selectedIsFuture = isBeyondToday(selectedDate);
+  // Everything the tab panels gate on. Both states replace them entirely.
+  const noDayToRender = Boolean(pendingForSelected) || selectedIsFuture;
+  // A pending day holds nothing, so there is nothing to gate: tier access is
+  // about withholding published figures, and these are not published anywhere.
+  // Wrapping rather than widening gridAccess keeps the paywall untouched.
+  const canAccessDate = useCallback(
+    (iso: string) => pendingByDate.has(iso) || gridAccess.canAccessDate(iso),
+    [pendingByDate, gridAccess],
+  );
   const [tierLockRequired, setTierLockRequired] = useState<ReturnType<typeof gridAccess.requiredTierForDate> | null>(null);
   const [activeData, setActiveData] = useState<GridDailyData | null>(() =>
     resolveInitialDailyReport(bootDate, latestDate, prefetchedDailyReports),
@@ -277,69 +305,12 @@ export function PowerGridExplorer({
   // itself is untouched and simply docks somewhere else below 40rem.
   const [isDateSheetOpen, setIsDateSheetOpen] = useState(false);
 
-  // Helper to get color-shifting backlog badge styles (psychological timeline)
-  const getBacklogBadgeStyles = useCallback((selected: string, latest: string) => {
-    try {
-      const selDate = new Date(selected);
-      const latDate = new Date(latest);
-      const diffTime = latDate.getTime() - selDate.getTime();
-      if (diffTime <= 0) {
-        return {
-          className: "bg-primary/10 text-primary border border-primary/20",
-          text: "Latest"
-        };
-      }
-      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-      
-      // Calculate text representation
-      let text = '';
-      if (diffDays < 30) {
-        text = `${diffDays} ${diffDays === 1 ? 'Day' : 'Days'} Ago`;
-      } else if (diffDays < 365) {
-        const diffMonths = Math.round(diffDays / 30.4);
-        text = `${diffMonths} ${diffMonths === 1 ? 'Month' : 'Months'} Ago`;
-      } else {
-        const diffYears = (diffDays / 365).toFixed(1);
-        text = `${diffYears} Years Ago`;
-      }
-
-      // Determine subtle color classes based on age
-      if (diffDays < 90) { // < 3 months (Recent)
-        return {
-          className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
-          text
-        };
-      }
-      if (diffDays < 365) { // < 1 year (Short-term)
-        return {
-          className: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20",
-          text
-        };
-      }
-      if (diffDays < 1095) { // 1 - 3 years (Medium-term)
-        return {
-          className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20",
-          text
-        };
-      }
-      if (diffDays < 2555) { // 3 - 7 years (Deep)
-        return {
-          className: "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20",
-          text
-        };
-      }
-      // > 7 years (Deep Historical Abyss)
-      return {
-        className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 font-semibold",
-        text
-      };
-    } catch {
-      return {
-        className: "bg-muted text-muted-foreground",
-        text: "Archive"
-      };
-    }
-  }, []);
+  // Age badge for the active date. Extracted to lib/data/grid/backlog-badge.ts
+  // when this file hit its size budget; the logic is unchanged.
+  const getBacklogBadgeStyles = useCallback(
+    (selected: string, latest: string) => backlogBadge(selected, latest, pendingByDate.get(selected)?.status ?? null),
+    [pendingByDate],
+  );
 
   const [isDailyYearDropdownOpen, setIsDailyYearDropdownOpen] = useState(false);
   const [isDailyMonthDropdownOpen, setIsDailyMonthDropdownOpen] = useState(false);
@@ -356,14 +327,14 @@ export function PowerGridExplorer({
 
   // Calculate options dynamically
   const selectAccessibleDate = useCallback((isoDate: string) => {
-    if (gridAccess.canAccessDate(isoDate)) {
+    if (canAccessDate(isoDate)) {
       setTierLockRequired(null);
       setSelectedDate(isoDate);
       return;
     }
     setTierLockRequired(gridAccess.requiredTierForDate(isoDate));
     setSelectedDate(isoDate);
-  }, [gridAccess]);
+  }, [gridAccess, canAccessDate]);
 
   useEffect(() => {
     let alive = true;
@@ -443,10 +414,10 @@ export function PowerGridExplorer({
       return {
         label: String(parseInt(d, 10)),
         value: d,
-        locked: !gridAccess.canAccessDate(iso),
+        locked: !canAccessDate(iso),
       };
     });
-  }, [daysForMonth, selectedYear, selectedMonth, gridAccess]);
+  }, [daysForMonth, selectedYear, selectedMonth, canAccessDate]);
 
   const handleYearChange = (newYear: string) => {
     const datesInYear = availableDatesList.filter((d) => d.startsWith(`${newYear}-`)).sort();
@@ -507,6 +478,22 @@ export function PowerGridExplorer({
     let isMounted = true;
     const requestSeq = ++fetchSeqRef.current;
     if (!selectedDate) return;
+
+    // A pending day has no file to fetch and never will until PGCB files it.
+    // Asking for it would 404 into the "could not be fetched" panel, which
+    // blames the mirror for a report that does not exist yet.
+    if (pendingByDate.has(selectedDate)) {
+      setIsLoadingDaily(false);
+      setIsDataMissing(false);
+      setTierLockRequired(null);
+      // Drop the previously selected day's payload. Leaving it in place would
+      // render its figures under the pending day's date — the one mistake this
+      // whole feature exists to avoid.
+      setActiveData(null);
+      setActiveDataDate(null);
+      return;
+    }
+
     if (gridAccess.loading && !visitorCanAccessSelected) return;
 
     if (!gridAccess.loading && !gridAccess.canAccessDate(selectedDate)) {
@@ -589,6 +576,7 @@ export function PowerGridExplorer({
     selectedDate,
     gridAccess,
     visitorCanAccessSelected,
+    pendingByDate,
   ]);
 
   const {
@@ -1341,7 +1329,10 @@ export function PowerGridExplorer({
             Grid Status Overview
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5 inline-flex items-center flex-wrap gap-1">
-            Active reporting date: <span className="font-semibold text-primary">{systemStats.date}</span>
+            {/* A pending day has no payload, so systemStats.date is undefined
+                and the header read "Active reporting date:" followed by
+                nothing. Fall back to the selection itself. */}
+            Active reporting date: <span className="font-semibold text-primary">{systemStats.date || isoDateToLegacy(selectedDate) || selectedDate}</span>
             {(() => {
               const badge = getBacklogBadgeStyles(selectedDate, latestDate);
               return (
@@ -1481,6 +1472,11 @@ export function PowerGridExplorer({
 
       <div className="min-h-[280px]">
       {/* KPI Strip */}
+      {/* The page strip reads whatever payload is loaded. On a pending day
+          there is none, and rendering it anyway prints this strip's fallbacks
+          under a date nobody has measured. PendingDayPanel below carries the
+          same six tiles with every figure a dash instead. */}
+      {!pendingForSelected && (
       <GridLockedContent
         locked={tierLockRequired !== null}
         requiredTier={tierLockRequired as any}
@@ -1511,6 +1507,7 @@ export function PowerGridExplorer({
         forecast={forecast}
       />
 </GridLockedContent>
+      )}
 
       {/* Flat Tab Navigation */}
       <div className="grid-explorer-tabs mt-6 mb-4" role="tablist" aria-label="Grid reports views">
@@ -1564,7 +1561,14 @@ export function PowerGridExplorer({
           </div>
         )}
 
-        {isDataMissing && !activeData && (
+        {/* A day the calendar has reached and PGCB has not filed. Rendered
+            before every other state and instead of the tab panels: there is
+            nothing to draw, and the reader's question is why the newest day
+            is not here. */}
+        {pendingForSelected && <PendingDayPanel pending={pendingForSelected} />}
+        {selectedIsFuture && <FutureDatePanel isoDate={selectedDate} />}
+
+        {!noDayToRender && isDataMissing && !activeData && (
           <div className="grid-explorer-panel space-y-6">
             <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
               <div className="p-4 rounded-full bg-muted/20 text-muted-foreground animate-pulse">
@@ -1606,7 +1610,7 @@ export function PowerGridExplorer({
           </div>
         )}
 
-        {!isDataMissing && activeTab === 'overview' && (
+        {!isDataMissing && !noDayToRender && activeTab === 'overview' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
             <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
@@ -1938,7 +1942,7 @@ export function PowerGridExplorer({
       </GridLockedContent> )
     )}
 
-      {!isDataMissing && activeTab === 'gen' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'gen' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
             <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
@@ -2454,7 +2458,7 @@ export function PowerGridExplorer({
         </GridLockedContent> )
       )}
 
-      {!isDataMissing && activeTab === 'gas' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'gas' && (
         <div className="grid-explorer-panel space-y-6">
           {dayWindowStrip}
           {provenanceNote}
@@ -2473,7 +2477,7 @@ export function PowerGridExplorer({
         </div>
       )}
 
-      {!isDataMissing && activeTab === 'imports' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'imports' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
             <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
@@ -2649,7 +2653,7 @@ export function PowerGridExplorer({
         </GridLockedContent> )
       )}
 
-      {!isDataMissing && activeTab === 'renewables' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'renewables' && (
         <GridLockedContent variant="micro" locked={tierLockRequired !== null} requiredTier={tierLockRequired as any} selectedDate={selectedDate} onTryDemo={() => setSelectedDate(DEMO_DATE)}>
           <RenewablesTab
             isoDate={selectedDate}
@@ -2660,14 +2664,14 @@ export function PowerGridExplorer({
         </GridLockedContent>
       )}
 
-      {!isDataMissing && activeTab === 'plants' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'plants' && (
         <div className="space-y-6">
           <StationsKpiStrip isoDate={selectedDate} systemStats={systemStats} sourceFiles={sourceFiles} />
           <PowerStationsTab isoDate={selectedDate} systemStats={systemStats} sourceFiles={sourceFiles} />
         </div>
       )}
 
-      {!isDataMissing && activeTab === 'transmission' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'transmission' && (
         <TechnicalInfoTab
           selectedDate={selectedDate}
           tierLockRequired={tierLockRequired}
@@ -2675,7 +2679,7 @@ export function PowerGridExplorer({
         />
       )}
 
-      {!isDataMissing && activeTab === 'regional' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'regional' && (
         selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
             <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[22rem]">
@@ -3142,7 +3146,7 @@ export function PowerGridExplorer({
         </GridLockedContent> )
       )}
 
-      {!isDataMissing && activeTab === 'macro' && (
+      {!isDataMissing && !noDayToRender && activeTab === 'macro' && (
         <MacroTrendsTab
           macroSubTab={macroSubTab}
           handleSubTabClick={handleSubTabClick}
