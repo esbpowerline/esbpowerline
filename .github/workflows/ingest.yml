@@ -47,11 +47,6 @@ permissions:
 
 env:
   DATA_BRANCH: authenticating
-  # Everything the chain keeps between runs lives under one directory that the
-  # Actions cache carries forward: the PGCB workbooks (the forecast step needs
-  # yesterday's workbook as well as today's) and the extractor's drop.
-  ESB_PGCB_ARCHIVE: ${{ github.workspace }}/.ingest-state/pgcb-archive
-  ESB_DAILY_REPORTS_ROOT: ${{ github.workspace }}/.ingest-state/daily-reports
   PYTHONUTF8: '1'
 
 jobs:
@@ -61,7 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.DATA_BRANCH }}
+          ref: authenticating
           # The chain reads the archive under public/data (2,300 gas days for
           # the timeline, the daily files for the source index); a shallow
           # checkout is enough because it never reads history.
@@ -81,13 +76,21 @@ jobs:
       - name: Restore the workbook archive from the previous poll
         uses: actions/cache@v4
         with:
-          path: |
-            .ingest-state
-            scratch/backfill-source-index.json
+          path: .ingest-state
           # A key that never matches, so every run saves a fresh entry and the
           # next one restores the newest via the prefix.
           key: ingest-state-${{ github.run_id }}
           restore-keys: ingest-state-
+
+      - name: Point the chain at the cached state
+        # Everything the chain keeps between runs lives under one directory
+        # that the Actions cache carries forward: the PGCB workbooks (the
+        # forecast step needs yesterday's workbook as well as today's), the
+        # extractor's drop and the energy-day → workbook index.
+        run: |
+          echo "ESB_PGCB_ARCHIVE=$GITHUB_WORKSPACE/.ingest-state/pgcb-archive" >> "$GITHUB_ENV"
+          echo "ESB_DAILY_REPORTS_ROOT=$GITHUB_WORKSPACE/.ingest-state/daily-reports" >> "$GITHUB_ENV"
+          echo "ESB_SOURCE_INDEX=$GITHUB_WORKSPACE/.ingest-state/source-index.json" >> "$GITHUB_ENV"
 
       - run: npm ci --ignore-scripts
       - run: npx prisma generate
