@@ -45,8 +45,12 @@ os.environ.setdefault("ESB_DAILY_OUTPUT_DIR", tempfile.mkdtemp(prefix="esb-backf
 
 REPO = Path(__file__).resolve().parent.parent
 DAILY = REPO / "public" / "data" / "daily"
+# `ESB_PGCB_ARCHIVE` is the store on a machine that is not the Windows box —
+# the GitHub Actions ingest runner (2026-09-03). Same contents, same names.
 SOURCE_DIRS = [
-    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
+    Path(os.environ["ESB_PGCB_ARCHIVE"])
+    if os.environ.get("ESB_PGCB_ARCHIVE")
+    else Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
 ]
 
 from ingest_bridge import derive_energy_day, workbook_energy_day, xlsx_to_md  # noqa: E402

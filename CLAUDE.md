@@ -206,8 +206,11 @@ Python parsers own every number on the site. They carry years of source-quirk kn
   under a `.pdf` URL, and a parser fed HTML produces confident nonsense.
 - A step that wrote nothing must **fail**, not report success.
 - `/api/cron/ingest` is **disabled on Vercel** (returns 503); the Python chain exceeds
-  serverless compute limits. Ingestion runs locally. Only `/api/cron/publish-scheduled`
-  runs on Vercel, every 15 min.
+  serverless compute limits. Ingestion runs locally or on the GitHub Actions job
+  (`.github/workflows/ingest.yml`, four polls a day over the trailing three days via
+  `scripts/ingest_recent_days.py`; free minutes, no deploy — releases carry the day to the
+  site). Off the Windows box the archive paths come from `ESB_PGCB_ARCHIVE` and
+  `ESB_DAILY_REPORTS_ROOT`. Only `/api/cron/publish-scheduled` runs on Vercel, every 15 min.
 
 ### Publishing
 

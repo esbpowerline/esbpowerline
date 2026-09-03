@@ -81,13 +81,22 @@ PARSED_DIRS = [
 #
 # Checked before reordering: on the 535 days held in both stores the files are
 # byte-identical, so this changes provenance and not a single figure.
-SOURCE_WORKBOOK_DIRS = [
-    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
-    Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
-]
-ERP_MIRROR_DIRS = [
-    Path(r"C:\ESB-Grid-Archive\01-pgcb\acquired-from-erp"),
-]
+_env_archive = os.environ.get("ESB_PGCB_ARCHIVE")
+SOURCE_WORKBOOK_DIRS = (
+    # Off the Windows box (the GitHub Actions runner, 2026-09-03) the archive
+    # is wherever `ESB_PGCB_ARCHIVE` points; same precedence rules apply.
+    [Path(_env_archive)]
+    if _env_archive
+    else [
+        Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
+        Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
+    ]
+)
+ERP_MIRROR_DIRS = (
+    [Path(_env_archive) / "acquired-from-erp"]
+    if _env_archive
+    else [Path(r"C:\ESB-Grid-Archive\01-pgcb\acquired-from-erp")]
+)
 WORKBOOK_DIRS = [*SOURCE_WORKBOOK_DIRS, *ERP_MIRROR_DIRS]
 WORKBOOK_SUFFIXES = {".xlsx", ".xlsm", ".xls"}
 

@@ -322,6 +322,19 @@ def main() -> None:
             import datetime as _dt
 
             pf = plant_forecast_for(_dt.date.fromisoformat(day))
+            if not pf:
+                # The projection is in the previous day's workbook, which a
+                # machine can lack while holding this day's. Rebuilding then
+                # dropped a plantForecast the published file already carried
+                # (2026-09-01 on a runner with no 08-31 workbook, 2026-09-03);
+                # keep it — not holding the source says nothing about the figure.
+                prior = PLANTS / f"{day}.json"
+                try:
+                    pf = json.loads(prior.read_text(encoding="utf-8")).get("plantForecast") if prior.exists() else None
+                except Exception:  # noqa: BLE001
+                    pf = None
+                if pf:
+                    stats["per-station forecast kept from the published day"] += 1
             if pf:
                 doc["plantForecast"] = pf
                 stats["with per-station forecast"] += 1

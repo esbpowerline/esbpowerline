@@ -61,6 +61,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -73,18 +74,33 @@ if hasattr(sys.stdout, "reconfigure"):
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 PUBLIC = ROOT / "public" / "data"
-SOURCE_INDEX = ROOT / "scratch" / "backfill-source-index.json"
+# The energy-day → workbook map the curve and plants builders resolve through.
+# `ESB_SOURCE_INDEX` moves it off scratch/ on the Actions runner, where it is
+# carried between polls in the cache next to the archive it points into.
+SOURCE_INDEX = Path(os.environ.get("ESB_SOURCE_INDEX", str(ROOT / "scratch" / "backfill-source-index.json")))
 
-PGCB_SOURCE_DIRS = [
-    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
-    Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
-]
+# The local PGCB archive. `ESB_PGCB_ARCHIVE` names it on a machine that is not
+# Hamim's Windows box — the GitHub Actions runner that ingests four times a day
+# keeps its copy under the workspace and restores it from the Actions cache
+# (2026-09-03). The Windows paths stay as the fallback for the desktop.
+_env_archive = os.environ.get("ESB_PGCB_ARCHIVE")
+PGCB_SOURCE_DIRS = (
+    [Path(_env_archive)]
+    if _env_archive
+    else [
+        Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
+        Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
+    ]
+)
 # Where the extractor drops the workbook it has just downloaded. That is a
 # working directory, not a store: it is keyed by energy day rather than by
 # PGCB's report name, and nothing downstream looks in it. A day collected on a
 # machine with no reachable store therefore has its workbook on disk and still
-# builds no curve and no plants — see ensure_source_workbook.
-EXTRACTOR_DROP = Path.home() / "Desktop" / "Daily Reports"
+# builds no curve and no plants — see ensure_source_workbook. Follows the
+# extractor's own `ESB_DAILY_REPORTS_ROOT` (daily_extractor/config.py).
+EXTRACTOR_DROP = Path(
+    os.environ.get("ESB_DAILY_REPORTS_ROOT", str(Path.home() / "Desktop" / "Daily Reports"))
+)
 
 
 def run(name: str, args: list[str], timeout: int = 1800) -> dict:
@@ -97,7 +113,7 @@ def run(name: str, args: list[str], timeout: int = 1800) -> dict:
             capture_output=True,
             text=True,
             timeout=timeout,
-            env={**__import__("os").environ, "PYTHONUTF8": "1"},
+            env={**os.environ, "PYTHONUTF8": "1"},
         )
         tail = (proc.stdout or "").strip().splitlines()
         return {
@@ -285,7 +301,7 @@ def run_forward_forecast(day: date) -> dict:
             capture_output=True,
             text=True,
             timeout=900,
-            env={**__import__("os").environ, "PYTHONUTF8": "1"},
+            env={**os.environ, "PYTHONUTF8": "1"},
         )
     except Exception as e:  # noqa: BLE001
         return {"step": "forward forecast", "ok": False,
@@ -335,7 +351,7 @@ def publish_releases(iso: str, aggregates: bool) -> dict:
             text=True,
             timeout=900,
             shell=sys.platform == "win32",  # npx is a .cmd on Windows
-            env={**__import__("os").environ, "PYTHONUTF8": "1"},
+            env={**os.environ, "PYTHONUTF8": "1"},
         )
         lines = [ln for ln in (proc.stdout or "").strip().splitlines() if ln.strip()]
         summary = next((ln for ln in reversed(lines) if "published" in ln), "")
@@ -394,6 +410,14 @@ def main() -> int:
     # the station detail; the one PGCB filed the morning OF this day — that is
     # the previous energy day's report — carries the forecast this day is
     # measured against, and the per-station forecast with it.
+    # On a runner the archive starts empty and the source index does not exist,
+    # and index_sources() then walks the (empty) store instead of the cache —
+    # so the workbook this run just filed is invisible to the curve and plants
+    # builders. An empty index makes ensure_source_workbook register it.
+    if os.environ.get("ESB_PGCB_ARCHIVE") and not SOURCE_INDEX.exists():
+        SOURCE_INDEX.parent.mkdir(parents=True, exist_ok=True)
+        SOURCE_INDEX.write_text("{}", encoding="utf-8")
+
     held, problem = ensure_source_workbook(day)
     if held:
         say(f"      source workbook: {held}")
@@ -405,7 +429,10 @@ def main() -> int:
         say(f"      forecast issued in: {prior}")
 
     say("[2/12] energy curve …")
-    steps.append(run("energy curve", [str(SCRIPTS / "backfill_energy_curve.py"), "--apply", "--from", iso]))
+    # Both builders are told which index to read so they resolve the workbook
+    # this run just registered, wherever SOURCE_INDEX lives.
+    steps.append(run("energy curve", [str(SCRIPTS / "backfill_energy_curve.py"), "--apply", "--from", iso,
+                                      "--index-cache", str(SOURCE_INDEX)]))
 
     say("[3/12] split curve …")
     steps.append(run("split curve", [str(SCRIPTS / "split_energy_curve.py"), "--apply"]))
@@ -421,7 +448,8 @@ def main() -> int:
     steps.append(run("border imports", [str(SCRIPTS / "backfill_border_imports.py"), "--apply", "--from", iso]))
 
     say("[5/12] per-station detail …")
-    steps.append(run("plants", [str(SCRIPTS / "build_daily_plants.py"), "--apply", "--only", iso]))
+    steps.append(run("plants", [str(SCRIPTS / "build_daily_plants.py"), "--apply", "--only", iso,
+                                "--index-cache", str(SOURCE_INDEX)]))
     gate(steps, PUBLIC / "plants" / f"{iso}.json", "plants",
          "no station detail written — the day's source workbook was not readable")
 

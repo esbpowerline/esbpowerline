@@ -17,6 +17,7 @@ from .config import (
     PETROBANGLA_GAS_PRODUCTION_COMPANIES,
     PETROBANGLA_JSON_STAGING,
     SCRATCH_DOWNLOADS,
+    energy_to_report_date,
 )
 from .convert import pdf_to_text, xlsx_to_text
 
@@ -89,10 +90,16 @@ def _apply_gas_fallback(grid_data: dict, energy: date, warnings: list[str]) -> N
         grid_data["gasDistributionData"] = preserved["gasDistributionData"]
         warnings.append("Petrobangla unavailable — kept existing gas sections for this energy day")
         return
-    prod, dist = _zero_gas_sections()
-    grid_data["gasProductionData"] = prod
-    grid_data["gasDistributionData"] = dist
-    warnings.append("Petrobangla unavailable — zero-filled gas sections (Gas tab empty state)")
+    # Absent, not zero. The docstring above argued zero was "honest", and the
+    # UI does treat an all-zero table as unpublished — but the FILE still said
+    # six companies produced 0.0 MMCFD, and the publish gate let it through:
+    # 2026-08-30 and 2026-09-01 both shipped that way and were repaired by
+    # hand. Omitting the keys is what the doctrine actually says ("null is not
+    # zero"), the validator accepts a missing section, and the day fills in on
+    # the next run once Petrobangla files the window (2026-09-03).
+    grid_data.pop("gasProductionData", None)
+    grid_data.pop("gasDistributionData", None)
+    warnings.append("Petrobangla unavailable — gas sections omitted until the window is published")
 
 
 def parse_petrobangla_pdf(pdf_path: Path, energy: date) -> dict | None:
@@ -228,7 +235,16 @@ def parse_all(
                 enrich_grid_daily(
                     grid_data,
                     energy,
-                    pgcb_file=pgcb_xlsx.name if pgcb_xlsx else None,
+                    # PGCB's own report name, publication-dated. A workbook
+                    # fetched from the ERP mirror arrives as `erp_<id>.xlsx`,
+                    # and 2026-08-22..26, 08-31 and 09-01 were cited that way
+                    # until repaired by hand; the ERP is transport, not a
+                    # different document (2026-09-03).
+                    pgcb_file=(
+                        f"Daily Report {energy_to_report_date(energy):%d-%m-%Y}{pgcb_xlsx.suffix}"
+                        if pgcb_xlsx and pgcb_xlsx.name.startswith("erp_")
+                        else (pgcb_xlsx.name if pgcb_xlsx else None)
+                    ),
                     petrobangla=petrobangla_data,
                 )
             )
@@ -236,6 +252,22 @@ def parse_all(
             # A day is still a complete day without its forecast; failing the
             # whole collection over an enrichment step would be the wrong trade.
             warnings.append(f"enrichment skipped: {exc}")
+
+        # The forecast lives in the PREVIOUS day's workbook. A machine that does
+        # not hold it — a fresh Actions runner, a desktop with W: unmounted —
+        # can still rebuild the day from its own workbook, and the rebuild used
+        # to replace a day that HAD its forecast with one that did not
+        # (2026-09-01 lost PGCB's 18,800 MW evening projection to exactly this,
+        # 2026-09-03). Not holding the source is not evidence about the figure.
+        if grid_data.get("forecast") is None:
+            existing = GRID_DAILY_OUT / f"{energy.isoformat()}.json"
+            try:
+                held = json.loads(existing.read_text(encoding="utf-8")).get("forecast") if existing.exists() else None
+            except Exception:  # noqa: BLE001
+                held = None
+            if held:
+                grid_data["forecast"] = held
+                warnings.append(f"forecast for {energy.isoformat()} kept from the archived day — its source workbook is not held here")
 
     return ParseResult(
         energy_day=energy,
