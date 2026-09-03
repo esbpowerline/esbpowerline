@@ -222,16 +222,10 @@ export function CmsListRow({
   const content = (
     <>
       {rank !== undefined && <span className="admin-rank">{rank}</span>}
-      {/* `min-w-0 truncate` WITHOUT flex-1: the title takes only the width it
-          needs so its status and category stay beside it. Growing it to fill
-          the row pushed them to the far edge, leaving 208-341px of dead space
-          between a headline and the label describing it. */}
-      <span className="min-w-0 truncate admin-list-title">{title}</span>
+      <span className="flex-1 min-w-0 truncate admin-list-title">{title}</span>
       {badge && <span className="shrink-0">{badge}</span>}
       {metaNode && <span className="hidden sm:inline-flex shrink-0">{metaNode}</span>}
       {meta && <span className="admin-list-meta hidden sm:inline">{meta}</span>}
-      {/* The figure is the one thing that stays a column — a reader scans it
-          vertically, so it keeps the right edge to itself. */}
       {value !== undefined && <span className="admin-list-value">{value}</span>}
     </>
   );
