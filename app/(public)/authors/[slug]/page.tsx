@@ -196,6 +196,17 @@ export default async function AuthorPage({
     if (!author) notFound();
   }
 
+  // `User.email` is the staff account's sign-in address, not a published
+  // contact. Rendering it as a mailto put a personal Gmail — and therefore
+  // half of a working CMS credential — in the public HTML of an author page,
+  // where it is also trivially harvested. Only an address on the site's own
+  // domain is a role address someone chose to publish; anything else is
+  // withheld and the button simply does not render.
+  const contactEmail =
+    author.email && /@([a-z0-9-]+\.)*esbpowerline\.com$/i.test(author.email)
+      ? author.email
+      : null;
+
   // ProfilePage over a Person, from the fields the page already shows. No
   // sameAs: the author rows carry no profile links.
   const profileJsonLd = {
@@ -228,8 +239,8 @@ export default async function AuthorPage({
             {author.bio || `Staff writer at ESB PowerLine.`}
           </p>
           <div className="flex items-center gap-3">
-            {author.email && (
-              <a href={`mailto:${author.email}`} className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+            {contactEmail && (
+              <a href={`mailto:${contactEmail}`} className="w-10 h-10 rounded-full bg-background border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                 <Mail className="w-4 h-4" />
               </a>
             )}
