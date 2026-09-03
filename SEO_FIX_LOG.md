@@ -611,3 +611,88 @@ origin on top of these local numbers.
 - Staff surfaces keep their styles: `/login` and `/members/login` serve two stylesheets on
   the dev server (global + staff), the homepage serves one; the sign-in shell renders.
 - Production build: 196 routes prerendered as before.
+
+---
+
+## Stage 8 — The archive had no pages
+
+### 8.1 Investigated
+
+- Whether the ~4,500-day grid archive was reachable by a search engine at all.
+- Every URL the Grid Explorer can produce, and which of them a crawler can see.
+- Status codes returned for URLs under `/grid-explorer/` that do not exist.
+
+### 8.2 Found
+
+**The archive was one URL.** `/grid-explorer` held the date in client state, so
+4,548 days of PGCB and Petrobangla figures — 2013-12-31 to 2026-09-02 — shared a
+single document. `?date=` was never read by the server (made deliberately static
+in the cost pass, stage 1), so it produced no distinct HTML, and the sitemap
+submitted `/grid-explorer` once with the newest day's `lastModified`.
+
+Stages 1-7 tuned how well the site's existing pages ranked. None of them could
+have helped an archive query, because there was nothing to rank: a search for
+the grid's figures on a given day in 2019 had no page on this site to return.
+This is the single largest indexing gap the site has had, and it is invisible in
+Search Console — a page that does not exist reports no impressions, no coverage
+error and no warning.
+
+**A soft 404 under the whole segment.** `app/(public)/grid-explorer/loading.tsx`
+wrapped every child segment in a Suspense boundary. A streamed response commits
+its status before the page body runs, so `notFound()` could swap the UI but not
+the status: every nonexistent URL under `/grid-explorer/` returned **200 with a
+"page could not be found" body**. Confirmed in both dev and the production build,
+on first request and on cache hits. The four older dynamic routes (`articles`,
+`categories`, `authors`, `energy-policy`) return a correct 404 and have no
+`loading.tsx`, which is what isolated the cause.
+
+### 8.3 Changed
+
+| # | Change | Files |
+|---|---|---|
+| 1 | One page per archive day at `/grid-explorer/{date}` — eleven headline figures, the fuel table, source documents, and prev/next day links. Figures reuse `buildHomeSnapshotFromDaily`, so the data doctrine is enforced in one place and an absent figure prints a dash naming its publisher. | `app/(public)/grid-explorer/[date]/page.tsx`, `lib/data/grid/archive-day.server.ts` |
+| 2 | A prose summary per day, used as both the meta description and the page's lead. Written only from figures the report carried — a clause about a figure nobody filed is not written at all, rather than written with a zero. | `lib/data/grid/archive-day.server.ts` |
+| 3 | Crawl path: `/grid-explorer/archive` (years) and `/grid-explorer/archive/{year}` (days by month), linked from the Grid Explorer itself. A sitemap alone would have left 4,548 orphans. | `app/(public)/grid-explorer/archive/**`, `app/(public)/grid-explorer/(explorer)/page.tsx` |
+| 4 | `grid-sitemap.xml`, separate from the editorial sitemap so Search Console reports archive and newsroom indexing apart. `lastmod` is the day itself, stated once — the honest value, per the stage 2 rule. | `app/grid-sitemap.xml/route.ts`, `app/robots.ts` |
+| 5 | `loading.tsx` moved into an `(explorer)` route group so the skeleton still covers the page that needs it while the archive routes fall outside the Suspense boundary. No URL changes. | `app/(public)/grid-explorer/(explorer)/loading.tsx` |
+| 6 | `Dataset` and `BreadcrumbList` JSON-LD per day, with each known figure as a `PropertyValue` and PGCB named as creator. | `app/(public)/grid-explorer/[date]/page.tsx` |
+| 7 | Seven tests pinning the prose against inventing a figure, and the date formatter against timezone drift. | `lib/test/archive-day-summary.test.ts` |
+
+### 8.4 What stayed paid
+
+The day page publishes the headline figures and nothing else. The hourly curve,
+per-station output, zone demand and load shedding, the gas field table and
+cross-border imports remain behind `grid-tier-access.ts` and the ৳499/৳999
+plans. Verified against the served HTML of an old day: no `hourlyLoadData`, no
+`zoneGenerationData`, no station or regional rows. The public page is the index
+entry and the pitch for that day, not the day itself.
+
+### 8.5 Verification (production build, Googlebot UA)
+
+| URL | Before | After |
+|---|---|---|
+| `/grid-explorer/2019-06-15` | did not exist | 200, unique title and description |
+| `/grid-explorer/archive` | did not exist | 200, 14 year links |
+| `/grid-explorer/archive/2019` | did not exist | 200, 359 day links |
+| `/grid-explorer/zzz-bad` | **200** (soft 404) | 404 |
+| `/grid-explorer/1854-05-05` | **200** (soft 404) | 404 |
+| `/grid-explorer/archive/1896` | n/a | 404 |
+| `/grid-sitemap.xml` | did not exist | 200, 4,563 URLs |
+| `/grid-explorer` | 200 | 200, unchanged, skeleton intact |
+
+Googlebot, Bingbot, DuckDuckBot, GoogleOther and Google-InspectionTool all
+receive 200 on the day pages and the sitemap. Yandex receives 403, consistent
+with the crawler block list already in `robots.ts`.
+
+Indexable URLs submitted: **172 → 4,735**.
+
+Build 317 static pages (was 241); 433 tests pass; lint 0 errors.
+
+### 8.6 Cost
+
+No new database work per page. `getPublishedKeys` is already `unstable_cache`d
+with tag invalidation, so a crawler walking the whole archive shares one cached
+entry rather than issuing a query per day; the figures come from the daily JSON
+already traced into the bundle. Day pages carry `revalidate = 86400` and 60 recent
+days are prerendered, so the common case is a CDN hit and the rare case is one
+disk read.
