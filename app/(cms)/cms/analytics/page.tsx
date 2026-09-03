@@ -4,6 +4,8 @@ import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
 import { publicArticleUrl } from '@/lib/public-site-url';
+import { CmsCategoryChip } from '@/components/cms/CmsCategoryChip';
+import { getCategories } from '@/lib/actions/categories';
 import {
   CmsPageHeader, CmsStatCard, CmsCard, CmsListRow, CmsMetricRow,
   CmsSectionStack, CmsStatGrid, CmsListStack, CmsScheduleList,
@@ -31,6 +33,8 @@ export default async function CMSAnalyticsPage() {
   }
 
   let stats: Awaited<ReturnType<typeof getAuthorAnalytics>>;
+  // Article.category is a name, not a relation, so the colour needs a lookup.
+  const categoryColor = new Map((await getCategories()).map((c) => [c.name, c.color]));
   try {
     stats = await getAuthorAnalytics();
   } catch {
@@ -135,7 +139,7 @@ export default async function CMSAnalyticsPage() {
                   rank={i + 1}
                   title={a.title}
                   href={publicArticleUrl(a.slug)}
-                  meta={a.category}
+                  metaNode={<CmsCategoryChip name={a.category} color={categoryColor.get(a.category)} />}
                   value={`${formatNumber(a.views)} views`}
                 />
               ))}
@@ -161,7 +165,11 @@ export default async function CMSAnalyticsPage() {
           <CmsCard title="Content Mix" icon={FileText}>
             <CmsListStack>
               {stats.categoryBreakdown.slice(0, 8).map((c) => (
-                <CmsMetricRow key={c.category} label={c.category} value={`${c.count} · ${formatNumber(c.views)} views`} />
+                <CmsMetricRow
+                  key={c.category}
+                  label={<CmsCategoryChip name={c.category} color={categoryColor.get(c.category)} className="admin-cat-chip--inline" />}
+                  value={`${c.count} · ${formatNumber(c.views)} views`}
+                />
               ))}
               {stats.categoryBreakdown.length === 0 && (
                 <p className="text-[13px] text-muted-foreground py-2">No category data yet.</p>

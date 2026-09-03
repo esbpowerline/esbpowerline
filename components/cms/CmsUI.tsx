@@ -203,6 +203,7 @@ export function CmsListRow({
   href,
   meta,
   badge,
+  metaNode,
   value,
 }: {
   rank?: number;
@@ -213,6 +214,9 @@ export function CmsListRow({
    *  string was set in 10px uppercase grey, which read as a caption rather
    *  than the state of the story. */
   badge?: React.ReactNode;
+  /** A rendered element for the trailing meta slot — a category chip, say.
+   *  Sizes itself, unlike `meta`, which lives in a fixed uppercase column. */
+  metaNode?: React.ReactNode;
   value?: string | number;
 }) {
   const content = (
@@ -220,6 +224,7 @@ export function CmsListRow({
       {rank !== undefined && <span className="admin-rank">{rank}</span>}
       <span className="flex-1 min-w-0 truncate admin-list-title">{title}</span>
       {badge && <span className="shrink-0">{badge}</span>}
+      {metaNode && <span className="hidden sm:inline-flex shrink-0">{metaNode}</span>}
       {meta && <span className="admin-list-meta hidden sm:inline">{meta}</span>}
       {value !== undefined && <span className="admin-list-value">{value}</span>}
     </>
@@ -271,7 +276,7 @@ export function CmsTableShell({ children, className }: { children: React.ReactNo
 }
 
 /* ── Metric row (key-value) ── */
-export function CmsMetricRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+export function CmsMetricRow({ label, value, highlight }: { label: React.ReactNode; value: string; highlight?: boolean }) {
   return (
     <div className={cn('admin-metric-row', highlight && 'admin-metric-row--highlight')}>
       <span>{label}</span>

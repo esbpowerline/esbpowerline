@@ -198,6 +198,26 @@ export function formatDeskDate(value: string | Date | null | undefined): string 
   });
 }
 
+/**
+ * Date and clock time for an activity feed: "3 Sept, 10:45 pm".
+ *
+ * A "recently published" list is about WHEN, and several stories a day go out
+ * on this desk — a date alone leaves five entries all reading "3 Sept" with no
+ * way to tell their order apart. Asia/Dhaka is pinned for the same reason the
+ * locale is: the server is in Singapore, so an unpinned clock would print a
+ * time two hours off the newsroom's own.
+ */
+export function formatDeskDateTime(value: string | Date | null | undefined): string {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  const day = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'Asia/Dhaka' });
+  const time = d
+    .toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Dhaka' })
+    .toLowerCase();
+  return `${day}, ${time}`;
+}
+
 /** Subcontinental grouping (en-IN): 15,000 · 13,40,606 */
 export function formatNumber(num: number, maxFractionDigits = 0): string {
   if (!Number.isFinite(num)) return '—';

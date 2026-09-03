@@ -70,11 +70,26 @@ export async function ArticlesIndexFrame({
           </Link>
           {/* The sort control, as two links instead of a client select that
               wrote `?sort=` into the URL: each order is its own page. */}
-          <nav className="articles-page__sort inline-flex rounded-full border border-border/60 p-0.5 text-xs font-semibold" aria-label={t('articles.filterBy')}>
-            <Link href="/articles" className={`rounded-full px-3 py-1 ${sort === 'latest' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`} aria-current={sort === 'latest' ? 'page' : undefined}>
+          {/* A segmented control, styled in globals.css alongside the search
+              button it sits next to. The Tailwind version put a solid
+              `bg-primary` blob against bare grey text inside a track whose
+              border/60 was invisible — so the active half read as a heavy
+              badge and the inactive half did not read as a control at all. */}
+          <nav className="articles-page__sort" aria-label={t('articles.filterBy')}>
+            <Link
+              href="/articles"
+              className="articles-page__sort-btn"
+              data-active={sort === 'latest' ? 'true' : 'false'}
+              aria-current={sort === 'latest' ? 'page' : undefined}
+            >
               {t('articles.latest')}
             </Link>
-            <Link href="/articles/popular" className={`rounded-full px-3 py-1 ${sort === 'popular' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`} aria-current={sort === 'popular' ? 'page' : undefined}>
+            <Link
+              href="/articles/popular"
+              className="articles-page__sort-btn"
+              data-active={sort === 'popular' ? 'true' : 'false'}
+              aria-current={sort === 'popular' ? 'page' : undefined}
+            >
               {t('articles.mostRead')}
             </Link>
           </nav>

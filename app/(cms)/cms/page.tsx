@@ -5,7 +5,7 @@ import { getMyNotices } from '@/lib/actions/notices';
 import { getCalendarArticles } from '@/lib/actions/articles';
 import { EditorialNoticesPanel } from '@/components/cms/EditorialNoticesPanel';
 import { publicArticleUrl } from '@/lib/public-site-url';
-import { formatNumber, formatDeskDate } from '@/lib/utils';
+import { formatNumber, formatDeskDate, formatDeskDateTime } from '@/lib/utils';
 import { can, isAdminRole } from '@/lib/constants';
 import { isEditorLead } from '@/lib/cms-nav';
 import {
@@ -19,6 +19,8 @@ import {
   CmsListStack, CmsScheduleList, CmsCardFooter,
 } from '@/components/cms/CmsUI';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
+import { CmsCategoryChip } from '@/components/cms/CmsCategoryChip';
+import { getCategories } from '@/lib/actions/categories';
 
 import { Suspense } from 'react';
 import { CmsLoading } from '@/components/cms/CmsUI';
@@ -30,14 +32,19 @@ async function CmsDashboardData() {
   const editorLead = isEditorLead(role);
   const isAdmin = isAdminRole(role);
 
-  const [stats, notices, calendar] = await Promise.all([
+  const [stats, notices, calendar, categories] = await Promise.all([
     authorId ? getAuthorArticleStats(isAdmin ? undefined : authorId) : Promise.resolve({
       total: 0, published: 0, drafts: 0, scheduled: 0, archived: 0, featured: 0, breaking: 0,
       totalViews: 0, recent: [], topByViews: [], pendingNotices: 0,
     }),
     getMyNotices(),
     getCalendarArticles({ authorId, allAuthors: editorLead }),
+    getCategories(),
   ]);
+
+  // Article.category is the category NAME, not a relation, so the colour has
+  // to be looked up. One map, built once per render.
+  const categoryColor = new Map(categories.map((c) => [c.name, c.color]));
 
   const {
     total: articlesCount, published, drafts, scheduled, archived, featured, breaking,
@@ -122,7 +129,7 @@ async function CmsDashboardData() {
                 rank={i + 1}
                 title={a.title}
                 href={publicArticleUrl(a.slug)}
-                meta={a.category}
+                metaNode={<CmsCategoryChip name={a.category} color={categoryColor.get(a.category)} />}
                 value={`${formatNumber(a.views)} views`}
               />
             ))}
@@ -188,7 +195,7 @@ async function CmsDashboardData() {
               <CmsActivityItem
                 key={a.id}
                 badge={<StatusBadge status="PUBLISHED" />}
-                date={formatDeskDate(a.publishedAt)}
+                date={formatDeskDateTime(a.publishedAt)}
                 message={
                   <Link href={`/cms/articles/${a.id}/edit`} className="hover:text-sky-400">
                     {a.title}
