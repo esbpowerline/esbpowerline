@@ -216,6 +216,18 @@ trailing three energy days (`scripts/ingest_recent_days.py`). It publishes DataR
 rows and pushes `public/data` to `authenticating`; **nothing redeploys** — releases carry
 the day to the live site. No cost on any plan.
 
+The runner assumes it is broken until shown otherwise: a lock so polls never overlap, a
+25-minute timeout, a disk guard (Jellyfin on the same card refuses to start under 2 GiB),
+a clock guard, and at the start of every poll it fetches the day it published last time
+from the live site and compares every value. Two more jobs share the lock:
+`scripts/pi-nightly.sh` (02:30 — `verify:data`, `verify:source` over the trailing week
+with the ledger committed, gzipped `pg_dump` kept 14 deep) and `scripts/pi-weekly.sh`
+(Sunday 03:30 — SREDA register, media-bucket mirror). Every failure goes through
+`scripts/pi-notify.sh`: always `~/esb-ingest/logs/alerts.log`, Telegram if
+`~/esb-ingest/notify.env` holds a token. Power-cut behaviour is documented at the top of
+`pi-ingest.sh`; the short version is that downloads are atomic, torn workbooks are
+refetched, and the next poll finishes whatever the last one did not.
+
 `.github/workflows/ingest.yml` is the same job for GitHub Actions and has **never run**:
 every dispatch on this account ends in `startup_failure`, including a one-line `echo`
 workflow, so Actions is blocked at the account level rather than by the file. Kept in
