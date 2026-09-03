@@ -22,17 +22,6 @@ export interface OverviewBaseline {
    *  per-unit rates would move for reasons the headline never shows. */
   dailyCost: number | null;
   /**
-   * Mean national gas production over the window, in MMCFD — the same sum of
-   * Petrobangla's company rows the Gas Supply tile headlines.
-   *
-   * Counted only over days that actually carry the window. A day without gas is
-   * written with the six company rows present and zeroed, so a row count cannot
-   * tell absent from zero and a mean that trusted it would be dragged toward
-   * zero by every day Petrobangla had not filed yet — which, since they file a
-   * day or two behind PGCB, is most of the recent end of any window.
-   */
-  gasSupply: number | null;
-  /**
    * The most recent day before this one that Petrobangla did file, with its
    * date. The newest energy day routinely has no gas window — Petrobangla files
    * a day or two behind PGCB — and on that day there is no current figure to
@@ -44,8 +33,6 @@ export interface OverviewBaseline {
   lastGas: { date: string; total: number } | null;
   /** How many of the requested days actually answered. */
   days: number;
-  /** How many of them carried a Petrobangla gas window, for the gas trend. */
-  gasDays: number;
 }
 
 export interface OverviewCapacity {
@@ -141,18 +128,18 @@ export function useGridOverviewContext(
         .map((s) => (typeof s.totalDailyCost === 'number' && s.totalDailyCost > 0 ? s.totalDailyCost : null))
         .filter((n): n is number => n != null);
 
-      // The same sum the Gas Supply tile headlines: Petrobangla's company rows
-      // for the day, added up. A day whose gas window is not filed yet carries
-      // those rows zeroed, so a zero total means absent and is dropped rather
-      // than averaged in — see `hasGasProductionData` in PowerGridExplorer,
-      // where the identical rule keeps the tile from printing "0.0 MMCFD" as a
-      // national figure.
-      const gasByDay = dated.map((entry) => ({
-        date: entry.date,
-        total: (entry.data.gasProductionData ?? []).reduce((sum, row) => sum + (row.gas || 0), 0),
-      }));
-      const gasTotals = gasByDay.map((g) => g.total).filter((total) => total > 0);
-      const lastGas = gasByDay.find((g) => g.total > 0) ?? null;
+      // The nearest earlier day Petrobangla actually filed. A day without a gas
+      // window is written with the six company rows present and zeroed — which
+      // is why `hasGasProductionData` tests the sum and not the row count — so
+      // a zero total means absent and is skipped rather than reported as a
+      // reading of nothing.
+      const lastGas =
+        dated
+          .map((entry) => ({
+            date: entry.date,
+            total: (entry.data.gasProductionData ?? []).reduce((sum, row) => sum + (row.gas || 0), 0),
+          }))
+          .find((g) => g.total > 0) ?? null;
 
       setBaseline({
         peakDemand: mean(nums((s) => s.eveningPeakDemand)),
@@ -160,8 +147,6 @@ export function useGridOverviewContext(
         peakDeficit: mean(deficits),
         costPerKwh: mean(unitCosts),
         dailyCost: mean(dailyCosts),
-        gasSupply: mean(gasTotals),
-        gasDays: gasTotals.length,
         lastGas,
         days: stats.length,
       });

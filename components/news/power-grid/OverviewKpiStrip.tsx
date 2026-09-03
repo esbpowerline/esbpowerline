@@ -168,6 +168,12 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
   const { capacity, baseline } = useGridOverviewContext(isoDate, systemStats);
 
+  // Everything Petrobangla lists that is not RPGCL's imported LNG: the state
+  // fields plus the IOCs. Taken as the remainder of the published total rather
+  // than as `100 - lngPct`, so it stays exact if a row is ever added.
+  const domesticGasPct =
+    totalGasSupply > 0 ? ((totalGasSupply - importedLngGas) / totalGasSupply) * 100 : 0;
+
   // "02-03 Sep, 2026" — the published half of `gasWindowLabel`, without the
   // "2 Sep 08:00 → 3 Sep 08:00" clause the tooltip's citation line carries.
   // The full label is far too long for a 10px hint in a 190px tile.
@@ -600,25 +606,24 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             </span>
           ) : (
             <>
-              {/* The trend earns its place, though it is quiet: measured over
-                  the last 726 gas days against this same 4-day mean, 32% read
-                  level, 38% moved 0.5-2%, and 29% moved more than 2% — the
-                  largest swing 35% on 2026-02-13, which is what an FSRU or a
-                  major field going down looks like. A flat week is the tile
-                  working, not the tile saying nothing. */}
-              {baseline?.gasSupply != null ? (
-                // Counted over gas days, not over the whole window — Petrobangla
-                // files behind PGCB, so this mean routinely rests on fewer days
-                // than the five other tiles, and the line says which.
-                <GridKpiTrend
-                  current={totalGasSupply}
-                  baseline={baseline.gasSupply}
-                  days={baseline.gasDays}
-                  polarity="up-good"
-                />
-              ) : (
-                <span className="text-muted-foreground">no earlier gas window to compare</span>
-              )}
+              {/* Where the gas came from, rather than how it moved.
+                  A trend sat here and was measured across 726 gas days: a third
+                  of them read "level" and another 38% moved under 2%, so on most
+                  days the line reported that national production had not changed
+                  — true, and not worth the row. The split does change, and it is
+                  the thing that matters about a day's supply: imported LNG has
+                  run between 15.5% and 39.0% of the total in the last sixty days
+                  alone, and every taka of it is a bill in foreign currency.
+
+                  Both shares are ours, not Petrobangla's — they publish the
+                  company rows and we divide — which is what the tile's D mark
+                  already covers. Domestic is the total less RPGCL's imported
+                  LNG, so the two always sum to the published total rather than
+                  to a rounded 100. */}
+              <span className="text-muted-foreground">
+                domestic {domesticGasPct.toFixed(1)}% · imported LNG{' '}
+                {importedLngPct.toFixed(1)}%
+              </span>
               {/* The second line, and the reason the tile is worth reading on
                   the two days in three the trend is quiet. This figure covers
                   Petrobangla's 08:00-to-08:00 gas day, which shares only 16
