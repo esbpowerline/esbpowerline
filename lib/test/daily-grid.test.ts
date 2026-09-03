@@ -228,12 +228,16 @@ describe('fetchDailyReport client integration', () => {
     if (!result.ok) expect(result.status).toBe(429);
   });
 
-  it('falls back to archive on 404', async () => {
+  it('reports a 404 as missing rather than serving the bundled archive', async () => {
+    // The client used to fall back to a bundled chunk of 31 full days, which
+    // shipped gated figures to every browser (audit 2026-08-08, fixed
+    // 2026-09-03). A day the network cannot produce is now reported missing;
+    // only the server-side prefetch may read the bundled fallback.
     const { fetchDailyReport } = await import('@/lib/data/grid/daily-loader.client');
     vi.mocked(fetch).mockResolvedValue({ ok: false, status: 404 } as Response);
     const result = await fetchDailyReport('2026-06-29');
-    expect(result.ok).toBe(true);
-    if (result.ok) expect(result.source).toBe('archive');
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.status).toBe(404);
   });
 });
 

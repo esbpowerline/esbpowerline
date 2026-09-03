@@ -9,6 +9,14 @@ export type AuthUserSyncInput = {
   name: string;
   role: Role;
   status?: UserStatus;
+  /**
+   * When the address already has an Auth user, overwrite its password and
+   * role (default) or refuse. Registration passes `false`: a self-serve form
+   * must never be able to reset the password of an account that already
+   * exists — a deleted-staff or auth-only identity has no Prisma row, so the
+   * database uniqueness check cannot catch it (audit finding, 2026-08-08).
+   */
+  allowExistingOverwrite?: boolean;
 };
 
 export type AuthMetadataSyncInput = {
@@ -19,9 +27,18 @@ export type AuthMetadataSyncInput = {
 };
 
 async function findUserIdByEmail(admin: SupabaseClient, email: string): Promise<string | null> {
-  const { data, error } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-  if (error) throw error;
-  return data.users.find((user) => user.email?.toLowerCase() === email.toLowerCase())?.id ?? null;
+  // Page through the directory. A single page of 200 meant that once the
+  // member base passed 200 accounts, suspension and password sync silently
+  // no-opped for everyone beyond it (audit finding, 2026-08-08).
+  const wanted = email.toLowerCase();
+  for (let page = 1; page <= 50; page += 1) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const hit = data.users.find((user) => user.email?.toLowerCase() === wanted);
+    if (hit) return hit.id;
+    if (data.users.length < 1000) break;
+  }
+  return null;
 }
 
 function buildMetadata(input: { name: string; status?: UserStatus }) {
@@ -71,6 +88,9 @@ export async function upsertAuthUserWithClient(
 
   if (!createError.message.toLowerCase().includes('already')) {
     throw createError;
+  }
+  if (input.allowExistingOverwrite === false) {
+    throw new Error('EMAIL_ALREADY_REGISTERED');
   }
 
   const userId = await findUserIdByEmail(admin, input.email);

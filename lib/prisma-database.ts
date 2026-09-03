@@ -53,7 +53,17 @@ export function createPgPoolConfig(connectionString: string) {
 
   return {
     connectionString: poolUrl,
-    ssl: remote ? { rejectUnauthorized: false as const } : undefined,
+    // Verify the pooler's certificate when its CA is supplied. Supabase's
+    // pooler chain is signed by a project CA, not a public one — Node's bundled
+    // store rejects it (`SELF_SIGNED_CERT_IN_CHAIN`, tested 2026-09-03) — so
+    // verification needs the PEM from Dashboard → Database → SSL in
+    // `PG_CA_CERT`. Without it the connection is still encrypted but the peer
+    // is unverified, which the audit flagged; set the variable to close it.
+    ssl: remote
+      ? process.env.PG_CA_CERT?.trim()
+        ? { rejectUnauthorized: true as const, ca: process.env.PG_CA_CERT.trim() }
+        : { rejectUnauthorized: false as const }
+      : undefined,
     max: process.env.NODE_ENV === 'production' ? 2 : 10,
     idleTimeoutMillis: 15000,
     // Fail fast when Supabase is slow or restricted. Without these bounds a

@@ -98,6 +98,8 @@ export async function registerMemberAction(input: {
       name,
       role: 'SUBSCRIBER',
       status,
+      // Never reset an existing Auth account from the public form.
+      allowExistingOverwrite: false,
     });
     if (supabaseUserId) {
       await prisma.user.update({
@@ -107,6 +109,9 @@ export async function registerMemberAction(input: {
     }
   } catch (error) {
     await prisma.user.delete({ where: { id: created.id } }).catch(() => undefined);
+    if (error instanceof Error && error.message === 'EMAIL_ALREADY_REGISTERED') {
+      return { ok: false, error: 'An account with this email already exists. Sign in or reset your password.' };
+    }
     console.error('[registerMemberAction] Supabase sync failed:', error);
     return { ok: false, error: 'Could not create your account. Please try again.' };
   }

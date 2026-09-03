@@ -256,7 +256,15 @@ export async function middleware(request: NextRequest) {
     // the shipped archive can only exist because it was just published, and the
     // newest day is always inside the public window, so treat it as public.
     // Nothing leaks: if no release exists the route simply 404s.
-    const isBeyondShippedArchive = !!isoDate && !!latestDate && isoDate > latestDate;
+    // Bounded: a day can only be "just published" if it is within the visitor
+    // window of the shipped catalog. Unbounded, this made EVERY runtime-
+    // published day public at any tier — including a backfilled 2019 day,
+    // which is exactly the kind of day the tier exists to sell.
+    const isBeyondShippedArchive =
+      !!isoDate &&
+      !!latestDate &&
+      isoDate > latestDate &&
+      (Date.parse(isoDate) - Date.parse(latestDate)) / 86_400_000 <= 7;
 
     const isPublicDate =
       !isoDate ||
@@ -320,7 +328,14 @@ export async function middleware(request: NextRequest) {
   // reader browsing public articles). Refresh the Supabase session token only — skip the
   // Postgres profiles lookup in resolveEdgeSession entirely.
   if (!pathNeedsRoleCheck(pathname) && hasSupabaseAuthCookie(request)) {
-    const { response } = await updateSession(request);
+    // A router prefetch is speculative and carries no user-visible state; it
+    // never needs a token refresh, and on the homepage 10–30 of them fire per
+    // view for a signed-in reader (cost audit, 2026-09-03).
+    if (request.headers.get('next-router-prefetch') === '1') {
+      return NextResponse.next({ request });
+    }
+    // Refresh only. No decision is made on this path, so no verification call.
+    const { response } = await updateSession(request, { verify: false });
     return response;
   }
 

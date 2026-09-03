@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { HANDOFF_COOKIE, verifyHandoffToken } from '@/lib/auth-handoff';
+import { safeAuthRedirectPath } from '@/lib/auth-redirect';
 import { getSupabaseEnv } from '@/utils/supabase/env';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-function safeCallbackUrl(raw: string | null): string {
-  if (!raw) return '/';
-  if (!raw.startsWith('/') || raw.startsWith('//') || raw.startsWith('/\\') || raw.includes('\\')) {
-    return '/';
-  }
-  return raw;
-}
-
 export async function GET(request: NextRequest) {
-  const token =
-    request.cookies.get(HANDOFF_COOKIE)?.value ?? request.nextUrl.searchParams.get('token');
-  const callbackUrl = safeCallbackUrl(request.nextUrl.searchParams.get('callbackUrl'));
+  // Cookie only. The `?token=` fallback let a session be minted from a link —
+  // anyone who could get a victim to open a URL carrying a token logged them
+  // into the attacker's account (login CSRF / fixation, audit 2026-08-08).
+  // The cookie is set by our own login handler and never appears in a URL.
+  const token = request.cookies.get(HANDOFF_COOKIE)?.value ?? null;
+  // The shared helper, not a local copy: the local one lacked the control-
+  // character check, so `?callbackUrl=/%09/evil.com` resolved off-site.
+  const callbackUrl = safeAuthRedirectPath(request.nextUrl.searchParams.get('callbackUrl'), '/');
 
   const isMemberCallback = callbackUrl === '/members' || callbackUrl.startsWith('/members/');
 

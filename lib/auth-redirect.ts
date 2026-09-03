@@ -26,7 +26,11 @@ export function safeAuthRedirectPath(raw: string | null | undefined, fallback: s
   try {
     const url = new URL(value);
     const hostname = url.hostname;
-    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1';
+    // Loopback is a development convenience for the three-port dev split. In
+    // production it was an accepted destination for a URL carrying a refresh
+    // token, i.e. a plain-HTTP hop anyone on the victim's machine could catch.
+    const isLocal =
+      process.env.NODE_ENV !== 'production' && (hostname === 'localhost' || hostname === '127.0.0.1');
     const vercelHost = process.env.VERCEL_URL?.trim().replace(/^https?:\/\//, '').split('/')[0];
     const isProdDomain =
       hostname === 'esbpowerline.com' ||

@@ -525,15 +525,10 @@ export function PowerGridExplorer({
           setTierLockRequired(gridAccess.requiredTierForDate(selectedDate));
           setIsDataMissing(false);
         } else if (!result.ok && shouldUseArchiveFallback(result.status ?? null)) {
-          const { getArchiveFallback } = await import('@/lib/data/grid/archive-fallback');
-          const fallback = getArchiveFallback(selectedDate);
+          // No bundled fallback on the client any more: that chunk carried 31
+          // full gated days to every browser (see daily-loader.client.ts).
           const stale = getCachedDailyReport(selectedDate);
-          if (fallback) {
-            setCachedDailyReport(selectedDate, fallback);
-            setActiveData(fallback);
-            setActiveDataDate(selectedDate);
-            setIsDataMissing(false);
-          } else if (stale) {
+          if (stale) {
             setActiveData(stale);
             setActiveDataDate(selectedDate);
             setIsDataMissing(false);

@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { createClient } from '@/utils/supabase/server';
 import { resolvePrismaUserId } from '@/lib/resolve-prisma-user-id';
 import prisma from '@/lib/prisma';
-import { getRuntimeLatestDate } from '@/lib/data/grid/available-dates.server';
+import { getRuntimeLatestDate, getRuntimeAvailableDates } from '@/lib/data/grid/available-dates.server';
 import {
   resolveGridAccessTier,
   parseGridPlanId,
@@ -104,10 +104,16 @@ export async function GET(request: Request) {
 
   const datasetKeys = parseDatasetKeys(searchParams.get('datasets'));
   const columnSelection = parseColumnSelection(searchParams, datasetKeys);
+  // The runtime catalog, not the bundled one: `latestDate` above is already
+  // runtime, but without the matching catalog the resolver fell back to the
+  // build-time list and silently dropped every day published since the last
+  // deploy from a paid export. The Petrobangla branch below always passed its
+  // own catalog; this one did not.
   const scope = resolveExportDates(
     { from: searchParams.get('from'), to: searchParams.get('to') },
     tier,
     latestDate,
+    await getRuntimeAvailableDates(),
   );
 
   // Petrobangla datasets are read from a separate archive with its own catalog.

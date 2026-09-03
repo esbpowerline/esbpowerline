@@ -12,10 +12,12 @@ import { isPathPublished } from '@/lib/data/runtime-data.client';
 
 export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loader-core';
 
-async function loadArchiveFallback(isoDate: string): Promise<GridDailyData | null> {
-  const { getArchiveFallback } = await import('@/lib/data/grid/archive-fallback');
-  return getArchiveFallback(isoDate);
-}
+// The bundled archive fallback is server-only now. Importing it here shipped
+// a 1 MB chunk of 31 full days to every browser — days 65–96 old, well outside
+// the visitor window and outside the member one, readable by anyone who
+// opened the chunk (audit finding, 2026-08-08). A day the network cannot
+// produce is reported missing; the server prefetch still uses the fallback
+// where it is allowed to.
 
 /**
  * A day published after the last deploy, served from the DataRelease table.
@@ -24,7 +26,7 @@ async function loadArchiveFallback(isoDate: string): Promise<GridDailyData | nul
  */
 async function loadRuntimeRelease(isoDate: string): Promise<GridDailyData | null> {
   try {
-    const res = await fetch(runtimeDailyReportPath(isoDate), { cache: 'no-store' });
+    const res = await fetch(runtimeDailyReportPath(isoDate), { cache: 'default' });
     if (!res.ok) return null;
     return (await res.json()) as GridDailyData;
   } catch {
@@ -78,11 +80,6 @@ export async function fetchDailyReport(
           setCachedDailyReport(parsed, runtime);
           return { ok: true, data: runtime, source: 'network' };
         }
-        const fallback = await loadArchiveFallback(parsed);
-        if (fallback) {
-          setCachedDailyReport(parsed, fallback);
-          return { ok: true, data: fallback, source: 'archive' };
-        }
         return { ok: false, error: `Daily report not found for ${parsed}`, status: 404 };
       }
       if (res.status === 403) {
@@ -95,11 +92,6 @@ export async function fetchDailyReport(
     setCachedDailyReport(parsed, data);
     return { ok: true, data, source: 'network' };
   } catch {
-    const fallback = await loadArchiveFallback(parsed);
-    if (fallback) {
-      setCachedDailyReport(parsed, fallback);
-      return { ok: true, data: fallback, source: 'archive' };
-    }
     return { ok: false, error: 'Network error while loading daily report' };
   }
 }
