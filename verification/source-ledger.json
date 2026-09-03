@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T13:58:14.106Z",
+  "generated_at": "2026-09-03T15:38:07.994Z",
   "eps": 0.05,
   "days": {
     "2026-07-01": {
@@ -164721,8 +164721,1323 @@
     },
     "2026-09-01": {
       "day": "2026-09-01",
-      "verdict": "UNFETCHED",
-      "note": "unparseable bridge output: Unexpected token 'w', \"warning: T\"... is not valid JSON"
+      "verdict": "DRIFT",
+      "parserVersion": "2.0.0-reconstructed",
+      "gasVerified": true,
+      "hash": {
+        "committed": "dcbbe9fa1141ced2dfbf9ce0e844d43947af5e72e21e9e0a6accc481fadfd514",
+        "source": "dcbbe9fa1141ced2dfbf9ce0e844d43947af5e72e21e9e0a6accc481fadfd514",
+        "file": "2026-09-01.json",
+        "match": true
+      },
+      "counts": {
+        "indicator": 0,
+        "unfiled": 0,
+        "value": 7,
+        "shape": 2,
+        "order": 0
+      },
+      "indicatorDiffs": [],
+      "unfiledDiffs": [],
+      "valueDiffs": [
+        {
+          "path": "dailyOutages[8].reason",
+          "kind": "value",
+          "published": "for redhot maintenance",
+          "source": "Due to shutdown tacken by pbs for redhot maintenance"
+        },
+        {
+          "path": "dailyOutages[9].reason",
+          "kind": "value",
+          "published": "for redhot maintenance",
+          "source": "Due to shutdown tacken by pbs for redhot maintenance"
+        },
+        {
+          "path": "dailyOutages[10].reason",
+          "kind": "value",
+          "published": "due to  Tripped showing:  ATR SELF Protection Operated. SUDDEN OIL Pressure Trip, Lockout operated(K861, K8612, K862,K8622) <br> in SAS Panel on 31.08.2026 at",
+          "source": "Due to For Transformer troubleshooting and checking of  ATR-3 due to  Tripped showing:  ATR SELF Protection Operated. SUDDEN OIL Pressure Trip, Lockout operated(K861, K8612, K862,K8622) <br> in SAS Panel on 31.08.2026 at"
+        },
+        {
+          "path": "dailyOutages[11].reason",
+          "kind": "value",
+          "published": "due to  Tripped showing:  ATR SELF Protection Operated. SUDDEN OIL Pressure Trip, Lockout operated(K861, K8612, K862,K8622) <br> in SAS Panel on 31.08.2026 at",
+          "source": "Due to For Transformer troubleshooting and checking of  ATR-3 due to  Tripped showing:  ATR SELF Protection Operated. SUDDEN OIL Pressure Trip, Lockout operated(K861, K8612, K862,K8622) <br> in SAS Panel on 31.08.2026 at"
+        },
+        {
+          "path": "gasProductionData[company=BAPEX (Shahbazpur, Srikail, Begumganj)].condensate",
+          "kind": "value",
+          "published": 69.2,
+          "source": 69.1,
+          "delta": -0.10000000000000853
+        },
+        {
+          "path": "gasProductionData[company=Chevron (Bibiyana, Jalalabad, Moulavibazar)].condensate",
+          "kind": "value",
+          "published": 4627.5,
+          "source": 4627.4,
+          "delta": -0.1000000000003638
+        },
+        {
+          "path": "observationWindows.pgcb.sourceFile",
+          "kind": "value",
+          "published": "Daily Report 02-09-2026.xlsx",
+          "source": "erp_5118.xlsx"
+        }
+      ],
+      "shapeDiffs": [
+        {
+          "path": "forecast",
+          "kind": "shape",
+          "published": {
+            "maxDemandEveningMw": 18800,
+            "maxDemandDayMw": 16990,
+            "maxGenEveningMw": 15830,
+            "totalEnergyGenMkwh": 338.42,
+            "maxTempC": 34.8,
+            "totalLoadShedMw": 2836,
+            "hourly": [
+              {
+                "time": "00:00",
+                "generationMw": 14650,
+                "loadShedMw": 1930,
+                "demandMw": 16670.903
+              },
+              {
+                "time": "01:00",
+                "generationMw": 13800,
+                "loadShedMw": 2380,
+                "demandMw": 16292.098
+              },
+              {
+                "time": "02:00",
+                "generationMw": 13720,
+                "loadShedMw": 2370,
+                "demandMw": 16201.627
+              },
+              {
+                "time": "03:00",
+                "generationMw": 13760,
+                "loadShedMw": 2240,
+                "demandMw": 16105.504
+              },
+              {
+                "time": "04:00",
+                "generationMw": 13720,
+                "loadShedMw": 1820,
+                "demandMw": 15625.722
+              },
+              {
+                "time": "05:00",
+                "generationMw": 13680,
+                "loadShedMw": 1610,
+                "demandMw": 15365.831
+              },
+              {
+                "time": "06:00",
+                "generationMw": 13480,
+                "loadShedMw": 1510,
+                "demandMw": 15061.121
+              },
+              {
+                "time": "07:00",
+                "generationMw": 13380,
+                "loadShedMw": 1410,
+                "demandMw": 14856.411
+              },
+              {
+                "time": "08:00",
+                "generationMw": 13360,
+                "loadShedMw": 1400,
+                "demandMw": 14825.94
+              },
+              {
+                "time": "09:00",
+                "generationMw": 13550,
+                "loadShedMw": 1700,
+                "demandMw": 15330.07
+              },
+              {
+                "time": "10:00",
+                "generationMw": 13820,
+                "loadShedMw": 2015.05,
+                "demandMw": 15930
+              },
+              {
+                "time": "11:00",
+                "generationMw": 13960,
+                "loadShedMw": 2110.55,
+                "demandMw": 16170
+              },
+              {
+                "time": "12:00",
+                "generationMw": 13930,
+                "loadShedMw": 2922.3,
+                "demandMw": 16990
+              },
+              {
+                "time": "13:00",
+                "generationMw": 13910,
+                "loadShedMw": 2979.6,
+                "demandMw": 17030
+              },
+              {
+                "time": "14:00",
+                "generationMw": 13680,
+                "loadShedMw": 3237.45,
+                "demandMw": 17070
+              },
+              {
+                "time": "15:00",
+                "generationMw": 13630,
+                "loadShedMw": 3409.35,
+                "demandMw": 17200
+              },
+              {
+                "time": "16:00",
+                "generationMw": 13350,
+                "loadShedMw": 3457.1,
+                "demandMw": 16970
+              },
+              {
+                "time": "17:00",
+                "generationMw": 13410,
+                "loadShedMw": 3113.3,
+                "demandMw": 16670
+              },
+              {
+                "time": "18:00",
+                "generationMw": 13830,
+                "loadShedMw": 2330.2,
+                "demandMw": 16270
+              },
+              {
+                "time": "18:30",
+                "generationMw": 14630,
+                "loadShedMw": 2330.2,
+                "demandMw": 17070
+              },
+              {
+                "time": "19:00",
+                "generationMw": 15430,
+                "loadShedMw": 2330.2,
+                "demandMw": 17870
+              },
+              {
+                "time": "19:30",
+                "generationMw": 15630,
+                "loadShedMw": 2893.65,
+                "demandMw": 18660
+              },
+              {
+                "time": "20:00",
+                "generationMw": 15700,
+                "loadShedMw": 2750.4,
+                "demandMw": 18580
+              },
+              {
+                "time": "21:00",
+                "generationMw": 15830,
+                "loadShedMw": 2836.35,
+                "demandMw": 18800
+              },
+              {
+                "time": "22:00",
+                "generationMw": 15630,
+                "loadShedMw": 2731.3,
+                "demandMw": 18490
+              },
+              {
+                "time": "23:00",
+                "generationMw": 15210,
+                "loadShedMw": 3199.25,
+                "demandMw": 18560
+              }
+            ],
+            "issuedAt": "2026-09-01T08:23:00+06:00",
+            "areaLoadShedMw": {
+              "Dhaka": 790,
+              "Chattogram": 150,
+              "Cumilla": 215,
+              "Mymensingh": 675,
+              "Sylhet": 205,
+              "Khulna": 253,
+              "Barishal": 100,
+              "Rajshahi": 230,
+              "Rangpur": 218
+            },
+            "issuedOn": "2026-08-31",
+            "issuedIn": "Daily Report 01-09-2026",
+            "targetDay": "2026-09-01",
+            "layout": "scenario",
+            "issuedFrom": "source-copy"
+          },
+          "source": null
+        },
+        {
+          "path": "energyCurveData",
+          "kind": "shape",
+          "published": null,
+          "source": {
+            "fuels": [
+              "Gas-Public",
+              "Gas-Pvt",
+              "HVDC",
+              "Nepal",
+              "Tripura",
+              "Adani",
+              "Hydro",
+              "Coal",
+              "Solar",
+              "HFO-Public",
+              "HFO-Pvt",
+              "HSD-Public",
+              "HSD-Pvt",
+              "Oil-Public",
+              "Oil-Pvt",
+              "Wind",
+              "Shortage"
+            ],
+            "rows": [
+              {
+                "time": "00:00",
+                "mw": [
+                  3569,
+                  1262,
+                  882,
+                  0,
+                  164,
+                  1009.49,
+                  217,
+                  5409,
+                  0,
+                  538,
+                  2027.7,
+                  404,
+                  0,
+                  null,
+                  null,
+                  27,
+                  2533
+                ]
+              },
+              {
+                "time": "00:30",
+                "mw": [
+                  3552,
+                  1259.5,
+                  905.5,
+                  0,
+                  161,
+                  912.44,
+                  217,
+                  5385,
+                  0,
+                  440.5,
+                  1744.45,
+                  403.5,
+                  0,
+                  null,
+                  null,
+                  21,
+                  2454.5
+                ]
+              },
+              {
+                "time": "01:00",
+                "mw": [
+                  3535,
+                  1257,
+                  929,
+                  0,
+                  158,
+                  815.39,
+                  217,
+                  5361,
+                  0,
+                  343,
+                  1461.2,
+                  403,
+                  0,
+                  null,
+                  null,
+                  15,
+                  2376
+                ]
+              },
+              {
+                "time": "01:30",
+                "mw": [
+                  3548,
+                  1261,
+                  929,
+                  0,
+                  154,
+                  820.34,
+                  217,
+                  5384,
+                  0,
+                  328.5,
+                  1423.7,
+                  216.5,
+                  0,
+                  null,
+                  null,
+                  19,
+                  2370
+                ]
+              },
+              {
+                "time": "02:00",
+                "mw": [
+                  3561,
+                  1265,
+                  929,
+                  0,
+                  150,
+                  825.29,
+                  217,
+                  5407,
+                  0,
+                  314,
+                  1386.2,
+                  30,
+                  0,
+                  null,
+                  null,
+                  23,
+                  2364
+                ]
+              },
+              {
+                "time": "02:30",
+                "mw": [
+                  3575.5,
+                  1257.5,
+                  928.5,
+                  0,
+                  150,
+                  826.74,
+                  216.5,
+                  5406.5,
+                  0,
+                  289,
+                  1385.8,
+                  15,
+                  0,
+                  null,
+                  null,
+                  32.5,
+                  2302
+                ]
+              },
+              {
+                "time": "03:00",
+                "mw": [
+                  3590,
+                  1250,
+                  928,
+                  0,
+                  150,
+                  828.19,
+                  216,
+                  5406,
+                  0,
+                  264,
+                  1385.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  42,
+                  2240
+                ]
+              },
+              {
+                "time": "03:30",
+                "mw": [
+                  3589.5,
+                  1253.5,
+                  928,
+                  0,
+                  152,
+                  827.39,
+                  215.5,
+                  5408,
+                  0,
+                  260.5,
+                  1371.9,
+                  0,
+                  0,
+                  null,
+                  null,
+                  51,
+                  2031
+                ]
+              },
+              {
+                "time": "04:00",
+                "mw": [
+                  3589,
+                  1257,
+                  928,
+                  0,
+                  154,
+                  826.59,
+                  215,
+                  5410,
+                  0,
+                  257,
+                  1358.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  60,
+                  1822
+                ]
+              },
+              {
+                "time": "04:30",
+                "mw": [
+                  3647,
+                  1277,
+                  928.5,
+                  0,
+                  155,
+                  829.355,
+                  215,
+                  5349,
+                  0,
+                  257,
+                  1292.9,
+                  0,
+                  0,
+                  null,
+                  null,
+                  48.5,
+                  1715.5
+                ]
+              },
+              {
+                "time": "05:00",
+                "mw": [
+                  3705,
+                  1297,
+                  929,
+                  0,
+                  156,
+                  832.12,
+                  215,
+                  5288,
+                  0,
+                  257,
+                  1227.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  37,
+                  1609
+                ]
+              },
+              {
+                "time": "05:30",
+                "mw": [
+                  3732.5,
+                  1309.5,
+                  929,
+                  0,
+                  150,
+                  833.515,
+                  215,
+                  5200.5,
+                  1.125,
+                  235,
+                  1213.9,
+                  0,
+                  0,
+                  null,
+                  null,
+                  31.5,
+                  1559.5
+                ]
+              },
+              {
+                "time": "06:00",
+                "mw": [
+                  3760,
+                  1322,
+                  929,
+                  0,
+                  144,
+                  834.91,
+                  215,
+                  5113,
+                  2.25,
+                  213,
+                  1200.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  26,
+                  1510
+                ]
+              },
+              {
+                "time": "06:30",
+                "mw": [
+                  3756.5,
+                  1314.5,
+                  929.5,
+                  0,
+                  140,
+                  833.99,
+                  192.5,
+                  5099,
+                  18.64,
+                  213,
+                  1164.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  33,
+                  1454
+                ]
+              },
+              {
+                "time": "07:00",
+                "mw": [
+                  3753,
+                  1307,
+                  930,
+                  0,
+                  136,
+                  833.07,
+                  170,
+                  5085,
+                  35.03,
+                  213,
+                  1128.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  40,
+                  1398
+                ]
+              },
+              {
+                "time": "07:30",
+                "mw": [
+                  3747,
+                  1275.5,
+                  929.5,
+                  0,
+                  141,
+                  834.17,
+                  170,
+                  5085,
+                  81.92,
+                  196.5,
+                  1127.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  33.5,
+                  1395.5
+                ]
+              },
+              {
+                "time": "08:00",
+                "mw": [
+                  3741,
+                  1244,
+                  929,
+                  0,
+                  146,
+                  835.27,
+                  170,
+                  5085,
+                  128.81,
+                  180,
+                  1126.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  27,
+                  1393
+                ]
+              },
+              {
+                "time": "08:30",
+                "mw": [
+                  3670.5,
+                  1237,
+                  928.5,
+                  0,
+                  135,
+                  833.745,
+                  170,
+                  5089,
+                  166.035,
+                  185.5,
+                  1155.9,
+                  0,
+                  0,
+                  null,
+                  null,
+                  21,
+                  1525
+                ]
+              },
+              {
+                "time": "09:00",
+                "mw": [
+                  3600,
+                  1230,
+                  928,
+                  0,
+                  124,
+                  832.22,
+                  170,
+                  5093,
+                  203.26,
+                  191,
+                  1185.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  15,
+                  1657
+                ]
+              },
+              {
+                "time": "09:30",
+                "mw": [
+                  3545,
+                  1200,
+                  928.5,
+                  0,
+                  123,
+                  832.41,
+                  193.5,
+                  5104.5,
+                  333.195,
+                  217,
+                  1261.3,
+                  0,
+                  0,
+                  null,
+                  null,
+                  20.5,
+                  1446
+                ]
+              },
+              {
+                "time": "10:00",
+                "mw": [
+                  3490,
+                  1170,
+                  929,
+                  0,
+                  122,
+                  832.6,
+                  217,
+                  5116,
+                  463.13,
+                  243,
+                  1337.2,
+                  0,
+                  0,
+                  null,
+                  null,
+                  26,
+                  1235
+                ]
+              },
+              {
+                "time": "10:30",
+                "mw": [
+                  3520,
+                  1191.5,
+                  929,
+                  0,
+                  124,
+                  833.605,
+                  217,
+                  5168.5,
+                  390.55,
+                  261,
+                  1386.8,
+                  0,
+                  0,
+                  null,
+                  null,
+                  32,
+                  1186.5
+                ]
+              },
+              {
+                "time": "11:00",
+                "mw": [
+                  3550,
+                  1213,
+                  929,
+                  0,
+                  126,
+                  834.61,
+                  217,
+                  5221,
+                  317.97,
+                  279,
+                  1436.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  38,
+                  1138
+                ]
+              },
+              {
+                "time": "11:30",
+                "mw": [
+                  3600,
+                  1218.5,
+                  929,
+                  0,
+                  129,
+                  833.63,
+                  217,
+                  5321.5,
+                  359.625,
+                  287.5,
+                  1450.3,
+                  0,
+                  0,
+                  null,
+                  null,
+                  44,
+                  1367.5
+                ]
+              },
+              {
+                "time": "12:00",
+                "mw": [
+                  3650,
+                  1224,
+                  929,
+                  0,
+                  132,
+                  832.65,
+                  217,
+                  5422,
+                  401.28,
+                  296,
+                  1464.2,
+                  0,
+                  0,
+                  null,
+                  null,
+                  50,
+                  1597
+                ]
+              },
+              {
+                "time": "12:30",
+                "mw": [
+                  3635.5,
+                  1245,
+                  913,
+                  0,
+                  134,
+                  834.205,
+                  217,
+                  5418,
+                  324.02,
+                  246.5,
+                  1479.7,
+                  0,
+                  0,
+                  null,
+                  null,
+                  46.5,
+                  1493.5
+                ]
+              },
+              {
+                "time": "13:00",
+                "mw": [
+                  3621,
+                  1266,
+                  897,
+                  0,
+                  136,
+                  835.76,
+                  217,
+                  5414,
+                  246.76,
+                  197,
+                  1495.2,
+                  0,
+                  0,
+                  null,
+                  null,
+                  43,
+                  1390
+                ]
+              },
+              {
+                "time": "13:30",
+                "mw": [
+                  3566,
+                  1227,
+                  897,
+                  0,
+                  141,
+                  834.295,
+                  217,
+                  5391.5,
+                  312.505,
+                  206.5,
+                  1485.7,
+                  0,
+                  0,
+                  null,
+                  null,
+                  32.5,
+                  1433
+                ]
+              },
+              {
+                "time": "14:00",
+                "mw": [
+                  3511,
+                  1188,
+                  897,
+                  0,
+                  146,
+                  832.83,
+                  217,
+                  5369,
+                  378.25,
+                  216,
+                  1476.2,
+                  0,
+                  0,
+                  null,
+                  null,
+                  22,
+                  1476
+                ]
+              },
+              {
+                "time": "14:30",
+                "mw": [
+                  3511.5,
+                  1179.3,
+                  897,
+                  0,
+                  148,
+                  830.765,
+                  217,
+                  5351.5,
+                  356.86,
+                  218.5,
+                  1483.8,
+                  0,
+                  0,
+                  null,
+                  null,
+                  34.5,
+                  1511.5
+                ]
+              },
+              {
+                "time": "15:00",
+                "mw": [
+                  3512,
+                  1170.6,
+                  897,
+                  0,
+                  150,
+                  828.7,
+                  217,
+                  5334,
+                  335.47,
+                  221,
+                  1491.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  47,
+                  1547
+                ]
+              },
+              {
+                "time": "15:30",
+                "mw": [
+                  3525,
+                  1192.1,
+                  896.5,
+                  0,
+                  151,
+                  829.05,
+                  217,
+                  5258.5,
+                  292.725,
+                  221.5,
+                  1520.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  37.5,
+                  1209.5
+                ]
+              },
+              {
+                "time": "16:00",
+                "mw": [
+                  3538,
+                  1213.6,
+                  896,
+                  0,
+                  152,
+                  829.4,
+                  217,
+                  5183,
+                  249.98,
+                  222,
+                  1549.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  28,
+                  872
+                ]
+              },
+              {
+                "time": "16:30",
+                "mw": [
+                  3571.5,
+                  1227.6,
+                  896,
+                  0,
+                  149,
+                  828.12,
+                  217,
+                  5188.5,
+                  157.24,
+                  238,
+                  1594.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  28,
+                  673.5
+                ]
+              },
+              {
+                "time": "17:00",
+                "mw": [
+                  3605,
+                  1241.6,
+                  896,
+                  0,
+                  146,
+                  826.84,
+                  217,
+                  5194,
+                  64.5,
+                  254,
+                  1639.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  28,
+                  475
+                ]
+              },
+              {
+                "time": "17:30",
+                "mw": [
+                  3603.5,
+                  1255.6,
+                  883,
+                  0,
+                  146,
+                  843.765,
+                  217,
+                  5139.5,
+                  34.975,
+                  333.5,
+                  1739.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  20.5,
+                  499
+                ]
+              },
+              {
+                "time": "18:00",
+                "mw": [
+                  3602,
+                  1269.6,
+                  870,
+                  0,
+                  146,
+                  860.69,
+                  217,
+                  5085,
+                  5.45,
+                  413,
+                  1839.4,
+                  0,
+                  0,
+                  null,
+                  null,
+                  13,
+                  523
+                ]
+              },
+              {
+                "time": "18:30",
+                "mw": [
+                  3596,
+                  1232.6,
+                  870.5,
+                  0,
+                  154,
+                  1087.12,
+                  217,
+                  5100.5,
+                  2.725,
+                  575,
+                  1984.9,
+                  140,
+                  0,
+                  null,
+                  null,
+                  15,
+                  681
+                ]
+              },
+              {
+                "time": "19:00",
+                "mw": [
+                  3590,
+                  1195.6,
+                  871,
+                  0,
+                  162,
+                  1313.55,
+                  217,
+                  5116,
+                  0,
+                  737,
+                  2130.4,
+                  280,
+                  0,
+                  null,
+                  null,
+                  17,
+                  839
+                ]
+              },
+              {
+                "time": "19:30",
+                "mw": [
+                  3633,
+                  1235.6,
+                  871,
+                  0,
+                  170,
+                  1314.79,
+                  218,
+                  5146,
+                  0,
+                  794.42,
+                  2433.9,
+                  250,
+                  0,
+                  null,
+                  null,
+                  30,
+                  726
+                ]
+              },
+              {
+                "time": "20:00",
+                "mw": [
+                  3652,
+                  1247.6,
+                  822,
+                  0,
+                  176,
+                  1311.62,
+                  218,
+                  5173,
+                  0,
+                  826.42,
+                  2404.9,
+                  250,
+                  0,
+                  null,
+                  null,
+                  14,
+                  279
+                ]
+              },
+              {
+                "time": "20:30",
+                "mw": [
+                  3628.5,
+                  1237.1,
+                  798,
+                  0,
+                  169,
+                  1309.31,
+                  218,
+                  5207,
+                  0,
+                  820.92,
+                  2438.08,
+                  250,
+                  0,
+                  null,
+                  null,
+                  11.5,
+                  235.5
+                ]
+              },
+              {
+                "time": "21:00",
+                "mw": [
+                  3605,
+                  1226.6,
+                  774,
+                  0,
+                  162,
+                  1307,
+                  218,
+                  5241,
+                  0,
+                  815.42,
+                  2471.26,
+                  250,
+                  0,
+                  null,
+                  null,
+                  9,
+                  192
+                ]
+              },
+              {
+                "time": "21:30",
+                "mw": [
+                  3633,
+                  1223.1,
+                  774.5,
+                  0,
+                  161,
+                  1299.97,
+                  218,
+                  5212,
+                  0,
+                  814.42,
+                  2490.76,
+                  125,
+                  0,
+                  null,
+                  null,
+                  15.5,
+                  193
+                ]
+              },
+              {
+                "time": "22:00",
+                "mw": [
+                  3661,
+                  1219.6,
+                  775,
+                  0,
+                  160,
+                  1292.94,
+                  218,
+                  5183,
+                  0,
+                  813.42,
+                  2510.26,
+                  0,
+                  0,
+                  null,
+                  null,
+                  22,
+                  194
+                ]
+              },
+              {
+                "time": "22:30",
+                "mw": [
+                  3634,
+                  1217.55,
+                  822.5,
+                  0,
+                  162,
+                  1284.205,
+                  218.5,
+                  5163.5,
+                  0,
+                  814.92,
+                  2484.08,
+                  0,
+                  0,
+                  null,
+                  null,
+                  23,
+                  387
+                ]
+              },
+              {
+                "time": "23:00",
+                "mw": [
+                  3607,
+                  1215.5,
+                  870,
+                  0,
+                  164,
+                  1275.47,
+                  219,
+                  5144,
+                  0,
+                  816.42,
+                  2457.9,
+                  0,
+                  0,
+                  null,
+                  null,
+                  24,
+                  580
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "orderDiffs": []
     },
     "2026-09-02": {
       "day": "2026-09-02",
