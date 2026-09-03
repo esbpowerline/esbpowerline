@@ -65,11 +65,11 @@ export function productionSiteSettings() {
       value: [
         { label: 'Current Demand', value: 16956, unit: 'MW', icon: 'Activity', color: '#ef4444' },
         { label: 'Peak Generation', value: 16030, unit: 'MW', icon: 'Zap', color: '#3b82f6' },
-        { label: 'Peak Today', value: 16956, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
+        { label: 'Peak Demand', value: 16956, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
         { label: 'Daily Generation', value: 361.5, unit: 'GWh', isDecimal: true, icon: 'TrendingUp', color: '#3b82f6' },
         { label: 'Load Shedding', value: 926, unit: 'MW', icon: 'Activity', color: '#ef4444' },
         { label: 'Energy Unserved', value: 2.14, unit: 'GWh', isDecimal: true, icon: 'Gauge', color: '#ef4444' },
-        { label: 'Fuel Cost', value: 6.5, unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge', color: '#f59e0b' },
+        { label: 'Production Cost', value: 6.5, unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge', color: '#f59e0b' },
         { label: 'Gas Supply', value: 2686, unit: 'MMcfd', icon: 'Flame', color: '#8b5cf6' },
         { label: 'Coal Generation', value: 129.2, unit: 'GWh', isDecimal: true, icon: 'Flame', color: '#8b5cf6' },
         { label: 'Grid Import', value: 2570, unit: 'MW', icon: 'Cable', color: '#06b6d4' },

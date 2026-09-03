@@ -7,7 +7,7 @@ import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import type { PetrobanglaDaily, PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
-import { LiveBadge } from './pbLiveShared';
+import { LatestBadge } from './pbLiveShared';
 
 const HIGHLIGHT_FIELDS = new Set(['Bibiyana', 'R-LNG Terminal', 'Titas']);
 
@@ -26,7 +26,7 @@ export function PbLiveFieldSnapshot({
   return (
     <div className="space-y-3">
       <h4 className="grid-explorer-chart-card__title text-sm">
-        Daily Field Snapshot<LiveBadge />
+        Daily Field Snapshot<LatestBadge />
       </h4>
       <div className="grid-explorer-table-wrap max-h-80 overflow-auto">
         <table className="grid-explorer-table text-xs">

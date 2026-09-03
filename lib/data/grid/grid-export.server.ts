@@ -87,8 +87,15 @@ import {
   type GridAccessTier,
 } from '@/lib/data/grid/grid-tier-access';
 
-/** Hard ceiling on days per export — a full-archive request never blows memory. */
-export const MAX_EXPORT_DATES = 1500;
+/**
+ * Hard ceiling on days per export — a full-archive request never blows memory.
+ *
+ * Was 1,500: one request could pull a full payload for every published day
+ * from Postgres, ~52 MB of source JSON, and the cap was fifteen times the
+ * plausible export (audit 2026-09-01). A year is the widest range the sheet
+ * and PDF layouts were designed around; anyone who needs more runs two.
+ */
+export const MAX_EXPORT_DATES = 366;
 
 export type ResolvedExportScope = {
   from: string;

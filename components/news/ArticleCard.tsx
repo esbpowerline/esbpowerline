@@ -31,6 +31,13 @@ interface ArticleCardProps {
   isPinned?: boolean;
   heroMeta?: any;
   hideCategory?: boolean;
+  /**
+   * True for the first card or two of a listing: the card image is the page's
+   * largest paint on category and index pages, and without this it was
+   * discovered late — 690 ms of resource delay on the category page's LCP
+   * (Lighthouse, 2026-09-02, SEO_FIX_LOG stage 7).
+   */
+  priority?: boolean;
 }
 
 export function ArticleCard({
@@ -50,6 +57,7 @@ export function ArticleCard({
   isPinned,
   heroMeta,
   hideCategory = false,
+  priority = false,
 }: ArticleCardProps) {
   const { locale, t } = useLocale();
   const timeAgo = date ? formatExactDate(date) : '';
@@ -61,10 +69,14 @@ export function ArticleCard({
         {hasArticleImage(imageUrl) ? (
           <Image
             src={imageUrl}
-            alt={title}
+            alt={heroMeta?.alt ?? title}
             width={500}
             height={192}
-            
+            // The card is one column on phones and a third of the container on
+            // desktop; without `sizes` the browser assumed full viewport width
+            // and fetched the largest candidate for a 400px slot.
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority={priority}
             className="article-card__image"
             style={heroImageStyle(heroMeta)}
           />

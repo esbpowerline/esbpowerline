@@ -1,3 +1,3 @@
 'use client';
 
-export { LiveBadge } from '../GasTabShared';
+export { LatestBadge } from '../GasTabShared';

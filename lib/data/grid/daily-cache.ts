@@ -40,9 +40,15 @@ export function resolveInitialDailyReportEntry(
   const forSelected = prefetched?.[selectedDate] ?? getCachedDailyReport(selectedDate);
   if (forSelected) return { date: selectedDate, data: forSelected };
 
-  const forLatest = prefetched?.[latestDate] ?? getCachedDailyReport(latestDate);
-  if (forLatest) return { date: latestDate, data: forLatest };
-
+  // No fallback to the latest day for a different selection. Booting a deep
+  // link (?date=2026-08-12) from the latest day's report put 2026-08-17's
+  // figures under a 2026-08-12 heading until the fetch landed — and that is
+  // what a crawler and a slow connection actually saw. The page used to work
+  // around it by reading searchParams on the server and prefetching the
+  // deep-linked day, which made the whole route dynamic: every view rendered
+  // on a function with its own database reads. Now the route is static (ISR)
+  // and a deep-linked day simply loads: a skeleton is honest, a wrong day is
+  // not.
   return null;
 }
 

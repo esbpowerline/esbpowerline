@@ -1,6 +1,6 @@
 import { bercBulkTariffHistory } from '@/lib/data/companies/berc';
 
-/** Wholesale tariff vs unit production cost (Tk/KWh). */
+/** Wholesale tariff vs unit production cost (Tk/kWh). */
 export const macroTariffData = [
   { year: 'Mar 2010', cost: 2.68, tariff: 2.37 },
   { year: 'Feb 2011', cost: 4.20, tariff: 2.61 },

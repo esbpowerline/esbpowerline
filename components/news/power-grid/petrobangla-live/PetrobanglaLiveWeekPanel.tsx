@@ -24,7 +24,7 @@ import {
   AudienceModeToggle,
   PetrobanglaOfficialSourceLink,
 } from '../petrobangla-archive/PetrobanglaArchiveShared';
-import { GasExplanationBlock, GasSourceFooter, LiveBadge } from '../GasTabShared';
+import { GasExplanationBlock, GasSourceFooter, LatestBadge } from '../GasTabShared';
 import { MacroGasWeekSummary } from '../MacroGasSectionChrome';
 import { PbLiveKpiStrip, type PeriodKpis } from './pbLiveKpiStrip';
 import { PbLiveTimeline } from './pbLiveTimeline';
@@ -161,7 +161,7 @@ export function PetrobanglaLiveWeekPanel({
   if (!activeBundle) {
     return (
       <div className={cn('text-center text-sm text-muted-foreground', unified ? 'py-6' : 'grid-explorer-chart-card card p-6')}>
-        Live week data unavailable. Run sync_petrobangla_live.py to refresh.
+        Latest-week data unavailable. Run sync_petrobangla_live.py to refresh.
       </div>
     );
   }
@@ -368,7 +368,7 @@ if (unified) return body;
         <div className="flex-1 min-w-0">
           <h3 className="grid-explorer-chart-card__title">
             Rolling Gas-Day Window
-            <LiveBadge />
+            <LatestBadge />
           </h3>
           <p className="grid-explorer-chart-card__sub">
             Latest official data:{' '}

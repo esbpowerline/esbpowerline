@@ -146,7 +146,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   const hasPublishedFuelCost = generationData.some((g) => g.cost != null);
   const fuelUnitRate = (name: string) => {
     const rate = generationData.find((g) => g.name === name)?.unitCost;
-    return rate == null ? '—' : `${rate.toFixed(2)} Tk/KWh`;
+    return rate == null ? '—' : `${rate.toFixed(2)} Tk/kWh`;
   };
 
   // Null where P1 leaves the total-generation cell empty. Averaging a null to
@@ -178,9 +178,14 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   const idleMw = installedMw == null ? null : Math.max(0, installedMw - systemStats.eveningPeakGen);
   const idlePct = installedMw && installedMw > 0 ? ((idleMw ?? 0) / installedMw) * 100 : null;
 
-  // PGCB states an average production cost of its own; prefer it to dividing the
-  // bill by the generation, which rests on per-fuel rates that are themselves
-  // quotients rather than published prices.
+  // PGCB does print "Production Cost per KWHr" on P1, but `avgProductionCost`
+  // is NOT that cell: scripts/parse_daily_reports.py:1890-1892 computes it as
+  // total_daily_cost / total_energy_gen and never reads the printed rate. The
+  // two coincide to the paisa on every day checked, but the figure on this
+  // tile is ours, so it carries a D mark below — it wore a P until the label
+  // fidelity pass of 2026-09-02, and the DailyCostCard already said D for the
+  // same field. Still preferred over the per-fuel quotient route, whose inputs
+  // are themselves derived rates rather than published prices.
   const publishedUnitCost =
     typeof systemStats.avgProductionCost === 'number' && systemStats.avgProductionCost > 0
       ? systemStats.avgProductionCost
@@ -207,7 +212,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         icon={Zap}
         label={
           <>
-            Peak Supply
+            {/* PGCB's word. "Peak Supply" renamed the figure the tooltip
+                below calls Evening Peak Gen — the source never says supply. */}
+            Peak Generation
             <DailyBadge />
           </>
         }
@@ -260,12 +267,14 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           />
           <GridKpiTooltipRow
             provenance="P"
-            label="Max Peak Gen:"
+            label="Max Generation of the Day:"
             value={systemStats.maxGen == null ? '—' : `${formatNumber(Math.round(systemStats.maxGen))} MW`}
           />
+          {/* P1's own row title. "Min Base Gen" implied baseload; the parser
+              documents this as the 08:00 morning trough PGCB prints. */}
           <GridKpiTooltipRow
             provenance="P"
-            label="Min Base Gen:"
+            label="Min Generation of the Day:"
             value={systemStats.minGen == null ? '—' : `${formatNumber(Math.round(systemStats.minGen))} MW`}
           />
           {/* PGCB called this number at ~10:00 the same morning, in the report
@@ -341,7 +350,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           {/* The deficit this demand implies is the Peak Deficit tile's headline. */}
           <GridKpiTooltipRow
             provenance="P"
-            label="Max System Temp:"
+            label="Max Temperature:"
             value={systemStats.maxTemp == null ? '—' : `${systemStats.maxTemp.toFixed(1)} °C`}
           />
           {(forecast?.maxDemandEveningMw ?? forecast?.maxDemandMw) != null && (
@@ -574,7 +583,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
                 label="State Field Output:"
                 value={`${formatNumber(stateFieldsGas, 1)} MMCFD (${stateFieldsPct.toFixed(1)}%)`}
               />
-              <GridKpiTooltipRow provenance="D" label="Total Condensate:" value={`${formatNumber(totalCondensate, 1)} BBL`} />
+              <GridKpiTooltipRow provenance="D" label="Total Condensate:" value={`${formatNumber(totalCondensate, 1)} BBLD`} />
               <GridKpiTooltipAudit>As published by Petrobangla. Not audited.</GridKpiTooltipAudit>
             </>
           ) : (
@@ -583,8 +592,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
               gas day yet. PGCB grid figures above are unaffected.
             </p>
           )}
+          {/* The document's own title. "Daily Gas Intake/Offtake Report" is
+              the PDF's file name, not what is printed on it. */}
           <GridKpiTooltipRef
-            refLabel="Petrobangla Daily Gas Intake/Offtake Report"
+            refLabel="Petrobangla Daily Gas & Condensate Production and Distribution Report"
             part="I. Production"
             sourceFile={sourceFiles?.petrobangla}
             refHref="https://www.petrobangla.org.bd/"
@@ -635,10 +646,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
       >
         <GridKpiTooltipBody>
           {/* A day whose report carries no production-cost block has no unit
-              rate to show. "0.00 Tk/KWh" would read as free electricity. */}
+              rate to show. "0.00 Tk/kWh" would read as free electricity. */}
           <GridKpiTooltipRow
-            provenance="P"
-            label="Avg production cost:"
+            provenance="D"
+            label="Avg production cost (bill ÷ energy):"
             value={publishedUnitCost == null ? 'not published for this day' : `${publishedUnitCost.toFixed(3)} Tk/kWh`}
             valueClass="text-primary"
           />

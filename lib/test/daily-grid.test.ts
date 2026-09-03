@@ -255,11 +255,11 @@ describe('home-snapshot', () => {
     expect(stats.map((s) => s.label)).toEqual([
       'Current Demand',
       'Peak Generation',
-      'Peak Today',
+      'Peak Demand',
       'Daily Generation',
       'Load Shedding',
       'Energy Unserved',
-      'Fuel Cost',
+      'Production Cost',
       'Gas Supply',
       'Coal Generation',
       'Grid Import',

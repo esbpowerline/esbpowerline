@@ -678,12 +678,12 @@ export function MacroTrendsTab({
                       Icon: Zap,
                       iconColor: "text-primary",
                       label: "Current Bulk:",
-                      value: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/KWh`,
+                      value: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/kWh`,
                       valueColor: "text-primary",
                       tooltipTitle: "BERC Approved",
                       tooltipDesc: "The latest official wholesale bulk tariff set by the Bangladesh Energy Regulatory Commission (BERC) for utility distribution.",
                       highlightLabel: "Official Rate",
-                      highlightValue: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/KWh`,
+                      highlightValue: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/kWh`,
                       highlightStyles: "bg-primary/10 text-primary border-primary/20",
                       roundedClasses: "rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none"
                     },
@@ -691,12 +691,12 @@ export function MacroTrendsTab({
                       Icon: History,
                       iconColor: "text-orange-500",
                       label: "2010 Baseline:",
-                      value: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/KWh`,
+                      value: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/kWh`,
                       valueColor: "text-orange-600 dark:text-orange-400",
                       tooltipTitle: "Historical Anchor",
                       tooltipDesc: "The earliest recorded BERC bulk tariff in our dataset, establishing the historical cost baseline from March 2010.",
                       highlightLabel: "Initial Rate",
-                      highlightValue: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/KWh`,
+                      highlightValue: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/kWh`,
                       highlightStyles: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
                       roundedClasses: ""
                     },
@@ -704,7 +704,7 @@ export function MacroTrendsTab({
                       Icon: TrendingUp,
                       iconColor: "text-destructive",
                       label: "True Gen Cost:",
-                      value: `${formatUnitRate(systemStats?.avgProductionCost ?? 0)} Tk/KWh`,
+                      value: `${formatUnitRate(systemStats?.avgProductionCost ?? 0)} Tk/kWh`,
                       valueColor: "text-foreground",
                       tooltipTitle: "Real Production Cost",
                       tooltipDesc: "BPDB's current blended per-unit generation and procurement cost, factoring in fuel prices and IPP capacity payments.",
@@ -785,15 +785,15 @@ export function MacroTrendsTab({
                                 <div className="space-y-2 text-xs">
                                   <div className="flex justify-between flex-col mb-2">
                                     <span className="text-muted-foreground font-semibold">Approved Bulk Tariff (BPDB to Utilities):</span>
-                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.tariff.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.tariff.toFixed(2)} Tk/kWh</span>
                                   </div>
                                   <div className="flex justify-between flex-col mb-2">
                                     <span className="text-muted-foreground font-semibold">Total Generation &amp; Procurement Cost:</span>
-                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.cost.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.cost.toFixed(2)} Tk/kWh</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/30 pt-2 mt-2">
                                     <span className="text-destructive font-semibold">BPDB Unit Deficit / Subsidy Reqd:</span>
-                                    <span className="font-bold text-destructive tabular-nums">{deficit} Tk/KWh</span>
+                                    <span className="font-bold text-destructive tabular-nums">{deficit} Tk/kWh</span>
                                   </div>
                                 </div>
                               </div>
@@ -850,7 +850,7 @@ export function MacroTrendsTab({
                       <TakaIcon className="h-5 w-5 shrink-0 text-primary" />
                       <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">Wholesale Tariff vs. Unit Production Cost</h3>
-                        <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                        <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/kWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
                       </div>
                     </div>
                     <span className="grid-explorer-chip">Bulk Tariff Gap</span>
@@ -877,15 +877,15 @@ export function MacroTrendsTab({
                                   <div className="space-y-2 text-[11px] md:text-xs">
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Wholesale Bulk Tariff:</span>
-                                      <span className="font-bold text-foreground tabular-nums">{d.tariff.toFixed(2)} Tk/KWh</span>
+                                      <span className="font-bold text-foreground tabular-nums">{d.tariff.toFixed(2)} Tk/kWh</span>
                                     </div>
                                     <div className="flex justify-between">
                                       <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Unit Production Cost:</span>
-                                      <span className="font-bold text-foreground tabular-nums">{d.cost.toFixed(2)} Tk/KWh</span>
+                                      <span className="font-bold text-foreground tabular-nums">{d.cost.toFixed(2)} Tk/kWh</span>
                                     </div>
                                     <div className="flex justify-between border-t border-border/30 pt-1">
                                       <span className="text-destructive font-semibold inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Unit Deficit:</span>
-                                      <span className="font-bold text-destructive tabular-nums">{deficit} Tk/KWh</span>
+                                      <span className="font-bold text-destructive tabular-nums">{deficit} Tk/kWh</span>
                                     </div>
                                   </div>
                                   <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
@@ -2233,7 +2233,7 @@ export function MacroTrendsTab({
         series={[
           { label: "Operating Revenue", values: columnOf(localBpdbAuditedFinancials, 'revenue') },
           { label: "Govt Subsidy", values: columnOf(localBpdbAuditedFinancials, 'subsidy') },
-          { label: "Gen &amp; Purchase Cost", values: columnOf(localBpdbAuditedFinancials, 'cost') },
+          { label: "Gen & Purchase Cost", values: columnOf(localBpdbAuditedFinancials, 'cost') },
           { label: "Net Loss (after subsidy)", values: columnOf(localBpdbAuditedFinancials, 'loss') },
         ]}
       />
@@ -2467,7 +2467,7 @@ export function MacroTrendsTab({
                     <Sun className="h-5 w-5 shrink-0 text-teal-500" />
                     <div className="min-w-0">
                       <h3 className="grid-explorer-chart-card__title">Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff</h3>
-                      <p className="grid-explorer-chart-card__sub">Global Average Solar LCOE vs. Domestic Solar Contracts (Tk/KWh) — <span className="text-primary font-semibold text-xs">Tracked since 2015</span></p>
+                      <p className="grid-explorer-chart-card__sub">Global Average Solar LCOE vs. Domestic Solar Contracts (Tk/kWh) — <span className="text-primary font-semibold text-xs">Tracked since 2015</span></p>
                     </div>
                   </div>
                   <span className="grid-explorer-chip bg-teal-500/5 text-teal-500 border-teal-500/10">Solar Energy</span>
@@ -2504,17 +2504,17 @@ export function MacroTrendsTab({
                                     <span className="font-semibold text-foreground tabular-nums">{exRate.toFixed(2)} Tk/$</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/20 pt-1">
-                                    <span className="text-muted-foreground">Global Solar (Tk/KWh equivalent):</span>
-                                    <span className="font-bold text-teal-400 tabular-nums">{globalSolarBdt.toFixed(2)} Tk/KWh</span>
+                                    <span className="text-muted-foreground">Global Solar (Tk/kWh equivalent):</span>
+                                    <span className="font-bold text-teal-400 tabular-nums">{globalSolarBdt.toFixed(2)} Tk/kWh</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-muted-foreground">BD Solar Contract Tariff:</span>
-                                    <span className="font-bold text-rose-500 tabular-nums">{d.bdSolar.toFixed(2)} Tk/KWh</span>
+                                    <span className="font-bold text-rose-500 tabular-nums">{d.bdSolar.toFixed(2)} Tk/kWh</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/20 pt-1 border-dashed">
                                     <span className="text-muted-foreground">Domestic Contract Premium:</span>
                                     <span className={cn("font-bold", premium >= 0 ? "text-rose-500" : "text-emerald-500")}>
-                                      {premium >= 0 ? `+${premium.toFixed(2)} Tk/KWh (Premium)` : `${premium.toFixed(2)} Tk/KWh`}
+                                      {premium >= 0 ? `+${premium.toFixed(2)} Tk/kWh (Premium)` : `${premium.toFixed(2)} Tk/kWh`}
                                     </span>
                                   </div>
                                 </div>
@@ -2530,8 +2530,8 @@ export function MacroTrendsTab({
                           }}
                         />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                        <Line type="monotone" dataKey="globalSolarBdt" name="Global Solar LCOE (Tk/KWh)" stroke={SERIES_COLORS.transmissionIndex} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.transmissionIndex, r: 3 }} />
-                        <Line type="monotone" dataKey="bdSolar" name="BD Solar Tariff (Tk/KWh)" stroke={STATUS_COLORS.critical} strokeWidth={2.5} dot={{ fill: STATUS_COLORS.critical, r: 3 }} />
+                        <Line type="monotone" dataKey="globalSolarBdt" name="Global Solar LCOE (Tk/kWh)" stroke={SERIES_COLORS.transmissionIndex} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.transmissionIndex, r: 3 }} />
+                        <Line type="monotone" dataKey="bdSolar" name="BD Solar Tariff (Tk/kWh)" stroke={STATUS_COLORS.critical} strokeWidth={2.5} dot={{ fill: STATUS_COLORS.critical, r: 3 }} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   ) : (
@@ -2543,8 +2543,8 @@ export function MacroTrendsTab({
                     categoryHeader="Year"
                     categories={(localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015)).map((d) => String(d.year))}
                     series={[
-                      { label: "Global Solar LCOE (Tk/KWh)", values: columnOf(localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015), 'globalSolarBdt') },
-                      { label: "BD Solar Tariff (Tk/KWh)", values: columnOf(localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015), 'bdSolar') },
+                      { label: "Global Solar LCOE (Tk/kWh)", values: columnOf(localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015), 'globalSolarBdt') },
+                      { label: "BD Solar Tariff (Tk/kWh)", values: columnOf(localGlobalVsDomesticData.filter(x => parseInt(x.year) >= 2015), 'bdSolar') },
                     ]}
                   />
 
@@ -2650,7 +2650,7 @@ export function MacroTrendsTab({
                 {/* Card Metadata Footer */}
                 <GridCardFooter className="mt-6">
                   <span>Source: <a href="https://powerdivision.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Ministry of Power, Energy and Mineral Resources (Power Division)</a></span>
-                  <span className="font-medium">Last Updated: Sunday, June 14, 2026 at 03:39 PM</span>
+                  <span className="font-medium">Figures as entered by the desk on June 14, 2026 — not refreshed automatically</span>
                 </GridCardFooter>
               </div>
 
@@ -2662,7 +2662,7 @@ export function MacroTrendsTab({
                     <h3 className="grid-explorer-chart-card__title">Historical System Loss Trends (T&amp;D)</h3>
                     <p className="grid-explorer-chart-card__sub">Long-term reduction curves in transmission, distribution, and overall system loss — <span className="text-primary font-semibold text-xs">Tracked since 2001</span></p>
                   </div>
-                  <span className="grid-explorer-chip bg-primary/10 text-primary border-primary/20 ml-auto text-[10px] font-bold">Last Updated: Wednesday, Sep 17, 2025 at 06:01 PM</span>
+                  <span className="grid-explorer-chip bg-primary/10 text-primary border-primary/20 ml-auto text-[10px] font-bold">Series as entered Sep 17, 2025</span>
                 </div>
 
                 <div className="grid-explorer-chart-area grid-explorer-chart-area--lg mt-4">

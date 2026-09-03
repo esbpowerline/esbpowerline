@@ -5,7 +5,7 @@ import { cn, formatNumber } from '@/lib/utils';
 import { dayOverDayDelta } from '@/lib/data/petrobangla/computeLiveWeek';
 import type { PetrobanglaLiveWeekBundle } from '@/lib/data/petrobangla/types';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
-import { LiveBadge } from './pbLiveShared';
+import { LatestBadge } from './pbLiveShared';
 
 export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle }) {
   const n = bundle.days.length;
@@ -30,7 +30,7 @@ export function PbLiveDayCompare({ bundle }: { bundle: PetrobanglaLiveWeekBundle
   return (
     <div className="space-y-3">
       <h4 className="grid-explorer-chart-card__title text-sm">
-        Day-over-Day (within week)<LiveBadge />
+        Day-over-Day (within week)<LatestBadge />
       </h4>
       <div className="flex flex-wrap gap-2 items-center">
         <select

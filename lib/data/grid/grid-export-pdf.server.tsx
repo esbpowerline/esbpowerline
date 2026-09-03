@@ -186,7 +186,7 @@ const VIEWS: Record<GridExportDatasetKey, { title: string; columns: PdfCol[] }> 
       { key: 'total_energy_unserved_mkwh', label: 'Unserved MKWh', width: '6.5%', ...NUM },
       { key: 'max_temp_c', label: 'Max C', width: '5%', ...NUM },
       { key: 'gas_to_power_mmcfd', label: 'Gas-Power MMCFD', width: '7.5%', ...NUM },
-      { key: 'avg_production_cost_tk_kwh', label: 'Avg Cost Tk/KWh', width: '6.5%', ...NUM },
+      { key: 'avg_production_cost_tk_kwh', label: 'Avg Cost Tk/kWh', width: '6.5%', ...NUM },
       { key: 'total_daily_cost_bdt', label: 'Daily Cost BDT', width: '11.5%', ...INT },
     ],
   },
@@ -197,7 +197,7 @@ const VIEWS: Record<GridExportDatasetKey, { title: string; columns: PdfCol[] }> 
       { key: 'fuel', label: 'Fuel', width: '20%', align: 'left', lines: 1, fmt: asText },
       { key: 'generation_mkwh', label: 'Gen (MKWh)', width: '14%', ...NUM },
       { key: 'generation_share_pct', label: 'Gen Share %', width: '12%', ...NUM },
-      { key: 'unit_cost_tk_kwh', label: 'Unit Cost (Tk/KWh)', width: '14%', ...NUM },
+      { key: 'unit_cost_tk_kwh', label: 'Unit Cost (Tk/kWh)', width: '14%', ...NUM },
       { key: 'daily_cost_bdt', label: 'Daily Cost (BDT)', width: '17%', ...INT },
       { key: 'cost_share_pct', label: 'Cost Share %', width: '12%', ...NUM },
     ],
@@ -267,9 +267,9 @@ const VIEWS: Record<GridExportDatasetKey, { title: string; columns: PdfCol[] }> 
     title: 'Tariff vs Generation Cost',
     columns: [
       { key: 'period', label: 'Period', width: '34%', align: 'left', lines: 1, fmt: asText },
-      { key: 'gen_cost_tk_kwh', label: 'Gen Cost (Tk/KWh)', width: '22%', ...NUM },
-      { key: 'bulk_tariff_tk_kwh', label: 'Bulk Tariff (Tk/KWh)', width: '22%', ...NUM },
-      { key: 'deficit_tk_kwh', label: 'Deficit (Tk/KWh)', width: '22%', ...NUM },
+      { key: 'gen_cost_tk_kwh', label: 'Gen Cost (Tk/kWh)', width: '22%', ...NUM },
+      { key: 'bulk_tariff_tk_kwh', label: 'Bulk Tariff (Tk/kWh)', width: '22%', ...NUM },
+      { key: 'deficit_tk_kwh', label: 'Deficit (Tk/kWh)', width: '22%', ...NUM },
     ],
   },
   fin_budget: {
@@ -455,9 +455,9 @@ function renderChart(table: DatasetTable): { caption: string; chart: ReactNode }
         { name: 'Bulk tariff', color: SERIES_BLUE, values: rows.map((r) => rowNum(r, 'bulk_tariff_tk_kwh')) },
       ];
       return {
-        caption: 'Generation cost vs bulk tariff, Tk/KWh — the shaded band is the per-unit deficit',
+        caption: 'Generation cost vs bulk tariff, Tk/kWh — the shaded band is the per-unit deficit',
         chart: (
-          <LineChart series={series} xLabels={xLabels} unit="Tk/KWh" fillBetween gapLabel="deficit" />
+          <LineChart series={series} xLabels={xLabels} unit="Tk/kWh" fillBetween gapLabel="deficit" />
         ),
       };
     }
@@ -1307,7 +1307,7 @@ const GLOSSARY: Array<[string, string]> = [
   ['MKWh', 'Million kilowatt-hours — energy over a period.'],
   ['MMCFD', 'Million cubic feet of gas per day.'],
   ['BBLD', 'Barrels of liquid (condensate / products) per day.'],
-  ['Tk/KWh', 'Taka per kilowatt-hour — per-unit cost or tariff.'],
+  ['Tk/kWh', 'Taka per kilowatt-hour — per-unit cost or tariff.'],
   ['Cr BDT', 'Crore taka (10 million BDT).'],
   ['T&D loss', 'Energy lost between generation and billed consumption.'],
   ['Unserved', 'Demand that could not be supplied (load-shedding).'],

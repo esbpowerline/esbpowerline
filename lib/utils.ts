@@ -182,7 +182,7 @@ export function formatNumber(num: number, maxFractionDigits = 0): string {
 }
 
 /**
- * Format a per-unit rate (e.g. Tk/KWh) to exactly two decimals, TRUNCATING the
+ * Format a per-unit rate (e.g. Tk/kWh) to exactly two decimals, TRUNCATING the
  * third decimal rather than rounding — so 6.517 renders as "6.51", not "6.52".
  * The intermediate toFixed(4) absorbs binary float error before the floor so a
  * value like 5.83 (stored as 5.8299999…) is not truncated down to "5.82".

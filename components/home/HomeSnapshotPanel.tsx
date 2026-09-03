@@ -126,7 +126,7 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
       return live.latest.demandMw;
     case 'Load Shedding':
       return live.latest.loadShedMw;
-    case 'Peak Today':
+    case 'Peak Demand':
       return live.today.maxDemandMw;
     // Both of these come off the generation table, which is the table the
     // reconciliation covers. When the printed total stops matching its own
@@ -174,12 +174,12 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
         // Nor is one whose source has not filed: there is no figure to move,
         // and `null + variation` is NaN.
         if (s.value === null) return s;
-        if (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation') {
+        if (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
           return { ...s, value: Math.round(next) };
         }
-        if (s.label === 'Fuel Cost') {
+        if (s.label === 'Production Cost') {
           const variation = (Math.random() - 0.5) * 0.04;
           const next = Math.max(5.5, Math.min(7.5, s.value + variation));
           return { ...s, value: parseFloat(next.toFixed(2)) };
@@ -238,7 +238,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                     </>
-                  ) : simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation' || s.label === 'Fuel Cost') ? (
+                  ) : simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation' || s.label === 'Production Cost') ? (
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
@@ -265,7 +265,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                   // reporting one.
                   <span className="text-muted-foreground/70">—</span>
                 ) : s.isDecimal ? (
-                  displayValue.toFixed(s.label === 'Fuel Cost' || s.label === 'Energy Unserved' ? 2 : 1)
+                  displayValue.toFixed(s.label === 'Production Cost' || s.label === 'Energy Unserved' ? 2 : 1)
                 ) : (
                   formatNumber(Math.round(displayValue))
                 )}
@@ -377,13 +377,19 @@ function SnapshotSegment({
                 <time dateTime={dailyDay ?? undefined}>{headerDate}</time>
               </span>
             )}
-            <span className="home-snapshot-segment__live">
-              <span className="home-snapshot-segment__live-dot" aria-hidden>
-                <span className="home-snapshot-segment__live-ping" />
-                <span className="home-snapshot-segment__live-core" />
+            {/* The badge renders only while an NLDC hourly reading is actually
+                loaded. It used to render unconditionally from the settings
+                string, putting a pulsing "Live" over a panel where 7 of 12
+                tiles are daily or standing-register figures (audit 2026-09-01). */}
+            {live ? (
+              <span className="home-snapshot-segment__live">
+                <span className="home-snapshot-segment__live-dot" aria-hidden>
+                  <span className="home-snapshot-segment__live-ping" />
+                  <span className="home-snapshot-segment__live-core" />
+                </span>
+                {liveWord}
               </span>
-              {liveWord}
-            </span>
+            ) : null}
           </div>
         </header>
 
@@ -433,7 +439,7 @@ export function HomeSnapshotPanel({
     .split(/\s*•\s*/)
     .map((part) => part.trim())
     .filter(Boolean);
-  const [liveWord, ...agencies] = parts;
+  const [, ...agencies] = parts;
   const sourcesText = agencies.join(' • ');
   const headerDateToUse =
     snapshotHeaderDate ?? formatSnapshotHeaderDate(snapshotDate, locale);
@@ -465,13 +471,10 @@ export function HomeSnapshotPanel({
           <span className="text-[10px] md:text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground dark:text-muted-foreground select-none leading-none">
             {locale === 'bn' ? 'আপডেট: ' : 'UPDATED: '}{headerDateToUse}
           </span>
-          <span className="inline-flex items-center gap-1 rounded border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[9.5px] md:text-[10px] font-display font-extrabold uppercase tracking-widest text-rose-600 dark:text-rose-400 select-none transition-colors duration-300 shadow-[0_1px_2px_rgba(244,63,94,0.03)] leading-none mt-1.5">
-            <span className="relative flex h-1.5 w-1.5 mr-0.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
-            </span>
-            {liveWord}
-          </span>
+          {/* No live chip here: this layout has no NLDC hourly wiring at all,
+              so the pulsing live-word chip it used to show was a permanent live
+              claim over daily figures (audit 2026-09-01). The UPDATED stamp
+              above and the DATA sources footer below carry the honest story. */}
         </div>
       </div>
 

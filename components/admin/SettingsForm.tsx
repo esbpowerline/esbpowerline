@@ -111,7 +111,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
       { label: 'Renewable Share', value: null, unit: '%', isDecimal: true, icon: 'Leaf', color: '#10b981' },
       { label: 'System Loss', value: null, unit: '%', isDecimal: true, icon: 'Gauge', color: '#f59e0b' },
       { label: 'Gas Supply', value: null, unit: 'MMcfd', icon: 'Flame', color: '#8b5cf6' },
-      { label: 'Peak Today', value: null, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
+      { label: 'Peak Demand', value: null, unit: 'MW', icon: 'TrendingUp', color: '#3b82f6' },
       { label: 'India Grid Import', value: null, unit: 'MW', icon: 'Cable', color: '#06b6d4' },
       { label: 'Solar Installed', value: null, unit: 'MW', icon: 'Sun', color: '#f59e0b' },
     ]

@@ -141,11 +141,13 @@ export function PetrobanglaGasKpiStrip({ selectedDate }: Props) {
           iconClassName="text-amber-500"
           label={
             <>
-              True Power-Gas Gap
+              {/* "True" overclaimed: the gap rests on a diversity factor the
+                  PDF does not print. Named for what it is — an adjustment. */}
+              Adjusted Power-Gas Gap
               <DailyBadge />
             </>
           }
-          value={`${formatNumber(Math.max(0, powerGap ?? 0), 1)} MMCFD`}
+          value={powerGap == null ? '— MMCFD' : `${formatNumber(Math.max(0, powerGap), 1)} MMCFD`}
           active={activeTooltip === 'diversity'}
           onToggle={() => toggleTooltip('diversity')}
           tooltipTitle="Diversity-Adjusted Demand"
@@ -191,18 +193,23 @@ export function PetrobanglaGasKpiStrip({ selectedDate }: Props) {
           iconClassName="text-emerald-500"
           label={
             <>
-              Refinery Output
+              {/* The rows come from the PDF's "III. SGFL Production" block —
+                  Sylhet Gas Fields' fractionation plant — not RPGCL, which is
+                  the R-LNG importer on a separate production line. */}
+              SGFL Plant Output
               <DailyBadge />
             </>
           }
           value={
             typeof products?.ms === 'number'
               ? `${formatNumber(products.ms, 0)} BBLD MS`
-              : `${formatNumber(products?.lpg ?? 0, 1)} Kg LPG`
+              : typeof products?.lpg === 'number'
+                ? `${formatNumber(products.lpg, 1)} Kg LPG`
+                : '—'
           }
           active={activeTooltip === 'refinery'}
           onToggle={() => toggleTooltip('refinery')}
-          tooltipTitle="RPGCL Fractionation Output"
+          tooltipTitle="SGFL Production (fractionation)"
           tooltipIcon={Factory}
           tooltipAccent="text-emerald-500"
           width="lg"

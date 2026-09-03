@@ -16,6 +16,8 @@ export interface TickerItem {
   /** The published daily delta. Null when unknown — not 0, which reads flat. */
   change: number | null;
   prefix: string;
+  /** ISO day of the report the figure came from. Absent for admin-entered items. */
+  asOf?: string | null;
 }
 
 /**
@@ -61,7 +63,10 @@ export function LiveMarketTicker({
   // archives, or entered in Settings. Nothing is simulated client-side and
   // nothing is defaulted; the change % is a true daily delta or it is absent.
   const [items, setItems] = useState<TickerItem[]>(localizedSeed);
-  const [marketOpen] = useState(true);
+  // The label used to carry a green "market open" ping driven by a constant
+  // `useState(true)` — a permanent live claim over once-a-day archive figures
+  // (audit 2026-09-01). It now carries the report day the figures came from.
+  const asOf = items.find((item) => item.asOf)?.asOf ?? null;
 
   useEffect(() => {
     setItems(localizedSeed);
@@ -181,16 +186,14 @@ export function LiveMarketTicker({
         <span className="md:hidden">COMMODITIES</span>
         <span className="hidden md:inline">{t('ticker.commodities')}</span>
       </span>
-      <span className="relative flex h-1.5 w-1.5 shrink-0">
-        {marketOpen ? (
-          <>
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
-          </>
-        ) : (
-          <span className="relative inline-flex rounded-full h-full w-full bg-rose-500"></span>
-        )}
-      </span>
+      {asOf ? (
+        <span
+          className="font-mono text-[9px] font-semibold tracking-wide text-muted-foreground/70 whitespace-nowrap select-none"
+          title="Figures from the named day's PGCB / Petrobangla daily reports — updated per ingest, not a live market feed"
+        >
+          {asOf}
+        </span>
+      ) : null}
     </div>
   ) : (
     <div
@@ -203,16 +206,14 @@ export function LiveMarketTicker({
       <span className={cn('font-semibold uppercase tracking-[0.1em]', labelSize)}>
         {t('ticker.commodities')}
       </span>
-      <span className="relative flex h-1.5 w-1.5 shrink-0">
-        {marketOpen ? (
-          <>
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-full w-full bg-emerald-500"></span>
-          </>
-        ) : (
-          <span className="relative inline-flex rounded-full h-full w-full bg-rose-500"></span>
-        )}
-      </span>
+      {asOf ? (
+        <span
+          className="font-mono text-[9px] font-semibold tracking-wide text-muted-foreground/70 whitespace-nowrap select-none"
+          title="Figures from the named day's PGCB / Petrobangla daily reports — updated per ingest, not a live market feed"
+        >
+          {asOf}
+        </span>
+      ) : null}
     </div>
   );
 

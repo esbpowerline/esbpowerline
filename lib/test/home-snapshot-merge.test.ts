@@ -79,7 +79,7 @@ describe('mergeHomeSnapshot', () => {
 
   it('preserves an explicit awaiting from the builder', () => {
     const slots = mergeHomeSnapshot([
-      stat('Gas Supply', null, { unit: 'MMcfd', awaiting: 'Petrobangla' }),
+      stat('Gas Supply', null, { unit: 'MMCFD', awaiting: 'Petrobangla' }),
     ]);
     const gas = slots.find((s) => s.label === 'Gas Supply');
     expect(gas?.value).toBeNull();
@@ -97,7 +97,7 @@ describe('mergeHomeSnapshot', () => {
     // `liveValueFor` in the panel must return a figure for exactly these, and
     // no others — a label listed here but missing there waits forever.
     expect(LIVE_BACKED_LABELS).toEqual(
-      new Set(['Current Demand', 'Peak Today', 'Load Shedding', 'Coal Generation', 'Grid Import']),
+      new Set(['Current Demand', 'Peak Demand', 'Load Shedding', 'Coal Generation', 'Grid Import']),
     );
   });
 

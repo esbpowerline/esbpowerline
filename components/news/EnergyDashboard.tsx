@@ -113,7 +113,7 @@ function StatValue({ stat, unitClass }: { stat: Stat; unitClass: string }) {
   return (
     <>
       {stat.isDecimal
-        ? stat.value.toFixed(stat.label === 'Fuel Cost' || stat.label === 'Energy Unserved' ? 2 : 1)
+        ? stat.value.toFixed(stat.label === 'Production Cost' || stat.label === 'Energy Unserved' ? 2 : 1)
         : formatNumber(Math.round(stat.value))}{' '}
       <span className={unitClass}>{stat.unit}</span>
     </>
@@ -182,12 +182,12 @@ export function EnergyDashboard({
         // Nothing to jitter on a tile whose source has not filed, and
         // `null + variation` is NaN.
         if (s.value === null) return s;
-        if (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation') {
+        if (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
           return { ...s, value: Math.round(next) };
         }
-        if (s.label === 'Fuel Cost') {
+        if (s.label === 'Production Cost') {
           const variation = (Math.random() - 0.5) * 0.04;
           const next = Math.max(5.5, Math.min(7.5, s.value + variation));
           return { ...s, value: parseFloat(next.toFixed(2)) };
@@ -238,7 +238,7 @@ export function EnergyDashboard({
                 side="top"
               >
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
-                  {s.value !== null && simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Today' || s.label === 'Peak Generation' || s.label === 'Fuel Cost') ? (
+                  {s.value !== null && simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation' || s.label === 'Production Cost') ? (
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />

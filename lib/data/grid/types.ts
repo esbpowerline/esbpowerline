@@ -31,8 +31,20 @@ export interface GridSystemStats {
   totalEnergyUnserved: number | null;
   totalEnergyDemand: number | null;
   maxTemp: number | null;
+  /**
+   * P1 "Total Gas Supplied … MMCFD": gas delivered to the power sector on the
+   * energy day. It is about a third of Petrobangla's national grand total and
+   * must never stand in for it (see the Gas Supply tile incident in
+   * home-snapshot-core.ts).
+   */
   totalGasSuppliedPower: number;
+  /**
+   * Derived, not P1's printed "Production Cost per KWHr": the parser divides
+   * `totalDailyCost` by `totalEnergyGen` (parse_daily_reports.py:1890) and
+   * never reads the printed cell. Every surface must mark it D.
+   */
   avgProductionCost: number;
+  /** P1 "Production Cost (Tk.)" total row, in Taka. */
   totalDailyCost: number;
   /**
    * The clock time P1 stamps against each figure above — the hour the peak was

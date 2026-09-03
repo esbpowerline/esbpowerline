@@ -987,7 +987,7 @@ export function TechnicalInfoTab({
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="text-lg font-bold text-foreground">National Grid Substation Database</h3>
                           <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
-                            Last Updated: Sunday, May 24, 2026 at 02:12 PM
+                            Register as collected May 24, 2026 — not refreshed automatically
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground leading-relaxed">

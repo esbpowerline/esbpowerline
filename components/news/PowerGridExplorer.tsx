@@ -64,6 +64,7 @@ import {
 import { PowerStationsTab } from '@/components/news/power-grid/PowerStationsTab';
 import { BpdbAccountsPanel } from '@/components/news/power-grid/BpdbAccountsPanel';
 import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles } from '@/components/news/power-grid/GridExplorerUI';
+import { GridReportingStandards } from '@/components/news/power-grid/GridReportingStandards';
 import { GenerationMixCard } from '@/components/news/power-grid/GenerationMixCard';
 import { DailyCostCard } from '@/components/news/power-grid/DailyCostCard';
 import { GridExplorerUrlSyncer } from '@/components/news/power-grid/GridExplorerUrlSyncer';
@@ -1081,7 +1082,7 @@ export function PowerGridExplorer({
   const hasPublishedFuelCost = generationData.some((item) => item.cost != null);
   // PGCB prices imports as a single line in its production-cost table — one
   // figure covering every interconnector. The cost is published and shown; the
-  // Tk/KWh it implies is not, and no longer derived here: one average across
+  // Tk/kWh it implies is not, and no longer derived here: one average across
   // three separate commercial agreements reads as a price Bangladesh pays, or
   // as one supplier's tariff, and the report supports neither.
   const importsCost = generationData.find((g) => g.name === 'Imports')?.cost ?? null;
@@ -1246,9 +1247,14 @@ export function PowerGridExplorer({
       {/* Dynamic Animated Ambient Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-3xl" aria-hidden="true">
         {/* Glow Blobs */}
-        <div className={cn("absolute top-[5%] left-[10%] w-[35rem] h-[35rem] rounded-full blur-[120px] grid-glow-blob-1 transition-colors duration-1000", glow.blob1)} />
-        <div className={cn("absolute bottom-[15%] right-[5%] w-[30rem] h-[30rem] rounded-full blur-[130px] grid-glow-blob-2 transition-colors duration-1000", glow.blob2)} />
-        <div className={cn("absolute top-[45%] left-[45%] w-[38rem] h-[38rem] rounded-full blur-[140px] grid-glow-blob-3 transition-colors duration-1000", glow.blob3)} />
+        {/* Fixed offsets from the top, not percentages of the container's
+            height. The wrapper is inset-0, so as each tab's content streamed
+            in and the explorer grew, `top-[45%]` and `bottom-[15%]` moved
+            the blobs down the page — Lighthouse scored it as a 0.128 layout
+            shift on the flagship page (2026-09-02, SEO_FIX_LOG stage 7). */}
+        <div className={cn("absolute top-8 left-[10%] w-[35rem] h-[35rem] rounded-full blur-[120px] grid-glow-blob-1 transition-colors duration-1000", glow.blob1)} />
+        <div className={cn("absolute top-[70rem] right-[5%] w-[30rem] h-[30rem] rounded-full blur-[130px] grid-glow-blob-2 transition-colors duration-1000", glow.blob2)} />
+        <div className={cn("absolute top-[38rem] left-[45%] w-[38rem] h-[38rem] rounded-full blur-[140px] grid-glow-blob-3 transition-colors duration-1000", glow.blob3)} />
       </div>
 
       <style>{`
@@ -1331,7 +1337,7 @@ export function PowerGridExplorer({
       <div id="grid-status-overview-header" className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 relative z-[60]">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Activity className="h-5 w-5 shrink-0 text-primary animate-pulse" />
+            <Activity className="h-5 w-5 shrink-0 text-primary" />
             Grid Status Overview
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5 inline-flex items-center flex-wrap gap-1">
@@ -1629,7 +1635,10 @@ export function PowerGridExplorer({
             <div className="flex items-center gap-2.5 min-w-0">
               <Activity className="h-5 w-5 shrink-0 text-destructive" />
               <div className="min-w-0">
-                <h3 className="grid-explorer-chart-card__title">24-Hour System Load Curve<DailyBadge /></h3>
+                {/* Named for what the sheet is: P4 is "Hourly Demand, Generation & Load-Shed
+                    Report" and the L-Curve is "DAILY GENERATION CURVE". "System Load
+                    Curve" called a generation series a load series. */}
+                <h3 className="grid-explorer-chart-card__title">24-Hour Generation, Demand &amp; Load-Shed<DailyBadge /></h3>
                 <p className="grid-explorer-chart-card__sub">
                   {curveIsHourly
                     ? <>Generation, demand and load shedding for every hour PGCB publishes, from the NLDC hourly report (Date: {systemStats.date})</>
@@ -1995,7 +2004,7 @@ export function PowerGridExplorer({
                     <th className="text-left">Daily Cost (Crore BDT) <GridProvenanceTag kind="P" /></th>
                     <th className="text-left">Cost Share <GridProvenanceTag kind="D" /></th>
                     <th className="text-left">Cost intensity <GridProvenanceTag kind="D" /></th>
-                    <th className="text-left">Unit Cost (Tk/KWh) <GridProvenanceTag kind="D" /></th>
+                    <th className="text-left">Unit Cost (Tk/kWh) <GridProvenanceTag kind="D" /></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2231,7 +2240,7 @@ export function PowerGridExplorer({
                 </div>
                 <p className="mb-1.5">
                   <strong className="text-foreground">How the unit cost is arrived at.</strong>{' '}
-                  No agency publishes a Tk/KWh rate. PGCB publishes a production cost in Taka
+                  No agency publishes a Tk/kWh rate. PGCB publishes a production cost in Taka
                   and an energy total in MKWh for each fuel; the rate here is the first divided
                   by the second, which is why it is marked{' '}
                   <GridProvenanceTag kind="D" />. The marker beside each rate says what
@@ -2276,7 +2285,7 @@ export function PowerGridExplorer({
                   <li>
                     <UnitCostBadge fact={{ status: 'administered' } as UnitCostFact} className="ml-0" />{' '}
                     a flat rate the publisher applies rather than measures. Through 2026 PGCB
-                    prints Wind at 14.7100 Tk/KWh unchanged, and Hydro at 0.1000 except for
+                    prints Wind at 14.7100 Tk/kWh unchanged, and Hydro at 0.1000 except for
                     2026-06-30 to 07-15, when it stepped to 3.8100 and back. Rates that hold to
                     four decimals for weeks and then jump are tariffs in force, not daily costs.
                   </li>
@@ -2338,8 +2347,11 @@ export function PowerGridExplorer({
             <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
               <CheckSquare className="h-5 w-5 shrink-0 text-primary" />
               <div className="min-w-0">
-                <h3 className="grid-explorer-chart-card__title">Daily Operational Milestones<DailyBadge /></h3>
-                <p className="grid-explorer-chart-card__sub">Key metrics on system margin, load shedding demand, and gas-to-power allocations • <span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
+                {/* P1's own block heading. "Operational Milestones" and "System
+                    Margins" were our names, and "margin" reads as reserve margin,
+                    which nothing in the block is. */}
+                <h3 className="grid-explorer-chart-card__title">Power Supply Scenario<DailyBadge /></h3>
+                <p className="grid-explorer-chart-card__sub">PGCB&rsquo;s summary block as printed: generation extremes, temperature, unserved energy and gas supplied to power •<span className="text-primary font-semibold text-xs">{coverageLabel('fuelMix')}</span></p>
               </div>
             </div>
 
@@ -2365,7 +2377,7 @@ export function PowerGridExplorer({
               <div className="p-4 rounded-xl border border-border/30 bg-muted/5 space-y-3">
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                   <BarChart3 className="h-4 w-4 shrink-0 text-primary" />
-                  Daily System Margins
+                  Generation Extremes &amp; Temperature
                 </div>
                 {/*
                   All three are printed. Max and min generation are PGCB's own
@@ -2416,7 +2428,7 @@ export function PowerGridExplorer({
                   <span className="font-semibold text-primary text-left tabular-nums">
                     {(() => {
                       const u = generationData.find(g => g.name === 'Gas')?.unitCost;
-                      return u == null ? '—' : `${u.toFixed(2)} Tk/KWh`;
+                      return u == null ? '—' : `${u.toFixed(2)} Tk/kWh`;
                     })()}
                   </span>
                 </div>
@@ -2493,7 +2505,7 @@ export function PowerGridExplorer({
               <Globe className="h-5 w-5 text-purple-500 shrink-0" />
               <div>
                 <h3 className="grid-explorer-chart-card__title">Cross-Border Power Imports Tracker<DailyBadge /></h3>
-                  <p className="grid-explorer-chart-card__sub">Real-time import allocations and daily power trade (Report: {systemStats.date}) • <span className="text-primary font-semibold text-xs">{coverageLabel('borderImports')}</span></p>
+                  <p className="grid-explorer-chart-card__sub">Import allocations and power trade as filed for the day (Report: {systemStats.date}) • <span className="text-primary font-semibold text-xs">{coverageLabel('borderImports')}</span></p>
               </div>
             </div>
 
@@ -2512,11 +2524,13 @@ export function PowerGridExplorer({
                         Nepal, whose row is derived from the half-hourly curve
                         and is marked on the row itself. */}
                     <th className="text-left">Daily Energy Imported (MKWh)<GridProvenanceTag kind="P" className="ml-1" /></th>
-                    <th className="text-left">Peak Capacity Served (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                    {/* P1 prints "Peak Hr Flow … MW at 21:00 hrs." — an instantaneous
+                        flow at one hour. "Capacity Served" read as a capacity. */}
+                    <th className="text-left">Peak Hour Flow (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
                     {/*
                       The blended-rate column is deliberately not here. PGCB
                       prices imports as one line covering Bheramara, Adani and
-                      Tripura together, so any Tk/KWh from it is a single average
+                      Tripura together, so any Tk/kWh from it is a single average
                       over three separate commercial agreements at different
                       prices. Published as a rate it reads as "what Bangladesh
                       pays for imported power", or worse as one supplier's
@@ -2533,7 +2547,7 @@ export function PowerGridExplorer({
                       for all three interconnectors together.
 
                       Both derived columns used to be filled from that blended
-                      rate, which put the SAME Tk/KWh against Bheramara, Adani
+                      rate, which put the SAME Tk/kWh against Bheramara, Adani
                       and Tripura on every day in the archive — three different
                       agreements shown at one price, in a column headed "Unit
                       Rate", where it reads as each line's contracted tariff.
@@ -2730,7 +2744,9 @@ export function PowerGridExplorer({
                     {regionalDemandData.map((rd, idx) => (
                       <tr key={idx}>
                         <td className="font-semibold">{rd.zone}</td>
-                        <td data-label="Evening demand" className="text-left tabular-nums font-medium">{formatNumber(rd.demand)}</td>
+                        {/* Unit on the cell, not only in the header: on a phone the
+                            header is hidden and this read "6,259" beside "743 MW". */}
+                        <td data-label="Evening demand" className="text-left tabular-nums font-medium">{formatNumber(rd.demand)} MW</td>
                         <td data-label="Load-shedding" className="text-left tabular-nums text-destructive font-semibold">
                           {rd.loadShed > 0 ? `${rd.loadShed} MW` : '0 MW'}
                         </td>
@@ -2758,8 +2774,8 @@ export function PowerGridExplorer({
                     ))}
                     <tr className="is-total border-t border-border/80 font-bold bg-muted/20">
                       <td>Entire Grid Total<GridProvenanceTag kind="D" className="ml-1" /></td>
-                      <td data-label="Evening demand" className="text-left tabular-nums text-primary">{formatNumber(totalRegionalDemand)}</td>
-                      <td data-label="Load-shedding" className="text-left tabular-nums text-destructive">{formatNumber(totalRegionalLoadShed)}</td>
+                      <td data-label="Evening demand" className="text-left tabular-nums text-primary">{formatNumber(totalRegionalDemand)} MW</td>
+                      <td data-label="Load-shedding" className="text-left tabular-nums text-destructive">{formatNumber(totalRegionalLoadShed)} MW</td>
                       {/* Not the mean of the nine zone percentages — the
                           demand-weighted grid ratio. Labelled accordingly. */}
                       <td data-label="Severity" className="text-left tabular-nums text-primary">{avgRegionalPct}% grid-wide</td>
@@ -2830,8 +2846,8 @@ export function PowerGridExplorer({
               <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
                 <FileText className="h-5 w-5 text-amber-500 shrink-0" />
                 <div>
-                  <h3 className="grid-explorer-chart-card__title">NLDC Daily Outage Log<DailyBadge /></h3>
-                  <p className="grid-explorer-chart-card__sub">Major event log of yesterday's grid outages • <span className="text-primary font-semibold text-xs">{coverageLabel('outages')}</span></p>
+                  <h3 className="grid-explorer-chart-card__title">NLDC Outage Log<DailyBadge /></h3>
+                  <p className="grid-explorer-chart-card__sub">Outage events as printed in the day&rsquo;s report ({systemStats.date}) •<span className="text-primary font-semibold text-xs">{coverageLabel('outages')}</span></p>
                   {/* Not uniformly P: PGCB prints ONE free-text description per
                       event, and the asset/cause split shown below is ours. */}
                   <p className="mt-1.5 text-[10px] text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -3141,73 +3157,7 @@ export function PowerGridExplorer({
       )}
       </div>
 
-      {/* Footer / Notes */}
-      <div className="mt-8 p-4 bg-muted/10 border border-border/30 rounded-2xl text-[10px] text-muted-foreground/80 leading-relaxed space-y-3 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/20 pb-3">
-          <div className="flex items-center gap-1.5">
-            <Info className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span className="font-bold text-foreground">Data Reporting Standards &amp; Attributions</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground/70 text-[9.5px]">
-            <span>Report Period: <span className="font-semibold text-foreground">{systemStats.date}</span></span>
-            <span>·</span>
-            <span>All data scraped from verified official daily publications.</span>
-          </div>
-        </div>
-
-        {/*
-          The documents behind this day, named. "Source: PGCB Daily Report" is an
-          attribution; the filename is what lets a reader request the same file
-          and check the figure themselves.
-        */}
-        {(sourceFiles?.pgcb || sourceFiles?.petrobangla) && (
-          <div className="pt-2.5 border-t border-border/20">
-            <GridSourceFiles
-              files={[
-                { label: 'PGCB', name: sourceFiles?.pgcb },
-                { label: 'Petrobangla', name: sourceFiles?.petrobangla },
-              ]}
-            />
-            {!sourceFiles?.petrobangla && (
-              <span className="ml-2 text-[10px] text-muted-foreground/70">
-                No Petrobangla gas report is held for this day.
-              </span>
-            )}
-          </div>
-        )}
-
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <div className="font-semibold text-foreground text-[10.5px]">Backlog Reactivity &amp; Updates</div>
-            <div className="space-y-1 text-muted-foreground/75">
-              <div className="flex items-start gap-1.5">
-                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[8.5px] font-extrabold uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-md shrink-0 mt-0.5">Daily</span>
-                <span>Data updates daily, fully reactive to daily backlog selections.</span>
-              </div>
-              <div className="flex items-start gap-1.5">
-                <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[8.5px] font-extrabold uppercase bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-md shrink-0 mt-0.5">Monthly</span>
-                <span>Data updates monthly (SREDA installed capacity is static/monthly and unaffected by daily backlog, while actual renewable generation output updates daily).</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="font-semibold text-foreground text-[10.5px]">Source Directories</div>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground/90 font-semibold">
-              <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">PGCB/NLDC Operations</a>
-              <span>·</span>
-              <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">Petrobangla Reports</a>
-              <span>·</span>
-              <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">SREDA Database</a>
-              <span>·</span>
-              <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">BPC Pricing</a>
-            </div>
-            <div className="text-[9.5px] text-muted-foreground/60 border-t border-border/10 pt-1.5">
-              Sources: BPDB, PGCB, SREDA, BERC, Petrobangla. Figures are indicative and editor-managed unless noted. Member downloads are logged for reference.
-            </div>
-          </div>
-        </div>
-      </div>
+      <GridReportingStandards date={systemStats.date} sourceFiles={sourceFiles} />
       </div>
 
       {tierLockRequired === null && (
@@ -3257,7 +3207,7 @@ export function PowerGridExplorer({
         </div>
         <div className="border border-border/60 p-3 rounded-lg bg-muted/5">
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Avg. Generation Cost</span>
-          <div className="text-lg font-bold text-foreground mt-1">{formatUnitRate(systemStats.avgProductionCost)} Tk/KWh</div>
+          <div className="text-lg font-bold text-foreground mt-1">{formatUnitRate(systemStats.avgProductionCost)} Tk/kWh</div>
         </div>
       </div>
 
@@ -3272,7 +3222,7 @@ export function PowerGridExplorer({
               <th className="text-left py-1.5 px-2 font-bold">Fuel Type</th>
               <th className="text-right py-1.5 px-2 font-bold">Output (MKWh)</th>
               <th className="text-right py-1.5 px-2 font-bold">Daily Cost (BDT)</th>
-              <th className="text-right py-1.5 px-2 font-bold">Unit Cost (Tk/KWh)</th>
+              <th className="text-right py-1.5 px-2 font-bold">Unit Cost (Tk/kWh)</th>
               <th className="text-right py-1.5 px-2 font-bold">System Share</th>
             </tr>
           </thead>
@@ -3326,13 +3276,16 @@ export function PowerGridExplorer({
           </div>
 
           <div>
-            <h3 className="text-xs font-bold text-muted-foreground uppercase mb-2">Power and Industry Distribution</h3>
+            {/* Petrobangla's distribution table has three supply columns: Power
+                Plants, Fertilizer and "Others-Supl.". It publishes no industry
+                split; calling the third column Industry claimed one. */}
+            <h3 className="text-xs font-bold text-muted-foreground uppercase mb-2">Power, Fertilizer and Others Distribution</h3>
             <table className="print-report-table w-full text-[10px]">
               <thead>
                 <tr className="border-b border-border bg-muted/10">
                   <th className="text-left py-1.5 px-2">Distributor</th>
                   <th className="text-right py-1.5 px-2">Power (MMCFD)</th>
-                  <th className="text-right py-1.5 px-2">Industry / Other</th>
+                  <th className="text-right py-1.5 px-2">Others (Suppl.)</th>
                   <th className="text-right py-1.5 px-2">Total</th>
                 </tr>
               </thead>
@@ -3445,7 +3398,7 @@ export function PowerGridExplorer({
                 </p>
                 <div className="p-3 bg-muted/20 border border-border/30 rounded-xl space-y-1.5 font-mono text-[10px] md:text-xs text-foreground">
                   <div className="font-bold text-[10px] uppercase text-primary/80">Calculation Formula:</div>
-                  <div>Net System Cost = Total Net Energy Generated (MKWh) × Avg Production Cost (Tk/KWh) × 10,000,000</div>
+                  <div>Net System Cost = Total Net Energy Generated (MKWh) × Avg Production Cost (Tk/kWh) × 10,000,000</div>
                   <div className="text-muted-foreground mt-1 text-[9px]">※ Excludes auxiliary consumption (~8-10%) and transmission losses (~3%).</div>
                 </div>
               </div>
@@ -3460,7 +3413,7 @@ export function PowerGridExplorer({
                 </p>
                 <div className="p-3 bg-muted/20 border border-border/30 rounded-xl space-y-1.5 font-mono text-[10px] md:text-xs text-foreground">
                   <div className="font-bold text-[10px] uppercase text-emerald-500/80">Calculation Formula:</div>
-                  <div>Gross Cost = Sum of [Individual Fuel Gross Generation (MKWh) × Estimated Fuel Unit Rate (Tk/KWh) × 1,000,000]</div>
+                  <div>Gross Cost = Sum of [Individual Fuel Gross Generation (MKWh) × Estimated Fuel Unit Rate (Tk/kWh) × 1,000,000]</div>
                   <div className="text-muted-foreground mt-1 text-[9px]">※ Reflected directly in the fuel/import cost breakdown bars.</div>
                 </div>
               </div>
@@ -3469,7 +3422,7 @@ export function PowerGridExplorer({
             <div className="pt-3 border-t border-border/40 text-[11px] leading-relaxed space-y-1 text-muted-foreground/80">
               <p className="font-semibold text-foreground">Why do the values differ?</p>
               <p>
-                PGCB's daily grid reports list Net System generation separately from Gross Station generation. The difference is the <strong>Grid Dispatch Loss &amp; Aux overhead</strong>. For instance, on July 24, 2024, Gross Generation was <strong>345.90 MKWh</strong> (leading to a gross cost of 217.24 Crore BDT), while Net Grid Dispatch was <strong>315.27 MKWh</strong> (representing a net cost of 174.2 Crore BDT under PGCB's bulk system average tariff of 5.526 Tk/KWh).
+                PGCB's daily grid reports list Net System generation separately from Gross Station generation. The difference is the <strong>Grid Dispatch Loss &amp; Aux overhead</strong>. For instance, on July 24, 2024, Gross Generation was <strong>345.90 MKWh</strong> (leading to a gross cost of 217.24 Crore BDT), while Net Grid Dispatch was <strong>315.27 MKWh</strong> (representing a net cost of 174.2 Crore BDT under PGCB's bulk system average tariff of 5.526 Tk/kWh).
               </p>
             </div>
           </div>

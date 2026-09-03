@@ -8,7 +8,7 @@ import { PetrobanglaArchivePanel } from './petrobangla-archive/PetrobanglaArchiv
 import { PetrobanglaLiveWeekPanel, LiveWeekRangeToolbar } from './petrobangla-live/PetrobanglaLiveWeekPanel';
 import { PetrobanglaBootstrapProvider, usePetrobanglaBootstrap } from './PetrobanglaBootstrap';
 import { AudienceModeToggle, PetrobanglaOfficialSourceLink } from './petrobangla-archive/PetrobanglaArchiveShared';
-import { GasExplanationBlock, GasSourceFooter, LiveBadge } from './GasTabShared';
+import { GasExplanationBlock, GasSourceFooter, LatestBadge } from './GasTabShared';
 import { MacroGasInnerSection } from './MacroGasSectionChrome';
 import { LIVE_WEEK_RANGE_OPTIONS, type LiveWeekPreset } from '@/lib/data/petrobangla/getLiveWeek';
 
@@ -97,7 +97,7 @@ export function PetrobanglaMacroGasSection({
           <MacroGasInnerSection
             icon={Database}
             title={blockTitle}
-            badge={<LiveBadge />}
+            badge={<LatestBadge />}
             subtitle={
               audienceMode === 'simple'
                 ? `${rangeDesc} — national supply vs power plant allocation`

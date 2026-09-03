@@ -56,6 +56,17 @@ export function createPgPoolConfig(connectionString: string) {
     ssl: remote ? { rejectUnauthorized: false as const } : undefined,
     max: process.env.NODE_ENV === 'production' ? 2 : 10,
     idleTimeoutMillis: 15000,
+    // Fail fast when Supabase is slow or restricted. Without these bounds a
+    // render waits on the pooler until Vercel kills the function: on
+    // 2026-08-26 eleven article/category/tag renders each ran the full 300 s
+    // ("Task timed out after 300 seconds") — 55 minutes of billed compute
+    // that produced nothing — and on 2026-08-29..09-01 ISR revalidations
+    // died with EAUTHTIMEOUT. Ten seconds to get a connection and fifteen
+    // per statement is generous for this schema; past that the ISR layer
+    // should serve the stale page it already has.
+    connectionTimeoutMillis: 10_000,
+    query_timeout: 15_000,
+    statement_timeout: 15_000,
   };
 }
 

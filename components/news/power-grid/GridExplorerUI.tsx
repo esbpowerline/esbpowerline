@@ -17,13 +17,20 @@ import { ModernTooltip } from '@/components/shared/ModernTooltip';
 const BADGE_TONE: Record<string, string> = {
   daily: 'text-emerald-600 dark:text-emerald-400',
   live: 'text-emerald-600 dark:text-emerald-400',
+  latest: 'text-emerald-600 dark:text-emerald-400',
   archive: 'text-sky-600 dark:text-sky-400',
   monthly: 'text-orange-600 dark:text-orange-400',
 };
 
+// `live` is reserved for a figure that is genuinely re-read on a clock (the
+// NLDC hourly forecast panel). `latest` is the Petrobangla rolling window —
+// the most recent gas days a sync run pulled, headed "Latest official data:
+// <date>". Every card in that family wore the "Live" badge, which claimed a
+// feed the site does not have (audit 2026-09-01).
 const BADGE_LABEL: Record<string, string> = {
   daily: 'Daily',
   live: 'Live',
+  latest: 'Latest',
   archive: 'Archive',
   monthly: 'Monthly',
 };
@@ -42,6 +49,8 @@ export function GridDataBadge({ cadence, label }: { cadence: GridCadence; label?
 export const DailyBadge = () => <GridDataBadge cadence="daily" />;
 /** @deprecated Use GridDataBadge */
 export const LiveBadge = () => <GridDataBadge cadence="live" />;
+/** The Petrobangla rolling window: most recent synced gas days, not a live feed. */
+export const LatestBadge = () => <GridDataBadge cadence="latest" />;
 /** @deprecated Use GridDataBadge */
 export const ArchiveBadge = () => <GridDataBadge cadence="archive" />;
 /** @deprecated Use GridDataBadge */

@@ -4,7 +4,7 @@ import { formatNumber } from '@/lib/utils';
 import { stressedPlants } from '@/lib/data/petrobangla/computeLiveWeek';
 import type { PetrobanglaDaily } from '@/lib/data/petrobangla/types';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
-import { LiveBadge } from './pbLiveShared';
+import { LatestBadge } from './pbLiveShared';
 
 export function PbLivePlantStress({ latest }: { latest: PetrobanglaDaily }) {
   const plants = stressedPlants(latest);
@@ -12,7 +12,7 @@ export function PbLivePlantStress({ latest }: { latest: PetrobanglaDaily }) {
   return (
     <div className="space-y-3">
       <h4 className="grid-explorer-chart-card__title text-sm">
-        Plant Stress List<LiveBadge />
+        Plant Stress List<LatestBadge />
       </h4>
       <p className="text-[11px] text-muted-foreground">
         Stations that asked for gas and got little or none — load-shedding in official numbers.

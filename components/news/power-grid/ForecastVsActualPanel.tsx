@@ -329,7 +329,12 @@ export function ForecastVsActualPanel({
             four-column one strung across 1,480px with the numbers marooned
             mid-row. The columns are apportioned instead so the table fills the
             card deliberately rather than by accident. */}
-        <table className="grid-explorer-table table-fixed">
+        {/* `--stack` as well: on a phone the plain table went display:block
+            with the Measure cell at 569px, so Forecast / Actual / Difference
+            sat off-screen to the right and the card read as a list of labels
+            with no figures (393px screenshot, 2026-09-02). Stacked, each
+            measure becomes a block with its three figures labelled. */}
+        <table className="grid-explorer-table grid-explorer-table--stack table-fixed">
           <colgroup>
             <col className="w-[40%]" />
             <col className="w-[20%]" />
@@ -362,23 +367,33 @@ export function ForecastVsActualPanel({
                 both && row.forecast !== 0 ? (gap! / Math.abs(row.forecast!)) * 100 : null;
               return (
                 <tr key={row.label}>
+                  {/* One child per cell. Stacked cells are flex rows, so a bare
+                      number followed by a unit span was spread to opposite
+                      edges — "15,720 … MW" — and the note ran inline after the
+                      label. */}
                   <td className="font-semibold">
-                    {row.label}
-                    {row.note && (
-                      <span className="block text-[10px] font-normal text-muted-foreground/80 leading-snug mt-0.5">
-                        {row.note}
-                      </span>
-                    )}
+                    <div>
+                      {row.label}
+                      {row.note && (
+                        <span className="block text-[10px] font-normal text-muted-foreground/80 leading-snug mt-0.5">
+                          {row.note}
+                        </span>
+                      )}
+                    </div>
                   </td>
-                  <td className="tabular-nums">
-                    {fmt(row.forecast, row.dp)}
-                    <span className="text-muted-foreground/70 ml-1">{row.unit}</span>
+                  <td data-label="Forecast" className="tabular-nums">
+                    <span>
+                      {fmt(row.forecast, row.dp)}
+                      <span className="text-muted-foreground/70 ml-1">{row.unit}</span>
+                    </span>
                   </td>
-                  <td className="tabular-nums">
-                    {fmt(row.actual, row.dp)}
-                    <span className="text-muted-foreground/70 ml-1">{row.unit}</span>
+                  <td data-label="Actual" className="tabular-nums">
+                    <span>
+                      {fmt(row.actual, row.dp)}
+                      <span className="text-muted-foreground/70 ml-1">{row.unit}</span>
+                    </span>
                   </td>
-                  <td>
+                  <td data-label="Difference">
                     <Delta gap={gap} dp={row.dp} pct={pct} />
                   </td>
                 </tr>

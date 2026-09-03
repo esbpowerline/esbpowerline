@@ -240,7 +240,10 @@ export function InterconnectorCanvas({
       plotTop, plotH, plotW, x, y, yMax, bands, totals,
       peak: { i: peakI, mw: totals[peakI], time: pts[peakI].time },
       ticks: niceTicks(yMax),
-      hourTicks: Array.from({ length: 9 }, (_, i) => i * 3).filter((h) => h * 60 >= t0 - 1 && h * 60 <= t1 + 1),
+      // Six-hour step on a phone-width card; nine 3-hour labels collide below ~560px.
+      hourTicks: Array.from({ length: 9 }, (_, i) => i * 3)
+        .filter((h) => (width < 560 ? h % 6 === 0 : true))
+        .filter((h) => h * 60 >= t0 - 1 && h * 60 <= t1 + 1),
     };
   }, [corridors, pts, width, height]);
 

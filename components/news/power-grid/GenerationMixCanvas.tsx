@@ -246,9 +246,10 @@ export function GenerationMixCanvas({
 
     const ticks = mode === 'share' ? [0, 25, 50, 75, 100] : niceTicks(yMax);
 
-    const hourTicks = Array.from({ length: 9 }, (_, i) => i * 3).filter(
-      (h) => h * 60 >= t0 - 1 && h * 60 <= t1 + 1,
-    );
+    // Six-hour step on a phone-width card; nine 3-hour labels collide below ~560px.
+    const hourTicks = Array.from({ length: 9 }, (_, i) => i * 3)
+      .filter((h) => (width < 560 ? h % 6 === 0 : true))
+      .filter((h) => h * 60 >= t0 - 1 && h * 60 <= t1 + 1);
 
     return { plotW, plotH, x, y, yMax, bands, shortD, ticks, hourTicks, t0, t1, totalAt, peakTotal };
   }, [rows, ordered, width, height, mode, showShortage, shortageAt]);

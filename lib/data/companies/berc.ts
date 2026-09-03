@@ -1,4 +1,4 @@
-/** BERC bulk wholesale tariff history (Tk/KWh) — paired with BPDB production cost in macro charts. */
+/** BERC bulk wholesale tariff history (Tk/kWh) — paired with BPDB production cost in macro charts. */
 export const bercBulkTariffHistory = [
   { year: 'Mar 2010', tariff: 2.37 },
   { year: 'Feb 2011', tariff: 2.61 },

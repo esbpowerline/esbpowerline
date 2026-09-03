@@ -25,7 +25,7 @@ import { PB_ARCHIVE_COLORS } from '@/lib/data/petrobangla/constants';
 import { liveWeekTimelinePoints, formatLiveWeekAxisLabel } from '@/lib/data/petrobangla/computeLiveWeek';
 import { decimateTimelineDays } from '@/lib/data/petrobangla/compute';
 import type { PetrobanglaLiveWeekBundle, PetrobanglaTimelineDay } from '@/lib/data/petrobangla/types';
-import { LiveBadge } from './pbLiveShared';
+import { LatestBadge } from './pbLiveShared';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
 import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 
@@ -142,7 +142,7 @@ export function PbLiveTimeline({
     <div className={cn('flex flex-col', fillHeight ? 'flex-1 min-h-0 gap-2' : 'space-y-3')}>
       {!compact && (
         <h4 className="grid-explorer-chart-card__title text-sm shrink-0">
-          {dayCount}-day timeline<LiveBadge />
+          {dayCount}-day timeline<LatestBadge />
         </h4>
       )}
       <div className="gas-reserve-archive-chart-block">

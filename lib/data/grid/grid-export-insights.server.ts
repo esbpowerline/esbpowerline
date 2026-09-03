@@ -69,7 +69,7 @@ export function computeInsights(table: DatasetTable): string[] {
         const last = rowNum(rows[rows.length - 1], 'avg_production_cost_tk_kwh');
         if (first > 0) {
           const pct = ((last - first) / first) * 100;
-          out.push(`Avg production cost moved from ${fmt(first, 2)} to ${fmt(last, 2)} Tk/KWh (${pct >= 0 ? '+' : ''}${fmt(pct, 1)}%).`);
+          out.push(`Avg production cost moved from ${fmt(first, 2)} to ${fmt(last, 2)} Tk/kWh (${pct >= 0 ? '+' : ''}${fmt(pct, 1)}%).`);
         }
       }
       break;
@@ -86,7 +86,7 @@ export function computeInsights(table: DatasetTable): string[] {
       if (withGen.length >= 2) {
         const hi = withGen[0];
         const lo = withGen[withGen.length - 1];
-        out.push(`${hi.label} was the costliest source at ${fmt(hi.value, 2)} Tk/KWh — ${fmt(hi.value / Math.max(lo.value, 0.01), 1)}x the ${lo.label.toLowerCase()} rate.`);
+        out.push(`${hi.label} was the costliest source at ${fmt(hi.value, 2)} Tk/kWh — ${fmt(hi.value / Math.max(lo.value, 0.01), 1)}x the ${lo.label.toLowerCase()} rate.`);
       }
       break;
     }
@@ -151,7 +151,7 @@ export function computeInsights(table: DatasetTable): string[] {
     case 'fin_tariff': {
       const first = rows[0];
       const last = rows[rows.length - 1];
-      out.push(`The cost-tariff deficit stands at ${fmt(rowNum(last, 'deficit_tk_kwh'), 2)} Tk/KWh (${last.period}), vs ${fmt(rowNum(first, 'deficit_tk_kwh'), 2)} in ${first.period}.`);
+      out.push(`The cost-tariff deficit stands at ${fmt(rowNum(last, 'deficit_tk_kwh'), 2)} Tk/kWh (${last.period}), vs ${fmt(rowNum(first, 'deficit_tk_kwh'), 2)} in ${first.period}.`);
       break;
     }
     case 'fin_budget': {
@@ -265,7 +265,7 @@ export function computeSummary(tables: DatasetTable[]) {
     tiles.push({
       icon: 'trend',
       label: 'Avg Production Cost',
-      value: `${fmt(avgBy(rows, 'avg_production_cost_tk_kwh'), 2)} Tk/KWh`,
+      value: `${fmt(avgBy(rows, 'avg_production_cost_tk_kwh'), 2)} Tk/kWh`,
       sub: costDelta === null ? 'range average' : `${costDelta >= 0 ? '+' : ''}${fmt(costDelta, 1)}% over range`,
       subColor: costDelta === null ? undefined : costDelta > 0 ? CRITICAL : GOOD,
       spark: rows.map((r) => rowNum(r, 'avg_production_cost_tk_kwh')),

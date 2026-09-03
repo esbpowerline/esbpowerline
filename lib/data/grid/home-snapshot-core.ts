@@ -46,11 +46,11 @@ export interface HomeSnapshotStat {
 export const DAILY_SNAPSHOT_LABELS = [
   'Current Demand',
   'Peak Generation',
-  'Peak Today',
+  'Peak Demand',
   'Daily Generation',
   'Load Shedding',
   'Energy Unserved',
-  'Fuel Cost',
+  'Production Cost',
   'Gas Supply',
   'Coal Generation',
   'Grid Import',
@@ -178,13 +178,13 @@ export function buildHomeSnapshotFromDaily(
     // faults in one line: a quantity that is not current demand, and a name
     // nothing downstream was listening for.
     //
-    // The evening peak is not lost — `Peak Today` below is the max of the
+    // The evening peak is not lost — `Peak Demand` below is the max of the
     // evening and day peaks, and the Grid Explorer prints the evening figure
     // under its own name. Here the honest answer on a day with no live feed is
     // that nobody has published a current demand, which is what `awaiting` says.
     tile('Current Demand', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Activity' }),
     tile('Peak Generation', known(Math.round(peakGeneration)), { unit: POWER_UNIT, icon: 'Zap' }),
-    tile('Peak Today', known(Math.round(peakDemand)), { unit: POWER_UNIT, icon: 'TrendingUp' }),
+    tile('Peak Demand', known(Math.round(peakDemand)), { unit: POWER_UNIT, icon: 'TrendingUp' }),
     // `GridSystemStats.totalEnergyGen` is explicitly nullable and says why:
     // PGCB leaves the cell empty on some days, and 42 days of early 2018
     // published a headline "0.0 MKWh" as a result. This read `== null ? 0`,
@@ -198,11 +198,11 @@ export function buildHomeSnapshotFromDaily(
     // energy — a homepage tile reading "0 MW" would assert that no load was
     // shed, which is not what an absent figure means.
     tile('Energy Unserved', energyUnserved, { unit: POWER_UNIT, icon: 'Gauge' }),
-    tile('Fuel Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
+    tile('Production Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
     // Petrobangla files its 08:00-08:00 window a day or two behind PGCB, so the
     // newest day routinely has grid figures and no gas. That is the ordinary
     // state, not an outage, and `awaiting` is what says so on the tile.
-    tile('Gas Supply', gasSupply, { unit: 'MMcfd', icon: 'Flame' }),
+    tile('Gas Supply', gasSupply, { unit: 'MMCFD', icon: 'Flame' }),
     tile('Coal Generation', coalGeneration, { unit: POWER_UNIT, icon: 'Flame' }),
     tile('Grid Import', gridImport, { unit: POWER_UNIT, icon: 'Cable' }),
   ];

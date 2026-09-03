@@ -285,7 +285,7 @@ export function GasTab({
                 <GridProvenanceTag kind="P" className="ml-1" />
               </span>
               <span>
-                Condensate Produced (BBL)
+                Condensate Produced (BBLD)
                 <GridProvenanceTag kind="P" className="ml-1" />
               </span>
               <span>
@@ -335,7 +335,9 @@ export function GasTab({
                     <Figure label="Gas (MMCFD)" className="font-medium">
                       {gp.gas ? gp.gas.toFixed(1) : '—'}
                     </Figure>
-                    <Figure label="Condensate (BBL)">
+                    {/* BBLD, as the PDF's units line says — barrels per day, a
+                        rate. "BBL" turned it into a stock. */}
+                    <Figure label="Condensate (BBLD)">
                       {gp.condensate !== undefined ? formatNumber(Math.round(gp.condensate)) : '—'}
                     </Figure>
                     <span className="gas-disclosure__share">
@@ -447,8 +449,31 @@ export function GasTab({
         <GridExplanationBlock
           what={
             <>
-              <p className="leading-relaxed">This table displays the daily gas volume (MMCFD) and associated condensate liquids (BBL) produced by local gas fields and foreign operators (Chevron, Tullow), alongside imported liquefied natural gas (LNG) regasified into the grid.</p>
-              <p className="leading-relaxed"><strong>Analytical Insight:</strong> Chevron (operating the Bibiyana field) remains the dominant producer of natural gas in Bangladesh, supplying over 50% of domestic gas. The high dependency on a single field and company exposes the entire gas-to-power supply chain to operational vulnerability and highlights the urgency of expanding national exploration or gas import capacity.</p>
+              <p className="leading-relaxed">This table displays the daily gas volume (MMCFD) and associated condensate liquids (BBLD, barrels per day) produced by local gas fields and foreign operators (Chevron, Tullow), alongside imported liquefied natural gas (LNG) regasified into the grid.</p>
+              {/* Computed from the rows on screen. The old sentence said Chevron
+                  supplied "over 50% of domestic gas" directly beneath a table
+                  showing 37.4% — both true (the 50% excluded LNG), but a reader
+                  saw a contradiction. Now the two shares are stated with their
+                  denominators, from this day's figures. */}
+              {(() => {
+                const rows = productionRows.filter((g) => (g.gas ?? 0) > 0);
+                const lng = rows.filter((g) => /RPGCL|LNG/i.test(g.company));
+                const domestic = rows.filter((g) => !/RPGCL|LNG/i.test(g.company));
+                const national = rows.reduce((s, g) => s + (g.gas ?? 0), 0);
+                const domesticTotal = domestic.reduce((s, g) => s + (g.gas ?? 0), 0);
+                const top = domestic.slice().sort((a, b) => (b.gas ?? 0) - (a.gas ?? 0))[0];
+                if (!top || national <= 0 || domesticTotal <= 0) return null;
+                const lngTotal = lng.reduce((s, g) => s + (g.gas ?? 0), 0);
+                return (
+                  <p className="leading-relaxed">
+                    <strong>Reading this day:</strong> {top.company} is the largest domestic producer,
+                    at {((top.gas ?? 0) / domesticTotal * 100).toFixed(1)}% of gas from Bangladeshi fields
+                    and {((top.gas ?? 0) / national * 100).toFixed(1)}% of the national total once imported
+                    LNG ({formatNumber(lngTotal, 1)} MMCFD, {(lngTotal / national * 100).toFixed(1)}%) is counted.
+                    That concentration in one field and one importer is the exposure the gas-to-power chain carries.
+                  </p>
+                );
+              })()}
               <p className="leading-relaxed"><strong>How Petrobangla calculates this:</strong> Each report covers an 8:00 AM → 8:00 AM &ldquo;gas day&rdquo; and is dated by the morning it closes — the report for the 31 Dec → 1 Jan window is filed under 1 Jan. In the per-field detail, <em>% T. Cap</em> is a field&apos;s gas output divided by national installed capacity, and <em>% T. Prod</em> is its share of the day&apos;s grand-total production. Sub-totals are recomputed from volumes exactly as Petrobangla computes its own subtotal lines; the PDF&apos;s per-field % column is rounded to one decimal (and occasionally misprinted at source), so summing that printed column can drift a few tenths from the official subtotal.</p>
             </>
           }
@@ -502,8 +527,12 @@ export function GasTab({
                 distribution table; the row total is our sum of the three. */}
             <div className="gas-disclosure__head" aria-hidden="true">
               <span>Distributor</span>
+              {/* Column names follow the PDF's own distribution table: Power
+                  Plants · Fertilizer · Others-Supl. Petrobangla publishes no
+                  industrial split, so "Industrial / Others" under a P mark
+                  claimed a figure the source never states. */}
               <span>
-                Power Grid Supply
+                Power Plants Supply
                 <GridProvenanceTag kind="P" className="ml-1" />
               </span>
               <span>
@@ -511,7 +540,7 @@ export function GasTab({
                 <GridProvenanceTag kind="P" className="ml-1" />
               </span>
               <span>
-                Industrial / Others
+                Others (Suppl.)
                 <GridProvenanceTag kind="P" className="ml-1" />
               </span>
               <span>

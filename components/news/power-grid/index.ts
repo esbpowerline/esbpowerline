@@ -28,6 +28,7 @@ export {
   GridSourceFooter,
   GridSourceFooterLinks,
   LiveBadge,
+  LatestBadge,
   MonthlyBadge,
   type GridCadence,
   type GridSourceLink,

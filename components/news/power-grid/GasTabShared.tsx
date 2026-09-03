@@ -13,10 +13,10 @@ import {
   DailyBadge,
   GridExplanationBlock,
   GridSourceFooter,
-  LiveBadge,
+  LatestBadge,
 } from './GridExplorerUI';
 
-export { ArchiveBadge, DailyBadge, LiveBadge };
+export { ArchiveBadge, DailyBadge, LatestBadge };
 
 /** Gas tab panels — thin alias preserving `reportingPeriod` prop name */
 export function GasSourceFooter({
@@ -81,7 +81,7 @@ export function GasSectorFootnote() {
 
 const LAYER_PILLS = [
   { id: 'daily', label: 'Daily Snapshot', badge: DailyBadge, icon: Droplet, tone: 'text-sky-500' },
-  { id: 'live', label: 'Live Week', badge: LiveBadge, icon: Layers, tone: 'text-emerald-500' },
+  { id: 'live', label: 'Latest Week', badge: LatestBadge, icon: Layers, tone: 'text-emerald-500' },
   { id: 'archive', label: 'Field Archive', badge: ArchiveBadge, icon: History, tone: 'text-sky-600' },
 ] as const;
 
@@ -161,7 +161,7 @@ export function GasTabHero({
           </>
         ) : (
           <>
-            PGCB grid totals and Petrobangla field totals use different reporting layers. Daily tables mirror the PGCB daily record; Live Week and Archive are authoritative for field, plant, and sector detail from{' '}
+            PGCB grid totals and Petrobangla field totals use different reporting layers. Daily tables mirror the PGCB daily record; Latest Week and Archive are authoritative for field, plant, and sector detail from{' '}
             <PetrobanglaOfficialSourceLink className="text-[11px]" />.
           </>
         )}

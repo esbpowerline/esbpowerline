@@ -128,7 +128,7 @@ export function DailyCostCard({
                               </div>
                               <div className="flex justify-between">
                                 <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Average Unit Rate:</span>
-                                <span className="font-bold text-foreground tabular-nums">{formatUnitRate(row.unitCost)} Tk/KWh</span>
+                                <span className="font-bold text-foreground tabular-nums">{formatUnitRate(row.unitCost)} Tk/kWh</span>
                               </div>
                             </div>
                             {/* The old note stated the calculation backwards — cost
@@ -194,7 +194,7 @@ export function DailyCostCard({
                     rows instead, so the two rates differ where those disagree. */}
                 <div className="text-2xl font-bold text-primary tabular-nums leading-none">
                   {formatUnitRate(systemStats.avgProductionCost)}{' '}
-                  <span className="text-xs font-medium text-muted-foreground">Tk/KWh</span>
+                  <span className="text-xs font-medium text-muted-foreground">Tk/kWh</span>
                 </div>
               </div>
               <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col items-center justify-center gap-1.5 min-h-[5.5rem] text-center">

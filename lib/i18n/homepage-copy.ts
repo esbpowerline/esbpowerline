@@ -18,7 +18,7 @@ const ENERGY_STAT_LABELS_BN: Record<string, string> = {
   'RE Grid Share': 'নবায়নযোগ্য গ্রিড অংশ',
   'System Loss': 'সিস্টেম লস',
   'Gas Supply': 'গ্যাস সরবরাহ',
-  'Peak Today': 'আজকের পিক',
+  'Peak Demand': 'পিক চাহিদা',
   'Peak Generation': 'পিক উৎপাদন',
   'Energy Unserved': 'অপূরণীয় বিদ্যুৎ',
   'Grid Import': 'গ্রিড আমদানি',
@@ -28,7 +28,7 @@ const ENERGY_STAT_LABELS_BN: Record<string, string> = {
   'Load Shedding': 'লোড শেডিং',
   'Coal Generation': 'কয়লা বিদ্যুৎ',
   'Grid Frequency': 'গ্রিড ফ্রিকোয়েন্সি',
-  'Fuel Cost': 'জ্বালানি খরচ',
+  'Production Cost': 'উৎপাদন খরচ',
   'Liquid Fuel Gen': 'তরল জ্বালানি বিদ্যুৎ',
   'Hydro Power': 'হাইড্রো বিদ্যুৎ',
 };

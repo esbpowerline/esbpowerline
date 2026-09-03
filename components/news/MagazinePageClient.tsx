@@ -108,7 +108,15 @@ export function MagazinePageClient({
                   <Download className="h-4 w-4" /> Download PDF
                 </a>
               ) : pdfUrl ? (
-                <Link href="/members/login?callbackUrl=/magazine" className="btn btn-primary gap-2 px-5 w-full sm:w-auto justify-center">
+                <Link
+                  href="/members/login"
+                  rel="nofollow"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.location.assign('/members/login?callbackUrl=/magazine');
+                  }}
+                  className="btn btn-primary gap-2 px-5 w-full sm:w-auto justify-center"
+                >
                   <Download className="h-4 w-4" /> Member login to download
                 </Link>
               ) : (
@@ -182,8 +190,12 @@ export function MagazinePageClient({
                 <span className="text-[10px] font-bold text-accent tracking-[2px] uppercase">Curated Archive</span>
                 <span className="text-sm font-bold text-foreground">Previous Releases</span>
               </div>
-              <Link 
-                href="/members/magazine" 
+              {/* Members-only, redirects anonymous readers to the login page:
+                  nofollow so crawlers do not chase a redirect from a public
+                  page (Search Console "page with redirect", Stage 3). */}
+              <Link
+                href="/members/magazine"
+                rel="nofollow"
                 className="text-[11px] text-primary hover:text-primary-foreground font-semibold inline-flex items-center gap-1 group/link"
               >
                 Full Archive <ArrowUpRight className="h-3 w-3 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />

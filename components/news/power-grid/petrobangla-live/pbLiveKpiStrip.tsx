@@ -8,7 +8,7 @@ import {
   GridKpiLabel,
   GridProvenanceTag,
   GridSinceBadge,
-  LiveBadge,
+  LatestBadge,
   type GridProvenance,
 } from '@/components/news/power-grid/GridExplorerUI';
 
@@ -71,7 +71,7 @@ export function PbLiveKpiStrip({
         label={
           <>
             {labelPrefix} Avg Gas
-            <LiveBadge />
+            <LatestBadge />
             <GridSinceBadge />
           </>
         }
@@ -88,7 +88,7 @@ export function PbLiveKpiStrip({
             label={
               <>
                 {labelPrefix} Power Fulfillment
-                <LiveBadge />
+                <LatestBadge />
                 <GridSinceBadge />
               </>
             }
@@ -104,7 +104,7 @@ export function PbLiveKpiStrip({
             label={
               <>
                 {labelPrefix} LNG Share
-                <LiveBadge />
+                <LatestBadge />
                 <GridSinceBadge />
               </>
             }
@@ -119,7 +119,7 @@ export function PbLiveKpiStrip({
             label={
               <>
                 {labelPrefix} Volatility
-                <LiveBadge />
+                <LatestBadge />
                 <GridSinceBadge />
               </>
             }

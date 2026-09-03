@@ -358,7 +358,7 @@ export async function runIngestionPipeline(): Promise<IngestPipelineResult> {
               const dayGen = Number(powerGridData.dayPeakGen ?? 0);
               const eveGen = Number(powerGridData.eveningPeakGen ?? 0);
               item.value = Math.round(Math.max(dayGen, eveGen));
-            } else if (item.label === 'Peak Today') {
+            } else if (item.label === 'Peak Demand') {
               const dayPeak = Number(powerGridData.dayPeakDemand ?? 0);
               const evePeak = Number(powerGridData.eveningPeakDemand ?? 0);
               item.value = Math.round(Math.max(dayPeak, evePeak));
@@ -368,7 +368,7 @@ export async function runIngestionPipeline(): Promise<IngestPipelineResult> {
             } else if (item.label === 'Energy Unserved' && powerGridData.totalEnergyUnserved != null) {
               item.value = gwhToAvgMw(Number(powerGridData.totalEnergyUnserved));
               item.unit = POWER_UNIT;
-            } else if (item.label === 'Fuel Cost' && powerGridData.avgProductionCost != null) {
+            } else if (item.label === 'Production Cost' && powerGridData.avgProductionCost != null) {
               item.value = parseFloat(Number(powerGridData.avgProductionCost).toFixed(2));
             } else if (item.label === 'Gas Supply' && gasData) {
               item.value = Math.round(Number(gasData.totalGasProduction));

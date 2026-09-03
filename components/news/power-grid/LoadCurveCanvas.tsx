@@ -336,7 +336,11 @@ export function LoadCurveCanvas({
       barWidths, t0, t1, baselineRuns,
       // Whole hours on a 3-hour step that lie inside the span the readings
       // cover, so no label points at time the chart does not draw.
+      // Six-hour step below ~560px: at 393px the 3-hour labels ran into each
+      // other ("00:0003:00", "18:0021:00") on the phone screenshot of
+      // 2026-09-02. Nine labels need ~46px each; a phone card has ~340px.
       hourTicks: Array.from({ length: 9 }, (_, i) => i * 3)
+        .filter((h) => (width < 560 ? h % 6 === 0 : true))
         .filter((h) => h * 60 >= t0 - 1 && h * 60 <= t1 + 1),
       dayMaxGen: Math.max(...data.map((d) => d.generation ?? 0), 0),
     };
