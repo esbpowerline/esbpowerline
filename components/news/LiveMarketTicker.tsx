@@ -18,6 +18,14 @@ export interface TickerItem {
   prefix: string;
   /** ISO day of the report the figure came from. Absent for admin-entered items. */
   asOf?: string | null;
+  /**
+   * Who published this figure — "PGCB", "Petrobangla", "BERC", "BPC".
+   *
+   * Shown beside the value, because the strip is meant to carry official
+   * figures and a reader cannot otherwise tell which body stands behind one.
+   * Absent for admin-entered items, which name no publisher.
+   */
+  source?: string | null;
 }
 
 /**
@@ -139,6 +147,12 @@ export function LiveMarketTicker({
           {item.value?.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
           {item.unit && <span className="ml-0.5 text-neutral-500 dark:text-neutral-400 font-normal">{item.unit}</span>}
         </span>
+        {/* The publishing body, named on the figure itself. */}
+        {item.source && (
+          <span className="font-sans text-[9px] md:text-[9.5px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
+            {item.source}
+          </span>
+        )}
         {/* No delta badge without a delta. A green 0.0% reads as "unchanged
             today", which is a measurement, not a blank. */}
         {change !== null && (

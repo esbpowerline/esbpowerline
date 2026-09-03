@@ -16,8 +16,19 @@ import { macroEconomicData } from '@/lib/data/macro/economics';
  * simulation anywhere — change percentages are true day-over-day deltas.
  */
 
-const pct = (cur: number, prev: number): number =>
-  prev > 0 ? Number((((cur - prev) / prev) * 100).toFixed(1)) : 0;
+/**
+ * Day-over-day movement, or null when there is no previous figure to move from.
+ *
+ * This returned 0 in that case, and 0 is not "unknown" — the ticker renders it
+ * as a green "▲ 0%" badge, which claims the figure was measured and did not
+ * change. The FX item already passed null explicitly with a comment saying so;
+ * every report-derived item was quietly doing the opposite whenever the day
+ * before was missing or carried no such figure.
+ */
+const pct = (cur: number, prev: number | null | undefined): number | null =>
+  typeof prev === 'number' && prev > 0
+    ? Number((((cur - prev) / prev) * 100).toFixed(1))
+    : null;
 
 const round = (v: number, d = 2) => Number(v.toFixed(d));
 
@@ -128,72 +139,92 @@ async function buildLiveTickerItems(): Promise<TickerItem[] | null> {
   const prev = prevRes && prevRes.ok ? prevRes.data : null;
   const items: TickerItem[] = [];
 
-  // Average production cost — the headline number.
-  const avgCur = cur.systemStats?.avgProductionCost ?? 0;
-  const avgPrev = prev?.systemStats?.avgProductionCost ?? 0;
-  if (avgCur > 0) {
-    items.push({ id: 'avg-cost', name: 'Avg Gen Cost', value: round(avgCur), unit: 'Tk/kWh', change: pct(avgCur, avgPrev), prefix: '', asOf: latest });
+  /**
+   * Published figures only, each named to the body that published it.
+   *
+   * The strip used to lead with "Avg Gen Cost" and five per-fuel "Gen Cost"
+   * entries. None of the six is a price anyone publishes: `avgProductionCost`
+   * is the day's bill divided by its energy (parse_daily_reports.py:1890, which
+   * never reads P1's printed rate), and each per-fuel `unitCost` is that fuel's
+   * cost divided by its generation. The Grid Explorer's own cost briefing says
+   * as much in as many words — "the per-fuel rates below are not published
+   * tariffs" — while the site chrome was quoting them, on every page, under a
+   * heading that reads COMMODITIES. The import figure was the worst of them: a
+   * blended settlement number presented beside BPC's gazetted diesel price.
+   *
+   * What replaces them is what PGCB, Petrobangla, BERC and BPC actually state.
+   */
+  const s = cur.systemStats;
+  const sPrev = prev?.systemStats;
+
+  // P1's Evening Peak Generation row.
+  if (s?.eveningPeakGen != null && s.eveningPeakGen > 0) {
+    items.push({ id: 'peak-gen', name: 'Evening Peak Gen', value: round(s.eveningPeakGen, 0), unit: 'MW', change: pct(s.eveningPeakGen, sPrev?.eveningPeakGen), prefix: '', asOf: latest, source: 'PGCB' });
   }
 
-  // Per-fuel unit costs with true day-over-day movement.
-  const fuelRows: Array<[string, string, string]> = [
-    ['Gas', 'gas-cost', 'Gas Gen Cost'],
-    ['Coal', 'coal-cost', 'Coal Gen Cost'],
-    ['HFO', 'hfo-cost', 'HFO Gen Cost'],
-    ['Imports', 'import-cost', 'Import Gen Cost'],
-    ['Solar', 'solar-cost', 'Solar Gen Cost'],
-  ];
-  for (const [fuel, id, name] of fuelRows) {
-    const c = cur.generationData?.find((g) => g.name === fuel);
-    const p = prev?.generationData?.find((g) => g.name === fuel);
-    // unitCost is null when the day's report carries no production-cost
-    // block; such a day is skipped rather than shown as a 0 Tk/kWh fuel.
-    if (c && c.unitCost != null && c.unitCost > 0 && c.gen > 0) {
-      items.push({ id, name, value: round(c.unitCost), unit: 'Tk/kWh', change: pct(c.unitCost, p?.unitCost ?? 0), prefix: '', asOf: latest });
-    }
+  // P1's Evening Peak Demand row.
+  if (s?.eveningPeakDemand != null && s.eveningPeakDemand > 0) {
+    items.push({ id: 'peak-demand', name: 'Evening Peak Demand', value: round(s.eveningPeakDemand, 0), unit: 'MW', change: pct(s.eveningPeakDemand, sPrev?.eveningPeakDemand), prefix: '', asOf: latest, source: 'PGCB' });
   }
 
-  // Evening peak generation.
-  const peakCur = cur.systemStats?.eveningPeakGen ?? 0;
-  const peakPrev = prev?.systemStats?.eveningPeakGen ?? 0;
-  if (peakCur > 0) {
-    items.push({ id: 'peak-gen', name: 'Evening Peak', value: round(peakCur, 0), unit: 'MW', change: pct(peakCur, peakPrev), prefix: '', asOf: latest });
+  // Explicitly nullable in the schema: PGCB leaves the cell empty on some days,
+  // and 42 days of early 2018 published a headline "0.0 MKWh" as a result.
+  if (s?.totalEnergyGen != null && s.totalEnergyGen > 0) {
+    items.push({ id: 'energy-gen', name: 'Energy Generated', value: round(s.totalEnergyGen, 2), unit: 'MKWh', change: pct(s.totalEnergyGen, sPrev?.totalEnergyGen), prefix: '', asOf: latest, source: 'PGCB' });
+  }
+
+  // P1's "Production Cost (Tk.)" total row — the printed total, not the rate
+  // derived from it. Zero means the day's report carries no cost block.
+  if (s?.totalDailyCost != null && s.totalDailyCost > 0) {
+    items.push({ id: 'production-cost', name: 'Production Cost', value: round(s.totalDailyCost / 10000000, 2), unit: 'Cr BDT', change: pct(s.totalDailyCost, sPrev?.totalDailyCost), prefix: '', asOf: latest, source: 'PGCB' });
+  }
+
+  // P1's "Energy Unserverd" row, PGCB's own spelling. Absent on the layouts
+  // that omit it; never shown as zero, which would assert nothing was shed.
+  if (s?.totalEnergyUnserved != null && s.totalEnergyUnserved > 0) {
+    items.push({ id: 'energy-unserved', name: 'Energy Unserved', value: round(s.totalEnergyUnserved, 2), unit: 'MKWh', change: pct(s.totalEnergyUnserved, sPrev?.totalEnergyUnserved), prefix: '', asOf: latest, source: 'PGCB' });
   }
 
   // National gas production: the newest gas day and the one before it.
+  // Petrobangla's own printed grand total for the gas day, not our sum of the
+  // company rows beneath it.
   const [gasLast, gasPrev] = gasTotals;
   if (gasLast) {
     items.push({
       id: 'gas-prod',
-      name: 'Total Gas Prod',
+      name: 'Gas Production',
       value: round(gasLast.total, 1),
       unit: 'MMCFD',
-      change: pct(gasLast.total, gasPrev?.total ?? 0),
+      change: pct(gasLast.total, gasPrev?.total),
       prefix: '',
       asOf: gasLast.date,
+      source: 'Petrobangla',
     });
   }
 
-  // USD/BDT — live rate, falling back to the latest published macro figure.
-  const fxFallback = macroEconomicData[macroEconomicData.length - 1]?.exchangeRate ?? 0;
-  const fx = fxLive ?? fxFallback;
-  if (fx > 0) {
-    // Standing prices carry no daily delta. A 0 here rendered as a green
-    // "▲ 0%" badge — a claim the price was measured unchanged today.
-    items.push({ id: 'fx', name: 'USD/BDT', value: fx, unit: '', change: null, prefix: '৳' });
-  }
-
-  // Published regulated prices (BERC bulk tariff, BPC retail fuel).
+  // Regulated prices, as gazetted. Standing prices carry no daily delta — a 0
+  // there rendered as a green "▲ 0%" badge, a claim the price was measured
+  // unchanged today.
   const tariff = macroTariffData[macroTariffData.length - 1]?.tariff ?? 0;
   if (tariff > 0) {
-    items.push({ id: 'tariff', name: 'Bulk Tariff', value: round(tariff), unit: 'Tk/kWh', change: null, prefix: '' });
+    items.push({ id: 'tariff', name: 'Bulk Tariff', value: round(tariff), unit: 'Tk/kWh', change: null, prefix: '', source: 'BERC' });
   }
   const macro = macroEconomicData[macroEconomicData.length - 1];
   if (macro?.retailDiesel) {
-    items.push({ id: 'diesel-bpc', name: 'Diesel (BPC)', value: round(macro.retailDiesel), unit: 'Tk/L', change: null, prefix: '' });
+    items.push({ id: 'diesel-bpc', name: 'Diesel', value: round(macro.retailDiesel), unit: 'Tk/L', change: null, prefix: '', source: 'BPC' });
   }
   if (macro?.retailOctane) {
-    items.push({ id: 'octane-bpc', name: 'Octane (BPC)', value: round(macro.retailOctane), unit: 'Tk/L', change: null, prefix: '' });
+    items.push({ id: 'octane-bpc', name: 'Octane', value: round(macro.retailOctane), unit: 'Tk/L', change: null, prefix: '', source: 'BPC' });
+  }
+
+  // Last, and named for what it is. Bangladesh Bank publishes the official
+  // rate; this is a public aggregator, so it is the one figure on the strip no
+  // government body stands behind and it says so rather than borrowing the
+  // authority of the four that do.
+  const fxFallback = macroEconomicData[macroEconomicData.length - 1]?.exchangeRate ?? 0;
+  const fx = fxLive ?? fxFallback;
+  if (fx > 0) {
+    items.push({ id: 'fx', name: 'USD/BDT', value: fx, unit: '', change: null, prefix: '৳', source: fxLive ? 'ER-API' : 'ESB archive' });
   }
 
   return items.length > 0 ? items : null;

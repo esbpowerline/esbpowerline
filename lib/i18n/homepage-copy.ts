@@ -1,13 +1,24 @@
 import type { SiteLocale } from '@/lib/locale';
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
 
+/**
+ * Keyed by `TickerItem.id`, so it has to be rekeyed whenever the strip's
+ * contents change. It had drifted: `lng`, `coal`, `solar` and `gas` were ids of
+ * the hardcoded specimen prices removed long ago, and matched nothing the
+ * ticker actually emitted, so a Bengali reader saw English names for every item
+ * but the tariff and the exchange rate.
+ */
 const ENERGY_TICKER_LABELS_BN: Record<string, string> = {
-  lng: 'এলএনজি (স্পট)',
-  coal: 'কয়লা (API২)',
-  fx: 'ডলার/টাকা',
-  solar: 'সোলার মডিউল',
+  'peak-gen': 'সান্ধ্য পিক উৎপাদন',
+  'peak-demand': 'সান্ধ্য পিক চাহিদা',
+  'energy-gen': 'উৎপাদিত বিদ্যুৎ',
+  'production-cost': 'উৎপাদন খরচ',
+  'energy-unserved': 'অপূরণীয় বিদ্যুৎ',
+  'gas-prod': 'গ্যাস উৎপাদন',
   tariff: 'বাল্ক ট্যারিফ',
-  gas: 'পেট্রোবাংলা গ্যাস',
+  'diesel-bpc': 'ডিজেল',
+  'octane-bpc': 'অকটেন',
+  fx: 'ডলার/টাকা',
 };
 
 const ENERGY_STAT_LABELS_BN: Record<string, string> = {
