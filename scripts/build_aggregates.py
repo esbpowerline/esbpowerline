@@ -30,25 +30,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PB = ROOT / "public" / "data" / "petrobangla"
 DAILY = PB / "daily"
-def write_if_changed(path: Path, doc: dict, stamp: str = "generated_at") -> bool:
-    """Write `doc` unless the file already holds the same content bar the stamp.
-
-    Keeps the previous stamp in that case, so `generated_at` keeps meaning
-    "when the content last changed" rather than "when the poll last ran".
-    """
-    if path.exists():
-        try:
-            current = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            current = None
-        if isinstance(current, dict):
-            a = {k: v for k, v in current.items() if k != stamp}
-            b = {k: v for k, v in doc.items() if k != stamp}
-            if a == b:
-                return False
-    path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
-    return True
-
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _artifact_io import write_if_changed  # noqa: E402
 
 INDEX = PB / "_index.json"
 LIVE_WEEK = PB / "_live_week.json"

@@ -72,6 +72,12 @@ from datetime import date, timedelta
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+
+# Explicit, because `reserve_sensitivity.py` loads this module by file path
+# through importlib, where the script directory is not guaranteed on sys.path.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _artifact_io import write_if_changed  # noqa: E402
+
 DAILY = REPO / "public" / "data" / "petrobangla" / "daily"
 PUBLISHED = REPO / "public" / "data" / "petrobangla" / "reserves-published.json"
 OUT = REPO / "public" / "data" / "petrobangla" / "reserve-model.json"
@@ -731,9 +737,15 @@ def main() -> int:
           f"{h['unbooked_gas_needed_by_10_years_bcf']} BCF nobody has booked")
 
     if args.apply:
-        OUT.write_text(json.dumps(model, indent=2), encoding="utf-8")
-        size = OUT.stat().st_size / 1024
-        print(f"\nWritten: {OUT.relative_to(REPO)} ({size:.0f} KB)")
+        # The poll rebuilds this on every run that sees a gas day, and the
+        # payload is deterministic — so an unchanged rebuild was rewriting
+        # 80 KB to the Pi's SD card several times a day for no gain.
+        size = OUT.stat().st_size / 1024 if OUT.exists() else 0
+        if write_if_changed(OUT, model):
+            size = OUT.stat().st_size / 1024
+            print(f"\nWritten: {OUT.relative_to(REPO)} ({size:.0f} KB)")
+        else:
+            print(f"\nUnchanged: {OUT.relative_to(REPO)} ({size:.0f} KB) already current")
     else:
         print("\nRe-run with --apply to write the artifact.")
     return 0

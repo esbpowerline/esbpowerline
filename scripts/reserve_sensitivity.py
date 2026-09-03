@@ -214,8 +214,13 @@ def main() -> int:
           "minus a measured one, with nothing to choose.")
 
     if args.json:
-        Path(args.json).write_text(json.dumps(results, indent=2), encoding="utf-8")
-        print(f"\nWritten: {args.json}")
+        # Rebuilt alongside the reserve model on every poll that sees a gas
+        # day, and deterministic like it — so an unchanged run has nothing to
+        # write. See scripts/_artifact_io.py.
+        if brm.write_if_changed(Path(args.json), results):
+            print(f"\nWritten: {args.json}")
+        else:
+            print(f"\nUnchanged: {args.json} already current")
     return 0
 
 

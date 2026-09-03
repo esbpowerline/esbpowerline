@@ -2,7 +2,11 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _artifact_io import write_if_changed  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 DAILY = ROOT / "public" / "data" / "petrobangla" / "daily"
@@ -80,17 +84,11 @@ def main():
     }
     # A rebuild with no new day must not rewrite the file: the only difference
     # would be the stamp, and the scheduled poll was committing and
-    # republishing that four times a day (2026-09-03). See build_aggregates.
-    if OUT.exists():
-        try:
-            current = json.loads(OUT.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            current = None
-        if isinstance(current, dict) and {k: v for k, v in current.items() if k != "generated_at"} == {k: v for k, v in doc.items() if k != "generated_at"}:
-            print(f"Unchanged: {len(rows)} days already in {OUT}")
-            return
-    OUT.write_text(json.dumps(doc, indent=2), encoding="utf-8")
-    print(f"Wrote {len(rows)} days to {OUT}")
+    # republishing that four times a day (2026-09-03). See _artifact_io.
+    if write_if_changed(OUT, doc):
+        print(f"Wrote {len(rows)} days to {OUT}")
+    else:
+        print(f"Unchanged: {len(rows)} days already in {OUT}")
 
 
 if __name__ == "__main__":
