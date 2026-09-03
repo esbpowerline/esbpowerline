@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArticleCard } from '@/components/news/ArticleCard';
@@ -14,7 +15,7 @@ interface Props {
 export async function generateMetadata({ params }: Props) {
   const { tag } = await params;
   return {
-    title: `#${tag} | ESB PowerLine`,
+    title: `#${tag}`,
     description: `Articles tagged with #${tag} in Bangladesh power & energy news.`,
     alternates: {
       canonical: `/tags/${encodeURIComponent(tag)}`,
@@ -34,6 +35,7 @@ export default async function TagPage({ params }: Props) {
 
   return (
     <div className="container py-8">
+      <Breadcrumbs crumbs={[{ name: 'Tags', path: '/tags' }, { name: `#${tag}` }]} />
       <div className="mb-6">
         <Link href="/tags" className="text-sm text-primary">← All tags</Link>
         <h1 className="text-4xl font-display font-bold tracking-tight mt-2">#{tag}</h1>

@@ -1,3 +1,4 @@
+import '@/app/staff-surface.css';
 import { requireMemberSession } from '@/lib/member-auth';
 import { MemberShell } from '@/components/members/MemberShell';
 

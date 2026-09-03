@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import Link from 'next/link';
 import { getPublicCategories } from '@/lib/category-content';
 import { localizeCategoryFields } from '@/lib/i18n/categories';
@@ -16,7 +17,7 @@ import { CategoryIconDisplay } from '@/components/category/CategoryIconDisplay';
 export const revalidate = 86400;
 
 export const metadata = {
-  title: 'Categories | ESB PowerLine',
+  title: 'Categories',
   description:
     "Browse Bangladesh power & energy coverage by category — generation, renewables, policy, grid, projects and tenders.",
   alternates: {
@@ -31,6 +32,7 @@ export default async function CategoriesIndex() {
 
   return (
     <div className="container container--shell py-8 md:py-10">
+      <Breadcrumbs crumbs={[{ name: 'Categories' }]} />
       <div className="mb-8">
         <h1 className="h2 mb-2">{t('categories.title')}</h1>
         <p className="text-muted-foreground max-w-prose">{t('categories.subtitle')}</p>

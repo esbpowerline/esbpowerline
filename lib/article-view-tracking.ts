@@ -54,10 +54,12 @@ export async function recordArticleView(
           referrer: referrer?.trim().slice(0, 500) || null,
         },
       });
-      await tx.article.update({
-        where: { id: articleId },
-        data: { views: { increment: 1 } },
-      });
+      // Raw, not `tx.article.update`: Prisma's `@updatedAt` rewrites
+      // `updatedAt` on every update, so a read counted as an edit. That column
+      // feeds the sitemap's lastmod and the NewsArticle `dateModified`, so every
+      // article claimed to have changed moments before each crawl — the fastest
+      // way to have Google discount the field site-wide (SEO_FIX_LOG stage 2).
+      await tx.$executeRaw`UPDATE "Article" SET "views" = "views" + 1 WHERE "id" = ${articleId}`;
       await tx.user.update({
         where: { id: article.authorId },
         data: { totalViews: { increment: 1 } },

@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, ShieldCheck, AlertTriangle, Dot, Flame } from 'lucide-react';
 import { TITAS_RECORD } from '@/lib/data/titas/titas-record';
@@ -6,7 +7,7 @@ export const revalidate = 3600;
 
 export function generateMetadata() {
   return {
-    title: `${TITAS_RECORD.short} — the accountability record | ESB PowerLine`,
+    title: `${TITAS_RECORD.short} — the accountability record`,
     description: TITAS_RECORD.overview,
     alternates: {
       canonical: '/titas-gas',
@@ -17,6 +18,7 @@ export function generateMetadata() {
 export default function TitasGasRecordPage() {
   return (
     <div className="container container--shell py-8 md:py-10">
+      <Breadcrumbs crumbs={[{ name: TITAS_RECORD.short }]} />
       <div className="w-full">
         <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           <ArrowLeft className="w-4 h-4" />

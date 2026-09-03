@@ -84,6 +84,9 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
     { label: t('footer.allCategories'), href: '/categories' },
     { label: t('footer.monthlyMagazine'), href: '/magazine' },
     { label: t('footer.gridExplorer'), href: '/grid-explorer' },
+    // The policy library ranks on page one for several queries and had no
+    // site-wide link at all (stage 6).
+    { label: t('footer.energyPolicy'), href: '/energy-policy' },
     { label: t('footer.search'), href: '/search' },
   ];
 

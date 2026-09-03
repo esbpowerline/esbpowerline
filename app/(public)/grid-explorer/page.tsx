@@ -12,6 +12,7 @@ import { Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { safeJsonLd } from '@/lib/json-ld';
+import { GRID_EXPLORER_VIEWS } from '@/lib/grid-explorer-views';
 
 // Dynamic grid data is client-fetched; settings mutations call revalidatePath('/grid-explorer'),
 // so this time window is only a safety net. 300s keeps ISR churn low (new report dates ship via
@@ -29,12 +30,16 @@ export const revalidate = 300;
  * discovered and followed; they are not advertised as separate pages.
  */
 export const metadata = {
-  title: 'Bangladesh Power Grid Explorer — daily generation, demand & gas data',
+  // "Power sector" is the phrase readers actually search; it was absent from
+  // the title, the H1 strap and the first paragraph of this page (2026-09-02).
+  title: 'Bangladesh Power Sector Data — Grid Explorer: daily generation, demand & gas',
   description:
     'Daily generation, demand, load shedding, fuel mix, gas supply and cross-border imports for Bangladesh’s national grid — 4,500+ days from the official PGCB and Petrobangla daily reports, with every figure traced to its source.',
   // Broad but honest: every term below names something this page actually
   // publishes figures for. Nothing here is a query we cannot answer.
   keywords: [
+    'Bangladesh power sector',
+    'power sector data Bangladesh',
     'Bangladesh power grid',
     'PGCB daily report',
     'Bangladesh electricity generation',
@@ -59,9 +64,10 @@ export const metadata = {
     type: 'website',
     url: '/grid-explorer',
     siteName: 'ESB PowerLine',
-    title: 'Bangladesh Power Grid Explorer — daily generation, demand & gas data',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    title: 'Bangladesh Power Sector Data — Grid Explorer',
     description:
-      'Every day of Bangladesh’s grid since 2013, from the official PGCB and Petrobangla reports: generation, demand, load shedding, fuel mix, gas supply and imports.',
+      'Every day of Bangladesh’s power sector since 2013, from the official PGCB and Petrobangla reports: generation, demand, load shedding, fuel mix, gas supply and imports.',
   },
   twitter: {
     card: 'summary_large_image',
@@ -71,42 +77,28 @@ export const metadata = {
   },
 };
 
-/** The eight `?tab=` views the explorer switches between, as crawlable links. */
-const GRID_EXPLORER_VIEWS: { tab: string; label: string; blurb: string }[] = [
-  { tab: 'gen', label: 'Generation & cost', blurb: 'Half-hourly fuel mix and the day’s production cost by fuel' },
-  { tab: 'gas', label: 'Gas & LNG supply', blurb: 'Field-by-field gas production and where it was allocated' },
-  { tab: 'imports', label: 'Cross-border imports', blurb: 'The four interconnectors with India and Nepal, hour by hour' },
-  { tab: 'regional', label: 'Regional grid', blurb: 'Zone-wise demand, load shedding and the NLDC outage log' },
-  { tab: 'renewables', label: 'Renewables', blurb: 'Solar, wind and hydro output against installed capacity' },
-  { tab: 'plants', label: 'Power stations', blurb: 'Every station’s output, installed capacity and utilisation' },
-  { tab: 'transmission', label: 'Technical information', blurb: 'Transmission lines, substations and grid infrastructure' },
-  { tab: 'macro', label: 'Macro trends', blurb: 'Gas reserves, budgets, monthly archives and long-run indicators' },
-];
-
 /**
- * `searchParams` opts this route into dynamic rendering, which costs the ISR
- * window declared above. It is read anyway, because without it a deep link is
- * served the WRONG DAY.
+ * Static, on purpose — this page does NOT read `searchParams`.
  *
- * `prefetchGridExplorerDailyReports` takes the deep-linked date precisely so it
- * can be prefetched alongside the latest one; the call passed a hardcoded null,
- * so for /grid-explorer?date=2026-08-12 the server prefetched only the latest
- * day and the client booted `activeData` from it. The page then rendered
- * 2026-08-17's source file, generation and cost under a 2026-08-12 heading
- * until the client fetch landed — and that is what a crawler, and a reader on a
- * slow connection, actually saw.
+ * It used to, so that a deep link (?date=2026-08-12) could be prefetched
+ * alongside the latest day; without that the client booted from the latest
+ * report and showed it under the deep-linked heading. Reading searchParams
+ * opts the whole route into dynamic rendering, which threw away the ISR
+ * window above: every Grid Explorer view — the site's most expensive page —
+ * ran on a function, with the settings queries, the runtime date catalog and
+ * the disk prefetch executed per visitor (cost pass, 2026-09-02).
+ *
+ * The wrong-day boot is now fixed where it lived: `resolveInitialDailyReport`
+ * no longer substitutes the latest day for a different selection, so a deep
+ * link boots to a skeleton and fetches its own day. The server prefetches the
+ * latest day only, and the page is served from the CDN for five minutes at a
+ * time. `?tab=` and `?macro=` were always client-side (`useSearchParams` in
+ * the client shell, inside the Suspense boundary below).
  */
-export default async function PowerGridExplorerPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const rawDate = (await searchParams).date;
-  const urlDate = Array.isArray(rawDate) ? rawDate[0] : rawDate;
-
+export default async function PowerGridExplorerPage() {
   const [settings, prefetchedDailyReports, runtimeDates] = await Promise.all([
     getGridSettingsMap(),
-    prefetchGridExplorerDailyReports(urlDate ?? null),
+    prefetchGridExplorerDailyReports(null),
     // Days published from the admin panel since the last deploy. The bundled
     // catalog is compiled into the client bundle and cannot see them, so the
     // server hands them down and the picker merges the two.
@@ -213,14 +205,21 @@ export default async function PowerGridExplorerPage({
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-border/40 pb-5 mb-6 group">
         <div>
           <div className="flex items-center gap-1.5 mb-1.5 opacity-90 transition-opacity group-hover:opacity-100">
-            <Activity className="w-3 h-3 text-primary animate-pulse" />
+            {/* No animate-pulse: a perpetual heartbeat beside the kicker reads
+                as a live-system indicator on a daily-ingest page (audit 2026-09-01). */}
+            <Activity className="w-3 h-3 text-primary" />
             <div className="uppercase tracking-[2.5px] text-[9px] text-primary font-bold">Interactive Data • Power Sector</div>
           </div>
           <h1 className="h1 font-display font-bold text-2xl md:text-3xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
             Power Grid Explorer
           </h1>
           <p className="text-muted-foreground mt-1 text-xs md:text-sm leading-relaxed max-w-2xl">
-            Planning and indicative data for Bangladesh’s electricity system — generation, transmission, demand &amp; projects.
+            {/* Not "planning and indicative": every daily figure below is an
+                operational number PGCB or Petrobangla filed for that day, and
+                the strap-line is the first sentence a reader (and a crawler)
+                sees. It says what the page is — and names the sector. */}
+            Bangladesh’s power sector, one day at a time — generation, demand, load shedding, gas supply
+            and cross-border imports as filed by PGCB and Petrobangla, back to 2013.
           </p>
         </div>
         

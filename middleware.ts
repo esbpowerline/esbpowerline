@@ -145,6 +145,25 @@ function redirectWithCookies(
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // The news index no longer takes query strings: `?category=`, `?sort=` and
+  // `?page=` each became a real page in Stage 4 of the SEO fix. Google holds
+  // hundreds of the old combinations ("crawled, currently not indexed"), so
+  // they are sent permanently to their replacements. Pure URL normalisation,
+  // ahead of and independent from everything below.
+  if (pathname === '/articles' && request.nextUrl.search) {
+    const q = request.nextUrl.searchParams;
+    const category = q.get('category');
+    const page = Number.parseInt(q.get('page') ?? '', 10);
+    const target = category
+      ? `/categories/${encodeURIComponent(category)}`
+      : q.get('sort') === 'views'
+        ? '/articles/popular'
+        : Number.isInteger(page) && page >= 2
+          ? `/articles/page/${page}`
+          : '/articles';
+    return NextResponse.redirect(new URL(target, request.url), 308);
+  }
   const ip = clientIpFromForwarded(
     request.headers.get('x-forwarded-for'),
     request.headers.get('x-real-ip'),
@@ -155,9 +174,17 @@ export async function middleware(request: NextRequest) {
   // middleware with no catch, which 500s every route on the site — a limiter
   // failure must degrade, not take the site down.
   if (redis) {
+    // The data twins (/api/data/*, /api/data-manifest) are read-only, gated
+    // and CDN-cached below; every Grid Explorer visit fires a handful of them,
+    // and each limiter check is two Upstash commands. That was the single
+    // largest consumer of the Upstash allowance for no protection the tier
+    // gate and the edge cache do not already give.
+    const isReadOnlyDataApi =
+      request.method === 'GET' &&
+      (pathname.startsWith('/api/data/') || pathname === '/api/data-manifest');
     const limiter = isCredentialPath(pathname)
       ? authRateLimit
-      : pathname.startsWith('/api/')
+      : pathname.startsWith('/api/') && !isReadOnlyDataApi
         // Protect API routes from abuse, but avoid draining the 10,000 Upstash
         // Free Tier limit on regular page views.
         ? standardRateLimit
@@ -238,7 +265,19 @@ export async function middleware(request: NextRequest) {
 
     if (isPublicDate) {
       const publicResponse = NextResponse.next({ request });
-      publicResponse.headers.set('Cache-Control', 'private, no-store');
+      // Public-window days are the hot path and the same bytes for everyone,
+      // so let the CDN keep them. `private, no-store` here (and the matching
+      // rules that used to sit in vercel.json / next.config) meant even the
+      // newest day was fetched from origin by every visitor. The gate is
+      // unaffected: middleware runs before the edge cache, so a day that has
+      // fallen out of the window is refused before any cached copy is
+      // consulted, and the referer/bot checks above run every time too.
+      // An hour, because the newest day can be corrected and republished
+      // (the daemon re-runs late Petrobangla windows into an existing day).
+      publicResponse.headers.set(
+        'Cache-Control',
+        'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
+      );
       return publicResponse;
     }
 

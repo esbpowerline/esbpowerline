@@ -1,3 +1,4 @@
+import '@/app/staff-surface.css';
 import { Suspense } from 'react';
 
 function MemberLoginFallback() {

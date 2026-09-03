@@ -1,3 +1,4 @@
+import '@/app/staff-surface.css';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { auth } from '@/lib/auth';
 import { canAccessAdminPanel } from '@/lib/constants';

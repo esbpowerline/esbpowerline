@@ -6,7 +6,7 @@ import { MagazinePageClient, MagazineLibraryButton } from '@/components/news/Mag
 export const revalidate = 300;
 
 export const metadata = {
-  title: 'Monthly Magazine | ESB PowerLine',
+  title: 'Monthly Magazine',
   description: 'Read the latest issue of ESB PowerLine — in-depth analysis, data and features on Bangladesh energy & power.',
   alternates: {
     canonical: '/magazine',

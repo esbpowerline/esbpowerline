@@ -5,7 +5,7 @@ import FinancialsClient from './FinancialsClient';
 export const dynamic = 'force-static';
 
 export const metadata = {
-  title: 'Sector Financials | ESB PowerLine',
+  title: 'Sector Financials',
   description:
     "Annual financial performance of Bangladesh's power sector utilities — revenue, subsidy, losses and capital spend, charted from published annual reports.",
   alternates: {

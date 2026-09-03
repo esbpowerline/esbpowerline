@@ -1,3 +1,4 @@
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import Link from 'next/link';
 import { ChevronRight, Scale } from 'lucide-react';
 import {
@@ -10,7 +11,7 @@ export const revalidate = 3600;
 
 export function generateMetadata() {
   return {
-    title: 'Energy Policy & Regulatory Framework | ESB PowerLine',
+    title: 'Energy Policy & Regulatory Framework',
     description:
       "The acts, policies, master plans and regulations that officially govern Bangladesh's power & energy sector — curated summaries with links to the official source documents.",
     alternates: {
@@ -46,6 +47,7 @@ export default async function EnergyPolicyLibraryPage() {
 
   return (
     <div className="container container--shell py-8 md:py-10">
+      <Breadcrumbs crumbs={[{ name: 'Energy Policy' }]} />
       <div className="w-full">
         {/* Page header */}
         <header className="border-b border-border/50 pb-6">

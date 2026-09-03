@@ -1,32 +1,47 @@
 import { getServerSiteLocale } from '@/lib/locale-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import { User, Twitter, Linkedin, Mail } from 'lucide-react';
 import prisma from '@/lib/prisma';
 import { slugify } from '@/lib/utils';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
+import { safeJsonLd } from '@/lib/json-ld';
+import { ORGANIZATION_ID, SITE_URL } from '@/lib/seo';
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 
 export const revalidate = 600;
+
+/**
+ * One user scan per request, shared by generateMetadata and the page. The
+ * lookup is by slugified name, which SQL cannot express, so the (small) staff
+ * table is read once and matched here; it used to be read twice per request
+ * (SEO_FIX_LOG stage 1, 2026-09-02).
+ */
+const findAuthorBySlug = cache(async (slug: string) => {
+  const users = await prisma.user.findMany({
+    select: { id: true, name: true, bio: true, avatar: true, email: true },
+  });
+  return users.find((u) => slugify(u.name) === slug) ?? null;
+});
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   if (slug === 'esb-news-desk') {
     return {
-      title: 'ESB News Desk | ESB PowerLine',
+      title: 'ESB News Desk',
       description: 'The official editorial desk of ESB PowerLine, delivering authoritative, breaking, and in-depth energy sector news in Bangladesh.',
       alternates: { canonical: '/authors/esb-news-desk' },
     };
   }
 
-  const users = await prisma.user.findMany({ select: { name: true, bio: true } });
-  const user = users.find(u => slugify(u.name) === slug);
-  
-  if (!user) return { title: 'Author not found | ESB PowerLine' };
+  const user = await findAuthorBySlug(slug);
+
+  if (!user) return { title: 'Author not found' };
 
   return {
-    title: `${user.name} | ESB PowerLine`,
+    title: `${user.name}`,
     description: user.bio ?? `Articles written by ${user.name}`,
     alternates: { canonical: `/authors/${slug}` },
   };
@@ -52,6 +67,10 @@ async function AuthorArticles({
     prisma.article.findMany({
       where: whereClause,
       include: { author: { select: { name: true } } },
+      // The mapper below reads fifteen scalars and never the body; without
+      // this, twenty full article bodies (and their Bengali twins) crossed the
+      // wire per page and were discarded (SEO_FIX_LOG stage 1, 2026-09-02).
+      omit: { content: true, contentBn: true },
       orderBy: { publishedAt: 'desc' },
       take,
       skip,
@@ -172,17 +191,29 @@ export default async function AuthorPage({
       email: 'desk@esbpowerline.com',
     };
   } else {
-    // Find author by matching slugified name
-    const users = await prisma.user.findMany({ 
-      select: { id: true, name: true, bio: true, avatar: true, email: true } 
-    });
-    author = users.find(u => slugify(u.name) === slug);
-    
+    author = await findAuthorBySlug(slug);
+
     if (!author) notFound();
   }
 
+  // ProfilePage over a Person, from the fields the page already shows. No
+  // sameAs: the author rows carry no profile links.
+  const profileJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: {
+      '@type': 'Person',
+      name: author.name,
+      url: `${SITE_URL}/authors/${slug}`,
+      ...(author.bio ? { description: author.bio } : {}),
+      worksFor: { '@id': ORGANIZATION_ID },
+    },
+  };
+
   return (
     <div className="container py-12 max-w-5xl">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(profileJsonLd) }} />
+      <Breadcrumbs crumbs={[{ name: 'News', path: '/articles' }, { name: author.name }]} />
       <div className="flex flex-col md:flex-row gap-8 items-start mb-16 bg-muted/30 p-8 rounded-3xl border border-border/50">
         <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold text-3xl md:text-5xl shrink-0 overflow-hidden border border-primary/20">
           {author.avatar ? (

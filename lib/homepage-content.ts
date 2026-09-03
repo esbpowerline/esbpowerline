@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
 import prisma from '@/lib/prisma';
 import { HOMEPAGE_DEFAULTS, type CarouselItem } from '@/lib/homepage-defaults';
 import { normalizeCoverageSlots } from '@/lib/coverage-defaults';
@@ -6,6 +7,7 @@ import type { CoverageSlot } from '@/lib/coverage-types';
 import { MAX_CAROUSEL_ITEMS } from '@/lib/placement-rules';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
 import { ARTICLE_CARD_SELECT } from '@/lib/category-content';
+import { CONTENT_TAGS } from '@/lib/public-paths';
 
 const PUBLIC_SETTING_KEYS = [
   'homepage', 'ticker', 'snapshot', 'snapshotDate', 'interviews', 'site', 'seo', 'hero', 'coverage', 'panels',
@@ -17,23 +19,45 @@ const GRID_SETTING_KEYS = ['gridMix', 'gridLines', 'gridProjects'] as const;
 export type { CarouselItem };
 export { HOMEPAGE_DEFAULTS };
 
-export const getPublicSettingsMap = cache(async () => {
-  const settings = await prisma.siteSetting.findMany({
-    where: { key: { in: [...PUBLIC_SETTING_KEYS] } },
-  });
-  const map: Record<string, unknown> = {};
-  for (const s of settings) map[s.key] = s.value;
-  return map;
-});
+/**
+ * Tag every cached settings read carries, so `updateSettingsBatch` can drop
+ * them the moment an editor saves — without it the only refresh would be the
+ * revalidate window below.
+ */
+export const SITE_SETTINGS_CACHE_TAG = 'site-settings';
 
-export const getGridSettingsMap = cache(async () => {
+/**
+ * Cross-request, not just per-request. React's `cache()` alone deduplicates
+ * within one render; on a dynamically rendered route (the public layout under
+ * a page that reads searchParams, or any route with a live cookie) that meant
+ * one `siteSetting.findMany` per page view, twice on Grid Explorer. Settings
+ * change when an editor saves and at no other time, so five minutes plus the
+ * tag is the right shape: cheap to read, invalidated on write.
+ */
+async function readSettingsMap(keys: readonly string[]): Promise<Record<string, unknown>> {
   const settings = await prisma.siteSetting.findMany({
-    where: { key: { in: [...GRID_SETTING_KEYS] } },
+    where: { key: { in: [...keys] } },
   });
   const map: Record<string, unknown> = {};
   for (const s of settings) map[s.key] = s.value;
   return map;
-});
+}
+
+const readPublicSettingsCached = unstable_cache(
+  () => readSettingsMap(PUBLIC_SETTING_KEYS),
+  ['site-settings', 'public'],
+  { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: 300 },
+);
+
+const readGridSettingsCached = unstable_cache(
+  () => readSettingsMap(GRID_SETTING_KEYS),
+  ['site-settings', 'grid'],
+  { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: 300 },
+);
+
+export const getPublicSettingsMap = cache(() => readPublicSettingsCached());
+
+export const getGridSettingsMap = cache(() => readGridSettingsCached());
 
 function mapCarouselArticle(
   a: {
@@ -50,8 +74,10 @@ function mapCarouselArticle(
     author?: { name: string } | null;
     titleBn?: string | null;
     excerptBn?: string | null;
-    publishedAt?: Date | null;
-    createdAt?: Date | null;
+    // Date from Prisma, string once the row has passed through
+    // `unstable_cache`, which serialises to JSON.
+    publishedAt?: Date | string | null;
+    createdAt?: Date | string | null;
   },
   locale?: string,
 ): CarouselItem {
@@ -72,7 +98,7 @@ function mapCarouselArticle(
   const published = a.publishedAt ?? a.createdAt ?? null;
 
   return {
-    date: published ? published.toISOString() : undefined,
+    date: published ? new Date(published).toISOString() : undefined,
     slug: a.slug,
     title: displayTitle,
     excerpt: displayExcerpt,
@@ -90,21 +116,31 @@ function mapCarouselArticle(
   };
 }
 
+// Cross-request, tag-invalidated, like the other homepage lists; it was memoised
+// per request only, so each ISR regeneration re-read the hero pool from
+// Postgres (SEO_FIX_LOG stage 1, 2026-09-02).
+const readCarouselPool = unstable_cache(
+  () =>
+    prisma.article.findMany({
+      // The hero carries the latest published news, not only the breaking items.
+      // Pinned and trending stories stay excluded because they each render in
+      // their own row further down the homepage, and the hero repeating them
+      // would spend its slots on stories the reader has already been shown.
+      where: {
+        status: 'PUBLISHED',
+        isPinned: false,
+        isTrending: false,
+      },
+      select: ARTICLE_CARD_SELECT,
+      orderBy: { publishedAt: 'desc' },
+      take: MAX_CAROUSEL_ITEMS * 2,
+    }),
+  ['homepage-carousel-pool'],
+  { revalidate: 60, tags: [CONTENT_TAGS.articles] },
+);
+
 async function fetchManagedCarouselItems(locale?: string): Promise<CarouselItem[]> {
-  const articles = await prisma.article.findMany({
-    // The hero carries the latest published news, not only the breaking items.
-    // Pinned and trending stories stay excluded because they each render in
-    // their own row further down the homepage, and the hero repeating them
-    // would spend its slots on stories the reader has already been shown.
-    where: {
-      status: 'PUBLISHED',
-      isPinned: false,
-      isTrending: false,
-    },
-    select: ARTICLE_CARD_SELECT,
-    orderBy: { publishedAt: 'desc' },
-    take: MAX_CAROUSEL_ITEMS * 2,
-  });
+  const articles = await readCarouselPool();
 
   const filtered = articles.filter((a) => {
     if (locale === 'bn') {

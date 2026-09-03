@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { submitArticleComment } from '@/lib/actions/members';
 import { toast } from 'sonner';
+import { useSession } from '@/utils/supabase/auth-context';
+import { can } from '@/lib/constants';
 
 type CommentRow = {
   id: string;
@@ -17,16 +19,20 @@ type CommentRow = {
 export function ArticleCommentSection({
   articleId,
   articleSlug,
-  canPostComment,
-  staffComment,
   initialComments,
 }: {
   articleId: string;
   articleSlug: string;
-  canPostComment: boolean;
-  staffComment?: boolean;
   initialComments: CommentRow[];
 }) {
+  // Permissions come from the browser session, not from the page: the article
+  // page no longer reads the session on the server so it can be cached
+  // (SEO_FIX_LOG stage 1, 2026-09-02). `submitArticleComment` re-checks the
+  // session on the server, so this only decides what to show.
+  const { data, status } = useSession();
+  const role = data?.user?.role;
+  const canPostComment = status === 'authenticated' && can(role, 'comment.create');
+  const staffComment = can(role, 'comment.moderate_any');
   const router = useRouter();
   const [content, setContent] = useState('');
   const [pending, startTransition] = useTransition();
@@ -95,11 +101,30 @@ export function ArticleCommentSection({
         </form>
       ) : (
         <p className="member-comments__signin">
-          <Link href={`/members/login?callbackUrl=${encodeURIComponent(`/articles/${articleSlug}`)}`} className="text-primary hover:underline">
+          {/* Bare hrefs, callback attached on click: one login URL per article
+              in the HTML gave crawlers 256 robots-blocked, canonical-less URLs
+              to discover (SEO_FIX_LOG stage 2). */}
+          <Link
+            href="/members/login"
+            rel="nofollow"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.assign(`/members/login?callbackUrl=${encodeURIComponent(`/articles/${articleSlug}`)}`);
+            }}
+            className="text-primary hover:underline"
+          >
             Sign in as a member
           </Link>{' '}
           or{' '}
-          <Link href={`/login?callbackUrl=${encodeURIComponent(`/articles/${articleSlug}`)}`} className="text-primary hover:underline">
+          <Link
+            href="/login"
+            rel="nofollow"
+            onClick={(e) => {
+              e.preventDefault();
+              window.location.assign(`/login?callbackUrl=${encodeURIComponent(`/articles/${articleSlug}`)}`);
+            }}
+            className="text-primary hover:underline"
+          >
             staff account
           </Link>{' '}
           to join the discussion.

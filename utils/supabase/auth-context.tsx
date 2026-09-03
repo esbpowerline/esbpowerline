@@ -1,8 +1,16 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, type ReactNode } from 'react';
-import { createClient } from '@/utils/supabase/client';
 import { getSupabaseEnv } from '@/utils/supabase/env';
+
+/**
+ * supabase-js is loaded on demand, not imported at the top. This provider is
+ * in the root layout, and a static import put the whole client library —
+ * the largest chunk on every page, 246 KB raw — in front of every anonymous
+ * reader who will never sign in (SEO_FIX_LOG stage 4). Only a visitor with an
+ * auth cookie, or a sign-in screen, pays for it.
+ */
+const loadClient = () => import('@/utils/supabase/client').then((m) => m.createClient());
 import { resolveRoleFromSupabaseUser } from '@/lib/supabase/resolve-role';
 import type { Role } from '@/lib/constants';
 import { parseGridPlanId } from '@/lib/data/grid/grid-tier-access';
@@ -49,7 +57,7 @@ const AuthContext = createContext<AuthContextValue>({
 const SESSION_BOOTSTRAP_TIMEOUT_MS = 10_000;
 
 async function buildAuthUser(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof loadClient>>,
   supaUser: User,
 ): Promise<AuthUser | null> {
   const { data: profile } = await supabase
@@ -94,7 +102,7 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const supabase = createClient();
+    const supabase = await loadClient();
 
     try {
       let supaUser = sessionUser;
@@ -128,6 +136,19 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     const bootstrap = async () => {
+      // No auth cookie means no session to resolve. This provider is mounted
+      // in the root layout, so before this check every anonymous reader of
+      // every page sent a GET /auth/v1/user to Supabase Auth on load — the
+      // single highest-frequency Supabase call on the site, for an answer
+      // that was always "no user" (SEO_FIX_LOG stage 1, 2026-09-02). Supabase
+      // SSR stores the session in a cookie named sb-<ref>-auth-token (chunked
+      // as .0, .1 … when long), which is readable here; a signed-in reader
+      // still resolves as before.
+      if (typeof document !== 'undefined' && !/(^|;\s*)sb-[^=;]*-auth-token/.test(document.cookie)) {
+        setUser(null);
+        setStatus('unauthenticated');
+        return;
+      }
       const timeout = window.setTimeout(() => {
         if (!cancelled) {
           console.warn('[SupabaseAuthProvider] Session bootstrap timed out');
@@ -151,25 +172,30 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
       };
     }
 
-    const supabase = createClient();
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
-        setUser(null);
-        setStatus('unauthenticated');
-        return;
-      }
+    // The auth-state subscription needs the client too; without a cookie
+    // there is no session to observe, so anonymous readers never load it.
+    let subscription: { unsubscribe: () => void } | null = null;
+    if (/(^|;\s*)sb-[^=;]*-auth-token/.test(document.cookie)) {
+      void loadClient().then((supabase) => {
+        if (cancelled) return;
+        subscription = supabase.auth.onAuthStateChange((_event, session) => {
+          if (!session?.user) {
+            setUser(null);
+            setStatus('unauthenticated');
+            return;
+          }
 
-      // Never call getUser() synchronously inside this callback — it deadlocks Supabase auth.
-      window.setTimeout(() => {
-        void fetchUser(session.user);
-      }, 0);
-    });
+          // Never call getUser() synchronously inside this callback — it deadlocks Supabase auth.
+          window.setTimeout(() => {
+            void fetchUser(session.user);
+          }, 0);
+        }).data.subscription;
+      });
+    }
 
     return () => {
       cancelled = true;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [fetchUser]);
 

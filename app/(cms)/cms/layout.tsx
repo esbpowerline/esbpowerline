@@ -1,3 +1,4 @@
+import '@/app/staff-surface.css';
 import { CmsShell } from '@/components/cms/CmsShell';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';

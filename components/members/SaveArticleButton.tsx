@@ -1,30 +1,66 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Bookmark } from 'lucide-react';
 import { toast } from 'sonner';
-import { toggleSaveArticle } from '@/lib/actions/members';
+import { getArticleSavedState, toggleSaveArticle } from '@/lib/actions/members';
+import { useSession } from '@/utils/supabase/auth-context';
 import { cn } from '@/lib/utils';
 
+/**
+ * Resolves its own state in the browser.
+ *
+ * It used to take `signedIn` and `initialSaved` from the article page, which
+ * meant the page had to read the session on the server — and a page that reads
+ * cookies is rendered on every request. The article page is cached now, so the
+ * button asks the session provider whether anyone is signed in and, only then,
+ * asks the server whether this article is saved (SEO_FIX_LOG stage 1,
+ * 2026-09-02). Anonymous readers, the overwhelming majority, cost nothing.
+ */
 export function SaveArticleButton({
   articleId,
   articleSlug,
-  initialSaved,
-  signedIn,
 }: {
   articleId: string;
   articleSlug: string;
-  initialSaved: boolean;
-  signedIn: boolean;
 }) {
-  const [saved, setSaved] = useState(initialSaved);
+  const { status } = useSession();
+  const signedIn = status === 'authenticated';
+  const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
 
+  useEffect(() => {
+    if (!signedIn) return;
+    let live = true;
+    getArticleSavedState(articleId)
+      .then((value) => {
+        if (live) setSaved(value);
+      })
+      .catch(() => {
+        /* the button simply starts unsaved */
+      });
+    return () => {
+      live = false;
+    };
+  }, [signedIn, articleId]);
+
   if (!signedIn) {
+    // The href carries no callback: with one per article, the site's HTML
+    // offered crawlers 128 distinct /members/login?callbackUrl=… URLs (and
+    // the comment section another 128 of /login?…), all robots-blocked and
+    // canonical-less — the "duplicate without user-selected canonical" and
+    // "blocked by robots.txt" rows in Search Console (SEO_FIX_LOG stage 2).
+    // The reader still comes back to this article: the callback is attached
+    // on click, which a crawler never performs.
     return (
       <Link
-        href={`/members/login?callbackUrl=${encodeURIComponent(`/articles/${articleSlug}`)}`}
+        href="/members/login"
+        rel="nofollow"
+        onClick={(e) => {
+          e.preventDefault();
+          window.location.assign(`/members/login?callbackUrl=${encodeURIComponent(`/articles/${articleSlug}`)}`);
+        }}
         className="inline-flex items-center justify-center whitespace-nowrap rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 gap-2 bg-primary/10 text-primary hover:bg-primary/20"
       >
         <Bookmark className="h-4 w-4" />

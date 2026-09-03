@@ -6,6 +6,8 @@ import {
   type PolicyTint, type PolicyStatus,
 } from '@/lib/data/policy/policies';
 import { getPublicSettingsMap } from '@/lib/homepage-content';
+import { cleanDescription } from '@/lib/seo';
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 
 export const revalidate = 3600;
 
@@ -41,12 +43,24 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const policy = getPolicyBySlug(slug, resolvePolicies(await getPublicSettingsMap()));
-  if (!policy) return { title: 'Policy not found | ESB PowerLine' };
+  if (!policy) return { title: 'Policy not found' };
   return {
-    title: `${policy.short} — Energy Policy & Regulatory Framework | ESB PowerLine`,
-    description: policy.brief.overview,
+    // The full name and the country, not the acronym alone. "SREDA — Energy
+    // Policy & Regulatory Framework" drew 410 impressions in a month for the
+    // query "what is the industry of sreda.bg" (a Bulgarian domain) and zero
+    // clicks — the title said nothing that told Google which SREDA this is
+    // (Search Console export, 2026-09-02).
+    title: `${policy.title} — Bangladesh energy policy`,
+    description: cleanDescription(policy.brief.overview),
     alternates: {
       canonical: `/energy-policy/${policy.slug}`,
+    },
+    openGraph: {
+      title: `${policy.title} — Bangladesh energy policy`,
+      description: cleanDescription(policy.brief.overview),
+      url: `/energy-policy/${policy.slug}`,
+      type: 'article',
+      images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     },
   };
 }
@@ -63,6 +77,7 @@ export default async function PolicyDetailPage({ params }: Props) {
 
   return (
     <div className="container container--shell py-8 md:py-10">
+      <Breadcrumbs crumbs={[{ name: 'Energy Policy', path: '/energy-policy' }, { name: policy.short }]} />
       <div className="w-full">
         <Link href="/energy-policy" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           <ArrowLeft className="w-4 h-4" />

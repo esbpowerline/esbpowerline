@@ -254,10 +254,13 @@ const nextConfig: NextConfig = {
       ...immutableAsset('/_next/static/(.*)'),
       ...immutableAsset('/images/(.*)'),
       ...immutableAsset('/fonts/(.*)'),
+      // No Cache-Control on the daily files here: middleware sets it per
+      // request — shared-cacheable inside the public window, `private,
+      // no-store` for a gated date — and a static rule would override that
+      // with one answer for both. The gate itself runs before the edge cache.
       {
         source: '/data/daily/(.*)',
         headers: [
-          { key: 'Cache-Control', value: 'private, no-store' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
         ],
       },
@@ -288,6 +291,64 @@ const nextConfig: NextConfig = {
         destination: '/grid-explorer/:path*',
         permanent: true,
       },
+      // The WordPress-era URL scheme. Search Console (export of 2026-09-02)
+      // still holds /YYYY/MM/DD/<slug>/, /posts/all/ and /category/<x> from
+      // the old site, all answering 404 — 140 "Not found" pages in Coverage,
+      // and 10% of Googlebot's requests. Article slugs were carried over
+      // unchanged in the migration (verified against the database), so the
+      // date-prefixed form maps 1:1 onto /articles/<slug>. Permanent, so the
+      // history and any inbound links those URLs earned transfer.
+      {
+        source: '/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug',
+        destination: '/articles/:slug',
+        permanent: true,
+      },
+      {
+        source: '/posts/all',
+        destination: '/articles',
+        permanent: true,
+      },
+      {
+        source: '/category/:slug',
+        destination: '/categories/:slug',
+        permanent: true,
+      },
+      // The feed lives at /feed.xml (app/feed.xml/route.ts); readers and the
+      // old site's subscribers ask for the WordPress paths.
+      { source: '/feed', destination: '/feed.xml', permanent: true },
+      { source: '/rss.xml', destination: '/feed.xml', permanent: true },
+      { source: '/rss', destination: '/feed.xml', permanent: true },
+      // WordPress nested categories (/category/news/power-generation): the
+      // leaf is the category. Tag and paginated-index URLs map directly; the
+      // old author slugs (WordPress logins) have no counterpart here, so they
+      // land on the news index rather than on a guessed byline.
+      {
+        source: '/category/:parent/:slug',
+        destination: '/categories/:slug',
+        permanent: true,
+      },
+      {
+        source: '/tag/:tag',
+        destination: '/tags/:tag',
+        permanent: true,
+      },
+      {
+        source: '/author/:name',
+        destination: '/articles',
+        permanent: true,
+      },
+      {
+        source: '/page/:n(\\d+)',
+        destination: '/articles?page=:n',
+        permanent: true,
+      },
+      // Browsers and crawlers ask for these by convention regardless of the
+      // <link> tags; all three were 404 in production (Stage 3). The app
+      // router serves /icon.png, /apple-icon.png and /manifest.webmanifest.
+      { source: '/favicon.ico', destination: '/icon.png', permanent: true },
+      { source: '/apple-touch-icon.png', destination: '/apple-icon.png', permanent: true },
+      { source: '/apple-touch-icon-precomposed.png', destination: '/apple-icon.png', permanent: true },
+      { source: '/site.webmanifest', destination: '/manifest.webmanifest', permanent: true },
     ];
   },
 };

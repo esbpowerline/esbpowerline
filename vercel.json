@@ -26,14 +26,13 @@
     {
       "source": "/data/daily/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "private, no-store" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
     },
     {
       "source": "/data/sreda/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Cache-Control", "value": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]
     },

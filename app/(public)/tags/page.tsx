@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { getPublicTagCounts } from '@/lib/category-content';
 
 export const metadata = {
-  title: 'Tags | ESB PowerLine',
+  title: 'Tags',
   alternates: {
     canonical: '/tags',
   },

@@ -1,7 +1,8 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { SITE_SETTINGS_CACHE_TAG } from '@/lib/homepage-content';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 
@@ -75,6 +76,9 @@ export async function updateSettingsBatch(updates: Record<string, unknown>) {
     console.error('Failed to log settings updates to auditLog:', err);
   });
 
+  // The settings maps are cached across requests (lib/homepage-content.ts);
+  // drop them first, or the revalidated pages re-render from the stale map.
+  revalidateTag(SITE_SETTINGS_CACHE_TAG, { expire: 0 });
   const { PUBLIC_REVALIDATE_PATHS } = await import('@/lib/public-paths');
   for (const path of PUBLIC_REVALIDATE_PATHS) revalidatePath(path);
   revalidatePath('/admin/settings');

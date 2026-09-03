@@ -2,7 +2,6 @@
 
 import { signOutSessionAction } from '@/lib/actions/sign-out';
 import { getPublicSiteUrl } from '@/lib/auth-routing';
-import { createClient } from '@/utils/supabase/client';
 
 async function clearSession() {
   try {
@@ -13,6 +12,11 @@ async function clearSession() {
   }
 
   try {
+    // Loaded here, not at the top: this module reaches the public navbar
+    // through the member menu, and a static import carried all of supabase-js
+    // (a 223 KB chunk) to every anonymous reader for a fallback that runs
+    // only when a sign-out's server action fails (SEO_FIX_LOG stage 4).
+    const { createClient } = await import('@/utils/supabase/client');
     const supabase = createClient();
     await supabase.auth.signOut();
   } catch {

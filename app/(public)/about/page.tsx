@@ -7,7 +7,7 @@ import { ScrollGeometryBackdrop } from '@/components/shared/ScrollGeometryBackdr
 export const revalidate = 86400;
 
 export const metadata = {
-  title: 'About | ESB PowerLine',
+  title: 'About',
   description:
     "Who we are: ESB PowerLine is Bangladesh's dedicated power & energy newsroom, covering generation, renewables, policy, grid data and projects.",
   alternates: {

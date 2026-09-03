@@ -51,16 +51,18 @@ export const revalidate = 180;
 export const metadata = {
   // `absolute` opts out of the root '%s | ESB PowerLine' template, which was
   // appending the brand to a title that already starts with it.
-  title: { absolute: 'ESB PowerLine — Bangladesh Energy & Power News' },
+  title: { absolute: 'ESB PowerLine — Bangladesh Power Sector News & Grid Data' },
   description:
     "Bangladesh's premier source for power sector news, renewable energy, policy, projects & tenders, grid explorer, and the monthly magazine.",
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'ESB PowerLine — Bangladesh Energy & Power News',
+    title: 'ESB PowerLine — Bangladesh Power Sector News & Grid Data',
     description:
       'Authoritative coverage of generation, renewables, policy, grid infrastructure and the projects shaping the sector.',
+    // A page-level openGraph replaces the layout's block, image included.
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 };
 
@@ -115,6 +117,11 @@ export default async function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 home-page">
+        {/* The homepage had no h1 at all — the hero story is an h2 — so the
+            site's highest-authority URL carried no heading-level topic signal
+            (SEO_FIX_LOG stage 5). Screen-reader-only; the visual design is
+            unchanged. */}
+        <h1 className="sr-only">ESB PowerLine — Bangladesh power sector news, grid data and energy policy</h1>
         <div className="container container--shell home-hero-band">
           <div className="home-hero-band__grid">
             <div className="home-hero-band__hero">

@@ -15,6 +15,10 @@ export type PublicArticleDetail = PublicArticleCard & {
   collaborators?: { id: string; name: string }[];
   /** ISO timestamp — feeds NewsArticle.dateModified, which Google uses for freshness. */
   updatedAt: string;
+  /** The editor's search title / description from the article's seo JSON; null when unset. */
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  focusKeyword?: string | null;
 };
 
 
@@ -187,7 +191,10 @@ export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, l
     where: { status: 'PUBLISHED' },
     select: ARTICLE_CARD_SELECT,
     orderBy: [{ isPinned: 'desc' }, { isFeatured: 'desc' }, { publishedAt: 'desc' }],
-    take: limit * 2,
+    // Over-fetch only by the size of the Bengali-titled set the filter below
+    // drops (33 of 161 published rows, 2026-09-02). `limit * 2` fetched 240 card
+    // rows to show 120 on /search and /articles (SEO_FIX_LOG stage 1).
+    take: limit + 40,
   });
   return articles
     .filter((a) => {
@@ -227,13 +234,24 @@ export const getPublishedArticleBySlug = unstable_cache(async function getPublis
     collaborators = users;
   }
 
-  const seo = (article.seo ?? {}) as { heroImage?: HeroImageMeta };
+  const seo = (article.seo ?? {}) as {
+    heroImage?: HeroImageMeta;
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    focusKeyword?: string | null;
+  };
   const displayContent = locale === 'bn' && article.contentBn ? article.contentBn : article.content;
   return {
     ...mapArticle(article, locale),
     content: displayContent,
     tags: (article.tags as string[]) ?? [],
     heroImage: seo.heroImage,
+    // The editor's own search title and description. They were stored on
+    // every article and rendered nowhere: the page built <title> from the
+    // headline and the description from the excerpt (stage 5, 2026-09-02).
+    metaTitle: seo.metaTitle?.trim() || null,
+    metaDescription: seo.metaDescription?.trim() || null,
+    focusKeyword: seo.focusKeyword?.trim() || null,
     imageCredit: article.imageCredit,
     collaborators,
     updatedAt: article.updatedAt.toISOString(),

@@ -11,14 +11,17 @@ import {
   getRelatedPublishedArticles,
 } from '@/lib/category-content';
 import { ArticleViewTracker } from '@/components/analytics/ArticleViewTracker';
-import { auth } from '@/lib/auth';
-import { can, type Role } from '@/lib/constants';
-import { getArticleComments, getArticleSavedState } from '@/lib/actions/members';
+import { getArticleComments } from '@/lib/actions/members';
 import { SaveArticleButton } from '@/components/members/SaveArticleButton';
 import { ArticleCommentSection } from '@/components/members/ArticleCommentSection';
 import { ArticleAuthorSticky } from '@/components/shared/ArticleAuthorSticky';
 import { NoImage } from '@/components/shared/NoImage';
 import { safeJsonLd } from '@/lib/json-ld';
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
+import { linkPolicyMentions, policiesMentioned } from '@/lib/policy-links';
+import { POLICIES } from '@/lib/data/policy/policies';
+import { gridViewForCategory } from '@/lib/grid-explorer-views';
+import { cleanDescription, ORGANIZATION_ID, shareImageUrl, SITE_URL } from '@/lib/seo';
 import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
@@ -27,32 +30,68 @@ import prisma from '@/lib/prisma';
 
 export const revalidate = 600;
 
+/**
+ * Prerender the newest published English articles at build time; the rest
+ * render on first request and are then cached for `revalidate` seconds like
+ * any ISR page. Before this no article route was prerendered at all
+ * (prerender-manifest: 0 article entries), so Googlebot's first fetch of any
+ * article was always a cold render.
+ */
+export async function generateStaticParams() {
+  const rows = await prisma.article.findMany({
+    where: { status: 'PUBLISHED' },
+    select: { slug: true, title: true },
+    orderBy: { publishedAt: 'desc' },
+    take: 240,
+  });
+  return rows
+    .filter((r) => !/[ঀ-৿]/.test(r.title))
+    .slice(0, 200)
+    .map((r) => ({ slug: r.slug }));
+}
+
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const locale = await getServerSiteLocale();
   const { slug } = await params;
   const article = await getPublishedArticleBySlug(slug, locale);
-  if (!article) return { title: 'Article not found | ESB PowerLine' };
+  if (!article) return { title: 'Article not found', robots: { index: false } };
+
+  // <title> is the search title, not the headline: the editor's metaTitle when
+  // one was written (a field stored on every article and rendered nowhere
+  // until stage 5), else the short title, else the headline. No site-name
+  // suffix — it cost ~15 of the ~60 visible characters on 121 of 161 titles.
+  // The <h1> below stays the editorial headline.
+  const searchTitle = article.metaTitle ?? article.shortTitle ?? article.title;
+  const description = cleanDescription(article.metaDescription ?? article.excerpt);
+  const image = shareImageUrl(normalizeArticleImageUrl(article.imageUrl));
+  const tags = article.tags?.length ? article.tags : undefined;
 
   return {
-    title: `${article.title} | ESB PowerLine`,
-    description: article.excerpt,
+    title: { absolute: searchTitle },
+    description,
+    ...(tags ? { keywords: tags } : {}),
     alternates: {
-      canonical: `/articles/${article.slug}`,
+      canonical: `/articles/${encodeURIComponent(article.slug)}`,
     },
     openGraph: {
-      title: article.title,
-      description: article.excerpt,
-      images: [{ url: normalizeArticleImageUrl(article.imageUrl) ?? '' }],
+      title: searchTitle,
+      description,
+      url: `/articles/${encodeURIComponent(article.slug)}`,
+      images: [{ url: image, width: 1200, alt: article.heroImage?.alt ?? article.title }],
       type: 'article',
       publishedTime: article.date,
+      modifiedTime: article.updatedAt ?? article.date,
+      authors: [`${SITE_URL}/authors/${slugify(article.author)}`],
+      section: article.category,
+      ...(tags ? { tags } : {}),
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt,
-      images: [normalizeArticleImageUrl(article.imageUrl) ?? ''],
+      title: searchTitle,
+      description,
+      images: [image],
     },
   };
 }
@@ -63,58 +102,54 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   const article = await getPublishedArticleBySlug(slug, locale);
   if (!article) notFound();
 
-  const [related, session, comments, saved] = await Promise.all([
-    getRelatedPublishedArticles(slug, article.category, article.tags, 3, locale),
-    auth(),
+  // No session read here, on purpose. `auth()` reads cookies, which makes the
+  // whole route dynamic: every one of the 842 article views in the week to
+  // 2026-09-02 was a cold function render with its own Supabase Auth,
+  // profiles and article reads, and `revalidate = 600` above never applied.
+  // The session-dependent pieces — the save button, the comment form's
+  // permissions, the quick-edit shortcut — resolve their own state in the
+  // browser after hydration (SEO_FIX_LOG stage 1).
+  const [related, comments] = await Promise.all([
+    getRelatedPublishedArticles(slug, article.category, article.tags, 4, locale),
     getArticleComments(article.id),
-    getArticleSavedState(article.id),
   ]);
-
-  const role = session?.user?.role as Role | undefined;
-  const signedIn = !!session?.user?.id;
-  const canPostComment = signedIn && can(role, 'comment.create');
-  const staffComment = can(role, 'comment.moderate_any');
 
   const paragraphs = article.content.split('</p>');
   const middleIndex = Math.floor(paragraphs.length / 2);
   const firstHalf = paragraphs.slice(0, middleIndex).join('</p>') + (middleIndex > 0 ? '</p>' : '');
   const secondHalf = paragraphs.slice(middleIndex).join('</p>');
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
+  const siteUrl = SITE_URL;
   const heroImage = normalizeArticleImageUrl(article.imageUrl);
+  const keywords = article.tags?.length ? article.tags : extractKeywords(article.title, article.content);
 
+  // Every field here has a real source on the row; the ones that do not
+  // (image dimensions, a licence) are left out rather than guessed.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/articles/${article.slug}` },
     // Google ignores headlines over 110 characters.
     headline: article.title.slice(0, 110),
-    description: article.excerpt,
-    // An empty `image` invalidates the whole block — omit it instead.
-    ...(heroImage ? { image: [heroImage] } : {}),
+    description: cleanDescription(article.metaDescription ?? article.excerpt),
+    // An empty `image` invalidates the whole block — omit it instead. Served
+    // through the site's optimizer, not the storage origin (see shareImageUrl).
+    ...(heroImage ? { image: [shareImageUrl(heroImage)] } : {}),
     datePublished: article.date,
     dateModified: article.updatedAt ?? article.date,
     author: {
       '@type': 'Person',
       name: article.author,
+      url: `${siteUrl}/authors/${slugify(article.author)}`,
     },
-    publisher: {
-      '@type': 'Organization',
-      name: 'ESB PowerLine',
-      // Required by Google for the Article rich result.
-      logo: { '@type': 'ImageObject', url: `${siteUrl}/images/esb-logo.png` },
-    },
-  };
-
-  // Names the Home → News → article trail for the breadcrumb rich result.
-  const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
-      { '@type': 'ListItem', position: 2, name: 'News', item: `${siteUrl}/articles` },
-      { '@type': 'ListItem', position: 3, name: article.title.slice(0, 110) },
-    ],
+    // The organisation declared once in the root layout, by id — not a second,
+    // competing publisher entity.
+    publisher: { '@id': ORGANIZATION_ID },
+    articleSection: article.category,
+    inLanguage: 'en',
+    // The paywall gates member features, never the article body.
+    isAccessibleForFree: true,
+    ...(keywords.length ? { keywords: keywords.join(', ') } : {}),
   };
 
   return (
@@ -123,16 +158,21 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }}
-      />
       <ArticleViewTracker articleId={article.id} />
+      {/* Home → News → <category> → this story, visible and as BreadcrumbList. */}
+      <Breadcrumbs
+        crumbs={[
+          { name: 'News', path: '/articles' },
+          { name: article.category, path: `/categories/${slugify(article.category)}` },
+          { name: article.title.slice(0, 110) },
+        ]}
+      />
       <Link href="/articles" className="text-sm text-primary hover:underline">← Back to news</Link>
 
       <header className="article-header">
         <div className="article-category-wrap flex items-center gap-2">
-          <span className="text-sm font-bold uppercase tracking-widest text-primary">{article.category}</span>
+          {/* A link, not a span: no article linked to its own category hub (stage 5). */}
+          <Link href={`/categories/${slugify(article.category)}`} className="text-sm font-bold uppercase tracking-widest text-primary hover:underline">{article.category}</Link>
         </div>
         <h1 className="font-display font-extrabold tracking-tight leading-[1.05] text-foreground">
           {article.title}
@@ -199,12 +239,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <div className="article-meta-actions flex items-center gap-2">
             <QuickEditButton articleId={article.id} variant="inline" />
             <ShareArticleMenu title={article.title} slug={slug} />
-            <SaveArticleButton
-              articleId={article.id}
-              articleSlug={slug}
-              initialSaved={saved}
-              signedIn={signedIn}
-            />
+            <SaveArticleButton articleId={article.id} articleSlug={slug} />
           </div>
         </div>
       </header>
@@ -244,7 +279,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
 
       <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe">
-        <div dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(firstHalf) }} />
+        {/* Policy mentions are linked AFTER sanitising, on the sanitised
+            output, so the link markup is ours and never the editor's. The
+            first mention of each named act, plan or regulator links to its
+            page in the policy library (stage 6). */}
+        <div dangerouslySetInnerHTML={{ __html: linkPolicyMentions(sanitizeArticleHtml(firstHalf)) }} />
 
         {/* In-Article Ad Space */}
         {paragraphs.length > 3 && (
@@ -255,21 +294,68 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
         )}
 
-        <div dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(secondHalf) }} />
+        <div dangerouslySetInnerHTML={{ __html: linkPolicyMentions(sanitizeArticleHtml(secondHalf)) }} />
       </div>
 
+      {/* The data view that backs this kind of story, and the policy pages it
+          names. Both are derived: the view from the article's category, the
+          policies from the register's names found in the body. A story whose
+          category has no data view, or names no policy, shows neither. */}
       {(() => {
-        const displayTags = article.tags && article.tags.length > 0
-          ? article.tags
-          : extractKeywords(article.title, article.content);
+        const view = gridViewForCategory(slugify(article.category));
+        const mentioned = policiesMentioned(article.content)
+          .map((s) => POLICIES.find((p) => p.slug === s))
+          .filter((p): p is (typeof POLICIES)[number] => Boolean(p))
+          .slice(0, 4);
+        if (!view && mentioned.length === 0) return null;
+        return (
+          <aside className="article-context mt-10 grid gap-4 sm:grid-cols-2" aria-label="Related data and policy">
+            {view && (
+              <Link href={`/grid-explorer?tab=${view.tab}`} className="article-context__card block rounded-2xl border border-border/60 bg-muted/20 p-4 hover:border-primary/40 transition-colors">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">Data behind this story</span>
+                <span className="mt-1 block font-semibold text-foreground">Grid Explorer — {view.label}</span>
+                <span className="mt-1 block text-sm text-muted-foreground">{view.blurb}, from the official PGCB and Petrobangla daily reports.</span>
+              </Link>
+            )}
+            {mentioned.length > 0 && (
+              <div className="article-context__card rounded-2xl border border-border/60 bg-muted/20 p-4">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">Policy referenced</span>
+                <ul className="mt-1 space-y-1.5">
+                  {mentioned.map((p) => (
+                    <li key={p.slug}>
+                      <Link href={`/energy-policy/${p.slug}`} className="font-semibold text-foreground hover:text-primary">{p.title}</Link>
+                      <span className="block text-xs text-muted-foreground">{p.authority} · {p.year} · {p.status}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </aside>
+        );
+      })()}
+
+      {(() => {
+        // Stored tags link to their tag page. Keywords extracted from the body
+        // (the fallback for the 89 untagged articles) are shown but NOT linked:
+        // a tag page only lists articles whose stored `tags` contain the word,
+        // so /tags/<keyword> answered 404 for every one of them — 225 dead
+        // internal links across the site in the 2026-09-02 crawl, plus 378
+        // near-empty noindex tag pages Google was spending crawl on
+        // (SEO_FIX_LOG stage 2).
+        const stored = article.tags && article.tags.length > 0;
+        const displayTags = stored ? article.tags : extractKeywords(article.title, article.content);
         if (displayTags.length === 0) return null;
         return (
           <div className="mt-10 pt-6 border-t border-border/30">
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground/60 block mb-3">Trending Keywords</span>
             <div className="flex flex-wrap gap-2">
-              {displayTags.map((t: string) => (
-                <Link key={t} href={`/tags/${t}`} className="tag">#{t}</Link>
-              ))}
+              {displayTags.map((t: string) =>
+                stored ? (
+                  <Link key={t} href={`/tags/${encodeURIComponent(t)}`} className="tag">#{t}</Link>
+                ) : (
+                  <span key={t} className="tag">#{t}</span>
+                ),
+              )}
             </div>
           </div>
         );
@@ -279,8 +365,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <ArticleCommentSection
           articleId={article.id}
           articleSlug={slug}
-          canPostComment={canPostComment}
-          staffComment={staffComment}
           initialComments={comments.map((c) => ({
             id: c.id,
             authorName: c.authorName,
@@ -291,7 +375,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       </div>
 
       <div className="mt-10">
-        <h3 className="font-semibold mb-4">Related stories</h3>
+        {/* h2, not h3: the page's heading order skipped a level (Lighthouse). */}
+        <div className="flex items-baseline justify-between gap-3 mb-4">
+          <h2 className="font-semibold text-lg">Related stories</h2>
+          <Link href={`/categories/${slugify(article.category)}`} className="text-sm text-primary hover:underline">
+            More in {article.category} →
+          </Link>
+        </div>
         <div className="grid sm:grid-cols-2 gap-4">
           {related.map((r) => (
             <ArticleCard

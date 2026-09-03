@@ -24,6 +24,7 @@ export type MessageKey =
   | 'footer.allCategories'
   | 'footer.monthlyMagazine'
   | 'footer.gridExplorer'
+  | 'footer.energyPolicy'
   | 'footer.search'
   | 'footer.copyright'
   | 'footer.tagline'
@@ -64,6 +65,11 @@ export type MessageKey =
   | 'articles.of'
   | 'articles.loadMore'
   | 'articles.trending'
+  | 'articles.latest'
+  | 'articles.mostRead'
+  | 'articles.page'
+  | 'articles.previous'
+  | 'articles.next'
   | 'search.title'
   | 'search.subtitle'
   | 'home.trendingWeek'
@@ -191,6 +197,7 @@ const EN: Record<MessageKey, string> = {
   'footer.allCategories': 'All Categories',
   'footer.monthlyMagazine': 'Monthly Magazine',
   'footer.gridExplorer': 'Grid Explorer',
+  'footer.energyPolicy': 'Energy Policy Library',
   'footer.search': 'Search',
   'footer.copyright': '© {year} ESB PowerLine. All rights reserved.',
   'footer.tagline':
@@ -234,6 +241,11 @@ const EN: Record<MessageKey, string> = {
   'articles.of': 'of',
   'articles.loadMore': 'Load more articles',
   'articles.trending': 'Trending',
+  'articles.latest': 'Latest',
+  'articles.mostRead': 'Most read',
+  'articles.page': 'Page',
+  'articles.previous': 'Previous',
+  'articles.next': 'Next',
   'search.title': 'Search',
   'search.subtitle': 'Search titles, excerpts, and categories from live published content.',
   'home.trendingWeek': 'Trending this week',
@@ -374,6 +386,7 @@ const BN: Record<MessageKey, string> = {
   'footer.allCategories': 'সব খাত',
   'footer.monthlyMagazine': 'মাসিক ম্যাগাজিন',
   'footer.gridExplorer': 'গ্রিড তথ্য',
+  'footer.energyPolicy': 'জ্বালানি নীতি সংগ্রহ',
   'footer.search': 'খুঁজুন',
   'footer.copyright': '© {year} ইএসবি পাওয়ারলাইন। সর্বস্বত্ব সংরক্ষিত।',
   'footer.tagline':
@@ -417,6 +430,11 @@ const BN: Record<MessageKey, string> = {
   'articles.of': 'এর মধ্যে',
   'articles.loadMore': 'আরও সংবাদ দেখুন',
   'articles.trending': 'আলোচিত',
+  'articles.latest': 'সর্বশেষ',
+  'articles.mostRead': 'সর্বাধিক পঠিত',
+  'articles.page': 'পৃষ্ঠা',
+  'articles.previous': 'আগের',
+  'articles.next': 'পরের',
   'search.title': 'খুঁজুন',
   'search.subtitle': 'প্রকাশিত শিরোনাম, সারাংশ ও খাত থেকে সংবাদ খুঁজুন।',
   'home.trendingWeek': 'সপ্তাহের আলোচিত',

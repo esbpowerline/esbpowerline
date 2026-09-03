@@ -13,8 +13,25 @@ export async function generateMetadata(): Promise<Metadata> {
   const site = settings.site as { name?: string; tagline?: string } | undefined;
   const seo = settings.seo as { metaTitle?: string; metaDescription?: string } | undefined;
   return {
-    ...(seo?.metaTitle ? { title: seo.metaTitle } : {}),
+    // A template, so every public page states its own title and the site name
+    // is appended once. Pages used to hard-code "| ESB PowerLine" themselves
+    // (17 files) because a plain string here cancelled the root template; the
+    // suffix then cost ~15 of the ~60 characters a result shows on 121 of 161
+    // article titles. Articles opt out with an absolute title (stage 5).
+    title: {
+      // `absolute`, not `default`: the site-level title already names the
+      // site, and the root template would append the name a second time.
+      absolute: seo?.metaTitle ?? 'ESB PowerLine — Bangladesh Power Sector News & Grid Data',
+      template: '%s | ESB PowerLine',
+    },
     description: seo?.metaDescription ?? site?.tagline,
+    // Feed autodiscovery on every public page.
+    alternates: { types: { 'application/rss+xml': '/feed.xml' } },
+    openGraph: {
+      siteName: 'ESB PowerLine',
+      images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    },
+    twitter: { card: 'summary_large_image' },
   };
 }
 
