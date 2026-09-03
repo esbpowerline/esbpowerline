@@ -10456,3 +10456,125 @@ a.admin-list-row:hover .admin-list-title {
   cursor: not-allowed;
   font-weight: 500;
 }
+
+/* ── Editor settings panel ───────────────────────────────────────────────
+   This panel had three selection patterns of its own — a filled slab for the
+   guidance choice, a switch, and two bordered pills for the clock — none of
+   them the segmented control used by the header's theme picker or the Desk
+   panel next door. Its section headings were also the only accent-blue
+   uppercase on the surface, at 0.12em, the widest tracking anywhere in the
+   product. Everything below is the surface's existing language, applied. */
+.editor-settings__label {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-bottom: 0.4375rem;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground) / 0.75);
+}
+
+.editor-settings__label svg {
+  width: 0.75rem;
+  height: 0.75rem;
+  opacity: 0.7;
+}
+
+.editor-settings__option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--r-sm);
+  text-align: left;
+  font-size: var(--fs-body);
+  color: hsl(var(--foreground) / 0.9);
+  transition: background 130ms ease, color 130ms ease;
+}
+
+.editor-settings__option:hover {
+  background: var(--hover-wash);
+}
+
+/* Selected reads as selected through the tick and a quiet wash — the old
+   version tinted the whole row AND its text the same blue, which put blue
+   text on a blue field. */
+.editor-settings__option--active {
+  background: hsl(var(--staff-accent) / 0.08);
+  color: hsl(var(--foreground));
+  font-weight: 550;
+}
+
+.editor-settings__option--active svg {
+  color: hsl(var(--staff-accent));
+}
+
+.editor-settings__hint {
+  display: block;
+  font-size: var(--fs-micro);
+  font-weight: 400;
+  color: hsl(var(--muted-foreground) / 0.85);
+}
+
+.editor-settings__segment {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.125rem;
+  padding: 0.1875rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: hsl(var(--muted) / 0.5);
+}
+
+.editor-settings__segment-btn {
+  min-height: 1.5rem;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-meta);
+  font-weight: 550;
+  color: hsl(var(--muted-foreground));
+  transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
+}
+
+.editor-settings__segment-btn:hover:not(.editor-settings__segment-btn--active) {
+  color: hsl(var(--foreground));
+  background: hsl(var(--card) / 0.55);
+}
+
+.editor-settings__segment-btn--active {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-weight: 600;
+  box-shadow: var(--sh-1);
+}
+
+.editor-settings__switch {
+  width: 1.875rem;
+  height: 1.0625rem;
+  padding: 0.125rem;
+  border-radius: var(--r-pill);
+  background: hsl(var(--muted-foreground) / 0.28);
+  transition: background 180ms ease;
+  flex-shrink: 0;
+}
+
+.editor-settings__switch--on {
+  background: hsl(var(--staff-accent));
+}
+
+.editor-settings__switch-thumb {
+  width: 0.8125rem;
+  height: 0.8125rem;
+  border-radius: var(--r-pill);
+  background: #fff;
+  box-shadow: 0 1px 2px hsl(0 0% 0% / 0.2);
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.editor-settings__switch--on .editor-settings__switch-thumb {
+  transform: translateX(0.8125rem);
+}

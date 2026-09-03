@@ -44,7 +44,7 @@ export function EditorSettingsMenu({ variant = 'default' }: EditorSettingsMenuPr
 
             {/* Guidance Mode Section */}
             <div className="px-4 py-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-400 flex items-center gap-1.5 mb-1.5">
+              <span className="editor-settings__label">
                 <HelpCircle className="h-3 w-3" />
                 Guidance Level
               </span>
@@ -53,13 +53,13 @@ export function EditorSettingsMenu({ variant = 'default' }: EditorSettingsMenuPr
                   type="button"
                   onClick={() => setGuidanceMode('noob')}
                   className={cn(
-                    'w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors hover:bg-muted/50',
-                    preferences.guidanceMode === 'noob' && 'bg-sky-500/10 text-sky-400 font-medium'
+                    'editor-settings__option',
+                    preferences.guidanceMode === 'noob' && 'editor-settings__option--active'
                   )}
                 >
                   <div className="flex flex-col">
                     <span>Beginner (Noob)</span>
-                    <span className="text-[10px] opacity-75">Show hints, tooltips & help</span>
+                    <span className="editor-settings__hint">Show hints, tooltips & help</span>
                   </div>
                   {preferences.guidanceMode === 'noob' && <Check className="h-3.5 w-3.5" />}
                 </button>
@@ -67,13 +67,13 @@ export function EditorSettingsMenu({ variant = 'default' }: EditorSettingsMenuPr
                   type="button"
                   onClick={() => setGuidanceMode('pro')}
                   className={cn(
-                    'w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors hover:bg-muted/50',
-                    preferences.guidanceMode === 'pro' && 'bg-sky-500/10 text-sky-400 font-medium'
+                    'editor-settings__option',
+                    preferences.guidanceMode === 'pro' && 'editor-settings__option--active'
                   )}
                 >
                   <div className="flex flex-col">
                     <span>Professional (Pro)</span>
-                    <span className="text-[10px] opacity-75">Headings only, clean view</span>
+                    <span className="editor-settings__hint">Headings only, clean view</span>
                   </div>
                   {preferences.guidanceMode === 'pro' && <Check className="h-3.5 w-3.5" />}
                 </button>
@@ -84,27 +84,24 @@ export function EditorSettingsMenu({ variant = 'default' }: EditorSettingsMenuPr
 
             {/* Sticky Editor Toolbar Toggle */}
             <div className="px-4 py-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-400 flex items-center gap-1.5 mb-1.5">
+              <span className="editor-settings__label">
                 <Pin className="h-3 w-3" />
                 Toolbar Behavior
               </span>
               <button
                 type="button"
                 onClick={() => setStickyTipTapToolbar(!preferences.stickyTipTapToolbar)}
-                className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors hover:bg-muted/50"
+                className="editor-settings__option"
               >
                 <div className="flex flex-col">
                   <span>Sticky editor toolbar</span>
-                  <span className="text-[10px] text-muted-foreground">Pin toolbar while writing</span>
+                  <span className="editor-settings__hint">Pin toolbar while writing</span>
                 </div>
                 <div className={cn(
-                  'w-8 h-4 rounded-full p-0.5 transition-colors duration-200 focus:outline-none',
-                  preferences.stickyTipTapToolbar ? 'bg-sky-500' : 'bg-muted'
+                  'editor-settings__switch',
+                  preferences.stickyTipTapToolbar && 'editor-settings__switch--on',
                 )}>
-                  <div className={cn(
-                    'w-3 h-3 rounded-full bg-white transition-transform duration-200',
-                    preferences.stickyTipTapToolbar ? 'translate-x-4' : 'translate-x-0'
-                  )} />
+                  <div className="editor-settings__switch-thumb" />
                 </div>
               </button>
             </div>
@@ -113,35 +110,29 @@ export function EditorSettingsMenu({ variant = 'default' }: EditorSettingsMenuPr
 
             {/* Clock Format Section */}
             <div className="px-4 py-2 pb-3">
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-400 flex items-center gap-1.5 mb-1.5">
+              <span className="editor-settings__label">
                 <Clock className="h-3 w-3" />
                 Clock Format
               </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setClockFormat('12')}
-                  className={cn(
-                    'flex-1 text-center py-1 rounded-md text-xs border transition-all',
-                    preferences.clockFormat === '12'
-                      ? 'border-sky-500/50 bg-sky-500/10 text-sky-400 font-medium'
-                      : 'border-border/60 hover:bg-muted/30 text-muted-foreground'
-                  )}
-                >
-                  12-Hour
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setClockFormat('24')}
-                  className={cn(
-                    'flex-1 text-center py-1 rounded-md text-xs border transition-all',
-                    preferences.clockFormat === '24'
-                      ? 'border-sky-500/50 bg-sky-500/10 text-sky-400 font-medium'
-                      : 'border-border/60 hover:bg-muted/30 text-muted-foreground'
-                  )}
-                >
-                  24-Hour
-                </button>
+              {/* One segmented control, the same one the header's theme picker
+                  and the Desk panel use. This was a third pattern: two
+                  separate bordered pills with a gap, the selected one filled
+                  blue with blue text on it. */}
+              <div className="editor-settings__segment">
+                {(['12', '24'] as const).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => setClockFormat(f)}
+                    aria-pressed={preferences.clockFormat === f}
+                    className={cn(
+                      'editor-settings__segment-btn',
+                      preferences.clockFormat === f && 'editor-settings__segment-btn--active',
+                    )}
+                  >
+                    {f}-Hour
+                  </button>
+                ))}
               </div>
             </div>
           </AdminDropdownPanel>
