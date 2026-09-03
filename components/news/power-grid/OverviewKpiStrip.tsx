@@ -178,21 +178,29 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   const idleMw = installedMw == null ? null : Math.max(0, installedMw - systemStats.eveningPeakGen);
   const idlePct = installedMw && installedMw > 0 ? ((idleMw ?? 0) / installedMw) * 100 : null;
 
-  // PGCB does print "Production Cost per KWHr" on P1, but `avgProductionCost`
-  // is NOT that cell: scripts/parse_daily_reports.py:1890-1892 computes it as
-  // total_daily_cost / total_energy_gen and never reads the printed rate. The
-  // two coincide to the paisa on every day checked, but the figure on this
-  // tile is ours, so it carries a D mark below — it wore a P until the label
-  // fidelity pass of 2026-09-02, and the DailyCostCard already said D for the
-  // same field. Still preferred over the per-fuel quotient route, whose inputs
-  // are themselves derived rates rather than published prices.
-  const publishedUnitCost =
+  // The strip carries published figures. `totalDailyCost` is P1's printed
+  // "Production Cost (Tk.)" total row — a number PGCB states — so it is what
+  // this tile headlines.
+  //
+  // `avgProductionCost` used to hold that slot, and it is NOT the printed
+  // "Production Cost per KWHr" cell: parse_daily_reports.py:1890-1892 computes
+  // it as total_daily_cost / total_energy_gen and never reads the rate PGCB
+  // prints. The tile still claimed `provenance="P"` for it while its own
+  // tooltip row underneath marked the same field D — the mark was corrected in
+  // the label fidelity pass and the headline was not. The derived rate keeps
+  // its place in the briefing below, under a D, where it can be read against
+  // the bill it came from.
+  const publishedDailyCost =
+    typeof systemStats.totalDailyCost === 'number' && systemStats.totalDailyCost > 0
+      ? systemStats.totalDailyCost
+      : null;
+  const derivedUnitCost =
     typeof systemStats.avgProductionCost === 'number' && systemStats.avgProductionCost > 0
       ? systemStats.avgProductionCost
       : null;
   const unitCostGap =
-    publishedUnitCost != null && hasPublishedFuelCost
-      ? Math.abs(publishedUnitCost - avgCostPerKwh)
+    derivedUnitCost != null && hasPublishedFuelCost
+      ? Math.abs(derivedUnitCost - avgCostPerKwh)
       : null;
 
   // The page-level strip: its briefings drop over the tab content below, so it
@@ -618,20 +626,14 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <DailyBadge />
           </>
         }
-        // Per unit rather than the day's total: a crore figure means little
-        // without the energy it bought, and the rate is what moves.
-        //
-        // PGCB's own average production cost, not our total-over-total. The two
-        // land within 0.0003 Tk on 2026-08-12, but only one of them is a figure
-        // the report actually states, and the per-fuel rates the division rests
-        // on are cost over generation — the import rate especially is not a
-        // published tariff. Where the report omits the cost block there is no
-        // published rate, and the tile says so rather than dividing anyway.
-        value={publishedUnitCost == null ? '—' : `${publishedUnitCost.toFixed(2)} Tk/kWh`}
+        // The day's published fuel and import bill. Where the report omits the
+        // production-cost block there is no total, and the tile prints a dash
+        // rather than a zero — "0 Cr" would read as a day the grid ran for free.
+        value={publishedDailyCost == null ? '—' : `${(publishedDailyCost / 10000000).toFixed(2)} Cr BDT`}
         hint={
           <GridKpiTrend
-            current={publishedUnitCost}
-            baseline={baseline?.costPerKwh}
+            current={publishedDailyCost}
+            baseline={baseline?.dailyCost}
             days={baseline?.days ?? 0}
             polarity="down-good"
           />
@@ -645,18 +647,23 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         widthClass="w-[18.5rem] md:w-[21rem]"
       >
         <GridKpiTooltipBody>
-          {/* A day whose report carries no production-cost block has no unit
-              rate to show. "0.00 Tk/kWh" would read as free electricity. */}
-          <GridKpiTooltipRow
-            provenance="D"
-            label="Avg production cost (bill ÷ energy):"
-            value={publishedUnitCost == null ? 'not published for this day' : `${publishedUnitCost.toFixed(3)} Tk/kWh`}
-            valueClass="text-primary"
-          />
+          {/* The headline, restated as the row it comes from. A day whose
+              report carries no production-cost block has no total to show;
+              "0.00 Crore" would read as a grid that ran for free. */}
           <GridKpiTooltipRow
             provenance="P"
             label="Fuel bill for the day:"
-            value={`${(systemStats.totalDailyCost / 10000000).toFixed(2)} Crore BDT`}
+            value={
+              publishedDailyCost == null
+                ? 'not published for this day'
+                : `${(publishedDailyCost / 10000000).toFixed(2)} Crore BDT`
+            }
+            valueClass="text-primary"
+          />
+          <GridKpiTooltipRow
+            provenance="D"
+            label="Avg production cost (bill ÷ energy):"
+            value={derivedUnitCost == null ? 'not published for this day' : `${derivedUnitCost.toFixed(3)} Tk/kWh`}
           />
           {/* Shown only when it disagrees with the published rate. Agreement is
               the normal case and a second identical number teaches nothing. */}
@@ -671,10 +678,12 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           <GridKpiTooltipRow provenance="D" label="HFO generation cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
           <GridKpiTooltipRow provenance="D" label="Cross-border imports:" value={fuelUnitRate('Imports')} />
           <GridKpiTooltipAudit>
-            The headline is the average production cost PGCB prints. The per-fuel rates below
-            it are not published tariffs — each is that fuel&rsquo;s cost divided by its
-            generation, and the import rate in particular is a blended settlement figure
-            rather than a contracted price, so read it as an indication.
+            The headline is the production-cost total PGCB prints on P1. The average rate
+            beneath it is ours — the bill divided by the day&rsquo;s energy, not the rate the
+            report states. The per-fuel rates below are not published tariffs either: each is
+            that fuel&rsquo;s cost divided by its generation, and the import rate in particular
+            is a blended settlement figure rather than a contracted price, so read it as an
+            indication.
             <br />
             Fuel and import bills only: capacity payments, debt service and O&amp;M appear
             nowhere on this report, so the true cost of running the grid is higher than any

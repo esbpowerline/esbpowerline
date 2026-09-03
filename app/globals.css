@@ -5376,15 +5376,38 @@ html.theme-dark .locale-toggle__btn--active:hover {
   .grid-explorer-kpi-strip--four .grid-explorer-kpi {
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
+    /* flex-start, not center. Centring the stack meant every tile centred its
+       own content height, so a tile with a two-line trend line pushed its label
+       down relative to its neighbours: measured at 1440px the six labels began
+       at y=42, 42, 49, 49, 57 and 49 — a 15px stagger across the row a reader
+       scans horizontally. The comment on `.grid-explorer-kpi` above claims
+       top-alignment fixes exactly this, and this rule was quietly overriding
+       it. */
+    justify-content: flex-start;
+    gap: 0.25rem;
   }
 
+  /* Out of the flow, into the corner.
+     The icon led the vertical stack, so 22px plus its gap sat above every
+     label and set roughly a quarter of a 122px tile's height without carrying
+     a figure. As a corner mark it still identifies the tile at a glance and
+     costs no height at all. The content block keeps symmetric inline padding
+     so its centred text stays centred while clearing the corner. */
   .grid-explorer-kpi-strip--six .grid-explorer-kpi__icon,
   .grid-explorer-kpi-strip--four .grid-explorer-kpi__icon {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.45rem;
+    height: 13px;
+    width: 13px;
     margin-top: 0;
+    opacity: 0.55;
   }
 
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi:hover .grid-explorer-kpi__icon,
+  .grid-explorer-kpi-strip--four .grid-explorer-kpi:hover .grid-explorer-kpi__icon {
+    opacity: 0.85;
+  }
   /* :first-of-type keeps this off the hover briefing panel, which is also a
      direct div child of the tile (it renders after the content block) —
      width:100% was collapsing it from its own fixed width down to the tile's.
@@ -5396,11 +5419,31 @@ html.theme-dark .locale-toggle__btn--active:hover {
     flex: 0 1 auto;
     width: 100%;
     text-align: center;
+    /* No inline padding. Symmetric padding cannot push centred text away from
+       the corner icon — it leaves the centre where it was and only forces an
+       earlier wrap, which is what it did: "Peak Generation" went to two lines
+       at 1280px and handed back the height the icon had just freed. The icon
+       buys its own clearance through its size and inset instead. */
   }
 
   .grid-explorer-kpi-strip--six .grid-explorer-kpi__label,
   .grid-explorer-kpi-strip--four .grid-explorer-kpi__label {
     justify-content: center;
+  }
+}
+
+/* The narrow end of the six-column range.
+   1280px is where six tiles first share the row, so each is ~190px — the one
+   width at which the longest label ("Peak Generation" plus its cadence badge
+   and provenance mark) reaches the corner icon, measured overlapping it by
+   5px. The icon tucks further into the corner here rather than the label
+   wrapping, which would hand back the height this whole change just freed. */
+@media (min-width: 1280px) and (max-width: 1365px) {
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi__icon {
+    top: 0.45rem;
+    right: 0.2rem;
+    height: 11px;
+    width: 11px;
   }
 }
 
@@ -12653,8 +12696,14 @@ iframe::-webkit-scrollbar-track {
   @apply font-normal text-muted-foreground;
 }
 
+/* `shrink-0` pinned this to its max-content width. The gas-day label spells out
+   both ends of the window ("Gas day: 02-03 Sep, 2026 · 2 Sep 08:00 → …"), which
+   at 1024px measured 254px inside a 233px panel: flex-wrap dropped it to its own
+   line as intended, and it then overflowed that line by 20px, printing the date
+   outside the hover shell. It may shrink now, so the text wraps inside the panel
+   instead of running past it. */
 .grid-kpi-cite__date {
-  @apply shrink-0 text-muted-foreground/80 ml-auto text-right;
+  @apply min-w-0 text-muted-foreground/80 ml-auto text-right;
 }
 
 .grid-kpi-cite__row {

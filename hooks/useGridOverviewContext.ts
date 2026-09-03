@@ -16,6 +16,11 @@ export interface OverviewBaseline {
   peakSupply: number | null;
   peakDeficit: number | null;
   costPerKwh: number | null;
+  /** Mean of P1's printed "Production Cost (Tk.)" total row, in Taka. The
+   *  Cost of Power tile headlines that published total, so its trend has to
+   *  compare against the same quantity — trending a total against a mean of
+   *  per-unit rates would move for reasons the headline never shows. */
+  dailyCost: number | null;
   /** How many of the requested days actually answered. */
   days: number;
 }
@@ -97,11 +102,19 @@ export function useGridOverviewContext(
         )
         .filter((n): n is number => n != null);
 
+      // A day whose report carries no production-cost block prints 0 here; that
+      // is an omission, not a day the country generated for free, so it is
+      // dropped from the mean rather than pulling it down.
+      const dailyCosts = stats
+        .map((s) => (typeof s.totalDailyCost === 'number' && s.totalDailyCost > 0 ? s.totalDailyCost : null))
+        .filter((n): n is number => n != null);
+
       setBaseline({
         peakDemand: mean(nums((s) => s.eveningPeakDemand)),
         peakSupply: mean(nums((s) => s.eveningPeakGen)),
         peakDeficit: mean(deficits),
         costPerKwh: mean(unitCosts),
+        dailyCost: mean(dailyCosts),
         days: stats.length,
       });
     });
