@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # The poll that runs on the Raspberry Pi, four times a day, from cron.
 #
-# GitHub Actions was the plan (.github/workflows/ingest.yml, still in the repo)
-# and it never ran: every dispatch on chiefhamim/esbpowerline ends in
-# `startup_failure`, including a one-line `echo hello` workflow, so Actions is
-# blocked at the account level rather than by the workflow (2026-09-03). The Pi
-# is a better host anyway — it is on a Bangladeshi connection, so PGCB's ERP and
-# Petrobangla see a local visitor, and it is already up 24/7 for the seedbox.
+# GitHub Actions was the plan and it never ran: every dispatch on
+# chiefhamim/esbpowerline ends in `startup_failure`, including a one-line
+# `echo hello` workflow, so Actions is blocked at the account level rather
+# than by the workflow. The workflow was removed on 2026-09-03 — each
+# scheduled tick emailed Hamim a startup failure. The Pi is a better host
+# anyway — it is on a Bangladeshi connection, so PGCB's ERP and Petrobangla
+# see a local visitor, and it is already up 24/7 for the seedbox.
 #
 # Layout it expects, all created by the setup (see CLAUDE.md § Ingestion):
 #   ~/esb-ingest/repo        clone of `authenticating`, deploy-key remote

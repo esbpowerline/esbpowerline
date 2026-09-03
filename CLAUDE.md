@@ -228,11 +228,12 @@ with the ledger committed, gzipped `pg_dump` kept 14 deep) and `scripts/pi-weekl
 `pi-ingest.sh`; the short version is that downloads are atomic, torn workbooks are
 refetched, and the next poll finishes whatever the last one did not.
 
-`.github/workflows/ingest.yml` is the same job for GitHub Actions and has **never run**:
-every dispatch on this account ends in `startup_failure`, including a one-line `echo`
-workflow, so Actions is blocked at the account level rather than by the file. Kept in
-case that is ever cleared. The Pi is the better host anyway — it is on a Bangladeshi
-connection, so PGCB's ERP and Petrobangla see a local visitor.
+GitHub Actions was tried first and **removed** (2026-09-03): every dispatch on this
+account ends in `startup_failure` — including a one-line `echo` workflow, so the block
+is account-level, not the file — and each scheduled tick emailed Hamim a failure. The
+workflow and its `DATABASE_URL` secret are deleted; do not re-add an Actions job
+without checking the account block is lifted. The Pi is the better host anyway — it is
+on a Bangladeshi connection, so PGCB's ERP and Petrobangla see a local visitor.
 
 Off the Windows box every archive path is an env var: `ESB_PGCB_ARCHIVE`,
 `ESB_DAILY_REPORTS_ROOT`, `ESB_SOURCE_INDEX`. The Pi holds ~365 MB of npm packages for
