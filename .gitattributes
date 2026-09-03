@@ -1,1 +1,12 @@
+# The Pi runs the daily poll and this box still ingests by hand, so the same
+# file gets written on Linux and on Windows. Several publishers' writers emit
+# CRLF deliberately (build_forward_forecast.py says so in a comment); on
+# Windows autocrlf normalised that away on commit and on the Pi it did not, so
+# the first scheduled run rewrote a forecast file end to end with no change to
+# a single figure (2026-09-03). The archive is stored LF — 300 sampled blobs,
+# all LF — so pin it there and let either machine write what it likes on disk.
+public/data/**/*.json text eol=lf
+lib/available-dates.json text eol=lf
+
+# Executable as checked out, whichever machine clones it.
 scripts/pi-ingest.sh text eol=lf
