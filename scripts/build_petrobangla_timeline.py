@@ -70,14 +70,26 @@ def main():
     ok = [r for r in rows if r["parse_status"] == "ok" and not r["quarantined"]]
     peak = max(ok, key=lambda r: r["total_gas"]) if ok else None
     low = min(ok, key=lambda r: r["total_gas"]) if ok else None
-    OUT.write_text(json.dumps({
+    doc = {
         "generated_at": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
         "total_days": len(rows),
         "ok_days": len(ok),
         "peak": {"date": peak["date"], "gas": peak["total_gas"]} if peak else None,
         "low": {"date": low["date"], "gas": low["total_gas"]} if low else None,
         "days": rows,
-    }, indent=2), encoding="utf-8")
+    }
+    # A rebuild with no new day must not rewrite the file: the only difference
+    # would be the stamp, and the scheduled poll was committing and
+    # republishing that four times a day (2026-09-03). See build_aggregates.
+    if OUT.exists():
+        try:
+            current = json.loads(OUT.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            current = None
+        if isinstance(current, dict) and {k: v for k, v in current.items() if k != "generated_at"} == {k: v for k, v in doc.items() if k != "generated_at"}:
+            print(f"Unchanged: {len(rows)} days already in {OUT}")
+            return
+    OUT.write_text(json.dumps(doc, indent=2), encoding="utf-8")
     print(f"Wrote {len(rows)} days to {OUT}")
 
 

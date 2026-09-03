@@ -30,6 +30,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PB = ROOT / "public" / "data" / "petrobangla"
 DAILY = PB / "daily"
+def write_if_changed(path: Path, doc: dict, stamp: str = "generated_at") -> bool:
+    """Write `doc` unless the file already holds the same content bar the stamp.
+
+    Keeps the previous stamp in that case, so `generated_at` keeps meaning
+    "when the content last changed" rather than "when the poll last ran".
+    """
+    if path.exists():
+        try:
+            current = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            current = None
+        if isinstance(current, dict):
+            a = {k: v for k, v in current.items() if k != stamp}
+            b = {k: v for k, v in doc.items() if k != stamp}
+            if a == b:
+                return False
+    path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+    return True
+
+
 INDEX = PB / "_index.json"
 LIVE_WEEK = PB / "_live_week.json"
 TIMELINE = PB / "timeline-summary.json"
@@ -148,8 +168,13 @@ def main() -> None:
         }))
         return
 
-    INDEX.write_text(json.dumps(index, indent=2), encoding="utf-8")
-    LIVE_WEEK.write_text(json.dumps(live_week, indent=2), encoding="utf-8")
+    # Only touch the files when a figure changed. Every scheduled poll rebuilds
+    # these, and a rebuild with nothing new differed from the last one by the
+    # `generated_at` stamp alone — which the Pi then committed, pushed and
+    # republished four times a day as if the archive had moved (2026-09-03).
+    # A stamp is not a change.
+    write_if_changed(INDEX, index)
+    write_if_changed(LIVE_WEEK, live_week)
 
     # --- timeline-summary.json : full rebuild -----------------------------
     proc = subprocess.run(
