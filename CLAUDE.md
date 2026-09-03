@@ -206,11 +206,32 @@ Python parsers own every number on the site. They carry years of source-quirk kn
   under a `.pdf` URL, and a parser fed HTML produces confident nonsense.
 - A step that wrote nothing must **fail**, not report success.
 - `/api/cron/ingest` is **disabled on Vercel** (returns 503); the Python chain exceeds
-  serverless compute limits. Ingestion runs locally or on the GitHub Actions job
-  (`.github/workflows/ingest.yml`, four polls a day over the trailing three days via
-  `scripts/ingest_recent_days.py`; free minutes, no deploy — releases carry the day to the
-  site). Off the Windows box the archive paths come from `ESB_PGCB_ARCHIVE` and
-  `ESB_DAILY_REPORTS_ROOT`. Only `/api/cron/publish-scheduled` runs on Vercel, every 15 min.
+  serverless compute limits. Only `/api/cron/publish-scheduled` runs on Vercel, every
+  15 min.
+
+### The scheduled poll runs on the Raspberry Pi
+
+`scripts/pi-ingest.sh`, from cron at 09:30 / 12:30 / 16:30 / 21:30 Dhaka, over the
+trailing three energy days (`scripts/ingest_recent_days.py`). It publishes DataRelease
+rows and pushes `public/data` to `authenticating`; **nothing redeploys** — releases carry
+the day to the live site. No cost on any plan.
+
+`.github/workflows/ingest.yml` is the same job for GitHub Actions and has **never run**:
+every dispatch on this account ends in `startup_failure`, including a one-line `echo`
+workflow, so Actions is blocked at the account level rather than by the file. Kept in
+case that is ever cleared. The Pi is the better host anyway — it is on a Bangladeshi
+connection, so PGCB's ERP and Petrobangla see a local visitor.
+
+Off the Windows box every archive path is an env var: `ESB_PGCB_ARCHIVE`,
+`ESB_DAILY_REPORTS_ROOT`, `ESB_SOURCE_INDEX`. The Pi holds ~365 MB of npm packages for
+`publish-local.ts` alone, symlinked in as `node_modules` — a full install does not fit on
+that card.
+
+Two things that only appear when the same day is built on both machines, both fixed and
+both worth knowing about: a parser that split a path on backslashes alone published an
+absolute POSIX path as the gas document's *name*, and a writer that deliberately emits
+CRLF rewrote a whole file with no figure changed. `.gitattributes` pins the published
+archive to LF for that reason.
 
 ### Publishing
 
