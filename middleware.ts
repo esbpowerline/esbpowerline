@@ -18,6 +18,7 @@ import {
   isProtectedDataJsonPath,
   canonicalDataPath,
   dataPathIsoDate,
+  normalizeRequestPath,
 } from '@/lib/data/grid/daily-access';
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import {
@@ -144,7 +145,9 @@ function redirectWithCookies(
 }
 
 export async function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  // Gate on the path the file system will resolve, not the path as typed:
+  // see normalizeRequestPath for the percent-encoding bypass this closes.
+  const pathname = normalizeRequestPath(request.nextUrl.pathname);
 
   // The news index no longer takes query strings: `?category=`, `?sort=` and
   // `?page=` each became a real page in Stage 4 of the SEO fix. Google holds

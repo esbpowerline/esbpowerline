@@ -1,2 +1,0 @@
-export { GridSourceFooterLinks as default, GridSourceFooterLinks } from '@/components/news/power-grid/GridExplorerUI';
-export type { GridSourceLink as FooterLink, GridSourceLink } from '@/components/news/power-grid/GridExplorerUI';

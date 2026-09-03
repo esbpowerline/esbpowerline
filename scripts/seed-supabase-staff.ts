@@ -6,7 +6,7 @@ import {
   MASTER_ADMIN_EMAIL,
   MASTER_ADMIN_NAME,
 } from '../lib/staff-accounts';
-import { seedPasswordForEmail } from '../lib/seed-credentials';
+import { seedPasswordForEmail, isProductionSeedTarget } from '../lib/seed-credentials';
 import { upsertAuthUserWithClient } from '../lib/supabase/auth-user-sync';
 
 config({ path: '.env.local' });
@@ -24,8 +24,12 @@ const STAFF_ACCOUNTS: StaffSeedAccount[] = [
 ];
 
 async function main() {
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_PRODUCTION_SEED !== 'true') {
-    console.error('❌ Refusing to seed Supabase staff: set ALLOW_PRODUCTION_SEED=true to override in production.');
+  // Keyed on the TARGET project, not NODE_ENV — see isProductionSeedTarget.
+  if (isProductionSeedTarget() && process.env.ALLOW_PRODUCTION_SEED !== 'true') {
+    console.error(
+      '❌ Refusing to seed: NEXT_PUBLIC_SUPABASE_URL points at a hosted Supabase project. ' +
+        'Set ALLOW_PRODUCTION_SEED=true and explicit MASTER_ADMIN_PASSWORD / EDITOR_PASSWORD to override.',
+    );
     process.exit(1);
   }
 

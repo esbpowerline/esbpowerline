@@ -80,6 +80,38 @@ const DATED_JSON_RE = new RegExp(
  * and apply to both — a second copy for the API twin is precisely the kind of
  * thing that drifts and quietly opens a hole.
  */
+/**
+ * The path as the file system will see it, for gating.
+ *
+ * `request.nextUrl.pathname` is the path as SENT, and Next decodes it before
+ * matching a static file. So `/data/d%61ily/2013-12-31.json` did not match
+ * the gate's regex, was waved through as public, and was then served as
+ * `/data/daily/2013-12-31.json` — every paid day, one percent sign away.
+ * Reproduced live 2026-08-08 and still live 2026-09-03 (403 for the plain
+ * path, 200 with real figures for the encoded one).
+ *
+ * Decoding repeats until the string is stable so a double-encoded `%2561`
+ * cannot slip through either; that is strictly conservative, since a path that
+ * needed two decodes never matches a real file and 404s regardless. A malformed
+ * sequence keeps the raw path — a request Next itself will reject.
+ */
+export function normalizeRequestPath(pathname: string): string {
+  let current = pathname;
+  for (let i = 0; i < 3; i += 1) {
+    if (!current.includes('%')) break;
+    let decoded: string;
+    try {
+      decoded = decodeURIComponent(current);
+    } catch {
+      break;
+    }
+    if (decoded === current) break;
+    current = decoded;
+  }
+  // Collapse duplicate separators; `/data//daily/x.json` also reaches the file.
+  return current.replace(/\/{2,}/g, '/');
+}
+
 export function canonicalDataPath(pathname: string): string {
   return pathname.startsWith('/api/data/') ? pathname.slice('/api'.length) : pathname;
 }

@@ -80,10 +80,21 @@ export async function updateProfile(data: {
     }
   }
 
-  if (data.email && data.email !== user.email) {
-    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+  // Emails are one identity regardless of case. The check used to be
+  // case-SENSITIVE against a plain-text unique column while Supabase Auth
+  // resolves users case-INsensitively, so an editor could set their email to
+  // `Admin@…`, pass this check, and be resolved as the admin's account on the
+  // next auth sync (audit finding, 2026-08-08). Lower-case on write and check
+  // the same way; the `User_email_lower_key` index enforces it in the database
+  // whatever path a write takes.
+  const nextEmailNormalized = data.email?.trim().toLowerCase();
+  if (nextEmailNormalized && nextEmailNormalized !== user.email.toLowerCase()) {
+    const existing = await prisma.user.findFirst({
+      where: { email: { equals: nextEmailNormalized, mode: 'insensitive' } },
+      select: { id: true },
+    });
     if (existing) throw new Error('Email already in use');
-    updateData.email = data.email;
+    updateData.email = nextEmailNormalized;
   }
 
   if (data.avatar !== undefined) {
