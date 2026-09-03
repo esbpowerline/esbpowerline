@@ -20,6 +20,11 @@
 # Load shedding is not a problem worth engineering around: every run re-does the
 # trailing three energy days, so a poll missed while the power is out is picked
 # up by the next one.
+#
+# cron runs the COPY at ~/esb-ingest/pi-ingest.sh, not this file in the repo:
+# the run does `git reset --hard`, and bash reads a script incrementally, so
+# rewriting the file being executed can drop it mid-run. The copy is refreshed
+# from the repo at the end of each run, so an edit here lands on the next poll.
 set -uo pipefail
 
 ROOT="$HOME/esb-ingest"
@@ -74,5 +79,13 @@ else
 fi
 
 find "$LOGS" -name '*.log' -mtime +30 -delete
+
+# Pick up any change to this script for the next run (see the note at the top).
+if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
+    cp "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"
+    chmod +x "$ROOT/pi-ingest.sh"
+    echo "runner updated from the repo — effective next poll"
+fi
+
 echo "=== $(date -Is) — exit $status ==="
 exit $status
