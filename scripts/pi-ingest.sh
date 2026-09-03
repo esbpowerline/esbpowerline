@@ -10,16 +10,25 @@
 #
 # Layout it expects, all created by the setup (see CLAUDE.md § Ingestion):
 #   ~/esb-ingest/repo        clone of `authenticating`, deploy-key remote
-#   ~/esb-ingest/deps        the eight npm packages publish-local.ts needs,
-#                            symlinked in as repo/node_modules (a full install
-#                            is ~1.4 GB and this card has ~1.6 GB spare)
+#   ~/esb-ingest/deps        the npm packages publish-local.ts needs, symlinked
+#                            in as repo/node_modules (a full install is ~1.4 GB)
 #   ~/esb-ingest/venv        pandas, openpyxl, pypdf, pymupdf
 #   ~/esb-ingest/state       workbook archive, extractor drop, source index
 #   ~/esb-ingest/logs        one log per run, pruned to 30 days
 #
-# Load shedding is not a problem worth engineering around: every run re-does the
-# trailing three energy days, so a poll missed while the power is out is picked
-# up by the next one.
+# What happens when the power goes mid-run — which on this mains supply is a
+# matter of when, not if:
+#   * Every run starts with `git reset --hard origin/authenticating`, so a
+#     half-written file in the repo is discarded, never committed.
+#   * Downloads are written to a temp name and renamed, and a workbook is only
+#     reused after its zip directory reads whole (download.py), so a torn file
+#     is refetched rather than trusted.
+#   * Publishing is per release row; a cut between rows leaves a day partly
+#     published, and the next poll — which re-does the same three days —
+#     publishes the rest. Worst case is a few hours with a day's KPIs live and
+#     its curve tab saying the curve is not held yet.
+#   * The cron lock below means an overlapping poll after a reboot simply
+#     exits; the timeout means a hung publisher cannot pin the Pi forever.
 #
 # cron runs the COPY at ~/esb-ingest/pi-ingest.sh, not this file in the repo:
 # the run does `git reset --hard`, and bash reads a script incrementally, so
@@ -34,11 +43,23 @@ LOGS="$ROOT/logs"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 LOG="$LOGS/$STAMP.log"
 DAYS="${ESB_INGEST_DAYS:-3}"
+NOTIFY="$ROOT/pi-notify.sh"
+SITE="${ESB_SITE_URL:-https://esbpowerline.com}"
 
 mkdir -p "$STATE/pgcb-archive" "$STATE/daily-reports" "$LOGS"
 exec >>"$LOG" 2>&1
 
+notify() { [[ -x "$NOTIFY" ]] && "$NOTIFY" "$@"; }
+
 echo "=== $(date -Is) — trailing $DAYS days ==="
+
+# One poll at a time. A reboot mid-run and a cron tick can otherwise overlap,
+# and two chains writing the same day file is the one way to corrupt it.
+exec 9>"$ROOT/.ingest.lock"
+if ! flock -n 9; then
+    echo "another poll is still running — leaving it to finish"
+    exit 0
+fi
 
 # Every path the chain would otherwise resolve to a Windows drive.
 export ESB_PGCB_ARCHIVE="$STATE/pgcb-archive"
@@ -55,24 +76,85 @@ export PYTHONUTF8=1
 export PATH="$HOME/.local/node/bin:$PATH"
 export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/esb_deploy_key -o IdentitiesOnly=yes"
 
-cd "$REPO" || exit 1
+cd "$REPO" || { notify error "ingest: repo missing" "$REPO is not a checkout"; exit 1; }
 
 # Refuse to run on a machine that has lost its clock: the window is computed as
 # "yesterday in Dhaka", so a wrong date silently ingests the wrong days.
 if ! timedatectl show -p NTPSynchronized --value | grep -q yes; then
     echo "! clock is not NTP-synchronised — refusing to guess which day it is"
+    notify error "ingest: clock not synchronised" "refusing to run until NTP agrees"
     exit 1
+fi
+
+# The SD card is the scarce resource on this box (Jellyfin refuses to start
+# under 2 GiB free). A poll that fills it would take the media server down.
+FREE_MB=$(df -Pm "$HOME" | awk 'NR==2{print $4}')
+if [[ "${FREE_MB:-0}" -lt 1024 ]]; then
+    echo "! only ${FREE_MB} MB free on the card — refusing to write"
+    notify error "ingest: disk nearly full" "${FREE_MB} MB free on the SD card; poll skipped"
+    exit 1
+fi
+
+# Before doing anything new: is what the LAST poll published actually what the
+# live site serves? Assume it is not until proven. The edge cache turns over
+# within ten minutes, and polls are hours apart, so a mismatch here is real.
+if [[ -f "$STATE/last-published.json" ]]; then
+    "$ROOT/venv/bin/python" - "$STATE/last-published.json" "$SITE" <<'PY' || notify warn "ingest: live site disagrees with last publish" "$(tail -1 "$LOG")"
+import hashlib, json, sys, urllib.request
+# Compare VALUES, not bytes: the release layer re-serialises, so 17.0 comes
+# back as 17 and a byte hash of the two disagrees while every figure agrees.
+def norm(o):
+    if isinstance(o, dict): return {k: norm(v) for k, v in o.items()}
+    if isinstance(o, list): return [norm(v) for v in o]
+    if isinstance(o, float) and o.is_integer(): return int(o)
+    return o
+def digest(o): return hashlib.sha256(json.dumps(norm(o), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+state = json.load(open(sys.argv[1]))
+day, want = state["day"], state["sha256"]
+req = urllib.request.Request(f"{sys.argv[2]}/api/data/daily/{day}.json", headers={
+    "User-Agent": "Mozilla/5.0 (esb-pi-verify)", "Referer": f"{sys.argv[2]}/grid-explorer"})
+try:
+    body = urllib.request.urlopen(req, timeout=30).read()
+except Exception as e:
+    print(f"live check: could not fetch {day}: {e}"); sys.exit(0)  # network, not a publish fault
+got = digest(json.loads(body))
+if got != want:
+    print(f"live check: {day} on the site differs from what was published ({got[:12]} vs {want[:12]})"); sys.exit(1)
+print(f"live check: {day} matches what was published")
+PY
 fi
 
 # A dirty tree means a previous run half-failed. Reset rather than pile on:
 # the archive of record is what is on the remote, and every file this chain
 # writes is reproducible from the sources.
-git fetch -q origin authenticating || { echo "! fetch failed"; exit 1; }
+git fetch -q origin authenticating || { echo "! fetch failed"; notify error "ingest: git fetch failed" "GitHub unreachable or deploy key rejected"; exit 1; }
 git checkout -q authenticating
 git reset -q --hard origin/authenticating
 
-"$ROOT/venv/bin/python" scripts/ingest_recent_days.py --days "$DAYS"
+timeout 1500 "$ROOT/venv/bin/python" scripts/ingest_recent_days.py --days "$DAYS"
 status=$?
+if [[ $status -eq 124 ]]; then
+    echo "! chain timed out after 25 minutes"
+    notify error "ingest: timed out" "chain killed after 25 min; see $LOG"
+elif [[ $status -ne 0 ]]; then
+    notify error "ingest: a day failed" "$(grep -E '^\| 20' "$LOG" | grep -v published | tail -3)"
+fi
+
+# Remember what the newest held day looks like, for the live check next poll.
+"$ROOT/venv/bin/python" - "$STATE/last-published.json" <<'PY'
+import hashlib, json, sys
+def norm(o):
+    if isinstance(o, dict): return {k: norm(v) for k, v in o.items()}
+    if isinstance(o, list): return [norm(v) for v in o]
+    if isinstance(o, float) and o.is_integer(): return int(o)
+    return o
+dates = json.load(open("lib/available-dates.json"))
+day = dates[-1]
+doc = json.load(open(f"public/data/daily/{day}.json", encoding="utf-8"))
+sha = hashlib.sha256(json.dumps(norm(doc), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+json.dump({"day": day, "sha256": sha}, open(sys.argv[1], "w"))
+print(f"recorded {day} {sha[:12]} for the next live check")
+PY
 
 # Commit only data paths. The chain must never be able to push code from here.
 git add public/data lib/available-dates.json
@@ -81,9 +163,24 @@ if git diff --cached --quiet; then
 else
     days=$(git diff --cached --name-only -- public/data/daily | sed -E 's#.*/([0-9-]+)\.json#\1#' | sort | tr '\n' ' ')
     git commit -q -m "chore(data): ingest energy day(s) ${days:-refresh} from the scheduled poll"
-    git pull -q --rebase origin authenticating && git push -q origin HEAD:authenticating \
-        && echo "pushed: ${days:-refresh}" || echo "! push failed — the release rows are live, the commit is not"
+    if git pull -q --rebase origin authenticating && git push -q origin HEAD:authenticating; then
+        echo "pushed: ${days:-refresh}"
+    else
+        echo "! push failed — the release rows are live, the commit is not"
+        notify warn "ingest: push failed" "release rows are live; commit for ${days:-refresh} not pushed"
+    fi
 fi
+
+# How far behind is the archive? Two days back is PGCB being slow; three is us.
+"$ROOT/venv/bin/python" - <<'PY' || notify warn "ingest: archive falling behind" "$(tail -1 "$LOG")"
+import json, datetime, sys
+dates = json.load(open("lib/available-dates.json"))
+latest = datetime.date.fromisoformat(dates[-1])
+today = (datetime.datetime.utcnow() + datetime.timedelta(hours=6)).date()
+behind = (today - datetime.timedelta(days=1) - latest).days
+print(f"newest held day {latest}, {behind} day(s) behind the newest that can exist")
+sys.exit(1 if behind >= 3 else 0)
+PY
 
 find "$LOGS" -name '*.log' -mtime +30 -delete
 
@@ -93,6 +190,12 @@ if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
     chmod +x "$ROOT/pi-ingest.sh"
     echo "runner updated from the repo — effective next poll"
 fi
+for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh; do
+    if [[ -f "$REPO/scripts/$helper" ]] && ! cmp -s "$REPO/scripts/$helper" "$ROOT/$helper"; then
+        cp "$REPO/scripts/$helper" "$ROOT/$helper"; chmod +x "$ROOT/$helper"
+        echo "$helper updated from the repo"
+    fi
+done
 
 echo "=== $(date -Is) — exit $status ==="
 exit $status

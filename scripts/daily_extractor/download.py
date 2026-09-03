@@ -65,19 +65,48 @@ def download_erp_by_id(fid: int, dest_dir: Path | None = None) -> Path | None:
     dest_dir.mkdir(parents=True, exist_ok=True)
     for ext in ("xlsx", "xlsm", "xls"):
         dest = dest_dir / f"erp_{fid}.{ext}"
+        # A size check alone trusted a workbook cut short by a power cut mid-write
+        # (the Pi runs this on a mains supply that drops most days), and a
+        # truncated file over 20 KB would have been reused on every later run.
+        # Ask the archive whether it is whole; if not, throw it away and refetch.
         if dest.exists() and dest.stat().st_size > 20000:
-            return dest
+            if _workbook_is_whole(dest):
+                return dest
+            dest.unlink(missing_ok=True)
         loc = urllib.parse.quote(f"erp/web/report_docs/{fid}.{ext}", safe="")
         url = f"https://erp.powergrid.gov.bd/web/files/download?location={loc}&title=Daily"
         try:
             data = fetch(url)
             if data[:2] != b"PK" or len(data) < 20000:
                 continue
-            dest.write_bytes(data)
+            _write_atomic(dest, data)
+            if not _workbook_is_whole(dest):
+                dest.unlink(missing_ok=True)
+                continue
             return dest
         except Exception:
             continue
     return None
+
+
+def _workbook_is_whole(path: Path) -> bool:
+    """A .xlsx/.xlsm is a zip; a torn one fails the central-directory read."""
+    if path.suffix.lower() == ".xls":
+        return path.stat().st_size > 20000
+    try:
+        import zipfile
+
+        with zipfile.ZipFile(path) as zf:
+            return zf.testzip() is None and any(n.startswith("xl/") for n in zf.namelist())
+    except Exception:
+        return False
+
+
+def _write_atomic(dest: Path, data: bytes) -> None:
+    """Write to a sibling temp file and rename, so a cut leaves nothing half-written."""
+    tmp = dest.with_name(dest.name + ".part")
+    tmp.write_bytes(data)
+    tmp.replace(dest)
 
 
 def probe_erp_for_energy(energy: date, start_id: int | None = None) -> tuple[Path | None, int | None]:
@@ -148,7 +177,7 @@ def try_pgcb_legacy(report_date: date, dest_dir: Path | None = None) -> Path | N
             data = fetch(url)
             if len(data) < 5000 or data[:2] != b"PK":
                 continue
-            dest.write_bytes(data)
+            _write_atomic(dest, data)
             return dest
         except Exception:
             continue
@@ -271,7 +300,7 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
         filed = energy + timedelta(days=1)
         stamp = f"{filed.day:02d}.{filed.month:02d}.{str(filed.year)[-2:]}"
         dest = dest_dir / f"Daily-Gas-Intake-Offtake-Report ({stamp}).pdf"
-        dest.write_bytes(data)
+        _write_atomic(dest, data)
         try:
             import pypdf
 
