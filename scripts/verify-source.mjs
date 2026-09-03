@@ -342,7 +342,15 @@ const fetchDay = (day) =>
       (err, stdout) => {
         if (err && !stdout) return resolve({ ok: false, error: err.message });
         try {
-          resolve(JSON.parse(stdout));
+          // The bridge prints one JSON document last, but not necessarily
+          // alone: on the Pi's first nightly a stray `warning:` line landed on
+          // stdout ahead of it and 2026-09-01 was scored UNFETCHED for a parse
+          // error, not a fetch failure (2026-09-03). Take the last JSON object
+          // rather than trusting the whole stream — same rule as
+          // ingest_recent_days._last_json.
+          const start = stdout.startsWith('{') ? 0 : stdout.lastIndexOf('\n{');
+          if (start < 0) throw new Error(`no JSON object in output: ${stdout.slice(0, 80)}`);
+          resolve(JSON.parse(stdout.slice(start)));
         } catch (e) {
           resolve({ ok: false, error: `unparseable bridge output: ${e.message}` });
         }

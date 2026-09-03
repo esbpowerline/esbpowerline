@@ -41,38 +41,14 @@ else
 fi
 
 # --- 2. media bucket mirror ----------------------------------------------------
-SUPA_URL=$(grep '^NEXT_PUBLIC_SUPABASE_URL=' "$REPO/.env.local" | cut -d= -f2- | tr -d '"')
-ANON=$(grep '^NEXT_PUBLIC_SUPABASE_ANON_KEY=' "$REPO/.env.local" | cut -d= -f2- | tr -d '"')
-if [[ -n "$SUPA_URL" && -n "$ANON" ]]; then
-    "$ROOT/venv/bin/python" - "$SUPA_URL" "$ANON" "$ROOT/backups/media" <<'PY' || notify warn "media mirror failed" "see the weekly log"
-import json, os, sys, urllib.request
-base, anon, dest = sys.argv[1], sys.argv[2], sys.argv[3]
-def api(path, body=None):
-    req = urllib.request.Request(f"{base}/storage/v1/{path}", data=json.dumps(body).encode() if body is not None else None,
-        headers={"apikey": anon, "Authorization": f"Bearer {anon}", "Content-Type": "application/json"}, method="POST" if body is not None else "GET")
-    return urllib.request.urlopen(req, timeout=60).read()
-def walk(prefix=""):
-    offset = 0
-    while True:
-        rows = json.loads(api("object/list/media", {"prefix": prefix, "limit": 1000, "offset": offset}))
-        if not rows: break
-        for r in rows:
-            name = f"{prefix}{r['name']}" if prefix == "" else f"{prefix}/{r['name']}"
-            if r.get("id") is None: yield from walk(name)      # folder
-            else: yield name, (r.get("metadata") or {}).get("size")
-        offset += len(rows)
-        if len(rows) < 1000: break
-new = kept = 0
-for name, size in walk():
-    out = os.path.join(dest, name)
-    if os.path.exists(out) and (size is None or os.path.getsize(out) == size): kept += 1; continue
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    data = urllib.request.urlopen(f"{base}/storage/v1/object/public/media/{name}", timeout=120).read()
-    tmp = out + ".part"; open(tmp, "wb").write(data); os.replace(tmp, out); new += 1
-print(f"media mirror: {new} fetched, {kept} already held")
-PY
-else
-    echo "media mirror skipped: NEXT_PUBLIC_SUPABASE_URL / ANON key not in .env.local"
+# Listing comes from Postgres, not the Storage API: the anon key can read
+# public objects but cannot LIST them (RLS, no anon policy), and the first
+# version of this step "mirrored" an empty listing as success while the bucket
+# held 659 files. pi_media_mirror.mjs exits non-zero on a zero listing, a
+# query failure, or any file it could not fetch — a backup that backed up
+# nothing must never look like one that did.
+if ! timeout 1200 node scripts/pi_media_mirror.mjs "$ROOT/backups/media" ; then
+    notify warn "media mirror failed or incomplete" "see $LOG"
 fi
 
 echo "=== weekly done $(date -Is) ==="
