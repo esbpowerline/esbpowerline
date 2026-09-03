@@ -710,13 +710,24 @@
   --staff-warn: var(--admin-yellow);
   --staff-bad: var(--admin-red);
 
-  /* Type scale. The surface previously mixed 10/11/12/13/14px arbitrarily and
-     10px meta text was below comfortable reading size at a desk. */
-  --fs-micro: 11px;
+  /* Type scale, with actual steps.
+     Measured before this: 22 / 15 / 13 / 12 / 11.5 / 11 — six sizes inside
+     11px, four of them within 4px of each other, which reads as noise rather
+     than hierarchy. And the stat value was 28px against a 22px page title, so
+     a count on a tile outranked the heading of the page holding it.
+
+     The steps below are deliberate and the order is the argument: on a desk
+     tool the DATA leads, the page title is a label rather than a headline
+     ("Welcome, System Admin" is the least useful text on the screen), and a
+     card title is a section marker, not a headline — so it drops below body
+     size and earns its rank from weight instead. */
+  --fs-micro: 10.5px;
   --fs-meta: 11.5px;
   --fs-body: 13px;
-  --fs-title: 13.5px;
-  --fs-h2: 15px;
+  --fs-title: 13px;
+  --fs-h2: 13.5px;
+  --fs-page: 19px;
+  --fs-display: 26px;
   background:
     radial-gradient(ellipse 80% 50% at 0% 0%, hsl(var(--admin-rose) / 0.06), transparent 50%),
     radial-gradient(ellipse 60% 40% at 100% 100%, hsl(var(--admin-violet) / 0.05), transparent 50%),
@@ -865,11 +876,14 @@
   color: hsl(var(--muted-foreground) / 0.6);
 }
 
+/* 0.5rem padding around a 22px icon made every row 43px tall, so eleven
+   destinations filled the sidebar's full height and the groups stopped
+   reading as groups. */
 .admin-nav-item {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.5625rem;
+  padding: 0.3125rem 0.75rem;
   margin: 0 0.25rem;
   border-radius: 9999px;
   font-size: 13px;
@@ -1323,8 +1337,8 @@
 
   .admin-page-icon,
   .cms-write-page__icon {
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 1.875rem;
+    height: 1.875rem;
   }
 
   .admin-stat-card {
@@ -1824,8 +1838,8 @@ a.admin-card-footer:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 1.875rem;
+  height: 1.875rem;
   border-radius: var(--r-md);
   background: hsl(var(--staff-accent) / 0.1);
   border: 1px solid hsl(var(--staff-accent) / 0.18);
@@ -1833,10 +1847,10 @@ a.admin-card-footer:hover {
 }
 
 .admin-page-title {
-  font-size: 1.375rem;
-  font-weight: 650;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  font-size: var(--fs-page);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .admin-page-desc {
@@ -1855,10 +1869,14 @@ a.admin-card-footer:hover {
 }
 
 /* Stat card.
-   Three fixed grid rows — label, value, delta — so a tile WITH a sub-label and
-   one without still align on every baseline. The old version was a flex column
-   and equalised itself by rendering an invisible `&nbsp;`, which is why the
-   dashboard's second row of tiles never lined up with the first. */
+   Measured: a tile with no second line was 212x122 holding 67px of ink — 55%
+   of the box, with 37px of nothing under the number — while a tile that had
+   one reached 72%. So the strip was both over-tall AND unevenly filled, which
+   is what makes a KPI row read as generic: a big container saying one small
+   thing. The answer is not to pad the content, it is to give every tile a
+   real second line (see the dashboard, where each now carries its own share
+   or context) and to take the surplus height out of the box.
+   Three fixed rows keep the values on one baseline across the strip. */
 /* Rows: label, value, then the delta takes the slack. Putting the slack in
    the MIDDLE row pushed the value down in tiles that had no sub-label, so the
    figures in one strip sat on two different baselines. */
@@ -1907,29 +1925,34 @@ a.admin-card-footer:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.625rem;
-  height: 1.625rem;
+  width: 1.375rem;
+  height: 1.375rem;
   border-radius: var(--r-sm);
   flex-shrink: 0;
+}
+
+.admin-stat-icon svg {
+  width: 0.75rem;
+  height: 0.75rem;
 }
 
 /* Sans, not mono. Mono numerals read as a terminal readout; this is an
    editorial desk. `tabular-nums` keeps the columns steady without it. */
 .admin-stat-value {
-  margin-top: var(--sp-4);
-  font-size: 1.75rem;
-  font-weight: 650;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
+  margin-top: var(--sp-3);
+  font-size: var(--fs-display);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .admin-stat-change {
-  margin-top: var(--sp-2);
+  margin-top: var(--sp-1);
   align-self: start;
   font-size: var(--fs-micro);
   line-height: 1.3;
-  color: hsl(var(--muted-foreground) / 0.9);
+  color: hsl(var(--muted-foreground) / 0.85);
 }
 
 /* Content cards.
@@ -1953,7 +1976,9 @@ a.admin-card-footer:hover {
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-4);
-  padding: var(--sp-4) var(--sp-5);
+  /* Was 45px tall to hold an 18px title — 40% ink. A section marker does not
+     need a band of its own that deep. */
+  padding: var(--sp-3) var(--sp-5);
   border-bottom: 1px solid var(--line-soft);
 }
 
@@ -1996,8 +2021,8 @@ a.admin-card-footer:hover {
 
 .admin-card-title {
   font-size: var(--fs-h2);
-  font-weight: 620;
-  letter-spacing: -0.015em;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   line-height: 1.2;
 }
 
@@ -3077,9 +3102,28 @@ a.admin-list-row:hover .admin-list-title {
   }
 }
 
+/* The header band ran 966px wide to hold a 99px title — 814px of nothing.
+   Where a card has somewhere to go, the link lives here and the band does
+   work instead of holding air. */
 .admin-card-action {
   text-align: right;
   max-width: 55%;
+}
+
+.admin-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--fs-micro);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: hsl(var(--muted-foreground));
+  transition: color 130ms ease;
+  white-space: nowrap;
+}
+
+.admin-card-link:hover {
+  color: hsl(var(--staff-accent));
 }
 
 .admin-analytics-page .admin-card-action {

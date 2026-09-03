@@ -46,6 +46,9 @@ async function CmsDashboardData() {
   // to be looked up. One map, built once per render.
   const categoryColor = new Map(categories.map((c) => [c.name, c.color]));
 
+  /** A count as a share of the whole desk — the context a bare number lacks. */
+  const shareOf = (n: number) => (articlesCount > 0 ? `${Math.round((n / articlesCount) * 100)}%` : '—');
+
   const {
     total: articlesCount, published, drafts, scheduled, archived, featured, breaking,
     totalViews, recent: articles, topByViews, pendingNotices,
@@ -78,15 +81,41 @@ async function CmsDashboardData() {
           as the other counts: same tile, same size, wrapping where the row
           runs out. The grid is `auto-fit` with a capped track now, so however
           many of these are present the tiles stay tile-sized. */}
+      {/* Every tile carries a second line, and it is a real one.
+          Half of these used to render a number alone, which left 37px of dead
+          space under it and made the strip read as six big boxes each saying
+          one small thing. The share and the average were already derivable
+          from the same query — they were simply never shown. */}
       <CmsStatGrid>
-        <CmsStatCard title="My Articles" value={formatNumber(articlesCount)} icon={FileText} change={`${published} live`} />
-        <CmsStatCard title="Total Views" value={formatNumber(totalViews)} icon={Eye} />
-        <CmsStatCard title="Drafts" value={formatNumber(drafts)} icon={PenLine} accent="amber" change={scheduled > 0 ? `${scheduled} scheduled` : undefined} />
-        <CmsStatCard title="Published" value={formatNumber(published)} icon={Clock} accent="emerald" change={archived > 0 ? `${archived} archived` : undefined} />
-        {featured > 0 && <CmsStatCard title="Featured" value={formatNumber(featured)} icon={Star} accent="amber" />}
-        {breaking > 0 && <CmsStatCard title="Breaking" value={formatNumber(breaking)} icon={Flame} accent="red" />}
+        <CmsStatCard title="My Articles" value={formatNumber(articlesCount)} icon={FileText} change={`${published} live · ${drafts} draft${drafts === 1 ? '' : 's'}`} />
+        <CmsStatCard
+          title="Total Views"
+          value={formatNumber(totalViews)}
+          icon={Eye}
+          change={published > 0 ? `${formatNumber(Math.round(totalViews / published))} avg per story` : 'No published stories'}
+        />
+        <CmsStatCard
+          title="Drafts"
+          value={formatNumber(drafts)}
+          icon={PenLine}
+          accent="amber"
+          change={scheduled > 0 ? `${scheduled} scheduled next` : 'Nothing scheduled'}
+        />
+        <CmsStatCard
+          title="Published"
+          value={formatNumber(published)}
+          icon={Clock}
+          accent="emerald"
+          change={archived > 0 ? `${archived} archived` : `${shareOf(published)} of all stories`}
+        />
+        {featured > 0 && (
+          <CmsStatCard title="Featured" value={formatNumber(featured)} icon={Star} accent="amber" change={`${shareOf(featured)} of all stories`} />
+        )}
+        {breaking > 0 && (
+          <CmsStatCard title="Breaking" value={formatNumber(breaking)} icon={Flame} accent="red" change={`${shareOf(breaking)} of all stories`} />
+        )}
         {pendingNotices > 0 && (
-          <CmsStatCard title="Notices" value={formatNumber(pendingNotices)} icon={MessageSquare} accent="red" change="Action needed" />
+          <CmsStatCard title="Notices" value={formatNumber(pendingNotices)} icon={MessageSquare} accent="red" change="Awaiting your reply" />
         )}
       </CmsStatGrid>
 
@@ -101,7 +130,11 @@ async function CmsDashboardData() {
           where its content does. */}
       <div className="admin-split">
         <div className="admin-split__main">
-        <CmsCard title="Recent Articles" icon={Layers}>
+        <CmsCard
+          title="Recent Articles"
+          icon={Layers}
+          action={<Link href="/cms/articles" className="admin-card-link">All stories →</Link>}
+        >
           <CmsListStack>
             {articles.slice(0, 8).map((a) => (
               <CmsListRow
@@ -121,7 +154,11 @@ async function CmsDashboardData() {
           </CmsListStack>
         </CmsCard>
 
-        <CmsCard title="Top Performers" icon={BarChart3}>
+        <CmsCard
+          title="Top Performers"
+          icon={BarChart3}
+          action={<Link href="/cms/analytics" className="admin-card-link">Performance →</Link>}
+        >
           <CmsListStack>
             {topByViews.map((a, i) => (
               <CmsListRow
