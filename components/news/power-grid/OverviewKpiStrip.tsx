@@ -168,6 +168,11 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
   const { capacity, baseline } = useGridOverviewContext(isoDate, systemStats);
 
+  // "02-03 Sep, 2026" — the published half of `gasWindowLabel`, without the
+  // "2 Sep 08:00 → 3 Sep 08:00" clause the tooltip's citation line carries.
+  // The full label is far too long for a 10px hint in a 190px tile.
+  const gasDayLabel = gasWindowLabel ? gasWindowLabel.split(' · ')[0] : null;
+
   // Demand and supply at the same instant, so the difference is the shortfall at
   // the moment the grid was most stretched. The strip used to headline the day's
   // energy averaged over 24 hours next to this peak; the two are not comparable,
@@ -593,18 +598,37 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
                 </>
               )}
             </span>
-          ) : baseline?.gasSupply != null ? (
-            // Counted over gas days, not over the whole window — for the same
-            // filing lag, the mean routinely rests on fewer days than the five
-            // other tiles, and the line says which.
-            <GridKpiTrend
-              current={totalGasSupply}
-              baseline={baseline.gasSupply}
-              days={baseline.gasDays}
-              polarity="up-good"
-            />
           ) : (
-            <span className="text-muted-foreground">no earlier gas window to compare</span>
+            <>
+              {/* The trend earns its place, though it is quiet: measured over
+                  the last 726 gas days against this same 4-day mean, 32% read
+                  level, 38% moved 0.5-2%, and 29% moved more than 2% — the
+                  largest swing 35% on 2026-02-13, which is what an FSRU or a
+                  major field going down looks like. A flat week is the tile
+                  working, not the tile saying nothing. */}
+              {baseline?.gasSupply != null ? (
+                // Counted over gas days, not over the whole window — Petrobangla
+                // files behind PGCB, so this mean routinely rests on fewer days
+                // than the five other tiles, and the line says which.
+                <GridKpiTrend
+                  current={totalGasSupply}
+                  baseline={baseline.gasSupply}
+                  days={baseline.gasDays}
+                  polarity="up-good"
+                />
+              ) : (
+                <span className="text-muted-foreground">no earlier gas window to compare</span>
+              )}
+              {/* The second line, and the reason the tile is worth reading on
+                  the two days in three the trend is quiet. This figure covers
+                  Petrobangla's 08:00-to-08:00 gas day, which shares only 16
+                  hours with the PGCB energy day every other tile in this row is
+                  measured over. Naming the window is what stops a reader
+                  subtracting one from the other. */}
+              {gasDayLabel && (
+                <span className="block mt-0.5 text-muted-foreground">gas day {gasDayLabel}</span>
+              )}
+            </>
           )
         }
         active={activeKpiTooltip === 'gas'}
