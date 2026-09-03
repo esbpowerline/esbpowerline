@@ -643,7 +643,12 @@
   --admin-elevated: 220 35% 11%;
   --shell-gutter: clamp(0.75rem, 1.1vw, 1.25rem);
   --shell-gap: clamp(0.625rem, 0.85vw, 1rem);
-  --shell-section: clamp(0.875rem, 1vw, 1.25rem);
+  /* Zones need more air than the things inside them. Measured at 1600px the
+     page header, the tile strip and the content split were 12px apart while a
+     card's own padding was 16px — so the gap BETWEEN sections was tighter than
+     the gap inside one, and the page read as a single undifferentiated column
+     of boxes. */
+  --shell-section: clamp(1.125rem, 1.4vw, 1.5rem);
   --shell-tight: 0.4375rem;
   --shell-header-h: 3.125rem;
   --shell-sidebar-w: 17rem;
@@ -1187,20 +1192,26 @@
    page — a 14 and an 8 marooned in half a screen of white each. Capping the
    track means a partly-filled strip keeps tile-sized tiles and simply leaves
    the remainder empty, which is what the eye expects. */
-.admin-stat-grid {
+/* `1fr` as the max, not a fixed cap.
+   Capping the track at 17rem stopped the strip 192px short of the cards
+   below it, so the page had a ragged right edge that nothing else shared.
+   `minmax(10rem, 1fr)` fills the row at any count and wraps when it runs out;
+   the marooned-tile problem the cap was guarding against is gone anyway now
+   that the promotion counts live in this same strip rather than a separate
+   grid of their own. */
+.admin-stat-grid,
+.admin-stat-grid--cols-3,
+.admin-stat-grid--cols-2 {
   display: grid;
   gap: var(--sp-4);
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 15rem));
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 }
 
 @media (min-width: 1024px) {
-  .admin-stat-grid {
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 17rem));
-  }
-
+  .admin-stat-grid,
   .admin-stat-grid--cols-3,
   .admin-stat-grid--cols-2 {
-    grid-template-columns: repeat(auto-fit, minmax(12rem, 17rem));
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   }
 }
 
@@ -1282,7 +1293,11 @@
   .cms-shell {
     --shell-gutter: clamp(0.65rem, 0.75vw, 1rem);
     --shell-gap: clamp(0.5rem, 0.55vw, 0.75rem);
-    --shell-section: clamp(0.625rem, 0.65vw, 0.875rem);
+    /* Measured 9px between zones at 1366px, against 16px of padding inside
+       each card — the same inversion the 1536 and 1920 layers had. Section
+       spacing is the one measure that must not shrink with the viewport;
+       it is what tells the eye where one zone ends. */
+    --shell-section: 1.25rem;
     --shell-tight: 0.3125rem;
     --shell-header-h: 2.875rem;
     --shell-sidebar-w: 15.75rem;
@@ -1305,8 +1320,8 @@
   }
 
   .admin-stat-card {
-    padding: 1rem;
-    border-radius: 1rem;
+    padding: var(--sp-5);
+    border-radius: var(--r-lg);
   }
 
   .admin-stat-value {
@@ -1319,19 +1334,23 @@
   }
 
   .admin-card {
-    border-radius: 0.875rem;
+    border-radius: var(--r-lg);
   }
 
+  /* The header carries a bottom hairline now, so it needs padding on that
+     side; `1rem 1rem 0` put the rule hard against the title. And the body's
+     top padding was 0.75 against 1rem elsewhere, which tipped every card
+     forward by 4px. */
   .admin-card-header {
-    padding: 1rem 1rem 0;
+    padding: var(--sp-4) var(--sp-5);
   }
 
   .admin-card-body {
-    padding: 0.75rem 1rem 1rem;
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
   }
 
   .admin-card-title {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .admin-action-pill {
@@ -1376,12 +1395,21 @@
   .cms-shell {
     --shell-gutter: 0.75rem;
     --shell-gap: 0.5625rem;
-    --shell-section: 0.75rem;
+    /* Was 0.75rem — tighter than a card's own 1rem padding, so at the width
+       most of this newsroom actually works at, the gaps BETWEEN zones were
+       smaller than the gaps inside them and the page read as one column of
+       undifferentiated boxes. */
+    --shell-section: 1.25rem;
     --shell-sidebar-w: 15.25rem;
   }
 
+  /* `auto-fit`, not `auto-fill`.
+     auto-fill keeps the empty tracks it could not fill, and each one still
+     claims its 1fr — which is exactly why the six-tile strip stopped 192px
+     short of the cards below it and left the page with a ragged right edge.
+     auto-fit collapses the empties so the tiles divide the full row. */
   .admin-stat-grid:not(.admin-stat-grid--cols-2):not(.admin-stat-grid--cols-3) {
-    grid-template-columns: repeat(auto-fill, minmax(10.25rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(10.25rem, 1fr));
   }
 
   .admin-card-grid--cols-3 {
@@ -1413,11 +1441,11 @@
   .cms-shell {
     --shell-gutter: 0.875rem;
     --shell-gap: 0.5rem;
-    --shell-section: 0.6875rem;
+    --shell-section: 1.25rem;
   }
 
   .admin-stat-grid:not(.admin-stat-grid--cols-2):not(.admin-stat-grid--cols-3) {
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   }
 
   .admin-card-grid--cols-2 {
@@ -1918,7 +1946,7 @@ a.admin-card-footer:hover {
 .admin-card-header__title {
   display: flex;
   align-items: center;
-  gap: var(--shell-tight);
+  gap: var(--sp-3);
   min-width: 0;
 }
 
@@ -1931,15 +1959,25 @@ a.admin-card-footer:hover {
   width: 100%;
 }
 
+/* Single definition. There were two `.admin-card-icon` blocks 23 lines apart
+   and the later one silently won, which is why the icon stayed a 28px rose
+   disc: the rose predates the accent consolidation, and the 28px was pushing
+   every card title 36px right of the rows beneath it. */
 .admin-card-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 9999px;
-  background: hsl(var(--admin-rose) / 0.1);
-  color: hsl(var(--admin-rose));
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: var(--r-sm);
+  background: hsl(var(--staff-accent) / 0.1);
+  color: hsl(var(--staff-accent));
+  flex-shrink: 0;
+}
+
+.admin-card-icon svg {
+  width: 0.8125rem;
+  height: 0.8125rem;
 }
 
 .admin-card-title {
@@ -2181,6 +2219,16 @@ a.admin-list-row:hover .admin-list-title {
   color: hsl(var(--muted-foreground) / 0.75);
   line-height: 1.2;
   white-space: nowrap;
+  /* Same reason as the value: a variable-width category was shifting the
+     column to its right by up to 40px between rows. */
+  /* A fixed width, not a min/max range: within the range the column still
+     sized to its own text, so the category in Top Performers still shifted
+     the views beside it by 33px between rows. */
+  width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .admin-list-stat {
@@ -2194,6 +2242,12 @@ a.admin-list-row:hover .admin-list-title {
 
 /* Dropped from 700/foreground to 550/muted: a view count is context, and at
    full weight in full black it outshouted the headline it belonged to. */
+/* Fixed column, right-aligned.
+   As free-flowing inline text the value's width tracked its own content, so
+   "3 views" and "143 views" pushed the status pill beside them to different
+   x positions — the pill column zig-zagged by 15px down the card, and the
+   category column in Top Performers by 40px. A trailing column in a list has
+   to be a column. */
 .admin-list-value {
   font-size: var(--fs-meta);
   font-weight: 550;
@@ -2201,6 +2255,9 @@ a.admin-list-row:hover .admin-list-title {
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  min-width: 4.75rem;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .admin-list-value-label {
@@ -6596,15 +6653,56 @@ a.admin-list-row:hover .admin-list-title {
   }
 }
 
+/* Theme picker as ONE segmented control.
+   It rendered as three bare icons floating between a pill-shaped "Visit Site"
+   and a plain-text "Sign out" — four different button treatments in one row.
+   Worse, two of the three icons were tinted, so the control read as having
+   two active states. A track with a single raised thumb says "one of these
+   three", which is what it is. */
 .cms-header-toolbar .cms-theme-toggle,
 .admin-header-toolbar .cms-theme-toggle {
-  padding: 0 0.25rem;
+  padding: 0;
+}
+
+.cms-header-toolbar .site-theme-toggle__swatches,
+.admin-header-toolbar .site-theme-toggle__swatches {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  /* 26px thumb + 3px inset either side = 32px, flush with the pills beside
+     it. The header chrome keeps its full-round radius — that contrast with
+     the squircle content cards is deliberate — but every control in the row
+     now shares one height and one shape family. */
+  padding: 0.1875rem;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: hsl(var(--muted) / 0.55);
 }
 
 .cms-header-toolbar .site-theme-toggle__btn,
 .admin-header-toolbar .site-theme-toggle__btn {
-  height: 1.75rem;
-  width: 1.75rem;
+  height: 1.625rem;
+  width: 1.625rem;
+  border-radius: var(--r-pill);
+  transition: background 140ms ease, box-shadow 140ms ease;
+}
+
+.cms-header-toolbar .site-theme-toggle__btn[aria-pressed='true'],
+.admin-header-toolbar .site-theme-toggle__btn[aria-pressed='true'] {
+  background: hsl(var(--card));
+  box-shadow: var(--sh-1);
+}
+
+.cms-header-toolbar .site-theme-toggle__btn[aria-pressed='false']:hover,
+.admin-header-toolbar .site-theme-toggle__btn[aria-pressed='false']:hover {
+  background: hsl(var(--card) / 0.5);
+}
+
+/* The inactive icons were tinted per-theme, which is what made two of them
+   look selected. Inactive is neutral; only the thumb carries colour. */
+.cms-header-toolbar .site-theme-toggle__btn[aria-pressed='false'] svg,
+.admin-header-toolbar .site-theme-toggle__btn[aria-pressed='false'] svg {
+  color: hsl(var(--muted-foreground) / 0.75);
 }
 
 .cms-header-write-link,
@@ -9002,14 +9100,35 @@ a.admin-list-row:hover .admin-list-title {
   gap: 0.35rem;
   height: 2rem;
   padding: 0 0.75rem;
-  border-radius: 9999px;
-  font-size: 11px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-micro);
   font-weight: 600;
   letter-spacing: -0.01em;
   color: hsl(var(--foreground) / 0.82);
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.65);
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  border: 1px solid var(--line);
+  background: hsl(var(--card));
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+/* One height for every control in the header row. Before this the menu
+   triggers, the site link, the theme picker and sign-out were four different
+   sizes and three different surfaces, so the row had no baseline. */
+.cms-header-toolbar > *,
+.admin-header-toolbar > * {
+  flex-shrink: 0;
+}
+
+.admin-header-signout,
+.cms-header-toolbar .admin-header-signout {
+  height: 2rem !important;
+  border: 1px solid transparent;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.admin-header-signout:hover {
+  border-color: hsl(var(--staff-bad) / 0.3);
+  background: hsl(var(--staff-bad) / 0.08) !important;
+  color: hsl(var(--staff-bad)) !important;
 }
 
 .cms-header-public-link svg {
@@ -9019,10 +9138,9 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .cms-header-public-link:hover {
-  background: hsl(199 89% 48% / 0.1);
+  background: hsl(var(--staff-accent) / 0.09);
   color: hsl(var(--foreground));
-  border-color: hsl(199 89% 48% / 0.38);
-  box-shadow: 0 1px 3px hsl(199 89% 48% / 0.12);
+  border-color: hsl(var(--staff-accent) / 0.35);
 }
 
 .cms-header-public-link:hover svg {
