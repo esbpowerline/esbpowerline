@@ -264,6 +264,30 @@ export default async function PowerGridExplorerPage() {
           ))}
         </ul>
       </nav>
+
+      {/* The entry point to the per-day archive. The explorer holds the date in
+          client state, so until this link existed every one of the ~4,500 day
+          pages was an orphan: submitted in a sitemap but linked from nothing,
+          which Google treats as a much weaker signal than a crawl path. */}
+      <nav aria-labelledby="grid-archive-heading" className="grid-explorer-views no-print">
+        <h2 id="grid-archive-heading">Browse the archive by date</h2>
+        <ul>
+          <li>
+            <Link href="/grid-explorer/archive">Full daily archive</Link>
+            <span>
+              {' '}
+              — every day PGCB and Petrobangla published
+              {availableDates[0] ? `, from ${availableDates[0]}` : ''} to today, one page each.
+            </span>
+          </li>
+          {latestDate && (
+            <li>
+              <Link href={`/grid-explorer/${latestDate}`}>Latest day ({latestDate})</Link>
+              <span> — the headline figures for the newest report.</span>
+            </li>
+          )}
+        </ul>
+      </nav>
     </main>
   );
 }

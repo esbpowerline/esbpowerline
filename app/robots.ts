@@ -62,7 +62,14 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/',
       },
     ],
-    sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/news-sitemap.xml`],
+    // Three, not one: editorial, the 48-hour news window, and the ~4,500-day
+    // grid archive. Split so Search Console reports indexing for each
+    // separately — the archive and the newsroom fail in different ways.
+    sitemap: [
+      `${baseUrl}/sitemap.xml`,
+      `${baseUrl}/news-sitemap.xml`,
+      `${baseUrl}/grid-sitemap.xml`,
+    ],
   };
 }
 
