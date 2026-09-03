@@ -115,6 +115,12 @@ def update_petrobangla_index(payload: dict, json_name: str, index_path: Path) ->
     days = [d for d in index.get("days", []) if d.get("date") != entry["date"]]
     days.append(entry)
     days.sort(key=lambda d: d.get("date") or "")
+    # Re-running a day that is already indexed identically must not rewrite
+    # the file: the only difference would be `generated_at`, and the Pi's poll
+    # committed, pushed and republished that stamp four times a day
+    # (2026-09-03). A stamp is not a change.
+    if days == index.get("days", []) and index.get("total_days") == len(days):
+        return
     index["days"] = days
     index["total_days"] = len(days)
     index["generated_at"] = datetime.now().isoformat(timespec="seconds")

@@ -103,7 +103,19 @@ def main():
                 f"staging holds only {len(staged.get('days', []))}."
             )
     live = build_live_week(index)
-    (PUBLIC / "_live_week.json").write_text(json.dumps(live, indent=2), encoding="utf-8")
+    out = PUBLIC / "_live_week.json"
+    # Skip the write when nothing but `generated_at` would change — the Pi's
+    # poll was committing and republishing that stamp four times a day
+    # (2026-09-03). A stamp is not a change.
+    if out.exists():
+        try:
+            current = json.loads(out.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            current = None
+        if isinstance(current, dict) and {k: v for k, v in current.items() if k != "generated_at"} == {k: v for k, v in live.items() if k != "generated_at"}:
+            print("live week unchanged")
+            return
+    out.write_text(json.dumps(live, indent=2), encoding="utf-8")
     print(f"Live week: {len(live['days'])} days, latest={live['latest_date']}")
 
 
