@@ -559,6 +559,29 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           </>
         }
         value={hasGasProductionData ? `${formatNumber(totalGasSupply, 1)} MMCFD` : '— MMCFD'}
+        // This was the one tile of the six with no second line at all, so it
+        // read as a figure whose context had failed to load. All three states
+        // say something now, because an empty slot beside five filled ones is
+        // itself a claim.
+        hint={
+          !hasGasProductionData ? (
+            // The ordinary state of the newest day, not an outage: Petrobangla
+            // files its window a day or two behind PGCB.
+            <span className="text-muted-foreground">awaiting Petrobangla&rsquo;s gas window</span>
+          ) : baseline?.gasSupply != null ? (
+            // Counted over gas days, not over the whole window — for the same
+            // filing lag, the mean routinely rests on fewer days than the five
+            // other tiles, and the line says which.
+            <GridKpiTrend
+              current={totalGasSupply}
+              baseline={baseline.gasSupply}
+              days={baseline.gasDays}
+              polarity="up-good"
+            />
+          ) : (
+            <span className="text-muted-foreground">no earlier gas window to compare</span>
+          )
+        }
         active={activeKpiTooltip === 'gas'}
         // Petrobangla publishes a row per company; the national total is our sum
         // of them, so the headline is ours even though every input is theirs.

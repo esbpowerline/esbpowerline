@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { fetchPlantDetail, plantCapacityTotals } from '@/lib/data/grid/plant-detail.client';
 import { subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
-import type { GridSystemStats } from '@/lib/data/grid/types';
+import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
 
 /** Days of history the Overview compares the selected day against. */
 export const TREND_WINDOW_DAYS = 7;
@@ -21,8 +21,21 @@ export interface OverviewBaseline {
    *  compare against the same quantity — trending a total against a mean of
    *  per-unit rates would move for reasons the headline never shows. */
   dailyCost: number | null;
+  /**
+   * Mean national gas production over the window, in MMCFD — the same sum of
+   * Petrobangla's company rows the Gas Supply tile headlines.
+   *
+   * Counted only over days that actually carry the window. A day without gas is
+   * written with the six company rows present and zeroed, so a row count cannot
+   * tell absent from zero and a mean that trusted it would be dragged toward
+   * zero by every day Petrobangla had not filed yet — which, since they file a
+   * day or two behind PGCB, is most of the recent end of any window.
+   */
+  gasSupply: number | null;
   /** How many of the requested days actually answered. */
   days: number;
+  /** How many of them carried a Petrobangla gas window, for the gas trend. */
+  gasDays: number;
 }
 
 export interface OverviewCapacity {
@@ -72,10 +85,11 @@ export function useGridOverviewContext(
 
     const baselineJob = Promise.all(days.map((d) => fetchDailyReport(d))).then((results) => {
       if (!live) return;
-      const stats = results
+      const payloads = results
         .filter((r) => r.ok)
-        .map((r) => (r as { ok: true; data: { systemStats: GridSystemStats } }).data.systemStats)
+        .map((r) => (r as { ok: true; data: GridDailyData }).data)
         .filter(Boolean);
+      const stats = payloads.map((d) => d.systemStats).filter(Boolean);
       if (stats.length < MIN_TREND_DAYS) {
         setBaseline(null);
         return;
@@ -109,12 +123,24 @@ export function useGridOverviewContext(
         .map((s) => (typeof s.totalDailyCost === 'number' && s.totalDailyCost > 0 ? s.totalDailyCost : null))
         .filter((n): n is number => n != null);
 
+      // The same sum the Gas Supply tile headlines: Petrobangla's company rows
+      // for the day, added up. A day whose gas window is not filed yet carries
+      // those rows zeroed, so a zero total means absent and is dropped rather
+      // than averaged in — see `hasGasProductionData` in PowerGridExplorer,
+      // where the identical rule keeps the tile from printing "0.0 MMCFD" as a
+      // national figure.
+      const gasTotals = payloads
+        .map((d) => (d.gasProductionData ?? []).reduce((sum, row) => sum + (row.gas || 0), 0))
+        .filter((total) => total > 0);
+
       setBaseline({
         peakDemand: mean(nums((s) => s.eveningPeakDemand)),
         peakSupply: mean(nums((s) => s.eveningPeakGen)),
         peakDeficit: mean(deficits),
         costPerKwh: mean(unitCosts),
         dailyCost: mean(dailyCosts),
+        gasSupply: mean(gasTotals),
+        gasDays: gasTotals.length,
         days: stats.length,
       });
     });
