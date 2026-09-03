@@ -25,8 +25,6 @@ export async function generateMetadata(): Promise<Metadata> {
       template: '%s | ESB PowerLine',
     },
     description: seo?.metaDescription ?? site?.tagline,
-    // Feed autodiscovery on every public page.
-    alternates: { types: { 'application/rss+xml': '/feed.xml' } },
     openGraph: {
       siteName: 'ESB PowerLine',
       images: [{ url: '/og-image.png', width: 1200, height: 630 }],

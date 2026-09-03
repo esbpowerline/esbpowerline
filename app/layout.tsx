@@ -123,6 +123,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: safeJsonLd(SITE_JSON_LD) }}
         />
         {/* Critical theme CSS injected before paint to avoid flash */}
+        {/* A plain tag, not `alternates.types` metadata: any page that sets its
+            own canonical replaces the layout's whole `alternates` object and
+            the feed link vanished from every such page (live check, 2026-09-03). */}
+        <link rel="alternate" type="application/rss+xml" title="ESB PowerLine" href="/feed.xml" />
         <style dangerouslySetInnerHTML={{ __html: SITE_THEME_CRITICAL_CSS }} suppressHydrationWarning />
         {/* Theme + locale hydration — must run before React tree */}
         <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: SITE_THEME_INIT_SCRIPT }} />
