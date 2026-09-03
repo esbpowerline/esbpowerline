@@ -25,10 +25,15 @@ export default function PublicError({
         </p>
         <p className="mt-2 text-xs text-muted-foreground/90">
           Diagnostics:{' '}
+          {/* Route handlers, not pages: `next/link` would client-navigate to a
+              JSON endpoint. Also an error boundary — the router may be the thing
+              that failed, so a real navigation is the reliable one. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/api/db/health" className="underline underline-offset-2 hover:text-foreground">
             /api/db/health
           </a>
           {' · '}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/api/supabase/health" className="underline underline-offset-2 hover:text-foreground">
             /api/supabase/health
           </a>

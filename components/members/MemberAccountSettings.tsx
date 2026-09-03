@@ -163,6 +163,9 @@ export function MemberAccountSettings({ name, email, phone, status }: MemberAcco
           </Button>
           <p className="text-xs text-muted-foreground">
             Locked out?{' '}
+            {/* Auth flow: this path 307s to the real reset screen and must be a
+                full navigation so the session cookie is re-read on arrival. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a href="/auth/forgot-password?audience=member" className="font-medium hover:underline">
               Reset via email
             </a>

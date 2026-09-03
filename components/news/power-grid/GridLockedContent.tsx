@@ -62,6 +62,10 @@ export function GridLockedContent({
            the whole panel, and the date picker's menu opens across it — without this it
            swallows every click on the days the visitor is actually allowed to pick. */
         <div className="pointer-events-none absolute inset-0 z-[55] flex flex-col items-center justify-center p-4 bg-background/10">
+          {/* A plain anchor on purpose: `rel="nofollow"` keeps this member-only
+              destination out of the crawl budget (SEO_FIX_LOG stage 3), and the
+              members surface is a different hostname in production. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a href="/members/subscription" rel="nofollow" className="btn btn-primary rounded-full px-6 py-2.5 shadow-2xl shadow-primary/20 flex items-center gap-2 border border-primary/30 text-sm font-semibold pointer-events-auto hover:scale-105 transition-transform">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span>Upgrade to Unlock</span>

@@ -43,6 +43,10 @@ export function CmsCategorySelect({
     return (
       <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-900 dark:text-amber-100">
         No categories in the database. Add sectors in{' '}
+        {/* The admin console is a different surface — a separate hostname in
+            production and a separate dev port — so this cannot be a client
+            navigation from the CMS. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/admin/categories" className="font-medium underline">
           Admin → Categories
         </a>{' '}

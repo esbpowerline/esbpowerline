@@ -38,6 +38,9 @@ export default async function MemberDownloadsPage() {
                   </p>
                 </div>
                 {item.fileUrl === '/api/members/grid-export' ? (
+                  // A route handler streaming a file, not a page: `next/link`
+                  // would try to client-navigate to the download.
+                  // eslint-disable-next-line @next/next/no-html-link-for-pages
                   <a href="/api/members/grid-export" className="btn btn-secondary text-xs">
                     Download again
                   </a>
