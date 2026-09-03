@@ -27,7 +27,6 @@ const config = [
       '.next-cms/**/*',
       '.next-public/**/*',
       'node_modules/**/*',
-      'legacy-static/**/*',
       'dist/**/*'
     ]
   }
