@@ -2193,6 +2193,7 @@ a.admin-list-row:hover,
 }
 
 .admin-list-title {
+  flex: 0 1 auto;
   font-weight: 500;
   color: hsl(var(--foreground) / 0.92);
   transition: color 130ms ease;
@@ -2225,13 +2226,9 @@ a.admin-list-row:hover .admin-list-title {
   white-space: nowrap;
   /* Same reason as the value: a variable-width category was shifting the
      column to its right by up to 40px between rows. */
-  /* A fixed width, not a min/max range: within the range the column still
-     sized to its own text, so the category in Top Performers still shifted
-     the views beside it by 33px between rows. */
-  width: 11rem;
+  max-width: 11rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  text-align: right;
   flex-shrink: 0;
 }
 
@@ -2256,14 +2253,42 @@ a.admin-list-row:hover .admin-list-title {
    Replaces the uppercase grey `admin-list-meta` treatment, which truncated
    the longer half of the taxonomy inside its fixed column. Sentence case and
    a wider track, because the name is the point. */
+/* Status pill inside a card list.
+   The shared Badge is sized for a table cell, and eight of them running down
+   a card in saturated mint became the loudest thing in it — a zigzag of
+   colour competing with the headlines each one belongs to. In a list the
+   status is a qualifier, so it is quieter here: smaller, tighter, and a
+   third of the fill. The table keeps the louder badge, where a status column
+   IS what the reader scans. */
+.admin-list-row .badge,
+.admin-list-row > span > div {
+  padding: 0.0625rem 0.4375rem;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.admin-list-row > span > div.bg-emerald-500\/15 {
+  background: hsl(var(--staff-ok) / 0.1);
+  color: hsl(var(--staff-ok));
+  border-color: transparent;
+}
+
+.admin-list-row > span > div.bg-amber-500\/15 {
+  background: hsl(var(--staff-warn) / 0.12);
+  color: hsl(var(--staff-warn));
+  border-color: transparent;
+}
+
 .admin-cat-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   min-width: 0;
-  width: 13.5rem;
+  max-width: 13.5rem;
   flex-shrink: 0;
-  justify-content: flex-end;
   font-size: var(--fs-micro);
   font-weight: 550;
   color: hsl(var(--muted-foreground));
@@ -2303,6 +2328,9 @@ a.admin-list-row:hover .admin-list-title {
   min-width: 4.75rem;
   text-align: right;
   flex-shrink: 0;
+  /* Pushed to the edge on its own, so it still forms a clean scan column
+     while everything before it stays grouped with the headline. */
+  margin-left: auto;
 }
 
 .admin-list-value-label {
