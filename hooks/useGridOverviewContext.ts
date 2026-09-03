@@ -32,6 +32,16 @@ export interface OverviewBaseline {
    * day or two behind PGCB, is most of the recent end of any window.
    */
   gasSupply: number | null;
+  /**
+   * The most recent day before this one that Petrobangla did file, with its
+   * date. The newest energy day routinely has no gas window — Petrobangla files
+   * a day or two behind PGCB — and on that day there is no current figure to
+   * trend, because a percentage change needs both sides. The week behind it is
+   * still known, so the tile reports the last window on record instead of
+   * nothing. Dated, always: an undated gas figure on a tile whose own day has
+   * none is exactly the substitution the Gas Supply incident was about.
+   */
+  lastGas: { date: string; total: number } | null;
   /** How many of the requested days actually answered. */
   days: number;
   /** How many of them carried a Petrobangla gas window, for the gas trend. */
@@ -85,10 +95,18 @@ export function useGridOverviewContext(
 
     const baselineJob = Promise.all(days.map((d) => fetchDailyReport(d))).then((results) => {
       if (!live) return;
-      const payloads = results
-        .filter((r) => r.ok)
-        .map((r) => (r as { ok: true; data: GridDailyData }).data)
-        .filter(Boolean);
+      // Paired with their dates and kept in order — `days` runs backwards from
+      // the selected day, so the first entry that carries gas is the most
+      // recent window on record, which is what `lastGas` reports.
+      const dated = results
+        .map((r, i) => ({ date: days[i], result: r }))
+        .filter((entry) => entry.result.ok)
+        .map((entry) => ({
+          date: entry.date,
+          data: (entry.result as { ok: true; data: GridDailyData }).data,
+        }))
+        .filter((entry) => Boolean(entry.data));
+      const payloads = dated.map((entry) => entry.data);
       const stats = payloads.map((d) => d.systemStats).filter(Boolean);
       if (stats.length < MIN_TREND_DAYS) {
         setBaseline(null);
@@ -129,9 +147,12 @@ export function useGridOverviewContext(
       // than averaged in — see `hasGasProductionData` in PowerGridExplorer,
       // where the identical rule keeps the tile from printing "0.0 MMCFD" as a
       // national figure.
-      const gasTotals = payloads
-        .map((d) => (d.gasProductionData ?? []).reduce((sum, row) => sum + (row.gas || 0), 0))
-        .filter((total) => total > 0);
+      const gasByDay = dated.map((entry) => ({
+        date: entry.date,
+        total: (entry.data.gasProductionData ?? []).reduce((sum, row) => sum + (row.gas || 0), 0),
+      }));
+      const gasTotals = gasByDay.map((g) => g.total).filter((total) => total > 0);
+      const lastGas = gasByDay.find((g) => g.total > 0) ?? null;
 
       setBaseline({
         peakDemand: mean(nums((s) => s.eveningPeakDemand)),
@@ -141,6 +162,7 @@ export function useGridOverviewContext(
         dailyCost: mean(dailyCosts),
         gasSupply: mean(gasTotals),
         gasDays: gasTotals.length,
+        lastGas,
         days: stats.length,
       });
     });

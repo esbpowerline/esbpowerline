@@ -54,6 +54,16 @@ export interface OverviewKpiStripProps {
   forecast?: GridForecast | null;
 }
 
+/** "1 Sep" — short enough for a 10px hint line, explicit enough to date a figure. */
+function formatGasDay(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
+}
+
 /**
  * "forecast 17,360 · outturn +186 MW", under the trend line of a peak tile.
  *
@@ -565,9 +575,24 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         // itself a claim.
         hint={
           !hasGasProductionData ? (
-            // The ordinary state of the newest day, not an outage: Petrobangla
-            // files its window a day or two behind PGCB.
-            <span className="text-muted-foreground">awaiting Petrobangla&rsquo;s gas window</span>
+            // No trend is possible here — a percentage change needs both sides
+            // and this day has no figure — but the week behind it is known, so
+            // the last window on record is reported rather than nothing.
+            //
+            // Dated, and never as a bare number. An undated gas figure on a
+            // tile whose own day has none is the substitution that put 2,366
+            // MMcfd on 26 August and 856 on the 28th under one unchanged label.
+            // The date is what makes this context instead of a stand-in.
+            <span className="text-muted-foreground">
+              awaiting Petrobangla
+              {baseline?.lastGas && (
+                <>
+                  {' · last filed '}
+                  {formatNumber(baseline.lastGas.total, 1)} MMCFD on{' '}
+                  {formatGasDay(baseline.lastGas.date)}
+                </>
+              )}
+            </span>
           ) : baseline?.gasSupply != null ? (
             // Counted over gas days, not over the whole window — for the same
             // filing lag, the mean routinely rests on fewer days than the five
