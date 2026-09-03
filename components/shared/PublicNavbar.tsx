@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Masthead } from '@/components/shared/Masthead';
+import { ThemeBanner } from '@/components/shared/ThemeBanner';
 
 import { Search, Menu, X, Newspaper, BookOpen, BarChart3, Home } from 'lucide-react';
 import { useMemo, useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
@@ -204,7 +204,9 @@ export function PublicNavbar({
         <div className="container container--shell px-0">
           <div className="site-banner-frame border-l border-r border-b border-border/40 overflow-hidden">
             <PublicNavLink href="/" className="w-full block transition-opacity hover:opacity-95">
-              <Masthead />
+              {/* The illustrated banner, by Hamim's decision (2026-09-03): the
+                  typographic masthead that replaced it on 1 Sep is retired. */}
+              <ThemeBanner />
             </PublicNavLink>
             <PublicMarketStrip energyItems={tickerItems} />
           </div>
