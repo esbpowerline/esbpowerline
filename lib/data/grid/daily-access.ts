@@ -66,8 +66,31 @@ const DAILY_JSON_RE = new RegExp(
   `^/data/(${TIER_GATED_DAILY_DIRS.join('|')})/\\d{4}-\\d{2}-\\d{2}\\.json$`,
 );
 
+/**
+ * The Petrobangla archive: the per-gas-day files, and every aggregate derived
+ * from them.
+ *
+ * The aggregates were listed by name — `_index`, `_live_week`,
+ * `timeline-summary` — and the list went stale exactly the way
+ * TIER_GATED_DAILY_DIRS did. `reserve-model.json`, `reserve-sensitivity.json`
+ * and `reserves-published.json` were added later and never registered, so they
+ * were served to any request that sent a browser user-agent, with no
+ * same-origin check: 200 with no Referer at all, while `timeline-summary.json`
+ * beside them answered 403 (verified against production 2026-09-04). They are
+ * built from the same gated per-day archive — the reserve model is a depletion
+ * projection over the whole of it — so they were the analytical use the tier
+ * exists to sell, given away by an omission.
+ *
+ * So this matches the DIRECTORY rather than a roster: any .json sitting
+ * directly under petrobangla/ is protected, and the next artifact to be split
+ * out is covered on the day it lands instead of the day someone notices. The
+ * dated `daily/` files keep their own branch because the tier window reads a
+ * date out of them; an aggregate has none and takes the `!isoDate` public path
+ * in middleware, so this adds the bot and same-origin checks without changing
+ * what a browser on the site can read.
+ */
 const PETROBANGLA_JSON_RE =
-  /^\/data\/petrobangla\/(daily\/\d{4}-\d{2}-\d{2}\.json|_index\.json|timeline-summary\.json|_live_week\.json)$/;
+  /^\/data\/petrobangla\/(daily\/\d{4}-\d{2}-\d{2}\.json|[A-Za-z0-9_][A-Za-z0-9._-]*\.json)$/;
 
 /** The ISO date a gated data path is for, or undefined for the non-dated files. */
 const DATED_JSON_RE = new RegExp(

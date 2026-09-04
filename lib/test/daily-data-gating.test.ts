@@ -28,9 +28,37 @@ describe('tier-gated daily data paths', () => {
       '/data/petrobangla/_index.json',
       '/data/petrobangla/_live_week.json',
       '/data/petrobangla/timeline-summary.json',
+      // Added later than the three above and left off the roster until
+      // 2026-09-04, when production served all three with no Referer while
+      // timeline-summary.json beside them answered 403.
+      '/data/petrobangla/reserve-model.json',
+      '/data/petrobangla/reserve-sensitivity.json',
+      '/data/petrobangla/reserves-published.json',
     ]) {
       expect(isProtectedDataJsonPath(p)).toBe(true);
     }
+  });
+
+  /**
+   * Default-closed, and checked against the directory as it actually is. Every
+   * aggregate under petrobangla/ is derived from the gated per-day archive, so
+   * a roster of filenames is the wrong shape: it goes stale silently, and the
+   * only symptom is that a file nobody re-listed is readable by anyone. This
+   * fails on the next artifact split out of that directory rather than on the
+   * next time someone thinks to look.
+   */
+  it('gates every aggregate that exists under public/data/petrobangla', () => {
+    const dir = path.join(process.cwd(), 'public', 'data', 'petrobangla');
+    const aggregates = fs
+      .readdirSync(dir, { withFileTypes: true })
+      .filter((e) => e.isFile() && e.name.endsWith('.json'))
+      .map((e) => e.name);
+
+    expect(aggregates.length).toBeGreaterThan(0);
+    const ungated = aggregates.filter(
+      (name) => !isProtectedDataJsonPath(`/data/petrobangla/${name}`),
+    );
+    expect(ungated).toEqual([]);
   });
 
   it('gates the /api/data twin exactly as the static path', () => {
