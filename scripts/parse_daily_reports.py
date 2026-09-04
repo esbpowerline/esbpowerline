@@ -673,18 +673,43 @@ NOT_AN_EVENT = re.compile(
 )
 
 
+# Where the asset stops and the cause starts. Matched at the EARLIEST position
+# in the sentence, case-insensitively — not in the order the markers happen to
+# be listed.
+#
+# The old form looped over [' due to ', ' for ', ' Due to '] and split on the
+# first one PRESENT, so a lower-cased ' due to ' or a ' for ' anywhere in the
+# line beat a ' Due to ' that came before it. PGCB writes the cause first and
+# then qualifies it, so the qualifier won and the cause was thrown away —
+# 48 of the 1,275 outage rows in 2026-08-26..09-03 alone:
+#
+#   "… Scheduled S/D Due to Maintenance Work for High Temperature"
+#        reason published as → "for High Temperature"
+#   "… TR-2 HT Project Work S/D Due to Replacement of poles for PBS 33kV …"
+#        reason published as → "for PBS 33kV double circuit line."
+#
+# That is not truncation, it is a different cause: the archive said the outage
+# was for high temperature when PGCB said it was maintenance work. Publishing a
+# cause the source did not state is the one thing this archive must never do.
+EVENT_CAUSE = re.compile(r'\s(?:due\s+to|for)\s', re.IGNORECASE)
+
+
 def split_event_text(desc, load_cell=None):
     """Asset, cause and lost load teased out of one free-text event description."""
     plant_val, reason_val = desc, ""
-    for keyword in [' due to ', ' for ', ' Due to ']:
-        if keyword in desc:
-            split_parts = desc.split(keyword, 1)
-            plant_val = split_parts[0]
-            reason_val = keyword.strip() + " " + split_parts[1]
-            break
+    cause = EVENT_CAUSE.search(desc)
+    if cause:
+        plant_val = desc[:cause.start()]
+        # Kept verbatim from the marker on, so PGCB's own wording survives —
+        # including its "Due to due to" duplications, which are the source's to
+        # make and not ours to tidy.
+        reason_val = desc[cause.start():].strip()
+    # A trailing space so a verb that ends the asset name still matches; the
+    # asset is otherwise cut short of the verb only when more text follows it.
+    padded = plant_val + ' '
     for verb in [' was ', ' is ', ' tripped ', ' synchronized ', ' S/D ', ' Scheduled S/D ']:
-        if verb in plant_val:
-            plant_val = plant_val.split(verb, 1)[0]
+        if verb in padded:
+            plant_val = padded.split(verb, 1)[0]
             break
     load_match = re.search(r'(\d+(?:\.\d+)?\s*MW)', load_cell or '', re.IGNORECASE) \
         or re.search(r'(\d+(?:\.\d+)?\s*MW)', desc, re.IGNORECASE)
