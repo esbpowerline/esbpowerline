@@ -207,8 +207,16 @@ export function GenerationKpiStrip({
             label="Fuel &amp; import bill:"
             value={`${(systemStats.totalDailyCost / CRORE).toFixed(2)} Crore BDT`}
           />
+          {/* D, not P. `avgProductionCost` is not P1's printed "Production Cost
+              per KWHr" cell: parse_daily_reports.py:1890-1892 computes it as
+              total_daily_cost / total_energy_gen and never reads the rate PGCB
+              prints (types.ts:42 — "every surface must mark it D"). The row
+              above IS published — it is P1's "Production Cost (Tk.)" total —
+              which is what made the two easy to tag alike. OverviewKpiStrip
+              carried the same mistake on its own tile and had it corrected;
+              this second surface kept it until 2026-09-04. */}
           <GridKpiTooltipRow
-            provenance="P"
+            provenance="D"
             label="Avg production cost:"
             value={systemStats.avgProductionCost > 0 ? `${systemStats.avgProductionCost.toFixed(3)} Tk/kWh` : '—'}
           />
