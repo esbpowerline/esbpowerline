@@ -238,7 +238,10 @@ has published gasless days since it was written (`run_daily_ingest.py` step 10 s
 explicitly and step 12 publishes anyway), and on 2026-09-04 the site served grid data for
 the 3rd while its newest gas window was the 1st. It was waiting on a clock.
 
-`scripts/pi-watch.sh`, every 15 min 08:00–23:00 Dhaka, closes that. It runs
+`scripts/pi-watch.sh`, at :07/:22/:37/:52 from 08:00 to 22:52 Dhaka, closes that. Offset off
+`:30` on purpose — a tick firing on the same minute as a scheduled poll takes the lock
+first, and the poll, which is the only thing that runs the trailing window, would find it
+held and skip that slot. It runs
 `scripts/watch_sources.py`, which puts **one question to each publisher about that
 publisher's own documents** and names only energy days a publisher demonstrably has and
 the archive demonstrably lacks — then hands those days to `pi-ingest.sh` through

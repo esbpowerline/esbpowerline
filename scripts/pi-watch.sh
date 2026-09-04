@@ -25,7 +25,11 @@
 # pi-ingest.sh does: a run can `git reset --hard` the file it is being read
 # from. pi-ingest.sh refreshes this copy from the repo at the end of each poll.
 #
-#   */15 8-22 * * *  $HOME/esb-ingest/pi-watch.sh
+# Offset off :30 rather than */15: a tick that fired at the same minute as a
+# scheduled poll would take the lock first, and the poll — the only thing that
+# runs the trailing window — would find it held and skip that slot entirely.
+#
+#   7,22,37,52 8-22 * * *  $HOME/esb-ingest/pi-watch.sh
 set -uo pipefail
 
 ROOT="$HOME/esb-ingest"
