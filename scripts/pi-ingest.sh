@@ -190,7 +190,7 @@ fi
 import json, datetime, sys
 dates = json.load(open("lib/available-dates.json"))
 latest = datetime.date.fromisoformat(dates[-1])
-today = (datetime.datetime.utcnow() + datetime.timedelta(hours=6)).date()
+today = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=6))).date()
 behind = (today - datetime.timedelta(days=1) - latest).days
 print(f"newest held day {latest}, {behind} day(s) behind the newest that can exist")
 sys.exit(1 if behind >= 3 else 0)
