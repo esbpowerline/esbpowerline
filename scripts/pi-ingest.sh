@@ -44,6 +44,11 @@ LOGS="$ROOT/logs"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 LOG="$LOGS/$STAMP.log"
 DAYS="${ESB_INGEST_DAYS:-3}"
+# Set by pi-watch.sh, which has already asked the publishers which days moved.
+# Running the trailing window on top of that would re-do two days for nothing,
+# and the window cannot reach a gas window filed late enough to have fallen out
+# of it — which is the case this runner alone could never cover.
+DATES="${ESB_INGEST_DATES:-}"
 NOTIFY="$ROOT/pi-notify.sh"
 SITE="${ESB_SITE_URL:-https://esbpowerline.com}"
 
@@ -52,7 +57,11 @@ exec >>"$LOG" 2>&1
 
 notify() { [[ -x "$NOTIFY" ]] && "$NOTIFY" "$@"; }
 
-echo "=== $(date -Is) — trailing $DAYS days ==="
+if [[ -n "$DATES" ]]; then
+    echo "=== $(date -Is) — days named by the watcher: $DATES ==="
+else
+    echo "=== $(date -Is) — trailing $DAYS days ==="
+fi
 
 # One poll at a time. A reboot mid-run and a cron tick can otherwise overlap,
 # and two chains writing the same day file is the one way to corrupt it.
@@ -132,7 +141,11 @@ git fetch -q origin authenticating || { echo "! fetch failed"; notify error "ing
 git checkout -q authenticating
 git reset -q --hard origin/authenticating
 
-timeout 1500 "$ROOT/venv/bin/python" scripts/ingest_recent_days.py --days "$DAYS"
+if [[ -n "$DATES" ]]; then
+    timeout 1500 "$ROOT/venv/bin/python" scripts/ingest_recent_days.py --dates "$DATES"
+else
+    timeout 1500 "$ROOT/venv/bin/python" scripts/ingest_recent_days.py --days "$DAYS"
+fi
 status=$?
 if [[ $status -eq 124 ]]; then
     echo "! chain timed out after 25 minutes"
@@ -191,7 +204,7 @@ if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
     chmod +x "$ROOT/pi-ingest.sh"
     echo "runner updated from the repo — effective next poll"
 fi
-for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh; do
+for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh; do
     if [[ -f "$REPO/scripts/$helper" ]] && ! cmp -s "$REPO/scripts/$helper" "$ROOT/$helper"; then
         cp "$REPO/scripts/$helper" "$ROOT/$helper"; chmod +x "$ROOT/$helper"
         echo "$helper updated from the repo"

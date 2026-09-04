@@ -13,8 +13,15 @@ posted yet, and the next poll will see it. A failure on any older day, or any
 failure that is not "collection failed", is a real problem and fails the run so
 the scheduler shows red.
 
+The trailing window is the scheduled poll's shape. `--dates` is the watcher's:
+`watch_sources.py` has already asked the publishers which days actually moved,
+so there is nothing to gain from re-running the two either side of them. It also
+reaches days the window cannot — a gas window filed a week late belongs to a day
+that dropped out of the trailing three long ago.
+
     python scripts/ingest_recent_days.py            # D-3 .. D-1, Dhaka time
     python scripts/ingest_recent_days.py --days 5
+    python scripts/ingest_recent_days.py --dates 2026-09-02,2026-09-03
     python scripts/ingest_recent_days.py --dry-run  # just list the dates
 """
 from __future__ import annotations
@@ -35,12 +42,20 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--days", type=int, default=3, help="trailing window length, ending yesterday (Dhaka)")
     ap.add_argument("--until", help="last energy day to run (default: yesterday in Dhaka)")
+    ap.add_argument("--dates", help="explicit energy days, comma-separated — overrides --days/--until")
     ap.add_argument("--no-publish", action="store_true", help="write the files but leave the live site alone")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    last = date.fromisoformat(args.until) if args.until else datetime.now(DHAKA).date() - timedelta(days=1)
-    days = [last - timedelta(days=i) for i in range(args.days - 1, -1, -1)]  # oldest first: D-1 needs D-2's workbook
+    if args.dates:
+        days = sorted({date.fromisoformat(d.strip()) for d in args.dates.split(",") if d.strip()})
+        if not days:
+            print("--dates named no days", file=sys.stderr)
+            return 2
+        last = days[-1]
+    else:
+        last = date.fromisoformat(args.until) if args.until else datetime.now(DHAKA).date() - timedelta(days=1)
+        days = [last - timedelta(days=i) for i in range(args.days - 1, -1, -1)]  # oldest first: D-1 needs D-2's workbook
     if args.dry_run:
         print("\n".join(d.isoformat() for d in days))
         return 0
@@ -73,7 +88,10 @@ def main() -> int:
         if row["ok"]:
             continue
         # Yesterday not posted yet is the expected state for the early polls.
-        if row["day"] == last and "collection failed" in row["note"]:
+        # Not under --dates: the watcher confirmed the publisher was serving
+        # every one of those days before naming them, so a collection failure
+        # there is a real fault and must not be excused as "not posted yet".
+        if not args.dates and row["day"] == last and "collection failed" in row["note"]:
             row["note"] = "not published yet — will retry next poll"
             continue
         failed_real.append(row)

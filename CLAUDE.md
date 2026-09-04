@@ -228,6 +228,50 @@ with the ledger committed, gzipped `pg_dump` kept 14 deep) and `scripts/pi-weekl
 `pi-ingest.sh`; the short version is that downloads are atomic, torn workbooks are
 refetched, and the next poll finishes whatever the last one did not.
 
+### Between the polls: the watcher asks each publisher separately
+
+Four slots a day is a timetable, and the lag it costs is the timetable's, not the
+publishers'. PGCB filed energy day 2026-09-03 between the 09:30 and the 12:30 poll and
+the site carried a stale newest day for three hours; Petrobangla filed the 2026-09-02
+window just after 12:30 and it waited for 16:30. **Nothing was ever blocked** — the chain
+has published gasless days since it was written (`run_daily_ingest.py` step 10 skips gas
+explicitly and step 12 publishes anyway), and on 2026-09-04 the site served grid data for
+the 3rd while its newest gas window was the 1st. It was waiting on a clock.
+
+`scripts/pi-watch.sh`, every 15 min 08:00–23:00 Dhaka, closes that. It runs
+`scripts/watch_sources.py`, which puts **one question to each publisher about that
+publisher's own documents** and names only energy days a publisher demonstrably has and
+the archive demonstrably lacks — then hands those days to `pi-ingest.sh` through
+`ESB_INGEST_DATES` → `ingest_recent_days.py --dates`. The poll runner is reused rather
+than reimplemented, so the lock, the guards, the live check, the commit and the push have
+exactly one copy.
+
+Two properties matter more than the cadence:
+
+- **Cost.** Petrobangla is one fetch of its listing, which names every report it serves.
+  PGCB costs *nothing at all* while the newest energy day is already held; only a missing
+  day makes it reach out, and then in order of cost — held workbook store, pgcb.gov.bd's
+  own URL, then the ERP estimate ± 2. Not `probe_erp_for_energy`, which widens its slack
+  with distance and pulls dozens of workbooks: right for a backfill, indefensible every
+  quarter hour. Whatever it fetches while asking is filed, so the chain that follows reads
+  it off disk. (`download.py`'s `PGCB_SOURCE_DIRS` honours `ESB_PGCB_ARCHIVE` for that
+  reason — it did not, so on the Pi nothing was ever filed or found and every re-run went
+  back to the ERP.)
+- **The trailing window cannot reach a late gas filing.** `--days 3` is anchored on PGCB's
+  cadence, so a window Petrobangla files four days late belongs to a day that left the
+  window before the gas arrived. The watcher compares per source against the whole
+  `LOOKBACK_GAS` span instead, and a day that fell out is still picked up.
+
+A day is emitted only once its publisher is confirmed to have it, so no run is spent on a
+day that does not exist yet. If a confirmed-available day is fired at `MAX_ATTEMPTS` times
+and still yields no artifact, it is backed off to the scheduled polls — otherwise a day
+the parser refuses (the zero-gas triage backlog is full of them) would be retried sixty
+times a day forever. Counters live in `$ESB_WATCH_STATE`, outside the repo, because every
+poll `git reset --hard`s the tree.
+
+The four cron slots stay. They are the backstop for anything the watcher missed, and the
+only thing that runs the trailing window.
+
 GitHub Actions was tried first and **removed** (2026-09-03): every dispatch on this
 account ends in `startup_failure` — including a one-line `echo` workflow, so the block
 is account-level, not the file — and each scheduled tick emailed Hamim a failure. The

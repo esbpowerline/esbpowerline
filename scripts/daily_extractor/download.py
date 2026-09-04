@@ -1,6 +1,7 @@
 """Download official PGCB (ERP/pgcb.gov.bd) and Petrobangla daily reports."""
 from __future__ import annotations
 
+import os
 import re
 import ssl
 import urllib.parse
@@ -315,10 +316,23 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
 
 
 # Where the publisher's own workbooks are kept. Searched before any mirror.
-PGCB_SOURCE_DIRS = [
-    Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
-    Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
-]
+#
+# `ESB_PGCB_ARCHIVE` names the store on a machine that is not Hamim's Windows
+# box, exactly as run_daily_ingest.py reads it. Without it these two Windows
+# paths were the only candidates, so on the Pi `find_archived_workbook` never
+# matched and `archive_workbook` never filed: every re-run of a day — and a
+# gas-only re-run is a re-run of the whole day — went back to PGCB's ERP for a
+# workbook already sitting in the archive. That is the difference between the
+# watcher costing one listing fetch per tick and it costing an ERP walk.
+_env_archive = os.environ.get("ESB_PGCB_ARCHIVE")
+PGCB_SOURCE_DIRS = (
+    [Path(_env_archive)]
+    if _env_archive
+    else [
+        Path(r"W:\Grid-Explorer\PGCB\Daily Reports - D"),
+        Path(r"C:\ESB-Grid-Archive\01-pgcb\local-archive\Daily Reports - D"),
+    ]
+)
 
 
 def find_archived_workbook(report_date: date) -> Path | None:
