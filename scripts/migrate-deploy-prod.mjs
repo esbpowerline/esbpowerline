@@ -76,6 +76,15 @@ function runPrisma(args, { inherit = false } = {}) {
     env: {
       ...process.env,
       DATABASE_URL: migrationDatabaseUrl,
+      // DIRECT_URL is overridden with the SAME resolved URL, not left as it was
+      // found. prisma.config.ts prefers DIRECT_URL for migrations (the
+      // transaction pooler cannot hold the schema engine's advisory locks), so
+      // leaving the raw value here would let the config silently win over this
+      // script and skip everything resolveMigrationDatabaseUrl does — the
+      // db.<ref>.supabase.co → pooler host rewrite that Vercel needs without
+      // the IPv4 add-on, and connection_limit=1. Both variables must name the
+      // one URL this script decided on.
+      DIRECT_URL: migrationDatabaseUrl,
       PRISMA_MIGRATIONS_DIR: migrationsDir,
     },
     shell: process.platform === 'win32',

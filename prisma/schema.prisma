@@ -14,30 +14,30 @@ datasource db {
 // USERS + AUTH + ROLES (port of datastore Users + ROLES + hasPermission)
 // ============================================
 model User {
-  id              String     @id @default(cuid())
-  supabaseUserId  String?    @unique
-  name            String
-  email           String     @unique
-  phone           String?    @unique
-  passwordHash    String
-  role          Role       @default(AUTHOR)
-  pendingName   String?
-  avatar        String?
-  bio           String?
-  status        UserStatus @default(ACTIVE)
-  lastLoginAt   DateTime?
-  articlesCount Int        @default(0)
-  totalViews    Int        @default(0)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id             String     @id @default(cuid())
+  supabaseUserId String?    @unique
+  name           String
+  email          String     @unique
+  phone          String?    @unique
+  passwordHash   String
+  role           Role       @default(AUTHOR)
+  pendingName    String?
+  avatar         String?
+  bio            String?
+  status         UserStatus @default(ACTIVE)
+  lastLoginAt    DateTime?
+  articlesCount  Int        @default(0)
+  totalViews     Int        @default(0)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
-  articles        Article[]
-  receivedNotices EditorialNotice[] @relation("ReceivedNotices")
-  sentNotices     EditorialNotice[] @relation("SentNotices")
-  savedItems      SavedItem[]
-  memberDownloads      MemberDownload[]
-  comments             Comment[]
-  gridSubscription     MemberGridSubscription?
+  articles         Article[]
+  receivedNotices  EditorialNotice[]       @relation("ReceivedNotices")
+  sentNotices      EditorialNotice[]       @relation("SentNotices")
+  savedItems       SavedItem[]
+  memberDownloads  MemberDownload[]
+  comments         Comment[]
+  gridSubscription MemberGridSubscription?
 }
 
 enum Role {
@@ -59,46 +59,48 @@ enum UserStatus {
 // ARTICLES (core of the news portal; rich parity with datastore)
 // ============================================
 model Article {
-  id          String          @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
   shortTitle  String?
-  slug        String          @unique
+  slug        String        @unique
   excerpt     String?
-  content     String          // TipTap JSON or sanitized HTML
+  content     String // TipTap JSON or sanitized HTML
   authorId    String
-  author      User            @relation(fields: [authorId], references: [id])
+  author      User          @relation(fields: [authorId], references: [id])
   publishedAt DateTime?
-  status      ArticleStatus   @default(DRAFT)
+  status      ArticleStatus @default(DRAFT)
   category    String
   categoryId  String?
-  categoryRef Category?       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryRef Category?     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   imageUrl    String?
   imageCredit String?
   titleBn     String?
   excerptBn   String?
   contentBn   String?
 
-  readTime    Int             @default(1)
-  views       Int             @default(0)
-  likes       Int             @default(0)
-  isFeatured  Boolean         @default(false)
-  isBreaking  Boolean         @default(false)
-  isPinned    Boolean         @default(false)
-  isTrending  Boolean         @default(false)
-  postAsNewsDesk Boolean      @default(false)
-  tags        Json?           // array of strings stored as JSON (sqlite does not support scalar lists natively in this setup)
-  seo         Json?           // { metaTitle, metaDescription, focusKeyword, ogImage }
-  collaboratorIds Json?       // array of user IDs
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  version     Int             @default(1)
-  locale      String          @default("en")
-  /** Private editor trash — hidden from admins; purged after 7 days */
-  editorTrash Boolean         @default(false)
-  trashedAt   DateTime?
+  readTime        Int       @default(1)
+  views           Int       @default(0)
+  likes           Int       @default(0)
+  isFeatured      Boolean   @default(false)
+  isBreaking      Boolean   @default(false)
+  isPinned        Boolean   @default(false)
+  isTrending      Boolean   @default(false)
+  postAsNewsDesk  Boolean   @default(false)
+  tags            Json? // array of strings stored as JSON (sqlite does not support scalar lists natively in this setup)
+  seo             Json? // { metaTitle, metaDescription, focusKeyword, ogImage }
+  collaboratorIds Json? // array of user IDs
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  version         Int       @default(1)
+  locale          String    @default("en")
+  /**
+   * Private editor trash — hidden from admins; purged after 7 days
+   */
+  editorTrash     Boolean   @default(false)
+  trashedAt       DateTime?
 
-  revisions Revision[]
-  notices   EditorialNotice[]
+  revisions  Revision[]
+  notices    EditorialNotice[]
   viewEvents ArticleView[]
 
   @@index([status, publishedAt])
@@ -108,7 +110,9 @@ model Article {
   @@index([authorId])
 }
 
-/** Append-only pageview ledger — Article.views increments only via recordArticleView(). */
+/**
+ * Append-only pageview ledger — Article.views increments only via recordArticleView().
+ */
 model ArticleView {
   id          String   @id @default(cuid())
   articleId   String
@@ -136,16 +140,16 @@ enum ArticleStatus {
 // CATEGORIES (exact legacy 10)
 // ============================================
 model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  slug        String   @unique
-  description String?
-  icon          String?
-  iconImageUrl  String?
-  color       String?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  articles    Article[]
+  id           String    @id @default(cuid())
+  name         String    @unique
+  slug         String    @unique
+  description  String?
+  icon         String?
+  iconImageUrl String?
+  color        String?
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  articles     Article[]
 }
 
 // ============================================
@@ -206,13 +210,13 @@ model Media {
   id           String   @id @default(cuid())
   name         String
   url          String
-  type         String   // image | pdf | video
+  type         String // image | pdf | video
   mimeType     String?
   size         Int?
   altText      String?
   caption      String?
   uploadedById String?
-  usedIn       Json?     // array of ids stored as JSON for sqlite compatibility
+  usedIn       Json? // array of ids stored as JSON for sqlite compatibility
   createdAt    DateTime @default(now())
 }
 
@@ -262,7 +266,9 @@ model MemberDownload {
   @@index([userId])
 }
 
-/** Paid grid archive subscription — payment webhook activates plan. */
+/**
+ * Paid grid archive subscription — payment webhook activates plan.
+ */
 model MemberGridSubscription {
   id        String                 @id @default(cuid())
   userId    String                 @unique
@@ -306,7 +312,7 @@ model MagazineIssue {
   pdfUrl       String?
   summary      String?
   status       String   @default("published")
-  articleLinks Json?     // array of article slugs/ids stored as JSON (sqlite compatible)
+  articleLinks Json? // array of article slugs/ids stored as JSON (sqlite compatible)
   createdAt    DateTime @default(now())
 }
 
@@ -314,20 +320,20 @@ model MagazineIssue {
 // POWER GRID / DATA REPORTS (unified from BD_PWR_TREE)
 // ============================================
 model Node {
-  id                String    @id @default(cuid())
+  id                String   @id @default(cuid())
   label             String
   designation       String
   category          String
-  status            String    @default("normal")
+  status            String   @default("normal")
   websiteUrl        String?
   capacityData      String?
   nodeColor         String?
-  textColor         String    @default("#e2e8f0")
-  x                 Float     @default(0)
-  y                 Float     @default(0)
+  textColor         String   @default("#e2e8f0")
+  x                 Float    @default(0)
+  y                 Float    @default(0)
   manualX           Float?
   manualY           Float?
-  useManualOverride Boolean   @default(false)
+  useManualOverride Boolean  @default(false)
   parentId          String?
   icon              String?
   kpiValue          String?
@@ -339,8 +345,8 @@ model Node {
   /// the place a power station's capacity lives as a string in kpiValue.
   entityType        String?
   entityId          String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   parent   Node?  @relation("NodeHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children Node[] @relation("NodeHierarchy")
@@ -352,17 +358,17 @@ model Node {
 }
 
 model Edge {
-  id        String   @id @default(cuid())
-  sourceId  String
-  targetId  String
-  edgeColor String   @default("#64748b")
-  edgeStyle String   @default("solid")
-  label     String?
+  id         String   @id @default(cuid())
+  sourceId   String
+  targetId   String
+  edgeColor  String   @default("#64748b")
+  edgeStyle  String   @default("solid")
+  label      String?
   flowVolume Float?
-  flowType  String?
-  animated  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  flowType   String?
+  animated   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   source Node @relation("EdgeSource", fields: [sourceId], references: [id], onDelete: Cascade)
   target Node @relation("EdgeTarget", fields: [targetId], references: [id], onDelete: Cascade)
@@ -388,24 +394,24 @@ model AuditLog {
 }
 
 model NewsletterSub {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  subscribedAt  DateTime @default(now())
-  status        String   @default("active")
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+  status       String   @default("active")
 }
 
 model Ad {
-  id         String   @id @default(cuid())
-  name       String
-  position   String
-  content    String
-  link       String   @default("#")
-  isActive   Boolean  @default(true)
-  impressions Int     @default(0)
-  clicks     Int      @default(0)
-  startDate  DateTime?
-  endDate    DateTime?
-  createdAt  DateTime @default(now())
+  id          String    @id @default(cuid())
+  name        String
+  position    String
+  content     String
+  link        String    @default("#")
+  isActive    Boolean   @default(true)
+  impressions Int       @default(0)
+  clicks      Int       @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
 }
 
 model SiteSetting {
@@ -454,7 +460,7 @@ model TickerItem {
 // ============================================
 model Notification {
   id        String   @id @default(cuid())
-  userId    String   // Profile.id
+  userId    String // Profile.id
   message   String
   linkUrl   String?
   read      Boolean  @default(false)
@@ -482,7 +488,7 @@ model ArticleHistory {
   articleId  String
   fromStatus String
   toStatus   String
-  changedBy  String   // Profile.id
+  changedBy  String // Profile.id
   comment    String?
   createdAt  DateTime @default(now())
 
@@ -496,7 +502,7 @@ model ContactMessage {
   id        String   @id @default(cuid())
   name      String
   email     String
-  phone     String?  // Phone Number (WhatsApp)
+  phone     String? // Phone Number (WhatsApp)
   subject   String?
   message   String
   read      Boolean  @default(false)
@@ -516,42 +522,42 @@ model ContactMessage {
 // ============================================
 
 enum DataFeed {
-  GRID_DAILY           // public/data/daily/{date}.json          (PGCB)
-  GAS_DAILY            // public/data/petrobangla/daily/{date}.json
-  GAS_INDEX            // public/data/petrobangla/_index.json
-  GAS_LIVE_WEEK        // public/data/petrobangla/_live_week.json
-  GAS_TIMELINE         // public/data/petrobangla/timeline-summary.json
-  PGCB_MONTHLY_SERIES  // public/data/pgcb-monthly/_series.json
-  PGCB_MONTHLY         // public/data/pgcb-monthly/{YYYY-MM}.json
-  SREDA_DAILY          // public/data/sreda/daily/{date}.json
+  GRID_DAILY // public/data/daily/{date}.json          (PGCB)
+  GAS_DAILY // public/data/petrobangla/daily/{date}.json
+  GAS_INDEX // public/data/petrobangla/_index.json
+  GAS_LIVE_WEEK // public/data/petrobangla/_live_week.json
+  GAS_TIMELINE // public/data/petrobangla/timeline-summary.json
+  PGCB_MONTHLY_SERIES // public/data/pgcb-monthly/_series.json
+  PGCB_MONTHLY // public/data/pgcb-monthly/{YYYY-MM}.json
+  SREDA_DAILY // public/data/sreda/daily/{date}.json
   // A published day is only complete if the Explorer's other tabs can read it
   // too. Without these a newly published day showed its headline figures while
   // the Energy Curve chart and the Power Stations tab silently 404ed, because
   // the ingest writes those as separate files.
-  GRID_CURVE           // public/data/curves/{date}.json
-  GRID_PLANTS          // public/data/plants/{date}.json
-  PGCB_MONTHLY_EVENTS  // public/data/pgcb-monthly/{YYYY-MM}-events.json
-  GAS_RESERVE_MODEL    // public/data/petrobangla/reserve-model.json
+  GRID_CURVE // public/data/curves/{date}.json
+  GRID_PLANTS // public/data/plants/{date}.json
+  PGCB_MONTHLY_EVENTS // public/data/pgcb-monthly/{YYYY-MM}-events.json
+  GAS_RESERVE_MODEL // public/data/petrobangla/reserve-model.json
   GAS_RESERVE_SENSITIVITY // public/data/petrobangla/reserve-sensitivity.json
 }
 
 /// A parsed payload awaiting review. Transient: cleared once published or discarded.
 model DataDraft {
-  id          String   @id @default(cuid())
-  feed        DataFeed
+  id            String   @id @default(cuid())
+  feed          DataFeed
   /// ISO date for daily feeds, YYYY-MM for monthly, "singleton" for aggregates.
-  key         String
-  payload     Json
+  key           String
+  payload       Json
   /// Parser output: reconciliation results, warnings, and anything the
   /// reviewer must see before approving. Shape is owned by the parser.
-  validation  Json?
+  validation    Json?
   /// SHA-256 of the canonical payload, so an unchanged re-parse is detectable.
-  checksum    String
-  sourceName  String?  // original upload filename, e.g. "23.07.26.pdf"
-  sourceUrl   String?  // archived original in Supabase Storage
+  checksum      String
+  sourceName    String? // original upload filename, e.g. "23.07.26.pdf"
+  sourceUrl     String? // archived original in Supabase Storage
   parserVersion String?
-  createdAt   DateTime @default(now())
-  createdById String?
+  createdAt     DateTime @default(now())
+  createdById   String?
 
   @@unique([feed, key])
   @@index([createdAt])
@@ -559,7 +565,7 @@ model DataDraft {
 
 /// A published payload. This is what the site serves.
 model DataRelease {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   feed          DataFeed
   key           String
   payload       Json
@@ -570,9 +576,9 @@ model DataRelease {
   /// Set when a release is withdrawn; the loader then falls back to the static
   /// archive rather than serving a known-bad day.
   revokedAt     DateTime?
-  publishedAt   DateTime @default(now())
+  publishedAt   DateTime  @default(now())
   publishedById String?
-  updatedAt     DateTime @updatedAt
+  updatedAt     DateTime  @updatedAt
 
   revisions DataReleaseRevision[]
 
@@ -581,10 +587,10 @@ model DataRelease {
 }
 
 enum RevisionKind {
-  PUBLISH  // first publish of this feed+key
-  CORRECT  // payload replaced with different bytes
-  REVOKE   // withdrawn; loader falls back to the static archive
-  RESTORE  // re-published after a revoke
+  PUBLISH // first publish of this feed+key
+  CORRECT // payload replaced with different bytes
+  REVOKE // withdrawn; loader falls back to the static archive
+  RESTORE // re-published after a revoke
 }
 
 /// Append-only history of every DataRelease. The current row above answers
@@ -704,8 +710,8 @@ model PowerPlant {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  sourceDocument SourceDocument? @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  sourceDocument SourceDocument?  @relation(fields: [sourceDocumentId], references: [id], onDelete: SetNull)
   units          GeneratingUnit[]
   contracts      Contract[]
   projects       PowerProject[]
@@ -801,6 +807,25 @@ model Contract {
 
 /// One fetched document: the bytes parsed are the bytes hashed. The same
 /// content_sha256 that verify:source pins, promoted to a row.
+/// How far a fetched document got through ingestion. A document that was
+/// retrieved but never parsed is evidence we hold and have not read; saying so
+/// is the difference between a gap we know about and one we do not.
+enum IngestStatus {
+  FETCHED
+  PARSED
+  FAILED
+}
+
+/// UNVALIDATED: not checked. PASSED: internally consistent. WARNED: the source
+/// disagrees with itself — published as filed and reported, never repaired
+/// (doctrine rule 4). FAILED: we produced something the source did not say.
+enum ValidationStatus {
+  UNVALIDATED
+  PASSED
+  WARNED
+  FAILED
+}
+
 model SourceDocument {
   id            String    @id @default(cuid())
   publisher     Publisher
@@ -811,11 +836,95 @@ model SourceDocument {
   fetchedAt     DateTime  @default(now())
   parserVersion String?
 
+  /// The exact endpoint this was retrieved from, including query string. The
+  /// filename alone cannot identify a paginated HTML page.
+  sourceUrl     String?
+  /// The bytes as served, gzipped. This is the evidence: it is what makes a
+  /// figure re-derivable years later when the publisher no longer serves the
+  /// page. PGCB's demand/load-shed endpoint retains roughly 145 days, so for
+  /// that series this column is the only durable copy that will exist.
+  rawGzip       Bytes?
+  rawByteLength Int?
+
+  ingestStatus     IngestStatus     @default(PARSED)
+  validationStatus ValidationStatus @default(UNVALIDATED)
+  /// Why a fetch or parse failed, or what the validator warned about.
+  note             String?
+
   observations Observation[]
   plants       PowerPlant[]
+  gridHours    GridHourlyObservation[]
 
   @@unique([publisher, contentSha256])
   @@index([publisher, windowStart])
+  @@index([sourceUrl])
+}
+
+/// Which NLDC hourly page a row came from. They are separate series because
+/// they are separate documents with separate retention: generation goes back to
+/// 2015, demand/supply/load-shed rolls off after about 145 days.
+enum GridSeries {
+  GENERATION
+  DEMAND_SUPPLY
+}
+
+/// One hour as NLDC published it, kept because NLDC will not keep it.
+///
+/// This is deliberately WIDE rather than the tall `Observation` shape above,
+/// and the reason is the charter rather than performance. `Observation.value`
+/// is `Decimal` NOT NULL, so absence can only be expressed by the row not
+/// existing — which makes "PGCB left this cell blank" and "we never fetched
+/// this hour" the same fact. They are not the same fact. Here the row records
+/// that the hour was retrieved and each nullable column records whether that
+/// figure was printed, so a blank cell survives as `null` and never as `0`.
+///
+/// `Observation` remains correct for sparse entity attributes. A dense
+/// fourteen-column hourly series is not that.
+model GridHourlyObservation {
+  id     String     @id @default(cuid())
+  series GridSeries
+
+  /// The hour NLDC stamps on the row, as an instant. Dhaka is UTC+06:00 all
+  /// year with no DST (observation-window.ts), applied uniformly.
+  observedAt DateTime
+  /// When ESB read the page carrying this row. Kept separate from observedAt
+  /// on purpose: the distance between them is how late the archive was, and
+  /// collapsing them would erase the only record of that.
+  fetchedAt  DateTime
+
+  sourceDocumentId String
+  sourceDocument   SourceDocument @relation(fields: [sourceDocumentId], references: [id], onDelete: Cascade)
+
+  // GENERATION. Every column nullable — a cell NLDC left blank is absent, and
+  // absent is never zero.
+  totalMw     Decimal? @db.Decimal(12, 3)
+  gasMw       Decimal? @db.Decimal(12, 3)
+  liquidMw    Decimal? @db.Decimal(12, 3)
+  coalMw      Decimal? @db.Decimal(12, 3)
+  hydroMw     Decimal? @db.Decimal(12, 3)
+  solarMw     Decimal? @db.Decimal(12, 3)
+  windMw      Decimal? @db.Decimal(12, 3)
+  bheramaraMw Decimal? @db.Decimal(12, 3)
+  tripuraMw   Decimal? @db.Decimal(12, 3)
+  adaniMw     Decimal? @db.Decimal(12, 3)
+  nepalMw     Decimal? @db.Decimal(12, 3)
+
+  // DEMAND_SUPPLY.
+  demandMw   Decimal? @db.Decimal(12, 3)
+  supplyMw   Decimal? @db.Decimal(12, 3)
+  loadShedMw Decimal? @db.Decimal(12, 3)
+
+  /// NLDC's own remark cell — "Day Peak", "Evening Peak" and the like.
+  remark        String?
+  basis         ObservationBasis @default(REPORTED)
+  parserVersion String
+  createdAt     DateTime         @default(now())
+
+  /// The idempotency key. Re-running a backfill, or a poll overlapping a
+  /// previous one, must update the hour rather than duplicate it.
+  @@unique([series, observedAt])
+  @@index([observedAt])
+  @@index([sourceDocumentId])
 }
 
 /// A figure, its subject, its window and its document. Nothing here may be
