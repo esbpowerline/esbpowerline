@@ -82,6 +82,47 @@ describe('parseNldcDemandSupplyHtml', () => {
     const evening = rows.find((x) => x.remark === 'Evening Peak');
     expect(evening).toBeDefined();
   });
+
+  /**
+   * The layout that broke it. Between 2026-08-23 and 2026-09-04 NLDC made the
+   * time cell responsive — the hour is printed once per breakpoint, and
+   * `stripTags` flattens both spans into "13:00:00 13:00". The anchored
+   * `^(\d{2}):(\d{2}):(\d{2})$` rejected that, so every row was dropped and the
+   * demand/supply half of the live layer went dark. The generation page was not
+   * changed, so nothing looked broken: the site simply said "Current Demand —
+   * awaiting NLDC" while NLDC was publishing 13,847 MW for that hour.
+   *
+   * The old fixture kept passing throughout. Both layouts are pinned here now,
+   * because a captured fixture only proves the parser handles the day it was
+   * captured — refresh it when the publisher moves, and keep the old one.
+   */
+  describe('responsive time cell (as served 2026-09-04)', () => {
+    const live = parseNldcDemandSupplyHtml(fixture('nldc-dsl-responsive.html'));
+
+    it('parses the page that the anchored regex silently dropped', () => {
+      expect(live.length).toBeGreaterThan(40);
+    });
+
+    it('reads the 13:00 row exactly as printed', () => {
+      const r = live.find((x) => x.at === '2026-09-04T13:00:00');
+      expect(r).toMatchObject({ demandMw: 13847, supplyMw: 13460, loadShedMw: 387 });
+    });
+
+    it('takes the desktop span, not the truncated mobile one', () => {
+      // Both spans say the same hour; the seconds must survive either way.
+      expect(live.every((r) => /T\d{2}:\d{2}:\d{2}$/.test(r.at))).toBe(true);
+    });
+
+    it('parses a cell whose mobile span is listed first', () => {
+      const flipped = `<table><tr>
+        <td>০৪-০৯-২০২৬</td>
+        <td><span class="time-mobile">১৩:০০</span><span class="time-desktop">১৩:০০:০০</span></td>
+        <td>১৩৮৪৭</td><td>১৩৪৬০</td><td>৩৮৭</td><td>—</td>
+      </tr></table>`;
+      const [r] = parseNldcDemandSupplyHtml(flipped);
+      expect(r).toMatchObject({ at: '2026-09-04T13:00:00', demandMw: 13847 });
+    });
+  });
 });
 
 describe('buildLiveGridSnapshot', () => {
@@ -108,7 +149,7 @@ describe('buildLiveGridSnapshot', () => {
 
   it("today's extremes come from today's rows only", () => {
     expect(snapshot.today.date).toBe('2026-08-23');
-    expect(snapshot.today.maxDemandAt.startsWith('2026-08-23')).toBe(true);
+    expect(snapshot.today.maxDemandAt?.startsWith('2026-08-23')).toBe(true);
     expect(snapshot.today.maxDemandMw).toBeGreaterThanOrEqual(14701);
   });
 
@@ -116,5 +157,35 @@ describe('buildLiveGridSnapshot', () => {
     expect(() =>
       buildLiveGridSnapshot([], [], { fetchedAt: 'x', generationUrl: 'g', demandSupplyUrl: 'd' }),
     ).toThrow();
+  });
+
+  /**
+   * The second half of the 2026-09-04 failure, and the reason it was invisible.
+   * With the demand page unparseable, `today` fell back to the generation
+   * table: peak demand became the generation total, peak supply became the
+   * generation total, and load shed became `Math.max(0, ...[])` — a printed
+   * zero asserting that no load was shed on a day nobody measured.
+   *
+   * Generation is not demand and not supply. On 2026-09-04 at 13:00 NLDC
+   * published 13,864 MW generated, 13,460 MW supplied and 13,847 MW demanded,
+   * with the day's demand peak at 14,937 MW — so the fallback understated peak
+   * demand by 1,073 MW under a label that named it demand.
+   */
+  it('never substitutes generation when the demand page yields nothing', () => {
+    const genOnly = buildLiveGridSnapshot(
+      parseNldcGenerationHtml(fixture('nldc-gen.html')),
+      [],
+      { fetchedAt: '2026-08-23T06:10:00.000Z', generationUrl: 'g', demandSupplyUrl: 'd' },
+    );
+
+    expect(genOnly.latest.totalMw).toBeGreaterThan(0); // generation still reported
+    expect(genOnly.today.maxDemandMw).toBeNull();
+    expect(genOnly.today.maxDemandAt).toBeNull();
+    expect(genOnly.today.maxSupplyMw).toBeNull();
+    expect(genOnly.today.maxSupplyAt).toBeNull();
+    // Not 0 — nobody measured it.
+    expect(genOnly.today.maxLoadShedMw).toBeNull();
+    expect(genOnly.latest.demandMw).toBeNull();
+    expect(genOnly.latest.supplyMw).toBeNull();
   });
 });

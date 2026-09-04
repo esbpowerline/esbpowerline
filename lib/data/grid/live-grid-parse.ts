@@ -75,12 +75,31 @@ function tableRows(html: string): string[][] {
   return rows;
 }
 
-/** "23-08-2026" + "10:00:00" → "2026-08-23T10:00:00", or null when malformed. */
+/**
+ * "23-08-2026" + "10:00:00" → "2026-08-23T10:00:00", or null when malformed.
+ *
+ * Both cells are SEARCHED, not anchored, and the seconds are optional. NLDC
+ * made the demand/supply page's time cell responsive between 2026-08-23 and
+ * 2026-09-04 — it now prints the hour twice, once per breakpoint:
+ *
+ *   <td class="text-nowrap">
+ *     <span class="time-desktop">১৩:০০:০০</span>
+ *     <span class="time-mobile">১৩:০০</span>
+ *   </td>
+ *
+ * `stripTags` flattens that to "13:00:00 13:00", which `^…$` rejects. Every
+ * demand row was therefore dropped, and because the generation page was NOT
+ * changed, the failure was silent and one-sided: the live layer kept reporting
+ * generation while the entire demand/supply half went dark. On 2026-09-04 the
+ * site had shown "Current Demand — awaiting NLDC" against a page that was
+ * publishing 13,847 MW at that very hour. Matching the first token parses
+ * either span, in whichever order the markup lists them.
+ */
 function toIsoLocal(date: string, time: string): string | null {
-  const d = /^(\d{2})-(\d{2})-(\d{4})$/.exec(date);
-  const t = /^(\d{2}):(\d{2}):(\d{2})$/.exec(time);
+  const d = /(\d{2})-(\d{2})-(\d{4})/.exec(date);
+  const t = /(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(time);
   if (!d || !t) return null;
-  return `${d[3]}-${d[2]}-${d[1]}T${t[1]}:${t[2]}:${t[3]}`;
+  return `${d[3]}-${d[2]}-${d[1]}T${t[1].padStart(2, '0')}:${t[2]}:${t[3] ?? '00'}`;
 }
 
 const num = (cell: string): number | null => {
@@ -158,14 +177,26 @@ export type LiveGridSnapshot = {
   /** The newest hour NLDC has posted (Dhaka wall-clock, ISO local). */
   asOf: string;
   latest: LiveGridHour;
-  /** Extremes across the newest day's rows, as posted so far. */
+  /**
+   * Extremes across the newest day's rows, as posted so far.
+   *
+   * Every field is nullable because all five come from the demand/supply page
+   * alone, and that page can be absent, unparseable or newly re-laid-out while
+   * the generation page keeps working. They used to fall back to the generation
+   * total — `maxDemandMw: byDemand?.demandMw ?? latest.demandMw ?? latest.totalMw`
+   * — which is a different quantity under the same label: on 2026-09-04 that
+   * substitution would have printed the day's peak demand as 13,864 MW when
+   * NLDC's own demand column said 14,937 MW, understating it by 1,073 MW. Load
+   * shed was worse: `Math.max(0, ...[])` returned 0, asserting that no load was
+   * shed on a day nobody had measured. Absent is absent (CLAUDE.md rules 1-2).
+   */
   today: {
     date: string;
-    maxSupplyMw: number;
-    maxSupplyAt: string;
-    maxDemandMw: number;
-    maxDemandAt: string;
-    maxLoadShedMw: number;
+    maxSupplyMw: number | null;
+    maxSupplyAt: string | null;
+    maxDemandMw: number | null;
+    maxDemandAt: string | null;
+    maxLoadShedMw: number | null;
   };
   /**
    * The last 24 POSTED rows, oldest first, for sparklines -- not 24 hours.
@@ -214,10 +245,8 @@ export function buildLiveGridSnapshot(
 
   const date = latest.at.slice(0, 10);
   const todayDemand = demand.filter((r) => r.at.startsWith(date));
-  const todayGen = gen.filter((r) => r.at.startsWith(date));
   const bySupply = [...todayDemand].sort((a, b) => a.supplyMw - b.supplyMw).pop();
   const byDemand = [...todayDemand].sort((a, b) => a.demandMw - b.demandMw).pop();
-  const byGenTotal = [...todayGen].sort((a, b) => a.totalMw - b.totalMw).pop();
 
   return {
     fetchedAt: opts.fetchedAt,
@@ -225,11 +254,18 @@ export function buildLiveGridSnapshot(
     latest,
     today: {
       date,
-      maxSupplyMw: bySupply?.supplyMw ?? byGenTotal?.totalMw ?? latest.totalMw,
-      maxSupplyAt: bySupply?.at ?? byGenTotal?.at ?? latest.at,
-      maxDemandMw: byDemand?.demandMw ?? latest.demandMw ?? latest.totalMw,
-      maxDemandAt: byDemand?.at ?? latest.at,
-      maxLoadShedMw: Math.max(0, ...todayDemand.map((r) => r.loadShedMw)),
+      // No generation-side fallback. Supply, demand and load shed are the
+      // demand/supply page's quantities; the generation total is not a stand-in
+      // for any of them (it read 13,864 MW against 13,460 MW supplied and
+      // 14,937 MW demanded on 2026-09-04). A caller that gets null renders a
+      // dash and names NLDC, which is what the tiles already do.
+      maxSupplyMw: bySupply?.supplyMw ?? null,
+      maxSupplyAt: bySupply?.at ?? null,
+      maxDemandMw: byDemand?.demandMw ?? null,
+      maxDemandAt: byDemand?.at ?? null,
+      maxLoadShedMw: todayDemand.length
+        ? Math.max(...todayDemand.map((r) => r.loadShedMw))
+        : null,
     },
     hours,
     reconciles: Math.abs(latest.totalMw - componentSum) <= 1,

@@ -68,7 +68,10 @@ type LiveGrid = {
     byFuel: { coalMw: number };
     imports: { totalMw: number };
   };
-  today: { maxDemandMw: number };
+  // Nullable: it comes from NLDC's demand/supply page, which can be absent or
+  // re-laid-out while the generation page keeps working. It used to fall back
+  // to the generation total, which put a different quantity under this label.
+  today: { maxDemandMw: number | null };
   /** buildLiveGridSnapshot's check: printed total === sum of fuels + imports. */
   reconciles?: boolean;
 };
