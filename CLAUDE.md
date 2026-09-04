@@ -24,6 +24,55 @@ deploys nothing.** That is deliberate. Production ships from `main`.
 
 ---
 
+## Open work — left standing 2026-09-04 night
+
+Delete an item when it is done; this section is a handover, not a changelog.
+
+**1. Production is running none of the day's fixes.** Four are committed and pushed to
+`authenticating`, which deploys nothing. Until something merges to `main`, esbpowerline.com
+still has: the dead NLDC demand parser (Current Demand permanently "awaiting", Peak Demand
+showing generation), `avgProductionCost` tagged P when it is derived, the Petrobangla
+aggregates readable cross-origin, and outage causes naming the wrong reason. **A PR to `main`
+is the single highest-value action tomorrow** — the fixes are worth nothing where they sit.
+
+**2. The outage backfill is built, dry-run, and not applied.**
+
+```bash
+python scripts/repair_outage_cause.py            # dry run, prints the report
+python scripts/repair_outage_cause.py --apply    # 1,233 files
+```
+
+4,549 days / 119,642 rows → **1,748 reasons** and **19,316 plants** corrected across **1,233
+days**. Blocked on 2026-09-04 by the permission classifier — a mass rewrite of the published
+archive is exactly what that guard is for, so it wants a human. The tool is idempotent (a
+second run reports nothing) and its writer reproduces the archive's serialisation byte for
+byte, asserted per file. Afterwards: republish the ~90 days holding `DataRelease` rows
+(`scripts/publish-local.ts`); older days ride the static archive and need the deploy in item 1.
+
+**3. 41,034 outage rows cannot be repaired from disk.** Pre-2025 the parser stored no
+`full_desc`, so there is no evidence to re-derive the cause from — 100% coverage in 2025-26,
+66% in 2023-24, 9.5% in 2017. Their causes are probably wrong in the same way. Fixing them
+means reparsing the source workbooks (`reingest_from_archive.py`), which is a different and
+much larger job. Do not guess at them; that would be inventing text.
+
+**4. The commodities strip is three hand-typed yearly rows.** `live-ticker.server.ts` carries
+Bulk Electricity (BERC), Diesel and Octane (BPC), read from `lib/data/macro/economics.ts` —
+one row per year, hand-maintained, no official document cited. Hamim asked for the real list of
+energy commodities the government imports or administers, each with its gazetted price, issuer,
+instrument and effective date. The research was started and lost to session limits; nothing
+usable survives. Note BPC moved to a **monthly automatic pricing formula in 2024** and BERC
+reprices LPG monthly, so a yearly table cannot be right by construction. Do not answer this
+from memory — the strip's own header says it carries gazetted prices and nothing else.
+
+**5. The audit and security sweeps are partial.** `GRID_EXPLORER_AUDIT.md` and
+`CONTENT_INVENTORY.md` are from 2026-09-03 and predate everything since. Of the security pass,
+the gating surface was checked directly (path-prefix bypass closed, `%`-encoding closed,
+`TIER_GATED_DAILY_DIRS` complete, every dated feed 403s on a locked day) — server actions, API
+routes, injection and secrets were **not**. Run those serially in small batches; four parallel
+fan-outs died on session limits with zero agents completing.
+
+---
+
 ## Commands
 
 ```bash
@@ -190,6 +239,29 @@ document by then.
 When a check "passes", confirm it actually ran. `gas-vs-archive` read two keys that exist in
 none of the 2,295 archive files, and passed 4,529 days by never looking at them.
 
+### The live layer has neither check, and a captured fixture is not a check
+
+Both sweeps above cover the **archive**. Nothing verifies `live-grid.server.ts` against NLDC,
+and a fixture in `lib/test/fixtures/` only ever proves the parser handled the day it was
+captured.
+
+NLDC made the demand/supply page's time cell responsive between 2026-08-23 and 2026-09-04 —
+the hour is printed once per breakpoint, so `stripTags` flattens it to `"13:00:00 13:00"` and
+`toIsoLocal`'s anchored regex dropped **every** demand row. The generation page was untouched,
+so the failure was silent and one-sided: the homepage said "Current Demand — awaiting NLDC"
+while that page was publishing 13,847 MW for the hour it was rendering. The suite stayed green
+the whole time, on a fixture captured before the change. Same parser, same code: 51 rows from
+the fixture, 0 from the live page.
+
+Two rules follow. **Refresh a fixture when the publisher moves, and keep the old one** — both
+layouts are pinned in `live-grid-parse.test.ts` now, because a parser that stops handling the
+2026-08 markup is also a regression. And **when a parse yields nothing, that is the finding** —
+do not let a fallback quietly answer for it. `buildLiveGridSnapshot` used to fall back to the
+generation table, so peak demand and peak supply both became the generation total and load shed
+became `Math.max(0, ...[])`. For 2026-09-04 that published 13,864 / 13,864 / **0** where NLDC
+had 15,583 / 13,815 / 2,222 — a zero asserting no load was shed on a day with 2.2 GW of it.
+Those five fields are nullable now and reach across to nothing.
+
 ---
 
 ## Ingestion
@@ -344,6 +416,15 @@ the full archive.
   Petrobangla window), older days gated by plan via `grid-tier-access.ts`. The public-window
   path deliberately skips Supabase and Postgres entirely — it is the hot path, do not add a
   round-trip to it.
+- **Splitting data out of a payload must not unlock it, and a roster of names will not keep
+  that promise.** It has gone stale three times: `plants` was caught, `curves` was not (1,979
+  locked days served to anyone), then `forecast` was added and missed, then the Petrobangla
+  aggregates — `reserve-model`, `reserve-sensitivity`, `reserves-published` answered 200 with
+  no Referer while `timeline-summary` beside them answered 403. Both gates are default-closed
+  now and both are tested against the real directory listing rather than a hand-written list
+  (`TIER_GATED_DAILY_DIRS`, and any `.json` directly under `petrobangla/`). Register a new feed
+  by putting the file where the pattern already covers it. `pgcb-monthly/**` is deliberately
+  public — `build_pgcb_monthly_public.py` says so and a test asserts it.
 - Exports (PDF/DOCX/CSV) are branded, datestamped and rate-limited, and inherit every rule
   above: an export must not print a figure the day did not publish.
 - `archive-fallback.ts` is **auto-generated**. Do not hand-edit; the canonical source is
