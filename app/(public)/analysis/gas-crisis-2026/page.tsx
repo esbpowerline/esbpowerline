@@ -138,6 +138,16 @@ function DeltaTile({ series, digits = 0 }: { series: EventStudySeries; digits?: 
           <>not computable — {series.publisher} filed no figure in one of the ranges</>
         )}
       </p>
+      {/*
+        Each tile states its OWN denominators, because they differ by publisher
+        and a single shared line was wrong for half of them: Petrobangla has no
+        document whose window starts on energy day 2026-06-21, so its baseline
+        is 29 of 30 days, while PGCB filed all 30. Heading this grid with one
+        series' formula printed "29 published day(s)" above two PGCB tiles
+        computed over 30 — a methodology claim the page could not support, on
+        the one page whose entire argument is that every figure is traceable.
+      */}
+      <p className="mt-2 text-[10px] leading-4 text-muted-foreground/80">{b.formula}</p>
     </div>
   );
 }
@@ -224,8 +234,9 @@ export default async function GasCrisis2026Page() {
           The window against its baseline
         </h2>
         <p className="text-xs text-muted-foreground mb-4">
-          Signed differences of means, and nothing more — no scores, no percentages.{' '}
-          {s.gasRlng.baseline.formula}.
+          Signed differences of means, and nothing more — no scores, no percentages. Each
+          tile states its own formula: the denominators differ by publisher, because a day a
+          publisher did not file is excluded and counted rather than zeroed.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <DeltaTile series={s.gasRlng} />
