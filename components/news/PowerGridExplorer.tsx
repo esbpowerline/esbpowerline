@@ -10,6 +10,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
+import { EventStudyDateLink } from '@/components/news/power-grid/EventStudyDateLink';
 import { useChartTheme, type ChartTheme } from '@/hooks/useChartTheme';
 import {
   LOAD_CURVE_COLORS as LOAD_CURVE_PALETTE,
@@ -1428,6 +1429,10 @@ export function PowerGridExplorer({
               <span>Latest</span>
             </button>
           </div>
+
+          {/* The event-study door — its own file, because the size ratchet
+              refused it inline (component-size.test.ts). */}
+          <EventStudyDateLink selectedDate={selectedDate} />
 
           <div className="w-full sm:w-28 relative z-50">
             <CustomDropdown

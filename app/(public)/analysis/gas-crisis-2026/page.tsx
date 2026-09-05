@@ -22,6 +22,10 @@ import EventStudyChart, {
   type EventChartColor,
 } from '@/components/analysis/gas-crisis/EventStudyChart';
 import HourlyShedPanel from '@/components/analysis/gas-crisis/HourlyShedPanel';
+import EventTimeline from '@/components/analysis/EventTimeline';
+import { GAS_CRISIS_2026 } from '@/lib/data/analysis/event-registry';
+import { loadEventCoverage } from '@/lib/data/analysis/event-coverage.server';
+import { buildNarrative } from '@/lib/data/analysis/event-narrative';
 
 /**
  * The first Analysis page: an event study of the July–August 2026 R-LNG
@@ -153,8 +157,16 @@ function DeltaTile({ series, digits = 0 }: { series: EventStudySeries; digits?: 
 }
 
 export default async function GasCrisis2026Page() {
-  const study: EventStudyResult = await loadGasCrisisStudy();
-  const quotes = await loadGasSupplyOutageQuotes();
+  const def = GAS_CRISIS_2026;
+  const [study, quotes, coverage] = await Promise.all([
+    loadGasCrisisStudy(),
+    loadGasSupplyOutageQuotes(),
+    loadEventCoverage(def),
+  ]);
+  const narrative = buildNarrative(def, study as EventStudyResult, coverage, [
+    'gasNational',
+    'gasGen',
+  ]);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
 
   const jsonLd = {
@@ -211,14 +223,21 @@ export default async function GasCrisis2026Page() {
           The R-LNG shortfall, July–August 2026
         </h1>
         <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-          On the gas day starting <strong>21 July 2026</strong>, Petrobangla&rsquo;s daily report
-          printed RPGCL&rsquo;s R-LNG supply at 621.6 MMCFD — down from 993.5 the day before, on an
-          unchanged printed capacity of 1,100. It settled near 500 MMCFD, fell again to 300 on
-          13–14 August, and never returned to its July baseline inside this window. This page
-          follows that shortfall through the official record: gas supply, gas delivered to power,
-          what generated instead, what it cost, and what was shed — day by day and hour by hour.
-          Every figure is a publisher&rsquo;s own, or is marked derived with its formula. The
-          archive names no cause for the fall, so neither does this page.
+          For three ordinary days the imported-gas line sat where it had sat all month: 966, 976,
+          993 MMCFD against a printed capacity of 1,100. On the gas day starting{' '}
+          <strong>21 July 2026</strong> Petrobangla printed it at <strong>621.6</strong>. It
+          settled near 500, fell again to <strong>300</strong> on 13–14 August, and had not
+          returned to its July level when this window closes. Below, the {narrative.totals.windowDays}{' '}
+          days of it in order — what the national record printed each day, and what this newsroom
+          published the same day, in separate columns because one is a measurement and the other
+          is reporting.
+        </p>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+          <strong className="text-foreground">Petrobangla never names a cause.</strong> Its daily
+          report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row and no terminal, vessel or
+          fault. So this page does not assert one either: where the reporting names a cause, the
+          reporting is quoted and linked, and it stands on its own sourcing, beside the figures
+          rather than inside them.
         </p>
         <p className="mt-3 text-xs text-muted-foreground">
           Study window {GAS_CRISIS_WINDOW.start} → {GAS_CRISIS_WINDOW.end} · baseline{' '}
@@ -244,6 +263,36 @@ export default async function GasCrisis2026Page() {
           <DeltaTile series={s.gasGen} digits={1} />
           <DeltaTile series={s.unserved} digits={1} />
         </div>
+      </section>
+
+      {/* ── the story, day by day ───────────────────────────────────────── */}
+      <section aria-labelledby="timeline-h" className="mb-12">
+        <h2 id="timeline-h" className="text-lg font-bold text-foreground">
+          Day by day
+        </h2>
+        <p className="mt-1 mb-2 max-w-3xl text-xs leading-5 text-muted-foreground">
+          {narrative.totals.windowDays} days, in order. The left column is the national record for
+          that day and the change on the day before; the right column is what ESB PowerLine
+          published that day, linked. Days marked{' '}
+          <span className="font-semibold text-primary">sharp move</span> are days the imported-gas
+          line moved more than 12% against the previous published day — found in the data, not
+          chosen. {narrative.totals.coverageCount} articles are placed on their filing date.
+        </p>
+        {narrative.totals.intensityPeak && (
+          <p className="mb-4 text-xs text-muted-foreground">
+            The red bar on each day is energy unserved, scaled against the worst published day in
+            the window: <strong>{narrative.totals.intensityPeak.value.toLocaleString('en-US', { maximumFractionDigits: 1 })}{' '}
+            {narrative.totals.intensityUnit}</strong> on {narrative.totals.intensityPeak.date}. A
+            day PGCB did not file gets no bar at all rather than an empty one.
+          </p>
+        )}
+        <EventTimeline narrative={narrative} />
+        {narrative.orphanCoverage.length > 0 && (
+          <p className="mt-4 text-xs text-muted-foreground">
+            {narrative.orphanCoverage.length} related article(s) fall outside the window shown and
+            are not placed above.
+          </p>
+        )}
       </section>
 
       {/* ── the chain, one card per question ────────────────────────────── */}
@@ -380,11 +429,40 @@ export default async function GasCrisis2026Page() {
           </h2>
           <ul className="list-disc pl-5 space-y-2">
             <li>
-              <strong className="text-foreground">No cause is asserted.</strong> The archive
-              holds no document naming why R-LNG supply fell — no FSRU, terminal or shipment is
-              identified anywhere in the window&rsquo;s reports. The chain on this page is a
-              reading order, not an attribution. The archive&rsquo;s own June is the caution:
-              62.3 GWh went unserved on 28 June with gas supply at its full ~2,690 MMCFD.
+              <strong className="text-foreground">The data column asserts no cause.</strong>{' '}
+              Petrobangla&rsquo;s report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row
+              and names no terminal, vessel or fault anywhere in this window. Where a cause
+              appears on this page it appears in the right-hand column, as ESB PowerLine
+              reporting, linked and dated, resting on that reporting&rsquo;s own sourcing —
+              never merged into a figure. Any correspondence between the two columns is the
+              reader&rsquo;s to draw. The archive&rsquo;s own June is the caution: 62.3 GWh went
+              unserved on 28 June with gas supply at its full ~2,690 MMCFD.
+            </li>
+            <li>
+              <strong className="text-foreground">How the coverage column is selected.</strong>{' '}
+              ESB PowerLine articles published inside the window whose title or standfirst
+              matches this event&rsquo;s subject terms, which are declared in
+              `event-registry.ts` rather than hand-picked per day, so coverage filed later is
+              picked up and the selection rule can be audited. {narrative.totals.coverageCount}{' '}
+              of the newsroom&rsquo;s pieces in this window match; the rest are energy coverage
+              that is not this story. Only published articles appear — a draft or archived piece
+              would be a link a reader cannot open. This is a filtered selection, not a claim to
+              be the complete record of what was reported.
+            </li>
+            <li>
+              <strong className="text-foreground">The three days before are the point.</strong>{' '}
+              18–20 July sat at 966.5, 976.3 and 993.5 MMCFD against the same printed 1,100
+              capacity the line kept all the way down. Without them the fall has nothing to be
+              measured against, and &ldquo;the day it broke&rdquo; would be an assertion rather
+              than something a reader can see.
+            </li>
+            <li>
+              <strong className="text-foreground">
+                &ldquo;Sharp move&rdquo; is measured, not chosen.
+              </strong>{' '}
+              A day is marked when the imported-gas line moved 12% or more against the previous
+              published day. Chapter-level phases are detected the same way, from level shifts in
+              the published series. No day is emphasised because it made a better story.
             </li>
             <li>
               <strong className="text-foreground">No forecast, no projection, no estimate.</strong>{' '}

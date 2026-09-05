@@ -36,23 +36,41 @@ import {
   type EventStudyDayInput,
   type EventStudyResult,
 } from '@/lib/data/analysis/event-study';
+import { GAS_CRISIS_2026, eventWindow } from '@/lib/data/analysis/event-registry';
 
 /**
- * The study window: the R-LNG break (gas day starting 2026-07-21, when the
- * RPGCL line fell 993.5 → 621.6 MMCFD day-on-day) through the end of August.
+ * The study window: three ordinary days, then the R-LNG break (gas day
+ * starting 2026-07-21, when the RPGCL line fell 993.5 → 621.6 MMCFD
+ * day-on-day), through the end of August.
+ *
+ * The lead-in is not decoration. A reader cannot see that something broke
+ * without seeing what unbroken looked like, and 18-20 July sit at 966.5, 976.3
+ * and 993.5 MMCFD — flat, and against the same printed 1,100 capacity the line
+ * kept all through the collapse. Derived from the registry so the window and
+ * the story it tells cannot drift apart.
  */
-export const GAS_CRISIS_WINDOW: DateRange = { start: '2026-07-21', end: '2026-08-31' };
+export const GAS_CRISIS_WINDOW: DateRange = eventWindow(GAS_CRISIS_2026);
 
 /**
- * The 30 days before the break. Not further back: twelve June days (06-02,
- * 06-06..11, 06-14..17, 06-20) carry no workbook hourly sheet and null
- * unserved/demand, so a longer baseline would quietly thin exactly the series
- * the study is about. This range has full unserved coverage — and it CONTAINS
- * the June shedding episode (62.3 GWh on 06-28 with gas at full supply), which
- * the page states rather than trims away: a baseline curated to look calm
- * would be our editing, not PGCB's record.
+ * The 30 days ending the day before the lead-in (2026-06-18 → 07-17).
+ *
+ * Two absences in it are real and are carried rather than dodged. PGCB filed
+ * no unserved/demand figure on 2026-06-20 — one of twelve June days whose
+ * workbook has no hourly sheet — so the unserved baseline is 29 of 30 days.
+ * Petrobangla has no document whose window starts on 2026-06-21, so its
+ * baselines are 29 of 30 too, for a different reason and on a different day.
+ * Neither is smoothed: each series states its own denominator on its own tile.
+ *
+ * An earlier version of this range started on 06-21 precisely to sidestep the
+ * first gap. That was the wrong instinct — it chose the baseline to flatter the
+ * arithmetic instead of choosing it to sit against the lead-in, and it is
+ * exactly the kind of quiet curation the archive's charter exists to prevent.
+ *
+ * The range also CONTAINS the late-June shedding episode (62.3 GWh unserved on
+ * 06-28 with gas at full supply), which the page states rather than trims: a
+ * baseline curated to look calm would be our editing, not PGCB's record.
  */
-export const GAS_CRISIS_BASELINE: DateRange = { start: '2026-06-21', end: '2026-07-20' };
+export const GAS_CRISIS_BASELINE: DateRange = GAS_CRISIS_2026.baseline;
 
 function fuelGen(data: GridDailyData, name: string): number | null {
   const row = data.generationData?.find((g) => g.name === name);

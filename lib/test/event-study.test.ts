@@ -153,11 +153,29 @@ describe('against the real archive (window days pinned in the Phase 1 findings)'
     }
   });
 
-  it('the default baseline has full unserved coverage — the reason it starts 06-21', async () => {
+  it('carries the baseline’s two real gaps instead of dodging them', async () => {
     const study = await loadGasCrisisStudy(GAS_CRISIS_WINDOW, GAS_CRISIS_BASELINE);
-    expect(study.series.unserved.baselineCoverage.missingDates).toEqual([]);
+    // PGCB filed no unserved figure on 2026-06-20 (no hourly sheet that day);
+    // Petrobangla has no document whose window starts on 2026-06-21. Different
+    // days, different publishers, both reported rather than smoothed.
+    expect(study.series.unserved.baselineCoverage.missingDates).toEqual(['2026-06-20']);
+    expect(study.series.gasNational.baselineCoverage.missingDates).toEqual(['2026-06-21']);
+    expect(study.series.unserved.baselineCoverage.publishedDays).toBe(29);
+    // The window itself, lead-in included, is complete for both publishers.
     expect(study.series.unserved.windowCoverage.missingDates).toEqual([]);
     expect(study.series.gasNational.windowCoverage.missingDates).toEqual([]);
+  }, 30_000);
+
+  it('opens three ordinary days before the break', async () => {
+    const study = await loadGasCrisisStudy();
+    const pts = study.series.gasRlng.points;
+    expect(pts[0].date).toBe('2026-07-18');
+    // 966.5, 976.3, 993.5 — flat, against the same printed 1,100 capacity the
+    // line kept all the way down. Without them the cliff has nothing to fall from.
+    expect(pts[0].value).toBeCloseTo(966.5, 1);
+    expect(pts[2].value).toBeCloseTo(993.5, 1);
+    expect(pts[3].date).toBe('2026-07-21');
+    expect(pts[3].value).toBeCloseTo(621.6, 1);
   }, 30_000);
 
   it('quotes the gas-supply outage rows verbatim, or drops them — never paraphrases', async () => {
