@@ -11,7 +11,19 @@
     "publishedOn is NOT issuedOn. BERC Reconsideration Order 2026/01 is dated 04 June 2026 on",
     "its own face and appeared on berc.org.bd on 24 August 2026 -- an 81-day gap during which",
     "the only public account of the 4 June decision was press coverage. Any provenance model",
-    "that carries one date cannot represent that."
+    "that carries one date cannot represent that.",
+    "",
+    "2026-09-05, second pass: a bounded search for BERC Order 2026/22 Appendix-kha. NOT RECOVERED.",
+    "Routes exhausted: berc.org.bd notices and tariff-orders pages, powerdivision.gov.bd (two tariff",
+    "pages), powercell.gov.bd, eprc.gov.bd, dpdc.gov.bd, desco.gov.bd, nesco.gov.bd policies,",
+    "reb.gov.bd, and a BREB PBS listing. No blogs, no calculators, no customer bills were used.",
+    "",
+    "The search produced a better answer than the appendix would have. The 2020 instrument of the",
+    "SAME CLASS -- terms, applicability and miscellaneous charges/fees, declared an inseparable part",
+    "of the 2020 tariff exactly as clause 3 of the 2026 notification declares Appendix-kha -- does",
+    "not fix VAT either. Its clause 2 delegates it: VAT applies on the electricity bill at the rate",
+    "determined from time to time by the government. So recovering Appendix-kha would not make a",
+    "bill total computable; VAT's authority is a government/NBR instrument, not a tariff order."
   ],
   "documents": [
     {
@@ -92,7 +104,10 @@
       "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\berc-2026-08-24-reconsideration.pdf",
       "retrievedAt": "2026-09-05",
       "verificationStatus": "DOCUMENT_HELD",
-      "amends": ["BERC Order 2026/20 (bulk, 3 June 2026)", "BERC Order 2026/22 (retail, 3 June 2026)"],
+      "amends": [
+        "BERC Order 2026/20 (bulk, 3 June 2026)",
+        "BERC Order 2026/22 (retail, 3 June 2026)"
+      ],
       "carries": [
         "para 5.1-5.2 — the 3 June increases for lifeline and first step are not made effective; 4.63 and 5.26 restored from bill month June 2026",
         "para 5.3 — post-amendment weighted-average RETAIL tariff per utility: BPDB 11.14, BREB 9.64, DPDC 11.89, DESCO 12.05, WZPDCL 10.44, NESCO 10.45 Tk/kWh",
@@ -132,26 +147,107 @@
         "bundled S.R.O. 42-Law/2024 — PGCB transmission wheeling charge: 0.3057 / 0.3086 / 0.3144 Tk/kWh at 230 / 132 / 33 kV; repeals BERC Order 2020/03"
       ],
       "note": "The only one of the four with a text layer, and the most complete instrument held. It is also the proof that the issuer changes: this is the Power Division acting under s. 34ka, not BERC."
+    },
+    {
+      "id": "berc-bulk-notification-2519-2026-06-03",
+      "issuer": "BERC",
+      "documentType": "BERC_NOTIFICATION",
+      "memoNo": "28.01.0000.012.04.003.26.2519",
+      "titleBn": "বিদ্যুতের পাইকারি (বাল্ক) মূল্যহার পুনর্নির্ধারণ সংক্রান্ত বিজ্ঞপ্তি",
+      "titleEn": "Notification on the re-fixing of the bulk electricity tariff (the schedule of BERC Order 2026/20)",
+      "issuedOn": "2026-06-03",
+      "publishedOn": "2026-06-03",
+      "effectiveFrom": "2026-06 bill month",
+      "legalBasis": "BERC Act 2003, ss. 22(kha) and 34, with reg. 14(3) of the BERC (Electricity Generation Tariff) Regulations 2008",
+      "pages": 6,
+      "language": "bn",
+      "hasTextLayer": false,
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-eprc/2026/5/33eb1326-83db-447b-8602-b422d529f006.pdf",
+      "listingUrl": "https://eprc.gov.bd/pages/notices/",
+      "contentSha256": "5f8d3f80f9005b3f2049838010cf32fc76ba02e16896d589799f7aacb6ceb44a",
+      "byteLength": 1826849,
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\berc-bulk-notification-2519-2026-06-03.pdf",
+      "retrievedAt": "2026-09-05",
+      "verificationStatus": "DOCUMENT_HELD",
+      "amendedBy": [
+        "berc-reconsideration-order-2026-01"
+      ],
+      "carries": [
+        "pages 1-2 - the 3 June bulk schedule per utility per voltage, BEFORE the 4 June cut: BPDB 33kV 9.5785, BREB 33kV 7.3955, DPDC/DESCO 33kV 10.1825, WZPDCL 8.7495, NESCO 8.5075; 230kV 10.0825 and 132kV 10.1325 for all",
+        "pages 3-6 - a second copy of the 3 June retail notification memo 2521"
+      ],
+      "note": "A BEPRC bundle, so a third publisher of the same BERC papers. Not used by V1 - bulk is outside the residential scope - but it is the missing side of the pair: against Appendix-ka of the reconsideration order it shows the 4 June bulk rates were REDUCED, e.g. BPDB 33kV 9.5785 to 9.4115."
+    },
+    {
+      "id": "berc-retail-terms-2020",
+      "issuer": "BERC",
+      "documentType": "BERC_NOTIFICATION",
+      "memoNo": "28.01.0000.012.04.003.20.653",
+      "titleBn": "খুচরা বিদ্যুৎ মূল্যহার, ২০২০ এর শর্তাবলী, প্রযোজ্যতা এবং বিবিধ চার্জ/ফি",
+      "titleEn": "Terms, applicability and miscellaneous charges/fees of the Retail Electricity Tariff, 2020",
+      "issuedOn": "2020-02-27",
+      "publishedOn": "2020-02-27",
+      "effectiveFrom": "the Retail Electricity Tariff 2020 it accompanies",
+      "legalBasis": "BERC Act 2003, ss. 22(kha) and 34; declared an inseparable part of the Retail Electricity Tariff 2020 issued under memo 28.01.0000.012.04.003.20.652",
+      "pages": 9,
+      "language": "bn",
+      "hasTextLayer": false,
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-nesco/2024/12/46363473402b4e64b9c946f6e7dcca5c.pdf",
+      "listingUrl": "https://nesco.gov.bd/site/view/policies",
+      "contentSha256": "ff30ba85c4129a01a14ed5d320d7a0f63a2160c5192f0cf98c3634e7c12effaa",
+      "byteLength": 3119813,
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2020\\berc-retail-terms-2020-02-27.pdf",
+      "retrievedAt": "2026-09-05",
+      "verificationStatus": "DOCUMENT_HELD",
+      "carries": [
+        "clause 1 - a 5% one-time LATE-PAYMENT surcharge for all consumer classes. There is no prompt-payment rebate anywhere in the document.",
+        "clause 2 - VAT applies on the electricity bill at the rate determined from time to time by the government. The rate is DELEGATED, not fixed here.",
+        "clause 3 - power-factor surcharge, LT above 20 kW sanctioned load and all MT/HT/EHT, below 0.95 lag",
+        "clause 4 - security deposit, Tk 800/kW up to 2 kW and Tk 600/kW above, for LT-A and LT-B; one-off, and no other deposit may be imposed",
+        "clause 5(ka) - exceeding sanctioned load: DOUBLE the demand rate on the excess load",
+        "clause 8 - meter rent: authority chained onward to the Commission's order of 23 November 2017, memo 28.01.0000.012.04.013.12-6488, paragraph 11, which it keeps in force",
+        "clause 9(ka) - prepaid meter rebate of 1% on the net bill excluding VAT, later reduced to 0.5% by the 2026 notification"
+      ],
+      "note": "ACQUIRED AS A DIAGNOSTIC, NOT AS A V1 RULE SOURCE. It is the 2020 analogue of the missing Appendix-kha and is authoritative for 2020 only. Its value is that it settles WHERE authority lies: VAT is delegated to the government by the tariff instrument itself, so no tariff order will ever fix it. Nothing from this document has been encoded into a 2024 or 2026 schedule."
     }
   ],
   "notHeld": [
     {
-      "id": "berc-order-2026-22",
-      "what": "BERC Order 2026/22 of 3 June 2026 and its Appendix-KHA",
-      "why": "Named by the 3 June notification as carrying the terms, applicability and miscellaneous charges/fees of the 2026 retail tariff, and declared an inseparable part of it. Not on BERC's tariff-orders page, which stops at 2020.",
-      "blocks": "the 2026 equivalent of the 2024 Table-2, and any authoritative statement of VAT treatment for 2026"
+      "id": "berc-order-2026-22-appendix-kha",
+      "what": "BERC Order 2026/22 of 3 June 2026, Appendix-kha - terms, applicability and miscellaneous charges/fees of the Retail Electricity Tariff 2026",
+      "status": "APPENDIX_NOT_RECOVERED",
+      "searched": [
+        "berc.org.bd notices listing and the tariff-orders page, which stops at 2020",
+        "powerdivision.gov.bd - both retail-tariff pages",
+        "powercell.gov.bd retail tariff page",
+        "eprc.gov.bd notices",
+        "dpdc.gov.bd tariff page",
+        "desco.gov.bd tariff page - five 2026 files, all already held; its Retail Rate (June 2026) is byte-identical to the reconsideration order, sha256 f5a7c453...",
+        "nesco.gov.bd policies - holds the 2020 analogue but nothing for 2026",
+        "reb.gov.bd and a BREB PBS notice listing"
+      ],
+      "notUsed": "No blogs, scraped calculator logic, Scribd uploads, customer bills or secondary reporting were consulted for the missing semantics.",
+      "whyItWouldNotHaveHelped": "The 2020 instrument of the same class delegates VAT to the government rather than fixing it. Appendix-kha would at best restate that delegation, so recovering it would not make a bill total computable."
     },
     {
-      "id": "berc-order-2026-20",
-      "what": "BERC Order 2026/20 of 3 June 2026 (bulk)",
-      "why": "The bulk instrument amended by Reconsideration Order 2026/01. Needed only to state what the bulk rates were between 3 and 4 June.",
-      "blocks": "nothing in V1"
+      "id": "vat-instrument",
+      "what": "The government/NBR instrument fixing the VAT rate and base on an electricity bill",
+      "status": "NOT SEARCHED - outside the bounded task",
+      "why": "Established by clause 2 of the 2020 terms document as the actual authority. This is the instrument that would settle VAT, and it is not a tariff order.",
+      "blocks": "a deterministic bill total"
+    },
+    {
+      "id": "berc-order-2017-11-23-para-11",
+      "what": "BERC retail tariff terms order of 23 November 2017, memo 28.01.0000.012.04.013.12-6488, paragraph 11 - meter rent",
+      "status": "NOT RECOVERED",
+      "why": "Named by clause 8 of the 2020 terms document as the standing authority on meter rent. BERC's notices page shows a BERC Electricity Tariff Order (Retail) dated 23-11-2017 which is probably it. Whether it survives the 2024 gazette's Table-2, whose condition (ka) forbids any charge outside that table, is exactly the open question.",
+      "blocks": "resolving whether a recurring meter rent exists for LT-A"
     },
     {
       "id": "real-bill",
       "what": "An authentic postpaid residential bill crossing a slab boundary",
-      "why": "Rate tables state rates; bills state order of operations. Not obtained in this sprint.",
-      "blocks": "the end-to-end golden case, and confirmation of the VAT base"
+      "why": "Rate tables state rates; bills state order of operations. Still not obtained, and deliberately not sourced from Scribd.",
+      "blocks": "the end-to-end golden case and confirmation of the VAT base"
     }
   ]
 }

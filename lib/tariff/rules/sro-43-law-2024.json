@@ -12,9 +12,16 @@
     "the gazette does not state, so they are left out.",
     "",
     "Table-2 of this gazette enumerates every permitted miscellaneous fee and every one is a",
-    "one-off event charge — no monthly meter rent, no monthly service charge — and its condition",
-    "(ka) forbids any charge outside that list. That is why METER_RENT and SERVICE_CHARGE appear",
-    "below as NOT applicable rather than as unknowns."
+    "one-off event charge - new connection, DC/RC, meter test, meter installation, prepaid card",
+    "re-issue, transformer rental - with no monthly meter rent and no monthly service charge, and",
+    "its condition (ka) forbids any charge outside that list.",
+    "",
+    "That is NOT enough to encode meter rent as NOT_APPLICABLE, and it is not encoded at all. The",
+    "2020 terms instrument, clause 8, keeps a meter rent alive by chaining its authority onward to",
+    "paragraph 11 of the Commission's order of 23 November 2017. Whether Table-2's condition (ka)",
+    "extinguished that or simply did not restate it is unresolved, and resolving it needs the 2017",
+    "order or the 2026 Appendix-kha, neither of which is held. An absent component is honest here;",
+    "a NOT_APPLICABLE would be a claim."
   ],
   "instrument": {
     "id": "sro-43-law-2024",
@@ -28,8 +35,12 @@
     "language": "bn",
     "legalBasis": "BERC Act 2003, s. 34ka — executive determination without a BERC public hearing",
     "lifecycle": "SUPERSEDED",
-    "supersededBy": ["berc-order-2026-22"],
-    "repeals": ["sro-9-law-2023"],
+    "supersededBy": [
+      "berc-order-2026-22"
+    ],
+    "repeals": [
+      "sro-9-law-2023"
+    ],
     "verificationStatus": "DOCUMENT_HELD",
     "evidence": {
       "documentId": "sro-43-law-2024",
@@ -56,7 +67,10 @@
       "toUnit": 50,
       "ratePaisa": 463,
       "applicability": "CATEGORICAL",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -77,7 +91,10 @@
       "toUnit": 75,
       "ratePaisa": 526,
       "applicability": "TELESCOPIC",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -98,7 +115,10 @@
       "toUnit": 200,
       "ratePaisa": 720,
       "applicability": "TELESCOPIC",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -119,7 +139,10 @@
       "toUnit": 300,
       "ratePaisa": 759,
       "applicability": "TELESCOPIC",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -140,7 +163,10 @@
       "toUnit": 400,
       "ratePaisa": 802,
       "applicability": "TELESCOPIC",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -161,7 +187,10 @@
       "toUnit": 600,
       "ratePaisa": 1267,
       "applicability": "TELESCOPIC",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -182,7 +211,10 @@
       "toUnit": null,
       "ratePaisa": 1461,
       "applicability": "TELESCOPIC",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -200,7 +232,10 @@
       "label": "Demand charge",
       "ratePaisa": 4200,
       "basis": "SANCTIONED_LOAD_KW",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -217,9 +252,12 @@
       "meterType": "POSTPAID",
       "phase": "SINGLE",
       "label": "VAT",
-      "reason": "Authoritative calculation rule not yet verified. This gazette states VAT only on the Table-2 miscellaneous service fees, condition (gha). Neither it nor the June 2026 instruments state VAT on the energy or demand charge — that rule belongs to VAT law rather than the tariff order, so the evidence chain runs through a second regulator. The universally quoted '5% on energy plus demand' is unsourced here.",
-      "wouldBeSettledBy": "An NBR instrument, or an authentic postpaid bill showing the VAT base and its position in the order of operations",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "reason": "Authoritative calculation rule not yet verified, and the tariff instruments cannot verify it. The 2020 instrument of the same class as the missing 2026 Appendix-kha -- 'Terms, applicability and miscellaneous charges/fees of the Retail Electricity Tariff, 2020', BERC memo 28.01.0000.012.04.003.20.653 of 27 February 2020, clause 2 -- states only that VAT applies on the electricity bill at the rate determined from time to time by the government. The rate and its base are DELEGATED. Gazette S.R.O. 43-Law/2024 likewise states VAT only on its Table-2 service fees, condition (gha). So no tariff order will settle this: the authority is a government/NBR instrument. The universally quoted '5% on energy plus demand' is unsourced here.",
+      "wouldBeSettledBy": "The government/NBR VAT instrument for electricity supply, or an authentic postpaid bill showing the base and its position in the order of operations. NOT BERC Order 2026/22 Appendix-kha, which the 2020 analogue shows would only restate the delegation.",
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
@@ -236,9 +274,12 @@
       "meterType": "POSTPAID",
       "phase": "SINGLE",
       "label": "Prompt-payment rebate",
-      "reason": "The 5% pay-by-due-date rebate that secondary calculators list appears in no instrument held. It is either in an appendix not yet obtained, a utility practice outside the tariff order, or calculator folklore.",
-      "wouldBeSettledBy": "The 2026 counterpart of Table-2 (BERC Order 2026/22, Appendix-kha), or an authentic bill",
-      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "reason": "No instrument held contains a prompt-payment rebate, and there is positive evidence that the widely quoted '5% for paying within the due date' is an inversion of a real rule pointing the other way: clause 1 of the 2020 terms instrument imposes a 5% one-time LATE-PAYMENT surcharge on all consumer classes, and no rebate appears anywhere in that document. That is a strong hint, not a finding -- absence in the 2020 instrument does not prove absence from the 2026 Appendix-kha, which is not held -- so this stays UNKNOWN rather than being resolved to zero. Note the ONE rebate that is documented is not this one: the 3 June 2026 notification, clause 4, gives PREPAID meter consumers 0.5% on the net bill excluding VAT, and V1 encodes postpaid only.",
+      "wouldBeSettledBy": "BERC Order 2026/22 Appendix-kha, or an authentic postpaid bill. If it turns out there is no prompt-payment rebate, the correct outcome is NOT_APPLICABLE with the surcharge recorded, not a silent zero.",
+      "billingValidity": {
+        "from": "2024-02",
+        "to": "2026-06"
+      },
       "knowledge": {
         "knownFrom": "2024-02-29",
         "knownUntil": null,
