@@ -16,11 +16,19 @@ before a survey question — it is almost always faster than grepping.
 ## Branch
 
 Work happens on **`authenticating`**, not `main`. The name is historical; it stopped being
-an auth branch long ago and now carries the grid/ingest/CMS work, ~34 commits ahead.
-`main` is stale.
+an auth branch long ago and now carries the grid/ingest/CMS work.
+
+**As of 2026-09-05 `main` == `authenticating` (`a9f33ef5`)** — the two are level and every
+merge so far has been a clean fast-forward. Keep it that way: `git push origin
+authenticating:main` is the whole release, and it needs no branch switch. Do **not** reach
+for `git checkout main` followed by `reset --hard`; if the checkout aborts on a dirty tree
+the reset lands on the branch you are standing on and throws away the work. That happened
+on 2026-09-05 and only the prior `git push` made it recoverable.
 
 `vercel.json` sets `git.deploymentEnabled.authenticating = false` — **pushing this branch
-deploys nothing.** That is deliberate. Production ships from `main`.
+deploys nothing.** That is deliberate. Production ships from `main`, and pushing `main`
+**does** trigger a Vercel production build automatically (git integration is live; only the
+`authenticating` branch is opted out). No CLI upload is needed.
 
 ---
 
@@ -28,12 +36,21 @@ deploys nothing.** That is deliberate. Production ships from `main`.
 
 Delete an item when it is done; this section is a handover, not a changelog.
 
-**1. Production is running none of the day's fixes.** Four are committed and pushed to
-`authenticating`, which deploys nothing. Until something merges to `main`, esbpowerline.com
-still has: the dead NLDC demand parser (Current Demand permanently "awaiting", Peak Demand
-showing generation), `avgProductionCost` tagged P when it is derived, the Petrobangla
-aggregates readable cross-origin, and outage causes naming the wrong reason. **A PR to `main`
-is the single highest-value action tomorrow** — the fixes are worth nothing where they sit.
+**1. Released 2026-09-05.** 38 commits fast-forwarded to `main` and deployed: the four
+2026-09-04 fixes (NLDC demand parser, `avgProductionCost` marked D, Petrobangla aggregates
+gated by directory, outage causes split on the right marker), the NLDC hourly persistence
+layer and Time Machine, the dormant tariff engine, and the event-study page at
+`/analysis/gas-crisis-2026`. Migrations 0019/0020 were already applied to the production
+database before the merge, so the deploy carried no DDL.
+
+**One thing to know about that deploy:** the first build failed and the second, identical,
+succeeded. During static prerender (318 pages, 3 workers) Prisma exhausted the Supabase
+session pooler and `/about` died on `lib/homepage-content.ts:38` — `prisma.siteSetting.findMany`
+has no fallback, so one timeout ends the build. Every `[releases]` read in the same window
+logged a timeout too and fell soft to the static archive exactly as designed, which is why
+only `/about` was fatal. If a deploy fails this way again it is not the commit: retry it, and
+if it recurs, give `readSettingsMap` the same fail-soft treatment `releases.server.ts` has
+rather than raising the pool ceiling.
 
 **2. The outage backfill is built, dry-run, and not applied.**
 

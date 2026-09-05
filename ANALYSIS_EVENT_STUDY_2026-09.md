@@ -108,11 +108,27 @@ a cyclone, an interconnector trip):
 
 ## 6. Known limits / follow-ups
 
-- **Not visually inspected.** The page compiles, type-checks and is test-covered, but I have
-  not seen it rendered — same caveat the strategic audit gives its §C. Open
-  `/analysis/gas-crisis-2026` in dev and look, especially at mobile widths and dark mode.
-- The navbar hub now has four links; `public-nav-bar__hub-link--analysis` has no bespoke
-  accent CSS yet (base hub styling applies). Cosmetic.
+**Visual QA was run on 2026-09-05 and the first two items below are now closed.** Rendered at
+360/768/1280 in both themes, logged out: no horizontal overflow at any width, six charts
+scaling 306/684/1125 px, all five card footers naming a document, no console errors, and the
+Bengali nav label rendering. Two defects were found and fixed (`a9f33ef5`):
+
+- ~~Not visually inspected.~~ Done. Two notes that are behaviour, not defects: the daily
+  charts show **no `connectNulls` breaks because the window has none** — all 42 days are
+  published for every daily series, so the only visible breaks are in the hourly panel
+  (7 line segments). And a logged-out visitor sees the hourly panel with ~92% of its x-axis
+  empty, because the tier clamps them to the last 3 days of a 42-day window. That is honest —
+  the banner names the clamp and the caption counts the restricted hours — but an empty frame
+  under a 0-based axis is close to the "reads as nothing happened" failure rule 3 warns about.
+  **Worth a follow-up:** shade the restricted span rather than leaving it blank. Not done here
+  because it is a feature, not a layout fix.
+- ~~`--analysis` has no accent CSS.~~ Fixed: violet from `CATEGORICAL_SLOTS[6]`, light and
+  dark, with the active pill, so the nav adds no unvalidated fifth hue.
+- **Fixed, and it was the important one:** the delta grid was headed by a single series'
+  formula, printing "29 published day(s)" above four tiles when only the two Petrobangla ones
+  have a 29-day baseline (no gas document's window starts on energy day 2026-06-21); the two
+  PGCB tiles are 30/30. Each tile now prints its own formula. The engine was right throughout
+  — only the render shared one string.
 - The delta tiles show window-vs-baseline means; a reader may want the per-leg means
   (Jul 21–Aug 5 vs Aug 6–14) — the engine supports any ranges if that is wanted.
 - `avgCost` is in the registry (marked D, formula stated) but not charted; the cost card shows
