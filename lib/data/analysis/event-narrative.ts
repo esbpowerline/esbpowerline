@@ -411,26 +411,86 @@ export function keyFacts(
   return facts;
 }
 
+/* ── the hero's shape ─────────────────────────────────────────────────────── */
+
+export interface HeroShape {
+  /** Normalised 0..1, x left-to-right and y bottom-to-top. Nulls preserved. */
+  points: Array<{ x: number; y: number | null }>;
+  /** Where the printed capacity sits on the same scale, or null. */
+  capacityY: number | null;
+  capacityValue: number | null;
+  /** The incident day's x position, and its label. */
+  incidentX: number | null;
+  /** The lowest published point, for a direct label on the drawing. */
+  low: { x: number; y: number; value: number; date: string } | null;
+  /** The first and last published points, likewise. */
+  first: { x: number; y: number; value: number; date: string } | null;
+  last: { x: number; y: number; value: number; date: string } | null;
+  unit: string;
+  domain: { min: number; max: number };
+}
+
 /**
- * Points for the masthead sparkline, normalised to 0..1 against the series'
- * own range, with nulls preserved so the drawing can break rather than join.
+ * Everything the hero drawing needs, normalised once, here.
+ *
+ * The capacity is folded into the domain deliberately. Scaling the delivered
+ * line to its own range would put its best day at the top of the frame and hide
+ * the thing the chart exists to show — that even the good days ran a long way
+ * under what the terminal was printed as able to deliver. The gap has to be
+ * visible or the drawing is flattering the source.
  */
-export function sparkline(
+export function heroShape(
   study: EventStudyResult,
   seriesId: EventStudySeriesId,
-): { points: Array<{ x: number; y: number | null }>; min: number; max: number } | null {
+  incidentDate: string,
+  capacitySeriesId?: EventStudySeriesId,
+): HeroShape | null {
   const series = study.series[seriesId];
-  const values = series.points.map((p) => p.value).filter((v): v is number => v !== null);
+  const pts = series.points;
+  const values = pts.map((p) => p.value).filter((v): v is number => v !== null);
   if (values.length < 2) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+
+  const capValues = capacitySeriesId
+    ? study.series[capacitySeriesId].points
+        .map((p) => p.value)
+        .filter((v): v is number => v !== null)
+    : [];
+  const capacityValue = capValues.length ? Math.max(...capValues) : null;
+
+  const max = Math.max(...values, ...(capacityValue !== null ? [capacityValue] : []));
+  // A zero floor, because the quantity has a real zero and a cropped baseline
+  // exaggerates every move on it.
+  const min = 0;
   const span = max - min || 1;
+  const norm = (v: number) => (v - min) / span;
+  const xOf = (i: number) => (pts.length > 1 ? i / (pts.length - 1) : 0);
+
+  const points = pts.map((p, i) => ({ x: xOf(i), y: p.value === null ? null : norm(p.value) }));
+
+  const withIndex = pts
+    .map((p, i) => ({ p, i }))
+    .filter((e): e is { p: { date: string; value: number }; i: number } => e.p.value !== null);
+  const lowEntry = withIndex.reduce((a, b) => (b.p.value < a.p.value ? b : a));
+  const firstEntry = withIndex[0];
+  const lastEntry = withIndex[withIndex.length - 1];
+  const mark = (e: typeof firstEntry) => ({
+    x: xOf(e.i),
+    y: norm(e.p.value),
+    value: e.p.value,
+    date: e.p.date,
+  });
+
+  const incidentIdx = pts.findIndex((p) => p.date === incidentDate);
+
   return {
-    points: series.points.map((p, i) => ({
-      x: series.points.length > 1 ? i / (series.points.length - 1) : 0,
-      y: p.value === null ? null : (p.value - min) / span,
-    })),
-    min,
-    max,
+    points,
+    capacityY: capacityValue !== null ? norm(capacityValue) : null,
+    capacityValue,
+    incidentX: incidentIdx >= 0 ? xOf(incidentIdx) : null,
+    low: mark(lowEntry),
+    first: mark(firstEntry),
+    last: mark(lastEntry),
+    unit: series.unit,
+    domain: { min, max },
   };
 }
