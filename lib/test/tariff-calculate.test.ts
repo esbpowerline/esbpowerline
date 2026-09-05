@@ -146,23 +146,25 @@ describe('412 kWh — the brief’s own example, both versions', () => {
     expect(energy(412, JUN_2026)).toBe(350912);
   });
 
-  it('the 4 June amendment DID move a 412-unit bill, by exactly Tk 69.00', () => {
+  it('the 4 June order cut a 412-unit ENERGY CHARGE by exactly Tk 69.00', () => {
     /**
-     * This test corrects a claim in TARIFF_EVIDENCE_SPRINT_2026-09-05.md §D,
-     * which said a 412-unit bill was identical under the 3 June and 4 June
-     * instruments. It is not, and the reason is the whole point of the
-     * CATEGORICAL/TELESCOPIC distinction.
+     * The 412-unit case was first claimed to be IDENTICAL across the amendment,
+     * on the reasoning that only the two lowest steps moved. Wrong: only the
+     * LIFELINE row is CATEGORICAL and therefore confined to bills of 50 units or
+     * less. The first step (0–75) is TELESCOPIC, so it prices the first 75 units
+     * of every residential bill however large.
      *
-     * Only the LIFELINE row is categorical, so only it is confined to bills of
-     * 50 units or less. The first step (0–75) is TELESCOPIC and therefore prices
-     * the first 75 units of EVERY residential bill, however large. Raising it
-     * from 5.26 to 6.18 on 3 June added 75 × Tk 0.92 = Tk 69.00 to every bill
-     * above 75 units, and restoring it on 4 June took that back.
+     * The correction then overstated itself in turn, and the schedule below is
+     * why a single headline number should not have been trusted either time. The
+     * defensible statement is exactly this:
      *
-     * So the reconsideration was not, as the press framing suggested and as I
-     * repeated, relief confined to low-income households. It reduced every
-     * residential bill in the country by Tk 69.00 relative to the 3 June order,
-     * and by more than that below 75 units.
+     *   For residential consumption above 75 kWh, the June 4 reconsideration
+     *   reduced the ENERGY-CHARGE COMPONENT by exactly Tk 69 compared with the
+     *   June 3 order, before any VAT, rebate or other applicable billing effects.
+     *
+     * Not "reduced every bill by Tk 69", and not "by more below 75 units" —
+     * below 75 the reduction is SMALLER, and it is not a bill reduction at all
+     * while `total` is null.
      */
     expect(energy(412, JUN_2026_ON_3RD)).toBe(357812);
     expect(energy(412, JUN_2026)).toBe(350912);
@@ -170,10 +172,37 @@ describe('412 kWh — the brief’s own example, both versions', () => {
     expect(energy(412, JUN_2026_ON_3RD) - energy(412, JUN_2026)).toBe(6900);
   });
 
-  it('that Tk 69.00 is the same for every bill above 75 units', () => {
+  it('above 75 units the energy-charge reduction is a flat Tk 69.00', () => {
+    // Scoped to the energy charge. The first step is capped at 75 units, so the
+    // saving stops growing there and every larger bill sees the same figure.
     for (const kwh of [76, 200, 412, 601, 5000]) {
       expect(energy(kwh, JUN_2026_ON_3RD) - energy(kwh, JUN_2026)).toBe(6900);
     }
+  });
+
+  it('below 75 units the reduction is SMALLER, and it is a schedule not a number', () => {
+    /**
+     * 1–50 kWh:  Tk 0.69 × units  — lifeline is categorical, 5.32 → 4.63
+     * 51–75 kWh: Tk 0.92 × units  — lifeline lost, the first step reprices all units
+     * above 75:  Tk 69.00 flat
+     *
+     * The 51-unit consumer is the counter-intuitive case: they save MORE than the
+     * 50-unit consumer (46.92 against 34.50) despite the lifeline being withdrawn
+     * from them, because the first step reprices all 51 units at a bigger
+     * per-unit reduction.
+     */
+    const cut = (kwh: number) => energy(kwh, JUN_2026_ON_3RD) - energy(kwh, JUN_2026);
+
+    expect(cut(1)).toBe(69);
+    expect(cut(50)).toBe(3450);
+    expect(cut(51)).toBe(4692);
+    expect(cut(75)).toBe(6900);
+
+    for (const kwh of [1, 10, 25, 50]) expect(cut(kwh)).toBe(69 * kwh);
+    for (const kwh of [51, 60, 75]) expect(cut(kwh)).toBe(92 * kwh);
+
+    // Smaller below 75, never larger — the claim this test was written to kill.
+    for (const kwh of [1, 25, 50, 51, 74]) expect(cut(kwh)).toBeLessThan(6900);
   });
 
   it('but a 40-unit bill is not identical — 5.32 on the 3rd, 4.63 after', () => {

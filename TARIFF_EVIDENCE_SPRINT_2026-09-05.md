@@ -192,18 +192,44 @@ national average across all categories and utilities, and it was superseded on 4
 weighted average fell to about 10.40 Tk/kWh. Two numbers agreeing to two decimals for unrelated
 reasons is exactly the kind of accident that gets published as validation. It is not.
 
-**CORRECTED 2026-09-05, by a golden test written during implementation.** This section originally
-said a 412-unit bill was **identical** under the 3 June and 4 June instruments, on the reasoning
-that the amendment touched only the two lowest steps. That is wrong, and the error is instructive:
-**only the lifeline row is categorical.** The 0–75 first step is *telescopic*, so it prices the
-first 75 units of every residential bill however large. Raising it 5.26 → 6.18 added
-**75 × Tk 0.92 = Tk 69.00** to every bill above 75 units, and the restoration took it back.
+**CORRECTED TWICE. The second correction matters more than the first.**
 
-So the 4 June reconsideration was **not** relief confined to low-income households, which is how the
-press framed it and how I repeated it. It **reduced every residential bill in the country** by
-Tk 69.00 relative to the 3 June order, and by more than that below 75 units. A 412-unit bill is
-Tk 3,578.12 as issued on 3 June and Tk 3,509.12 as governing. `lib/test/tariff-calculate.test.ts`
-pins both, and the constant Tk 69.00 gap across 76, 200, 412, 601 and 5,000 units.
+*First correction, 2026-09-05, by a golden test written during implementation.* This section
+originally said a 412-unit bill was **identical** under the 3 June and 4 June instruments, on the
+reasoning that the amendment touched only the two lowest steps. That is wrong: **only the lifeline
+row is categorical.** The 0–75 first step is *telescopic*, so it prices the first 75 units of every
+residential bill however large, and moving it 5.26 → 6.18 moved every bill above 75 units.
+
+*Second correction, same day, on review.* The first correction then **overstated its own finding**
+in two ways, and both are the same class of error as the one it was fixing — a single headline
+number standing in for a schedule. It said the reconsideration reduced **every** residential bill by
+Tk 69.00 "and by more than that below 75 units". Neither half is right. Below 75 units the reduction
+is **smaller**, not larger, and it is not a *bill* reduction at all while VAT and rebate are UNKNOWN
+and `total` is `null`.
+
+**The actual energy-charge effect of the 4 June order relative to the 3 June order**, which is a
+schedule and not a number:
+
+| consumption | reduction in energy charge | why |
+|---|---|---|
+| 1–50 kWh | **Tk 0.69 × units** (Tk 34.50 at 50) | lifeline is categorical: 5.32 → 4.63 on every unit |
+| 51–75 kWh | **Tk 0.92 × units** (Tk 46.92 at 51; Tk 69.00 at 75) | lifeline is lost; the first step reprices every unit, 6.18 → 5.26 |
+| above 75 kWh | **exactly Tk 69.00** | the first step is capped at 75 units, so the saving stops growing |
+
+The 51-unit consumer is the sharpest case in the table and it is the opposite of the intuition: they
+save **more** than the 50-unit consumer (Tk 46.92 against Tk 34.50) despite the lifeline being
+withdrawn from them, because the first step reprices all 51 units at a larger per-unit reduction.
+
+**The defensible statement, and the only one to publish:**
+
+> For residential consumption above 75 kWh, the June 4 reconsideration reduced the **energy-charge
+> component** by exactly Tk 69 compared with the June 3 order, **before any VAT, rebate or other
+> applicable billing effects.**
+
+A 412-unit energy charge is Tk 3,578.12 as issued on 3 June and Tk 3,509.12 as governing.
+`lib/test/tariff-calculate.test.ts` pins the whole schedule above, and every assertion is scoped to
+`ENERGY_CHARGE_ONLY` — the change in what a household actually pays remains uncomputable while VAT
+is UNKNOWN.
 
 ---
 
