@@ -31,8 +31,24 @@
  * these fixtures drawn from every schema era the archive contains.
  */
 
-/** How a figure came to exist. ESTIMATED has no producer here, deliberately. */
-export type SeriesState = 'REPORTED' | 'DERIVED' | 'ESTIMATED' | 'MISSING';
+/**
+ * How a figure came to exist, or why it does not.
+ *
+ * MISSING and RESTRICTED are kept apart deliberately, and the distinction is the
+ * point: MISSING is a statement about the ARCHIVE — ESB queried a range it was
+ * allowed to query and does not hold enough observations. RESTRICTED is a
+ * statement about the READER — the archive may hold the period in full, but
+ * entitlement stopped us asking.
+ *
+ * Collapsing them was a real defect. An anonymous request for 2015 was clamped
+ * to the 7-day window and the truncated month came back MISSING at 92/744
+ * coverage, which reads as "ESB does not have August 2026". ESB has every hour
+ * of it. A data platform that reports its own paywall as an absence of data is
+ * lying about the one thing it sells.
+ *
+ * ESTIMATED still has no producer anywhere in this module.
+ */
+export type SeriesState = 'REPORTED' | 'DERIVED' | 'ESTIMATED' | 'MISSING' | 'RESTRICTED';
 
 export type ObservationKind = 'REGULAR' | 'DAY_PEAK' | 'EVENING_PEAK' | 'UNCLASSIFIED';
 export type AggregationExclusion = 'TOTAL_DISAGREES_WITH_COMPONENTS' | 'BREAKDOWN_ALL_ZERO';
@@ -108,6 +124,40 @@ export type SeriesPoint = {
   excluded?: Partial<Record<AggregationExclusion, number>>;
 };
 
+/**
+ * Which figure on a row each exclusion actually condemns.
+ *
+ * Eligibility is METRIC-SPECIFIC, not row-level, because neither defect makes a
+ * whole observation worthless and treating them that way destroys good data:
+ *
+ *  - TOTAL_DISAGREES_WITH_COMPONENTS says the printed TOTAL cannot be trusted.
+ *    The components printed beside it are the evidence that convicted it, and
+ *    they remain perfectly usable. Dropping the whole row would remove 370 hours
+ *    of valid gas, coal and hydro readings to punish one bad total.
+ *  - BREAKDOWN_ALL_ZERO says the BREAKDOWN cannot be trusted — every component
+ *    printed as a literal zero beside a real total. The total is fine. Dropping
+ *    the whole row would delete 24 valid totals from the earliest days the
+ *    archive holds.
+ *
+ * A row-level flag cannot express either of these, which is why the exclusion is
+ * an enum naming the side rather than a boolean.
+ */
+const GENERATION_TOTAL_METRICS = new Set(['totalMw']);
+const GENERATION_COMPONENT_METRICS = new Set([
+  'gasMw', 'liquidMw', 'coalMw', 'hydroMw', 'solarMw', 'windMw',
+  'bheramaraMw', 'tripuraMw', 'adaniMw', 'nepalMw',
+]);
+
+export function isEligibleForMetric(
+  excluded: AggregationExclusion | null,
+  metric: string,
+): boolean {
+  if (!excluded) return true;
+  if (excluded === 'TOTAL_DISAGREES_WITH_COMPONENTS') return !GENERATION_TOTAL_METRICS.has(metric);
+  if (excluded === 'BREAKDOWN_ALL_ZERO') return !GENERATION_COMPONENT_METRICS.has(metric);
+  return false;
+}
+
 export type Resolution = 'hour' | 'day' | 'month';
 export type Aggregation = 'mean' | 'max' | 'min' | 'sum';
 
@@ -115,6 +165,12 @@ export type AggregateOptions = {
   resolution: Resolution;
   metric: string;
   aggregation: Aggregation;
+  /**
+   * The window entitlement actually permitted, when it is narrower than what was
+   * asked for. Periods falling wholly or partly outside it are RESTRICTED rather
+   * than MISSING, because their absence says nothing about the archive.
+   */
+  effectiveFrom?: string;
   /**
    * Minimum share of `expected` a period needs before a value is reported.
    * Below it the period is MISSING with its coverage attached — never estimated.
@@ -160,11 +216,14 @@ export function aggregate(rows: readonly HourRow[], opts: AggregateOptions): Ser
 
   const out: SeriesPoint[] = [];
   for (const [t, all] of [...buckets.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
-    // Rule 2: set aside what the source contradicted, and say how much.
+    // Rule 2: set aside what the source contradicted — but only for the figure
+    // it actually condemns. An exclusion is counted here only where it applied
+    // to the metric being asked for, so a total-side defect does not report
+    // itself as having suppressed a gas reading it never touched.
     const excluded: Partial<Record<AggregationExclusion, number>> = {};
     const eligible = all.filter((r) => {
-      if (!r.excluded) return true;
-      excluded[r.excluded] = (excluded[r.excluded] ?? 0) + 1;
+      if (isEligibleForMetric(r.excluded, opts.metric)) return true;
+      excluded[r.excluded!] = (excluded[r.excluded!] ?? 0) + 1;
       return false;
     });
 
@@ -185,12 +244,20 @@ export function aggregate(rows: readonly HourRow[], opts: AggregateOptions): Ser
       sufficient: expected > 0 && regularCount / expected >= floor,
     };
 
+    // A period the entitlement window cut into cannot be reported as a coverage
+    // fact. Its observations are missing from the QUERY, not from the archive.
+    const restricted = Boolean(opts.effectiveFrom) && periodTouchesRestricted(t, opts.resolution, opts.effectiveFrom!);
+
     const hasExclusions = Object.keys(excluded).length > 0;
     // Rule 3 and 4: an hour is REPORTED as published; a period is DERIVED, and
     // only when enough of it exists. Otherwise MISSING, with the coverage said.
     let value: number | null = null;
-    let state: SeriesState = 'MISSING';
-    if (nums.length) {
+    let state: SeriesState = restricted ? 'RESTRICTED' : 'MISSING';
+    if (restricted) {
+      // Nothing is reported for a period the reader was not allowed to see in
+      // full. Reporting a partial figure would be worse than reporting none: it
+      // would look like the whole period and be quietly wrong.
+    } else if (nums.length) {
       if (opts.resolution === 'hour') {
         value = nums[0];
         state = 'REPORTED';
@@ -262,6 +329,7 @@ export function fillMissing(
   from: Date,
   to: Date,
   resolution: Resolution,
+  effectiveFrom?: string,
 ): SeriesPoint[] {
   const have = new Map(points.map((p) => [p.t, p]));
   const out: SeriesPoint[] = [];
@@ -277,11 +345,14 @@ export function fillMissing(
 
   while (cur <= to) {
     const k = key(cur);
+    const restricted =
+      Boolean(effectiveFrom) && periodTouchesRestricted(k, resolution, effectiveFrom!);
     out.push(
       have.get(k) ?? {
         t: k,
         value: null,
-        state: 'MISSING',
+        // A hole before the entitlement window is not a hole in the archive.
+        state: restricted ? 'RESTRICTED' : 'MISSING',
         coverage: { observed: 0, expected: 0, sufficient: false },
       },
     );
@@ -298,5 +369,18 @@ export function fillMissing(
  * outage would be the single most damaging thing this feature could do.
  */
 export function isBreak(p: SeriesPoint): boolean {
-  return p.value === null || p.state === 'MISSING';
+  return p.value === null || p.state === 'MISSING' || p.state === 'RESTRICTED';
+}
+
+/**
+ * Does this period reach back beyond the entitlement window?
+ *
+ * A period only partly inside the window is still RESTRICTED. Reporting the
+ * visible slice as though it were the whole month is how "7 days of August"
+ * becomes "August", which is a smaller lie than a missing month but a lie in the
+ * direction of overstating what we know.
+ */
+function periodTouchesRestricted(t: string, resolution: Resolution, effectiveFrom: string): boolean {
+  if (resolution === 'month') return t < effectiveFrom.slice(0, 7) || `${t}-01` < effectiveFrom;
+  return t.slice(0, 10) < effectiveFrom.slice(0, 10);
 }

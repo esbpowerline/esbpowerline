@@ -81,9 +81,25 @@ export async function GET(request: Request) {
     clamped = { from: earliest, requestedFrom };
   }
 
+  const restriction = {
+    requested: { from: requestedFrom, to },
+    effective: { from: clamped ? from : requestedFrom, to },
+    restricted: Boolean(clamped),
+    reason: clamped ? ('tier' as const) : null,
+    tier,
+  };
+
   if (from > to) {
+    // The whole range is outside entitlement. This is NOT a 404 and the body
+    // says so: the archive is not missing these years, the reader cannot reach
+    // them. Both ranges are returned so the client can say which is which.
     return NextResponse.json(
-      { error: 'Range lies entirely outside your plan window', clamped, rulesVersion: RULES_VERSION },
+      {
+        error: 'The requested range lies entirely outside your plan window.',
+        restriction,
+        rulesVersion: RULES_VERSION,
+        points: [],
+      },
       { status: 403 },
     );
   }
@@ -95,10 +111,11 @@ export async function GET(request: Request) {
     from: `${from}T00:00:00.000Z`,
     to: `${to}T23:59:59.999Z`,
     dense,
+    requestedFrom: clamped ? `${requestedFrom}T00:00:00.000Z` : undefined,
   });
 
   return NextResponse.json(
-    { ...result, clamped },
+    { ...result, restriction },
     {
       headers: {
         // Same reasoning as the data routes: middleware gates before the edge

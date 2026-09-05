@@ -52,8 +52,21 @@ export type HistoryResult = {
   resolution: Resolution;
   aggregation: Aggregation;
   rulesVersion: string;
-  /** Where the request was narrowed by the caller's plan, and to what. */
-  clamped: { from: string; requestedFrom: string } | null;
+  /**
+   * Both ranges, always, plus why they differ.
+   *
+   * `requested` is what the caller asked for; `effective` is what entitlement
+   * permitted and what was actually queried. When they differ, every period
+   * outside `effective` comes back RESTRICTED — never MISSING, which would
+   * misreport a paywall as an absence of data.
+   */
+  restriction: {
+    requested: { from: string; to: string };
+    effective: { from: string; to: string };
+    restricted: boolean;
+    reason: 'tier' | null;
+    tier: string;
+  };
   points: SeriesPoint[];
   sources: Array<{ publisher: string; documents: number; earliest: string; latest: string }>;
 };
@@ -115,13 +128,19 @@ async function compute(
   fromIso: string,
   toIso: string,
   dense: boolean,
-): Promise<Omit<HistoryResult, 'clamped'>> {
+  /** Where entitlement actually started, when narrower than the request. */
+  effectiveFrom?: string,
+  /** What the caller asked for, so a dense axis can show the restricted span. */
+  axisFromIso?: string,
+): Promise<Omit<HistoryResult, 'restriction'>> {
   const series = seriesFor(metric);
   const from = new Date(fromIso);
   const to = new Date(toIso);
   const rows = await loadHours(series, metric, from, to);
-  let points = aggregate(rows, { resolution, metric, aggregation });
-  if (dense) points = fillMissing(points, from, to, resolution);
+  let points = aggregate(rows, { resolution, metric, aggregation, effectiveFrom });
+  // The axis spans what was ASKED for, so a restricted span is visible as
+  // restricted rather than silently absent from the chart.
+  if (dense) points = fillMissing(points, new Date(axisFromIso ?? fromIso), to, resolution, effectiveFrom);
   return {
     metric,
     resolution,
@@ -147,16 +166,28 @@ export function getHistorySeries(args: {
   metric: string;
   resolution: Resolution;
   aggregation: Aggregation;
+  /** What entitlement permits — the range actually queried. */
   from: string;
   to: string;
   dense: boolean;
+  /** What the caller asked for, when wider than `from`. */
+  requestedFrom?: string;
 }) {
+  const restricted = Boolean(args.requestedFrom && args.requestedFrom < args.from);
+  const effectiveFrom = restricted ? args.from : undefined;
+  const axisFrom = restricted ? args.requestedFrom : undefined;
+  // The entitlement window is part of the cache key. Without it a visitor's
+  // clamped answer could be served to a subscriber, or the reverse.
   const key = [
-    'grid-history', RULES_VERSION, args.metric, args.resolution,
-    args.aggregation, args.from, args.to, String(args.dense),
+    'grid-history', RULES_VERSION, args.metric, args.resolution, args.aggregation,
+    args.from, args.to, String(args.dense), effectiveFrom ?? '-', axisFrom ?? '-',
   ];
   return unstable_cache(
-    () => compute(args.metric, args.resolution, args.aggregation, args.from, args.to, args.dense),
+    () =>
+      compute(
+        args.metric, args.resolution, args.aggregation, args.from, args.to,
+        args.dense, effectiveFrom, axisFrom,
+      ),
     key,
     { revalidate: isSettled(args.to) ? 31_536_000 : 600 },
   )();

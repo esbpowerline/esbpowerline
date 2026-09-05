@@ -181,15 +181,27 @@ describe('source defects are excluded and counted, never altered', () => {
     expect(month.excluded).toEqual({ TOTAL_DISAGREES_WITH_COMPONENTS: 1 });
   });
 
-  it('keeps a 2015 all-zero breakdown out, and says which reason', () => {
+  /**
+   * This test previously asserted the opposite, and was wrong.
+   *
+   * It checked that a BREAKDOWN_ALL_ZERO row is dropped from a TOTAL aggregate —
+   * which encoded the row-level eligibility bug. That exclusion condemns the
+   * breakdown, not the total, and the total on those 24 rows is the earliest
+   * data the archive holds. Corrected during the post-launch semantics audit.
+   */
+  it('keeps the valid total on a 2015 all-zero breakdown row', () => {
     const rows = [
       ...flatDay('2015-04-18', 5_000),
-      G('2015-04-17T12:30:00Z', { totalMw: 5_862 }, 'REGULAR', 'BREAKDOWN_ALL_ZERO'),
+      G('2015-04-17T12:30:00Z', { totalMw: 5_862, gasMw: 0 }, 'REGULAR', 'BREAKDOWN_ALL_ZERO'),
     ];
-    const points = aggregate(rows, opts({ coverageFloor: 0 }));
-    const apr17 = points.find((p) => p.t === '2015-04-17')!;
-    expect(apr17.excluded).toEqual({ BREAKDOWN_ALL_ZERO: 1 });
-    expect(apr17.value).toBeNull();
+    const apr17 = aggregate(rows, opts({ coverageFloor: 0 })).find((p) => p.t === '2015-04-17')!;
+    expect(apr17.value).toBe(5_862);
+    expect(apr17.excluded).toBeUndefined();
+
+    // The breakdown from that same row is what is unusable.
+    const gas = aggregate(rows, opts({ metric: 'gasMw', coverageFloor: 0 })).find((p) => p.t === '2015-04-17')!;
+    expect(gas.value).toBeNull();
+    expect(gas.excluded).toEqual({ BREAKDOWN_ALL_ZERO: 1 });
   });
 
   it('reports the reason rather than a bare flag', () => {
@@ -263,5 +275,87 @@ describe('states', () => {
     const [day] = aggregate(rows, opts({ metric: 'adaniMw' }));
     expect(day.value).toBeNull();
     expect(day.state).toBe('MISSING');
+  });
+});
+
+describe('access limits are not data absence', () => {
+  it('marks a period outside the entitlement window RESTRICTED, not MISSING', () => {
+    // Anonymous asking for 2015: the archive holds every hour, entitlement does
+    // not permit them. Reporting that as MISSING says ESB lacks the data.
+    const rows = flatDay('2026-09-01', 12_000);
+    const points = aggregate(rows, opts({ effectiveFrom: '2026-08-28' }));
+    expect(points[0].state).toBe('DERIVED');
+
+    const dense = fillMissing(
+      points, new Date('2026-08-20T00:00:00Z'), new Date('2026-09-01T00:00:00Z'), 'day', '2026-08-28',
+    );
+    const before = dense.filter((p) => p.t < '2026-08-28');
+    expect(before.length).toBeGreaterThan(0);
+    expect(before.every((p) => p.state === 'RESTRICTED')).toBe(true);
+    expect(before.every((p) => p.state !== 'MISSING')).toBe(true);
+  });
+
+  it('does not report a partly-visible month as though it were the month', () => {
+    // Seven days of August are inside the window. Reporting a mean of them as
+    // "August" overstates what is known; the period is RESTRICTED and valueless.
+    const rows = Array.from({ length: 7 }, (_, i) =>
+      flatDay(`2026-08-${String(25 + i).padStart(2, '0')}`, 13_000),
+    ).flat();
+    const [month] = aggregate(rows, opts({ resolution: 'month', effectiveFrom: '2026-08-25' }));
+    expect(month.state).toBe('RESTRICTED');
+    expect(month.value).toBeNull();
+  });
+
+  it('still reports genuine absence as MISSING when nothing is restricted', () => {
+    const dense = fillMissing(
+      aggregate(flatDay('2026-06-03', 9_000), opts()),
+      new Date('2026-06-01T00:00:00Z'), new Date('2026-06-03T00:00:00Z'), 'day',
+    );
+    expect(dense.filter((p) => p.value === null).every((p) => p.state === 'MISSING')).toBe(true);
+  });
+
+  it('breaks the line for both, since neither may be drawn across', () => {
+    expect(isBreak({ t: 'x', value: null, state: 'RESTRICTED', coverage: { observed: 0, expected: 0, sufficient: false } })).toBe(true);
+    expect(isBreak({ t: 'x', value: null, state: 'MISSING', coverage: { observed: 0, expected: 0, sufficient: false } })).toBe(true);
+  });
+});
+
+describe('eligibility is metric-specific, not row-level', () => {
+  const row = (excluded: HourRow['excluded']) =>
+    G('2020-06-01T10:00:00Z', { totalMw: 907, gasMw: 5910, coalMw: 1349 }, 'REGULAR', excluded);
+
+  it('TOTAL_DISAGREES keeps the components it convicted the total with', () => {
+    const rows = [row('TOTAL_DISAGREES_WITH_COMPONENTS')];
+    // The bad total is excluded...
+    const [t] = aggregate(rows, opts({ metric: 'totalMw', coverageFloor: 0 }));
+    expect(t.value).toBeNull();
+    expect(t.excluded).toEqual({ TOTAL_DISAGREES_WITH_COMPONENTS: 1 });
+    // ...while gas and coal, which are perfectly good, survive. Dropping the
+    // whole row would discard 370 hours of valid component readings.
+    const [g] = aggregate(rows, opts({ metric: 'gasMw', coverageFloor: 0 }));
+    expect(g.value).toBe(5910);
+    expect(g.excluded).toBeUndefined();
+    const [c] = aggregate(rows, opts({ metric: 'coalMw', coverageFloor: 0 }));
+    expect(c.value).toBe(1349);
+  });
+
+  it('BREAKDOWN_ALL_ZERO keeps the valid total and drops only the breakdown', () => {
+    const rows = [G('2015-04-17T12:30:00Z', { totalMw: 5862, gasMw: 0, coalMw: 0 }, 'REGULAR', 'BREAKDOWN_ALL_ZERO')];
+    // The total is real and must survive — it is the earliest data ESB holds.
+    const [t] = aggregate(rows, opts({ metric: 'totalMw', coverageFloor: 0 }));
+    expect(t.value).toBe(5862);
+    expect(t.excluded).toBeUndefined();
+    // The all-zero breakdown is not usable as a fuel-mix figure.
+    const [g] = aggregate(rows, opts({ metric: 'gasMw', coverageFloor: 0 }));
+    expect(g.value).toBeNull();
+    expect(g.excluded).toEqual({ BREAKDOWN_ALL_ZERO: 1 });
+  });
+
+  it('counts an exclusion only against the metric it actually suppressed', () => {
+    const rows = [row('TOTAL_DISAGREES_WITH_COMPONENTS')];
+    const [g] = aggregate(rows, opts({ metric: 'gasMw', coverageFloor: 0 }));
+    // Reporting "1 row set aside" on a gas chart it never touched would be a
+    // false statement about that chart's completeness.
+    expect(g.excluded).toBeUndefined();
   });
 });

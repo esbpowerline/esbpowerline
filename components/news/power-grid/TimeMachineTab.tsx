@@ -22,7 +22,7 @@ import { categoricalSlot, isKnownFuel, resolveFuelColor } from '@/lib/data/grid/
  * the aggregator for exactly this, and the golden tests assert it.
  */
 
-type SeriesState = 'REPORTED' | 'DERIVED' | 'ESTIMATED' | 'MISSING';
+type SeriesState = 'REPORTED' | 'DERIVED' | 'ESTIMATED' | 'MISSING' | 'RESTRICTED';
 
 type Point = {
   t: string;
@@ -37,7 +37,13 @@ type SeriesResponse = {
   resolution: 'hour' | 'day' | 'month';
   aggregation: string;
   rulesVersion: string;
-  clamped: { from: string; requestedFrom: string } | null;
+  restriction: {
+    requested: { from: string; to: string };
+    effective: { from: string; to: string };
+    restricted: boolean;
+    reason: 'tier' | null;
+    tier: string;
+  };
   points: Point[];
   sources: Array<{ publisher: string; documents: number; earliest: string; latest: string }>;
 };
@@ -68,7 +74,8 @@ const STATE_LEGEND: Array<{ state: SeriesState; title: string; detail: string }>
   { state: 'REPORTED', title: 'Reported', detail: 'NLDC printed this figure for this hour.' },
   { state: 'DERIVED', title: 'Derived', detail: 'Calculated here from reported hours. The aggregation is named on hover.' },
   { state: 'ESTIMATED', title: 'Estimated', detail: 'Modelled where no figure exists. Nothing in the Time Machine produces this — it is reserved so a future forecast can never be mistaken for a reading.' },
-  { state: 'MISSING', title: 'Missing', detail: 'No figure was published. The line breaks; nothing is interpolated.' },
+  { state: 'MISSING', title: 'Missing', detail: 'No figure was published for this period. ESB queried it and does not hold enough observations. The line breaks; nothing is interpolated.' },
+  { state: 'RESTRICTED', title: 'Outside your plan', detail: 'ESB holds this period — your plan does not reach it, so it was not queried. This says nothing about whether the data exists.' },
 ];
 
 const fmt = (n: number) => n.toLocaleString(undefined, { maximumFractionDigits: 0 });
@@ -149,12 +156,14 @@ export default function TimeMachineTab() {
     if (!data) return null;
     const pts = data.points;
     const present = pts.filter((p) => p.value !== null);
-    const missing = pts.length - present.length;
+    // Counted apart, because they mean opposite things about the archive.
+    const missing = pts.filter((p) => p.state === 'MISSING').length;
+    const restricted = pts.filter((p) => p.state === 'RESTRICTED').length;
     const excluded = pts.reduce((acc, p) => {
       for (const [k, v] of Object.entries(p.excluded ?? {})) acc[k] = (acc[k] ?? 0) + v;
       return acc;
     }, {} as Record<string, number>);
-    return { total: pts.length, present: present.length, missing, excluded };
+    return { total: pts.length, present: present.length, missing, restricted, excluded };
   }, [data]);
 
   return (
@@ -212,11 +221,13 @@ export default function TimeMachineTab() {
             {loading && <span className="text-muted-foreground">loading…</span>}
           </div>
 
-          {data?.clamped && (
-            <div className="text-xs rounded-xl border border-amber-500/30 bg-amber-500/5 p-3 text-amber-700 dark:text-amber-400">
-              Your plan covers history from <strong>{data.clamped.from}</strong>. The range you asked
-              for began {data.clamped.requestedFrom}; everything before the covered window has been
-              left out rather than partially shown.
+          {data?.restriction?.restricted && (
+            <div className="text-xs rounded-xl border border-sky-500/30 bg-sky-500/5 p-3 text-sky-700 dark:text-sky-400">
+              <strong>The archive holds this period.</strong> Your plan reaches back to{' '}
+              <strong>{data.restriction.effective.from}</strong>; you asked from{' '}
+              {data.restriction.requested.from}. Everything earlier is marked{' '}
+              <em>outside your plan</em> rather than missing — ESB has the data, this view does not
+              reach it.
             </div>
           )}
 
@@ -240,10 +251,16 @@ export default function TimeMachineTab() {
                       return (
                         <div className="grid-hover-panel p-3 text-xs bg-card text-card-foreground w-64">
                           <div className="font-bold border-b border-border/40 pb-1.5 mb-2">{p.t}</div>
-                          {p.value === null ? (
+                          {p.state === 'RESTRICTED' ? (
+                            <div className="text-sky-700 dark:text-sky-400">
+                              <strong>Outside your plan.</strong> ESB holds this period; your plan
+                              does not reach it, so it was not queried. This is not a gap in the
+                              archive.
+                            </div>
+                          ) : p.value === null ? (
                             <div className="text-muted-foreground">
-                              <strong>Missing.</strong> No figure was published for this period.
-                              Nothing is estimated in its place.
+                              <strong>Missing.</strong> ESB queried this period and does not hold
+                              enough observations for it. Nothing is estimated in its place.
                             </div>
                           ) : (
                             <>
@@ -294,7 +311,14 @@ export default function TimeMachineTab() {
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
               <span>{summary.present} of {summary.total} periods carry a figure</span>
               {summary.missing > 0 && (
-                <span className="text-foreground font-medium">{summary.missing} missing — shown as breaks</span>
+                <span className="text-foreground font-medium">
+                  {summary.missing} missing from the archive — shown as breaks
+                </span>
+              )}
+              {summary.restricted > 0 && (
+                <span className="text-sky-700 dark:text-sky-400 font-medium">
+                  {summary.restricted} outside your plan — held, but not queried
+                </span>
               )}
               {Object.entries(summary.excluded).map(([k, v]) => (
                 <span key={k} className="text-amber-600 dark:text-amber-400">
@@ -310,7 +334,9 @@ export default function TimeMachineTab() {
                 <span
                   aria-hidden
                   className={
-                    s.state === 'MISSING'
+                    s.state === 'RESTRICTED'
+                      ? 'inline-block w-5 border-t-2 border-dashed border-sky-500/60'
+                      : s.state === 'MISSING'
                       ? 'inline-block w-5 border-t-2 border-dashed border-muted-foreground/50'
                       : s.state === 'ESTIMATED'
                         ? 'inline-block w-5 border-t-2 border-dotted border-muted-foreground/40'
