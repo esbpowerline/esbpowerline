@@ -445,7 +445,7 @@ async function main() {
         key: 'homepage',
         value: {
           carouselMode: 'managed',
-          marketPulse: 'LNG spot firming • Solar module prices -2.1% WoW • BDT volatility impacting IPP margins • Coal API2 steady at $102 • New 8.95 Tk/kWh bulk tariff in effect',
+          marketPulse: 'LNG spot firming • Solar module prices -2.1% WoW • BDT volatility impacting IPP margins • Coal API2 steady at $102',
           snapshotLabel: 'Live • BPDB • PGCB • SREDA • Petrobangla',
           professionalsCta: {
             label: 'MEMBER ACCESS',

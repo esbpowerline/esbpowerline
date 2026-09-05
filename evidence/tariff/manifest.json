@@ -1,0 +1,157 @@
+{
+  "_comment": [
+    "Tariff evidence manifest. This file is the index; the PDFs themselves are archived to",
+    "W:\\Grid-Explorer\\BERC\\tariff\\ and are NOT committed (11 MB of scans, and public/data",
+    "is already 413 MB). The sha256 is what makes the archived copy checkable against the",
+    "publisher's, and what makes a later transcription auditable.",
+    "",
+    "Acquired 2026-09-05 in the tariff evidence sprint. Nothing here has been transcribed into",
+    "a rule set yet, and no figure in this repo currently reads from it.",
+    "",
+    "publishedOn is NOT issuedOn. BERC Reconsideration Order 2026/01 is dated 04 June 2026 on",
+    "its own face and appeared on berc.org.bd on 24 August 2026 -- an 81-day gap during which",
+    "the only public account of the 4 June decision was press coverage. Any provenance model",
+    "that carries one date cannot represent that."
+  ],
+  "documents": [
+    {
+      "id": "berc-notification-2521-2026-06-03",
+      "issuer": "BERC",
+      "documentType": "BERC_NOTIFICATION",
+      "memoNo": "28.01.0000.012.04.003.26.2521",
+      "titleBn": "বিদ্যুতের খুচরা মূল্যহার পুনর্নির্ধারণ সংক্রান্ত বিজ্ঞপ্তি",
+      "titleEn": "Notification on the re-fixing of retail electricity tariff",
+      "issuedOn": "2026-06-03",
+      "publishedOn": "2026-06-03",
+      "effectiveFrom": "2026-06 bill month",
+      "signedBy": "Md. Nazrul Islam Sarkar, Secretary, BERC",
+      "legalBasis": "BERC Act 2003, ss. 22(kha) and 34",
+      "pages": 4,
+      "language": "bn",
+      "hasTextLayer": false,
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-berc/2026/5/d281aa72-3b0b-4fbf-8a71-f0f7309bb39c.pdf",
+      "listingUrl": "https://berc.org.bd/pages/notices/বিদ্যুতের-খুচরা-মূল্যহার-২০২৬-izhzg9-6a1ffac3d2a86bdf8e50fe99",
+      "contentSha256": "5c7b7b6bb615d635aa62326f5f0124f99346c08a414105f0d8d8c1cbb821bfa8",
+      "byteLength": 1186785,
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\berc-2026-06-03.pdf",
+      "retrievedAt": "2026-09-05",
+      "verificationStatus": "DOCUMENT_HELD",
+      "carries": [
+        "LT/MT/HT/EHT rate tables for all six distribution utilities",
+        "footnote 2 — demand basis: sanctioned load (kW) for LT and MT; max(recorded max demand, 80% of sanctioned load) for HT and EHT",
+        "footnote 3 — the lifeline benefit is unavailable to any other residential consumer",
+        "clause 3 — names BERC Order 2026/22, Appendix-KHA as the source of terms, applicability and miscellaneous charges",
+        "clause 4 — prepaid rebate 0.5% on net bill EXCLUDING VAT",
+        "clause 5 — effective from bill month June 2026"
+      ],
+      "note": "This is the notification publishing the schedule. The order itself, BERC Order 2026/22, and its Appendix-KHA are NOT yet held. See sprint report §H1."
+    },
+    {
+      "id": "dpdc-bundle-2026-06",
+      "issuer": "DPDC",
+      "documentType": "UTILITY_REPUBLICATION",
+      "titleEn": "DPDC tariff-rate page bundle: the 3 June notification (pp. 1-4) plus the 4 June amendment notification (p. 5)",
+      "issuedOn": "2026-06-04",
+      "publishedOn": "2026-06",
+      "pages": 5,
+      "language": "bn",
+      "hasTextLayer": false,
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-dpdc/2026/5/a54abcb7-19d9-4b7a-92d7-fe738615f3f5.pdf",
+      "listingUrl": "https://dpdc.gov.bd/pages/static-pages/6922de6f933eb65569e1a9c4",
+      "contentSha256": "8f0bc9b8322e897c33ff8f6ab5d9f8c0509e7dd78f20409b8f233a4ddaee827a",
+      "byteLength": 1474903,
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\dpdc-2026-06.pdf",
+      "retrievedAt": "2026-09-05",
+      "verificationStatus": "DOCUMENT_HELD",
+      "carries": [
+        "page 5 — BERC notification memo 28.01.0000.012.04.003.26.2569 dated 04 June 2026, titled সংশোধন বিজ্ঞপ্তি (amendment notification)",
+        "para 2 — on the distribution companies' 4 June application, after hearing, under BERC Act ss. 22(kha)/34 and reg. 13(3) of the BERC Electricity Distribution (Retail) Tariff Regulations 2016, the increased lifeline and first-step rates are not made effective and the previous rates are restored",
+        "para 3 — lifeline 4.63 and first step 5.26 remain in force from bill month June 2026",
+        "para 4 — all other orders of memo 2521 remain unchanged"
+      ],
+      "note": "The 4 June notification was found here, on the utility's own page, before it appeared on BERC's. A utility re-publication is a legitimate acquisition path and sometimes the fastest one -- but it is a copy, and it is recorded as one."
+    },
+    {
+      "id": "berc-reconsideration-order-2026-01",
+      "issuer": "BERC",
+      "documentType": "BERC_ORDER",
+      "orderNo": "BERC পুনর্বিবেচনা আদেশ নম্বর: ২০২৬/০১",
+      "titleBn": "আবাসিক লাইফ লাইন (০-৫০ ইউনিট) এবং আবাসিক প্রথম ধাপ: ০-৭৫ ইউনিট এর খুচরা বিদ্যুৎ মূল্যহার এবং বিদ্যুতের পাইকারি (বাল্ক) মূল্যহার পুনর্বিবেচনা আদেশ, ২০২৬",
+      "titleEn": "Reconsideration Order 2026 on the retail tariff for the residential lifeline (0-50 units) and residential first step (0-75 units), and on the bulk electricity tariff",
+      "issuedOn": "2026-06-04",
+      "publishedOn": "2026-08-24",
+      "effectiveFrom": "2026-06 bill month",
+      "signedBy": "Jalal Ahmed (Chairman) and four Members",
+      "pages": 10,
+      "language": "bn",
+      "hasTextLayer": false,
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-berc/2026/7/03a7fcfe-bc5f-41c3-b46e-8e3a5b15732a.pdf",
+      "listingUrl": "https://berc.org.bd/site/view/notices",
+      "contentSha256": "f5a7c4538585f849a0d4133c0066051bb0716062c714b5aaf33d5e00d9024386",
+      "byteLength": 2783481,
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\berc-2026-08-24-reconsideration.pdf",
+      "retrievedAt": "2026-09-05",
+      "verificationStatus": "DOCUMENT_HELD",
+      "amends": ["BERC Order 2026/20 (bulk, 3 June 2026)", "BERC Order 2026/22 (retail, 3 June 2026)"],
+      "carries": [
+        "para 5.1-5.2 — the 3 June increases for lifeline and first step are not made effective; 4.63 and 5.26 restored from bill month June 2026",
+        "para 5.3 — post-amendment weighted-average RETAIL tariff per utility: BPDB 11.14, BREB 9.64, DPDC 11.89, DESCO 12.05, WZPDCL 10.44, NESCO 10.45 Tk/kWh",
+        "para 5.4 + Appendix-KA — revised BULK tariff, per utility AND per voltage level, reduced to offset the distribution companies' shortfall",
+        "para 5.7 — all other orders and directions of Orders 2026/20 and 2026/22 remain unchanged",
+        "Appendix-KA terms — power-factor surcharges below 0.90 lag, 1% simple monthly late-payment charge on bulk bills, PBS break-even bulk rates refixable at year end"
+      ],
+      "note": "Dated 4 June, published 24 August. Both dates are recorded because only one of them is the date the rule took effect and only the other is the date the public could read it."
+    },
+    {
+      "id": "sro-43-law-2024",
+      "issuer": "Power Division, Ministry of Power, Energy and Mineral Resources",
+      "documentType": "GAZETTE_NOTIFICATION",
+      "sroNo": "এস.আর.ও. নম্বর ৪৩-আইন/২০২৪",
+      "titleEn": "Gazette notification re-fixing the retail electricity tariff and charges/fees for miscellaneous electricity-related services",
+      "issuedOn": "2024-02-29",
+      "effectiveFrom": "2024-02 bill month",
+      "legalBasis": "BERC Act 2003, s. 34ka — the executive route, exercised without a BERC public hearing",
+      "repeals": "S.R.O. No. 9-Law/2023 of 12 January 2023",
+      "pages": 21,
+      "language": "bn",
+      "hasTextLayer": true,
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-powercell/2024/12/107e2196d61d49a782cf7c85e79f4ab6.pdf",
+      "listingUrl": "https://powercell.gov.bd/site/page/d31fb598-5400-4991-a5a7-7a308893169d/বিদ্যুতের-খুচরা-মূল্যহার-(নতুন)",
+      "contentSha256": "dcfaf4667a0081db65fdf32a5b8c75fb522b0ef27c311ed568e34530784ae7b1",
+      "byteLength": 3877353,
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2024\\powercell-retail-2024.pdf",
+      "retrievedAt": "2026-09-05",
+      "verificationStatus": "DOCUMENT_HELD",
+      "carries": [
+        "Table-1 — the immediately previous residential (LT-A) schedule: lifeline 4.63, first step 5.26, then 7.20 / 7.59 / 8.02 / 12.67 / 14.61; demand charge 42.00 Tk/kW/month",
+        "footnote 3 — the lifeline benefit is unavailable to any other residential consumer (identical rule to June 2026, two years earlier), plus a BREB carve-out for PBSs already above 4.63",
+        "Table-2 — every permitted miscellaneous fee, all one-off, no recurring meter rent and no monthly service charge",
+        "Table-2 condition (ka) — NO fee or charge outside Table-2 may be imposed",
+        "Table-2 condition (gha) — VAT applies to the Table-2 fees at the rate set by government from time to time",
+        "clause 2 — any ambiguity of interpretation or of consumer classification is referred to the Power Division, whose decision is final",
+        "bundled S.R.O. 42-Law/2024 — PGCB transmission wheeling charge: 0.3057 / 0.3086 / 0.3144 Tk/kWh at 230 / 132 / 33 kV; repeals BERC Order 2020/03"
+      ],
+      "note": "The only one of the four with a text layer, and the most complete instrument held. It is also the proof that the issuer changes: this is the Power Division acting under s. 34ka, not BERC."
+    }
+  ],
+  "notHeld": [
+    {
+      "id": "berc-order-2026-22",
+      "what": "BERC Order 2026/22 of 3 June 2026 and its Appendix-KHA",
+      "why": "Named by the 3 June notification as carrying the terms, applicability and miscellaneous charges/fees of the 2026 retail tariff, and declared an inseparable part of it. Not on BERC's tariff-orders page, which stops at 2020.",
+      "blocks": "the 2026 equivalent of the 2024 Table-2, and any authoritative statement of VAT treatment for 2026"
+    },
+    {
+      "id": "berc-order-2026-20",
+      "what": "BERC Order 2026/20 of 3 June 2026 (bulk)",
+      "why": "The bulk instrument amended by Reconsideration Order 2026/01. Needed only to state what the bulk rates were between 3 and 4 June.",
+      "blocks": "nothing in V1"
+    },
+    {
+      "id": "real-bill",
+      "what": "An authentic postpaid residential bill crossing a slab boundary",
+      "why": "Rate tables state rates; bills state order of operations. Not obtained in this sprint.",
+      "blocks": "the end-to-end golden case, and confirmation of the VAT base"
+    }
+  ]
+}
