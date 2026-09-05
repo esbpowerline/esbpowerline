@@ -14,21 +14,31 @@ force on this date, who issued it, and where is the document."* That question is
 today from any public source in Bangladesh, and it is the one every downstream feature in the
 brief actually depends on.
 
-**Evidence that the gap is real, found while auditing:**
+> **CORRECTED 2026-09-05.** The original version of this section asserted that
+> `ebill.info.bd` was serving superseded lifeline rates. **That was wrong**, and it was wrong
+> because this document did what it accuses others of doing: it reasoned from press coverage of a
+> single day's announcement instead of from the instruments. The primary documents have since been
+> acquired and read. The corrected chronology and the retracted claim are in
+> `TARIFF_EVIDENCE_SPRINT_2026-09-05.md` §A. `ebill.info.bd`'s residential rates are **correct**
+> — they reflect the 4 June 2026 reconsideration order, which restored 4.63 and 5.26.
+>
+> The strategic conclusion below is unchanged, but its evidence is different and better: the June
+> 2026 tariff was **issued on the 3rd and amended on the 4th**, and neither the published rate
+> tables nor the press record which of the two governs a given bill. A dateless rate table cannot
+> represent a one-day amendment at all. That is the gap.
 
-The current tariff took effect June 2026. BERC raised the weighted-average retail tariff 16.68%,
-Tk 9.11 → Tk 10.63/kWh, announced 3 June 2026. The lifeline rate went **Tk 4.63 → Tk 5.32** and
-the 0–75 step **Tk 5.26 → Tk 6.18**.
+**Evidence that the gap is real:**
 
-`ebill.info.bd`, which brands itself *"Bangladesh Electricity Bill Calculator — 2026 BERC Tariff"*
-and cites BERC, currently publishes the lifeline rate as **Tk 4.63** and the 0–75 step as
-**Tk 5.26**, and states both were *"left unchanged in the 2026 revision."* Those are the
-superseded values. **The most prominent public calculator is serving the previous tariff as
-current, under the current tariff's name.** It has no version, so it cannot be wrong in a way it
-can detect.
+The June 2026 revision is **two instruments one day apart**. BERC Order 2026/22 of 3 June raised
+the lifeline rate Tk 4.63 → 5.32 and the 0–75 step Tk 5.26 → 6.18; BERC Reconsideration Order
+2026/01 of 4 June set those two increases aside and restored 4.63 and 5.26, both effective from
+the **same** bill month, June 2026. The 3 June rates for those two steps were validly issued and
+**never governed a single bill**.
 
-That is the differentiation, and it is not a marketing claim — it is a reproducible defect in the
-incumbent.
+Every public rate table — BERC's own notification included — states rates without stating which
+instrument they come from. A reader holding the 3 June table and a reader holding the 4 June table
+both believe they hold "the June 2026 tariff", and nothing on either page distinguishes them.
+Reproducing a March 2022 bill, or explaining why a bill changed, is impossible from that.
 
 **Three findings that shape the whole design:**
 
@@ -46,6 +56,8 @@ incumbent.
    exceed 50 units and none of your units get 4.63), not a band. One competitor asserts full
    telescopic pricing; another declines to say. Getting this wrong changes a 51-unit bill by
    roughly 13%. See §K1.
+   **RESOLVED 2026-09-05** — the categorical reading is correct, stated in footnote 3 of both the
+   Feb 2024 gazette and the June 2026 notification. `TARIFF_EVIDENCE_SPRINT_2026-09-05.md` §C.
 
 3. **The repository has no consumer tariff logic at all.** Not a partial one, not a stale one.
    There is nothing to refactor, which is the best possible starting position — and it means
@@ -72,7 +84,7 @@ What *does* exist is tariff-adjacent display data:
 | 1 | [lib/data/companies/berc.ts](lib/data/companies/berc.ts) | 11 rows of **bulk wholesale** tariff, 2010→Jun 2026 | **hardcoded · unverified** | No source, no URL, no document, no issuer. Jun 2026 = 8.39 is corroborated by the June 2026 order; Feb 2024 = **7.04** conflicts with the order's own stated prior value of **7.00**. This is the single best V1 migration candidate — small, real, and already wrong in a checkable way. |
 | 2 | [lib/data/macro/tariff.ts](lib/data/macro/tariff.ts) | Same 11 tariff values **re-typed**, plus a `cost` column | **duplicate · hardcoded · unverified** | Imports `bercBulkTariffHistory` and then restates every one of its values inline. Two copies of one series, and nothing keeps them equal. The `cost` column has no source at all. |
 | 3 | [lib/homepage-defaults.ts:5](lib/homepage-defaults.ts#L5) | `"New 8.95 Tk/kWh bulk tariff in effect"` | **dangerous · stale** | Contradicts 8.39 in both files above, and 8.39 is the one the June 2026 order supports. Ships in the homepage market-pulse string. **Fix independently of this project** — it is a wrong published figure, today. |
-| 4 | [lib/data/policy/policies.ts:689](lib/data/policy/policies.ts#L689) | `"Tk 7.00 → Tk 8.39/kWh; lifeline Tk 4.63 → Tk 5.32"`, `asOf: 'Jun 2026'` | **partially reusable · unverified source** | **The only retail tariff figure in the repo, and it is correct** — it matches the June 2026 order where the leading competitor does not. But it cites *Dhaka Tribune*, a newspaper, not the order. Right number, wrong provenance class. |
+| 4 | [lib/data/policy/policies.ts:689](lib/data/policy/policies.ts#L689) | `"Tk 7.00 → Tk 8.39/kWh; lifeline Tk 4.63 → Tk 5.32"`, `asOf: 'Jun 2026'` | **dangerous · stale** *(reclassified 2026-09-05)* | Originally graded "correct but wrongly cited". It is not correct. Both figures are the **3 June** values, and both were superseded on **4 June**: the lifeline increase to 5.32 was set aside and the bulk rates were re-fixed downward. The entry cites *Dhaka Tribune* — a newspaper reporting day one of a two-day sequence — which is precisely how the error entered. See `TARIFF_EVIDENCE_SPRINT_2026-09-05.md` §E. |
 | 5 | [lib/data/macro/economics.ts](lib/data/macro/economics.ts) | Exchange rate, inflation, spot LNG, coal, retail diesel/octane by year | **hardcoded · unverified · doctrine violation** | `spotLng: 0.0` and `importCoal: 0.0` for 2010–2016 assert a measured zero where the correct value is null (Bangladesh imported no LNG before 2018). This is exactly rule 1. **Do not reuse as a pattern.** |
 | 6 | [lib/data/macro/fuel-prices.ts](lib/data/macro/fuel-prices.ts) | Global vs domestic prices back to 1975; derived BDT conversions | **stale · unverified** | Same zero-for-absent shape (`bdCoal: 0.0`, `bdSolar: 0.0` for decades). The conversion arithmetic is inlined in a `.map()`. Out of scope, flagged. |
 | 7 | [lib/data/grid/live-ticker.server.ts](lib/data/grid/live-ticker.server.ts) | Reads 1, 5 into the commodities strip | **partially reusable** | Correctly structured — every item carries `source` and `asOf`, and `null` where unquoted. The consumer is right; its inputs are not. This is the **first place a real tariff version should plug in**, and it closes standing item 4 in `CLAUDE.md`. |
@@ -462,7 +474,14 @@ corrects a wrong figure the site prints today — before a single bill is calcul
 
 Ranked by how much wrongness each can cause.
 
-**K1 — Is the residential slab telescopic or categorical? `UNKNOWN`. Highest risk.**
+**K1 — RESOLVED 2026-09-05: categorical.** Footnote 3 of the June 2026 BERC notification and
+footnote 3 of the Feb 2024 gazette both say the lifeline benefit is unavailable to any other
+residential consumer. Two independent primary instruments, two years apart, identical wording.
+The engine implements `applicability: CATEGORICAL`. Full evidence in
+`TARIFF_EVIDENCE_SPRINT_2026-09-05.md` §C. The original risk statement is kept below unaltered,
+because how the question looked before it was answered is the reason the `UNKNOWN` state exists.
+
+**K1 (as originally written) — Is the residential slab telescopic or categorical? `UNKNOWN`. Highest risk.**
 The published table lists overlapping bands (0–50 at 4.63, 0–75 at 5.26), which only makes sense if
 the lifeline is all-or-nothing. One competitor asserts strict telescopic pricing; another declines
 to say. A 51-unit bill differs by ~13% between the readings, and it affects the poorest consumers —
