@@ -35,6 +35,23 @@ export interface CoverageItem {
   excerpt: string | null;
 }
 
+/**
+ * One item of external media coverage.
+ *
+ * A third strand, kept apart from both the archive and this newsroom's own
+ * reporting. `reportsOn` is the date the item is ABOUT rather than a publication
+ * date we could not always establish, and `dateBasis` says how that was decided
+ * — so a reader can check the placement rather than take it. Nothing here is
+ * ever plotted, summed, or set against an archive figure.
+ */
+export interface ExternalCoverageItem {
+  outlet: string;
+  headline: string;
+  url: string;
+  reportsOn: string | null;
+  dateBasis: string;
+}
+
 export interface NarrativeFigure {
   seriesId: EventStudySeriesId;
   label: string;
@@ -68,6 +85,8 @@ export interface NarrativeDay {
   inflection: boolean;
   /** ESB PowerLine articles published on this date, newest first. */
   coverage: CoverageItem[];
+  /** External media reporting on this date. */
+  external: ExternalCoverageItem[];
 }
 
 export interface NarrativePhase {
@@ -84,6 +103,8 @@ export interface EventNarrative {
   phases: NarrativePhase[];
   /** Coverage that falls in the window but on a day with no archive row. */
   orphanCoverage: CoverageItem[];
+  /** External items with no date established — shown outside the timeline. */
+  undatedExternal: ExternalCoverageItem[];
   totals: {
     /** Days in the window, and how many the headline publisher actually filed. */
     windowDays: number;
@@ -94,6 +115,8 @@ export interface EventNarrative {
     /** The worst single published day of the intensity series. */
     intensityPeak: { date: string; value: number } | null;
     coverageCount: number;
+    externalCount: number;
+    externalOutlets: string[];
   };
 }
 
@@ -208,6 +231,7 @@ export function buildNarrative(
   study: EventStudyResult,
   coverage: CoverageItem[],
   supportingIds: EventStudySeriesId[],
+  external: ExternalCoverageItem[] = [],
 ): EventNarrative {
   const headlineSeries = study.series[def.headlineSeries];
   const intensitySeries = study.series[def.intensitySeries];
@@ -216,6 +240,11 @@ export function buildNarrative(
   const coverageByDate = new Map<string, CoverageItem[]>();
   for (const c of coverage) {
     coverageByDate.set(c.date, [...(coverageByDate.get(c.date) ?? []), c]);
+  }
+  const externalByDate = new Map<string, ExternalCoverageItem[]>();
+  for (const e of external) {
+    if (!e.reportsOn) continue;
+    externalByDate.set(e.reportsOn, [...(externalByDate.get(e.reportsOn) ?? []), e]);
   }
 
   const days: NarrativeDay[] = dates.map((date) => {
@@ -236,6 +265,7 @@ export function buildNarrative(
       supporting: supportingIds.map((id) => figureOf(study.series[id], date, prevDate)),
       inflection,
       coverage: coverageByDate.get(date) ?? [],
+      external: externalByDate.get(date) ?? [],
     };
   });
 
@@ -253,6 +283,7 @@ export function buildNarrative(
     days,
     phases: detectPhases(headlineSeries, dates),
     orphanCoverage,
+    undatedExternal: external.filter((e) => !e.reportsOn),
     totals: {
       windowDays: dates.length,
       headlinePublished: headlineSeries.windowCoverage.publishedDays,
@@ -260,6 +291,8 @@ export function buildNarrative(
       intensityUnit: intensitySeries.unit,
       intensityPeak: peakPoint ? { date: peakPoint.date, value: peakPoint.value as number } : null,
       coverageCount: coverage.length,
+      externalCount: external.filter((e) => e.reportsOn).length,
+      externalOutlets: [...new Set(external.map((e) => e.outlet))].sort(),
     },
   };
 }

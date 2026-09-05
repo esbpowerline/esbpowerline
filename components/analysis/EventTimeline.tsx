@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import type {
   EventNarrative,
+  ExternalCoverageItem,
   NarrativeDay,
   NarrativeFigure,
 } from '@/lib/data/analysis/event-narrative';
@@ -153,37 +154,83 @@ function DayRow({ day, intensityMax }: { day: NarrativeDay; intensityMax: number
           <IntensityBar figure={day.intensity} max={intensityMax} />
         </div>
 
-        {/* right: what the newsroom published that day */}
-        <div className="md:border-l md:border-border/60 md:pl-4">
-          {day.coverage.length === 0 ? (
-            <p className="text-xs italic text-muted-foreground">
-              No ESB PowerLine coverage filed on this date.
+        {/* right: what was published that day, ours and everyone else's */}
+        <div className="md:border-l md:border-border/60 md:pl-5">
+          {day.coverage.length === 0 && day.external.length === 0 ? (
+            <p className="text-xs italic leading-5 text-muted-foreground">
+              No coverage filed on this date.
             </p>
           ) : (
-            <ul className="space-y-3">
-              {day.coverage.map((c) => (
-                <li key={c.slug}>
-                  <Link
-                    href={`/articles/${c.slug}`}
-                    className="text-sm font-semibold leading-snug text-foreground underline decoration-border underline-offset-2 hover:decoration-primary"
-                  >
-                    {c.title}
-                  </Link>
-                  {c.excerpt && (
-                    <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">
-                      {c.excerpt}
-                    </p>
-                  )}
-                  <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-                    ESB PowerLine · reporting
-                  </p>
-                </li>
-              ))}
-            </ul>
+            <div className="space-y-4">
+              {day.coverage.length > 0 && (
+                <ul className="space-y-3">
+                  {day.coverage.map((c) => (
+                    <li key={c.slug}>
+                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-primary">
+                        ESB PowerLine
+                      </p>
+                      <Link
+                        href={`/articles/${c.slug}`}
+                        className="text-[0.9375rem] font-semibold leading-snug text-foreground decoration-border underline-offset-4 hover:underline hover:decoration-primary"
+                      >
+                        {c.title}
+                      </Link>
+                      {/* Excerpts run to their natural end. They were clamped to
+                          two lines, which cut most of them mid-sentence for no
+                          gain — the column is wide enough to hold them and a
+                          half-sentence is worse than none. */}
+                      {c.excerpt && (
+                        <p className="mt-1 text-[13px] leading-6 text-muted-foreground">
+                          {c.excerpt}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {day.external.length > 0 && <ExternalList items={day.external} />}
+            </div>
           )}
         </div>
       </div>
     </li>
+  );
+}
+
+/**
+ * External reporting for a day.
+ *
+ * Visually subordinate to the archive column and to our own reporting, and
+ * labelled with the outlet first, because the outlet is the thing a reader
+ * needs in order to weigh it. `reportsOn` is the date the item is about — the
+ * evidence file records how each was established, and the methodology block
+ * says so — which is why the heading reads "reporting on this day" rather than
+ * claiming a publication date the search results did not always give.
+ */
+function ExternalList({ items }: { items: ExternalCoverageItem[] }) {
+  return (
+    <div className="rounded-xl border border-dashed border-border/70 bg-muted/20 p-3">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        Elsewhere · reporting on this day
+      </p>
+      <ul className="space-y-2">
+        {items.map((e) => (
+          <li key={e.url} className="leading-snug">
+            <a
+              href={e.url}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="text-[13px] font-medium text-foreground decoration-border underline-offset-4 hover:underline hover:decoration-primary"
+            >
+              {e.headline}
+            </a>
+            <span className="ml-1.5 whitespace-nowrap text-[11px] text-muted-foreground">
+              — {e.outlet}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

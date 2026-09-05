@@ -24,7 +24,7 @@ import EventStudyChart, {
 import HourlyShedPanel from '@/components/analysis/gas-crisis/HourlyShedPanel';
 import EventTimeline from '@/components/analysis/EventTimeline';
 import { GAS_CRISIS_2026 } from '@/lib/data/analysis/event-registry';
-import { loadEventCoverage } from '@/lib/data/analysis/event-coverage.server';
+import { loadEventCoverage, loadExternalCoverage } from '@/lib/data/analysis/event-coverage.server';
 import { buildNarrative } from '@/lib/data/analysis/event-narrative';
 
 /**
@@ -102,6 +102,19 @@ function docSpan(files: string[]): string {
   return `${files[0]} … ${files[files.length - 1]} (${files.length} documents)`;
 }
 
+/**
+ * How each series draws. Rates get an area, accumulated amounts get bars.
+ * `unserved` was a smoothed line, which read as a trend continuing between the
+ * days; it is an amount that happened on one day and a bar says so.
+ */
+const CARD_CHART_KIND: Record<string, Record<string, 'area' | 'bar' | 'line'>> = {
+  'gas-supply': { gasNational: 'line', gasRlng: 'area' },
+  'gas-to-power': { gasToPower: 'area' },
+  generation: { gasGen: 'area', hfoGen: 'line', coalGen: 'line' },
+  shortfall: { totalGen: 'line', demand: 'line', unserved: 'bar' },
+  cost: { dailyCost: 'area' },
+};
+
 /** Per-frame colour assignment — slots differ within each card, never across-checked. */
 const CARD_COLORS: Record<string, Record<string, EventChartColor>> = {
   'gas-supply': {
@@ -158,15 +171,30 @@ function DeltaTile({ series, digits = 0 }: { series: EventStudySeries; digits?: 
 
 export default async function GasCrisis2026Page() {
   const def = GAS_CRISIS_2026;
-  const [study, quotes, coverage] = await Promise.all([
+  const [study, quotes, coverage, external] = await Promise.all([
     loadGasCrisisStudy(),
     loadGasSupplyOutageQuotes(),
     loadEventCoverage(def),
+    loadExternalCoverage(def),
   ]);
-  const narrative = buildNarrative(def, study as EventStudyResult, coverage, [
-    'gasNational',
-    'gasGen',
-  ]);
+  const narrative = buildNarrative(
+    def,
+    study as EventStudyResult,
+    coverage,
+    ['gasNational', 'gasGen'],
+    external,
+  );
+  /**
+   * The chart markers are the timeline's own inflection days — the same 12%
+   * rule, so the rules on the charts and the rules in the story cannot drift
+   * apart. The incident day is emphasised; the rest are hairlines.
+   */
+  const chartMarkers = [
+    { date: def.incidentDate, label: 'the break', strong: true },
+    ...narrative.days
+      .filter((d) => d.inflection && d.date !== def.incidentDate)
+      .map((d) => ({ date: d.date, label: '', strong: false })),
+  ];
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
 
   const jsonLd = {
@@ -215,14 +243,18 @@ export default async function GasCrisis2026Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       {/* ── header ─────────────────────────────────────────────────────── */}
-      <header className="border-b border-border/40 pb-6 mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <header className="border-b border-border/40 pb-7 mb-9">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
           Analysis · event study
         </p>
-        <h1 className="mt-1 text-2xl md:text-3xl font-bold text-foreground">
+        {/* The measure is 68ch, not max-w-3xl. 3xl is a pixel width that
+            narrows the line as the type scale grows; a ch measure keeps the
+            line at a readable length whatever the font size, and on a 1280px
+            column it uses the width instead of stopping two-thirds across. */}
+        <h1 className="mt-2 text-[1.75rem] md:text-[2.125rem] font-bold leading-[1.15] tracking-[-0.015em] text-foreground">
           The R-LNG shortfall, July–August 2026
         </h1>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+        <p className="mt-4 max-w-[68ch] text-[0.9375rem] leading-7 text-muted-foreground">
           For three ordinary days the imported-gas line sat where it had sat all month: 966, 976,
           993 MMCFD against a printed capacity of 1,100. On the gas day starting{' '}
           <strong>21 July 2026</strong> Petrobangla printed it at <strong>621.6</strong>. It
@@ -232,14 +264,14 @@ export default async function GasCrisis2026Page() {
           published the same day, in separate columns because one is a measurement and the other
           is reporting.
         </p>
-        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+        <p className="mt-3 max-w-[68ch] text-[0.9375rem] leading-7 text-muted-foreground">
           <strong className="text-foreground">Petrobangla never names a cause.</strong> Its daily
           report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row and no terminal, vessel or
           fault. So this page does not assert one either: where the reporting names a cause, the
           reporting is quoted and linked, and it stands on its own sourcing, beside the figures
           rather than inside them.
         </p>
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5 text-muted-foreground">
           Study window {GAS_CRISIS_WINDOW.start} → {GAS_CRISIS_WINDOW.end} · baseline{' '}
           {GAS_CRISIS_BASELINE.start} → {GAS_CRISIS_BASELINE.end}
           {gasWindow ? <> · a &ldquo;gas day&rdquo; runs {gasWindow}</> : null} · an
@@ -249,7 +281,7 @@ export default async function GasCrisis2026Page() {
 
       {/* ── the headline deltas (all DERIVED, formula on each series) ───── */}
       <section aria-labelledby="deltas-h" className="mb-10">
-        <h2 id="deltas-h" className="text-lg font-bold text-foreground mb-1">
+        <h2 id="deltas-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground mb-1">
           The window against its baseline
         </h2>
         <p className="text-xs text-muted-foreground mb-4">
@@ -267,16 +299,18 @@ export default async function GasCrisis2026Page() {
 
       {/* ── the story, day by day ───────────────────────────────────────── */}
       <section aria-labelledby="timeline-h" className="mb-12">
-        <h2 id="timeline-h" className="text-lg font-bold text-foreground">
+        <h2 id="timeline-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
           Day by day
         </h2>
-        <p className="mt-1 mb-2 max-w-3xl text-xs leading-5 text-muted-foreground">
+        <p className="mt-1.5 mb-2 max-w-[74ch] text-[13px] leading-6 text-muted-foreground">
           {narrative.totals.windowDays} days, in order. The left column is the national record for
           that day and the change on the day before; the right column is what ESB PowerLine
-          published that day, linked. Days marked{' '}
+          published that day, plus what the wider press reported, linked. Days marked{' '}
           <span className="font-semibold text-primary">sharp move</span> are days the imported-gas
           line moved more than 12% against the previous published day — found in the data, not
-          chosen. {narrative.totals.coverageCount} articles are placed on their filing date.
+          chosen. {narrative.totals.coverageCount} of our articles are placed on their filing date, and{' '}
+          {narrative.totals.externalCount} external reports on the day they describe —{' '}
+          {narrative.totals.externalOutlets.join(', ')}.
         </p>
         {narrative.totals.intensityPeak && (
           <p className="mb-4 text-xs text-muted-foreground">
@@ -288,10 +322,37 @@ export default async function GasCrisis2026Page() {
         )}
         <EventTimeline narrative={narrative} />
         {narrative.orphanCoverage.length > 0 && (
-          <p className="mt-4 text-xs text-muted-foreground">
+          <p className="mt-4 text-[12px] leading-6 text-muted-foreground">
             {narrative.orphanCoverage.length} related article(s) fall outside the window shown and
             are not placed above.
           </p>
+        )}
+        {narrative.undatedExternal.length > 0 && (
+          <div className="mt-5 rounded-2xl border border-dashed border-border/70 bg-muted/15 p-4 sm:p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+              Also reported during the window · date not established
+            </p>
+            <p className="mt-1 max-w-[74ch] text-[12px] leading-6 text-muted-foreground">
+              These sit outside the day-by-day list on purpose. Placing a report on a day we could
+              not establish would put a date on the record that nothing supports — the same
+              standard the archive applies to its own figures.
+            </p>
+            <ul className="mt-3 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+              {narrative.undatedExternal.map((e) => (
+                <li key={e.url} className="text-[13px] leading-6">
+                  <a
+                    href={e.url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="font-medium text-foreground decoration-border underline-offset-4 hover:underline hover:decoration-primary"
+                  >
+                    {e.headline}
+                  </a>
+                  <span className="ml-1.5 text-[11px] text-muted-foreground">— {e.outlet}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </section>
 
@@ -303,10 +364,10 @@ export default async function GasCrisis2026Page() {
         return (
           <section key={card.key} aria-labelledby={`${card.key}-h`} className="mb-10">
             <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-              <h2 id={`${card.key}-h`} className="text-lg font-bold text-foreground">
+              <h2 id={`${card.key}-h`} className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
                 {card.question}
               </h2>
-              <p className="mt-1 mb-4 text-xs text-muted-foreground">
+              <p className="mt-1.5 mb-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[12px] leading-5 text-muted-foreground">
                 {cardSeries.map((cs, i) => (
                   <span key={cs.id}>
                     {i > 0 && ' · '}
@@ -320,6 +381,10 @@ export default async function GasCrisis2026Page() {
                   id: cs.id,
                   label: cs.label,
                   color: CARD_COLORS[card.key]?.[cs.id] ?? { kind: 'slot', index: 0 },
+                  // Rates read as areas, accumulated amounts as bars. Energy
+                  // unserved is an amount on a day, not a trend running through
+                  // it, and a smoothed line said the wrong thing about it.
+                  kind: CARD_CHART_KIND[card.key]?.[cs.id] ?? 'line',
                   points: isCost
                     ? // Axis scaling only — Taka to billion Taka. The quantity is
                       // unchanged; 2,387,798,687 is unreadable on a tick label.
@@ -330,6 +395,24 @@ export default async function GasCrisis2026Page() {
                     : cs.points,
                 }))}
                 unit={isCost ? 'bn Tk' : unit}
+                height={card.key === 'gas-supply' ? 340 : 300}
+                // The publisher's own printed capacity, on the card about the
+                // line that fell away from it.
+                capacity={
+                  card.key === 'gas-supply'
+                    ? {
+                        id: s.gasRlngCapacity.id,
+                        label: s.gasRlngCapacity.label,
+                        points: s.gasRlngCapacity.points,
+                      }
+                    : undefined
+                }
+                markers={card.key === 'cost' ? [] : chartMarkers}
+                shade={{
+                  from: GAS_CRISIS_WINDOW.start,
+                  to: def.incidentDate,
+                  label: 'before',
+                }}
                 baselineMean={
                   card.seriesIds.length === 1
                     ? isCost && cardSeries[0].baseline.baselineMean !== null
@@ -371,10 +454,10 @@ export default async function GasCrisis2026Page() {
       {/* ── the outage log, verbatim ────────────────────────────────────── */}
       <section aria-labelledby="outages-h" className="mb-10">
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-          <h2 id="outages-h" className="text-lg font-bold text-foreground">
+          <h2 id="outages-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
             What the outage log itself says
           </h2>
-          <p className="mt-1 mb-4 text-xs text-muted-foreground">
+          <p className="mt-1.5 mb-4 max-w-[74ch] text-[13px] leading-6 text-muted-foreground">
             Every generating-plant outage in the window whose printed reason names the gas supply,
             quoted verbatim from PGCB&rsquo;s daily log. This is a reading of the log, not a
             statistic — most &ldquo;gas&rdquo; entries in it are SF6 breaker gas at substations,
@@ -408,10 +491,10 @@ export default async function GasCrisis2026Page() {
       {/* ── hour by hour ────────────────────────────────────────────────── */}
       <section aria-labelledby="hourly-h" className="mb-10">
         <div className="rounded-2xl border border-border bg-card p-4 sm:p-6">
-          <h2 id="hourly-h" className="text-lg font-bold text-foreground">
+          <h2 id="hourly-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
             Hour by hour: load shedding
           </h2>
-          <p className="mt-1 mb-4 text-xs text-muted-foreground">
+          <p className="mt-1.5 mb-4 max-w-[74ch] text-[13px] leading-6 text-muted-foreground">
             NLDC&rsquo;s hourly record across the window — the series peaked at 3,757 MW on 10
             August. NLDC and PGCB&rsquo;s workbook print this quantity from different pages and
             they do not always agree; this panel is NLDC&rsquo;s account, the daily card above is
@@ -423,11 +506,11 @@ export default async function GasCrisis2026Page() {
 
       {/* ── methodology — what this page does not do ────────────────────── */}
       <section aria-labelledby="method-h" className="mb-8">
-        <div className="rounded-2xl border border-border bg-muted/20 p-4 sm:p-6 text-sm leading-6 text-muted-foreground">
-          <h2 id="method-h" className="text-lg font-bold text-foreground mb-3">
+        <div className="rounded-2xl border border-border bg-muted/20 p-5 sm:p-7 text-[13.5px] leading-7 text-muted-foreground">
+          <h2 id="method-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground mb-3">
             Methodology, and its limits
           </h2>
-          <ul className="list-disc pl-5 space-y-2">
+          <ul className="list-disc space-y-3 pl-5 max-w-[80ch]">
             <li>
               <strong className="text-foreground">The data column asserts no cause.</strong>{' '}
               Petrobangla&rsquo;s report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row

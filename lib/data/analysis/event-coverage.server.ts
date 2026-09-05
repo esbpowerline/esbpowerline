@@ -23,7 +23,7 @@ import 'server-only';
  */
 
 import prisma from '@/lib/prisma';
-import type { CoverageItem } from '@/lib/data/analysis/event-narrative';
+import type { CoverageItem, ExternalCoverageItem } from '@/lib/data/analysis/event-narrative';
 import type { EventStudyDefinition } from '@/lib/data/analysis/event-registry';
 import { eventWindow } from '@/lib/data/analysis/event-registry';
 
@@ -89,4 +89,42 @@ export async function loadEventCoverage(def: EventStudyDefinition): Promise<Cove
     });
   }
   return out;
+}
+
+/**
+ * External media coverage, from the committed evidence file.
+ *
+ * Stored as evidence rather than typed into a component for the same reason the
+ * tariff work keeps `evidence/tariff/manifest.json`: a hand-typed table inside a
+ * component is exactly the pattern this repo has had to delete twice
+ * (`globalVsDomesticRaw`, the yearly commodities rows). Here every item carries
+ * its outlet, its URL, the date it reports on and the basis for that date, so
+ * the placement can be checked rather than trusted.
+ *
+ * Absence is not fatal: a missing or malformed file costs the page its external
+ * column and nothing else.
+ */
+export async function loadExternalCoverage(
+  def: EventStudyDefinition,
+): Promise<ExternalCoverageItem[]> {
+  try {
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    const file = path.join(
+      process.cwd(),
+      'evidence',
+      'events',
+      def.slug,
+      'external-coverage.json',
+    );
+    const parsed = JSON.parse(await fs.readFile(file, 'utf8')) as {
+      items?: Array<Partial<ExternalCoverageItem>>;
+    };
+    return (parsed.items ?? [])
+      .filter((i): i is ExternalCoverageItem =>
+        Boolean(i.outlet && i.headline && i.url && typeof i.dateBasis === 'string'))
+      .map((i) => ({ ...i, reportsOn: i.reportsOn ?? null }));
+  } catch {
+    return [];
+  }
 }

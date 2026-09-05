@@ -53,6 +53,10 @@ export type PetrobanglaGasField = {
   company_code?: string;
   gas_mmcfd?: number | null;
   producing_wells?: number | null;
+  /** The field's printed capacity. Petrobangla prints it beside production on
+   *  every row, and for the R-LNG terminal it is the figure that makes the
+   *  shortfall legible: 1,100 MMCFD of capacity against 300 delivered. */
+  capacity_mmcfd?: number | null;
 };
 
 export type PetrobanglaDay = {
@@ -166,4 +170,21 @@ export function archiveGasTotal(doc: PetrobanglaDay): number | null {
 export function archiveGasLng(doc: PetrobanglaDay): number | null {
   const row = (doc.production?.subtotals ?? []).find((s) => s.company_code === 'RPGCL');
   return num(row?.gas_mmcfd);
+}
+
+/**
+ * The printed capacity of the R-LNG terminal row.
+ *
+ * Read from the field table rather than assumed, because it is a published
+ * figure like any other and the whole point of showing it is that Petrobangla
+ * kept printing 1,100 while the delivered line fell to 300 — the terminal's
+ * rated capacity did not change when it stopped delivering. A chart that draws
+ * the delivered line alone shows a fall; one that draws it against the capacity
+ * the source still claims shows the size of the hole.
+ */
+export function archiveGasLngCapacity(doc: PetrobanglaDay): number | null {
+  const row = (doc.production?.fields ?? []).find(
+    (f) => typeof f.field === 'string' && /R-?LNG/i.test(f.field),
+  );
+  return num(row?.capacity_mmcfd);
 }

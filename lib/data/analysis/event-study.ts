@@ -58,6 +58,8 @@ export interface EventStudyDayInput {
   /** Petrobangla, gas day 08:00 D → 08:00 D+1, MMCFD. */
   gasNationalMmcfd: number | null;
   gasRlngMmcfd: number | null;
+  /** The terminal's printed capacity — unchanged while delivery collapsed. */
+  gasRlngCapacityMmcfd: number | null;
   /** PGCB P1, energy day 00:00 → 24:00. */
   gasToPowerMmcfd: number | null;
   gasGenGwh: number | null;
@@ -77,6 +79,7 @@ export interface EventStudyDayInput {
 export type EventStudySeriesId =
   | 'gasNational'
   | 'gasRlng'
+  | 'gasRlngCapacity'
   | 'gasToPower'
   | 'gasGen'
   | 'hfoGen'
@@ -126,6 +129,17 @@ export const EVENT_STUDY_SERIES: Record<EventStudySeriesId, SeriesMeta> = {
     provenance: 'P',
     sourceNote: 'RPGCL (R-LNG) subtotal of the daily gas report',
     pick: (d) => d.gasRlngMmcfd,
+    windowFor: (date, f) => petrobanglaGasDay(date, { sourceFile: f }),
+  },
+  gasRlngCapacity: {
+    id: 'gasRlngCapacity',
+    label: 'R-LNG terminal capacity',
+    publisher: 'Petrobangla',
+    unit: 'MMCFD',
+    alignment: 'interval-mean',
+    provenance: 'P',
+    sourceNote: 'the capacity column Petrobangla prints beside the R-LNG Terminal row',
+    pick: (d) => d.gasRlngCapacityMmcfd,
     windowFor: (date, f) => petrobanglaGasDay(date, { sourceFile: f }),
   },
   gasToPower: {

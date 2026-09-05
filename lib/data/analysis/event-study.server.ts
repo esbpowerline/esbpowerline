@@ -25,6 +25,7 @@ import 'server-only';
 import { loadDailyReportFromDisk } from '@/lib/data/grid/daily-loader.server';
 import {
   archiveGasLng,
+  archiveGasLngCapacity,
   archiveGasTotal,
   loadPetrobanglaForEnergyDay,
 } from '@/lib/data/grid/petrobangla-day.server';
@@ -86,6 +87,7 @@ async function loadDayInput(date: string): Promise<EventStudyDayInput> {
     date,
     gasNationalMmcfd: null,
     gasRlngMmcfd: null,
+    gasRlngCapacityMmcfd: null,
     gasToPowerMmcfd: null,
     gasGenGwh: null,
     hfoGenGwh: null,
@@ -121,6 +123,7 @@ async function loadDayInput(date: string): Promise<EventStudyDayInput> {
   if (gas) {
     input.gasNationalMmcfd = archiveGasTotal(gas.doc);
     input.gasRlngMmcfd = archiveGasLng(gas.doc);
+    input.gasRlngCapacityMmcfd = archiveGasLngCapacity(gas.doc);
     input.petrobanglaSourceFile =
       (gas.doc as { meta?: { source_filename?: string } }).meta?.source_filename ?? null;
   }
