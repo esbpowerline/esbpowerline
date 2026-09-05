@@ -6,6 +6,7 @@ export type MessageKey =
   | 'nav.login'
   | 'nav.latest'
   | 'nav.gridExplorer'
+  | 'nav.analysis'
   | 'nav.magazine'
   | 'nav.search'
   | 'nav.latestNews'
@@ -179,6 +180,7 @@ const EN: Record<MessageKey, string> = {
   'nav.login': 'Login',
   'nav.latest': 'Latest',
   'nav.gridExplorer': 'Grid Explorer',
+  'nav.analysis': 'Analysis',
   'nav.magazine': 'Magazine',
   'nav.search': 'Search',
   'nav.latestNews': 'Latest News',
@@ -368,6 +370,7 @@ const BN: Record<MessageKey, string> = {
   'nav.login': 'প্রবেশ',
   'nav.latest': 'সর্বশেষ',
   'nav.gridExplorer': 'গ্রিড তথ্য',
+  'nav.analysis': 'বিশ্লেষণ',
   'nav.magazine': 'ম্যাগাজিন',
   'nav.search': 'খুঁজুন',
   'nav.latestNews': 'সর্বশেষ সংবাদ',

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ThemeBanner } from '@/components/shared/ThemeBanner';
 
-import { Search, Menu, X, Newspaper, BookOpen, BarChart3, Home } from 'lucide-react';
+import { Search, Menu, X, Newspaper, BookOpen, BarChart3, Home, TrendingUp } from 'lucide-react';
 import { useMemo, useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { PublicHrefProvider, usePublicHref } from '@/lib/public-href-client';
@@ -140,7 +140,7 @@ export function PublicNavbar({
   }, [pathname]);
 
   useEffect(() => {
-    const targetPaths = ['/grid-explorer', '/articles', '/magazine', '/about', '/contact'];
+    const targetPaths = ['/grid-explorer', '/analysis', '/articles', '/magazine', '/about', '/contact'];
     const isTarget = targetPaths.some(p => pathname.startsWith(p));
     
     if (isTarget && prevPathname.current !== pathname) {
@@ -306,6 +306,22 @@ export function PublicNavbar({
                   >
                     <BarChart3 className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
                     <span className="hidden lg:inline">{t('nav.gridExplorer')}</span>
+                  </PublicNavLink>
+
+                  {/* The Analysis section: derived studies over the archive
+                      (event studies first), visibly separate from the archive
+                      explorer so its derived framing never leans on the
+                      explorer's published-figures-only authority. */}
+                  <PublicNavLink
+                    href="/analysis/gas-crisis-2026"
+                    className={`public-nav-bar__hub-link public-nav-bar__hub-link--analysis${
+                      isHubSectionActive(pathname, '/analysis') ? ' public-nav-bar__hub-link--active' : ''
+                    }`}
+                    aria-label="Analysis"
+                    aria-current={isHubSectionActive(pathname, '/analysis') ? 'page' : undefined}
+                  >
+                    <TrendingUp className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
+                    <span className="hidden lg:inline">{t('nav.analysis')}</span>
                   </PublicNavLink>
 
                   <PublicNavLink
