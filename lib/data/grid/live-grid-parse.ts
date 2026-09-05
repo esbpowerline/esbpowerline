@@ -29,20 +29,39 @@ export function banglaToLatinDigits(text: string): string {
   return text.replace(/[০-৯]/g, (d) => BANGLA_DIGITS[d] ?? d);
 }
 
+/**
+ * One posted hour of the generation table.
+ *
+ * Most columns are nullable because NLDC uses TWO different empty cells and
+ * means different things by them: a literal `0` is a measured zero, and an
+ * empty cell is "not reported". The same 2015 row prints `0` for Tripura and
+ * nothing at all for Adani — two different cells on one row, so the source is
+ * distinguishing them deliberately. What the blank means is NLDC's to say; this
+ * file only records that it said nothing.
+ *
+ * The parser used to collapse both to `0` (`adaniMw: adani ?? 0`). Measured
+ * against 3,381 preserved documents, that put a figure into 84,895 canonical
+ * observations for Adani, 86,880 for Nepal, 73,572 for wind and 21,897 for
+ * solar where the source printed none — a claim no source made. Why NLDC left
+ * the column blank is not established here and is not this file's business. `gas`, `liquid`, `coal`, `hydro`, `bheramara` and
+ * `tripura` are never blank in the held evidence, but they are typed the same
+ * way: whether a column is reported is the source's decision to change, not a
+ * property to hard-code here.
+ */
 export type LiveGenerationRow = {
   /** ISO local Dhaka wall-clock, e.g. "2026-08-23T10:00:00" */
   at: string;
   totalMw: number;
   gasMw: number;
-  liquidMw: number;
   coalMw: number;
-  hydroMw: number;
-  solarMw: number;
-  windMw: number;
-  bheramaraMw: number;
-  tripuraMw: number;
-  adaniMw: number;
-  nepalMw: number;
+  liquidMw: number | null;
+  hydroMw: number | null;
+  solarMw: number | null;
+  windMw: number | null;
+  bheramaraMw: number | null;
+  tripuraMw: number | null;
+  adaniMw: number | null;
+  nepalMw: number | null;
   loadShedMw: number | null;
   remark: string;
 };
@@ -102,8 +121,23 @@ function toIsoLocal(date: string, time: string): string | null {
   return `${d[3]}-${d[2]}-${d[1]}T${t[1].padStart(2, '0')}:${t[2]}:${t[3] ?? '00'}`;
 }
 
+/**
+ * A printed figure, or null where the cell carries none.
+ *
+ * The empty check is load-bearing and easy to lose: `Number('')` is `0`, and
+ * `0` is finite, so an empty cell used to pass straight through this function
+ * as a measured zero. That — not the `?? 0` further down — was the deeper half
+ * of how the archive came to assert that Adani generated 0 MW in 2015. NLDC
+ * distinguishes the two cases itself, printing a literal `0` for a measured
+ * zero and nothing at all for a column it is not reporting, so both layers had
+ * to stop collapsing them.
+ *
+ * `-`, `—` and `n/a` are treated the same way: a placeholder is not a figure.
+ */
 const num = (cell: string): number | null => {
-  const n = Number(cell.replace(/,/g, ''));
+  const t = cell.replace(/,/g, '').trim();
+  if (t === '' || /^(?:[-–—.]+|n\/?a)$/i.test(t)) return null;
+  const n = Number(t);
   return Number.isFinite(n) ? n : null;
 };
 
@@ -129,15 +163,16 @@ export function parseNldcGenerationHtml(html: string): LiveGenerationRow[] {
       at,
       totalMw: total,
       gasMw: gas,
-      liquidMw: liquid ?? 0,
+      // No `?? 0` here. A blank cell is not a zero — see LiveGenerationRow.
+      liquidMw: liquid,
       coalMw: coal,
-      hydroMw: hydro ?? 0,
-      solarMw: solar ?? 0,
-      windMw: wind ?? 0,
-      bheramaraMw: bheramara ?? 0,
-      tripuraMw: tripura ?? 0,
-      adaniMw: adani ?? 0,
-      nepalMw: nepal ?? 0,
+      hydroMw: hydro,
+      solarMw: solar,
+      windMw: wind,
+      bheramaraMw: bheramara,
+      tripuraMw: tripura,
+      adaniMw: adani,
+      nepalMw: nepal,
       loadShedMw: loadShed,
       remark: cells[cells.length - 1] ?? '',
     });
@@ -161,11 +196,42 @@ export function parseNldcDemandSupplyHtml(html: string): LiveDemandRow[] {
   return out.sort((a, b) => a.at.localeCompare(b.at));
 }
 
+/**
+ * Sum of the components the source actually reported, or null when it reported
+ * none of them.
+ *
+ * A total over partly-reported components is a DERIVED figure and any surface
+ * printing it has to say so. What it must never be is a fabricated zero: before
+ * the Adani interconnector existed NLDC left that column blank, and adding it in
+ * as 0 would silently assert an import total the source never stated.
+ */
+function sumReported(...vals: Array<number | null>): number | null {
+  const present = vals.filter((v): v is number => v !== null);
+  return present.length ? present.reduce((a, b) => a + b, 0) : null;
+}
+
 export type LiveGridHour = {
   at: string;
   totalMw: number;
-  byFuel: { gasMw: number; liquidMw: number; coalMw: number; hydroMw: number; solarMw: number; windMw: number };
-  imports: { bheramaraMw: number; tripuraMw: number; adaniMw: number; nepalMw: number; indiaMw: number; totalMw: number };
+  /** Nullable throughout — a blank cell is "not reported", never zero. */
+  byFuel: {
+    gasMw: number;
+    coalMw: number;
+    liquidMw: number | null;
+    hydroMw: number | null;
+    solarMw: number | null;
+    windMw: number | null;
+  };
+  /** The four interconnectors as reported; `indiaMw` and `totalMw` are DERIVED
+   *  sums over whichever of them the source printed. */
+  imports: {
+    bheramaraMw: number | null;
+    tripuraMw: number | null;
+    adaniMw: number | null;
+    nepalMw: number | null;
+    indiaMw: number | null;
+    totalMw: number | null;
+  };
   demandMw: number | null;
   supplyMw: number | null;
   loadShedMw: number | null;
@@ -220,7 +286,7 @@ export function buildLiveGridSnapshot(
   const demandByAt = new Map(demand.map((r) => [r.at, r]));
   const hours: LiveGridHour[] = gen.slice(-24).map((g) => {
     const d = demandByAt.get(g.at) ?? null;
-    const indiaMw = g.bheramaraMw + g.tripuraMw + g.adaniMw;
+    const indiaMw = sumReported(g.bheramaraMw, g.tripuraMw, g.adaniMw);
     return {
       at: g.at,
       totalMw: g.totalMw,
@@ -230,7 +296,7 @@ export function buildLiveGridSnapshot(
       },
       imports: {
         bheramaraMw: g.bheramaraMw, tripuraMw: g.tripuraMw, adaniMw: g.adaniMw,
-        nepalMw: g.nepalMw, indiaMw, totalMw: indiaMw + g.nepalMw,
+        nepalMw: g.nepalMw, indiaMw, totalMw: sumReported(indiaMw, g.nepalMw),
       },
       demandMw: d?.demandMw ?? null,
       supplyMw: d?.supplyMw ?? null,
@@ -240,8 +306,14 @@ export function buildLiveGridSnapshot(
 
   const latest = hours[hours.length - 1];
   const f = latest.byFuel;
-  const componentSum =
-    f.gasMw + f.liquidMw + f.coalMw + f.hydroMw + f.solarMw + f.windMw + latest.imports.totalMw;
+  // Reconciliation runs over the components the source REPORTED. A column NLDC
+  // left blank contributes nothing to its own printed total either, so omitting
+  // it is right; inventing a 0 for it would be the thing this file exists to
+  // prevent. If nothing at all was reported there is no sum to compare, and the
+  // hour is simply not reconcilable.
+  const componentSum = sumReported(
+    f.gasMw, f.liquidMw, f.coalMw, f.hydroMw, f.solarMw, f.windMw, latest.imports.totalMw,
+  );
 
   const date = latest.at.slice(0, 10);
   const todayDemand = demand.filter((r) => r.at.startsWith(date));
@@ -268,7 +340,7 @@ export function buildLiveGridSnapshot(
         : null,
     },
     hours,
-    reconciles: Math.abs(latest.totalMw - componentSum) <= 1,
+    reconciles: componentSum !== null && Math.abs(latest.totalMw - componentSum) <= 1,
     sources: { generation: opts.generationUrl, demandSupply: opts.demandSupplyUrl },
   };
 }

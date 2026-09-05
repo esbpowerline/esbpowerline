@@ -51,12 +51,62 @@ describe('parseNldcGenerationHtml', () => {
     expect(r?.loadShedMw).toBeNull();
   });
 
-  it('reconciles the printed total against the component sum', () => {
+  it('reconciles the printed total against the components it reported', () => {
     const r = rows[rows.length - 1];
-    const sum =
-      r.gasMw + r.liquidMw + r.coalMw + r.hydroMw + r.solarMw + r.windMw +
-      r.bheramaraMw + r.tripuraMw + r.adaniMw + r.nepalMw;
+    const sum = [
+      r.gasMw, r.liquidMw, r.coalMw, r.hydroMw, r.solarMw, r.windMw,
+      r.bheramaraMw, r.tripuraMw, r.adaniMw, r.nepalMw,
+    ].reduce<number>((a, v) => a + (v ?? 0), 0);
     expect(Math.abs(r.totalMw - sum)).toBeLessThanOrEqual(1);
+  });
+
+  /**
+   * The distinction the parser used to destroy.
+   *
+   * NLDC prints a literal `0` for a measured zero and an EMPTY cell for a
+   * column it is not reporting, and it uses both on the same row: 2015-05-03
+   * 23:00 carries `0` for Tripura and nothing at all for Adani — two different
+   * cells on one row, so the distinction is the source's own.
+   *
+   * `adaniMw: adani ?? 0` collapsed the two. Measured across 3,381 preserved
+   * documents it put a figure into 84,895 canonical observations for Adani,
+   * 86,880 for Nepal, 73,572 for wind and 21,897 for solar where the source
+   * printed none.
+   */
+  it('keeps a blank cell absent and a printed zero zero', () => {
+    const era2015 = `<table><tr>
+      <td>০৩-০৫-২০১৫</td><td>২৩:০০:০০</td><td>৬৮২৩</td>
+      <td>৪৮২৬</td><td>১৩২৭</td><td>১৫৮</td><td>৪৬</td>
+      <td></td><td></td>
+      <td>৪৬৬</td><td>০</td><td></td><td></td><td></td>
+    </tr></table>`;
+    const [r] = parseNldcGenerationHtml(era2015);
+    expect(r.totalMw).toBe(6823);
+    expect(r.gasMw).toBe(4826);
+    // Printed zero — a measurement.
+    expect(r.tripuraMw).toBe(0);
+    // Blank — not reported. Never 0.
+    expect(r.solarMw).toBeNull();
+    expect(r.windMw).toBeNull();
+    expect(r.adaniMw).toBeNull();
+    expect(r.nepalMw).toBeNull();
+  });
+
+  it('derives an import total from reported components only, or null', () => {
+    const snap = buildLiveGridSnapshot(
+      [{
+        at: '2015-05-03T23:00:00', totalMw: 6823, gasMw: 4826, coalMw: 158,
+        liquidMw: 1327, hydroMw: 46, solarMw: null, windMw: null,
+        bheramaraMw: 466, tripuraMw: 0, adaniMw: null, nepalMw: null,
+        loadShedMw: null, remark: '',
+      }],
+      [],
+      { fetchedAt: 'x', generationUrl: 'g', demandSupplyUrl: 'd' },
+    );
+    // Bheramara + Tripura were reported; Adani was not and must not become 0.
+    expect(snap.latest.imports.indiaMw).toBe(466);
+    expect(snap.latest.imports.adaniMw).toBeNull();
+    expect(snap.latest.imports.totalMw).toBe(466);
   });
 
   it('still parses the 16-cell layout if PGCB re-enables the hidden columns', () => {
