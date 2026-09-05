@@ -341,12 +341,25 @@ ${'='.repeat(64)}`);
     }
     const min = agg._min.observedAt!;
     const max = agg._max.observedAt!;
-    const spanHours = Math.round((max.getTime() - min.getTime()) / 3_600_000) + 1;
+    // Coverage is measured in CALENDAR DAYS, not hours. NLDC is not strictly
+    // hourly: it posts an extra reading at :30 almost exactly once per day
+    // (365 of them in every full year), which is the evening-peak stamp. An
+    // hours-in-span denominator therefore undercounts the expected slots and
+    // can report a negative gap — it did, at -3.5%, before this was corrected.
+    const spanDays = Math.floor((max.getTime() - min.getTime()) / 86_400_000) + 1;
+    const days = await prisma.$queryRawUnsafe<Array<{ d: bigint; off: bigint }>>(
+      `SELECT COUNT(DISTINCT DATE("observedAt"))::bigint AS d,
+              COUNT(*) FILTER (WHERE EXTRACT(MINUTE FROM "observedAt") <> 0)::bigint AS off
+       FROM "GridHourlyObservation" WHERE "series" = '${series}'`,
+    );
+    const daysCovered = Number(days[0]?.d ?? 0);
+    const offHour = Number(days[0]?.off ?? 0);
     console.log(`  earliest observation     ${min.toISOString()}`);
     console.log(`  latest observation       ${max.toISOString()}`);
-    console.log(`  unique hourly rows       ${n.toLocaleString()}`);
-    console.log(`  hours in span            ${spanHours.toLocaleString()}`);
-    console.log(`  hours absent in span     ${(spanHours - n).toLocaleString()} (${(((spanHours - n) / spanHours) * 100).toFixed(1)}%)`);
+    console.log(`  unique observations      ${n.toLocaleString()}`);
+    console.log(`  calendar days covered    ${daysCovered.toLocaleString()} of ${spanDays.toLocaleString()} in span`);
+    console.log(`  days absent              ${(spanDays - daysCovered).toLocaleString()} (${(((spanDays - daysCovered) / spanDays) * 100).toFixed(1)}%)`);
+    console.log(`  off-hour (:30) readings  ${offHour.toLocaleString()} — NLDC's evening-peak stamp, ~1/day`);
 
     // FIELD-LEVEL coverage: a row existing does not mean the source printed
     // every figure on it. This is the number that matters — a series can be

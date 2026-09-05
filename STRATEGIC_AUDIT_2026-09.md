@@ -600,3 +600,774 @@ Four real defects found, fixed, tested and pushed:
 4. **Three Petrobangla aggregates ungated** — served cross-origin with no Referer while siblings 403'd.
 
 Baselines: `verify:data` **0 ERROR**; 439 tests passing; lint 0 errors; `tsc` clean.
+
+---
+---
+
+# PART II — PRESERVATION (2026-09-05)
+
+Written after building and running the NLDC hourly persistence layer, probing the three
+Bangladesh-only endpoints, and re-measuring the OpenStreetMap claim. Sections here supersede
+Part I wherever they disagree; every disagreement is called out in §Y.
+
+---
+
+## Q. THE BACKFILL — WHAT WAS RECOVERED
+
+Run 2026-09-05 from a Bangladeshi connection. Both NLDC pages walked to exhaustion.
+
+### Generation by fuel + interconnector
+
+| | |
+|---|---|
+| earliest observation | **2015-04-17T12:30:00Z** |
+| latest observation | 2026-09-04T17:00:00Z |
+| **unique observations** | **103,331** |
+| calendar days covered | **4,139 of 4,159 in span — 99.5%** |
+| days absent | 20 (0.5%) |
+| off-hour (:30) readings | 4,619 |
+
+### Demand / supply / load-shed
+
+| | |
+|---|---|
+| earliest observation | **2026-04-22T19:00:00Z** |
+| latest observation | 2026-09-04T17:00:00Z |
+| **unique observations** | **3,371** |
+| calendar days covered | 136 of 136 in span — **100%** |
+| off-hour (:30) readings | 135 |
+
+### Field-level coverage
+
+Row presence is not field presence. Measured per column, per series:
+
+| series | field | non-null | of rows |
+|---|---|---|---|
+| generation | totalMw, gasMw, liquidMw, coalMw, hydroMw, solarMw, windMw | 103,331 | **100.0%** |
+| generation | bheramaraMw, tripuraMw, adaniMw, nepalMw | 103,331 | **100.0%** |
+| generation | **loadShedMw** | **0** | **0.0% — never printed** |
+| demand | **demandMw** | 3,371 | **100.0%** |
+| demand | **supplyMw** | 3,371 | **100.0%** |
+| demand | **loadShedMw** | 3,371 | **100.0%** |
+
+`loadShedMw` on the generation series is **0.0% and that is correct** — NLDC ships that column
+commented out in the current layout. It is stored `null`, never `0`, which is the distinction the
+wide table exists to preserve. Load shedding is carried entirely by the demand series, which is the
+one with a 145-day retention window.
+
+### Largest missing intervals
+
+| series | gap | hours |
+|---|---|---|
+| generation | 2017-01-18 05:00 .. 2017-02-08 19:00 | **517** |
+| generation | 2017-12-15 14:00 .. 2017-12-16 17:00 | 26 |
+| generation | 2015-04-25 15:00 .. 2015-04-26 16:00 | 24 |
+| generation | 2015-04-17 18:00 .. 2015-04-18 18:00 | 23 |
+| demand | three gaps, 2026-05-11 / 08-20 / 09-02 | **1 each** |
+
+The 517-hour gap in early 2017 is a three-week hole in NLDC's own record, not a fetch failure — the
+pages either side parsed cleanly. It is recorded as absent, not interpolated.
+
+### Evidence stored
+
+**3,489 source documents · 231.0 MB as served → 26.3 MB gzipped (11%).**
+
+Every page that produced a row is retained whole, with its SHA-256 and the URL it came from, so any
+figure here can be re-derived years from now without refetching a page PGCB may no longer serve.
+
+---
+
+## R. SOURCE-QUALITY ANOMALIES FOUND DURING THE BACKFILL
+
+Four, all counted rather than swallowed, and none repaired.
+
+### 1. Repeated hours within a single page
+
+NLDC prints the same hour twice inside one page. Postgres refuses a multi-row upsert that touches
+the same conflict target twice (`ON CONFLICT DO UPDATE command cannot affect row a second time`),
+which is how this surfaced — at page 275 of the generation walk.
+
+**Canonicalisation rule, deterministic and stated:** collapse to the **last occurrence** in page
+order, and increment a counter reported at the end of the run. Last-wins because the parsers return
+rows sorted by timestamp, so the later row is the later-printed value; where the two are identical
+(the common case) the choice is immaterial. The page holding both is stored whole, so the discarded
+duplicate remains recoverable.
+
+### 2. Impossible years
+
+Seven rows carried years **0008, 0021, 0024, 0050, 0080, 0090, 0093** — 7 in ~103,000 (0.007%).
+They parse cleanly because the cell genuinely holds four digits; they are simply not years.
+
+**Rule:** a row is canonical only if its instant falls within `[2010-01-01, now + 2 days]`. Anything
+outside is **excluded and counted — never repaired, and nothing guessed about the intended year**.
+The seven were removed by `scripts/prune-implausible-hours.ts`, which reports each one with the id
+of the source document retained for it.
+
+### 3. NLDC is not strictly hourly
+
+**4,619 generation rows and 135 demand rows fall on `:30`**, and the distribution is unmistakable:
+365 per year in every full year (2019: 359, 2020: 365, 2021: 364, 2022: 364, 2023: 365, 2024: 365,
+2025: 365). That is **one extra reading per day** — the evening-peak stamp, posted off the hour.
+
+This initially produced a **negative** gap figure (−3,533 hours, −3.5%) because the coverage metric
+assumed a strictly hourly denominator. The metric now measures **calendar days**, and the off-hour
+count is reported explicitly rather than hidden. No data was wrong; the *measurement* was.
+
+### 4. A three-week hole in NLDC's own record
+
+2017-01-18 → 2017-02-08, 517 consecutive hours absent, with clean pages either side. Recorded as
+absent. Not interpolated, not carried forward.
+
+---
+
+---
+
+---
+
+## S. DATA ARCHITECTURE: EVIDENCE → CANONICAL → DERIVED
+
+| layer | means | models today |
+|---|---|---|
+| **EVIDENCE** | bytes as the publisher served them, immutable, never edited | `SourceDocument` (+`rawGzip`, `contentSha256`, `fetchedAt`, `sourceUrl`) · the PGCB workbook store on the Pi · gas PDFs |
+| **CANONICAL** | what the source *said*, normalised, one row per fact, no interpretation | `GridHourlyObservation` · `Observation` · `public/data/**` day files · `DataRelease` payloads |
+| **DERIVED** | anything ESB computed | `avgProductionCost` · `unitCost` · reserve model · forecast comparison · archive-fallback |
+
+### Boundary violations found
+
+**1. `public/data/**` straddles CANONICAL and DERIVED, and the schema does not say which is which.**
+A day file carries both what PGCB printed (`totalDailyCost`) and what ESB computed
+(`avgProductionCost` = cost ÷ generation). Nothing in the JSON marks the difference; the
+distinction lives only in a TypeScript comment and a UI badge. That is precisely how
+`avgProductionCost` came to be rendered `P` for months (fixed 2026-09-04) — the fact that it was
+derived was never stored anywhere a renderer could read.
+
+**2. `Observation.basis` is the right mechanism and is unused.** 327/327 rows say `REPORTED`.
+The column that would have prevented violation 1 exists and nobody writes `DERIVED` to it.
+
+**3. DERIVED values are written back into CANONICAL files.** `backfill_daily_extremes`,
+`backfill_border_imports` and the forecast anchoring all write computed figures into the same
+day JSON as reported ones. Not wrong in itself — the archive is the delivery format — but it
+means **the day file cannot answer "did PGCB say this?"** without consulting code.
+
+**4. EVIDENCE was absent for the live layer entirely** until today. That is what this work fixed.
+
+**The rule going forward:** a value may move EVIDENCE → CANONICAL → DERIVED and never backwards.
+Nothing in CANONICAL may be computed from another CANONICAL row without being marked `DERIVED`.
+`GridHourlyObservation.basis` defaults to `REPORTED` and every row the ingester writes is
+genuinely reported — the first table in the platform where that is true by construction.
+
+---
+
+## T. `GridHourlyObservation` — WHERE THE WIDE TABLE STOPS
+
+The wide shape is justified for one reason, and it is not performance: `Observation.value` is
+`Decimal NOT NULL`, so in the tall model absence can only be a missing row — which makes "NLDC
+printed a blank cell" and "we never fetched this hour" the same fact. Nullable columns on a
+present row separate them. That is charter rule 1, and it is the whole argument.
+
+**A metric belongs in this table only if all five hold:**
+
+1. It is published on **the same row, at the same instant**, by one of the two NLDC pages.
+2. It is **dense** — present for essentially every hour, not occasional.
+3. Its absence is **meaningful** (a blank cell is a fact about the source).
+4. The column set is **closed and small** — it changes only when PGCB changes the page layout.
+5. It is **REPORTED**, never computed.
+
+**The stop rule.** The moment any of these is false — a metric present for some hours only, a
+per-plant or per-zone breakdown, a third publisher's series, or anything ESB calculates — it goes
+to the generic time-series model (`Observation`, extended to allow a null value with an explicit
+absence reason), **not** a new column here.
+
+Concretely: **this table must never exceed the figure columns the two NLDC pages actually print.**
+If PGCB re-enables the generation page's commented-out deficit and load-shed columns, that is a
+legitimate addition. If someone proposes per-plant hourly output, per-zone hourly demand, weather,
+frequency, or a computed reserve margin — those are `Observation` rows or their own table. A
+hundred-column table is not prevented by good intentions; it is prevented by this paragraph and by
+the fact that adding a column requires a migration someone must justify in review.
+
+---
+
+## U. `rawGzip` IN POSTGRES — WHEN IT STOPS BEING RIGHT
+
+**Measured, not estimated:** 98.2 MB as served → **11.3 MB stored gzipped (12%)**. HTML compresses
+extremely well.
+
+**Why Postgres is right today.** The evidence is captured by the nightly `pg_dump` that already
+runs on the Pi; it is transactionally consistent with the rows derived from it; there is no second
+system to authenticate against or keep in sync; and a `SourceDocument` row is useless without its
+bytes. At ~11 MB the entire NLDC back-catalogue costs less than a single day of the gas archive.
+
+**The crossover.** Object storage wins when any one of these becomes true:
+
+| trigger | threshold | why it matters |
+|---|---|---|
+| total evidence size | **> ~2 GB** | `pg_dump` is kept 14 deep; 2 GB becomes 28 GB on a card with ~10 GB free |
+| single payload size | **> ~5 MB** | PDFs and workbooks, not HTML — TOAST overhead and dump duration |
+| read pattern | evidence served to users | Postgres egress is the expensive kind; a CDN in front of object storage is not |
+| write rate | > ~50 MB/day sustained | the Pi's nightly dump window starts to matter |
+
+**Projection.** The ongoing poll adds two pages per tick, ~140 KB served → ~17 KB stored. At the
+watcher's cadence that is roughly **6–12 MB/year**. The one-off backfill is the bulk of the total.
+Postgres therefore remains correct for this source for **years**, and the trigger that fires first
+will not be NLDC — it will be the day ESB stores gas PDFs or PGCB workbooks as evidence, each
+100×–1000× larger per document.
+
+**Recommendation: do not refactor now.** Add the size check to the nightly job so the crossover
+announces itself instead of being discovered when a `pg_dump` fails.
+
+---
+
+## V. THE THREE BANGLADESH PROBES — RESULTS
+
+Run from the Pi's Bangladeshi connection. Two negative answers and one genuine correction.
+
+### GeoDASH — dead, not blocked
+
+```
+getent hosts geodash.gov.bd  ->  NO DNS RECORD
+https/http, apex and www     ->  all fail to connect, from Bangladesh
+```
+
+The domain **does not resolve**. Part I recorded a timeout from abroad and flagged a possible
+geo-block worth retrying locally; it is not a geo-block. GeoDASH **cannot be an authoritative
+geometry source for any ESB asset, because it no longer exists.** The `geonode:power_line` layer
+referenced in secondary sources is unreachable. Treat every published description of GeoDASH as
+historical. Question closed.
+
+### PGCB procurement — forbidden, and empty
+
+| endpoint | from Bangladesh |
+|---|---|
+| `erp.pgcb.gov.bd/w/tenders/public` | **403** |
+| `erp.powergrid.gov.bd/w/tenders/public` | **500** |
+| `pgcb.gov.bd/site/view/tenders` → `/pages/tenders/` | **200** |
+
+The ERP tender endpoint is genuinely forbidden, not geo-fenced. The public portal works and
+renders a proper table (নং · Title · Publish Date · শিরোনাম · দরপত্র নং · দরপত্রের ধরণ) with
+**zero rows**: *"কোনো তথ্য পাওয়া যায়নি।"* PGCB is publishing no tenders on its own portal today.
+
+### e-GP — accessible, and NOT ingestible
+
+The one that changed with location. From Bangladesh the site serves content where it returned
+nothing from abroad, and the full public search suite loads: `AllTenders.jsp`,
+`StdTenderSearch.jsp`, `SearchNOA.jsp` (eContracts — the tender→award link), `SearchAPP.jsp`,
+`SearcheCMS.jsp`, `DebarmentRpt.jsp`, `SearchTenderOffline.jsp`, `SearchAwardedContractOffline.jsp`.
+
+The form contract is rich and exactly what an ingester would want:
+
+```
+keyword · refNo · tenderId · pubDtFrm/pubDtTo · closeDtFrm/closeDtTo
+procNature (Goods|Works|Service|Physical Services) · procType (NCT|ICT) · procMethod
+cpvCat · office · txtdepartment · cmbSearchTab (eTenders|APP|eContracts|eExperience)
+pageNo · size
+```
+
+`navigateSearch()` is trivial — it sets `form.action` by tab and submits. **No CAPTCHA, no CSRF
+token, no JS-computed payload.**
+
+**But every submission lands on a login page.** Tested with a live session cookie and correct referer:
+
+| path | result |
+|---|---|
+| `POST StdTenderSearch.jsp` | **User Login** |
+| `GET StdTenderSearch.jsp?h=t` | **User Login** |
+| `POST AllTenders.jsp` + date range + `search` | search form returned, **no results table** |
+| `GET SearchTenderOffline.jsp` | search form returned, **no results table** |
+
+**Verdict: e-GP is NOT ingestible.** The forms are public; the records are not. Retrieval would
+require an authenticated account, which is a terms question before it is a technical one, and
+nothing should be automated against a login until that is answered deliberately. **Stable
+identifiers, historical depth, pagination and tender→NOA linkage all appear to exist behind that
+gate — none is confirmed, because I never retrieved a record.**
+
+Practical alternatives remain the buyer-side boards (`misc.bpdb.gov.bd/tender`, EGCB, RPCL,
+NWPGCL) and the World Bank `procnotices` API — with the standing caveat that buyer boards list
+only currently-open notices, so an archive built by polling them has holes wherever a poll was
+missed, and those must be recorded as absent rather than inferred.
+
+---
+
+## W. OSM TRANSMISSION COVERAGE — METHODOLOGY, AND A CORRECTION
+
+Part I reported *"~95% of PGCB's transmission network (17,845 of 18,816 circuit-km)"*. **That
+figure does not survive scrutiny and is withdrawn.**
+
+### Method
+
+Overpass, area-filtered to Bangladesh (`ISO3166-1=BD`, admin_level 2) rather than a bounding box,
+so Indian border spill is excluded. `way["power"="line"]`, `out tags geom`. OSM base timestamp
+**2026-09-04T18:23:36Z**. 932 ways with geometry.
+
+- **Length** — haversine between consecutive nodes, summed per way. Ways are summed directly, so
+  membership in a route relation cannot double-count.
+- **Circuits** — `circuit-km = Σ (way length × circuits)`. Where `circuits` is absent the
+  multiplier falls back to the count of distinct voltages on the way, else **1** — the
+  conservative choice.
+- **Voltage** — classified by the maximum value in a `;`-separated `voltage` tag.
+- **Duplicates** — ways sharing a rounded (start, end, node-count) signature.
+
+### Results
+
+| measure | value |
+|---|---|
+| **route / corridor km** | **9,519** |
+| **circuit-km (conservative)** | **11,025** |
+| PGCB published benchmark | 18,816 circuit-km |
+| ways with a `circuits` tag | **59 of 932 — 6%** |
+| circuits multiplier distribution | 1 → 884 ways · 2 → 43 · 4 → 5 |
+| ways with no `voltage` tag | 97 |
+| possible duplicate geometries | 5 |
+
+| max voltage | route km | circuit km |
+|---|---|---|
+| 400 kV | 1,976 | 2,527 |
+| 230 kV | 2,591 | 3,187 |
+| 132 kV | 4,755 | 5,114 |
+| 500 kV | 21 | 21 |
+
+### What can and cannot be said
+
+**Circuit-km coverage cannot responsibly be stated as a single number.** Only 6% of ways declare a
+circuit count. The honest range:
+
+- **Lower bound ≈ 11,025 circuit-km → 59%** of PGCB's 18,816, if every untagged way is single-circuit.
+- **Upper bound ≈ 19,000 circuit-km → ~100%**, if essentially every untagged 132 kV+ way is double-circuit.
+
+The earlier 17,845 sits near that upper bound and implies a blanket double-circuit assumption
+across 94% of untagged ways. Nothing in the data supports it.
+
+**Corridor coverage is the defensible measure, and even it carries a caveat:** 9,519 route-km of
+mapped corridor, against which PGCB publishes no route-km benchmark — and where two parallel
+circuits are mapped as two ways, this figure counts the corridor twice.
+
+**Consequence:** OSM is good enough to *draw* Bangladesh's transmission network and badly
+under-specified to *quantify* it. It is a rendering source, not a measurement source. The Part I
+conclusion that the map is an import rather than an acquisition still stands; what changes is that
+**no ESB surface may print an OSM-derived circuit-km total as a fact.**
+
+---
+
+## X. ODbL — WHAT IS ACTUALLY DERIVATIVE
+
+Not a legal opinion. This is the architecture decision the licence forces, and where a lawyer
+should be asked.
+
+### The two shapes
+
+**Shape A — Produced Work only (recommended).** OSM geometry is fetched at render time or held in
+a tile/GeoJSON cache that is *not* joined to ESB's entity tables, and is used to draw a picture.
+The map is a **Produced Work**: attribution required, share-alike **not** triggered on ESB's
+database.
+
+**Shape B — geometry ingested into `TransmissionLine` and enriched** with ESB attributes (voltage
+confirmed against PGCB, outage history, ownership, asset IDs). This creates a **Derivative
+Database**. If ESB then makes it publicly available — and serving it through an API or an export
+almost certainly counts — that derivative database must be offered under ODbL. For a company whose
+commercial plan is selling structured data, that is *the* decision, and it cannot be undone once
+shipped.
+
+### What lands where
+
+| layer | source | licence state |
+|---|---|---|
+| line geometry | OSM | **ODbL-controlled** — keep isolated |
+| substation points | OSM | ODbL-controlled |
+| plant identity + coordinates | **GEM (CC BY 4.0) + Wikidata (CC0)** | **clean** — attribution only |
+| plant/zone operational history | PGCB workbooks, ESB-parsed | **ESB proprietary** |
+| hourly grid series | NLDC, ESB-parsed | **ESB proprietary** |
+| tariffs, gas, SREDA | official documents, ESB-parsed | **ESB proprietary** |
+
+**Collective vs Derivative.** Keeping OSM geometry in its own store, unmodified, and *displaying*
+ESB data beside it is closer to a **Collective Database** — components remain separable and
+share-alike does not reach ESB's tables. Merging OSM geometry into an ESB entity row, or attaching
+ESB-derived attributes to an OSM-derived record, moves it to **Derivative**. The boundary is
+whether OSM-sourced data is *combined with* or merely *displayed alongside* ESB's.
+
+**Attribution is required either way:** "© OpenStreetMap contributors", visible on any surface
+rendering the geometry, with the ODbL named for the data.
+
+### Flag for actual legal review
+
+1. Whether an ESB **API** serving map geometry constitutes "publicly using" a derivative database.
+2. Whether **tile caching** OSM-derived geometry on ESB infrastructure remains a Produced Work.
+3. The **GEM solar exception** — rows sourced from TransitionZero's Solar Asset Mapper are
+   **CC BY-NC 4.0**, incompatible with commercial republication. If GEM's solar tracker is
+   imported, those rows must be filtered or separately licensed.
+4. **IRENA** carries "© All Rights Reserved" with terms that read non-commercial. Nothing from
+   IRENA should be republished before someone reads those terms in a browser.
+
+**Recommendation: Shape A.** Render from OSM, source the plant table from GEM + Wikidata, keep the
+entity database clean of ODbL. It costs nothing today and preserves every commercial option.
+
+---
+
+## Y. CORRECTIONS TO THIS AUDIT
+
+The standard applied is the one ESB Intelligence would have to meet.
+
+### 1. "No Bangladeshi government source publishes machine-readable data. None."
+
+**Withdrawn — the absolute is false.** DESCO, a state-owned distribution company under the Power
+Division, serves a JSON API returning balance, customer info, tariff category, recharge history
+and daily/monthly consumption, unauthenticated (§E2). Part I asserted the absolute in §E3 while
+documenting the counter-example in §E2 — the two sections contradicted each other.
+
+**Replacement:**
+
+> Of the Bangladeshi government **energy-statistics publishers** ESB depends on — PGCB,
+> Petrobangla, BPDB, SREDA, EMRD, BBS — **none publishes a machine-readable feed or documented API
+> for its statistical output.** All ship HTML, PDF or images, and `data.gov.bd`'s CKAN API has been
+> removed with its content frozen since 2018. Machine-readable government endpoints do exist at the
+> **consumer-service** layer (DESCO's prepaid API), but not for national energy statistics.
+
+That is the claim that survives, and it is the one that matters: ESB's parsers are the
+machine-readable layer **for the statistical corpus** — the corpus the archive is built on.
+
+### 2. WRI Global Power Plant Database "unmaintained since 2021"
+
+**Not verified to the required standard, and softened.** The claim came from a research summary
+quoting the repository README ("not currently maintained by WRI… no planned updates as of early
+2022") with a final release of v1.3.0 (2021-06-02). I did **not** independently open the dataset's
+current metadata, and the requirement is right that a landing page can carry a later revision date
+than its README.
+
+**Replacement:** the last release evidenced is **v1.3.0, June 2021**, with a README disclaiming
+maintenance; Bangladesh coverage is ~57 rows against a fleet of 137 plants. Whether WRI has since
+revised the metadata is **unconfirmed**. The operative point is unchanged — Bangladesh coverage is
+a fraction of the fleet — but the wording should read "last evidenced release June 2021; current
+maintenance status unconfirmed."
+
+### 3. OSM "~95% of PGCB's transmission network"
+
+**Withdrawn, replaced by §W** — a 59%–100% range on circuit-km, with 9,519 route-km as the
+defensible corridor figure.
+
+### 4. "PGCB retains roughly 140 days" of hourly data
+
+**Half right, and the wrong half matters.** True of the **demand/supply/load-shed** page (~145
+days). The **generation** page paginates back to **2015-04-17**. Part I applied the retention
+figure to the hourly series generally. §Z treats them as different asset classes in consequence.
+
+---
+
+## Z. ESB DATA ASSET REGISTER
+
+Three classifications drive everything below.
+
+- **RECOVERABLE** — could a competitor starting later reconstruct the *history*? `NO` means the
+  publisher does not serve the past and no third party mirrors it.
+- **EPHEMERAL** — does the publisher overwrite or delete? A **stock** (a register showing "as of
+  now") is maximally ephemeral: yesterday's state is simply gone. A **flow** with a rolling window
+  is next. A permanent document archive is not ephemeral.
+- **TRANSFORMATION COST** — how hard is it to reproduce ESB's canonical dataset *given* the raw
+  source? This is where years of parser quirk-knowledge live, and it is the moat component people
+  consistently underrate.
+
+### The register
+
+| # | Asset | Publisher | Temporal | Geographic | Source retention | ESB retention | Struct. | Provenance | Licence | Ingest difficulty | Fragility | Replacement | **RECOV.** | **EPHEM.** | **TRANSF. COST** | Strat /10 | Urgency /10 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | **NLDC hourly demand / supply / load-shed** | PGCB ERP | hourly | national | **~145 days, rolling** | **from 2026-04-22, growing** | HTML→canonical | high (hash + raw) | none asserted | medium | **high** | none | **NO** | **rolling window** | **medium** | 10 | **10** |
+| 2 | **NLDC hourly generation by fuel + imports** | PGCB ERP | hourly | national | back to 2015-04-17 | **from 2015, growing** | HTML→canonical | high (hash + raw) | none asserted | medium | **high** | none | **partly** | truncatable | **medium** | 10 | **9** |
+| 3 | **PGCB daily energy workbook** | PGCB | daily | national + 9 zones + station | **index ~10 d; documents by id: full** | **4,549 days (2013→)** | XLSX→canonical | very high | none asserted | **very high** | medium | none | **YES — via id walk** | **index ROLLING, documents LONG-LIVED** | **very high** | 10 | 6 ⬇ |
+| 4 | **Petrobangla daily gas report** | Petrobangla | daily (08→08) | field + company | **paginates to 2020-01-12** | **2,308 days** | PDF→canonical | very high (SHA-256) | none asserted | **very high** | medium | none | **YES — to 2020-01** | **LONG-LIVED** | **very high** | 9 | 5 ⬇ |
+| 5 | **SREDA renewable register (NDRE)** | SREDA | **stock, live** | project | **current state only** | 9 snapshots | HTML→canonical | medium | none asserted | low | medium | none | **NO** | **stock — overwrites** | low | 8 | **9** |
+| 6 | **SREDA net-metering statistics** | SREDA | monthly | utility | ~12 months shown | none | HTML | medium | none asserted | low | medium | none | **NO** | **rolling** | low | 7 | **8** |
+| 7 | **BERC tariff orders** | BERC | irregular | national | gazette archive | **none — hand-typed table** | PDF | **currently none** | public document | medium | low | gazette | mostly yes | no | **high** | 9 | **9** |
+| 8 | **BPC fuel price notifications** | BPC / MoPEMR | **monthly since 2024** | national | site archive | **none — yearly table** | PDF/HTML | **currently none** | public document | medium | medium | press | mostly yes | partial | medium | 8 | **8** |
+| 9 | **BPDB daily generation report** | BPDB | daily | plant | **686 pages** | none | **PDF/GIF** | n/a | none asserted | **high** (image) | medium | none | partly | paginated archive | **very high** | 8 | 7 |
+| 10 | **Buyer tender boards** (BPDB, EGCB, RPCL, NWPGCL) |各 | irregular | national | **open notices only** | none | HTML+PDF | n/a | none asserted | low | high | e-GP (gated) | **NO** | **closed notices vanish** | low | 6 | **8** |
+| 11 | **PGCB monthly report** | PGCB | monthly | national + substation | site archive | **317 months** | XLSX→canonical | high | none asserted | high | low | none | partly | no | high | 7 | 5 |
+| 12 | **PGCB substation / line register** | PGCB | as-published | asset | current page only | in-component array | HTML/PDF | low | none asserted | medium | medium | OSM (ODbL) | **NO** | **stock** | medium | 7 | 7 |
+| 13 | **DESCO prepaid consumer API** | DESCO | daily (24 h lag) | **per meter** | arbitrary date range | none | **JSON** | high | **undocumented** | **low** | **very high** | none | per-user | account-scoped | low | 7 | 5 |
+| 14 | **Ember monthly Bangladesh** | Ember | monthly | national | full archive | none | CSV/API | high | **CC BY 4.0** | **very low** | very low | own archive | **YES** | no | very low | 5 | 3 |
+| 15 | **IRENA capacity by technology** | IRENA | annual | national | full archive | none | PxWeb API | high | **© all rights reserved** | low | low | SREDA | **YES** | no | very low | 4 | 2 |
+| 16 | **GEM plant trackers** | Global Energy Monitor | ~biannual releases | **unit + coords** | current release only | none | XLSX | high | **CC BY 4.0** (solar rows BY-NC) | low | low | Wikidata | **release vintages: NO** | supersedes | low | 7 | 6 |
+| 17 | **OSM power infrastructure** | OSM | continuous | geometry | **full history** | none | Overpass | medium | **ODbL** | low | very low | — | **YES** | no | low | 6 | 2 |
+| 18 | **BBS Statistical Yearbook energy ch.** | BBS | annual | national | back-issues online | none | PDF | medium | public document | medium | low | — | **YES** | no | medium | 4 | 3 |
+| 19 | **Bangladesh Bank USD/BDT reference rate** | BB | daily | national | archive published | none | HTML | high | public | low | low | — | mostly yes | daily page overwrites | low | 5 | 5 |
+| 20 | **World Bank procurement notices** | World Bank | continuous | project | full archive | none | **JSON API** | high | **CC BY 4.0** | **very low** | very low | — | **YES** | no | very low | 4 | 2 |
+
+### The ten a 2030 competitor could never reconstruct
+
+Ranked by the question asked: *if ESB starts preserving in September 2026 and a competitor starts
+in September 2030, what exactly is permanently beyond their reach?*
+
+**Revised after the decay measurements in §AA** — two entries I had placed high turned out to be
+recoverable, and are demoted accordingly. Reporting that is the point of measuring.
+
+1. **NLDC hourly demand / supply / load-shed, 2026-04 → 2030.** The window is ~145 days. A 2030
+   entrant gets 2030 onward and **nothing before**. Four years of hourly national demand and load
+   shedding — across the period Bangladesh was running 8–9 hour shortfalls — would exist in exactly
+   one place. This is the single most valuable thing ESB can do this year, and it began today.
+2. **SREDA's renewable register, snapshot by snapshot.** It is a *stock*, not a flow: the page shows
+   what exists now. Every historical state that is not captured is gone forever. A competitor in
+   2030 can see 2030's register and can never see how it got there — which project slipped, which
+   capacity was revised down, when a plant actually energised.
+3. **Closed tender notices from buyer boards.** They list only open notices. Every procurement that
+   closed unrecorded is unrecoverable from those boards, and e-GP's archive is behind a login.
+4. **NLDC hourly generation before whenever PGCB next truncates it.** Deep today (2015), served by
+   the same application whose sibling page keeps 145 days. It is one configuration change from
+   becoming asset #1.
+5. **PGCB's id→energy-day index.** Corrected after measurement (§AA): the *documents* are
+   recoverable — id 200 still serves a workbook — but PGCB's listing shows ~10 days, so without the
+   id map those 4,549 workbooks are addressable and unfindable. The map, not the archive, is the
+   scarce object.
+6. **The transformation, for both PGCB and Petrobangla.** Also corrected: the raw material for both
+   is obtainable in 2030. What is not is years of era-specific layout handling, EWIC quirks and
+   zone-rounding tolerances — plus, for gas, the SHA-256 binding each figure to the PDF it came
+   from, which cannot be retrofitted onto a later re-download.
+7. **The BERC/BPC tariff timeline as it applied.** Gazettes persist, but the reconstruction — which
+   rate was in force on which date, for which category, reproducing a historical bill exactly — is
+   expensive archaeology that compounds the longer it is deferred. Every month that passes adds a
+   month nobody has assembled.
+8. **BPDB's daily generation reports as images.** 686 pages of PDF/GIF. Recoverable while the
+   archive stands; the OCR/parse effort is the moat, and the archive is one site migration from
+   vanishing.
+9. **ESB's own correction history.** `DataReleaseRevision` records what was published, when it was
+   found wrong, and what replaced it. No competitor can reconstruct ESB's mistakes — and for an
+   archive that sells trustworthiness, the audit trail *is* part of the product.
+10. **The fetched-vs-observed lag series.** Because `fetchedAt` is stored separately from
+    `observedAt`, ESB accumulates a record of *how late each publisher actually was*. Nobody else is
+    measuring Bangladeshi publisher latency, and it cannot be reconstructed after the fact.
+
+**The pattern worth naming:** every item on this list is valuable because of **when it was captured**,
+not because of how cleverly it was processed. That is the opposite of where the four-product thesis
+proposed to spend the year.
+
+---
+
+## AA. SOURCE DECAY / RETENTION — MEASURED
+
+Every row below was probed directly on 2026-09-04/05 from the Pi's Bangladeshi connection. Where
+a figure could not be established it says so rather than being inferred.
+
+| Source | Oldest accessible | Newest | Retention window | Rolls off? | URL stability | Overwritten in place? | Reconstructable elsewhere? | **CLASS** |
+|---|---|---|---|---|---|---|---|---|
+| **NLDC demand / supply / load-shed** | ~2026-04-22 (page 68 last with data) | today | **~145 days** | **YES** | page numbers, contents shift | no — rows fall out | **no** | **ROLLING** |
+| **NLDC generation** | **2015-04-17** (page ~2036) | today | **~11.4 years** | not observed | page numbers, contents shift | no | no | **LONG-LIVED** |
+| **PGCB daily workbook — index page** | ~10 days | today | **~10 days** | **YES** | — | no | yes, via ID walk | **ROLLING** |
+| **PGCB daily workbook — documents** | id 200 still served | id 5121 | **full ID space, with gaps** | **no** | **stable by numeric ID** | no | no | **LONG-LIVED** |
+| **Petrobangla daily gas listing** | **2020-01-12** (page ~235) | 2026-09-03 | **~6.6 years** | not observed | Oracle objectstorage UUIDs — opaque but stable | no | no | **LONG-LIVED** |
+| **SREDA NDRE register** | current state only | "Last Update: 2026-09-03 21:48:25" | **none** | n/a | stable URL, changing content | **YES** | **no** | **OVERWRITTEN** |
+| **SREDA net-metering statistics** | ~12 months displayed | current month | ~1 year | **YES** | stable URL | **YES** | no | **OVERWRITTEN** |
+| **BPDB daily generation archive** | 686 pages deep | today | **years** | no | paginated | no | no | **LONG-LIVED** |
+| **Buyer tender boards** (BPDB/EGCB/RPCL/NWPGCL) | open notices only | today | **until each closes** | **YES** | per-tender PDF path | no — the row is removed | **no** | **EPHEMERAL** |
+| **e-GP** | behind login | — | — | — | — | — | — | **UNKNOWN** |
+| **GeoDASH** | — | — | — | — | **no DNS record** | — | — | **GONE** |
+| **BERC / BPC notifications** | gazette archive | current | years | no | site paths | no | yes (gazette) | **LONG-LIVED** |
+| **Ember / IRENA / World Bank / OSM** | full history | current | full | no | stable | no | **yes** | **PERMANENT** |
+
+### The phenomenon worth naming: PGCB's index rolls off while its documents do not
+
+You asked specifically whether historical documents disappear while index pages remain. **PGCB is
+the exact inverse, and it is the more dangerous shape.**
+
+Its listing page shows roughly ten days. Its *documents* remain addressable indefinitely — id 200
+still returns a valid 282 KB workbook today. So the archive has not been deleted; it has become
+**unfindable**. Anyone without the id→energy-day mapping sees a ten-day window and concludes the
+history is gone. That is exactly the conclusion recorded in this project's own notes
+("upstream archives are gone… anything older than ~10 days is not browsable") — **and it is wrong**,
+which is worth correcting because it changes the recoverability of ESB's largest asset.
+
+**The consequence is that `ERP_BY_ENERGY` — the id→date map in `daily_extractor/config.py`, plus
+`probe_erp_for_energy`'s ability to extend it — is itself an archival asset.** It is the index PGCB
+stopped publishing. Losing it would not lose the documents, but it would make 4,549 of them
+unfindable without re-walking thousands of ids. It should be treated as evidence and backed up
+accordingly, not as a config constant.
+
+### What this changes in the ranking
+
+Measuring decay rather than assuming it moved three assets:
+
+- **PGCB daily workbooks: recoverable after all.** Down-weighted for urgency, because a competitor
+  *could* walk the ID space. The moat there is the **transformation** — era-specific layouts, EWIC
+  quirks, zone-rounding tolerances — not the raw bytes.
+- **Petrobangla gas: recoverable to 2020-01.** Also down-weighted. ESB's 2,308 days are roughly
+  co-extensive with what Petrobangla still serves, so the raw material is obtainable; again the
+  moat is the parse, plus the SHA-256 provenance that cannot be retrofitted.
+- **SREDA: up-weighted to the top tier.** Confirmed `OVERWRITTEN` — a single page carrying a live
+  timestamp. Every state not captured is gone permanently, and it is the cheapest thing in the
+  register to preserve.
+
+**The rule the user proposed is right and the measurements bear it out:** decay beats commercial
+value in ranking. Petrobangla gas has higher immediate commercial value than SREDA's register, and
+SREDA should still be archived first — because gas can be re-fetched in 2030 and the register
+cannot.
+
+### Revised urgency tiers
+
+**Tier 1 — losing data every day, unrecoverable:**
+NLDC demand/load-shed (ROLLING 145 d) · SREDA register (OVERWRITTEN) · SREDA net-metering
+(OVERWRITTEN) · closed tender notices (EPHEMERAL)
+
+**Tier 2 — recoverable today, fragile tomorrow:**
+NLDC generation (LONG-LIVED but same platform as Tier 1) · PGCB workbook documents (LONG-LIVED but
+**index already rolled off** — depends on ESB's own id map) · BPDB daily generation (LONG-LIVED,
+un-ingested)
+
+**Tier 3 — recoverable, blocked on ESB's own work rather than decay:**
+BERC tariff orders · BPC monthly notifications · Bangladesh Bank rates
+
+**Tier 4 — permanent at source, no urgency:**
+Ember · IRENA · World Bank · OSM · BBS · GEM current releases (though GEM *release vintages* are
+themselves overwritten, so archiving each release as it lands is cheap insurance)
+
+---
+
+# THE ESB ARCHIVAL PRIORITY LIST
+
+Twenty external streams ranked by **urgency to begin preserving**. Urgency is driven by measured
+decay (§AA) *before* commercial value, exactly as instructed: a stream that overwrites itself
+outranks a more valuable stream the publisher archives properly, because only one of them is
+losing data while you read this.
+
+Storage assumes the evidence layer (raw bytes gzipped) plus canonical rows. NLDC compresses to
+**11%** of served size, measured.
+
+---
+
+### 1. NLDC hourly demand / supply / load-shed — **IMPLEMENTED 2026-09-05**
+The only hourly record of Bangladeshi electricity *shortfall*, and the most politically salient
+number in the sector. · PGCB ERP · hourly · **ESB from 2026-04-22, growing** ·
+**Decay: ROLLING ~145 days** · **Recoverability: NONE** · normalisation medium · commercial value
+very high · archive every 15 min · **~2 MB/yr** · licence risk low · **DONE.**
+
+### 2. SREDA renewable register (NDRE) — **NOT STARTED — highest unstarted urgency**
+A **stock**, not a flow: one page, live timestamp ("Last Update: 2026-09-03 21:48:25"). Every prior
+state is gone the moment it changes. A 2030 competitor can see 2030's register and can never see
+how it got there — which projects slipped, which capacities were revised, when plants actually
+energised. · SREDA · continuous · **9 accidental snapshots** · **Decay: OVERWRITTEN** ·
+**Recoverability: NONE** · normalisation low · value high · **weekly** · **~5 MB/yr** · low ·
+**NOT STARTED.**
+
+### 3. SREDA net-metering statistics — **NOT STARTED**
+Monthly distributed-solar uptake by utility; the only public series tracking it. Rolling display,
+overwritten. · SREDA · monthly · none · **Decay: OVERWRITTEN** · **Recoverability: poor** · low ·
+medium · **monthly** · ~2 MB/yr · low · **NOT STARTED.**
+
+### 4. Closed tender notices (BPDB, EGCB, RPCL, NWPGCL) — **NOT STARTED**
+Boards list **only currently-open** notices; a closed notice is removed, and e-GP's archive is
+behind a login (§V). Every procurement closing unrecorded is a permanently lost data point about
+the sector's capital pipeline. · various · irregular · none · **Decay: EPHEMERAL** ·
+**Recoverability: NONE** · low · medium · **daily poll** · ~50 MB/yr · low · **NOT STARTED.**
+
+### 5. NLDC hourly generation by fuel + interconnector — **IMPLEMENTED 2026-09-05**
+Hourly fuel mix and cross-border imports; the demand series is meaningless without it. Deep today,
+but served by the same application whose sibling page keeps 145 days — one config change from
+becoming item 1. · PGCB ERP · hourly · **2015-04-17 → present** · **Decay: LONG-LIVED (truncatable)**
+· recoverability partial now, none after truncation · medium · very high · every 15 min ·
+**~2 MB/yr** · low · **DONE.**
+
+### 6. PGCB's ERP id → energy-day map — **PARTIAL, and under-protected**
+Not a document — an **index**. PGCB's listing rolls off at ~10 days while the documents stay
+addressable by numeric id forever (§AA). Without the mapping, 4,549 workbooks are reachable but
+unfindable. This map lives in `daily_extractor/config.py` as a constant and should be treated as
+evidence. · derived by ESB · continuous · in-repo · **Decay: the index has ALREADY rolled off at
+source** · **Recoverability: only by re-walking thousands of ids** · low · **very high** ·
+**every poll** · <1 MB/yr · none · **PARTIAL — promote to a table and back it up.**
+
+### 7. BERC tariff orders — **NOT STARTED — blocks the consumer thesis**
+The versioned tariff engine is the spine of every consumer feature; today ESB has a hand-typed
+yearly table with no cited document. Gazettes persist, so this is recoverable — but the
+reconstruction cost compounds monthly and everything else waits on it. · BERC · irregular · none ·
+**Decay: LONG-LIVED** · recoverable · **normalisation high** · **very high** · on publication ·
+~20 MB/yr · low · **NOT STARTED.**
+
+### 8. BPC monthly fuel price notifications — **NOT STARTED**
+BPC moved to a **monthly automatic formula in 2024**; ESB's yearly table is wrong by construction
+between revisions. · BPC / MoPEMR · monthly · none · **Decay: LONG-LIVED** · mostly recoverable ·
+medium · high · **monthly** · ~5 MB/yr · low · **NOT STARTED.**
+
+### 9. GEM tracker release vintages — **NOT STARTED**
+The current release is always available; **superseded releases are not**. Archiving each release as
+it lands preserves the history of what the reference dataset believed — cheap insurance, and the
+only way to answer "when did GEM learn this plant existed?" · GEM · ~biannual · none ·
+**Decay: OVERWRITTEN per release** · current yes / vintages no · low · high · **each release** ·
+~50 MB/yr · **CC BY 4.0, but solar rows are BY-NC — filter** · **NOT STARTED.**
+
+### 10. PGCB substation & transmission register — **NOT STARTED**
+A stock published as a current-state page; ESB's copy is a literal array inside a React component.
+Underpins every asset-dossier ambition. · PGCB · as-published · in-component only ·
+**Decay: OVERWRITTEN (stock)** · poor · medium · high · **monthly** · ~1 MB/yr · low ·
+**NOT STARTED.**
+
+### 11. PGCB daily energy workbook — **OPERATIONAL** *(down-weighted after measurement)*
+4,549 days, the archive everything hangs off. **Down-weighted for urgency because the documents
+turn out to be recoverable** — id 200 still serves a valid workbook. The moat is the
+*transformation*, not the bytes: era-specific layouts, EWIC quirks, zone-rounding tolerances. ·
+PGCB · daily · **2013-12-31 →** · **Decay: LONG-LIVED (documents) / ROLLING (index)** ·
+**recoverable via id walk** · **transformation very high** · very high · 4×/day + watcher ·
+~150 MB/yr · low · **OPERATIONAL.**
+
+### 12. Petrobangla daily gas report — **OPERATIONAL** *(down-weighted after measurement)*
+2,308 days with SHA-256 per PDF. Listing paginates back to **2020-01-12**, so ESB's holdings are
+roughly co-extensive with what Petrobangla still serves — the raw material is obtainable. The moat
+is the parse plus provenance that cannot be retrofitted. · Petrobangla · daily ·
+**Decay: LONG-LIVED (~6.6 yr)** · recoverable · **transformation very high** · high ·
+4×/day + watcher · ~365 MB/yr · low · **OPERATIONAL.**
+
+### 13. BPDB daily generation report — **NOT STARTED**
+Plant-level daily generation from the generation utility — the dimension PGCB's workbook covers
+least well. **686-page archive** standing today. · BPDB · daily · none · **Decay: LONG-LIVED** ·
+partial · **very high (PDF/GIF → OCR)** · high · **daily** · ~180 MB/yr · low · **NOT STARTED.**
+
+### 14. Bangladesh Bank USD/BDT reference rate — **NOT STARTED**
+Every fuel-import and LNG cost figure is meaningless without the rate that applied *on that date*.
+ESB hard-codes a yearly table. · Bangladesh Bank · daily · none ·
+**Decay: daily page overwrites; archive published** · mostly recoverable · low · medium ·
+**daily** · <1 MB/yr · low · **NOT STARTED.**
+
+### 15. PGCB monthly report — **OPERATIONAL**
+317 months, substation-level detail; source keeps an archive. · PGCB · monthly ·
+**Decay: LONG-LIVED** · partial · high · high · monthly · ~30 MB/yr · low · **OPERATIONAL.**
+
+### 16. DESCO prepaid consumer API — **NOT STARTED, correctly**
+Per-meter consumption and tariff category. Highest fragility in the register: undocumented, EOL
+stack, leaks PII, one security review from closure. Archivable only per consenting user, and doing
+so makes ESB a processor of personal data (§N). · DESCO · daily (24 h lag) ·
+**Decay: per-account, arbitrary range** · n/a · low · medium · **only with consent** · depends ·
+**high — undocumented endpoint + PII** · **NOT STARTED.**
+
+### 17. Ember monthly Bangladesh — **NOT STARTED (low urgency, real utility)**
+Not for the data — ESB is upstream of it — but as a **free external cross-check** on ESB's monthly
+rollups under rule 4. · Ember · monthly · **Decay: PERMANENT** · fully recoverable · very low ·
+medium (as verification) · monthly · <1 MB/yr · **CC BY 4.0** · **NOT STARTED.**
+**Trap:** Ember publishes `0`, not null, for Bangladesh wind and bioenergy. Ingesting it without a
+null-mapping pass imports a claim the charter forbids.
+
+### 18. BBS Statistical Yearbook, energy chapter — **NOT STARTED**
+Annual, back-issues online. · BBS · annual · **Decay: PERMANENT** · yes · medium · low · annual ·
+~50 MB/yr · low · **NOT STARTED.**
+
+### 19. OSM power infrastructure — **NOT STARTED (no urgency)**
+Full history preserved by OSM itself; nothing is lost by waiting. Value is rendering, not
+measurement (§W). · OSM · continuous · **Decay: PERMANENT** · fully recoverable · low · medium ·
+quarterly · ~20 MB/yr · **ODbL share-alike — see §X** · **NOT STARTED.**
+
+### 20. IRENA capacity / World Bank procurement — **NOT STARTED**
+Both fully archived at source, both annual-or-slower in usefulness here. · IRENA / World Bank ·
+**Decay: PERMANENT** · yes · very low · low · annual / weekly · ~10 MB/yr ·
+**IRENA © all rights reserved — do not republish unchecked; World Bank CC BY 4.0** ·
+**NOT STARTED.**
+
+---
+
+## What the decay-weighted ranking says
+
+**Items 1–6 are the year, and four of them are not started.** Every one is losing data now (1–5) or
+protecting an index the publisher has already stopped serving (6). Together they are **under
+70 MB/year** and need no new architecture — the pattern built for items 1 and 5 covers all of them.
+
+**Measuring decay demoted the two assets I had ranked highest.** PGCB workbooks and Petrobangla gas
+both turned out to be *recoverable*: PGCB serves old documents by id, Petrobangla paginates to
+2020. Their moat is the transformation and the provenance, not scarcity of the raw material. That
+is a weaker moat than "nobody else can obtain this" — and it is better to know it.
+
+**The sharpest correction:** this project's own notes record that upstream archives are gone beyond
+~10 days. For the *index* that is true. For the *documents* it is not, and the difference is
+`ERP_BY_ENERGY` — a map in a config file that is doing more strategic work than anything in the
+four-product thesis.
+
+**The one-line version:** the assets worth most are the ones nobody can go back and get, they are
+almost always the cheapest to store, and three of the four in that category are still not started.
