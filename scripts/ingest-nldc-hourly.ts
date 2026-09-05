@@ -346,13 +346,23 @@ ${'='.repeat(64)}`);
     // (365 of them in every full year), which is the evening-peak stamp. An
     // hours-in-span denominator therefore undercounts the expected slots and
     // can report a negative gap — it did, at -3.5%, before this was corrected.
-    const spanDays = Math.floor((max.getTime() - min.getTime()) / 86_400_000) + 1;
-    const days = await prisma.$queryRawUnsafe<Array<{ d: bigint; off: bigint }>>(
+    // Both numbers come from ONE query so they share a date frame. Computing the
+    // span in JavaScript from elapsed milliseconds and the coverage from
+    // Postgres DATE() put them on different frames: with min at 19:00Z and max
+    // at 17:00Z the final day is incomplete, floor() discarded it, and the
+    // demand series reported 136 days covered "of 135 in span" — an absence of
+    // -1 (-0.7%). That is the second time this metric printed a negative gap;
+    // the first (-3.5%) came from an hours-in-span denominator against a source
+    // that is not strictly hourly. A count and its denominator have to be
+    // measured the same way or the difference between them means nothing.
+    const days = await prisma.$queryRawUnsafe<Array<{ d: bigint; span: number; off: bigint }>>(
       `SELECT COUNT(DISTINCT DATE("observedAt"))::bigint AS d,
+              (MAX(DATE("observedAt")) - MIN(DATE("observedAt")) + 1)::int AS span,
               COUNT(*) FILTER (WHERE EXTRACT(MINUTE FROM "observedAt") <> 0)::bigint AS off
        FROM "GridHourlyObservation" WHERE "series" = '${series}'`,
     );
     const daysCovered = Number(days[0]?.d ?? 0);
+    const spanDays = Number(days[0]?.span ?? 0);
     const offHour = Number(days[0]?.off ?? 0);
     console.log(`  earliest observation     ${min.toISOString()}`);
     console.log(`  latest observation       ${max.toISOString()}`);
