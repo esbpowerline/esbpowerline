@@ -102,7 +102,15 @@ function IntensityBar({ figure, max }: { figure: NarrativeFigure; max: number | 
   );
 }
 
-function DayRow({ day, intensityMax }: { day: NarrativeDay; intensityMax: number | null }) {
+function DayRow({
+  day,
+  intensityMax,
+  coverageAvailable,
+}: {
+  day: NarrativeDay;
+  intensityMax: number | null;
+  coverageAvailable: boolean;
+}) {
   const isIncident = day.position.kind === 'incident';
   const isLeadIn = day.position.kind === 'lead-in';
   const label = positionLabel(day.position);
@@ -158,7 +166,9 @@ function DayRow({ day, intensityMax }: { day: NarrativeDay; intensityMax: number
         <div className="md:border-l md:border-border/60 md:pl-5">
           {day.coverage.length === 0 && day.external.length === 0 ? (
             <p className="text-xs italic leading-5 text-muted-foreground">
-              No coverage filed on this date.
+              {coverageAvailable
+                ? 'No coverage filed on this date.'
+                : 'Newsroom coverage could not be loaded — this is not a statement that none was filed.'}
             </p>
           ) : (
             <div className="space-y-4">
@@ -239,7 +249,12 @@ export default function EventTimeline({ narrative }: { narrative: EventNarrative
   return (
     <ol className="space-y-3">
       {narrative.days.map((day) => (
-        <DayRow key={day.date} day={day} intensityMax={max} />
+        <DayRow
+          key={day.date}
+          day={day}
+          intensityMax={max}
+          coverageAvailable={narrative.coverageAvailable}
+        />
       ))}
     </ol>
   );

@@ -12,11 +12,7 @@ import {
   type EventStudySeries,
   type EventStudySeriesId,
 } from '@/lib/data/analysis/event-study';
-import {
-  ALIGNMENT_LABEL,
-  formatWindow,
-  petrobanglaGasDay,
-} from '@/lib/data/grid/observation-window';
+import { ALIGNMENT_LABEL } from '@/lib/data/grid/observation-window';
 import { GridCardFooter, GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import EventStudyChart, {
   type EventChartColor,
@@ -25,7 +21,8 @@ import HourlyShedPanel from '@/components/analysis/gas-crisis/HourlyShedPanel';
 import EventTimeline from '@/components/analysis/EventTimeline';
 import { GAS_CRISIS_2026 } from '@/lib/data/analysis/event-registry';
 import { loadEventCoverage, loadExternalCoverage } from '@/lib/data/analysis/event-coverage.server';
-import { buildNarrative } from '@/lib/data/analysis/event-narrative';
+import { buildNarrative, keyFacts, sparkline } from '@/lib/data/analysis/event-narrative';
+import EventMasthead from '@/components/analysis/EventMasthead';
 
 /**
  * The first Analysis page: an event study of the July–August 2026 R-LNG
@@ -180,9 +177,10 @@ export default async function GasCrisis2026Page() {
   const narrative = buildNarrative(
     def,
     study as EventStudyResult,
-    coverage,
+    coverage.ok ? coverage.items : [],
     ['gasNational', 'gasGen'],
     external,
+    coverage.ok,
   );
   /**
    * The chart markers are the timeline's own inflection days — the same 12%
@@ -232,10 +230,21 @@ export default async function GasCrisis2026Page() {
   };
 
   const s = study.series;
-  // The L1 anchor rule, rendered rather than assumed, exactly as the explorer
-  // header does: the strap states what a "gas day" is instead of letting the
-  // reader guess from the numbers.
-  const gasWindow = formatWindow(petrobanglaGasDay(GAS_CRISIS_WINDOW.start), { offset: false });
+  // The masthead panel: derived from the same series the timeline renders, so
+  // an "at a glance" box cannot quietly stop agreeing with its own page.
+  const facts = keyFacts(def, study as EventStudyResult, narrative);
+  const spark = sparkline(study as EventStudyResult, def.headlineSeries);
+  const incidentIndex = narrative.days.findIndex((d) => d.date === def.incidentDate);
+  const sourceLine =
+    `${study.sourceFiles.petrobangla.length} Petrobangla gas reports and ` +
+    `${study.sourceFiles.pgcb.length} PGCB workbooks, each named on the card it feeds · ` +
+    // Never print "0 articles" for a read that failed — that is a claim about
+    // the newsroom, and a connection timeout is not evidence of one.
+    (narrative.coverageAvailable
+      ? `${narrative.totals.coverageCount} ESB PowerLine articles · `
+      : 'ESB PowerLine coverage unavailable · ') +
+    `${narrative.totals.externalCount + narrative.undatedExternal.length} reports from ` +
+    `${narrative.totals.externalOutlets.length} other outlets`;
 
   return (
     <main className="container container--shell py-8 md:py-10">
@@ -243,40 +252,91 @@ export default async function GasCrisis2026Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       {/* ── header ─────────────────────────────────────────────────────── */}
-      <header className="border-b border-border/40 pb-7 mb-9">
+      <header className="border-b border-border/40 pb-8 mb-10">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
           Analysis · event study
         </p>
-        {/* The measure is 68ch, not max-w-3xl. 3xl is a pixel width that
-            narrows the line as the type scale grows; a ch measure keeps the
-            line at a readable length whatever the font size, and on a 1280px
-            column it uses the width instead of stopping two-thirds across. */}
-        <h1 className="mt-2 text-[1.75rem] md:text-[2.125rem] font-bold leading-[1.15] tracking-[-0.015em] text-foreground">
-          The R-LNG shortfall, July–August 2026
+        <h1 className="mt-2 max-w-[20ch] text-[1.875rem] md:text-[2.375rem] font-bold leading-[1.1] tracking-[-0.02em] text-foreground">
+          The R-LNG shortfall
         </h1>
-        <p className="mt-4 max-w-[68ch] text-[0.9375rem] leading-7 text-muted-foreground">
-          For three ordinary days the imported-gas line sat where it had sat all month: 966, 976,
-          993 MMCFD against a printed capacity of 1,100. On the gas day starting{' '}
-          <strong>21 July 2026</strong> Petrobangla printed it at <strong>621.6</strong>. It
-          settled near 500, fell again to <strong>300</strong> on 13–14 August, and had not
-          returned to its July level when this window closes. Below, the {narrative.totals.windowDays}{' '}
-          days of it in order — what the national record printed each day, and what this newsroom
-          published the same day, in separate columns because one is a measurement and the other
-          is reporting.
+        <p className="mt-1.5 text-[0.9375rem] font-medium text-muted-foreground">
+          Bangladesh, 18 July – 31 August 2026
         </p>
-        <p className="mt-3 max-w-[68ch] text-[0.9375rem] leading-7 text-muted-foreground">
-          <strong className="text-foreground">Petrobangla never names a cause.</strong> Its daily
-          report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row and no terminal, vessel or
-          fault. So this page does not assert one either: where the reporting names a cause, the
-          reporting is quoted and linked, and it stands on its own sourcing, beside the figures
-          rather than inside them.
-        </p>
-        <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] leading-5 text-muted-foreground">
-          Study window {GAS_CRISIS_WINDOW.start} → {GAS_CRISIS_WINDOW.end} · baseline{' '}
-          {GAS_CRISIS_BASELINE.start} → {GAS_CRISIS_BASELINE.end}
-          {gasWindow ? <> · a &ldquo;gas day&rdquo; runs {gasWindow}</> : null} · an
-          &ldquo;energy day&rdquo; runs 00:00→24:00 · all times BST (UTC+06:00)
-        </p>
+
+        {/*
+          Two columns from lg up. The masthead was one 68ch column on a 1280px
+          page, which left the entire right side empty above the fold — the most
+          valuable space on the page holding nothing. The panel beside it is
+          derived from the same series the timeline renders, so it cannot drift.
+        */}
+        <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_22rem]">
+          <div>
+            <p className="max-w-[66ch] text-base leading-[1.75] text-foreground/90">
+              For three ordinary days the imported-gas line sat where it had sat all month —{' '}
+              <span className="tabular-nums">966, 976, 993</span> MMCFD, against a printed capacity
+              of <span className="tabular-nums">1,100</span>. On the gas day starting{' '}
+              <strong className="font-semibold text-foreground">21 July 2026</strong>, Petrobangla
+              printed it at <strong className="font-semibold text-foreground">621.6</strong>. It
+              settled near 500, fell again to{' '}
+              <strong className="font-semibold text-foreground">300</strong> on 13–14 August, and
+              had not recovered its July level by the time this window closes.
+            </p>
+            <p className="mt-4 max-w-[66ch] text-[0.9375rem] leading-7 text-muted-foreground">
+              What follows is those {narrative.totals.windowDays} days in order. Each row carries
+              what the national record printed that day on one side, and what was published that
+              day on the other — kept in separate columns because one is a measurement and the
+              other is reporting.
+            </p>
+            <p className="mt-4 max-w-[66ch] text-[0.9375rem] leading-7 text-muted-foreground">
+              <strong className="font-semibold text-foreground">
+                Petrobangla never names a cause.
+              </strong>{' '}
+              Its daily report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row — no
+              terminal, no vessel, no fault. So this page does not assert one either. Where the
+              reporting names a cause it is quoted, linked and left to stand on its own sourcing,
+              beside the figures rather than inside them.
+            </p>
+
+            <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-border/50 pt-4 text-[11px] leading-5">
+              <div>
+                <dt className="font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                  Study window
+                </dt>
+                <dd className="tabular-nums text-foreground">
+                  {GAS_CRISIS_WINDOW.start} → {GAS_CRISIS_WINDOW.end}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                  Baseline
+                </dt>
+                <dd className="tabular-nums text-foreground">
+                  {GAS_CRISIS_BASELINE.start} → {GAS_CRISIS_BASELINE.end}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                  A &ldquo;gas day&rdquo;
+                </dt>
+                <dd className="text-foreground">08:00 → 08:00 the next morning</dd>
+              </div>
+              <div>
+                <dt className="font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+                  An &ldquo;energy day&rdquo;
+                </dt>
+                <dd className="text-foreground">00:00 → 24:00, all times BST (UTC+06:00)</dd>
+              </div>
+            </dl>
+          </div>
+
+          <EventMasthead
+            facts={facts}
+            spark={spark}
+            sparkUnit={s.gasRlng.unit}
+            incidentIndex={incidentIndex}
+            sourceLine={sourceLine}
+          />
+        </div>
       </header>
 
       {/* ── the headline deltas (all DERIVED, formula on each series) ───── */}
@@ -308,7 +368,9 @@ export default async function GasCrisis2026Page() {
           published that day, plus what the wider press reported, linked. Days marked{' '}
           <span className="font-semibold text-primary">sharp move</span> are days the imported-gas
           line moved more than 12% against the previous published day — found in the data, not
-          chosen. {narrative.totals.coverageCount} of our articles are placed on their filing date, and{' '}
+          chosen. {narrative.coverageAvailable
+            ? `${narrative.totals.coverageCount} of our articles are placed on their filing date, and `
+            : 'Our own coverage could not be loaded for this render — the column is empty because the read failed, not because nothing was filed. '}
           {narrative.totals.externalCount} external reports on the day they describe —{' '}
           {narrative.totals.externalOutlets.join(', ')}.
         </p>

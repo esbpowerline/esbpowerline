@@ -47,7 +47,11 @@ function matchesEvent(text: string, terms: string[]): boolean {
  * `getPublishedArticleBySlug` skips them: the article route returns null for a
  * Bengali title under the English locale, so the link would 404.
  */
-export async function loadEventCoverage(def: EventStudyDefinition): Promise<CoverageItem[]> {
+export type CoverageLoad =
+  | { ok: true; items: CoverageItem[] }
+  | { ok: false; reason: string };
+
+export async function loadEventCoverage(def: EventStudyDefinition): Promise<CoverageLoad> {
   const { start, end } = eventWindow(def);
   let rows: Array<{
     title: string;
@@ -55,8 +59,8 @@ export async function loadEventCoverage(def: EventStudyDefinition): Promise<Cove
     excerpt: string | null;
     publishedAt: Date | null;
   }>;
-  try {
-    rows = await prisma.article.findMany({
+  const read = () =>
+    prisma.article.findMany({
       where: {
         status: 'PUBLISHED',
         editorTrash: false,
@@ -65,11 +69,27 @@ export async function loadEventCoverage(def: EventStudyDefinition): Promise<Cove
       select: { title: true, slug: true, excerpt: true, publishedAt: true },
       orderBy: { publishedAt: 'asc' },
     });
-  } catch {
-    // The archive half of the page must survive a database outage, exactly as
-    // releases.server.ts fails soft to the static files. An event study with no
-    // coverage column is diminished; one that 500s is gone.
-    return [];
+  try {
+    // One retry, because the observed fault is a transient connection timeout
+    // under concurrent render rather than a bad query. If it fails twice the
+    // page says so instead of pretending the newsroom filed nothing.
+    try {
+      rows = await read();
+    } catch {
+      rows = await read();
+    }
+  } catch (err) {
+    /*
+      Fail soft, but SAY SO. The first version returned [] here, and one request
+      in three hit a Prisma connection timeout in dev: the page then rendered
+      "0 ESB PowerLine articles" in the masthead and "No coverage filed on this
+      date" on all 45 rows. That is a false statement about the newsroom's
+      record, produced by an infrastructure fault — the same shape as the NLDC
+      fallback that published 0 MW of load shed on a day with 2,222, and the
+      reason live-grid.server.ts now reaches across to nothing rather than
+      substituting. A read that failed is not a day that was quiet.
+    */
+    return { ok: false, reason: err instanceof Error ? err.message : 'coverage read failed' };
   }
 
   const out: CoverageItem[] = [];
@@ -88,7 +108,7 @@ export async function loadEventCoverage(def: EventStudyDefinition): Promise<Cove
       excerpt: r.excerpt,
     });
   }
-  return out;
+  return { ok: true, items: out };
 }
 
 /**

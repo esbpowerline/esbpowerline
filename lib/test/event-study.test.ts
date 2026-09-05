@@ -9,6 +9,8 @@ import {
   type ChainCard,
   type EventStudyDayInput,
 } from '@/lib/data/analysis/event-study';
+import { GAS_CRISIS_2026 } from '@/lib/data/analysis/event-registry';
+import { buildNarrative } from '@/lib/data/analysis/event-narrative';
 import {
   GAS_CRISIS_BASELINE,
   GAS_CRISIS_WINDOW,
@@ -223,5 +225,27 @@ describe('registry sanity', () => {
     expect(enumerateDays({ start: '2026-07-30', end: '2026-08-02' })).toEqual([
       '2026-07-30', '2026-07-31', '2026-08-01', '2026-08-02',
     ]);
+  });
+});
+
+describe('a failed newsroom read is not an empty newsroom', () => {
+  it('narrative marks coverage unavailable rather than reporting zero articles', () => {
+    // The bug this pins: one dev request in three hit a Prisma connection
+    // timeout, the loader returned [], and the page printed "0 ESB PowerLine
+    // articles" plus "No coverage filed on this date" on all 45 rows — a false
+    // claim about the newsroom manufactured by an infrastructure fault.
+    const day: EventStudyDayInput = { ...base('2026-07-21'), gasRlngMmcfd: 621.6, unservedGwh: 3.7 };
+    const range = { start: '2026-07-21', end: '2026-07-21' };
+    const study = buildEventStudy([day], range, range);
+    const def = { ...GAS_CRISIS_2026, incidentDate: '2026-07-21', leadInDays: 0, endDate: '2026-07-21' };
+
+    const failed = buildNarrative(def, study, [], [], [], false);
+    expect(failed.coverageAvailable).toBe(false);
+    expect(failed.totals.coverageCount).toBe(0);
+
+    // and the honest empty case stays distinguishable from it
+    const quiet = buildNarrative(def, study, [], [], [], true);
+    expect(quiet.coverageAvailable).toBe(true);
+    expect(quiet.totals.coverageCount).toBe(0);
   });
 });

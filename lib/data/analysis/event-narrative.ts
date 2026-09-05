@@ -105,6 +105,13 @@ export interface EventNarrative {
   orphanCoverage: CoverageItem[];
   /** External items with no date established — shown outside the timeline. */
   undatedExternal: ExternalCoverageItem[];
+  /**
+   * False when the newsroom read FAILED, as opposed to returning nothing.
+   * The distinction is the point: an empty column because the archive was
+   * quiet and an empty column because Postgres timed out look identical, and
+   * only one of them is a fact about the newsroom.
+   */
+  coverageAvailable: boolean;
   totals: {
     /** Days in the window, and how many the headline publisher actually filed. */
     windowDays: number;
@@ -232,6 +239,7 @@ export function buildNarrative(
   coverage: CoverageItem[],
   supportingIds: EventStudySeriesId[],
   external: ExternalCoverageItem[] = [],
+  coverageAvailable = true,
 ): EventNarrative {
   const headlineSeries = study.series[def.headlineSeries];
   const intensitySeries = study.series[def.intensitySeries];
@@ -284,6 +292,7 @@ export function buildNarrative(
     phases: detectPhases(headlineSeries, dates),
     orphanCoverage,
     undatedExternal: external.filter((e) => !e.reportsOn),
+    coverageAvailable,
     totals: {
       windowDays: dates.length,
       headlinePublished: headlineSeries.windowCoverage.publishedDays,
@@ -304,4 +313,124 @@ export function positionLabel(position: DayPosition): string {
     return position.daysBefore === 1 ? '1 day before' : `${position.daysBefore} days before`;
   }
   return `Day ${position.dayNumber + 1}`;
+}
+
+/* ── the masthead's key facts ─────────────────────────────────────────────── */
+
+export interface KeyFact {
+  label: string;
+  value: string;
+  /** Where it came from, in one line — rendered under the figure. */
+  note: string;
+  /** P when every input is a published figure; D when this file computed it. */
+  provenance: 'P' | 'D';
+}
+
+const n0 = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 0 });
+const n1 = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 1 });
+
+function prettyDay(iso: string): string {
+  const [, m, d] = iso.split('-');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${Number(d)} ${months[Number(m) - 1]}`;
+}
+
+/**
+ * The four figures the masthead leads with.
+ *
+ * Every one is read or computed from the series the page already loaded, so the
+ * headline panel cannot drift from the timeline underneath it — the failure
+ * mode of any "at a glance" box is that it is typed once and then quietly
+ * stops matching the data it summarises. Each carries its own P/D mark and the
+ * one-line basis for the number.
+ */
+export function keyFacts(
+  def: EventStudyDefinition,
+  study: EventStudyResult,
+  narrative: EventNarrative,
+): KeyFact[] {
+  const headline = study.series[def.headlineSeries];
+  const capacity = study.series.gasRlngCapacity;
+  const facts: KeyFact[] = [];
+
+  // The floor, and how far it fell from the days before the break.
+  const published = headline.points.filter((p) => p.value !== null) as Array<{ date: string; value: number }>;
+  const low = published.reduce<{ date: string; value: number } | null>(
+    (acc, p) => (acc === null || p.value < acc.value ? p : acc),
+    null,
+  );
+  const leadIn = narrative.days
+    .filter((d) => d.position.kind === 'lead-in' && d.headline.value !== null)
+    .map((d) => d.headline.value as number);
+  const leadInMean = leadIn.length ? leadIn.reduce((a, b) => a + b, 0) / leadIn.length : null;
+
+  if (low) {
+    facts.push({
+      label: 'Lowest day',
+      value: `${n1(low.value)} ${headline.unit}`,
+      // The headline value is published; the comparison beside it is a mean
+      // this file computed, so the note says so rather than letting the card's
+      // P mark cover both.
+      note:
+        leadInMean !== null
+          ? `${prettyDay(low.date)} — the three days before the break averaged ${n0(leadInMean)} (derived)`
+          : prettyDay(low.date),
+      provenance: 'P',
+    });
+  }
+
+  // What the source went on claiming it could deliver, all the way down.
+  const capValues = capacity.points.map((p) => p.value).filter((v): v is number => v !== null);
+  const capMax = capValues.length ? Math.max(...capValues) : null;
+  if (capMax !== null && low) {
+    facts.push({
+      label: 'Printed capacity',
+      value: `${n0(capMax)} ${capacity.unit}`,
+      note: `unchanged every day of the window, including the day ${n1(low.value)} was delivered`,
+      provenance: 'P',
+    });
+    const belowHalf = published.filter((p) => p.value < capMax / 2).length;
+    facts.push({
+      label: 'Days under half capacity',
+      value: `${belowHalf} of ${published.length}`,
+      note: `days the delivered line sat below ${n0(capMax / 2)} ${capacity.unit}`,
+      provenance: 'D',
+    });
+  }
+
+  // The consequence, at its worst.
+  if (narrative.totals.intensityPeak) {
+    facts.push({
+      label: 'Worst day for load shedding',
+      value: `${n1(narrative.totals.intensityPeak.value)} ${narrative.totals.intensityUnit}`,
+      note: `energy unserved on ${prettyDay(narrative.totals.intensityPeak.date)} — the highest of the window`,
+      provenance: 'P',
+    });
+  }
+
+  return facts;
+}
+
+/**
+ * Points for the masthead sparkline, normalised to 0..1 against the series'
+ * own range, with nulls preserved so the drawing can break rather than join.
+ */
+export function sparkline(
+  study: EventStudyResult,
+  seriesId: EventStudySeriesId,
+): { points: Array<{ x: number; y: number | null }>; min: number; max: number } | null {
+  const series = study.series[seriesId];
+  const values = series.points.map((p) => p.value).filter((v): v is number => v !== null);
+  if (values.length < 2) return null;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  return {
+    points: series.points.map((p, i) => ({
+      x: series.points.length > 1 ? i / (series.points.length - 1) : 0,
+      y: p.value === null ? null : (p.value - min) / span,
+    })),
+    min,
+    max,
+  };
 }
