@@ -192,9 +192,18 @@ national average across all categories and utilities, and it was superseded on 4
 weighted average fell to about 10.40 Tk/kWh. Two numbers agreeing to two decimals for unrelated
 reasons is exactly the kind of accident that gets published as validation. It is not.
 
-**And the fact this case makes best:** a 412-unit consumer's June bill is **identical** under the 3
-June and 4 June instruments. The amendment touched only the two lowest steps. Which instrument
-governs matters enormously at 40 units and not at all at 412 — and no rate table can express that.
+**CORRECTED 2026-09-05, by a golden test written during implementation.** This section originally
+said a 412-unit bill was **identical** under the 3 June and 4 June instruments, on the reasoning
+that the amendment touched only the two lowest steps. That is wrong, and the error is instructive:
+**only the lifeline row is categorical.** The 0–75 first step is *telescopic*, so it prices the
+first 75 units of every residential bill however large. Raising it 5.26 → 6.18 added
+**75 × Tk 0.92 = Tk 69.00** to every bill above 75 units, and the restoration took it back.
+
+So the 4 June reconsideration was **not** relief confined to low-income households, which is how the
+press framed it and how I repeated it. It **reduced every residential bill in the country** by
+Tk 69.00 relative to the 3 June order, and by more than that below 75 units. A 412-unit bill is
+Tk 3,578.12 as issued on 3 June and Tk 3,509.12 as governing. `lib/test/tariff-calculate.test.ts`
+pins both, and the constant Tk 69.00 gap across 76, 200, 412, 601 and 5,000 units.
 
 ---
 

@@ -1,5 +1,6 @@
 import { Scale, Map, ScrollText, Landmark } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { lifelineHistoryFact } from '@/lib/tariff/facts';
 
 /**
  * Energy Policy & Regulatory Framework — curated directory of the acts,
@@ -55,6 +56,35 @@ export type Policy = {
   /** Optional caveat surfaced prominently (e.g. replacement under preparation). */
   note?: string;
 };
+
+/**
+ * The first ESB surface to read a tariff figure from the canonical rule set
+ * instead of from a hand-typed string.
+ *
+ * EVIDENCE (a hashed BERC order on W:) -> VERSIONED RULE (lib/tariff/rules)
+ * -> RESOLUTION (resolveApplicableTariff) -> THIS PAGE. Nothing between the
+ * order and the reader is retyped, so when the rule set is corrected this page
+ * corrects with it, and it can no longer drift out of agreement with the
+ * engine the way the string it replaced did.
+ *
+ * `lifelineHistoryFact` resolves the governing rule and the rule as issued on
+ * 3 June, and reports both -- the fact worth publishing is not "Tk 4.63", it is
+ * that the rate was raised and restored inside a day.
+ */
+const LIFELINE_FACT: PolicyDataPoint = (() => {
+  const f = lifelineHistoryFact('2026-06');
+  // The rule set is validated at import, so this is unreachable; a page must
+  // still never render `undefined` as a tariff.
+  if (!f) {
+    return {
+      label: 'Residential lifeline rate',
+      value: 'No rule held for this period.',
+      asOf: 'Jun 2026',
+      source: { label: 'BERC', url: 'https://berc.org.bd/' },
+    };
+  }
+  return { label: f.label, value: f.value, asOf: 'Jun 2026', source: f.source };
+})();
 
 export const POLICY_GROUPS: readonly PolicyGroup[] = [
   { key: 'acts', title: 'Acts & Laws', blurb: 'Primary legislation passed by Parliament that governs the sector.', icon: Scale, tint: 'sky' },
@@ -686,7 +716,23 @@ export const POLICIES: Policy[] = [
     },
     dataPoints: [
       { label: 'Latest retail power tariff', value: '+16.68% — weighted average Tk 9.11 → Tk 10.63/kWh, announced 3 June 2026 (BERC’s first power determination since 2020)', asOf: 'Jun 2026', source: { label: 'Prothom Alo', url: 'https://en.prothomalo.com/business/local/x730jsk72r' } },
-      { label: 'Latest bulk tariff', value: '+19.85% — Tk 7.00 → Tk 8.39/kWh; transmission charge up to ~39 paisa/unit; lifeline rate Tk 4.63 → Tk 5.32', asOf: 'Jun 2026', source: { label: 'Dhaka Tribune', url: 'https://www.dhakatribune.com/bangladesh/power-energy/411666/how-much-does-electricity-tariff-increase-per' } },
+      /**
+       * QUARANTINED 2026-09-05, and replaced by a fact the engine resolves.
+       *
+       * This entry read: "+19.85% — Tk 7.00 → Tk 8.39/kWh; transmission charge
+       * up to ~39 paisa/unit; lifeline rate Tk 4.63 → Tk 5.32", asOf Jun 2026,
+       * cited to Dhaka Tribune. Every figure in it is from BERC's order of
+       * 3 June 2026, and BERC amended that order on 4 June: the lifeline
+       * increase was set aside and the bulk rates were cut. The page therefore
+       * told readers for three months that the lifeline rate had risen to 5.32
+       * when it had never left 4.63.
+       *
+       * It is not replaced with better hand-typed numbers, because the bulk
+       * half cannot be one number at all -- Appendix-ka of the reconsideration
+       * order fixes bulk per utility AND per voltage, and the 33 kV rate alone
+       * runs from 7.1530 for BREB's PBSs to 10.0950 for DPDC and DESCO.
+       */
+      LIFELINE_FACT,
       { label: 'Feb 2024 retail adjustment', value: '+8.5% to average Tk 8.95/kWh (from Tk 8.25), gazetted 29 Feb 2024 effective 1 Feb 2024', asOf: 'Feb 2024', source: { label: 'Dhaka Tribune', url: 'https://www.dhakatribune.com/bangladesh/power-energy/340667/gazette-notification-issued-to-raise-8.50%25-power' } },
       { label: 'Feb 2024 bulk adjustment', value: '+5% to Tk 7.04/kWh; distributors buy from BPDB at Tk 8.44 (230 kV), Tk 8.47 (132 kV), Tk 7.62 (33 kV)', asOf: 'Feb 2024', source: { label: 'Dhaka Tribune', url: 'https://www.dhakatribune.com/bangladesh/power-energy/340667/gazette-notification-issued-to-raise-8.50%25-power' } },
       { label: 'Latest gas tariff order', value: '+33% for new industrial connections (Tk 30 → 40/m³) and new captive users (Tk 31.5 → 42), effective 13 April 2025', asOf: 'Apr 2025', source: { label: 'The Daily Star', url: 'https://www.thedailystar.net/news/bangladesh/news/33-hike-gas-tariff-new-industries-3870696' } },

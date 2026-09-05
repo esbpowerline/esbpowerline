@@ -288,6 +288,33 @@ Reuse the archive's discipline verbatim; it is already proven here.
 
 ## F. Historical-version semantics
 
+> **SUPERSEDED 2026-09-05 by the implementation.** The zero-length-interval trick below is
+> **wrong** and was replaced before any code was written. Collapsing the 3 June rule to
+> `effectiveTo === effectiveFrom` made a validly issued instrument unrepresentable rather than
+> merely superseded, and it destroyed the ability to ask what was in force *as known on* 3 June —
+> it forced two different questions onto one interval.
+>
+> **What shipped instead: two intervals, not one.** Billing validity (`billingValidity`, in bill
+> months) answers *which billing periods does this rule govern*. Knowledge (`knowledge.knownFrom`
+> / `knownUntil`, in calendar days, with a `basis` naming what made the rule knowable) answers
+> *between which dates was this the answer*. The 3 June and 4 June lifeline rules have **identical**
+> billing validity and **disjoint** knowledge intervals. `resolveApplicableTariff` without `asOf`
+> filters on `knownUntil === null` and returns 4.63; with `asOf: '2026-06-03'` it filters on the
+> knowledge interval and returns 5.32 with `supersededBy` populated.
+>
+> Five dates are now kept distinct per instrument — `issuedOn`, `effectiveFrom`, `publishedOn`,
+> `retrievedAt` and the component's `knownFrom` — because Reconsideration Order 2026/01 is dated
+> 4 June and was uploaded on 24 August, and a website upload date is not a legal effective date.
+> `knownFrom` is 4 June with its basis recorded, because a *different* document (notification memo
+> 2569) made the decision knowable that day.
+>
+> Authoritative description: the header of `lib/tariff/types.ts`. The rest of this section stands
+> where it does not conflict — `CURRENT` is still derived rather than stored, overlap still throws,
+> revocation is still not deletion.
+
+### Original text, kept because the reasoning that produced the wrong model is worth reading
+
+
 **Resolution is a pure function**, separate from calculation:
 
 ```

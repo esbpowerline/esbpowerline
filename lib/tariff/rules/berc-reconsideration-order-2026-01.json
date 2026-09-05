@@ -1,0 +1,96 @@
+{
+  "_comment": [
+    "BERC Reconsideration Order 2026/01, dated 4 June 2026 — one day after Order 2026/22.",
+    "",
+    "It amends exactly two rows. Paragraph 5.1: the increases re-fixed on 3 June for the",
+    "residential lifeline (0-50 units) and first step (0-75 units) are not made effective, and the",
+    "previous rates are restored. Paragraph 5.2: 4.63 and 5.26 remain in force from bill month",
+    "June 2026. Paragraph 5.7: all other orders and directions of Orders 2026/20 and 2026/22",
+    "remain unchanged.",
+    "",
+    "This is the canonical version test. Both instruments carry the SAME billing validity — bill",
+    "month June 2026 onward — so an effective interval alone cannot order them. What separates",
+    "them is the knowledge interval: 3-4 June for the superseded rule, 4 June onward for this one.",
+    "Asking for June 2026 with no asOf returns 4.63; asking with asOf 2026-06-03 returns 5.32 and",
+    "flags it as subsequently amended.",
+    "",
+    "PUBLICATION LAG, RECORDED DELIBERATELY. This order is dated 4 June 2026 on its face and was",
+    "uploaded to berc.org.bd on 24 August 2026 — eighty-one days later. Neither date alone is",
+    "usable: treating the upload as the effective date would say June and July bills ran under a",
+    "rule that did not exist, and treating it as knownFrom would ignore that BERC's notification",
+    "memo 2569 published the same decision on 4 June, which DPDC carried on its own tariff page.",
+    "knownFrom is therefore 2026-06-04 with its basis named, and publishedOn stays 2026-08-24.",
+    "",
+    "Legal basis is worth noting because it shows this is a named mechanism rather than an ad hoc",
+    "reversal: BERC Act 2003 ss. 22(kha) and 34, read with regulation 13(3) of the BERC Electricity",
+    "Distribution (Retail) Tariff Regulations 2016."
+  ],
+  "instrument": {
+    "id": "berc-reconsideration-order-2026-01",
+    "authority": "BERC",
+    "instrumentType": "BERC_ORDER",
+    "identifier": "বিইআরসি পুনর্বিবেচনা আদেশ নম্বর: ২০২৬/০১ (notified by memo 28.01.0000.012.04.003.26.2569)",
+    "titleEn": "Reconsideration Order 2026 on the retail electricity tariff for the residential lifeline (0–50 units) and residential first step (0–75 units), and on the bulk electricity tariff",
+    "issuedOn": "2026-06-04",
+    "publishedOn": "2026-08-24",
+    "retrievedAt": "2026-09-05",
+    "language": "bn",
+    "legalBasis": "BERC Act 2003, ss. 22(kha) and 34, read with reg. 13(3) of the BERC Electricity Distribution (Retail) Tariff Regulations 2016, after a hearing",
+    "lifecycle": "IN_FORCE",
+    "amends": ["berc-order-2026-22", "berc-order-2026-20"],
+    "verificationStatus": "DOCUMENT_HELD",
+    "evidence": {
+      "documentId": "berc-reconsideration-order-2026-01",
+      "contentSha256": "f5a7c4538585f849a0d4133c0066051bb0716062c714b5aaf33d5e00d9024386",
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-berc/2026/7/03a7fcfe-bc5f-41c3-b46e-8e3a5b15732a.pdf",
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\berc-2026-08-24-reconsideration.pdf",
+      "pages": 10,
+      "locator": "paragraphs 5.1–5.2, page 5 (printed পৃষ্ঠা ৫); signed by the Chairman and four Members, page 6"
+    },
+    "note": "The 4 June notification memo 2569 that published this decision is independently held as pages 5 of the DPDC bundle, sha256 8f0bc9b8322e897c33ff8f6ab5d9f8c0509e7dd78f20409b8f233a4ddaee827a. Two copies of the same decision from two publishers."
+  },
+  "components": [
+    {
+      "id": "berc2026-01-lta-slab-1",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-reconsideration-order-2026-01",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Lifeline (0–50 units)",
+      "slabIndex": 1,
+      "fromUnit": 1,
+      "toUnit": 50,
+      "ratePaisa": 463,
+      "applicability": "CATEGORICAL",
+      "billingValidity": { "from": "2026-06", "to": null },
+      "knowledge": {
+        "knownFrom": "2026-06-04",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2569 published 4 June 2026; the full order followed on 24 August 2026"
+      }
+    },
+    {
+      "id": "berc2026-01-lta-slab-2",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-reconsideration-order-2026-01",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "First step (0–75 units)",
+      "slabIndex": 2,
+      "fromUnit": 1,
+      "toUnit": 75,
+      "ratePaisa": 526,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2026-06", "to": null },
+      "knowledge": {
+        "knownFrom": "2026-06-04",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2569 published 4 June 2026; the full order followed on 24 August 2026"
+      }
+    }
+  ]
+}

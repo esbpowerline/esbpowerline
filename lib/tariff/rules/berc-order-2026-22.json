@@ -1,0 +1,295 @@
+{
+  "_comment": [
+    "BERC Order 2026/22, published by notification memo 28.01.0000.012.04.003.26.2521 of 3 June",
+    "2026. The whole LT-A ladder rose. One day later, Reconsideration Order 2026/01 set aside the",
+    "increases to the lifeline and first step only, so slabs 1 and 2 below have a CLOSED knowledge",
+    "interval (3-4 June) while slabs 3-7 and the demand charge remain the answer today.",
+    "",
+    "That asymmetry is the point of versioning components rather than schedules: an amended",
+    "instrument still governs every row it was not amended in. Resolving June 2026 with no asOf",
+    "returns 4.63 from the reconsideration order for the lifeline AND 8.50 from this order for the",
+    "second step, in one schedule assembled from two instruments.",
+    "",
+    "Clause 2 of the notification states that existing demand charges are unchanged, which is why",
+    "the 42.00 Tk/kW/month rate is re-encoded here at the same value rather than inherited.",
+    "",
+    "Clause 3 names Appendix-kha of this order as fixing the 2026 terms, applicability and",
+    "miscellaneous charges, and declares it an inseparable part of the tariff. That appendix is",
+    "NOT held. It is the most likely home of the VAT treatment and the prompt-payment rebate, and",
+    "both stay UNKNOWN until it is."
+  ],
+  "instrument": {
+    "id": "berc-order-2026-22",
+    "authority": "BERC",
+    "instrumentType": "BERC_NOTIFICATION",
+    "identifier": "BERC Order 2026/22, notified by memo 28.01.0000.012.04.003.26.2521",
+    "titleEn": "Notification on the re-fixing of retail electricity tariff (Retail Electricity Tariff, 2026)",
+    "issuedOn": "2026-06-03",
+    "publishedOn": "2026-06-03",
+    "retrievedAt": "2026-09-05",
+    "language": "bn",
+    "legalBasis": "BERC Act 2003, ss. 22(kha) and 34, after a public hearing",
+    "lifecycle": "AMENDED",
+    "amendedBy": [
+      "berc-reconsideration-order-2026-01"
+    ],
+    "supersedes": [
+      "sro-43-law-2024"
+    ],
+    "verificationStatus": "DOCUMENT_HELD",
+    "evidence": {
+      "documentId": "berc-notification-2521-2026-06-03",
+      "contentSha256": "5c7b7b6bb615d635aa62326f5f0124f99346c08a414105f0d8d8c1cbb821bfa8",
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-berc/2026/5/d281aa72-3b0b-4fbf-8a71-f0f7309bb39c.pdf",
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2026\\berc-2026-06-03.pdf",
+      "pages": 4,
+      "locator": "Retail Electricity Tariff 2026, section ka (LT), page 1; footnotes 2 and 3 and clauses 2-6, page 4"
+    },
+    "note": "Effective from bill month June 2026. Signed by Md. Nazrul Islam Sarkar, Secretary, BERC."
+  },
+  "components": [
+    {
+      "id": "berc2026-22-lta-slab-1",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Lifeline (0–50 units)",
+      "slabIndex": 1,
+      "fromUnit": 1,
+      "toUnit": 50,
+      "ratePaisa": 532,
+      "applicability": "CATEGORICAL",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": "2026-06-04",
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026; ceased to be the answer when memo 2569 published the reconsideration on 4 June"
+      },
+      "supersededBy": {
+        "componentVersionId": "berc2026-01-lta-slab-1",
+        "instrumentId": "berc-reconsideration-order-2026-01",
+        "on": "2026-06-04"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-slab-2",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "First step (0–75 units)",
+      "slabIndex": 2,
+      "fromUnit": 1,
+      "toUnit": 75,
+      "ratePaisa": 618,
+      "applicability": "TELESCOPIC",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": "2026-06-04",
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026; ceased to be the answer when memo 2569 published the reconsideration on 4 June"
+      },
+      "supersededBy": {
+        "componentVersionId": "berc2026-01-lta-slab-2",
+        "instrumentId": "berc-reconsideration-order-2026-01",
+        "on": "2026-06-04"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-slab-3",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Second step (76–200 units)",
+      "slabIndex": 3,
+      "fromUnit": 76,
+      "toUnit": 200,
+      "ratePaisa": 850,
+      "applicability": "TELESCOPIC",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-slab-4",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Third step (201–300 units)",
+      "slabIndex": 4,
+      "fromUnit": 201,
+      "toUnit": 300,
+      "ratePaisa": 910,
+      "applicability": "TELESCOPIC",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-slab-5",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Fourth step (301–400 units)",
+      "slabIndex": 5,
+      "fromUnit": 301,
+      "toUnit": 400,
+      "ratePaisa": 962,
+      "applicability": "TELESCOPIC",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-slab-6",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Fifth step (401–600 units)",
+      "slabIndex": 6,
+      "fromUnit": 401,
+      "toUnit": 600,
+      "ratePaisa": 1501,
+      "applicability": "TELESCOPIC",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-slab-7",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Sixth step (above 600 units)",
+      "slabIndex": 7,
+      "fromUnit": 601,
+      "toUnit": null,
+      "ratePaisa": 1735,
+      "applicability": "TELESCOPIC",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-demand",
+      "kind": "DEMAND_CHARGE",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Demand charge",
+      "ratePaisa": 4200,
+      "basis": "SANCTIONED_LOAD_KW",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "BERC notification memo 28.01.0000.012.04.003.26.2521 published 3 June 2026"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-vat",
+      "kind": "VAT",
+      "status": "UNKNOWN",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "VAT",
+      "reason": "Authoritative calculation rule not yet verified. This gazette states VAT only on the Table-2 miscellaneous service fees, condition (gha). Neither it nor the June 2026 instruments state VAT on the energy or demand charge — that rule belongs to VAT law rather than the tariff order, so the evidence chain runs through a second regulator. The universally quoted '5% on energy plus demand' is unsourced here.",
+      "wouldBeSettledBy": "An NBR instrument, or an authentic postpaid bill showing the VAT base and its position in the order of operations",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "Absence established from the notification held; BERC Order 2026/22 Appendix-kha, which the notification names as fixing the miscellaneous charges, is not held"
+      }
+    },
+    {
+      "id": "berc2026-22-lta-rebate",
+      "kind": "REBATE",
+      "status": "UNKNOWN",
+      "instrumentId": "berc-order-2026-22",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Prompt-payment rebate",
+      "reason": "The 5% pay-by-due-date rebate that secondary calculators list appears in no instrument held. It is either in an appendix not yet obtained, a utility practice outside the tariff order, or calculator folklore.",
+      "wouldBeSettledBy": "The 2026 counterpart of Table-2 (BERC Order 2026/22, Appendix-kha), or an authentic bill",
+      "billingValidity": {
+        "from": "2026-06",
+        "to": null
+      },
+      "knowledge": {
+        "knownFrom": "2026-06-03",
+        "knownUntil": null,
+        "basis": "Absence established from the notification held; BERC Order 2026/22 Appendix-kha, which the notification names as fixing the miscellaneous charges, is not held"
+      }
+    }
+  ]
+}

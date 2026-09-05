@@ -1,0 +1,249 @@
+{
+  "_comment": [
+    "Gazette S.R.O. 43-Law/2024, 29 February 2024 — the residential tariff immediately before",
+    "June 2026, and the proof that the issuing authority changes across the archive: this one is",
+    "the Power Division acting under BERC Act s.34ka, the executive route that set tariffs without",
+    "a BERC public hearing between January 2023 and August 2024.",
+    "",
+    "Encoded for BPDB LT-A residential postpaid single-phase only. The gazette fixes one national",
+    "LT-A table for all six licensees, but its footnote 3 also carves out BREB's PBSs whose",
+    "lifeline rate already exceeds 4.63, and footnote 7 bills PBS consumption at the MT-5 rate.",
+    "Encoding the other five utilities without encoding those carve-outs would publish a figure",
+    "the gazette does not state, so they are left out.",
+    "",
+    "Table-2 of this gazette enumerates every permitted miscellaneous fee and every one is a",
+    "one-off event charge — no monthly meter rent, no monthly service charge — and its condition",
+    "(ka) forbids any charge outside that list. That is why METER_RENT and SERVICE_CHARGE appear",
+    "below as NOT applicable rather than as unknowns."
+  ],
+  "instrument": {
+    "id": "sro-43-law-2024",
+    "authority": "POWER_DIVISION",
+    "instrumentType": "GAZETTE_NOTIFICATION",
+    "identifier": "এস.আর.ও. নম্বর ৪৩-আইন/২০২৪",
+    "titleEn": "Gazette notification re-fixing the retail electricity tariff and charges for miscellaneous electricity-related services",
+    "issuedOn": "2024-02-29",
+    "publishedOn": "2024-02-29",
+    "retrievedAt": "2026-09-05",
+    "language": "bn",
+    "legalBasis": "BERC Act 2003, s. 34ka — executive determination without a BERC public hearing",
+    "lifecycle": "SUPERSEDED",
+    "supersededBy": ["berc-order-2026-22"],
+    "repeals": ["sro-9-law-2023"],
+    "verificationStatus": "DOCUMENT_HELD",
+    "evidence": {
+      "documentId": "sro-43-law-2024",
+      "contentSha256": "dcfaf4667a0081db65fdf32a5b8c75fb522b0ef27c311ed568e34530784ae7b1",
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-powercell/2024/12/107e2196d61d49a782cf7c85e79f4ab6.pdf",
+      "archivePath": "W:\\Grid-Explorer\\BERC\\tariff\\2024\\powercell-retail-2024.pdf",
+      "pages": 21,
+      "locator": "Table-1 (সারণি-১), section ka, page 2; footnotes 2 and 3, page 6; Table-2, pages 17-19"
+    },
+    "note": "The only instrument held with a text layer. Effective from bill month February 2024."
+  },
+  "components": [
+    {
+      "id": "sro43-2024-lta-slab-1",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Lifeline (0–50 units)",
+      "slabIndex": 1,
+      "fromUnit": 1,
+      "toUnit": 50,
+      "ratePaisa": 463,
+      "applicability": "CATEGORICAL",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-slab-2",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "First step (0–75 units)",
+      "slabIndex": 2,
+      "fromUnit": 1,
+      "toUnit": 75,
+      "ratePaisa": 526,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-slab-3",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Second step (76–200 units)",
+      "slabIndex": 3,
+      "fromUnit": 76,
+      "toUnit": 200,
+      "ratePaisa": 720,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-slab-4",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Third step (201–300 units)",
+      "slabIndex": 4,
+      "fromUnit": 201,
+      "toUnit": 300,
+      "ratePaisa": 759,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-slab-5",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Fourth step (301–400 units)",
+      "slabIndex": 5,
+      "fromUnit": 301,
+      "toUnit": 400,
+      "ratePaisa": 802,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-slab-6",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Fifth step (401–600 units)",
+      "slabIndex": 6,
+      "fromUnit": 401,
+      "toUnit": 600,
+      "ratePaisa": 1267,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-slab-7",
+      "kind": "ENERGY_SLAB",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Sixth step (above 600 units)",
+      "slabIndex": 7,
+      "fromUnit": 601,
+      "toUnit": null,
+      "ratePaisa": 1461,
+      "applicability": "TELESCOPIC",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-demand",
+      "kind": "DEMAND_CHARGE",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Demand charge",
+      "ratePaisa": 4200,
+      "basis": "SANCTIONED_LOAD_KW",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Gazette S.R.O. 43-Law/2024 published 29 February 2024"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-vat",
+      "kind": "VAT",
+      "status": "UNKNOWN",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "VAT",
+      "reason": "Authoritative calculation rule not yet verified. This gazette states VAT only on the Table-2 miscellaneous service fees, condition (gha). Neither it nor the June 2026 instruments state VAT on the energy or demand charge — that rule belongs to VAT law rather than the tariff order, so the evidence chain runs through a second regulator. The universally quoted '5% on energy plus demand' is unsourced here.",
+      "wouldBeSettledBy": "An NBR instrument, or an authentic postpaid bill showing the VAT base and its position in the order of operations",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Absence established from the gazette held"
+      }
+    },
+    {
+      "id": "sro43-2024-lta-rebate",
+      "kind": "REBATE",
+      "status": "UNKNOWN",
+      "instrumentId": "sro-43-law-2024",
+      "utility": "BPDB",
+      "category": "LT_A_RESIDENTIAL",
+      "meterType": "POSTPAID",
+      "phase": "SINGLE",
+      "label": "Prompt-payment rebate",
+      "reason": "The 5% pay-by-due-date rebate that secondary calculators list appears in no instrument held. It is either in an appendix not yet obtained, a utility practice outside the tariff order, or calculator folklore.",
+      "wouldBeSettledBy": "The 2026 counterpart of Table-2 (BERC Order 2026/22, Appendix-kha), or an authentic bill",
+      "billingValidity": { "from": "2024-02", "to": "2026-06" },
+      "knowledge": {
+        "knownFrom": "2024-02-29",
+        "knownUntil": null,
+        "basis": "Absence established from the gazette held"
+      }
+    }
+  ]
+}
