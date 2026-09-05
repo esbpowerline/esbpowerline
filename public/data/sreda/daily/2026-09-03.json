@@ -1,14 +1,14 @@
 {
   "date": "2026-09-03",
-  "lastUpdate": "2026-09-03 16:38:46",
+  "lastUpdate": "2026-09-03 21:48:25",
   "sourceUrl": "https://ndre.sreda.gov.bd/",
-  "totalRenewableMw": 1850.01,
+  "totalRenewableMw": 1850.04,
   "renewableTech": [
     {
       "tech": "Solar",
       "offGridMw": 0,
-      "onGridMw": 1556.917552,
-      "totalMw": 1556.917552
+      "onGridMw": 1556.954572,
+      "totalMw": 1556.954572
     },
     {
       "tech": "Wind",
@@ -65,7 +65,7 @@
     },
     {
       "fuel": "Renewable",
-      "capacityMw": 1850.09,
+      "capacityMw": 1850.12,
       "sharePct": 5.69
     },
     {
@@ -74,7 +74,7 @@
       "sharePct": 8.62
     }
   ],
-  "scrapedAt": "2026-09-03T13:59:31.252Z",
+  "scrapedAt": "2026-09-05T21:30:15.718Z",
   "technologyBreakdown": [
     {
       "source": "Solar",
@@ -95,10 +95,10 @@
     {
       "source": "Solar",
       "technology": "Net Metering Rooftop Solar",
-      "quantity": 4950,
+      "quantity": 4952,
       "offGridMwp": 0,
-      "onGridMwp": 364.193,
-      "totalMwp": 364.193
+      "onGridMwp": 364.23,
+      "totalMwp": 364.23
     },
     {
       "source": "Solar",
@@ -214,10 +214,10 @@
     }
   ],
   "technologyTotals": {
-    "quantity": 6433732,
+    "quantity": 6433734,
     "offGridMwp": 384.365,
-    "onGridMwp": 1465.643,
-    "totalMwp": 1850.008
+    "onGridMwp": 1465.68,
+    "totalMwp": 1850.045
   },
   "carbonEstimates": [
     {
@@ -230,11 +230,11 @@
     },
     {
       "technology": "Net Metering Rooftop Solar",
-      "installedCapacity": "360.79 MWp",
-      "lifetimeEnergyExpected": "8 TWh",
+      "installedCapacity": "365.4 MWp",
+      "lifetimeEnergyExpected": "9 TWh",
       "lifetimeCo2Expected": "6 M tCO₂",
       "tillTodayEnergyExpected": "1 TWh",
-      "tillTodayCo2Expected": "679 k tCO₂"
+      "tillTodayCo2Expected": "682 k tCO₂"
     },
     {
       "technology": "Solar Irrigation",
@@ -257,7 +257,7 @@
       "installedCapacity": "33.69 MWp",
       "lifetimeEnergyExpected": "687 GWh",
       "lifetimeCo2Expected": "460 k tCO₂",
-      "tillTodayEnergyExpected": "241 GWh",
+      "tillTodayEnergyExpected": "242 GWh",
       "tillTodayCo2Expected": "162 k tCO₂"
     },
     {
@@ -313,8 +313,8 @@
       "installedCapacity": "62 MWp",
       "lifetimeEnergyExpected": "3 TWh",
       "lifetimeCo2Expected": "2 M tCO₂",
-      "tillTodayEnergyExpected": "348 GWh",
-      "tillTodayCo2Expected": "233 k tCO₂"
+      "tillTodayEnergyExpected": "349 GWh",
+      "tillTodayCo2Expected": "234 k tCO₂"
     },
     {
       "technology": "Large Hydro (On-Grid)",
@@ -342,7 +342,7 @@
     },
     {
       "technology": "Total",
-      "installedCapacity": "1839.42 MWp",
+      "installedCapacity": "1844.03 MWp",
       "lifetimeEnergyExpected": "42 TWh",
       "lifetimeCo2Expected": "28 M tCO₂",
       "tillTodayEnergyExpected": "14 TWh",
@@ -395,9 +395,9 @@
         },
         {
           "organisation": "WZPDCL",
-          "quantity": 542,
-          "capacityMwp": 22.09,
-          "capacityPublished": "22.09 MWp"
+          "quantity": 544,
+          "capacityMwp": 22.13,
+          "capacityPublished": "22.13 MWp"
         },
         {
           "organisation": "DESCO",
@@ -418,9 +418,9 @@
           "capacityPublished": "9.65 MWp"
         }
       ],
-      "publishedTotalMwp": 365.37,
-      "publishedTotalQuantity": 4979,
-      "publishedTotalCapacity": "365.37 MWp"
+      "publishedTotalMwp": 365.4,
+      "publishedTotalQuantity": 4981,
+      "publishedTotalCapacity": "365.4 MWp"
     },
     {
       "category": "Solar Irrigation Pumps",
@@ -551,8 +551,8 @@
         {
           "year": "2026",
           "quantity": null,
-          "capacityMwp": 126.48,
-          "capacityPublished": "126.48 MWp",
+          "capacityMwp": 126.52,
+          "capacityPublished": "126.52 MWp",
           "yearMalformed": false
         },
         {
@@ -696,10 +696,10 @@
           "yearMalformed": true
         }
       ],
-      "publishedTotalMwp": 1563.29,
+      "publishedTotalMwp": 1563.33,
       "publishedTotalQuantity": null,
       "publishedTotalUnit": "MW",
-      "publishedTotalCapacity": "1563.29 MW"
+      "publishedTotalCapacity": "1563.33 MW"
     },
     {
       "category": "Small Projects",
@@ -2130,6 +2130,198 @@
       "publishedCapacity": "230 MWp"
     },
     {
+      "technology": "Biogas to Electricity",
+      "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=14",
+      "rows": [
+        {
+          "projectName": "Oasis Services (Agro) Ltd",
+          "sid": "3688",
+          "capacityMwp": 0.3,
+          "capacityPublished": "300 kWp",
+          "location": "Bhaluka, Mymensingh",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2020-02-18",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "Phenix Agro Ltd. at Member Bari, Gazipur",
+          "sid": "117",
+          "capacityMwp": 0.4,
+          "capacityPublished": "400 kWp",
+          "location": "Whole Bangladesh, Gazipur",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2016-09-30",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "UAL Bio-Electricity Project",
+          "sid": "121",
+          "capacityMwp": 0.06,
+          "capacityPublished": "60 kWp",
+          "location": "Whole Bangladesh, Gazipur",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2016-04-30",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "KKT Bio-Electricity Project",
+          "sid": "120",
+          "capacityMwp": 0.1,
+          "capacityPublished": "100 kWp",
+          "location": "Whole Bangladesh, Panchagarh",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2015-12-31",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "ZPL Bio-Electricity Project",
+          "sid": "119",
+          "capacityMwp": 0.03,
+          "capacityPublished": "30 kWp",
+          "location": "Whole Bangladesh, Chuadanga",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2015-11-30",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "UKAL Bio-Electricity Project",
+          "sid": "118",
+          "capacityMwp": 0.03,
+          "capacityPublished": "30 kWp",
+          "location": "Whole Bangladesh, Tangail",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2014-10-31",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "Seed Bangla Foundation Bio-Electricity Project",
+          "sid": "116",
+          "capacityMwp": 0.02,
+          "capacityPublished": "20 kWp",
+          "location": "Whole Bangladesh, Gazipur",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2012-12-31",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "RKKL Bio-Electricity Project",
+          "sid": "115",
+          "capacityMwp": 0.05,
+          "capacityPublished": "50 kWp",
+          "location": "Whole Bangladesh, Mymensingh",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2010-06-30",
+          "status": "Completed & Running"
+        },
+        {
+          "projectName": "Dutch Dairy Ltd.",
+          "sid": "3689",
+          "capacityMwp": 0.4,
+          "capacityPublished": "400 kWp",
+          "location": "Lohajang Upazila, Munshiganj",
+          "technology": "Biogas to Electricity (Off-Grid)",
+          "agency": "IDCOL",
+          "agencyFullName": "Infrastructure Development Company Limited",
+          "finance": "IDCOL",
+          "financeFullName": "Infrastructure Development Company Limited (IDCOL)",
+          "completionDate": "2021-08-30",
+          "status": "Implementation Ongoing"
+        },
+        {
+          "projectName": "11 MW (AC) Grid-Tied Waste to Power Plant at Brahmanbaria Sadar, Brahmanbaria",
+          "sid": "6188",
+          "capacityMwp": 11,
+          "capacityPublished": "11 MWp",
+          "location": "Brahmanbaria Sadar Upazila, Brahmanbaria",
+          "technology": "Biogas to Electricity (On-Grid)",
+          "agency": "BPDB",
+          "agencyFullName": "Bangladesh Power Development Board",
+          "finance": "IPP (Unsolicited)",
+          "financeFullName": "Independent Power Producer (Unsolicited) (IPP (Unsolicited))",
+          "completionDate": "2027-06-12",
+          "status": "Under Planning"
+        },
+        {
+          "projectName": "Narayanganj 6 MW Power Plant by Consortium of UD Environmental Equipment Technology Co. Ltd, Everbright Environmental Protection Technical Equipment (Changzhou) Limited and SABS Syndicate",
+          "sid": "4172",
+          "capacityMwp": 6,
+          "capacityPublished": "6 MWp",
+          "location": "Naryanganj Sadar Upazila, Narayanganj",
+          "technology": "Biogas to Electricity (On-Grid)",
+          "agency": "BPDB",
+          "agencyFullName": "Bangladesh Power Development Board",
+          "finance": "IPP",
+          "financeFullName": "Independent Power Producer (IPP)",
+          "completionDate": "2023-10-31",
+          "status": "Under Planning"
+        },
+        {
+          "projectName": "42.5 MW Municipal Solid Waste based Power Plant at Dhaka North City Corporation by China Machinery Engineering Corporation (CMEC)",
+          "sid": "4234",
+          "capacityMwp": 42.5,
+          "capacityPublished": "42.5 MWp",
+          "location": "Dhaka City, Dhaka",
+          "technology": "Biogas to Electricity (On-Grid)",
+          "agency": "BPDB",
+          "agencyFullName": "Bangladesh Power Development Board",
+          "finance": "IPP (Unsolicited)",
+          "financeFullName": "Independent Power Producer (Unsolicited) (IPP (Unsolicited))",
+          "completionDate": "2023-06-13",
+          "status": "Under Planning"
+        },
+        {
+          "projectName": "1 MW Grid Connected Power Plant Based on Municipal Solid Waste under Pilot Project at Keraniganj on Turnkey Basis",
+          "sid": "160",
+          "capacityMwp": 1,
+          "capacityPublished": "1 MWp",
+          "location": "Keraniganj Upazila, Dhaka",
+          "technology": "Biogas to Electricity (On-Grid)",
+          "agency": "BPDB",
+          "agencyFullName": "Bangladesh Power Development Board",
+          "finance": "IPP (Unsolicited)",
+          "financeFullName": "Independent Power Producer (Unsolicited) (IPP (Unsolicited))",
+          "completionDate": "2020-12-31",
+          "status": "Under Planning"
+        }
+      ],
+      "pagesFetched": 1,
+      "publishedSystemCount": 13,
+      "publishedCapacityMwp": 61.89,
+      "publishedCapacity": "61.89 MWp"
+    },
+    {
       "technology": "Biomass to Electricity",
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=16",
       "rows": [
@@ -2180,19 +2372,19 @@
     },
     {
       "check": "Technology-wise on-grid capacity == SREDA's own Total row",
-      "published": 1465.643,
-      "computed": 1465.643,
+      "published": 1465.68,
+      "computed": 1465.68,
       "delta": 0,
-      "tolerance": 1.0075,
+      "tolerance": 1.0165,
       "ok": true,
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=8"
     },
     {
       "check": "Technology-wise total capacity == SREDA's own Total row",
-      "published": 1850.008,
-      "computed": 1850.009,
+      "published": 1850.045,
+      "computed": 1850.046,
       "delta": 0.001,
-      "tolerance": 1.07,
+      "tolerance": 1.0745,
       "ok": true,
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=8"
     },
@@ -2216,19 +2408,19 @@
     },
     {
       "check": "Net Metered Rooftop Solar: organisations sum == SREDA's own Total row",
-      "published": 365.37,
-      "computed": 365.36,
-      "delta": -0.01,
-      "tolerance": 0.035,
+      "published": 365.4,
+      "computed": 365.4,
+      "delta": 0,
+      "tolerance": 0.08,
       "ok": true,
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=17"
     },
     {
       "check": "Net Metered Rooftop Solar: technology-wise page == statistics page",
-      "published": 365.37,
-      "computed": 364.193,
-      "delta": -1.177,
-      "tolerance": 0.0055,
+      "published": 365.4,
+      "computed": 364.23,
+      "delta": -1.17,
+      "tolerance": 0.055,
       "ok": false,
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=8"
     },
@@ -2261,8 +2453,8 @@
     },
     {
       "check": "Large Projects by year: years sum == SREDA's own Total row",
-      "published": 1563.29,
-      "computed": 1563.271,
+      "published": 1563.33,
+      "computed": 1563.311,
       "delta": -0.019,
       "tolerance": 1.1561,
       "ok": true,
@@ -2386,6 +2578,42 @@
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=12"
     },
     {
+      "check": "Biogas to Electricity: projects read == SREDA's own \"System\" count",
+      "published": 13,
+      "computed": 13,
+      "delta": 0,
+      "tolerance": 0,
+      "ok": true,
+      "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=14"
+    },
+    {
+      "check": "Biogas to Electricity: all projects sum == SREDA's own \"Capacity\" headline",
+      "published": 61.89,
+      "computed": 61.89,
+      "delta": 0,
+      "tolerance": 1.5595,
+      "ok": true,
+      "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=14"
+    },
+    {
+      "check": "Biogas to Electricity: running project count == technology-wise page",
+      "published": 7,
+      "computed": 8,
+      "delta": 1,
+      "tolerance": 0,
+      "ok": false,
+      "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=14"
+    },
+    {
+      "check": "Biogas to Electricity: running projects in the register == technology-wise page",
+      "published": 0.69,
+      "computed": 0.99,
+      "delta": 0.3,
+      "tolerance": 0.009,
+      "ok": false,
+      "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=1&i=14"
+    },
+    {
       "check": "Biomass to Electricity: projects read == SREDA's own \"System\" count",
       "published": 2,
       "computed": 2,
@@ -2424,17 +2652,17 @@
     {
       "check": "National mix: fuel rows sum == SREDA's own total installed capacity",
       "published": 32500,
-      "computed": 32500.09,
-      "delta": 0.09,
+      "computed": 32500.12,
+      "delta": 0.12,
       "tolerance": 3.505,
       "ok": true,
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=7"
     },
     {
       "check": "Renewable capacity: national mix page == technology-wise page",
-      "published": 1850.09,
-      "computed": 1850.008,
-      "delta": -0.082,
+      "published": 1850.12,
+      "computed": 1850.045,
+      "delta": -0.075,
       "tolerance": 0.0055,
       "ok": false,
       "sourceUrl": "https://ndre.sreda.gov.bd/index.php?id=7"
