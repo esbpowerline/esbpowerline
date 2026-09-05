@@ -38,6 +38,7 @@ const TAB_IDS: GridExplorerTab[] = [
   'regional',
   'macro',
   'plants',
+  'timemachine',
 ];
 
 const MACRO_IDS: GridMacroSubTab[] = [
