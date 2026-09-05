@@ -7,7 +7,8 @@ export type GridExplorerTab =
   | 'transmission'
   | 'regional'
   | 'macro'
-  | 'plants';
+  | 'plants'
+  | 'timemachine';
 
 export type GridMacroSubTab =
   | 'overview'

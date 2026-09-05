@@ -138,3 +138,30 @@ describe('tier-gated daily data paths', () => {
     expect(resolveDataTarget('curves/2014-01-01.json')?.feed).toBe('GRID_CURVE');
   });
 });
+
+/**
+ * The history API joins the gate as a directory, not as a roster entry.
+ *
+ * It carries no ISO date, so middleware passes it as public and the tier window
+ * is applied inside the route by clamping. What registration buys is the bot and
+ * same-origin check — the same protection `timeline-summary.json` gets, and the
+ * thing the Petrobangla aggregates went without until 2026-09-04.
+ */
+describe('history API gating', () => {
+  it('gates every endpoint under /api/grid/history', () => {
+    for (const p of [
+      '/api/grid/history/series',
+      '/api/grid/history/bounds',
+      '/api/grid/history/at',
+      '/api/grid/history/something-added-later',
+    ]) {
+      expect(isProtectedDataJsonPath(p)).toBe(true);
+    }
+  });
+
+  it('does not over-match neighbouring paths', () => {
+    for (const p of ['/api/grid/history', '/api/grid/other', '/api/grid/history/a/b', '/grid-explorer']) {
+      expect(isProtectedDataJsonPath(p)).toBe(false);
+    }
+  });
+});

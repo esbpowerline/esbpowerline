@@ -119,6 +119,15 @@ const MacroTrendsTab = dynamic(
   { ssr: false, loading: () => <div className="grid-explorer-skeleton h-96 rounded-2xl" /> },
 );
 
+// Reads the hourly archive directly over /api/grid/history, so unlike every
+// other tab it does not need the selected day to have loaded — and it carries a
+// chart library plus eleven years of range handling, so it stays out of the
+// initial chunk.
+const TimeMachineTab = dynamic(() => import('@/components/news/power-grid/TimeMachineTab'), {
+  ssr: false,
+  loading: () => <div className="grid-explorer-skeleton h-96 rounded-2xl" />,
+});
+
 interface GridLineItem {
   name: string;
   status: string;
@@ -697,7 +706,7 @@ export function PowerGridExplorer({
       )}`;
 
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'plants'>(
+  const [activeTab, setActiveTab] = useState<'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'plants' | 'timemachine'>(
     urlBoot?.tab ?? 'overview',
   );
   
@@ -898,6 +907,11 @@ export function PowerGridExplorer({
   }, []);
 
   const tabGlowColors: Record<typeof activeTab, { blob1: string; blob2: string; blob3: string }> = {
+    timemachine: {
+      blob1: 'bg-primary/5',
+      blob2: 'bg-indigo-500/4',
+      blob3: 'bg-slate-500/3',
+    },
     overview: {
       blob1: 'bg-primary/5',
       blob2: 'bg-sky-500/4',
@@ -948,7 +962,7 @@ export function PowerGridExplorer({
   const glow = tabGlowColors[activeTab] || tabGlowColors.overview;
 
   interface TabInfo {
-    id: 'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'plants' | 'pricing';
+    id: 'overview' | 'gen' | 'gas' | 'imports' | 'renewables' | 'transmission' | 'regional' | 'macro' | 'plants' | 'pricing' | 'timemachine';
     label: string;
     icon: any;
   }
@@ -3151,6 +3165,12 @@ export function PowerGridExplorer({
         </div>
         </GridLockedContent> )
       )}
+
+      {/* No `!isDataMissing && !noDayToRender` guard: the Time Machine reads the
+          hourly table over its own API, so it still works on a day the archive
+          has nothing for — which is exactly when a reader most wants to look
+          around it. */}
+      {activeTab === 'timemachine' && <TimeMachineTab />}
 
       {!isDataMissing && !noDayToRender && activeTab === 'macro' && (
         <MacroTrendsTab

@@ -147,9 +147,35 @@ export function isPetrobanglaJsonPath(pathname: string): boolean {
   return PETROBANGLA_JSON_RE.test(pathname);
 }
 
+/**
+ * The historical API.
+ *
+ * Matched as a DIRECTORY, like the two families above, so a fifth endpoint
+ * added under it is covered on the day it lands rather than the day someone
+ * notices. This has now gone wrong four times with hand-written rosters
+ * (`plants`, `curves`, `forecast`, the Petrobangla aggregates) and the pattern
+ * is the fix, not another entry.
+ *
+ * These paths carry no ISO date, so middleware's date gate takes its `!isoDate`
+ * branch and they pass as public — exactly as `timeline-summary.json` does.
+ * What they gain here is the bot and same-origin check. The TIER window is
+ * applied inside the route by clamping the requested range, using the same
+ * `getEarliestAllowedDate` this file's callers use, because the range lives in
+ * the query string where middleware's path-based rules cannot see it.
+ */
+const HISTORY_API_RE = /^\/api\/grid\/history\/[A-Za-z0-9_-]+$/;
+
+export function isProtectedHistoryPath(pathname: string): boolean {
+  return HISTORY_API_RE.test(pathname);
+}
+
 export function isProtectedDataJsonPath(pathname: string): boolean {
   const canonical = canonicalDataPath(pathname);
-  return isDailyJsonPath(canonical) || isPetrobanglaJsonPath(canonical);
+  return (
+    isDailyJsonPath(canonical) ||
+    isPetrobanglaJsonPath(canonical) ||
+    isProtectedHistoryPath(pathname)
+  );
 }
 
 export function dataPathIsoDate(pathname: string): string | undefined {

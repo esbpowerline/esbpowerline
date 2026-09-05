@@ -12,6 +12,7 @@ export const GRID_EXPLORER_VIEWS: { tab: string; label: string; blurb: string }[
   { tab: 'plants', label: 'Power stations', blurb: 'Every station’s output, installed capacity and utilisation' },
   { tab: 'transmission', label: 'Technical information', blurb: 'Transmission lines, substations and grid infrastructure' },
   { tab: 'macro', label: 'Macro trends', blurb: 'Gas reserves, budgets, monthly archives and long-run indicators' },
+  { tab: 'timemachine', label: 'Time Machine', blurb: 'Eleven years of NLDC’s hourly archive, hour by hour' },
 ];
 
 /**
