@@ -860,6 +860,44 @@ model SourceDocument {
   @@index([sourceUrl])
 }
 
+/// What NLDC's own remark column says this row is.
+///
+/// Derived from the remark at ingest and stored, never inferred from the
+/// timestamp: 6,535 peak stamps sit at :00 and 3,899 :30 rows carry no remark
+/// at all, so the minute offset misclassifies roughly a tenth of the series.
+/// Generation labels them in Bangla and demand/supply in English, so both
+/// vocabularies map here.
+///
+/// UNCLASSIFIED is load-bearing. A remark this code does not recognise must
+/// surface as its own kind rather than folding into REGULAR, because a new
+/// vocabulary at the source is exactly the change that would otherwise pass
+/// unnoticed into every average.
+enum ObservationKind {
+  REGULAR
+  DAY_PEAK
+  EVENING_PEAK
+  UNCLASSIFIED
+}
+
+/// Why a reported observation is not eligible for aggregation. NULL means it is.
+///
+/// The source value is NEVER altered — rule 4 says a source's inconsistency is
+/// reported, not repaired. This records only ESB's reason for setting a figure
+/// aside, and each reason names WHICH figure: one says the printed total cannot
+/// be used, the other says the breakdown cannot. Neither condemns the whole row,
+/// which is why a bare boolean would have been the wrong shape.
+enum AggregationExclusion {
+  /// The printed total disagrees with the components printed beside it by more
+  /// than 20% — far beyond the rounding that explains 94.4% of rows agreeing
+  /// within 0.5%. 370 rows. The clearest is 2023-01-15 05:00, published as
+  /// 64526500 against components summing to 6,464 and neighbours near 6,500.
+  /// The TOTAL is ineligible; the components remain usable.
+  TOTAL_DISAGREES_WITH_COMPONENTS
+  /// Every component is printed as a literal zero beside a non-zero total.
+  /// 24 rows, all 2015. The BREAKDOWN is ineligible; the total remains usable.
+  BREAKDOWN_ALL_ZERO
+}
+
 /// Which NLDC hourly page a row came from. They are separate series because
 /// they are separate documents with separate retention: generation goes back to
 /// 2015, demand/supply/load-shed rolls off after about 145 days.
@@ -916,6 +954,10 @@ model GridHourlyObservation {
 
   /// NLDC's own remark cell — "Day Peak", "Evening Peak" and the like.
   remark        String?
+  /// Classified from `remark`, never from the timestamp. See ObservationKind.
+  kind          ObservationKind @default(REGULAR)
+  /// NULL when the row may be aggregated. See AggregationExclusion.
+  excluded      AggregationExclusion?
   basis         ObservationBasis @default(REPORTED)
   parserVersion String
   createdAt     DateTime         @default(now())
@@ -925,6 +967,8 @@ model GridHourlyObservation {
   @@unique([series, observedAt])
   @@index([observedAt])
   @@index([sourceDocumentId])
+  /// The aggregation read path: regular, eligible rows in a time range.
+  @@index([series, kind, excluded, observedAt])
 }
 
 /// A figure, its subject, its window and its document. Nothing here may be

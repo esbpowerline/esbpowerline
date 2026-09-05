@@ -183,6 +183,47 @@ function rowsFor(series: SeriesKey, html: string): Row[] {
   }));
 }
 
+/**
+ * NLDC's own remark, mapped to a kind. Generation labels peaks in Bangla and
+ * demand/supply in English; both are here. A remark that is present but not
+ * recognised becomes UNCLASSIFIED rather than folding into REGULAR — a new
+ * vocabulary at the source has to surface, not vanish into every average.
+ */
+function classify(remark: string | null): string {
+  const t = (remark ?? '').trim();
+  if (t === '' || t === '—' || t === '-' || /^n\/?a$/i.test(t)) return 'REGULAR';
+  if (t === 'ডে পিক' || t === 'Day Peak') return 'DAY_PEAK';
+  if (t === 'সন্ধ্যা পিক' || t === 'Evening Peak') return 'EVENING_PEAK';
+  return 'UNCLASSIFIED';
+}
+
+const GEN_COMPONENTS = [
+  'gasMw', 'liquidMw', 'coalMw', 'hydroMw', 'solarMw', 'windMw',
+  'bheramaraMw', 'tripuraMw', 'adaniMw', 'nepalMw',
+] as const;
+
+/**
+ * Why this row may not be aggregated, or null when it may. The source value is
+ * never touched — this records only how ESB reads what was published.
+ *
+ * Order matters. A row printing every component as zero beside a real total
+ * would also trip the disagreement rule, and would then be blamed on the wrong
+ * side: there it is the breakdown that is unusable, not the total.
+ */
+function exclusionFor(series: SeriesKey, values: Record<string, number | null>, total: number | null) {
+  if (series !== 'GENERATION' || total === null) return null;
+  const present = GEN_COMPONENTS.filter((c) => values[c] !== null && values[c] !== undefined);
+  if (!present.length) return null;
+  const sum = present.reduce((a, c) => a + (values[c] as number), 0);
+  if (total > 0 && sum === 0) return 'BREAKDOWN_ALL_ZERO';
+  // 20%: 94.4% of rows agree within 0.5%, so this is far outside anything
+  // rounding explains and still forgiving of a genuinely odd hour.
+  if (sum > 0 && Math.abs(total - sum) > 0.2 * Math.max(total, 1)) {
+    return 'TOTAL_DISAGREES_WITH_COMPONENTS';
+  }
+  return null;
+}
+
 const FIGURE_COLUMNS = [
   'totalMw', 'gasMw', 'liquidMw', 'coalMw', 'hydroMw', 'solarMw', 'windMw',
   'bheramaraMw', 'tripuraMw', 'adaniMw', 'nepalMw',
@@ -212,20 +253,27 @@ async function upsertRows(series: SeriesKey, rows: Row[], docId: string, fetched
   const collapsed = rows.length - byHour.size;
   if (collapsed > 0) duplicateHours += collapsed;
   rows = [...byHour.values()];
-  const cols = ['series', 'observedAt', 'fetchedAt', 'sourceDocumentId', 'remark', 'parserVersion', ...FIGURE_COLUMNS];
+  const cols = ['series', 'observedAt', 'fetchedAt', 'sourceDocumentId', 'remark', 'parserVersion',
+                'kind', 'excluded', ...FIGURE_COLUMNS];
   const params: unknown[] = [];
   const tuples = rows.map((r) => {
     const vals = [
       series, r.observedAt, fetchedAt, docId, r.remark, PARSER_VERSION,
+      classify(r.remark), exclusionFor(series, r.values, r.values.totalMw ?? null),
       ...FIGURE_COLUMNS.map((c) => (c in r.values ? r.values[c] : null)),
     ];
     const start = params.length;
     params.push(...vals);
     // gen_random_uuid()::text for the id — the table's PK is a plain TEXT
     // column that Prisma normally fills with a cuid.
-    return `(gen_random_uuid()::text, ${vals.map((_, i) => `$${start + i + 1}`).join(', ')})`;
+    return `(gen_random_uuid()::text, ${vals.map((_, i) => {
+      const n = start + i + 1;
+      if (i === 6) return `$${n}::"ObservationKind"`;
+      if (i === 7) return `$${n}::"AggregationExclusion"`;
+      return `$${n}`;
+    }).join(', ')})`;
   });
-  const updates = ['fetchedAt', 'sourceDocumentId', 'remark', 'parserVersion']
+  const updates = ['fetchedAt', 'sourceDocumentId', 'remark', 'parserVersion', 'kind', 'excluded']
     .map((c) => `"${c}" = EXCLUDED."${c}"`)
     .concat(FIGURE_COLUMNS.map((c) => `"${c}" = COALESCE(EXCLUDED."${c}", "GridHourlyObservation"."${c}")`))
     .join(', ');
