@@ -317,6 +317,46 @@ with the ledger committed, gzipped `pg_dump` kept 14 deep) and `scripts/pi-weekl
 `pi-ingest.sh`; the short version is that downloads are atomic, torn workbooks are
 refetched, and the next poll finishes whatever the last one did not.
 
+### Every hour: the NLDC capture
+
+`scripts/pi-hourly.sh`, at :17 from cron, running
+`ingest-nldc-hourly.ts --recent 2`. It writes rows to Postgres and **nothing
+else** — no commit, no push, no deploy.
+
+This is the most perishable stream in the archive: NLDC's demand/supply/load-shed
+page rolls off after ~145 days and nobody else in Bangladesh keeps it, so an hour
+missed inside that window is gone. It was listed "IMPLEMENTED 2026-09-05" and was
+in fact **dead from the moment it was written** — nothing referenced the script,
+and its documented invocation could not run because it imported `@/lib/prisma`,
+which opens with `server-only` and throws outside an RSC. Found 2026-09-06 with
+26 hours missing; the import now uses `createScriptPrismaClient` like every other
+script in `scripts/`, and the gap was refilled from NLDC's own retention window.
+
+Three things keep it cheap enough to run 24×/day forever. `--recent` **stops at an
+unchanged page 1** — NLDC's first page turns over once an hour, identical bytes are
+the same `SourceDocument`, so a quiet tick is one request per series and zero
+writes. The poll skips `--report` (five aggregate scans per series). And
+`NODE_ENV=production` caps the pg pool at 2 rather than 10
+(`lib/prisma-database.ts:67`) — the session pooler is shared with the live site and
+has been exhausted twice in one day, once killing a production build on `/about`.
+
+`:17` is chosen against the timetable: the polls run at `:30`, the watcher at
+`:07/:22/:37/:52`, and all of them take the same lock, so `:17` is the widest gap.
+It takes that lock too — not for the database, where the writes are idempotent, but
+because `pi-ingest.sh` does `git reset --hard` on the checkout and pulling the tree
+out from under a running `tsx` is how one job corrupts another.
+
+**The tier ceiling is announced, not discovered.** The script prints `db_size_mb=`
+on the connection it already has open and the runner warns once a day past 400 MB.
+Measured 2026-09-06: the database is **142 MB** of Supabase's 500 MB free tier —
+`GridHourlyObservation` 72 MB, `SourceDocument` 30 MB — growing ~130 MB/year, almost
+all of it evidence bytes. Roughly two and a half years of headroom. When it gets
+close the answer is the object-storage move in `STRATEGIC_AUDIT_2026-09.md` §U or an
+evidence retention window, not a bigger tier.
+
+One failed tick is not an alert: the hour is still inside NLDC's window and the next
+tick's two-page walk picks it up. Four consecutive failures are.
+
 ### Between the polls: the watcher asks each publisher separately
 
 Four slots a day is a timetable, and the lag it costs is the timetable's, not the

@@ -45,11 +45,20 @@
 import https from 'node:https';
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
-import { prisma } from '@/lib/prisma';
+// `@/lib/prisma` opens with `import 'server-only'`, which throws outside a
+// React Server Component — so the usage documented above could not run at all
+// under plain `npx tsx`, and this script has not executed since the 2026-09-05
+// backfill. Every other script in this directory takes the same client from
+// `prisma/client`; this one now does too, rather than depending on callers
+// remembering `--conditions react-server` (which is how pi-weekly.sh gets
+// around it for publish-local.ts).
+import { createScriptPrismaClient } from '../prisma/client';
 import {
   parseNldcGenerationHtml,
   parseNldcDemandSupplyHtml,
 } from '@/lib/data/grid/live-grid-parse';
+
+const prisma = createScriptPrismaClient();
 
 /** Hours NLDC printed more than once inside one page, collapsed on the way in. */
 let duplicateHours = 0;
@@ -327,7 +336,22 @@ async function ingestPage(series: SeriesKey, page: number, dryRun: boolean) {
   return { rows: rows.length, exhausted: false, reused: Boolean(existing) };
 }
 
-async function walk(series: SeriesKey, maxPages: number, dryRun: boolean) {
+/**
+ * Walk a series' pages, newest first.
+ *
+ * `stopWhenUnchanged` is the poll's economy. NLDC's page 1 changes once an hour,
+ * when a new row is printed; a poll that runs on the hour therefore finds it
+ * unchanged most of the time, and identical bytes mean the same
+ * `SourceDocument` — nothing to store and nothing new to upsert. Walking on to
+ * pages 2 and 3 in that state costs two more fetches to re-derive rows already
+ * held. So in poll mode an unchanged page 1 ends the walk immediately: the
+ * common tick becomes one request per series and zero writes.
+ *
+ * It applies only to the FIRST page, and only in poll mode. Deeper pages are
+ * routinely unchanged during a backfill — stopping there would abandon the rest
+ * of the archive, which is the opposite of what a backfill is for.
+ */
+async function walk(series: SeriesKey, maxPages: number, dryRun: boolean, stopWhenUnchanged = false) {
   let page = 1;
   let totalRows = 0;
   let pagesFetched = 0;
@@ -345,6 +369,10 @@ async function walk(series: SeriesKey, maxPages: number, dryRun: boolean) {
       pagesFetched += 1;
       totalRows += r.rows;
       if (r.reused) reusedDocs += 1;
+      if (stopWhenUnchanged && page === 1 && r.reused) {
+        console.log(`  ${label}: page 1 unchanged since the last poll — nothing new to store`);
+        break;
+      }
       if (page % 100 === 0 || page === 1) {
         console.log(`  ${label}: page ${page} … ${totalRows} rows so far`);
       }
@@ -499,9 +527,10 @@ async function main() {
     `${dryRun ? 'DRY RUN — ' : ''}walking ${seriesList.length} series, up to ${maxPages} page(s) each\n`,
   );
 
+  const polling = has('--recent');
   for (const series of seriesList) {
     const t0 = Date.now();
-    const r = await walk(series, maxPages, dryRun);
+    const r = await walk(series, maxPages, dryRun, polling);
     console.log(
       `  ${SERIES[series].label}: ${r.pagesFetched} pages, ${r.totalRows} rows, ` +
         `${r.reusedDocs} documents already held, ${r.failures.length} failed, ` +
@@ -518,7 +547,29 @@ async function main() {
     console.log(`
   note: ${duplicateHours} hour(s) appeared more than once within a single page and were collapsed to the last occurrence`);
   }
-  if (!dryRun) await report();
+  // The report runs five aggregate scans per series. That is worth it after a
+  // backfill and pure waste on an hourly poll, where the runner only needs the
+  // exit status, so the poll skips it.
+  if (!dryRun && !polling) await report();
+
+  /*
+    One line the runner can act on, on the connection that is already open.
+
+    This archive lives on a Supabase instance whose free tier stops at 500 MB,
+    and the evidence layer is what grows: measured 2026-09-06 the database is
+    142 MB, of which SourceDocument is 30 MB and GridHourlyObservation 72 MB.
+    An hourly poll adds roughly one changed page per series per hour — about
+    130 MB a year, almost all of it evidence — so the ceiling is somewhere
+    around two and a half years away, not never. Printing the size every poll
+    means the crossover announces itself in a log and an alert rather than
+    being discovered when a write starts failing.
+  */
+  if (!dryRun) {
+    const [{ mb }] = await prisma.$queryRawUnsafe<Array<{ mb: number }>>(
+      `SELECT round(pg_database_size(current_database()) / 1048576.0, 1)::float8 AS mb`,
+    );
+    console.log(`db_size_mb=${mb}`);
+  }
 }
 
 main()

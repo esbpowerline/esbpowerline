@@ -204,7 +204,7 @@ if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
     chmod +x "$ROOT/pi-ingest.sh"
     echo "runner updated from the repo — effective next poll"
 fi
-for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh; do
+for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh; do
     if [[ -f "$REPO/scripts/$helper" ]] && ! cmp -s "$REPO/scripts/$helper" "$ROOT/$helper"; then
         cp "$REPO/scripts/$helper" "$ROOT/$helper"; chmod +x "$ROOT/$helper"
         echo "$helper updated from the repo"
