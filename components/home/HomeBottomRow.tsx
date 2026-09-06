@@ -15,8 +15,7 @@ type HomeBottomRowProps = {
     coverUrl: string;
   };
   magazineLabel: string;
-  /** The only issue the site has is a design demo; the card must say so before
-   *  a reader clicks through. See lib/magazine-demo-issue.ts. */
+  /** Marks the teaser, matching the badge the magazine page carries. */
   magazineIsDemo?: boolean;
   professionalsCta: {
     label: string;
@@ -27,6 +26,15 @@ type HomeBottomRowProps = {
     secondaryHref: string;
   };
 };
+
+/**
+ * next/image only serves hosts listed in next.config, and the magazine cover is
+ * a Supabase **signed** URL — `/storage/v1/object/sign/...`, which the allowed
+ * `/object/public/**` pattern does not cover, and whose query string carries a
+ * token the optimizer would strip. A plain img is the only thing that works
+ * here; MagazineCoverMockup takes the same escape hatch for the same reason.
+ */
+const isRemote = (src: string) => /^https?:\/\//i.test(src);
 
 export function HomeBottomRow({
   layout = 'split',
@@ -51,7 +59,7 @@ export function HomeBottomRow({
           <BookOpen className="h-4 w-4" />
           <span className="section-kicker">{t('home.monthlyMagazine')}</span>
           {magazineIsDemo ? (
-            <span className="rounded-full border border-amber-500/50 bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+            <span className="rounded-sm border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-600 dark:text-amber-400">
               Demo
             </span>
           ) : null}
@@ -59,14 +67,23 @@ export function HomeBottomRow({
         <div className={`flex gap-3.5 items-start ${isStack ? 'flex-col sm:flex-row' : ''}`}>
           <div className="w-16 sm:w-[4.5rem] shrink-0 relative">
             <div className="aspect-[3/4] rounded border border-border/40 overflow-hidden bg-muted shadow-md transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-[1.04] group-hover:shadow-lg relative">
-              <Image
-                src={magazine.coverUrl}
-                alt={magazine.title}
-                fill
-                
-                className="object-cover"
-                sizes="72px"
-              />
+              {isRemote(magazine.coverUrl) ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={magazine.coverUrl}
+                  alt={magazine.title}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                <Image
+                  src={magazine.coverUrl}
+                  alt={magazine.title}
+                  fill
+                  className="object-cover"
+                  sizes="72px"
+                />
+              )}
             </div>
           </div>
           <div className="flex-1 min-w-0">
@@ -78,7 +95,6 @@ export function HomeBottomRow({
         </div>
       </div>
       <Link
-        prefetch={false}
         href="/magazine"
         className="mt-4 inline-flex items-center text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
       >

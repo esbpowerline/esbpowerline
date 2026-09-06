@@ -41,8 +41,9 @@ import {
   getPublishedArticlesByCategory,
   getFeaturedArticles,
 } from '@/lib/category-content';
-import { getLatestYoutubeInterviews } from '@/lib/youtube-channel';
 import { DEMO_ISSUE, IS_DEMO } from '@/lib/magazine-demo-issue';
+import { getMagazineCoverUrl } from '@/lib/magazine-assets';
+import { getLatestYoutubeInterviews } from '@/lib/youtube-channel';
 import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
@@ -100,21 +101,19 @@ export default async function Home() {
   );
 
   /**
-   * The card must advertise the issue /magazine actually serves.
+   * The teaser must advertise the issue /magazine actually opens.
    *
-   * It read the database directly, which still holds the three seed rows from
-   * prisma/seed.ts — so the homepage printed "Renewables Surge & Tariff Reform,
-   * May 2026", an issue that was never produced, and linked to /magazine, which
-   * has ignored those rows under IS_DEMO since it was written and shows
-   * "A Shift in Power". Two different titles either side of one link, and no
-   * demo badge on the one a reader sees first. Same source, same flag, both
-   * places now.
+   * It read `getLatestMagazineIssue()` unconditionally, which is a seed row —
+   * so the homepage promoted "Renewables Surge & Tariff Reform", a May 2026
+   * edition that was never produced, while /magazine served the real demo issue
+   * "A Shift in Power". Same precedence rule as the magazine page: while
+   * IS_DEMO holds, the demo issue wins over whatever the database says.
    */
   const magazine = IS_DEMO
     ? {
         title: DEMO_ISSUE.title,
         summary: DEMO_ISSUE.standfirst,
-        coverUrl: DEMO_ISSUE.coverUrl,
+        coverUrl: await getMagazineCoverUrl(),
         issueDate: new Date(DEMO_ISSUE.producedOn),
       }
     : (magazineRow ?? {
