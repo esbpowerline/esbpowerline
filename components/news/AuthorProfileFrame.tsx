@@ -182,6 +182,7 @@ async function AuthorArticles({
             <div className="flex justify-center items-center gap-4 mt-12">
               {page > 1 && (
                 <Link
+                  prefetch={false}
                   href={authorPageHref(slug, page - 1)}
                   className="btn border border-border px-4 py-2 rounded-full hover:bg-muted transition-colors"
                 >
@@ -193,6 +194,7 @@ async function AuthorArticles({
               </span>
               {page < totalPages && (
                 <Link
+                  prefetch={false}
                   href={authorPageHref(slug, page + 1)}
                   className="btn border border-border px-4 py-2 rounded-full hover:bg-muted transition-colors"
                 >

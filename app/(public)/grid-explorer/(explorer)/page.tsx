@@ -258,7 +258,7 @@ export default async function PowerGridExplorerPage() {
         <ul>
           {GRID_EXPLORER_VIEWS.map((v) => (
             <li key={v.tab}>
-              <Link href={`/grid-explorer?tab=${v.tab}`}>{v.label}</Link>
+              <Link prefetch={false} href={`/grid-explorer?tab=${v.tab}`}>{v.label}</Link>
               <span> — {v.blurb}</span>
             </li>
           ))}
@@ -273,7 +273,7 @@ export default async function PowerGridExplorerPage() {
         <h2 id="grid-archive-heading">Browse the archive by date</h2>
         <ul>
           <li>
-            <Link href="/grid-explorer/archive">Full daily archive</Link>
+            <Link prefetch={false} href="/grid-explorer/archive">Full daily archive</Link>
             <span>
               {' '}
               — every day PGCB and Petrobangla published
@@ -282,7 +282,7 @@ export default async function PowerGridExplorerPage() {
           </li>
           {latestDate && (
             <li>
-              <Link href={`/grid-explorer/${latestDate}`}>Latest day ({latestDate})</Link>
+              <Link prefetch={false} href={`/grid-explorer/${latestDate}`}>Latest day ({latestDate})</Link>
               <span> — the headline figures for the newest report.</span>
             </li>
           )}

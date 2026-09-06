@@ -55,6 +55,7 @@ export function SaveArticleButton({
     // on click, which a crawler never performs.
     return (
       <Link
+        prefetch={false}
         href="/members/login"
         rel="nofollow"
         onClick={(e) => {

@@ -45,7 +45,7 @@ export default async function GridArchiveIndexPage() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       <nav className="mb-4 text-xs text-muted-foreground" aria-label="Breadcrumb">
-        <Link href="/grid-explorer" className="hover:text-foreground">Grid Explorer</Link>
+        <Link prefetch={false} href="/grid-explorer" className="hover:text-foreground">Grid Explorer</Link>
         {' / '}
         <span>Archive</span>
       </nav>
@@ -65,6 +65,7 @@ export default async function GridArchiveIndexPage() {
         {years.map(([year, count]) => (
           <li key={year}>
             <Link
+              prefetch={false}
               href={`/grid-explorer/archive/${year}`}
               className="block rounded-xl border border-border/70 bg-card px-4 py-3 transition-colors hover:border-primary/40"
             >

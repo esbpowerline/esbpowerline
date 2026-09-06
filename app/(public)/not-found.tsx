@@ -44,6 +44,7 @@ export default function NotFound() {
       <nav aria-label="Where to go instead" className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {DESTINATIONS.map((d) => (
           <Link
+            prefetch={false}
             key={d.href}
             href={d.href}
             className="card p-5 group hover:border-primary/50 transition-colors duration-200"

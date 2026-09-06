@@ -49,7 +49,7 @@ export function SectorCoverage({
               {t('coverage.nCategories', { count: categoryCount })}
             </div>
           </div>
-          <Link href="/articles" className="text-xs font-medium text-primary flex items-center gap-1 hover:underline">
+          <Link prefetch={false} href="/articles" className="text-xs font-medium text-primary flex items-center gap-1 hover:underline">
             {t('coverage.browseArchive')} <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -88,6 +88,7 @@ export function SectorCoverage({
 
       <div className="mt-3 text-right">
         <Link
+          prefetch={false}
           href="/articles"
           className="text-xs font-medium text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-1"
         >

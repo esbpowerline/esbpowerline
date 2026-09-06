@@ -85,6 +85,7 @@ export function PolicyFramework({
                 <div className="flex flex-col">
                   {items.map((item) => (
                     <Link
+                      prefetch={false}
                       key={item.slug}
                       href={`/energy-policy/${item.slug}`}
                       className="group -mx-2 w-[calc(100%+1rem)] flex items-start gap-2.5 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50"
@@ -107,6 +108,7 @@ export function PolicyFramework({
         </div>
 
         <Link
+          prefetch={false}
           href="/energy-policy"
           className="group mt-4 flex items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-muted/20 py-2.5 text-[12px] font-semibold text-foreground/80 transition-colors hover:border-primary/30 hover:bg-primary/[0.06] hover:text-primary"
         >

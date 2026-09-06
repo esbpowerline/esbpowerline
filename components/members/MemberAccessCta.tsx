@@ -22,14 +22,14 @@ export function MemberAccessCta({
 
   if (access.signedIn) {
     return (
-      <Link href={access.href} className={className}>
+      <Link prefetch={false} href={access.href} className={className}>
         {access.isMember ? 'Open my library' : access.label}
       </Link>
     );
   }
 
   return (
-    <Link href={guestHref} className={className}>
+    <Link prefetch={false} href={guestHref} className={className}>
       {guestLabel}
     </Link>
   );

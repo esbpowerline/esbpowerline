@@ -337,6 +337,7 @@ export function GridSourceFooterLinks({
           {sources.map((s, i) => (
             <span key={s.href + s.label}>
               <Link
+                prefetch={false}
                 href={s.href}
                 target="_blank"
                 rel="noopener noreferrer"

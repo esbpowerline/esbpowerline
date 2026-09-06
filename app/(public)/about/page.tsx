@@ -465,10 +465,10 @@ export default async function AboutPage() {
           </div>
           
           <div className="flex flex-wrap justify-center gap-4 relative z-10">
-            <Link href="/articles" className="btn btn--primary flex items-center gap-2 group shadow-lg shadow-primary/10">
+            <Link prefetch={false} href="/articles" className="btn btn--primary flex items-center gap-2 group shadow-lg shadow-primary/10">
               Read Latest News <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform duration-300" />
             </Link>
-            <Link href="/contact" className="btn border border-border hover:bg-muted/80 backdrop-blur-sm text-foreground transition-all duration-300">
+            <Link prefetch={false} href="/contact" className="btn border border-border hover:bg-muted/80 backdrop-blur-sm text-foreground transition-all duration-300">
               Get in Touch
             </Link>
           </div>

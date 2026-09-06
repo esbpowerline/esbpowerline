@@ -81,6 +81,7 @@ export function GridAccessBanner({ access, totalArchiveDays, className }: GridAc
 
         {status.upgradeLine && status.upgradeHref && (
           <Link
+            prefetch={false}
             href={status.upgradeHref}
             className="inline-flex shrink-0 items-center gap-1 self-start rounded-xl border border-primary/25 bg-background/70 px-3 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 sm:self-center"
           >

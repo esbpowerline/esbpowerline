@@ -159,6 +159,7 @@ export function TitasGasWatch() {
         <p className="mt-3 text-[10.5px] leading-snug text-muted-foreground">{footnote}</p>
 
         <Link
+          prefetch={false}
           href="/titas-gas"
           className="group mt-3.5 flex items-center justify-center gap-1.5 rounded-lg border border-border/60 bg-muted/20 py-2.5 text-[12px] font-semibold text-foreground/80 transition-colors hover:border-rose-500/30 hover:bg-rose-500/[0.06] hover:text-rose-700 dark:hover:text-rose-400"
         >

@@ -22,6 +22,7 @@ export default async function TagsIndex() {
         <div className="flex flex-wrap gap-3">
           {sortedTags.map(({ tag, count }) => (
             <Link
+              prefetch={false}
               key={tag}
               href={`/tags/${tag}`}
               className="tag gap-2 px-4 py-1.5 text-sm"

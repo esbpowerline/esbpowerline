@@ -63,6 +63,7 @@ export function GridArchiveTeaser({
           </button>
           {status.upgradeHref && (
             <Link
+              prefetch={false}
               href={status.upgradeHref}
               className="btn btn-primary inline-flex items-center justify-center gap-2 text-sm"
             >

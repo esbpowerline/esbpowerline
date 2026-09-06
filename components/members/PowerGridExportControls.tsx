@@ -36,6 +36,7 @@ export function PowerGridExportControls({
 
   return (
     <Link
+      prefetch={false}
       href="/members/login?callbackUrl=/grid-explorer"
       className={cn(
         'btn btn-secondary custom-tooltip-trigger flex items-center justify-center gap-1.5 text-xs w-full py-2 hover:bg-secondary transition-colors',

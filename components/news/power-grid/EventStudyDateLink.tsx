@@ -29,6 +29,7 @@ export function EventStudyDateLink({ selectedDate }: { selectedDate: string }) {
   return (
     <div className="w-full sm:w-auto">
       <Link
+        prefetch={false}
         href={study ? `/analysis/${study.slug}#day-${selectedDate}` : `/analysis/${fallback.slug}`}
         /*
           Always carries the accent, never transparent.

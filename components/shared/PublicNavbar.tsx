@@ -48,6 +48,7 @@ function PublicNavLink({
   onClick,
   'aria-current': ariaCurrent,
   'aria-label': ariaLabel,
+  prefetch = false,
 }: {
   href: string;
   className?: string;
@@ -56,11 +57,21 @@ function PublicNavLink({
   onClick?: () => void;
   'aria-current'?: 'page' | undefined;
   'aria-label'?: string;
+  /**
+   * Off by default. Next prefetches every `<Link>` that enters the viewport,
+   * and with no `loading.tsx` the payload is the destination's *entire* RSC
+   * tree — measured at ~20 KB each. The navbar renders the category ribbon
+   * twice (desktop rail and mobile sheet), so ten categories became twenty
+   * speculative page loads on every view of every page, for links a reader
+   * mostly scrolls past. The five primary hubs below opt back in explicitly.
+   */
+  prefetch?: boolean;
 }) {
   const resolvedHref = usePublicHref(href);
   return (
     <Link
       href={resolvedHref}
+      prefetch={prefetch}
       className={className}
       style={style}
       onClick={onClick}
@@ -233,7 +244,7 @@ export function PublicNavbar({
       <div className="site-banner-shell w-full flex justify-center">
         <div className="container container--shell px-0">
           <div className="site-banner-frame border-l border-r border-b border-border/40 overflow-hidden">
-            <PublicNavLink href="/" className="w-full block transition-opacity hover:opacity-95">
+            <PublicNavLink href="/" prefetch className="w-full block transition-opacity hover:opacity-95">
               {/* The illustrated banner, by Hamim's decision (2026-09-03): the
                   typographic masthead that replaced it on 1 Sep is retired. */}
               <ThemeBanner />
@@ -252,6 +263,10 @@ export function PublicNavbar({
                   <div className="public-nav-bar__utilities">
                     <Link
                       href="/"
+                      // The masthead logo above already prefetches home; this
+                      // pill is the same destination, and two Links to one href
+                      // are two prefetches.
+                      prefetch={false}
                       className={`public-nav-bar__pill-btn public-nav-bar__pill-btn--paired public-nav-bar__home${
                         pathname === '/' ? ' public-nav-bar__home--active' : ''
                       }`}
@@ -269,6 +284,7 @@ export function PublicNavbar({
 
                     <PublicNavLink
                       href="/search"
+                    prefetch
                       className={`public-nav-bar__pill-btn public-nav-bar__pill-btn--paired public-nav-bar__search-pill public-nav-bar__utility-btn${
                         pathname === '/search' ? ' public-nav-bar__utility-btn--active' : ''
                       }`}
@@ -287,6 +303,7 @@ export function PublicNavbar({
                 <div className="public-nav-bar__hub" role="group" aria-label="Primary sections">
                   <PublicNavLink
                     href="/articles"
+                    prefetch
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--latest${
                       isHubSectionActive(pathname, '/articles') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
@@ -298,6 +315,7 @@ export function PublicNavbar({
 
                   <PublicNavLink
                     href="/grid-explorer"
+                    prefetch
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--grid${
                       isHubSectionActive(pathname, '/grid-explorer') ? ' public-nav-bar__hub-link--active' : ''
                     }`}
@@ -314,6 +332,7 @@ export function PublicNavbar({
                       standing beside it as a fifth destination. */}
                   <PublicNavLink
                     href="/magazine"
+                    prefetch
                     className={`public-nav-bar__hub-link public-nav-bar__hub-link--magazine${
                       isHubSectionActive(pathname, '/magazine') ? ' public-nav-bar__hub-link--active' : ''
                     }`}

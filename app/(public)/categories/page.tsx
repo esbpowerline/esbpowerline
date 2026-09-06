@@ -49,6 +49,7 @@ export default async function CategoriesIndex() {
 
           return (
             <Link
+              prefetch={false}
               key={cat.id}
               href={`/categories/${cat.slug}`}
               style={categoryColorVars(cat.color)}

@@ -78,6 +78,7 @@ export function HomeBottomRow({
         </div>
       </div>
       <Link
+        prefetch={false}
         href="/magazine"
         className="mt-4 inline-flex items-center text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
       >

@@ -64,7 +64,7 @@ export async function ArticlesIndexFrame({
           <p className="text-muted-foreground mt-2 text-sm md:text-base">{t('articles.subtitle')}</p>
         </div>
         <div className="articles-page__toolbar shrink-0">
-          <Link href="/search" className="articles-page__toolbar-btn">
+          <Link prefetch={false} href="/search" className="articles-page__toolbar-btn">
             <Search className="articles-page__toolbar-icon" strokeWidth={2} aria-hidden />
             <span>{t('articles.advancedSearch')}</span>
           </Link>
@@ -77,6 +77,7 @@ export async function ArticlesIndexFrame({
               badge and the inactive half did not read as a control at all. */}
           <nav className="articles-page__sort" aria-label={t('articles.filterBy')}>
             <Link
+              prefetch={false}
               href="/articles"
               className="articles-page__sort-btn"
               data-active={sort === 'latest' ? 'true' : 'false'}
@@ -85,6 +86,7 @@ export async function ArticlesIndexFrame({
               {t('articles.latest')}
             </Link>
             <Link
+              prefetch={false}
               href="/articles/popular"
               className="articles-page__sort-btn"
               data-active={sort === 'popular' ? 'true' : 'false'}

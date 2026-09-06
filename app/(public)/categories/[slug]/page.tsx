@@ -86,7 +86,7 @@ export default async function CategoryPage({ params }: Props) {
       />
       <Breadcrumbs crumbs={[{ name: 'Categories', path: '/categories' }, { name: localized.name }]} />
       <div className="mb-6">
-        <Link href="/categories" className="inline-flex items-center text-sm text-primary">
+        <Link prefetch={false} href="/categories" className="inline-flex items-center text-sm text-primary">
           {t('categories.allCategories')}
         </Link>
         <div className="flex items-center gap-3 mt-3">

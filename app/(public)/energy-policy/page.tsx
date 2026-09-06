@@ -86,6 +86,7 @@ export default async function EnergyPolicyLibraryPage() {
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {items.map((item) => (
                     <Link
+                      prefetch={false}
                       key={item.slug}
                       href={`/energy-policy/${item.slug}`}
                       className="group flex flex-col rounded-xl border border-border/60 bg-card p-4 shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/20"

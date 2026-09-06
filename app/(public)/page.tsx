@@ -176,7 +176,7 @@ export default async function Home() {
 
               {/* Mobile/Tablet Inline Ad block for 004.png */}
               <div className="block lg:hidden home-ad-space--sidebar mb-8 max-w-sm mx-auto" suppressHydrationWarning>
-                <Link href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+                <Link prefetch={false} href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
                   <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
                 </Link>
               </div>
@@ -193,7 +193,7 @@ export default async function Home() {
               <HomeTrendingSection trending={trending} layout="hero-rail" />
               
               {/* Sidebar Ad Block */}
-              <Link href="/contact#advertising" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block mt-8" suppressHydrationWarning>
+              <Link prefetch={false} href="/contact#advertising" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block mt-8" suppressHydrationWarning>
                 <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
               </Link>
 
@@ -207,10 +207,10 @@ export default async function Home() {
 
           {/* 2-Column Pre-Footer Ad Space */}
           <div className="home-ad-space--pre-footer grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
-            <Link href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
+            <Link prefetch={false} href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
               <Image src="/images/promotions/006.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
             </Link>
-            <Link href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group hidden md:block" suppressHydrationWarning>
+            <Link prefetch={false} href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group hidden md:block" suppressHydrationWarning>
               <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
             </Link>
           </div>

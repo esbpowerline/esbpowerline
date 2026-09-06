@@ -22,10 +22,18 @@ function FooterHeading({ children, className = '' }: { children: ReactNode; clas
   );
 }
 
+/**
+ * Footer links are never prefetched. They sit below every page, so they enter
+ * the viewport on any scroll to the bottom, and the footer repeats
+ * destinations the navbar already offers — it contributed 15 of the homepage's
+ * 45 speculative page loads. Nobody reaches the footer by accident and then
+ * needs the next page instantly.
+ */
 function FooterLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <Link
       href={href}
+      prefetch={false}
       className="text-sm font-medium text-foreground/85 transition-colors hover:text-primary"
     >
       {children}
@@ -164,12 +172,14 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 md:justify-end">
               <Link
+                prefetch={false}
                 href="/about"
                 className="inline-flex items-center justify-center px-4 py-2 text-xs font-medium text-muted-foreground hover:text-primary bg-secondary/30 hover:bg-secondary/75 border border-border/40 hover:border-primary/30 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
               >
                 {t('footer.about')}
               </Link>
               <Link
+                prefetch={false}
                 href="/contact"
                 className="inline-flex items-center justify-center px-4 py-2 text-xs font-medium text-muted-foreground hover:text-primary bg-secondary/30 hover:bg-secondary/75 border border-border/40 hover:border-primary/30 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
               >

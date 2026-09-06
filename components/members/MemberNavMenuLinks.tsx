@@ -19,7 +19,7 @@ export function MemberNavMenuLinks() {
         <p className="px-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/80">
           Sign in
         </p>
-        <Link href="/members/login" className="mobile-account-option">
+        <Link prefetch={false} href="/members/login" className="mobile-account-option">
           <span className="mobile-account-option__icon mobile-account-option__icon--member">
             <BookOpenCheck className="h-4 w-4" />
           </span>
@@ -29,7 +29,7 @@ export function MemberNavMenuLinks() {
           </span>
           <ChevronRight className="h-4 w-4 text-muted-foreground/60" />
         </Link>
-        <Link href="/login" className="mobile-account-option">
+        <Link prefetch={false} href="/login" className="mobile-account-option">
           <span className="mobile-account-option__icon mobile-account-option__icon--staff">
             <Shield className="h-4 w-4" />
           </span>
@@ -46,6 +46,7 @@ export function MemberNavMenuLinks() {
   return (
     <div className="space-y-1 border-t border-border/50 pt-3">
       <Link
+        prefetch={false}
         href={access.href}
         className={cn(
           'workspace-open-control flex items-center gap-2 rounded-md px-0.5 py-1.5 font-medium',

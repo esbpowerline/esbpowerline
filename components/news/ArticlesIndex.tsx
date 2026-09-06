@@ -51,13 +51,13 @@ export function ArticlesIndex({
   return (
     <>
       <div className="articles-page__filters mb-6 md:mb-8">
-        <Link href="/articles" className={`category-pill ${sort === 'latest' ? 'active' : ''}`}>
+        <Link prefetch={false} href="/articles" className={`category-pill ${sort === 'latest' ? 'active' : ''}`}>
           {t('common.all')}
         </Link>
         {categories.map((cat) => {
           const localized = localizeCategoryFields(locale, cat);
           return (
-            <Link key={cat.id} href={`/categories/${cat.slug}`} className="category-pill">
+            <Link prefetch={false} key={cat.id} href={`/categories/${cat.slug}`} className="category-pill">
               {localized.name}
             </Link>
           );
@@ -92,7 +92,7 @@ export function ArticlesIndex({
         {sort === 'latest' && totalPages > 1 && (
           <nav className="articles-pagination mt-8 flex flex-wrap items-center justify-center gap-2" aria-label={t('articles.page')}>
             {page > 1 && (
-              <Link href={pageHref(page - 1)} className="btn btn-outline px-4" rel="prev">
+              <Link prefetch={false} href={pageHref(page - 1)} className="btn btn-outline px-4" rel="prev">
                 ← {t('articles.previous')}
               </Link>
             )}
@@ -102,14 +102,14 @@ export function ArticlesIndex({
                 {n === page ? (
                   <span className="btn btn-primary px-4" aria-current="page">{n}</span>
                 ) : (
-                  <Link href={pageHref(n)} className="btn btn-outline px-4" aria-label={`${t('articles.page')} ${n}`}>
+                  <Link prefetch={false} href={pageHref(n)} className="btn btn-outline px-4" aria-label={`${t('articles.page')} ${n}`}>
                     {n}
                   </Link>
                 )}
               </span>
             ))}
             {page < totalPages && (
-              <Link href={pageHref(page + 1)} className="btn btn-outline px-4" rel="next">
+              <Link prefetch={false} href={pageHref(page + 1)} className="btn btn-outline px-4" rel="next">
                 {t('articles.next')} →
               </Link>
             )}

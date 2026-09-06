@@ -20,7 +20,7 @@ export default function TitasGasRecordPage() {
     <div className="container container--shell py-8 md:py-10">
       <Breadcrumbs crumbs={[{ name: TITAS_RECORD.short }]} />
       <div className="w-full">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+        <Link prefetch={false} href="/" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           <ArrowLeft className="w-4 h-4" />
           Home
         </Link>

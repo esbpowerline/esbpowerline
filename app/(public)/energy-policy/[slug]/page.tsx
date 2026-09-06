@@ -79,7 +79,7 @@ export default async function PolicyDetailPage({ params }: Props) {
     <div className="container container--shell py-8 md:py-10">
       <Breadcrumbs crumbs={[{ name: 'Energy Policy', path: '/energy-policy' }, { name: policy.short }]} />
       <div className="w-full">
-        <Link href="/energy-policy" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+        <Link prefetch={false} href="/energy-policy" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           <ArrowLeft className="w-4 h-4" />
           Policy &amp; Regulatory Framework
         </Link>
@@ -245,6 +245,7 @@ export default async function PolicyDetailPage({ params }: Props) {
             <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {related.map((r) => (
                 <Link
+                  prefetch={false}
                   key={r.slug}
                   href={`/energy-policy/${r.slug}`}
                   className="group flex items-center gap-2 rounded-lg border border-border/50 px-3 py-2.5 transition-colors hover:border-primary/30 hover:bg-muted/30"

@@ -167,12 +167,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           { name: article.title.slice(0, 110) },
         ]}
       />
-      <Link href="/articles" className="text-sm text-primary hover:underline">← Back to news</Link>
+      <Link prefetch={false} href="/articles" className="text-sm text-primary hover:underline">← Back to news</Link>
 
       <header className="article-header">
         <div className="article-category-wrap flex items-center gap-2">
           {/* A link, not a span: no article linked to its own category hub (stage 5). */}
-          <Link href={`/categories/${slugify(article.category)}`} className="text-sm font-bold uppercase tracking-widest text-primary hover:underline">{article.category}</Link>
+          <Link prefetch={false} href={`/categories/${slugify(article.category)}`} className="text-sm font-bold uppercase tracking-widest text-primary hover:underline">{article.category}</Link>
         </div>
         <h1 className="font-display font-extrabold tracking-tight leading-[1.05] text-foreground">
           {article.title}
@@ -185,18 +185,19 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         
         <div className="article-meta-row">
           <div className="article-meta-left-group">
-            <Link href={`/authors/${slugify(article.author)}`} className="article-meta-avatar rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground uppercase shadow-sm hover:ring-2 hover:ring-primary transition-all shrink-0">
+            <Link prefetch={false} href={`/authors/${slugify(article.author)}`} className="article-meta-avatar rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground uppercase shadow-sm hover:ring-2 hover:ring-primary transition-all shrink-0">
               {article.author.substring(0, 2)}
             </Link>
             <div className="article-meta-text flex flex-col min-w-0">
               <div className="article-meta-author">
-                <Link href={`/authors/${slugify(article.author)}`} className="hover:text-primary transition-colors">
+                <Link prefetch={false} href={`/authors/${slugify(article.author)}`} className="hover:text-primary transition-colors">
                   {article.author}
                 </Link>
                 {article.collaborators && article.collaborators.length > 0 && (
                   <>
                     <span className="text-xs font-normal text-muted-foreground">with:</span>
                     <Link
+                      prefetch={false}
                       href={`/authors/${slugify(article.collaborators[0].name)}`}
                       className="hover:text-primary transition-colors underline decoration-dotted underline-offset-2"
                     >
@@ -288,7 +289,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {/* In-Article Ad Space */}
         {paragraphs.length > 3 && (
           <div className="article-body-ad-block my-12" suppressHydrationWarning>
-            <Link href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
+            <Link prefetch={false} href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
               <Image src="/images/promotions/008.png" alt="Advertisement" width={2136} height={420} className="w-full h-auto object-cover" suppressHydrationWarning />
             </Link>
           </div>
@@ -311,7 +312,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         return (
           <aside className="article-context mt-10 grid gap-4 sm:grid-cols-2" aria-label="Related data and policy">
             {view && (
-              <Link href={`/grid-explorer?tab=${view.tab}`} className="article-context__card block rounded-2xl border border-border/60 bg-muted/20 p-4 hover:border-primary/40 transition-colors">
+              <Link prefetch={false} href={`/grid-explorer?tab=${view.tab}`} className="article-context__card block rounded-2xl border border-border/60 bg-muted/20 p-4 hover:border-primary/40 transition-colors">
                 <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">Data behind this story</span>
                 <span className="mt-1 block font-semibold text-foreground">Grid Explorer — {view.label}</span>
                 <span className="mt-1 block text-sm text-muted-foreground">{view.blurb}, from the official PGCB and Petrobangla daily reports.</span>
@@ -323,7 +324,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 <ul className="mt-1 space-y-1.5">
                   {mentioned.map((p) => (
                     <li key={p.slug}>
-                      <Link href={`/energy-policy/${p.slug}`} className="font-semibold text-foreground hover:text-primary">{p.title}</Link>
+                      <Link prefetch={false} href={`/energy-policy/${p.slug}`} className="font-semibold text-foreground hover:text-primary">{p.title}</Link>
                       <span className="block text-xs text-muted-foreground">{p.authority} · {p.year} · {p.status}</span>
                     </li>
                   ))}
@@ -351,7 +352,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             <div className="flex flex-wrap gap-2">
               {displayTags.map((t: string) =>
                 stored ? (
-                  <Link key={t} href={`/tags/${encodeURIComponent(t)}`} className="tag">#{t}</Link>
+                  <Link prefetch={false} key={t} href={`/tags/${encodeURIComponent(t)}`} className="tag">#{t}</Link>
                 ) : (
                   <span key={t} className="tag">#{t}</span>
                 ),
@@ -378,7 +379,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         {/* h2, not h3: the page's heading order skipped a level (Lighthouse). */}
         <div className="flex items-baseline justify-between gap-3 mb-4">
           <h2 className="font-semibold text-lg">Related stories</h2>
-          <Link href={`/categories/${slugify(article.category)}`} className="text-sm text-primary hover:underline">
+          <Link prefetch={false} href={`/categories/${slugify(article.category)}`} className="text-sm text-primary hover:underline">
             More in {article.category} →
           </Link>
         </div>

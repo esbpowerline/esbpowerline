@@ -112,6 +112,7 @@ export default async function MagazinePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-5">
             <h2 className="font-semibold text-xl">In this issue</h2>
             <Link
+              prefetch={false}
               href="/articles"
               className="text-xs text-primary hover:underline flex items-center gap-1 self-start sm:self-auto"
             >

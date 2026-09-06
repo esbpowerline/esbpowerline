@@ -88,6 +88,7 @@ export function GridDataLockedGate({
 
         <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Link
+            prefetch={false}
             href={msg.primaryHref}
             className="btn btn-primary inline-flex items-center justify-center gap-2 text-sm"
           >
@@ -95,7 +96,7 @@ export function GridDataLockedGate({
             <ArrowRight className="h-4 w-4" />
           </Link>
           {msg.secondaryLabel && msg.secondaryHref && (
-            <Link href={msg.secondaryHref} className="btn btn-secondary text-sm">
+            <Link prefetch={false} href={msg.secondaryHref} className="btn btn-secondary text-sm">
               {msg.secondaryLabel}
             </Link>
           )}

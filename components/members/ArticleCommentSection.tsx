@@ -105,6 +105,7 @@ export function ArticleCommentSection({
               in the HTML gave crawlers 256 robots-blocked, canonical-less URLs
               to discover (SEO_FIX_LOG stage 2). */}
           <Link
+            prefetch={false}
             href="/members/login"
             rel="nofollow"
             onClick={(e) => {
@@ -117,6 +118,7 @@ export function ArticleCommentSection({
           </Link>{' '}
           or{' '}
           <Link
+            prefetch={false}
             href="/login"
             rel="nofollow"
             onClick={(e) => {

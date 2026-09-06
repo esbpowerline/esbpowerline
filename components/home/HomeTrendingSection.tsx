@@ -35,6 +35,7 @@ function TrendingListItem({
 
   return (
     <Link
+      prefetch={false}
       href={`/articles/${article.slug}`}
       className={`home-trending-item group flex gap-3 ${compact ? 'py-2.5' : 'py-2.5 first:pt-0 last:pb-0'}`}
     >
@@ -165,6 +166,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
         <div className="flex-grow flex flex-col justify-center min-h-0 my-3">
           <div className="home-trending-wave__stage">
             <Link
+              prefetch={false}
               key={`${article.slug}-${displayIndex}`}
               href={`/articles/${article.slug}`}
               className={`home-trending-wave__featured group${
@@ -240,6 +242,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
           >
             {trending.map((item, index) => (
               <Link
+                prefetch={false}
                 key={item.slug}
                 href={`/articles/${item.slug}`}
                 aria-current={index === displayIndex ? 'true' : undefined}
@@ -273,7 +276,7 @@ function ArticlesTrendingRailItem({
 
   return (
     <li className={`articles-trending-rail__item${isLead ? ' articles-trending-rail__item--lead' : ''}`}>
-      <Link href={`/articles/${article.slug}`} className="articles-trending-rail__link group">
+      <Link prefetch={false} href={`/articles/${article.slug}`} className="articles-trending-rail__link group">
         <span
           className={`articles-trending-rail__rank${isLead ? ' articles-trending-rail__rank--hot' : ''}`}
           aria-hidden
@@ -336,7 +339,7 @@ function ArticlesTrendingRail({ trending }: { trending: PublicArticleCard[] }) {
               {t('home.trendingWeek')}
             </h2>
           </div>
-          <Link href="/articles" className="articles-trending-rail__view-all section-inline-link">
+          <Link prefetch={false} href="/articles" className="articles-trending-rail__view-all section-inline-link">
             {t('home.trendingViewAll')}
             <ArrowRight className="h-2.5 w-2.5 shrink-0" aria-hidden />
           </Link>
@@ -366,6 +369,7 @@ function TrendingHeroRailHeader() {
         </h2>
       </div>
       <Link
+        prefetch={false}
         href="/articles"
         className="section-inline-link text-primary inline-flex items-center gap-0.5 hover:underline shrink-0 leading-none p-0 m-0 text-xs md:text-sm font-semibold"
       >
@@ -415,6 +419,7 @@ export function HomeTrendingSection({
         </div>
       </div>
       <Link
+        prefetch={false}
         href="/articles"
         className={`section-inline-link text-primary inline-flex items-center gap-1 hover:underline font-medium shrink-0 ${
           isHeroRail ? 'text-xs' : 'text-sm'
@@ -470,6 +475,7 @@ export function HomeTrendingSection({
 
       <div className="grid lg:grid-cols-12 gap-3 md:gap-4">
         <Link
+          prefetch={false}
           href={`/articles/${lead.slug}`}
           className="lg:col-span-5 group flex gap-3 md:gap-4 rounded-2xl border border-border bg-card p-3 md:p-4 hover:border-primary/30 transition-all relative overflow-hidden"
         >

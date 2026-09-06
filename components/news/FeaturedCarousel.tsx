@@ -251,6 +251,7 @@ export function FeaturedCarousel({
             <div className="featured-hero__stories">
               {slideItems.map((item, i) => (
                 <Link
+                  prefetch={false}
                   // `current` is part of the key on purpose: a story that
                   // reappears on the next slide must still remount, or the
                   // entrance animation skips it and one card sits static

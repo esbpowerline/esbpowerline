@@ -628,7 +628,7 @@ export default async function GasCrisis2026Page() {
               unchanged; <GridProvenanceTag kind="D" /> are calculated by ESB PowerLine from
               published figures, with the formula stated where they appear. Explore any single
               day of this window in the{' '}
-              <Link href="/grid-explorer" className="underline text-foreground">
+              <Link prefetch={false} href="/grid-explorer" className="underline text-foreground">
                 Grid Explorer
               </Link>
               .

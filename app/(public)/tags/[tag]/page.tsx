@@ -60,7 +60,7 @@ export default async function TagPage({ params }: Props) {
     <div className="container py-8">
       <Breadcrumbs crumbs={[{ name: 'Tags', path: '/tags' }, { name: `#${tag}` }]} />
       <div className="mb-6">
-        <Link href="/tags" className="text-sm text-primary">← All tags</Link>
+        <Link prefetch={false} href="/tags" className="text-sm text-primary">← All tags</Link>
         <h1 className="text-4xl font-display font-bold tracking-tight mt-2">#{tag}</h1>
         <p className="text-muted-foreground">{articles.length} articles</p>
       </div>

@@ -107,7 +107,7 @@ export function AccountMenu() {
             <p className="account-menu__title">Choose how to sign in</p>
           </div>
           <div className="account-menu__options">
-            <Link href="/members/login" role="menuitem" className="account-menu__option" onClick={close}>
+            <Link prefetch={false} href="/members/login" role="menuitem" className="account-menu__option" onClick={close}>
               <span className="account-menu__option-icon account-menu__option-icon--member" aria-hidden>
                 <BookOpenCheck className="h-4 w-4" />
               </span>
@@ -117,7 +117,7 @@ export function AccountMenu() {
               </span>
               <ChevronRight className="account-menu__option-arrow" aria-hidden />
             </Link>
-            <Link href="/login" role="menuitem" className="account-menu__option" onClick={close}>
+            <Link prefetch={false} href="/login" role="menuitem" className="account-menu__option" onClick={close}>
               <span className="account-menu__option-icon account-menu__option-icon--staff" aria-hidden>
                 <Shield className="h-4 w-4" />
               </span>
@@ -145,6 +145,7 @@ export function AccountMenu() {
           </div>
           <div className="account-menu__actions">
             <Link
+              prefetch={false}
               href={access.href}
               role="menuitem"
               className={cn(

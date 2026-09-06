@@ -152,6 +152,7 @@ export function MagazinePageClient({
                 </a>
               ) : pdfUrl ? (
                 <Link
+                  prefetch={false}
                   href="/members/login"
                   rel="nofollow"
                   onClick={(e) => {
@@ -239,6 +240,7 @@ export function MagazinePageClient({
                   <span className="text-sm font-bold text-foreground">Jump into the issue</span>
                 </div>
                 <Link
+                  prefetch={false}
                   href="/members/magazine"
                   rel="nofollow"
                   className="text-[11px] text-primary hover:text-primary-foreground font-semibold inline-flex items-center gap-1 group/link"
@@ -290,7 +292,7 @@ export function MagazineLibraryButton() {
   const signedIn = status === 'authenticated';
 
   if (signedIn) {
-    return <Link href="/members" className="btn btn-primary px-8">Open my library</Link>;
+    return <Link prefetch={false} href="/members" className="btn btn-primary px-8">Open my library</Link>;
   }
-  return <Link href="/members/login" className="btn btn-primary px-8">Sign in for full access</Link>;
+  return <Link prefetch={false} href="/members/login" className="btn btn-primary px-8">Sign in for full access</Link>;
 }

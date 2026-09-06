@@ -74,9 +74,9 @@ export default async function GridArchiveYearPage({
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
       <nav className="mb-4 text-xs text-muted-foreground" aria-label="Breadcrumb">
-        <Link href="/grid-explorer" className="hover:text-foreground">Grid Explorer</Link>
+        <Link prefetch={false} href="/grid-explorer" className="hover:text-foreground">Grid Explorer</Link>
         {' / '}
-        <Link href="/grid-explorer/archive" className="hover:text-foreground">Archive</Link>
+        <Link prefetch={false} href="/grid-explorer/archive" className="hover:text-foreground">Archive</Link>
         {' / '}
         <span>{year}</span>
       </nav>
@@ -100,6 +100,7 @@ export default async function GridArchiveYearPage({
               {dates.map((date) => (
                 <li key={date}>
                   <Link
+                    prefetch={false}
                     href={`/grid-explorer/${date}`}
                     className="inline-block rounded-lg border border-border/70 bg-card px-3 py-1.5 text-sm tabular-nums transition-colors hover:border-primary/40"
                     title={formatArchiveDate(date)}

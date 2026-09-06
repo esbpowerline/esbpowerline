@@ -26,7 +26,7 @@ export function Breadcrumbs({ crumbs, hideVisible = false, className }: { crumbs
                   {last || !c.path ? (
                     <span aria-current={last ? 'page' : undefined} className="truncate max-w-[16rem] text-foreground/80">{c.name}</span>
                   ) : (
-                    <Link href={c.path} className="hover:text-primary transition-colors">{c.name}</Link>
+                    <Link prefetch={false} href={c.path} className="hover:text-primary transition-colors">{c.name}</Link>
                   )}
                   {!last && <span aria-hidden className="text-muted-foreground/50">/</span>}
                 </li>

@@ -64,7 +64,7 @@ export function ArticleCard({
   const displayTitle = resolveDisplayTitle(title, shortTitle);
 
   return (
-    <Link href={`/articles/${id}`} className={`article-card group ${isFeatured ? 'is-featured' : ''}`}>
+    <Link prefetch={false} href={`/articles/${id}`} className={`article-card group ${isFeatured ? 'is-featured' : ''}`}>
       <div className="article-card__image-wrapper relative">
         {hasArticleImage(imageUrl) ? (
           <Image

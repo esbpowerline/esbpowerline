@@ -174,11 +174,11 @@ export default async function ArchiveDayPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbs) }} />
 
       <nav className="mb-4 text-xs text-muted-foreground" aria-label="Breadcrumb">
-        <Link href="/grid-explorer" className="hover:text-foreground">Grid Explorer</Link>
+        <Link prefetch={false} href="/grid-explorer" className="hover:text-foreground">Grid Explorer</Link>
         {' / '}
-        <Link href="/grid-explorer/archive" className="hover:text-foreground">Archive</Link>
+        <Link prefetch={false} href="/grid-explorer/archive" className="hover:text-foreground">Archive</Link>
         {' / '}
-        <Link href={`/grid-explorer/archive/${year}`} className="hover:text-foreground">{year}</Link>
+        <Link prefetch={false} href={`/grid-explorer/archive/${year}`} className="hover:text-foreground">{year}</Link>
       </nav>
 
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
@@ -251,12 +251,14 @@ export default async function ArchiveDayPage({
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
+            prefetch={false}
             href={`/grid-explorer?date=${summary.date}`}
             className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
           >
             Open in Grid Explorer
           </Link>
           <Link
+            prefetch={false}
             href="/members/subscription"
             rel="nofollow"
             className="rounded-full border border-border px-5 py-2 text-sm font-semibold"
@@ -282,7 +284,7 @@ export default async function ArchiveDayPage({
           any entry point, and how a reader follows a story across days. */}
       <nav className="mt-10 flex items-center justify-between border-t border-border/70 pt-5 text-sm">
         {summary.previous ? (
-          <Link href={`/grid-explorer/${summary.previous}`} className="flex items-center gap-2 hover:text-primary">
+          <Link prefetch={false} href={`/grid-explorer/${summary.previous}`} className="flex items-center gap-2 hover:text-primary">
             <ArrowLeft className="h-4 w-4" aria-hidden />
             {formatArchiveDate(summary.previous)}
           </Link>
@@ -290,7 +292,7 @@ export default async function ArchiveDayPage({
           <span />
         )}
         {summary.next ? (
-          <Link href={`/grid-explorer/${summary.next}`} className="flex items-center gap-2 hover:text-primary">
+          <Link prefetch={false} href={`/grid-explorer/${summary.next}`} className="flex items-center gap-2 hover:text-primary">
             {formatArchiveDate(summary.next)}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>

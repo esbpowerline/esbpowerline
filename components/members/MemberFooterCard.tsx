@@ -22,6 +22,7 @@ export function MemberFooterCard() {
       <div className="card flex flex-col gap-4 p-5 sm:p-6">
         <p className="text-sm leading-relaxed text-foreground/85">{t('member.guestPitch')}</p>
         <Link
+          prefetch={false}
           href="/members/login"
           className="btn btn-primary inline-flex w-fit items-center gap-1.5 text-sm"
         >
@@ -41,6 +42,7 @@ export function MemberFooterCard() {
           : t('member.signedInStaff', { name: access.userName ?? '' })}
       </p>
       <Link
+        prefetch={false}
         href={access.href}
         className="btn btn-primary inline-flex w-fit items-center gap-1.5 text-sm"
       >
@@ -52,7 +54,7 @@ export function MemberFooterCard() {
         <p className="text-xs leading-relaxed text-foreground/60">{t('member.manageAccount')}</p>
       ) : (
         <p className="text-xs leading-relaxed text-foreground/60">
-          <Link href="/login" className="text-primary hover:underline">
+          <Link prefetch={false} href="/login" className="text-primary hover:underline">
             {t('member.staffSignIn')}
           </Link>
         </p>
