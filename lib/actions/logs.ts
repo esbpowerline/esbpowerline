@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
+import { revalidateArticleContent } from '@/lib/revalidate-tags';
 
 export async function getAdminLogs(limit = 50) {
   const session = await auth();
@@ -128,6 +129,11 @@ export async function undoAuditLogAction(logId: string) {
   revalidatePath('/cms');
   revalidatePath('/cms/articles');
   revalidatePath('/');
+  // Undo restores `status` and `publishedAt`, so it can put an article back on
+  // the public site or take one off it. `revalidatePath('/')` re-renders the
+  // page but the card data it reads comes from the tagged cache, which has to
+  // be expired separately or the re-render just paints the same stale rows.
+  revalidateArticleContent();
 
   return { ok: true };
 }

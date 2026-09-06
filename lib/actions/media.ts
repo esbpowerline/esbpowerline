@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
@@ -514,4 +515,8 @@ export async function replaceMediaAndFeaturedImage(
   revalidatePath('/admin/articles');
   revalidatePath('/cms/articles');
   revalidatePath('/');
+  // `imageUrl` and `seo` are both in ARTICLE_CARD_SELECT, so replacing a hero
+  // image changes what every card of that article shows. Without this the new
+  // image appeared on the article page and the old one stayed on the cards.
+  revalidateArticleContent();
 }

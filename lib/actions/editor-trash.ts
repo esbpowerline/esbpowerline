@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { PUBLIC_REVALIDATE_PATHS } from '@/lib/public-paths';
+import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
 import { daysUntilPurge, purgeCutoffDate } from '@/lib/editor-trash';
@@ -10,6 +12,20 @@ const REVALIDATE_PATHS = ['/cms', '/cms/trash', '/cms/articles', '/cms/notices',
 
 function revalidateTrash() {
   for (const path of REVALIDATE_PATHS) revalidatePath(path);
+}
+
+/**
+ * An editor may trash their own article whatever its status — including one
+ * that is live. `revalidateTrash` only covers the CMS, so trashing a published
+ * article left it on the public site until the data cache aged out on its own.
+ * That was survivable while every cache carried `revalidate: 60`; it is not a
+ * thing to rely on, and taking published content down is the last path that
+ * should wait for a timer.
+ */
+function revalidateAfterPublicRemoval(slug: string) {
+  for (const path of PUBLIC_REVALIDATE_PATHS) revalidatePath(path);
+  revalidatePath(`/articles/${slug}`);
+  revalidateArticleContent();
 }
 
 async function requireUser() {
@@ -134,12 +150,15 @@ export async function trashOwnArticle(articleId: string) {
   const canTrash = article.authorId === user.id && can(user.role as Role, 'article.delete_own');
   if (!canTrash) throw new Error('Forbidden');
 
+  const wasPublic = article.status === 'PUBLISHED';
+
   await prisma.article.update({
     where: { id: articleId },
     data: { status: 'TRASH', editorTrash: true, trashedAt: new Date() },
   });
 
   revalidateTrash();
+  if (wasPublic) revalidateAfterPublicRemoval(article.slug);
   return { ok: true };
 }
 
