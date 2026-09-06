@@ -58,7 +58,32 @@ only `/about` was fatal. If a deploy fails this way again it is not the commit: 
 if it recurs, give `readSettingsMap` the same fail-soft treatment `releases.server.ts` has
 rather than raising the pool ceiling.
 
-**2. The outage backfill is built, dry-run, and not applied.**
+**2. The hourly NLDC ingest wrote nothing for a day, and said it succeeded.**
+Found 2026-09-06 night. Every tick that day logged `generation: 0 pages, 0 rows,
+0 documents already held, 2 failed` on both series, 132 `Unknown argument
+"sourceUrl"` errors from `prisma.sourceDocument.create()` — **and exited 0**, so
+`pi-notify.sh` never fired. The cause was a stale generated Prisma client on the
+Pi: `prisma/schema.prisma` carries `sourceUrl`, the client under
+`~/esb-ingest/deps/node_modules/.prisma/client` did not. Regenerating fixed it —
+the 00:17 tick on 2026-09-07 wrote 51 generation rows and 102 demand/supply rows,
+0 failed.
+
+**Both follow-ups are now closed.** `pi-hourly.sh` no longer trusts the exit
+code: it sums the `N failed` field across both series and treats any failure as
+a failed tick, feeding the existing consecutive-failure counter. The
+discriminator is deliberately `failed`, not `rows` — a quiet tick writes zero
+rows on purpose, because `--recent` stops at an unchanged page 1, and that is
+what makes this job cheap enough to run hourly forever. Checked against all
+three real cases: the healthy 00:17 tick and a quiet tick stay silent, the
+2026-09-06 output alerts. And the lost hours came back on their own — `--report`
+now shows **0 days absent** across all 138 days of the demand series, with the
+largest remaining gap one hour.
+
+**A related trap:** `pi-ingest.sh` copies helper scripts down and installs cron
+lines, but nothing re-runs `prisma generate` when the schema changes. A migration
+that adds a column will silently break every script on the Pi the same way.
+
+**3. The outage backfill is built, dry-run, and not applied.**
 
 ```bash
 python scripts/repair_outage_cause.py            # dry run, prints the report
@@ -72,13 +97,13 @@ second run reports nothing) and its writer reproduces the archive's serialisatio
 byte, asserted per file. Afterwards: republish the ~90 days holding `DataRelease` rows
 (`scripts/publish-local.ts`); older days ride the static archive and need the deploy in item 1.
 
-**3. 41,034 outage rows cannot be repaired from disk.** Pre-2025 the parser stored no
+**4. 41,034 outage rows cannot be repaired from disk.** Pre-2025 the parser stored no
 `full_desc`, so there is no evidence to re-derive the cause from — 100% coverage in 2025-26,
 66% in 2023-24, 9.5% in 2017. Their causes are probably wrong in the same way. Fixing them
 means reparsing the source workbooks (`reingest_from_archive.py`), which is a different and
 much larger job. Do not guess at them; that would be inventing text.
 
-**4. The commodities strip is three hand-typed yearly rows.** `live-ticker.server.ts` carries
+**5. The commodities strip is three hand-typed yearly rows.** `live-ticker.server.ts` carries
 Bulk Electricity (BERC), Diesel and Octane (BPC), read from `lib/data/macro/economics.ts` —
 one row per year, hand-maintained, no official document cited. Hamim asked for the real list of
 energy commodities the government imports or administers, each with its gazetted price, issuer,
@@ -87,7 +112,7 @@ usable survives. Note BPC moved to a **monthly automatic pricing formula in 2024
 reprices LPG monthly, so a yearly table cannot be right by construction. Do not answer this
 from memory — the strip's own header says it carries gazetted prices and nothing else.
 
-**5. The audit and security sweeps are partial.** `GRID_EXPLORER_AUDIT.md` and
+**6. The audit and security sweeps are partial.** `GRID_EXPLORER_AUDIT.md` and
 `CONTENT_INVENTORY.md` are from 2026-09-03 and predate everything since. Of the security pass,
 the gating surface was checked directly (path-prefix bypass closed, `%`-encoding closed,
 `TIER_GATED_DAILY_DIRS` complete, every dated feed 403s on a locked day) — server actions, API
@@ -304,6 +329,19 @@ Python parsers own every number on the site. They carry years of source-quirk kn
   serverless compute limits. Only `/api/cron/publish-scheduled` runs on Vercel, every
   15 min.
 
+### The Pi runs ingest, and nothing else
+
+It used to also serve the magazine's artwork — nginx on `:8090` over `/srv/magazine`,
+reachable only through Tailscale. That meant every page image, the cover and the
+PDF 404'd for anyone off the tailnet, and on 2026-09-06 Tailscale dropped and the
+magazine page rendered 97 broken images with no indication anything was wrong.
+The artwork now lives in a **private Supabase Storage bucket**, signed per render
+(`lib/magazine-assets.ts`, uploaded by `scripts/upload-magazine-assets.mjs`).
+
+**Nothing a reader loads should ever come off the Pi.** It is on a home
+connection behind NAT with no port forwarded; it is an ingest worker, not an
+origin. The `:8090` vhost can be retired.
+
 ### The scheduled poll runs on the Raspberry Pi
 
 `scripts/pi-ingest.sh`, from cron at 09:30 / 12:30 / 16:30 / 21:30 Dhaka, over the
@@ -376,6 +414,37 @@ evidence retention window, not a bigger tier.
 
 One failed tick is not an alert: the hour is still inside NLDC's window and the next
 tick's two-page walk picks it up. Four consecutive failures are.
+
+### Checking the Pi from anywhere
+
+The Pi is on the tailnet as `esb-pi`, key expiry disabled, no port forwarded. If
+the name will not resolve, it is this machine's Tailscale that is down, not the
+Pi — `tailscale status` printing `unexpected state: NoState` means it is still
+starting, and `tailscale up` finishes it. `docs/REMOTE-ACCESS.md` has the SSH
+config; nothing below needs a password.
+
+```bash
+tailscale status | grep esb-pi              # is it on the tailnet at all
+ssh pi@esb-pi 'crontab -l | grep -v "^#"'   # all five runners scheduled?
+ssh pi@esb-pi 'tail -20 ~/esb-ingest/logs/alerts.log'
+ssh pi@esb-pi 'timedatectl | grep -i synchron'   # a skewed clock refuses polls
+```
+
+**Read the counts, not the exit code.** This is the lesson of open-work item 2:
+a poll can fail on every write and still exit 0, so the only honest health check
+is whether rows landed.
+
+```bash
+# Today's hourly ticks. "0 pages, 0 rows" on both series is a FAILURE,
+# whatever the exit line says.
+ssh pi@esb-pi 'grep -E "pages,|exit [0-9]+" ~/esb-ingest/logs/hourly-$(date +%Y%m%d).log | tail'
+
+# The four daily polls and the between-poll watcher.
+ssh pi@esb-pi 'ls -t ~/esb-ingest/logs | head; tail -30 ~/esb-ingest/logs/watch-$(date +%Y%m%d).log'
+```
+
+A healthy hourly tick looks like `generation: 1 pages, 51 rows, ... 0 failed`.
+`db_size_mb=` is printed on every hourly run and warned on daily past 400 MB.
 
 ### Between the polls: the watcher asks each publisher separately
 
@@ -471,9 +540,32 @@ static archive rather than serving a known-bad day.
 snapshot is server-rendered.
 
 The **snapshot panel is a fixed 2×6 of twelve tiles** (`DAILY_SNAPSHOT_LABELS` in
-`home-snapshot-core.ts`) — ten PGCB/Petrobangla plus two SREDA. That count is a layout
-contract, and rules 1–3 above exist because of it. Adding, removing or reordering tiles
-means changing `DAILY_SNAPSHOT_LABELS` and its tests, not special-casing a render.
+`home-snapshot-core.ts`). That count is a layout contract, and rules 1–3 above exist
+because of it. Adding, removing or reordering tiles means changing
+`DAILY_SNAPSHOT_LABELS`, `SNAPSHOT_SLOTS` and the tests that pin both — not
+special-casing a render.
+
+**Ten of the twelve are hourly.** NLDC's two pages carry far more than the snapshot used
+to read: generation total, gas, liquid fuel, coal, hydro, solar, wind and four
+interconnectors, plus demand, supply and load shed — all of it stored in
+`GridHourlyObservation` since the capture was written, and for years only five tiles read
+any of it. `liveValueFor` in `HomeSnapshotPanel.tsx` now fills eight, and `LIVE_BACKED_LABELS`
+is the list both sides must agree on; a label in one and not the other waits forever.
+
+Two tiles stay daily on purpose. `Daily Generation` and `Energy Unserved` are day
+quantities — NLDC posts power, not energy, and the live snapshot's `hours` field is the
+last 24 *posted* rows rather than 24 hours, so averaging it and calling the result daily
+is what that field's comment forbids. `Gas Supply` (Petrobangla's 08:00→08:00 window) and
+`Production Cost` are the cadence their publishers file at.
+
+**`Gas Generation` and `Gas Supply` now sit adjacent, and they are different quantities** —
+gas burned for power against national production, roughly a third against the whole. That
+substitution is the sharpest incident in this repo (2,366 → 856 MMcfd under one unchanged
+label). A test pins them apart; keep it.
+
+SREDA's `RE Installed` and `RE Grid Share` left the panel for `Solar + Wind`, NLDC's hourly
+renewable output. The register answers "what is built", never "what is generating now".
+`buildSredaSnapshotStats` is still exported and tested for the surfaces that want capacity.
 
 `gwhToAvgMw()` is the only sanctioned GWh→MW conversion (daily energy over 24h). Do not
 inline the arithmetic; a tile that mixes a 24-hour average with an instantaneous peak under

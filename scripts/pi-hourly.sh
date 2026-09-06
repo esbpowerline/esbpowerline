@@ -139,6 +139,32 @@ if [[ $status -ne 0 ]]; then
     exit $status
 fi
 
+# Exit 0 is not success. Read the counts.
+#
+# On 2026-09-06 every tick of this runner logged
+#   generation: 0 pages, 0 rows, 0 documents already held, 2 failed
+# on both series and still exited 0, because the writes failed inside a script
+# whose own exit code only reflects whether it ran. A stale Prisma client on
+# this Pi rejected `sourceUrl`, 132 times in a day, and nothing alerted: the
+# most perishable stream in the archive stopped for twelve hours in silence.
+#
+# The discriminator is the `N failed` field, not the row count. A genuinely
+# quiet tick writes zero rows on purpose — `--recent` stops at an unchanged
+# page 1, which is the common case and the reason this job is cheap enough to
+# run hourly forever. Rows of zero with failures of zero is a healthy tick;
+# any failure at all means a page was fetched and could not be stored.
+FAILED_ITEMS=$(echo "$OUT" | sed -n 's/.*, \([0-9][0-9]*\) failed,.*/\1/p' | awk '{t+=$1} END{print t+0}')
+if [[ "$FAILED_ITEMS" -gt 0 ]]; then
+    fails=$(( $(cat "$FAILCOUNT" 2>/dev/null || echo 0) + 1 ))
+    echo "$fails" >"$FAILCOUNT"
+    echo "! capture wrote nothing usable ($FAILED_ITEMS failed) — $fails consecutive"
+    if [[ "$fails" -ge "$CONSECUTIVE_ALERT" ]]; then
+        notify error "hourly: NLDC capture storing nothing"             "$FAILED_ITEMS failed item(s) across series, $fails consecutive ticks. Exit code was 0, so check the log, not the status: $(echo "$OUT" | grep -E 'pages,|Unknown argument|Invalid' | tail -3 | tr '
+' ' ')"
+    fi
+    exit 1
+fi
+
 # A clean run resets the counter, so the alert means "still broken" rather than
 # "has ever been broken".
 [[ -f "$FAILCOUNT" ]] && rm -f "$FAILCOUNT"
