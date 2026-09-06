@@ -11,6 +11,12 @@ Tailwind 3 + shadcn/ui · Vitest · Python 3.14 for every parser.
 `AUDIT-INVENTORY.md` is a file:line inventory of routes, env vars and data flow. Read it
 before a survey question — it is almost always faster than grepping.
 
+`docs/REMOTE-ACCESS.md` is how to reach the Pi, Vercel and Supabase from a machine that
+has never seen this project. It holds **no secrets on purpose** — every credential is
+either a browser sign-in or comes down with `vercel env pull .env.local`, so nothing has
+to be copied between machines. The Pi is reachable off-LAN over Tailscale as `esb-pi`;
+no port is forwarded and nothing of the Pi's is public.
+
 ---
 
 ## Branch
