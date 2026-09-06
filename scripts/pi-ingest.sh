@@ -211,5 +211,52 @@ for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh; 
     fi
 done
 
+# A helper on disk that nothing schedules is a helper that does not run. That is
+# exactly how ingest-nldc-hourly.ts sat "IMPLEMENTED 2026-09-05" on the priority
+# list while the most perishable stream in the archive stopped dead — 26 hours
+# missing when it was found on 2026-09-06. The loop above guarantees every runner
+# is present and current; only the crontab decides whether one is ever called,
+# and until now that lived nowhere but the Pi's own crontab and a paragraph of
+# CLAUDE.md. Declaring it beside the copy loop closes the gap: a runner added to
+# the repo with a schedule next to it is scheduled by the next poll, with no
+# session on the Pi at all.
+#
+# Deliberately additive, and that restraint is the point. A helper already named
+# anywhere in the crontab is left exactly as it stands, whatever schedule or
+# redirection it carries — those four lines were typed by hand months ago, this
+# runner cannot see what else is on them, and rewriting four working jobs to
+# match a table authored on a Windows box is a poor trade for installing one
+# missing line. A schedule that disagrees with this table is reported and left.
+declare -a SCHEDULE=(
+    "pi-ingest.sh|30 9,12,16,21 * * *"
+    "pi-watch.sh|7,22,37,52 8-22 * * *"
+    "pi-hourly.sh|17 * * * *"
+    "pi-nightly.sh|30 2 * * *"
+    "pi-weekly.sh|30 3 * * 0"
+)
+if command -v crontab >/dev/null; then
+    cron_now="$(crontab -l 2>/dev/null || true)"
+    declare -a cron_add=()
+    for entry in "${SCHEDULE[@]}"; do
+        helper="${entry%%|*}"; when="${entry#*|}"
+        [[ -x "$ROOT/$helper" ]] || continue
+        held="$(grep -F -- "$helper" <<<"$cron_now" | head -1)"
+        if [[ -n "$held" ]]; then
+            [[ "$held" == "$when "* ]] || echo "cron: $helper runs as '$held' — the repo declares '$when' (left alone)"
+            continue
+        fi
+        cron_add+=("$when $ROOT/$helper")
+    done
+    if (( ${#cron_add[@]} )); then
+        if { [[ -n "$cron_now" ]] && printf '%s\n' "$cron_now"; printf '%s\n' "${cron_add[@]}"; } | crontab -; then
+            printf 'cron: installed %s\n' "${cron_add[@]}"
+            notify warn "ingest: cron entries installed" "$(printf '%s; ' "${cron_add[@]}")"
+        else
+            echo "! cron: could not install ${#cron_add[@]} entry(ies) — schedule unchanged"
+            notify warn "ingest: cron install failed" "$(printf '%s; ' "${cron_add[@]}")"
+        fi
+    fi
+fi
+
 echo "=== $(date -Is) — exit $status ==="
 exit $status

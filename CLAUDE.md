@@ -346,6 +346,20 @@ It takes that lock too — not for the database, where the writes are idempotent
 because `pi-ingest.sh` does `git reset --hard` on the checkout and pulling the tree
 out from under a running `tsx` is how one job corrupts another.
 
+**The schedule is declared in the repo, not just on the Pi.** `pi-ingest.sh` has
+always copied each helper down at the end of a poll, but nothing scheduled them —
+which is precisely how `ingest-nldc-hourly.ts` could be listed IMPLEMENTED while
+running zero times. The `SCHEDULE` table beside that copy loop now names every
+runner's cron line, and a poll installs any the crontab lacks. So a new helper
+reaches the Pi *and* gets called with no session on it at all, and a Pi reflashed
+or restored from a card image reschedules itself on its first poll.
+
+It is additive on purpose. A helper already named anywhere in the crontab is left
+alone whatever schedule or redirection it carries — the original four lines were
+typed by hand and the runner cannot see what else is on them. A schedule that
+disagrees with the table is printed to the log and **not** corrected; fix it by
+hand, or change the table. Retiming a runner therefore means editing both.
+
 **The tier ceiling is announced, not discovered.** The script prints `db_size_mb=`
 on the connection it already has open and the runner warns once a day past 400 MB.
 Measured 2026-09-06: the database is **142 MB** of Supabase's 500 MB free tier —

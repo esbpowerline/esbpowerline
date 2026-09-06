@@ -55,10 +55,15 @@
 #
 # cron runs the COPY at ~/esb-ingest/pi-hourly.sh, not this file in the repo,
 # for the same reason as pi-ingest.sh: a poll rewrites the checkout underneath a
-# running script. pi-ingest.sh copies this file into place on every poll, so
-# once the crontab line below exists it never needs touching again.
+# running script. pi-ingest.sh copies this file into place on every poll, and
+# installs the crontab line too, from the SCHEDULE table beside that copy loop:
 #
 #   17 * * * * /home/pi/esb-ingest/pi-hourly.sh
+#
+# It has to. Shipping a runner nothing calls is the whole reason the 26 hours
+# above went missing, and "a human SSHes in once" is not a property the archive
+# can rest on — the line is declared in the repo now, so a Pi that has lost it,
+# or never had it, is scheduled again by the next poll.
 #
 # :17 is deliberate. The scheduled polls run at :30, the watcher at
 # :07/:22/:37/:52, and all of them take the same lock; :17 is the widest gap in
