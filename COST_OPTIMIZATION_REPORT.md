@@ -7,6 +7,25 @@ database architecture untouched, `next/image` behaviour untouched.
 
 ---
 
+> ## ⚠ CORRECTION (2026-09-06, later the same day)
+>
+> **Every per-page request count in this document was measured against the development
+> server, and `next/link` prefetching is disabled in development.** Re-measured against a
+> production build, the real middleware-invocation counts are:
+>
+> | Page | stated below | actual (prod) | of which prefetch |
+> |---|---|---|---|
+> | homepage | 4 | **46** | 44 |
+> | article | 3 | **43** | 41 |
+> | category | 1 | **43** | 42 |
+> | `/articles` | 1 | **61** | 60 |
+> | `/grid-explorer` | 43 | **63** | 43 (data is 19, not 41) |
+>
+> Two conclusions below are withdrawn: that 41 of the Grid Explorer's requests are the tier
+> gate (19 are), and §2.7's rating of prefetch as **NOT A PROBLEM** — a prefetch of a
+> statically-cached page still costs a full middleware invocation, and prefetch is ~90% of all
+> invocations site-wide. See `GRID_REQUEST_AUDIT.md` §0 for the measurements.
+
 ## 1. Effective ISR behaviour, before vs after
 
 Both columns are read from a real `npm run build` route table, not from the declared values.
