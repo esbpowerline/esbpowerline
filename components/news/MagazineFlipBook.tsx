@@ -1,21 +1,23 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import {
-  X,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
-  BookOpen,
-  Volume2,
-  VolumeX,
+  ChevronsLeft,
+  ChevronsRight,
+  ImageOff,
+  LayoutGrid,
   Maximize2,
   Minimize2,
+  Sparkles,
+  Volume2,
+  VolumeX,
+  X,
   ZoomIn,
   ZoomOut,
-  LayoutGrid,
 } from 'lucide-react';
-import { playPageTurn, primePageTurnAudio } from './page-turn-sound';
 
 interface MagazineFlipBookProps {
   /**
@@ -23,230 +25,487 @@ interface MagazineFlipBookProps {
    * open rather than showing stand-in artwork.
    */
   pages?: string[];
-  /** Small renders of the same pages, for the thumbnail strip. */
+  /** Page thumbnails for the picker. Falls back to the full-size pages. */
   thumbs?: string[];
   /** Page index (0-based) to open at, so a thumbnail can jump straight there. */
   startPage?: number;
   isOpen: boolean;
   onClose: () => void;
-  /** Shown in the reader's title bar. */
-  title?: string;
+  /** Printed on the reader's header, e.g. "Vol 001 · Issue 01". */
   issueLabel?: string;
+  title?: string;
 }
 
-/** Must match --flip-dur in globals.css. */
-const FLIP_MS = 720;
-const MUTE_KEY = 'esb.magazine.muted';
-const ZOOM_STEPS = [1, 1.65, 2.5];
+/**
+ * A reader that behaves like a bound magazine.
+ *
+ * Three things had to be true before it stopped feeling like a slideshow, and
+ * each was a separate rewrite:
+ *
+ * 1. **One leaf animates, ever.** The spread underneath is two plain images and
+ *    a single sheet moves over it. An earlier version rotated all 24 leaves on a
+ *    z-index ladder; the one before that was hardcoded to eight files. Five
+ *    images are in the DOM now whether the issue is 48 pages or 480.
+ *
+ * 2. **The sheet rolls; it does not pivot.** Paper bends. A single `rotateY` is
+ *    a rigid board on a hinge, and no amount of easing hides that. The turning
+ *    leaf is built from `STRIPS` vertical slices nested inside one another, each
+ *    rotated a few degrees more than its parent — because transforms accumulate
+ *    down the chain, the slices stay joined and approximate a cylinder. The bend
+ *    grows towards the outer edge (`bendAt`) and peaks mid-turn, so the page
+ *    curls up off the spread, rolls over, and settles flat.
+ *
+ * 3. **Progress is driven, not declared, and never round-trips through React.**
+ *    A CSS transition only knows its endpoints, so it cannot shade a sheet
+ *    through its arc. The rAF loop writes transforms and shading straight to the
+ *    DOM through refs; React renders the sheet's structure when a turn starts
+ *    and again when it ends, and not once in between. That is what keeps 12
+ *    slices smooth on a mid-range laptop.
+ *
+ * You can also grab the page: drag and the sheet tracks your pointer, release
+ * past a third and it completes, otherwise it falls back.
+ *
+ * Pagination follows print convention: the cover stands alone, then 2-3, 4-5,
+ * and a final even page alone. Narrow screens read one page at a time, which
+ * changes the arithmetic but not the model — see `layoutFor`.
+ */
 
-type Turn = { dir: 'next' | 'prev'; from: number; to: number };
-type View = [string | null, string | null];
+/** A full turn at rest. Drags finish proportionally faster. */
+const TURN_MS = 900;
+const PAGE_ASPECT = 587 / 803;
+const SOUND_KEY = 'esb:magazine:page-sound';
+const MOTION_KEY = 'esb:magazine:page-roll';
+const ZOOM_STEPS = [1, 1.45, 2] as const;
+
+/** Fraction of a page you must drag before releasing completes the turn. */
+const COMMIT_AT = 0.32;
 
 /**
- * Reader for a full issue.
- *
- * This replaced a 3D sheet-flip mockup that was wired to eight hardcoded
- * `/images/INNER00N.jpg` files and could not show a real issue at all: the
- * demo issue is 48 pages.
- *
- * The 2026-09-06 rebuild put the turn back, properly this time:
- *
- * - **A spread that fills the viewport.** It was two fixed 380px boxes, so a
- *   48-page magazine was read through a window barely wider than a paperback on
- *   a 27" screen. The stage is sized by aspect-ratio against whatever space the
- *   browser has and takes all of it.
- * - **A real page turn.** A double-sided leaf rotates about the spine — front
- *   face the page being left, back face the page arriving, both painted before
- *   it starts moving, with shading sweeping across as it goes. The spread
- *   underneath is already the destination, so the leaf lands on a page that is
- *   in place rather than triggering a second paint at the end.
- * - **Sound.** Synthesised, not sampled — see ./page-turn-sound.ts. Muting is
- *   remembered across sessions.
- * - **Every page reachable on a phone.** The old mobile branch rendered
- *   `right ?? left`, i.e. only the right half of each spread, so pages 2, 4,
- *   6 … could not be opened at all on a narrow screen. Narrow viewports now get
- *   a genuine one-page-at-a-time mode over the full page list.
- *
- * Pagination follows print convention: the cover stands alone on the right,
- * then even/odd spreads (2-3, 4-5 ...), and a final odd page stands alone.
+ * Slices the turning sheet is bent into. Twelve is where the silhouette stops
+ * looking faceted; past that the extra nodes cost more than they show.
  */
+const STRIPS = 12;
+
+/** Degrees of bend across the whole sheet at the peak of a turn. */
+const CURL_DEGREES = 52;
+
+/**
+ * How the bend is distributed from spine to outer edge.
+ *
+ * Quadratic, so the half nearest the binding stays almost flat and the outer
+ * edge does most of the curling — which is how a held page actually behaves,
+ * and why a linear distribution reads as a tube rather than as paper.
+ */
+const bendAt = (u: number) => u * u;
+
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const clamp01 = (n: number) => (n < 0 ? 0 : n > 1 ? 1 : n);
+
+interface Turn {
+  /** 1 turns forward (right to left), -1 turns back. */
+  dir: 1 | -1;
+  dragging: boolean;
+}
+
+interface Layout {
+  /** 1-based page numbers, or null where the book shows no page. */
+  baseLeft: number | null;
+  baseRight: number | null;
+  leafFront: number | null;
+  leafBack: number | null;
+}
+
+/**
+ * Which page numbers sit where, for a given position and in-flight turn.
+ *
+ * `pos` is a spread index in two-page mode and a 0-based page index in one-page
+ * mode. Working this out in one place is what lets both modes share a single
+ * animation, pointer handler and shading path.
+ */
+function layoutFor(twoUp: boolean, pos: number, turn: Turn | null): Layout {
+  if (twoUp) {
+    const left = pos * 2;
+    const right = pos * 2 + 1;
+    if (!turn) return { baseLeft: left || null, baseRight: right, leafFront: null, leafBack: null };
+    if (turn.dir === 1) {
+      // The leaf lifts off the right and lands on the left, revealing pos+1.
+      return { baseLeft: left || null, baseRight: right + 2, leafFront: right, leafBack: right + 1 };
+    }
+    return { baseLeft: left - 2 || null, baseRight: right, leafFront: left - 1, leafBack: left };
+  }
+
+  const page = pos + 1;
+  if (!turn) return { baseLeft: null, baseRight: page, leafFront: null, leafBack: null };
+  if (turn.dir === 1) {
+    // One page at a time: the sheet leaves to the left and the next is beneath.
+    return { baseLeft: null, baseRight: page + 1, leafFront: page, leafBack: page + 1 };
+  }
+  return { baseLeft: null, baseRight: page, leafFront: page - 1, leafBack: page };
+}
+
+/**
+ * The page-turn sound, synthesised rather than downloaded.
+ *
+ * A hosted audio file would be one more asset that can 404 — which is exactly
+ * what this component was repaired for — and would need its own CSP entry and
+ * signed URL. Filtered noise costs nothing, ships in the bundle and never
+ * expires. Brown-tilted noise under a sweeping bandpass is close enough to
+ * paper dragging over paper.
+ */
+function usePageTurnSound(enabled: boolean) {
+  const contextRef = useRef<AudioContext | null>(null);
+  const noiseRef = useRef<AudioBuffer | null>(null);
+
+  useEffect(() => {
+    return () => {
+      void contextRef.current?.close();
+      contextRef.current = null;
+      noiseRef.current = null;
+    };
+  }, []);
+
+  return useCallback(
+    (intensity = 1) => {
+      if (!enabled || typeof window === 'undefined') return;
+
+      const Ctor =
+        window.AudioContext ??
+        (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!Ctor) return;
+
+      try {
+        const ctx = (contextRef.current ??= new Ctor());
+        // Browsers start a context suspended until a gesture; every turn is one.
+        if (ctx.state === 'suspended') void ctx.resume();
+
+        if (!noiseRef.current) {
+          const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 2), ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          let last = 0;
+          for (let i = 0; i < data.length; i += 1) {
+            const white = Math.random() * 2 - 1;
+            // Leaky integrator: tilts white noise towards brown, which reads as
+            // paper rather than as static.
+            last = (last + 0.02 * white) / 1.02;
+            data[i] = last * 3.2 + white * 0.5;
+          }
+          noiseRef.current = buffer;
+        }
+
+        const now = ctx.currentTime;
+        const source = ctx.createBufferSource();
+        source.buffer = noiseRef.current;
+        // Vary each turn; identical rustles start sounding synthetic fast.
+        source.playbackRate.value = 0.85 + Math.random() * 0.3;
+
+        const highpass = ctx.createBiquadFilter();
+        highpass.type = 'highpass';
+        highpass.frequency.value = 700;
+
+        const band = ctx.createBiquadFilter();
+        band.type = 'bandpass';
+        band.Q.value = 0.7;
+        band.frequency.setValueAtTime(1100, now);
+        band.frequency.exponentialRampToValueAtTime(5400, now + 0.3);
+        band.frequency.exponentialRampToValueAtTime(1600, now + 0.55);
+
+        const peak = 0.22 * Math.min(1, Math.max(0.25, intensity));
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(peak, now + 0.07);
+        gain.gain.exponentialRampToValueAtTime(peak * 0.5, now + 0.26);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+
+        source.connect(highpass).connect(band).connect(gain).connect(ctx.destination);
+        source.start(now, Math.random() * 1.2, 0.65);
+        source.stop(now + 0.65);
+      } catch {
+        // Audio is a garnish. A blocked context must never stop a page turning.
+      }
+    },
+    [enabled],
+  );
+}
+
 export function MagazineFlipBook({
   pages = [],
-  thumbs = [],
+  thumbs,
   startPage = 0,
   isOpen,
   onClose,
-  title,
   issueLabel,
+  title,
 }: MagazineFlipBookProps) {
-  const shellRef = useRef<HTMLDivElement | null>(null);
+  const leafCount = Math.ceil(pages.length / 2);
+  const thumbList = thumbs?.length ? thumbs : pages;
 
-  /**
-   * The reader is portalled to <body>.
-   *
-   * It used to render where it sits in the tree, inside MagazinePageClient's
-   * `relative z-10` wrapper — and `z-index: 10` on a positioned element opens a
-   * stacking context, so the reader's own `z-index: 200` was only 200 *within*
-   * that box. The site's fixed commodities strip (`.public-market-strip`,
-   * z-index 50, a sibling of the whole page) therefore painted straight over
-   * the reader's controls at the bottom of the screen. A fullscreen modal has
-   * no business being ranked inside the layout it covers.
-   */
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
-  // A phone cannot show a legible two-page spread; below this it reads one page
-  // at a time. Tracked live so a rotation re-lays-out rather than stranding the
-  // reader in a mode the screen cannot carry.
-  const [single, setSingle] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 860px), (max-aspect-ratio: 3/4)');
-    const apply = () => setSingle(mq.matches);
-    apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
-  }, []);
-
+  const [twoUp, setTwoUp] = useState(true);
+  const [pos, setPos] = useState(0);
+  const [turn, _setTurn] = useState<Turn | null>(null);
+  const [failed, setFailed] = useState<ReadonlySet<string>>(new Set());
   const [reduceMotion, setReduceMotion] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const apply = () => setReduceMotion(mq.matches);
-    apply();
-    mq.addEventListener('change', apply);
-    return () => mq.removeEventListener('change', apply);
-  }, []);
-
-  /** Each entry is what the two halves of the stage show. */
-  const views = useMemo<View[]>(() => {
-    if (pages.length === 0) return [];
-    if (single) return pages.map((p) => [null, p] as View);
-    const out: View[] = [[null, pages[0]]];
-    for (let i = 1; i < pages.length; i += 2) out.push([pages[i] ?? null, pages[i + 1] ?? null]);
-    return out;
-  }, [pages, single]);
-
-  /** Which view contains a given 0-based page index. */
-  const viewForPage = useCallback(
-    (page: number) => {
-      if (single) return Math.max(0, Math.min(page, Math.max(pages.length - 1, 0)));
-      return page <= 0 ? 0 : Math.floor((page - 1) / 2) + 1;
-    },
-    [single, pages.length],
-  );
-
-  /** The 0-based index of the first page a view shows. */
-  const firstPageOfView = useCallback((v: number) => (single ? v : v === 0 ? 0 : v * 2 - 1), [single]);
-
-  const [index, setIndex] = useState(0);
-  const [turn, setTurn] = useState<Turn | null>(null);
-  const turning = useRef(false);
-
-  const [muted, setMuted] = useState(false);
-  useEffect(() => {
-    try {
-      setMuted(window.localStorage.getItem(MUTE_KEY) === '1');
-    } catch {
-      /* private mode: default to audible, which is the intended experience */
-    }
-  }, []);
-  const toggleMute = useCallback(() => {
-    setMuted((m) => {
-      try {
-        window.localStorage.setItem(MUTE_KEY, m ? '0' : '1');
-      } catch {
-        /* nothing to persist to; the toggle still works for this session */
-      }
-      return !m;
-    });
-  }, []);
-
-  const [zoom, setZoom] = useState(0);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [showThumbs, setShowThumbs] = useState(false);
+  /**
+   * Whether the sheet rolls, defaulting to the OS preference but overridable.
+   *
+   * `prefers-reduced-motion: reduce` is honoured — but it is a default, not a
+   * verdict. On a machine with Windows animations switched off the reader
+   * silently became a slideshow with no way back, and the person looking at it
+   * had no reason to connect a blank-feeling page turn to an accessibility
+   * setting three menus deep. Null means "follow the system".
+   */
+  const [rollPref, setRollPref] = useState<boolean | null>(null);
+  const [soundOn, setSoundOn] = useState(true);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [zoomStep, setZoomStep] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const scale = ZOOM_STEPS[zoom];
+  // Progress lives in a ref, not in state. The rAF loop writes transforms
+  // straight to these nodes, so a turn costs no React renders at all.
+  const turnRef = useRef<Turn | null>(null);
+  const progressRef = useRef(0);
+  const posRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const bookRef = useRef<HTMLDivElement | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const castRef = useRef<HTMLDivElement | null>(null);
+  const stripRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const frontShadeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const backShadeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const dragRef = useRef<{ x: number; moved: number; at: number } | null>(null);
 
-  /* ---------------------------------------------------------------- turning */
+  const setTurn = useCallback((value: Turn | null) => {
+    turnRef.current = value;
+    _setTurn(value);
+  }, []);
 
-  const go = useCallback(
-    (delta: number) => {
-      if (turning.current) return;
-      const to = index + delta;
-      if (to < 0 || to >= views.length) return;
+  const rollOn = rollPref ?? !reduceMotion;
+  const maxPos = twoUp ? leafCount : Math.max(pages.length - 1, 0);
+  const zoom = ZOOM_STEPS[zoomStep];
+  const playTurn = usePageTurnSound(soundOn);
 
-      if (!muted) playPageTurn(1, delta < 0);
-      // Zoom is per-spread: staying magnified across a turn lands the reader in
-      // the middle of a page whose shape they have not seen.
-      setZoom(0);
-      setPan({ x: 0, y: 0 });
+  useEffect(() => {
+    posRef.current = pos;
+  }, [pos]);
 
-      if (reduceMotion) {
-        setIndex(to);
+  useEffect(() => {
+    try {
+      setSoundOn(window.localStorage.getItem(SOUND_KEY) !== 'off');
+      const stored = window.localStorage.getItem(MOTION_KEY);
+      if (stored === 'on' || stored === 'off') setRollPref(stored === 'on');
+    } catch {
+      // Private windows and blocked site data: the default stands.
+    }
+  }, []);
+
+  useEffect(() => {
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const wide = window.matchMedia('(min-width: 900px)');
+    const apply = () => {
+      setReduceMotion(motion.matches);
+      setTwoUp(wide.matches);
+    };
+    apply();
+    motion.addEventListener('change', apply);
+    wide.addEventListener('change', apply);
+    return () => {
+      motion.removeEventListener('change', apply);
+      wide.removeEventListener('change', apply);
+    };
+  }, []);
+
+  /**
+   * Writes one frame of the turn.
+   *
+   * The sheet's own hinge angle goes on the leaf; every slice then adds its
+   * share of the bend, and each slice is shaded by how far it has rotated out
+   * of the light. `Math.cos` of the accumulated angle is the whole lighting
+   * model, and it is enough: a slice edge-on to the viewer goes dark, a slice
+   * facing them stays bright, and the gradient between the two is what reads as
+   * a roll rather than a fold.
+   */
+  const applyProgress = useCallback((p: number) => {
+    const active = turnRef.current;
+    if (!active) return;
+
+    const hinge = active.dir === 1 ? -180 * p : -180 * (1 - p);
+    const arc = Math.sin(Math.PI * p);
+    const curl = CURL_DEGREES * arc;
+
+    if (sheetRef.current) sheetRef.current.style.transform = `rotateY(${hinge}deg)`;
+    if (castRef.current) castRef.current.style.opacity = String(arc * 0.72);
+
+    for (let i = 0; i < STRIPS; i += 1) {
+      const uPrev = i / STRIPS;
+      const u = (i + 1) / STRIPS;
+      const strip = stripRefs.current[i];
+      if (strip) strip.style.transform = `rotateY(${curl * (bendAt(u) - bendAt(uPrev))}deg)`;
+
+      // How this slice sits relative to the viewer, hinge and bend together.
+      const facing = Math.abs(Math.cos(((hinge + curl * bendAt(u)) * Math.PI) / 180));
+      const front = frontShadeRefs.current[i];
+      const back = backShadeRefs.current[i];
+      if (front) front.style.opacity = String(Math.min(0.82, (1 - facing) * 0.8 + p * 0.12));
+      if (back) back.style.opacity = String(Math.min(0.82, (1 - facing) * 0.8 + (1 - p) * 0.12));
+    }
+  }, []);
+
+  const stopAnimation = useCallback(() => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+  }, []);
+
+  useEffect(() => stopAnimation, [stopAnimation]);
+
+  // A turn's opening frame: React has just created the sheet, so put it at the
+  // progress the drag or animation already believes it is at.
+  useEffect(() => {
+    if (turn) applyProgress(progressRef.current);
+  }, [turn, applyProgress]);
+
+  /** Runs the in-flight turn to `to` (1 completes it, 0 abandons it). */
+  const settle = useCallback(
+    (to: 0 | 1) => {
+      const active = turnRef.current;
+      if (!active) return;
+
+      const from = progressRef.current;
+      const distance = Math.abs(to - from);
+      if (to === 1) playTurn(0.45 + distance * 0.55);
+
+      const finish = () => {
+        progressRef.current = 0;
+        if (to === 1) setPos((p) => p + active.dir);
+        setTurn(null);
+      };
+
+      if (!rollOn || distance < 0.01) {
+        finish();
         return;
       }
-      turning.current = true;
-      setTurn({ dir: delta > 0 ? 'next' : 'prev', from: index, to });
+
+      const duration = Math.max(200, TURN_MS * distance);
+      const started = performance.now();
+      stopAnimation();
+
+      const step = (now: number) => {
+        const k = Math.min(1, (now - started) / duration);
+        const p = from + (to - from) * easeInOut(k);
+        progressRef.current = p;
+        applyProgress(p);
+        if (k < 1) {
+          rafRef.current = requestAnimationFrame(step);
+          return;
+        }
+        rafRef.current = null;
+        finish();
+      };
+      rafRef.current = requestAnimationFrame(step);
     },
-    [index, views.length, muted, reduceMotion],
+    [applyProgress, playTurn, rollOn, setTurn, stopAnimation],
   );
 
-  const next = useCallback(() => go(1), [go]);
-  const prev = useCallback(() => go(-1), [go]);
+  const beginTurn = useCallback(
+    (dir: 1 | -1, dragging: boolean) => {
+      if (turnRef.current) return false;
+      const at = posRef.current;
+      if (dir === 1 && at >= maxPos) return false;
+      if (dir === -1 && at <= 0) return false;
+      progressRef.current = 0;
+      setTurn({ dir, dragging });
+      return true;
+    },
+    [maxPos, setTurn],
+  );
+
+  const flip = useCallback(
+    (dir: 1 | -1) => {
+      if (beginTurn(dir, false)) settle(1);
+    },
+    [beginTurn, settle],
+  );
 
   const jumpTo = useCallback(
-    (view: number) => {
-      if (turning.current || view === index) return;
-      if (view < 0 || view >= views.length) return;
-      if (!muted) playPageTurn(1, view < index);
-      setZoom(0);
-      setPan({ x: 0, y: 0 });
-      setIndex(view);
+    (page: number) => {
+      stopAnimation();
+      progressRef.current = 0;
+      setTurn(null);
+      setPos(Math.min(Math.max(twoUp ? (page <= 1 ? 0 : Math.floor(page / 2)) : page - 1, 0), maxPos));
+      playTurn(0.5);
     },
-    [index, views.length, muted],
+    [maxPos, playTurn, setTurn, stopAnimation, twoUp],
   );
 
-  // Commit the turn when the animation finishes. The leaf covers the halves it
-  // is moving between, so the swap underneath it is invisible.
-  useEffect(() => {
-    if (!turn) return;
-    const id = window.setTimeout(() => {
-      setIndex(turn.to);
-      setTurn(null);
-      turning.current = false;
-    }, FLIP_MS);
-    return () => window.clearTimeout(id);
-  }, [turn]);
+  const markFailed = useCallback((src: string) => setFailed((prev) => new Set(prev).add(src)), []);
 
-  /* ------------------------------------------------------------ open/close */
+  // Pointer drag. The sheet tracks the pointer across one page width, so a slow
+  // drag holds it open mid-roll exactly where you left it.
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (zoom > 1 || turnRef.current) return;
+      const rect = bookRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const forward = !twoUp || e.clientX - rect.left > rect.width / 2;
+      if (!beginTurn(forward ? 1 : -1, true)) return;
+      dragRef.current = { x: e.clientX, moved: 0, at: performance.now() };
+      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    },
+    [beginTurn, twoUp, zoom],
+  );
 
-  const pageRef = useRef(0);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const drag = dragRef.current;
+      const active = turnRef.current;
+      if (!drag || !active?.dragging) return;
+      const rect = bookRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const pageWidth = twoUp ? rect.width / 2 : rect.width;
+      const dx = e.clientX - drag.x;
+      drag.moved = Math.max(drag.moved, Math.abs(dx));
+      const p = clamp01((active.dir === 1 ? -dx : dx) / pageWidth);
+      progressRef.current = p;
+      applyProgress(p);
+    },
+    [applyProgress, twoUp],
+  );
+
+  const endDrag = useCallback(() => {
+    const drag = dragRef.current;
+    const active = turnRef.current;
+    dragRef.current = null;
+    if (!drag || !active?.dragging) return;
+    // A tap is a turn; only an actual drag gets judged on how far it went.
+    if (drag.moved < 6) {
+      settle(1);
+      return;
+    }
+    const flung = drag.moved / Math.max(performance.now() - drag.at, 1) > 0.7;
+    settle(progressRef.current > COMMIT_AT || flung ? 1 : 0);
+  }, [settle]);
+
+  const posForPage = useCallback(
+    (page: number) => (twoUp ? (page <= 1 ? 0 : Math.floor(page / 2)) : Math.max(page - 1, 0)),
+    [twoUp],
+  );
+
+  /** The page a reader would say they are on, used to survive a mode change. */
+  const currentPage = twoUp ? Math.max(pos * 2, 1) : pos + 1;
+  const currentPageRef = useRef(currentPage);
   useEffect(() => {
-    if (!isOpen) return;
-    pageRef.current = startPage;
-    setIndex(viewForPage(startPage));
-    setTurn(null);
-    turning.current = false;
-    setZoom(0);
-    setPan({ x: 0, y: 0 });
-    primePageTurnAudio();
-    // viewForPage is deliberately out of the deps: a mode change is handled by
-    // the effect below, which must not reset the reader back to startPage.
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  // Switching between one and two pages up must not lose the reader's place.
+  useEffect(() => {
+    setPos(Math.min(posForPage(currentPageRef.current), twoUp ? leafCount : Math.max(pages.length - 1, 0)));
+  }, [twoUp, posForPage, leafCount, pages.length]);
+
+  useEffect(() => {
+    if (isOpen) setPos(Math.min(posForPage(startPage + 1), maxPos));
+    // maxPos intentionally omitted: reopening should not re-seek on a resize.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, startPage]);
-
-  useEffect(() => {
-    pageRef.current = firstPageOfView(index);
-  }, [index, firstPageOfView]);
-
-  // Rotating a phone changes mode; hold the reader's place across it.
-  useEffect(() => {
-    if (!isOpen) return;
-    setIndex(viewForPage(pageRef.current));
-    setTurn(null);
-    turning.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [single]);
+  }, [isOpen, startPage, posForPage]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -255,393 +514,462 @@ export function MagazineFlipBook({
     // component: without it the page behind scrolls under the overlay.
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
-    document.body.style.height = '100%';
-    document.documentElement.style.height = '100%';
 
     const navBar = document.querySelector('.public-nav-bar') as HTMLElement | null;
     if (navBar) navBar.style.display = 'none';
 
-    const preventDefault = (e: Event) => e.preventDefault();
-    window.addEventListener('wheel', preventDefault, { passive: false });
-    window.addEventListener('touchmove', preventDefault, { passive: false });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowRight') flip(1);
+      else if (e.key === 'ArrowLeft') flip(-1);
+      else if (e.key === 'Home') jumpTo(1);
+      else if (e.key === 'End') jumpTo(pages.length);
+    };
+    window.addEventListener('keydown', onKey);
+
+    const onFullscreen = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', onFullscreen);
 
     return () => {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.height = '';
       if (navBar) navBar.style.display = '';
-      window.removeEventListener('wheel', preventDefault);
-      window.removeEventListener('touchmove', preventDefault);
+      window.removeEventListener('keydown', onKey);
+      document.removeEventListener('fullscreenchange', onFullscreen);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose, flip, jumpTo, pages.length]);
 
-  /* --------------------------------------------------------------- controls */
+  const toggleSound = useCallback(() => {
+    setSoundOn((on) => {
+      try {
+        window.localStorage.setItem(SOUND_KEY, on ? 'off' : 'on');
+      } catch {
+        // The preference is a convenience; failing to store it changes nothing.
+      }
+      return !on;
+    });
+  }, []);
+
+  const toggleRoll = useCallback(() => {
+    setRollPref((current) => {
+      const next = !(current ?? !window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      try {
+        window.localStorage.setItem(MOTION_KEY, next ? 'on' : 'off');
+      } catch {
+        // The preference is a convenience; failing to store it changes nothing.
+      }
+      return next;
+    });
+  }, []);
 
   const toggleFullscreen = useCallback(() => {
-    const el = shellRef.current;
-    if (!el) return;
-    if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
-    else void el.requestFullscreen?.().catch(() => {});
+    const shell = shellRef.current;
+    if (!shell) return;
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void shell.requestFullscreen?.().catch(() => undefined);
   }, []);
 
-  useEffect(() => {
-    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  const layout = useMemo(() => layoutFor(twoUp, pos, turn), [twoUp, pos, turn]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'Escape':
-          // In fullscreen the browser consumes Escape to exit; closing as well
-          // would drop the reader on a single press.
-          if (document.fullscreenElement) return;
-          onClose();
-          break;
-        case 'ArrowRight':
-        case 'PageDown':
-        case ' ':
-          e.preventDefault();
-          next();
-          break;
-        case 'ArrowLeft':
-        case 'PageUp':
-          e.preventDefault();
-          prev();
-          break;
-        case 'Home':
-          jumpTo(0);
-          break;
-        case 'End':
-          jumpTo(views.length - 1);
-          break;
-        case 'm':
-        case 'M':
-          toggleMute();
-          break;
-        case 'f':
-        case 'F':
-          toggleFullscreen();
-          break;
-        case 't':
-        case 'T':
-          setShowThumbs((s) => !s);
-          break;
-        default:
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose, next, prev, jumpTo, views.length, toggleMute, toggleFullscreen]);
+  const label = useMemo(() => {
+    if (!twoUp) return `Page ${pos + 1}`;
+    if (pos === 0) return 'Cover';
+    const left = pos * 2;
+    const right = pos * 2 + 1;
+    return right <= pages.length ? `Pages ${left}–${right}` : `Page ${left}`;
+  }, [pos, pages.length, twoUp]);
 
-  // Swipe. Only horizontal intent counts, so a vertical drag does not also turn
-  // the page.
-  const touch = useRef<{ x: number; y: number } | null>(null);
-  const onTouchStart = (e: React.TouchEvent) => {
-    const t = e.touches[0];
-    touch.current = { x: t.clientX, y: t.clientY };
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    const start = touch.current;
-    touch.current = null;
-    if (!start || scale > 1) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - start.x;
-    const dy = t.clientY - start.y;
-    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
-    if (dx < 0) next();
-    else prev();
-  };
-
-  // Drag to pan, once magnified.
-  const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
-  const onPointerDown = (e: React.PointerEvent) => {
-    if (scale === 1) return;
-    drag.current = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  };
-  const onPointerMove = (e: React.PointerEvent) => {
-    const d = drag.current;
-    if (!d) return;
-    setPan({ x: d.px + (e.clientX - d.x), y: d.py + (e.clientY - d.y) });
-  };
-  const onPointerUp = () => {
-    drag.current = null;
-  };
-
-  // Keep the neighbours decoded, so a turn never reveals a half-loaded page.
-  useEffect(() => {
-    if (!isOpen) return;
-    const wanted = [index - 1, index + 1, index + 2]
-      .filter((i) => i >= 0 && i < views.length)
-      .flatMap((i) => views[i])
-      .filter((src): src is string => Boolean(src));
-    for (const src of wanted) {
-      const img = new window.Image();
-      img.src = src;
-    }
-  }, [index, views, isOpen]);
-
-  if (!isOpen || !mounted) return null;
+  if (!isOpen) return null;
 
   // No pages means no issue to read. Saying so beats rendering placeholder art.
-  if (views.length === 0) {
-    return createPortal(
+  if (pages.length === 0) {
+    return (
       <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95 backdrop-blur-md p-6">
         <div className="text-center text-zinc-300 max-w-sm">
           <BookOpen className="h-8 w-8 mx-auto mb-4 text-primary" />
           <p className="text-sm">This issue has no page images available to read.</p>
           <button onClick={onClose} className="btn btn-primary mt-6 px-6">Close</button>
         </div>
-      </div>,
-      document.body,
+      </div>
     );
   }
 
-  /* --------------------------------------------------------------- geometry */
+  const src = (page: number | null) => (page && page >= 1 && page <= pages.length ? pages[page - 1] : null);
 
-  const from = turn ? turn.from : index;
-  const to = turn ? turn.to : index;
-  const forward = turn?.dir === 'next';
+  const Page = ({ page, side }: { page: number | null; side: 'left' | 'right' }) => {
+    const url = src(page);
+    return (
+      <div className="relative h-full w-full overflow-hidden bg-[#14161a]">
+        {url && !failed.has(url) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={url}
+            alt={`Page ${page}`}
+            className="h-full w-full object-contain"
+            draggable={false}
+            onError={() => markFailed(url)}
+          />
+        ) : url ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center text-zinc-500">
+            <ImageOff className="h-6 w-6" aria-hidden="true" />
+            <span className="text-[11px] uppercase tracking-widest">Page {page} unavailable</span>
+          </div>
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-[3px] text-zinc-700">
+            {side === 'left' ? 'ESB PowerLine' : 'End of issue'}
+          </div>
+        )}
 
-  // What sits under the leaf: the half that is not moving stays put, the half
-  // being uncovered already shows the destination.
-  const baseLeft = turn ? (forward ? views[from][0] : views[to][0]) : views[index][0];
-  const baseRight = turn ? (forward ? views[to][1] : views[from][1]) : views[index][1];
+        {/* Gutter shadow. The bound edge of a real spread is always darker, and
+            it is most of what stops two flat images reading as one flat image. */}
+        <div
+          className="pointer-events-none absolute inset-y-0 w-[14%]"
+          style={{
+            [side === 'left' ? 'right' : 'left']: 0,
+            background:
+              side === 'left'
+                ? 'linear-gradient(to left, rgba(0,0,0,0.5), rgba(0,0,0,0.12) 45%, transparent)'
+                : 'linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.12) 45%, transparent)',
+          }}
+        />
+      </div>
+    );
+  };
+
+  const frontUrl = src(layout.leafFront);
+  const backUrl = src(layout.leafBack);
+  /** A page whose image is missing cannot be sliced; fall back to a flat sheet. */
+  const canRoll =
+    rollOn && Boolean(frontUrl) && !failed.has(frontUrl ?? '') && (!backUrl || !failed.has(backUrl));
 
   /**
-   * The leaf's two faces, in book order.
+   * One slice of the rolling sheet, holding the next slice as its child.
    *
-   * Spread `from` is [A, B] and spread `to` is [C, D]. The physical sheet
-   * between them carries B on one side and C on the other, so turning forward
-   * shows B lifting and C landing; turning back is the same sheet going the
-   * other way, which means it starts as the current spread's *left* page and
-   * ends as the destination's *right* page. Getting this pair backwards makes
-   * the reverse turn flash a page from two spreads away.
+   * Each face paints its own vertical band of the page by blowing the image up
+   * to `STRIPS` times the slice width and offsetting it — so the sheet is one
+   * continuous picture across twelve independently rotated pieces. The back
+   * face counts its slices from the other end, because a turned sheet meets the
+   * spine on its opposite edge.
    */
-  const leafFront = turn
-    ? single
-      ? forward
-        ? views[from][1]
-        : views[to][1]
-      : forward
-        ? views[from][1]
-        : views[from][0]
-    : null;
-  const leafBack = turn ? (forward ? views[to][0] : views[to][1]) : null;
+  const buildStrip = (i: number): React.ReactNode => {
+    if (i >= STRIPS) return null;
+    const first = i === 0;
+    const at = (n: number) => `${(n / (STRIPS - 1)) * 100}% 0`;
+    const faceBase: React.CSSProperties = {
+      position: 'absolute',
+      // Overhang the right edge by a hair so neighbouring slices overlap. Without
+      // it the sheet shows twelve hairline seams at the steepest part of the
+      // roll, where the slices are most splayed. Less than a pixel of the image
+      // is duplicated, which is invisible; the seams were not.
+      inset: '0 -0.75px 0 0',
+      backfaceVisibility: 'hidden',
+      WebkitBackfaceVisibility: 'hidden',
+      backgroundColor: '#14161a',
+      backgroundRepeat: 'no-repeat',
+      backgroundSize: `${STRIPS * 100}% 100%`,
+    };
 
-  const pageNo = (view: number, side: 0 | 1) => {
-    if (single) return view + 1;
-    if (view === 0) return side === 1 ? 1 : null;
-    return side === 0 ? view * 2 : view * 2 + 1;
-  };
-
-  const leftNo = pageNo(index, 0);
-  const rightNo = pageNo(index, 1);
-  const label = single
-    ? `Page ${index + 1}`
-    : index === 0
-      ? 'Cover'
-      : views[index][1]
-        ? `Pages ${leftNo}–${rightNo}`
-        : `Page ${leftNo}`;
-
-  const progress = views.length > 1 ? (index / (views.length - 1)) * 100 : 100;
-  const thumbList = thumbs.length === pages.length ? thumbs : pages;
-
-  const bookStyle: React.CSSProperties = {
-    transform: `translate3d(${pan.x}px, ${pan.y}px, 0) scale(${scale})`,
-  };
-
-  const face = (src: string | null, alt: string, blank?: 'end') => (
-    <div className="flipbook-page">
-      {src ? (
-        // Plain img: these are served from Supabase storage at their printed
-        // size, and the optimizer has nothing to add to a page render.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} className="flipbook-page__img" draggable={false} />
-      ) : blank === 'end' ? (
-        <div className="flipbook-page__blank">End of issue</div>
-      ) : (
-        <div className="flipbook-page__blank flipbook-page__blank--inner">
-          <span className="flipbook-page__mark">ESB PowerLine</span>
-          <span className="flipbook-page__markSub">Energy &amp; Power Portal</span>
+    return (
+      <div
+        key={i}
+        ref={(el) => {
+          stripRefs.current[i] = el;
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          height: '100%',
+          left: first ? 0 : '100%',
+          width: first ? `${100 / STRIPS}%` : '100%',
+          transformStyle: 'preserve-3d',
+          transformOrigin: 'left center',
+          willChange: 'transform',
+        }}
+      >
+        <div style={{ ...faceBase, backgroundImage: `url("${frontUrl}")`, backgroundPosition: at(i) }}>
+          <div
+            ref={(el) => {
+              frontShadeRefs.current[i] = el;
+            }}
+            style={{ position: 'absolute', inset: 0, background: '#000', opacity: 0 }}
+          />
         </div>
-      )}
-    </div>
-  );
 
-  const reader = (
+        <div
+          style={{
+            ...faceBase,
+            transform: 'rotateY(180deg)',
+            backgroundImage: backUrl ? `url("${backUrl}")` : undefined,
+            backgroundPosition: at(STRIPS - 1 - i),
+          }}
+        >
+          <div
+            ref={(el) => {
+              backShadeRefs.current[i] = el;
+            }}
+            style={{ position: 'absolute', inset: 0, background: '#000', opacity: 0 }}
+          />
+        </div>
+
+        {buildStrip(i + 1)}
+      </div>
+    );
+  };
+
+  const barButton =
+    'grid h-9 w-9 place-items-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:hover:bg-transparent';
+
+  return (
     <div
       ref={shellRef}
-      className="flipbook"
-      role="dialog"
-      aria-modal="true"
-      aria-label={title ? `${title} — interactive reader` : 'Interactive reader'}
+      className="fixed inset-0 z-[200] flex flex-col bg-[#0a0b0d] text-white"
+      style={{
+        backgroundImage: 'radial-gradient(120% 90% at 50% 0%, #1b1f26 0%, #0a0b0d 55%, #06070a 100%)',
+      }}
     >
-      <button className="flipbook__scrim" onClick={onClose} aria-label="Close interactive reader" tabIndex={-1} />
-
-      <div className="flipbook__bar flipbook__bar--top">
-        <div className="flipbook__id">
-          <BookOpen className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
-          <div className="min-w-0">
-            <div className="flipbook__title">{title ?? 'Interactive reader'}</div>
-            {issueLabel ? <div className="flipbook__sub">{issueLabel}</div> : null}
-          </div>
+      <header className="relative z-30 flex shrink-0 items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <div className="min-w-0">
+          {issueLabel ? (
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/80">{issueLabel}</div>
+          ) : null}
+          <div className="truncate text-sm font-semibold text-white/90">{title ?? 'Interactive reader'}</div>
         </div>
 
-        <div className="flipbook__tools">
+        <div className="flex items-center gap-1">
           <button
-            onClick={() => setShowThumbs((s) => !s)}
-            className={`flipbook__tool${showThumbs ? ' is-on' : ''}`}
-            aria-pressed={showThumbs}
-            title="All pages (T)"
+            onClick={toggleSound}
+            className={barButton}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? 'Mute page turn sound' : 'Unmute page turn sound'}
           >
-            <LayoutGrid className="h-4 w-4" />
+            {soundOn ? <Volume2 className="h-[18px] w-[18px]" /> : <VolumeX className="h-[18px] w-[18px]" />}
           </button>
           <button
-            onClick={() => {
-              setZoom((z) => (z + 1) % ZOOM_STEPS.length);
-              setPan({ x: 0, y: 0 });
-            }}
-            className={`flipbook__tool${scale > 1 ? ' is-on' : ''}`}
-            title={scale > 1 ? 'Zoom out' : 'Zoom in'}
+            onClick={toggleRoll}
+            className={`${barButton} ${rollOn ? '' : 'opacity-45'}`}
+            aria-pressed={rollOn}
+            aria-label={rollOn ? 'Turn off the page roll animation' : 'Turn on the page roll animation'}
+            title={rollOn ? 'Page roll on' : 'Page roll off — your system asks for reduced motion'}
           >
-            {scale > 1 ? <ZoomOut className="h-4 w-4" /> : <ZoomIn className="h-4 w-4" />}
+            <Sparkles className="h-[18px] w-[18px]" />
           </button>
-          <button onClick={toggleMute} className="flipbook__tool" aria-pressed={!muted} title="Page-turn sound (M)">
-            {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+          <button onClick={toggleFullscreen} className={barButton} aria-label={isFullscreen ? 'Leave fullscreen' : 'Enter fullscreen'}>
+            {isFullscreen ? <Minimize2 className="h-[18px] w-[18px]" /> : <Maximize2 className="h-[18px] w-[18px]" />}
           </button>
-          <button onClick={toggleFullscreen} className="flipbook__tool" title="Fullscreen (F)">
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-          </button>
-          <button onClick={onClose} className="flipbook__tool flipbook__tool--close" aria-label="Close reader">
+          <button onClick={onClose} className={barButton} aria-label="Close reader">
             <X className="h-5 w-5" />
           </button>
         </div>
-      </div>
+      </header>
 
-      <div
-        className="flipbook__stage"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-      >
+      <div className={`relative flex min-h-0 flex-1 items-center justify-center px-2 sm:px-8 ${zoom > 1 ? 'overflow-auto' : 'overflow-hidden'}`}>
         <div
-          className={`flipbook__book${single ? ' flipbook__book--single' : ''}${scale > 1 ? ' is-zoomed' : ''}`}
-          style={bookStyle}
+          className="relative"
+          style={{
+            width: `min(${twoUp ? 96 : 92}vw, calc((100vh - 190px) * ${(twoUp ? 2 : 1) * PAGE_ASPECT}))`,
+            aspectRatio: `${(twoUp ? 2 : 1) * PAGE_ASPECT}`,
+            transform: `scale(${zoom})`,
+            transformOrigin: 'center center',
+            transition: 'transform 260ms ease',
+          }}
         >
-          {!single ? (
-            <div className="flipbook__half flipbook__half--left">
-              {face(baseLeft, leftNo ? `Page ${leftNo}` : 'Inside cover')}
-            </div>
-          ) : null}
-          <div className="flipbook__half flipbook__half--right">
-            {face(baseRight, rightNo ? `Page ${rightNo}` : 'Page', 'end')}
-          </div>
-
-          {/* The turning leaf. Both faces are painted before it starts moving. */}
-          {turn ? (
-            <div
-              key={`${from}-${to}`}
-              className={`flipbook-leaf flipbook-leaf--${forward ? 'next' : 'prev'}${single ? ' flipbook-leaf--single' : ''}`}
-              aria-hidden="true"
-            >
-              <div className="flipbook-leaf__face flipbook-leaf__face--front">
-                {face(leafFront, '')}
-                <div className="flipbook-leaf__shade flipbook-leaf__shade--front" />
-              </div>
-              <div className="flipbook-leaf__face flipbook-leaf__face--back">
-                {/* In single-page mode the reverse of the sheet is not a page we
-                    hold an image of — it is the back of the one being turned. */}
-                {single ? <div className="flipbook-page flipbook-page--verso" /> : face(leafBack, '')}
-                <div className="flipbook-leaf__shade flipbook-leaf__shade--back" />
-              </div>
-            </div>
-          ) : null}
-
-          {/* Gutter shading. A spread with no shadow down the spine reads as two
-              unrelated images side by side rather than one open magazine. */}
-          {!single ? <div className="flipbook__gutter" aria-hidden="true" /> : null}
-
-          {scale === 1 ? (
+          {/* The stack's own thickness. A book with pages left to read is
+              visibly thicker on that side; this is the cheapest cue there is. */}
+          {twoUp ? (
             <>
-              <button
-                className="flipbook__zone flipbook__zone--prev"
-                onClick={prev}
-                disabled={index === 0}
-                aria-label="Previous page"
+              <div
+                className="pointer-events-none absolute inset-y-[1.5%] right-full rounded-l-sm bg-gradient-to-l from-zinc-400/70 to-zinc-700/10"
+                style={{ width: `${1 + (pos / Math.max(maxPos, 1)) * 9}px` }}
               />
-              <button
-                className="flipbook__zone flipbook__zone--next"
-                onClick={next}
-                disabled={index >= views.length - 1}
-                aria-label="Next page"
+              <div
+                className="pointer-events-none absolute inset-y-[1.5%] left-full rounded-r-sm bg-gradient-to-r from-zinc-400/70 to-zinc-700/10"
+                style={{ width: `${1 + (1 - pos / Math.max(maxPos, 1)) * 9}px` }}
               />
             </>
           ) : null}
-        </div>
-      </div>
 
-      <div className="flipbook__bar flipbook__bar--bottom">
-        <div className="flipbook__nav">
-          <button onClick={prev} disabled={index === 0} className="flipbook__arrow" aria-label="Previous page">
-            <ChevronLeft className="h-5 w-5" />
-          </button>
+          <div
+            ref={bookRef}
+            className="absolute inset-0 flex touch-pan-y select-none"
+            style={{ perspective: '2000px', perspectiveOrigin: '50% 50%' }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+          >
+            {twoUp ? (
+              <div className="relative h-full w-1/2 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.95)]">
+                <Page page={layout.baseLeft} side="left" />
+              </div>
+            ) : null}
+            <div className={`relative h-full ${twoUp ? 'w-1/2' : 'w-full'} shadow-[0_30px_80px_-30px_rgba(0,0,0,0.95)]`}>
+              <Page page={layout.baseRight} side="right" />
+              {/* The shadow the rolling sheet throws on the page it reveals. */}
+              {turn ? (
+                <div
+                  ref={castRef}
+                  className="pointer-events-none absolute inset-0"
+                  style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.8), transparent 62%)', opacity: 0 }}
+                />
+              ) : null}
+            </div>
 
-          <div className="flipbook__meter">
-            <div className="flipbook__count">
-              {label} <span className="flipbook__of">of {pages.length}</span>
-            </div>
-            <div className="flipbook__track" aria-hidden="true">
-              <div className="flipbook__fill" style={{ width: `${progress}%` }} />
-            </div>
+            {turn ? (
+              <div
+                ref={sheetRef}
+                className={`absolute top-0 h-full ${twoUp ? 'left-1/2 w-1/2' : 'left-0 w-full'}`}
+                style={{
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'left center',
+                  zIndex: 20,
+                  willChange: 'transform',
+                }}
+              >
+                {canRoll ? (
+                  buildStrip(0)
+                ) : (
+                  // Reduced motion, or artwork we could not load: turn it flat.
+                  <>
+                    <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden' }}>
+                      <Page page={layout.leafFront} side="right" />
+                    </div>
+                    <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                      <Page page={layout.leafBack} side="left" />
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : null}
           </div>
 
-          <button
-            onClick={next}
-            disabled={index >= views.length - 1}
-            className="flipbook__arrow"
-            aria-label="Next page"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+          {twoUp ? (
+            <div
+              className="pointer-events-none absolute inset-y-0 left-1/2 z-[25] w-[26px] -translate-x-1/2"
+              style={{
+                background:
+                  'linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 42%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.45) 58%, rgba(0,0,0,0) 100%)',
+              }}
+            />
+          ) : null}
         </div>
 
-        <p className="flipbook__hint">
-          Click either page, swipe, or use &larr; &rarr;. <kbd>T</kbd> all pages &middot; <kbd>M</kbd> sound &middot;{' '}
-          <kbd>F</kbd> fullscreen
-        </p>
+        <button
+          onClick={() => flip(-1)}
+          disabled={pos === 0}
+          className="absolute left-2 top-1/2 z-30 hidden -translate-y-1/2 rounded-full border border-white/10 bg-white/5 p-3 text-white/70 backdrop-blur transition-all hover:bg-white/15 hover:text-white disabled:opacity-20 md:block"
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <button
+          onClick={() => flip(1)}
+          disabled={pos >= maxPos}
+          className="absolute right-2 top-1/2 z-30 hidden -translate-y-1/2 rounded-full border border-white/10 bg-white/5 p-3 text-white/70 backdrop-blur transition-all hover:bg-white/15 hover:text-white disabled:opacity-20 md:block"
+          aria-label="Next page"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
       </div>
 
-      <div className={`flipbook__thumbs${showThumbs ? ' is-open' : ''}`} aria-hidden={!showThumbs}>
-        <div className="flipbook__thumbsInner">
-          {thumbList.map((src, i) => {
-            const view = viewForPage(i);
+      {/* Page picker. Every page is reachable in one click, which is the whole
+          point of a reader and is what the six-thumbnail teaser on the landing
+          page deliberately stops trying to be. */}
+      <div
+        className="relative z-30 shrink-0 overflow-hidden border-t border-white/10 bg-black/40 backdrop-blur transition-[max-height,opacity] duration-300"
+        style={{ maxHeight: pickerOpen ? 190 : 0, opacity: pickerOpen ? 1 : 0 }}
+        aria-hidden={!pickerOpen}
+      >
+        <div className="flex gap-2.5 overflow-x-auto px-4 py-4">
+          {thumbList.map((thumbSrc, index) => {
+            const page = index + 1;
+            const active = twoUp ? page === pos * 2 || page === pos * 2 + 1 : page === pos + 1;
             return (
               <button
-                key={src}
-                onClick={() => jumpTo(view)}
-                className={`flipbook__thumb${view === index ? ' is-current' : ''}`}
-                aria-label={`Go to page ${i + 1}`}
-                tabIndex={showThumbs ? 0 : -1}
+                key={thumbSrc}
+                type="button"
+                onClick={() => jumpTo(page)}
+                className="group shrink-0"
+                aria-label={`Go to page ${page}`}
+                aria-current={active}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" loading="lazy" draggable={false} />
-                <span>{i + 1}</span>
+                <div
+                  className={`w-[74px] overflow-hidden rounded border transition-all ${
+                    active ? 'border-primary ring-2 ring-primary/40' : 'border-white/15 group-hover:border-white/50'
+                  }`}
+                  style={{ aspectRatio: `${PAGE_ASPECT}` }}
+                >
+                  {failed.has(thumbSrc) ? (
+                    <div className="grid h-full w-full place-items-center bg-white/5 text-zinc-600">
+                      <ImageOff className="h-4 w-4" />
+                    </div>
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={thumbSrc}
+                      alt={`Page ${page}`}
+                      loading="lazy"
+                      draggable={false}
+                      className="h-full w-full object-cover"
+                      onError={() => markFailed(thumbSrc)}
+                    />
+                  )}
+                </div>
+                <div className={`mt-1 text-center text-[10px] tabular-nums ${active ? 'text-primary' : 'text-white/45'}`}>
+                  {page}
+                </div>
               </button>
             );
           })}
         </div>
       </div>
+
+      <footer className="relative z-30 flex shrink-0 items-center justify-center gap-1 px-3 py-3 sm:gap-2">
+        <button onClick={() => jumpTo(1)} disabled={pos === 0} className={barButton} aria-label="First page">
+          <ChevronsLeft className="h-[18px] w-[18px]" />
+        </button>
+        <button onClick={() => flip(-1)} disabled={pos === 0} className={barButton} aria-label="Previous page">
+          <ChevronLeft className="h-[18px] w-[18px]" />
+        </button>
+
+        <div className="mx-1 flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5">
+          <span className="text-xs font-medium tabular-nums text-white/90">{label}</span>
+          <span className="text-xs text-white/35">of {pages.length}</span>
+        </div>
+
+        <button onClick={() => flip(1)} disabled={pos >= maxPos} className={barButton} aria-label="Next page">
+          <ChevronRight className="h-[18px] w-[18px]" />
+        </button>
+        <button onClick={() => jumpTo(pages.length)} disabled={pos >= maxPos} className={barButton} aria-label="Last page">
+          <ChevronsRight className="h-[18px] w-[18px]" />
+        </button>
+
+        <div className="mx-1 h-5 w-px bg-white/10" />
+
+        <button
+          onClick={() => setPickerOpen((open) => !open)}
+          className={`${barButton} ${pickerOpen ? 'bg-white/15 text-white' : ''}`}
+          aria-pressed={pickerOpen}
+          aria-label="Choose a page"
+        >
+          <LayoutGrid className="h-[18px] w-[18px]" />
+        </button>
+        <button onClick={() => setZoomStep((z) => Math.max(0, z - 1))} disabled={zoomStep === 0} className={barButton} aria-label="Zoom out">
+          <ZoomOut className="h-[18px] w-[18px]" />
+        </button>
+        <button
+          onClick={() => setZoomStep((z) => Math.min(ZOOM_STEPS.length - 1, z + 1))}
+          disabled={zoomStep === ZOOM_STEPS.length - 1}
+          className={barButton}
+          aria-label="Zoom in"
+        >
+          <ZoomIn className="h-[18px] w-[18px]" />
+        </button>
+      </footer>
+
+      <p className="pb-3 text-center text-[11px] text-white/30">
+        <span className="hidden md:inline">Drag a page to turn it, or use the arrow keys.</span>
+        <span className="md:hidden">Swipe a page to turn it.</span>
+      </p>
     </div>
   );
-
-  return createPortal(reader, document.body);
 }
