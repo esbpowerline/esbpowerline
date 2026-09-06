@@ -67,20 +67,35 @@ fi
 # the NLDC hourly backfill landed. Nothing announced that; the number simply
 # grew into the ceiling.
 #
-# What makes splitting it safe is NLDC's own retention window. The two heavy
-# tables are append-only — GridHourlyObservation (72 MB) and the SourceDocument
-# evidence behind it (30 MB) — and NLDC still serves the pages they are derived
-# from for ~145 days. A row lost tonight is therefore re-derivable for months,
-# so those two need a copy taken comfortably inside that window, not every
-# night. Everything genuinely mutable — releases, revisions, articles,
-# settings, users — is small and keeps its nightly copy.
+# What the nightly keeps is what exists nowhere else. Four tables are excluded
+# from it, each because a copy of the same bytes is already somewhere safe:
 #
-#   Sunday, or no full copy in 7 days   everything          ~164 MB
-#   every other night                   all but those two    ~20 MB
+#   GridHourlyObservation  72 MB on disk, append-only, and NLDC still serves the
+#   SourceDocument         pages behind it for ~145 days. A row lost tonight is
+#                          re-derivable for months, so it needs a copy inside
+#                          that window, not inside 24 hours.
+#   DailyReport            28.5 MB of the dump. Duplicated byte for byte by
+#                          public/data/daily/*.json, which the poll pushes to
+#                          git every run — 4,551 files tracked against 4,478
+#                          rows, so git is the superset, not the copy.
+#   DataReleaseRevision    41.5 MB of the dump for 167 rows, because a revision
+#                          stores the whole payload rather than a diff. The
+#                          current revision of each is also in DataRelease,
+#                          which the nightly does keep; what is left behind for
+#                          a week is superseded history.
 #
-# ≈1.2 GB/month, a 4x cut, with mutable state never more than a day old and the
-# perishable state never more than a week — well inside the 145 days in which
-# NLDC can still answer for it.
+# DataRelease itself stays nightly. It is the precedence layer — a release wins
+# over a static file of the same key — and a revocation is real state that
+# exists in no other place.
+#
+# Measured on the dumps themselves, not estimated:
+#
+#   Sunday, or no full copy in 7 days   everything      164 MB
+#   every other night                   the rest         11 MB
+#
+# ≈1.0 GB/month against a 5 GB allowance, down from 4.9 GB — with the state that
+# exists only in Postgres never more than a day old, and everything else covered
+# by git continuously and by the weekly full copy.
 URL=$(grep '^DATABASE_URL=' "$REPO/.env.local" | cut -d= -f2- | tr -d '"' | sed 's/:6543/:5432/; s/[?&]pgbouncer=true//')
 
 # Dumps predating the two-tier split were full copies; fold them into the full
@@ -106,7 +121,9 @@ if [[ "$KIND" == full ]]; then
 else
     MIN=20000
     EXCLUDE=(--exclude-table-data='public."GridHourlyObservation"'
-             --exclude-table-data='public."SourceDocument"')
+             --exclude-table-data='public."SourceDocument"'
+             --exclude-table-data='public."DailyReport"'
+             --exclude-table-data='public."DataReleaseRevision"')
 fi
 OUT="$BACKUPS/esbpowerline-$(date +%Y%m%d)-$KIND.sql.gz"
 if [[ -n "$URL" ]] && PGCONNECT_TIMEOUT=20 timeout 900 pg_dump "$URL" --no-owner --no-privileges         "${EXCLUDE[@]}" | gzip -6 > "$OUT.part" && [[ $(stat -c %s "$OUT.part") -gt $MIN ]]; then
