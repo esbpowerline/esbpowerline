@@ -30,11 +30,24 @@ export function EventStudyDateLink({ selectedDate }: { selectedDate: string }) {
     <div className="w-full sm:w-auto">
       <Link
         href={study ? `/analysis/${study.slug}#day-${selectedDate}` : `/analysis/${fallback.slug}`}
+        /*
+          Always carries the accent, never transparent.
+          Sitting between Latest and the Year/Month/Day dropdowns — all of them
+          outlined neutrals — a transparent control read as a fifth piece of
+          date machinery and nobody would think to press it. Violet is the
+          analysis identity here and appears nowhere else in the explorer, so
+          the one control that leaves the archive for a reading of it does not
+          look like the controls that move around inside it.
+
+          The hue is CATEGORICAL_SLOTS[6] from chart-palette.ts, which has been
+          through that file's CVD and contrast validation, so this adds no
+          unvalidated colour to the product.
+        */
         className={cn(
-          'grid-explorer-control w-full flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold shadow-sm',
+          'grid-explorer-control group w-full flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold shadow-sm transition-colors',
           study
-            ? 'bg-primary/10 border-primary/40 text-foreground hover:bg-primary/15'
-            : 'bg-transparent text-foreground hover:bg-muted/10 hover:border-primary/30',
+            ? 'border-[hsl(249_48%_52%)] bg-[hsl(249_48%_52%)] text-white hover:bg-[hsl(249_54%_46%)] dark:border-[hsl(249_58%_58%)] dark:bg-[hsl(249_58%_58%)] dark:hover:bg-[hsl(249_58%_52%)]'
+            : 'border-[hsl(249_48%_52%)]/35 bg-[hsl(249_48%_52%)]/10 text-[hsl(249_48%_40%)] hover:bg-[hsl(249_48%_52%)]/16 dark:border-[hsl(247_70%_78%)]/30 dark:bg-[hsl(247_70%_78%)]/12 dark:text-[hsl(247_70%_82%)] dark:hover:bg-[hsl(247_70%_78%)]/20',
         )}
         title={
           study
@@ -42,7 +55,12 @@ export function EventStudyDateLink({ selectedDate }: { selectedDate: string }) {
             : 'Event studies built from this archive'
         }
       >
-        <History className="h-3.5 w-3.5 text-primary shrink-0" />
+        <History
+          className={cn(
+            'h-3.5 w-3.5 shrink-0',
+            study ? 'text-white' : 'text-[hsl(249_48%_46%)] dark:text-[hsl(247_70%_82%)]',
+          )}
+        />
         <span className="whitespace-nowrap">{study ? `In: ${study.title}` : 'Event studies'}</span>
       </Link>
     </div>

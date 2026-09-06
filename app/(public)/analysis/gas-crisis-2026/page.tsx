@@ -153,15 +153,24 @@ function DeltaTile({ series, digits = 0 }: { series: EventStudySeries; digits?: 
         )}
       </p>
       {/*
-        Each tile states its OWN denominators, because they differ by publisher
+        Coverage per tile, not the whole formula per tile.
+
+        Each tile still states its OWN denominators — they differ by publisher,
         and a single shared line was wrong for half of them: Petrobangla has no
-        document whose window starts on energy day 2026-06-21, so its baseline
-        is 29 of 30 days, while PGCB filed all 30. Heading this grid with one
-        series' formula printed "29 published day(s)" above two PGCB tiles
-        computed over 30 — a methodology claim the page could not support, on
-        the one page whose entire argument is that every figure is traceable.
+        document whose window starts on 2026-06-21 so its baseline is 29 of 30,
+        while PGCB filed all 30. But the previous version printed the entire
+        formula in each tile, which repeated the identical 45-day window four
+        times in 10px grey and pushed the four tiles out of rhythm. The shared
+        half now sits once, above the grid; what differs stays here.
       */}
-      <p className="mt-2 text-[10px] leading-4 text-muted-foreground/80">{b.formula}</p>
+      <p className="mt-2 flex flex-wrap gap-x-3 text-[10.5px] leading-4 text-muted-foreground/90">
+        <span className="tabular-nums">
+          window {series.windowCoverage.publishedDays}/{series.windowCoverage.expectedDays} days
+        </span>
+        <span className="tabular-nums">
+          baseline {series.baselineCoverage.publishedDays}/{series.baselineCoverage.expectedDays} days
+        </span>
+      </p>
     </div>
   );
 }
@@ -303,10 +312,18 @@ export default async function GasCrisis2026Page() {
         <h2 id="deltas-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground mb-1">
           The window against its baseline
         </h2>
-        <p className="text-xs text-muted-foreground mb-4">
-          Signed differences of means, and nothing more — no scores, no percentages. Each
-          tile states its own formula: the denominators differ by publisher, because a day a
-          publisher did not file is excluded and counted rather than zeroed.
+        <p className="mb-5 max-w-[86ch] text-[13px] leading-6 text-muted-foreground">
+          Signed differences of means, and nothing more — no scores, no percentages. Each mean is
+          taken over the days a publisher actually filed in{' '}
+          <span className="tabular-nums text-foreground/80">
+            {GAS_CRISIS_WINDOW.start} – {GAS_CRISIS_WINDOW.end}
+          </span>{' '}
+          against the baseline{' '}
+          <span className="tabular-nums text-foreground/80">
+            {GAS_CRISIS_BASELINE.start} – {GAS_CRISIS_BASELINE.end}
+          </span>
+          ; a day nobody filed is excluded and counted, never zeroed. The counts under each tile
+          are that tile&rsquo;s own — they differ by publisher.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <DeltaTile series={s.gasRlng} />
@@ -531,7 +548,7 @@ export default async function GasCrisis2026Page() {
           <h2 id="method-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground mb-3">
             Methodology, and its limits
           </h2>
-          <ul className="list-disc space-y-3 pl-5 max-w-[80ch]">
+          <ul className="list-disc space-y-3 pl-5 lg:columns-2 lg:gap-x-10 [&>li]:break-inside-avoid">
             <li>
               <strong className="text-foreground">The data column asserts no cause.</strong>{' '}
               Petrobangla&rsquo;s report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row
@@ -545,9 +562,12 @@ export default async function GasCrisis2026Page() {
             <li>
               <strong className="text-foreground">How the coverage column is selected.</strong>{' '}
               ESB PowerLine articles published inside the window whose title or standfirst
-              matches this event&rsquo;s subject terms, which are declared in
-              `event-registry.ts` rather than hand-picked per day, so coverage filed later is
-              picked up and the selection rule can be audited. {narrative.totals.coverageCount}{' '}
+              matches this event&rsquo;s subject terms, which are declared in{' '}
+              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[12px] text-foreground/80">
+                event-registry.ts
+              </code>{' '}
+              rather than hand-picked per day, so coverage filed later is picked up and the
+              selection rule can be audited. {narrative.totals.coverageCount}{' '}
               of the newsroom&rsquo;s pieces in this window match; the rest are energy coverage
               that is not this story. Only published articles appear — a draft or archived piece
               would be a link a reader cannot open. This is a filtered selection, not a claim to
