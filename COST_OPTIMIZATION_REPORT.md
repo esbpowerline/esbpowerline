@@ -237,3 +237,111 @@ check must be shown to have run:
 | `c7946e23` | `perf(middleware): exclude static and unnecessary public requests` |
 
 `main` untouched. Nothing deployed.
+
+---
+
+# Phase 3 — prefetch, and the disabled Supabase transform
+
+**Date:** 2026-09-06 · **Commits:** `acd3f2ad`, `eaa954d4`
+All measurements below are from `npm run build` + `next start`. None are from `next dev`.
+
+## 1. Where the 19 duplicate homepage prefetches came from
+
+Not a rendering bug, and not two links per card — `ArticleCard` carries exactly one `<Link>`.
+They came from the **same destination being legitimately reachable several times on one page**,
+and prefetch firing **per `<Link>`, not per href**:
+
+| Destination | Anchors on the homepage | Where |
+|---|---|---|
+| `/articles` | **5** | navbar hub "Latest", "Browse archive", "View all in All News", "All stories", footer |
+| `/categories/power-generation` | **3** | navbar category ribbon, section "View All", footer |
+| `/` | **3** | masthead logo, navbar Home pill, footer logo |
+| `/grid-explorer` | **3** | navbar hub, "System Snapshot" title link, footer |
+
+Two structural amplifiers: the navbar renders its **category ribbon twice** (desktop rail and
+mobile sheet, both in the DOM), and the **footer repeats destinations the navbar already offers** —
+the footer alone owned 15 of the homepage's prefetched anchors.
+
+A third, smaller mechanism: a single anchor re-firing on re-render — `/analysis/gas-crisis-2026`
+was prefetched 4× from **1** anchor on the Grid Explorer.
+
+## 2–4. Before / after
+
+| Route | Prefetch reqs | Prefetch bytes | Unique dests | Duplicates | Middleware-eligible |
+|---|---|---|---|---|---|
+| `/` | 45 → **5** | 896 KB → **4 KB** | 25 → **5** | 20 → **0** | 47 → **12** |
+| article | 42 → **5** | 847 KB → **4 KB** | 23 → **5** | 19 → **0** | 43 → **11** |
+| category | 46 → **5** | 941 KB → **4 KB** | 27 → **5** | 19 → **0** | 47 → **11** |
+| `/articles` | 60 → **5** | 1193 KB → **4 KB** | 37 → **5** | 23 → **0** | 61 → **11** |
+| `/grid-explorer` | 44 → **5** | 1028 KB → **4 KB** | 23 → **5** | 21 → **0** | 60 → **26** |
+
+Total transferred per view also falls (homepage 3854 → 3383 KB; `/articles` 3299 → 2532 KB).
+Every page now prefetches exactly the five primary hubs, once each. Targets were 5–8; the result
+is **5 on all five pages**.
+
+Grid Explorer's residual 26 is its data layer (19 requests) plus the document — the tier gate,
+untouched, and the subject of `GRID_REQUEST_AUDIT.md`.
+
+## 5. Navigation UX
+
+Measured, three runs each, median time from click to the destination's heading:
+
+| Transition | Prefetch | Median |
+|---|---|---|
+| navbar → `/articles` | kept | 71 ms |
+| navbar → `/magazine` | kept | 72 ms |
+| navbar → `/grid-explorer` | kept | 145 ms |
+| article card | **disabled** | 106 ms |
+| category ribbon | **disabled** | 91 ms |
+| footer → `/about` | **disabled** | 85 ms |
+| pagination → page 2 | **disabled** | **63 ms** |
+
+**The fastest transition on the site is now one with prefetch disabled.** Every destination is
+prerendered, so the click-time RSC fetch is already quick. No hover-prefetch framework was built —
+the measurements do not justify one.
+
+## 6. Where prefetch was disabled
+
+Kept (opted in explicitly on `PublicNavLink`): home, `/articles`, `/grid-explorer`, `/magazine`,
+`/search`. Disabled across 105 `<Link>` sites in 44 files: footer, navbar category ribbon,
+`ArticleCard`, `ArticlesIndex`/`Frame`, `AuthorProfileFrame`, `FeaturedCarousel`, `SectorCoverage`,
+home sections, breadcrumbs, grid-explorer lists, member CTAs, and the public pages' inline links.
+`href`, keyboard behaviour, accessibility and crawlability are unchanged.
+
+## 7–10. The Supabase transform bug
+
+**Root cause.** Transformations are disabled; `/storage/v1/render/image/` answers
+`403 FeatureNotEnabled`. Two live constructors still built those URLs.
+
+| Constructor | Callers | Class | Effect |
+|---|---|---|---|
+| `lib/media-thumbnail.ts` `mediaThumbnailUrl` | `MediaPicker`, `FeaturedImageEditor`, `MediaUpload` (6 sites) | **CMS** | 168 Supabase-object Media rows → broken |
+| `lib/article-image.ts` `normalizeArticleImageUrl` | `category-content`, `coverage-content`, `homepage-content`, `AuthorProfileFrame`, article page | **PUBLIC** | branch only fires for `/uploads/` — **0 published articles**, so no public breakage |
+| same | `MediaUpload` | **CMS** | the other 42 `/uploads/` Media rows → broken |
+| `next.config.ts` remotePattern | — | **DEAD** | allowlisted a path nothing may use; removed |
+
+**Fix.** Both return the plain `/storage/v1/object/public/...` URL. No Supabase transformation, and
+no Vercel one either — these render through plain `<img>` already, CSS-constrained at every site.
+
+**Why that is now cheap:** uploads are normalised on ingest (WebP q80, 2560px longest edge), so the
+168 objects total **16 MB — 100 kB average, 342 kB largest**. The comment justifying the transform
+predated that normalisation.
+
+**Confirmation of zero live requests:** nine public pages driven in a real browser produced **608
+requests, 0 to `/storage/v1/render/image/`**, 408 images rendered, **0 broken**, 0 page errors. All
+212 Media rows resolve with no transform URL; a 25-row sample all HEAD 200. A repo-wide re-grep
+leaves only comments and test assertions — no live constructor.
+
+## 11. Build / tests
+
+`tsc` clean · `lint` 0 errors (14 pre-existing warnings) · `build` exit 0 · **753 tests pass**
+(was 748). The new transform guard was verified by reintroducing a `render/image` URL, which fails
+three assertions.
+
+## 12. Commits
+
+| SHA | Commit |
+|---|---|
+| `acd3f2ad` | `perf(prefetch): stop speculative loading on dense content surfaces` |
+| `eaa954d4` | `fix(media): remove disabled Supabase transform dependency` |
+| `fffc75d0` | `feat(magazine): fix the section and rebuild the interactive reader` (unrelated work that had been sitting uncommitted; separated out rather than folded in) |
