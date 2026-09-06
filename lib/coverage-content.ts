@@ -10,6 +10,10 @@ import { MAX_PINNED_COVERAGE } from '@/lib/placement-rules';
 import { normalizeArticleImageUrl } from '@/lib/article-image';
 import { ARTICLE_CARD_SELECT } from '@/lib/category-content';
 
+// Backstop only; the tag is expired on publish. See lib/category-content.ts
+// for why this is a day and why it is not sixty seconds.
+const CONTENT_CACHE_TTL = 86_400;
+
 function mapArticle(
   a: {
     id: string;
@@ -76,7 +80,7 @@ const readPinnedPool = unstable_cache(
       take: MAX_PINNED_COVERAGE * 4,
     }),
   ['coverage-pinned-pool'],
-  { revalidate: 60, tags: [CONTENT_TAGS.articles] },
+  { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] },
 );
 
 const readSlotArticles = unstable_cache(
@@ -86,7 +90,7 @@ const readSlotArticles = unstable_cache(
       select: ARTICLE_CARD_SELECT,
     }),
   ['coverage-slot-articles'],
-  { revalidate: 60, tags: [CONTENT_TAGS.articles] },
+  { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] },
 );
 
 const readFallbackPool = unstable_cache(
@@ -98,7 +102,7 @@ const readFallbackPool = unstable_cache(
       take: 36,
     }),
   ['coverage-fallback-pool'],
-  { revalidate: 60, tags: [CONTENT_TAGS.articles] },
+  { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] },
 );
 
 export const getPinnedCoverageArticles = cache(async (locale?: string): Promise<PublicArticleCard[]> => {

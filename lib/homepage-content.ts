@@ -9,6 +9,11 @@ import { normalizeArticleImageUrl } from '@/lib/article-image';
 import { ARTICLE_CARD_SELECT } from '@/lib/category-content';
 import { CONTENT_TAGS } from '@/lib/public-paths';
 
+// Backstop only; both tags are expired on mutation (settings via
+// lib/actions/settings.ts, articles via lib/revalidate-tags.ts). See
+// lib/category-content.ts for why this is a day.
+const CONTENT_CACHE_TTL = 86_400;
+
 const PUBLIC_SETTING_KEYS = [
   'homepage', 'ticker', 'snapshot', 'snapshotDate', 'interviews', 'site', 'seo', 'hero', 'coverage', 'panels',
   'importantLinks', 'policyFramework',
@@ -46,13 +51,13 @@ async function readSettingsMap(keys: readonly string[]): Promise<Record<string, 
 const readPublicSettingsCached = unstable_cache(
   () => readSettingsMap(PUBLIC_SETTING_KEYS),
   ['site-settings', 'public'],
-  { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: 300 },
+  { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: CONTENT_CACHE_TTL },
 );
 
 const readGridSettingsCached = unstable_cache(
   () => readSettingsMap(GRID_SETTING_KEYS),
   ['site-settings', 'grid'],
-  { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: 300 },
+  { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: CONTENT_CACHE_TTL },
 );
 
 export const getPublicSettingsMap = cache(() => readPublicSettingsCached());
@@ -136,7 +141,7 @@ const readCarouselPool = unstable_cache(
       take: MAX_CAROUSEL_ITEMS * 2,
     }),
   ['homepage-carousel-pool'],
-  { revalidate: 60, tags: [CONTENT_TAGS.articles] },
+  { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] },
 );
 
 async function fetchManagedCarouselItems(locale?: string): Promise<CarouselItem[]> {

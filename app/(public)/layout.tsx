@@ -6,7 +6,23 @@ import { getPublicCategories } from '@/lib/category-content';
 import { getPublicSettingsMap } from '@/lib/homepage-content';
 import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 
-export const revalidate = 300;
+/**
+ * The second half of the 60-second clamp, and the one that only showed up in a
+ * build.
+ *
+ * A layout's revalidate applies to every page beneath it, and the effective
+ * window is the minimum down the whole segment tree — so this five minutes
+ * capped all 26 public routes regardless of what each declared. With the data
+ * caches fixed, /about and /grid-explorer/archive/2013 went from 1m to 5m and
+ * stopped there, still re-rendering 288 times a day apiece.
+ *
+ * Nothing this layout reads needs five minutes. Categories and settings are
+ * both tagged caches that are expired on mutation, and the ticker is a plain
+ * import of lib/data/macro/*.ts — compile-time data, no query, no fetch. So
+ * this is a backstop like the others, and each page's own declaration is what
+ * should govern: 3m for the homepage, 10m for an article, a day for /about.
+ */
+export const revalidate = 86_400;
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettingsMap();

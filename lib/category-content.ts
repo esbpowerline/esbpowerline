@@ -40,6 +40,49 @@ export type PublicMagazineIssue = {
  * at `take: 60`, so it was transferring tens of MB of article bodies per ISR
  * regeneration to render title-and-image cards.
  */
+/**
+ * Fallback lifetimes for the tagged public-content caches.
+ *
+ * These are a BACKSTOP, not the invalidation mechanism. Every cache below is
+ * tagged, and every in-app mutation that changes public content expires its tag
+ * immediately (lib/revalidate-tags.ts, called from articles / categories /
+ * magazine / platform / review-workflow / editor-trash / logs / media and the
+ * scheduled-publish cron). Publishing is read-your-writes and stays that way.
+ *
+ * They used to be 60 seconds. Next takes the *minimum* revalidate of everything
+ * touched while rendering a route, so a single 60 here pinned every ISR page on
+ * the site to a one-minute window no matter what the page itself declared —
+ * /about asked for 86400 and got 1m, and /grid-explorer/archive/2013, a page
+ * about a year that ended thirteen years ago, was eligible to re-render every
+ * sixty seconds forever. Each of those regenerations is a function invocation
+ * and a round of Postgres queries.
+ *
+ * The timer is kept rather than removed because tag invalidation cannot cover
+ * everything: the CLI scripts (import:news, translate:news, backfill:media) and
+ * any direct database edit run outside the Next runtime, where `revalidateTag`
+ * does not exist. A day is the ceiling on how long such an out-of-band change
+ * can stay invisible. Nothing that goes through the app waits for it.
+ */
+const CONTENT_CACHE_TTL = 86_400;
+
+/**
+ * The exception. Trending is ordered by `views`, which `recordArticleView`
+ * increments on every single article read and deliberately does NOT invalidate
+ * — flushing the whole article cache on every page view would defeat the point
+ * of having one. So this is the one cache whose input really does drift with no
+ * hook to catch it, and it gets a real timer rather than a backstop.
+ *
+ * This also sets the floor for /articles, /articles/page/N and
+ * /articles/popular, which all read it through ArticlesIndexFrame — and,
+ * less obviously, for EVERY page in the (public) group. app/(public)/not-found.tsx
+ * renders three trending articles, and a not-found belongs to the segment tree,
+ * so its data requirement folds into the effective revalidate of every sibling
+ * route. That is why /about — a page with no articles on it at all — reports
+ * 30m rather than the day it declares. Raising this number raises the whole
+ * group with it; the alternative is to give the 404 page a longer-lived list.
+ */
+const TRENDING_CACHE_TTL = 1_800;
+
 export const ARTICLE_CARD_SELECT = {
   id: true,
   slug: true,
@@ -137,7 +180,7 @@ export const getPublicCategories = unstable_cache(async (): Promise<PublicCatego
     order: c.order,
     articleCount: countMap[c.name] ?? 0,
   }));
-}, ['getPublicCategories'], { revalidate: 60, tags: [CONTENT_TAGS.categories, CONTENT_TAGS.articles] });
+}, ['getPublicCategories'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.categories, CONTENT_TAGS.articles] });
 
 export async function getCategoryBySlug(slug: string): Promise<PublicCategory | null> {
   const cat = await prisma.category.findUnique({ where: { slug } });
@@ -186,7 +229,7 @@ export const getPublishedArticlesByCategory = unstable_cache(async function getP
       }
     })
     .map((a) => mapArticle(a, locale));
-}, ['getPublishedArticlesByCategory'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
+}, ['getPublishedArticlesByCategory'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
 
 
@@ -210,7 +253,7 @@ export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, l
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-}, ['getPublishedArticlesForPublic'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
+}, ['getPublishedArticlesForPublic'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
 export const getPublishedArticleBySlug = unstable_cache(async function getPublishedArticleBySlug(slug: string, locale?: string): Promise<PublicArticleDetail | null> {
   const article = await prisma.article.findFirst({
@@ -260,7 +303,7 @@ export const getPublishedArticleBySlug = unstable_cache(async function getPublis
     collaborators,
     updatedAt: article.updatedAt.toISOString(),
   };
-}, ['getPublishedArticleBySlug'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
+}, ['getPublishedArticleBySlug'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
 export async function getRelatedPublishedArticles(
   slug: string,
@@ -322,7 +365,7 @@ export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, loc
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-}, ['getTrendingPublishedArticles'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
+}, ['getTrendingPublishedArticles'], { revalidate: TRENDING_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
 export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({
@@ -346,7 +389,7 @@ export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: str
     })
     .slice(0, limit)
     .map((a) => mapArticle(a, locale));
-}, ['getFeaturedArticles'], { revalidate: 60, tags: [CONTENT_TAGS.articles] });
+}, ['getFeaturedArticles'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
 export async function getPublicTagCounts(): Promise<{ tag: string; count: number }[]> {
   try {
@@ -401,4 +444,4 @@ export const getLatestMagazineIssue = unstable_cache(async (): Promise<PublicMag
     pdfUrl: issue.pdfUrl,
     summary: issue.summary ?? '',
   };
-}, ['getLatestMagazineIssue'], { revalidate: 60, tags: [CONTENT_TAGS.magazine] });
+}, ['getLatestMagazineIssue'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.magazine] });
