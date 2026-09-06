@@ -91,9 +91,9 @@ fi
 # Measured on the dumps themselves, not estimated:
 #
 #   Sunday, or no full copy in 7 days   everything      164 MB
-#   every other night                   the rest         11 MB
+#   every other night                   the rest          8 MB
 #
-# ≈1.0 GB/month against a 5 GB allowance, down from 4.9 GB — with the state that
+# ≈0.9 GB/month against a 5 GB allowance, down from 4.9 GB — with the state that
 # exists only in Postgres never more than a day old, and everything else covered
 # by git continuously and by the weekly full copy.
 URL=$(grep '^DATABASE_URL=' "$REPO/.env.local" | cut -d= -f2- | tr -d '"' | sed 's/:6543/:5432/; s/[?&]pgbouncer=true//')
