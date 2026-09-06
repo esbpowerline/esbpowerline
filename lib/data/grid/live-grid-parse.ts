@@ -263,6 +263,17 @@ export type LiveGridSnapshot = {
     maxDemandMw: number | null;
     maxDemandAt: string | null;
     maxLoadShedMw: number | null;
+    /**
+     * The day's highest generation total, from the generation page.
+     *
+     * Kept apart from `maxSupplyMw` deliberately. Generation dispatched and
+     * supply delivered are different quantities measured on different pages,
+     * and on 2026-09-04 they differed by 404 MW; the snapshot has already been
+     * burned once by treating one as a stand-in for the other. This is the
+     * generation page's own maximum and nothing else's.
+     */
+    maxGenerationMw: number | null;
+    maxGenerationAt: string | null;
   };
   /**
    * The last 24 POSTED rows, oldest first, for sparklines -- not 24 hours.
@@ -317,6 +328,8 @@ export function buildLiveGridSnapshot(
 
   const date = latest.at.slice(0, 10);
   const todayDemand = demand.filter((r) => r.at.startsWith(date));
+  const todayGen = gen.filter((r) => r.at.startsWith(date));
+  const byGeneration = [...todayGen].sort((a, b) => a.totalMw - b.totalMw).pop();
   const bySupply = [...todayDemand].sort((a, b) => a.supplyMw - b.supplyMw).pop();
   const byDemand = [...todayDemand].sort((a, b) => a.demandMw - b.demandMw).pop();
 
@@ -338,6 +351,8 @@ export function buildLiveGridSnapshot(
       maxLoadShedMw: todayDemand.length
         ? Math.max(...todayDemand.map((r) => r.loadShedMw))
         : null,
+      maxGenerationMw: byGeneration?.totalMw ?? null,
+      maxGenerationAt: byGeneration?.at ?? null,
     },
     hours,
     reconciles: componentSum !== null && Math.abs(latest.totalMw - componentSum) <= 1,

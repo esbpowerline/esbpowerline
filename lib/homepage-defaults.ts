@@ -22,7 +22,12 @@
 export const HOMEPAGE_DEFAULTS = {
   marketPulse:
     'LNG spot firming • Solar module prices -2.1% WoW • BDT volatility impacting IPP margins • Coal API2 steady at $102',
-  snapshotLabel: 'Live • BPDB • PGCB • SREDA • Petrobangla',
+  // The agencies the snapshot panel actually reads, in the order it leans on
+  // them. NLDC leads because ten of the twelve tiles are its hourly pages;
+  // SREDA left when `RE Installed` and `RE Grid Share` did. This is only the
+  // default — a `homepage.snapshotLabel` row in site settings overrides it, so
+  // an existing deployment keeps whatever it was given until that is edited.
+  snapshotLabel: 'Live • NLDC • PGCB • Petrobangla • BPDB',
   professionalsCta: {
     label: 'MEMBER ACCESS',
     title: 'Save articles & magazine issues, download data, comment, and unlock in-depth analysis.',

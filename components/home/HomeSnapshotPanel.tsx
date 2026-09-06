@@ -11,6 +11,7 @@ import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
 import { LIVE_BACKED_LABELS, mergeHomeSnapshot, type SnapshotSlot } from '@/lib/data/grid/home-snapshot-merge';
+import { sourceSiteFor } from '@/lib/data/grid/source-sites';
 
 const IconMap: Record<string, any> = {
   Zap,
@@ -65,18 +66,87 @@ type LiveGrid = {
     demandMw: number | null;
     supplyMw: number | null;
     loadShedMw: number | null;
-    byFuel: { coalMw: number };
-    imports: { totalMw: number };
+    // Solar and wind are nullable and coal and gas are not, because NLDC has
+    // printed the two thermal columns for the whole life of the page and added
+    // the renewable ones later. Widening this to match the parser's own shape
+    // is what lets the panel carry the fuels it was already receiving.
+    byFuel: {
+      gasMw: number;
+      coalMw: number;
+      solarMw: number | null;
+      windMw: number | null;
+    };
+    imports: { totalMw: number | null };
   };
-  // Nullable: it comes from NLDC's demand/supply page, which can be absent or
-  // re-laid-out while the generation page keeps working. It used to fall back
-  // to the generation total, which put a different quantity under this label.
-  today: { maxDemandMw: number | null };
+  // Nullable: these come from NLDC's demand/supply page, which can be absent or
+  // re-laid-out while the generation page keeps working. `maxDemandMw` used to
+  // fall back to the generation total, which put a different quantity under
+  // this label. `maxGenerationMw` is the generation page's own maximum and is
+  // deliberately not a stand-in for supply.
+  today: { maxDemandMw: number | null; maxGenerationMw: number | null };
   /** buildLiveGridSnapshot's check: printed total === sum of fuels + imports. */
   reconciles?: boolean;
 };
 
 const LIVE_POLL_MS = 15 * 60 * 1000;
+
+/**
+ * The agency credits, as links to where each one publishes.
+ *
+ * Same font, weight and italic as before — the only added affordance is the
+ * hover, because a footer of links that looks like a footer of links would
+ * shout louder than a source line should. An agency `source-sites.ts` has no
+ * URL for stays plain text: a guessed link is a fabricated citation.
+ */
+function SourceCredits({ text }: { text: string }) {
+  const agencies = text.split(/\s*•\s*/).filter(Boolean);
+  return (
+    <span className="home-snapshot-segment__sources-text">
+      {agencies.map((agency, idx) => {
+        const href = sourceSiteFor(agency);
+        const style = 'text-muted-foreground/90 font-medium italic';
+        return (
+          <span key={`${agency}-${idx}`}>
+            {href ? (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${style} underline-offset-2 transition-colors hover:text-primary hover:underline`}
+                title={`Open ${agency} — check these figures at the source`}
+              >
+                {agency}
+              </a>
+            ) : (
+              <span className={style}>{agency}</span>
+            )}
+            {idx < agencies.length - 1 && (
+              <span className="mx-1.5 text-primary/60 font-extrabold select-none">•</span>
+            )}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+/**
+ * "23:00" as "11 PM", for the readers who do not think in 24-hour time.
+ *
+ * Derived from the same string the 24-hour stamp prints, so the two can never
+ * disagree about the hour. Minutes are dropped when they are zero, which they
+ * are for every NLDC row except the one evening-peak stamp a day.
+ */
+function to12Hour(hhmm: string): string | null {
+  const m = /^(\d{2}):(\d{2})$/.exec(hhmm);
+  if (!m) return null;
+  const hour = Number(m[1]);
+  const minute = m[2];
+  if (!Number.isFinite(hour) || hour > 23) return null;
+  const suffix = hour < 12 ? 'AM' : 'PM';
+  const twelve = hour % 12 === 0 ? 12 : hour % 12;
+  return minute === '00' ? `${twelve} ${suffix}` : `${twelve}:${minute} ${suffix}`;
+}
 
 /**
  * NLDC posts hourly generation and demand/supply/load-shed pages on PGCB's
@@ -131,16 +201,31 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
       return live.latest.loadShedMw;
     case 'Peak Demand':
       return live.today.maxDemandMw;
-    // Both of these come off the generation table, which is the table the
+    // Every case below comes off the generation table, which is the table the
     // reconciliation covers. When the printed total stops matching its own
     // components, that table is mis-parsed or mis-published, so the tile
     // falls back to the daily report rather than showing a confident green
     // dot over a number we cannot vouch for. The demand-side tiles above
     // are unaffected -- they are parsed from the other page.
+    case 'Peak Generation':
+      return live.reconciles === false ? null : live.today.maxGenerationMw;
+    case 'Gas Generation':
+      return live.reconciles === false ? null : live.latest.byFuel.gasMw;
     case 'Coal Generation':
       return live.reconciles === false ? null : live.latest.byFuel.coalMw;
     case 'Grid Import':
       return live.reconciles === false ? null : live.latest.imports.totalMw;
+    // Solar and wind are summed over whichever of the two NLDC printed, never
+    // over a blank read as zero: the wind column is present in 28.8% of stored
+    // hours and solar in 78.8%, because both postdate most of the archive. An
+    // hour carrying neither is absent -- not a grid running on no renewables.
+    case 'Solar + Wind': {
+      if (live.reconciles === false) return null;
+      const parts = [live.latest.byFuel.solarMw, live.latest.byFuel.windMw].filter(
+        (v): v is number => typeof v === 'number',
+      );
+      return parts.length ? parts.reduce((a, b) => a + b, 0) : null;
+    }
     default:
       return null;
   }
@@ -337,6 +422,7 @@ function SnapshotSegment({
       ? `${formatCompactDay(liveDay, locale)}, ${liveHour}`
       : liveHour;
   const compactHeaderDate = headerDate.replace(/,?\s*[\d০-৯]{4}\s*$/, '');
+  const liveHour12 = liveHour ? to12Hour(liveHour) : null;
 
   return (
     <section className="home-snapshot-segment" aria-labelledby="home-snapshot-title">
@@ -364,12 +450,20 @@ function SnapshotSegment({
               // Two stacked stamps, not one long line: the meta column cannot
               // shrink (nowrap + flex-shrink:0), so a single line overflowed
               // the card at tighter widths.
+              // Two stamps, two colours, because they are two cadences and the
+              // panel already speaks that language: emerald is what a live tile
+              // wears, so the hourly stamp wears it too, and the daily stamp
+              // takes the slower colour. A reader can tell at a glance which
+              // half of the panel a figure came from without reading a word.
               <>
-                <span className="home-snapshot-segment__updated">
+                <span className="home-snapshot-segment__updated home-snapshot-segment__updated--hourly">
                   {locale === 'bn' ? 'ঘণ্টাভিত্তিক ' : 'Hourly '}
                   <time dateTime={live!.asOf}>{liveStamp}</time>
+                  {liveHour12 ? (
+                    <span className="home-snapshot-segment__clock12">({liveHour12})</span>
+                  ) : null}
                 </span>
-                <span className="home-snapshot-segment__updated">
+                <span className="home-snapshot-segment__updated home-snapshot-segment__updated--daily">
                   {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
                   <time dateTime={dailyDay ?? undefined}>{compactHeaderDate}</time>
                 </span>
@@ -380,19 +474,6 @@ function SnapshotSegment({
                 <time dateTime={dailyDay ?? undefined}>{headerDate}</time>
               </span>
             )}
-            {/* The badge renders only while an NLDC hourly reading is actually
-                loaded. It used to render unconditionally from the settings
-                string, putting a pulsing "Live" over a panel where 7 of 12
-                tiles are daily or standing-register figures (audit 2026-09-01). */}
-            {live ? (
-              <span className="home-snapshot-segment__live">
-                <span className="home-snapshot-segment__live-dot" aria-hidden>
-                  <span className="home-snapshot-segment__live-ping" />
-                  <span className="home-snapshot-segment__live-core" />
-                </span>
-                {liveWord}
-              </span>
-            ) : null}
           </div>
         </header>
 
@@ -404,18 +485,28 @@ function SnapshotSegment({
           />
         </div>
 
-        {sourcesText ? (
+        {sourcesText || live ? (
           <footer className="home-snapshot-segment__foot">
-            <span className="home-snapshot-segment__sources-text">
-              {sourcesText.split(/\s*•\s*/).map((agency, idx, arr) => (
-                <span key={idx}>
-                  <span className="text-muted-foreground/90 font-medium italic">{agency}</span>
-                  {idx < arr.length - 1 && (
-                    <span className="mx-1.5 text-primary/60 font-extrabold select-none">•</span>
-                  )}
+            {/* The badge sits with the sources, at their size, because that is
+                what it is: a statement about where the figures came from. In
+                the header it competed with the two cadence stamps for the meta
+                column and pushed the tile grid down; here it costs no height
+                the footer was not already spending.
+
+                It renders only while an NLDC hourly reading is actually loaded.
+                It used to render unconditionally from the settings string,
+                putting a pulsing "Live" over a panel where most tiles were
+                daily or standing-register figures (audit 2026-09-01). */}
+            {live ? (
+              <span className="home-snapshot-segment__live">
+                <span className="home-snapshot-segment__live-dot" aria-hidden>
+                  <span className="home-snapshot-segment__live-ping" />
+                  <span className="home-snapshot-segment__live-core" />
                 </span>
-              ))}
-            </span>
+                {liveWord}
+              </span>
+            ) : null}
+            <SourceCredits text={sourcesText} />
           </footer>
         ) : null}
       </div>
@@ -490,7 +581,10 @@ export function HomeSnapshotPanel({
           <div className="flex flex-col items-end w-full gap-0.5 text-[9px] xs:text-[10px] md:text-[11px] text-muted-foreground font-mono font-medium italic opacity-75 text-right">
             <div className="flex items-center justify-end gap-1 w-full whitespace-nowrap">
               <span className="font-semibold text-foreground/50 tracking-wider not-italic">{locale === 'bn' ? 'তথ্য সূত্র:' : 'DATA:'}</span>
-              <span>{sourcesText}</span>
+              {/* Same credits, same links. This is the non-segment layout; both
+                  render sites go through SourceCredits so a new agency needs one
+                  entry in source-sites.ts and nothing else. */}
+              <SourceCredits text={sourcesText} />
             </div>
           </div>
         </div>

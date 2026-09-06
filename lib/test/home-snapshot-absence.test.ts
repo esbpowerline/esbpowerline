@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { buildHomeSnapshotFromDaily } from '@/lib/data/grid/home-snapshot-core';
+import {
+  buildHomeSnapshotFromDaily,
+  buildSredaSnapshotStats,
+} from '@/lib/data/grid/home-snapshot-core';
 import {
   SAMPLE_DAILY_REPORT,
   SAMPLE_SYSTEM_ONLY_REPORT,
@@ -121,21 +124,59 @@ describe('absent is absent — cross-border imports', () => {
   });
 });
 
-describe('absent is absent — SREDA register', () => {
-  it('holds both renewable tiles when the register was not read', () => {
-    // These hardcoded 0, which published "0 MW installed" and "0% renewable
-    // share" over SREDA's name on any day the register was unavailable.
-    const built = buildHomeSnapshotFromDaily(SAMPLE_DAILY_REPORT as never, null);
+describe('SREDA register — off the snapshot, still reported', () => {
+  it('no longer occupies snapshot slots', () => {
+    // The register answers "what is built", never "what is generating now", so
+    // it lost its two tiles to `Solar + Wind` — NLDC's hourly renewable output.
+    // A capacity figure in a panel of live readings invited exactly the
+    // quantity confusion rule 2 exists to prevent.
+    const built = buildHomeSnapshotFromDaily(SAMPLE_DAILY_REPORT as never, SAMPLE_SREDA as never);
     for (const label of ['RE Installed', 'RE Grid Share']) {
-      const t = built.find((s) => s.label === label);
-      expect(t?.value, `${label} should be null`).toBeNull();
-      expect(t?.awaiting).toBe('SREDA');
+      expect(built.find((s) => s.label === label), `${label} should be gone`).toBeUndefined();
     }
   });
 
-  it('reports the register when it is present', () => {
-    expect(tile(SAMPLE_DAILY_REPORT, SAMPLE_SREDA, 'RE Installed')?.value).toBe(1806);
-    expect(tile(SAMPLE_DAILY_REPORT, SAMPLE_SREDA, 'RE Grid Share')?.value).toBe(5.56);
+  it('still reports the register itself, for the surfaces that want capacity', () => {
+    const stats = buildSredaSnapshotStats(SAMPLE_SREDA as never);
+    expect(stats.find((s) => s.label === 'RE Installed')?.value).toBe(1806);
+    expect(stats.find((s) => s.label === 'RE Grid Share')?.value).toBe(5.56);
+  });
+});
+
+describe('absent is absent — hourly fuel tiles', () => {
+  it('holds Solar + Wind rather than reporting a grid with no renewables', () => {
+    // NLDC printed neither column for most of the archive's life — solar is in
+    // 78.8% of stored hours and wind in 28.8%. A report with no renewable rows
+    // is a report that did not carry them, not a day the sun and wind produced
+    // nothing, and 0 MW would be the second claim.
+    const report = {
+      ...SAMPLE_DAILY_REPORT,
+      generationData: [{ name: 'Coal', gen: 129.21 }],
+    };
+    const t = tile(report, SAMPLE_SREDA, 'Solar + Wind');
+    expect(t?.value).toBeNull();
+    expect(t?.awaiting).toBe('PGCB');
+  });
+
+  it('sums whichever renewable rows the day did publish', () => {
+    const report = {
+      ...SAMPLE_DAILY_REPORT,
+      generationData: [
+        { name: 'Solar', gen: 24 },
+        { name: 'Wind', gen: 12 },
+      ],
+    };
+    expect(tile(report, SAMPLE_SREDA, 'Solar + Wind')?.value).toBe(1500);
+  });
+
+  it('keeps Gas Generation and Gas Supply apart', () => {
+    // Adjacent tiles, different quantities: gas burned for power versus national
+    // production. Standing one in for the other printed a 64% collapse once.
+    const gen = tile(SAMPLE_DAILY_REPORT, SAMPLE_SREDA, 'Gas Generation');
+    const supply = tile(SAMPLE_DAILY_REPORT, SAMPLE_SREDA, 'Gas Supply');
+    expect(gen?.unit).toBe('MW');
+    expect(supply?.unit).toBe('MMCFD');
+    expect(gen?.value).not.toBe(supply?.value);
   });
 });
 

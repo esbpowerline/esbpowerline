@@ -38,17 +38,17 @@ export const SNAPSHOT_SLOTS: readonly SnapshotSlotSpec[] = [
   // it must not borrow the evening peak, which is a different quantity
   // measured at a different moment. (`Peak Demand` below carries that.)
   { label: 'Current Demand', unit: POWER_UNIT, icon: 'Activity', source: 'NLDC', liveBacked: true },
-  { label: 'Peak Generation', unit: POWER_UNIT, icon: 'Zap', source: 'PGCB' },
   { label: 'Peak Demand', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB', liveBacked: true },
+  { label: 'Peak Generation', unit: POWER_UNIT, icon: 'Zap', source: 'PGCB', liveBacked: true },
   { label: 'Daily Generation', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB' },
   { label: 'Load Shedding', unit: POWER_UNIT, icon: 'Activity', source: 'PGCB', liveBacked: true },
   { label: 'Energy Unserved', unit: POWER_UNIT, icon: 'Gauge', source: 'PGCB' },
-  { label: 'Production Cost', unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge', source: 'PGCB' },
-  { label: 'Gas Supply', unit: 'MMCFD', icon: 'Flame', source: 'Petrobangla' },
+  { label: 'Gas Generation', unit: POWER_UNIT, icon: 'Flame', source: 'PGCB', liveBacked: true },
   { label: 'Coal Generation', unit: POWER_UNIT, icon: 'Flame', source: 'PGCB', liveBacked: true },
   { label: 'Grid Import', unit: POWER_UNIT, icon: 'Cable', source: 'PGCB', liveBacked: true },
-  { label: 'RE Installed', unit: POWER_UNIT, icon: 'Sun', source: 'SREDA' },
-  { label: 'RE Grid Share', unit: '%', isDecimal: true, icon: 'Leaf', source: 'SREDA' },
+  { label: 'Solar + Wind', unit: POWER_UNIT, icon: 'Sun', source: 'PGCB', liveBacked: true },
+  { label: 'Gas Supply', unit: 'MMCFD', icon: 'Flame', source: 'Petrobangla' },
+  { label: 'Production Cost', unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge', source: 'PGCB' },
 ] as const;
 
 /** The tiles the NLDC hourly overlay can carry on its own. */

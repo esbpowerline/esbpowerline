@@ -258,17 +258,17 @@ describe('home-snapshot', () => {
     expect(stats).toHaveLength(12);
     expect(stats.map((s) => s.label)).toEqual([
       'Current Demand',
-      'Peak Generation',
       'Peak Demand',
+      'Peak Generation',
       'Daily Generation',
       'Load Shedding',
       'Energy Unserved',
-      'Production Cost',
-      'Gas Supply',
+      'Gas Generation',
       'Coal Generation',
       'Grid Import',
-      'RE Installed',
-      'RE Grid Share',
+      'Solar + Wind',
+      'Gas Supply',
+      'Production Cost',
     ]);
     // Current Demand is instantaneous and only NLDC publishes it, so a daily
     // report yields a held place, not a figure. It used to carry the evening
@@ -276,23 +276,28 @@ describe('home-snapshot', () => {
     expect(stats[0].value).toBeNull();
     expect(stats[0].awaiting).toBe('NLDC');
     expect(stats[0].unit).toBe(POWER_UNIT);
-    expect(stats[1].value).toBe(16181);
-    expect(stats[1].unit).toBe(POWER_UNIT);
+    expect(stats[2].label).toBe('Peak Generation');
+    expect(stats[2].value).toBe(16181);
+    expect(stats[2].unit).toBe(POWER_UNIT);
     expect(stats[3].value).toBe(gwhToAvgMw(354.94));
     expect(stats[3].unit).toBe(POWER_UNIT);
     expect(stats[5].value).toBe(gwhToAvgMw(2.14));
     expect(stats[5].unit).toBe(POWER_UNIT);
-    expect(stats[6].value).toBe(6.5);
-    expect(stats[8].value).toBe(gwhToAvgMw(129.21));
+    expect(stats[7].label).toBe('Coal Generation');
+    expect(stats[7].value).toBe(gwhToAvgMw(129.21));
+    expect(stats[7].unit).toBe(POWER_UNIT);
+    expect(stats[8].label).toBe('Grid Import');
+    expect(stats[8].value).toBe(2570);
     expect(stats[8].unit).toBe(POWER_UNIT);
-    expect(stats[9].value).toBe(2570);
-    expect(stats[9].unit).toBe(POWER_UNIT);
-    expect(stats[10].value).toBe(1806);
-    expect(stats[10].unit).toBe(POWER_UNIT);
-    expect(stats[11].value).toBe(5.56);
-    // National production, not the power sector's slice of it.
-    expect(stats[7].label).toBe('Gas Supply');
-    expect(stats[7].value).toBe(2388);
+    expect(stats[11].label).toBe('Production Cost');
+    expect(stats[11].value).toBe(6.5);
+    // National production, not the power sector's slice of it — and the two now
+    // sit side by side, so the distinction has to survive being adjacent.
+    expect(stats[10].label).toBe('Gas Supply');
+    expect(stats[10].value).toBe(2388);
+    expect(stats[10].unit).toBe('MMCFD');
+    expect(stats[6].label).toBe('Gas Generation');
+    expect(stats[6].unit).toBe(POWER_UNIT);
   });
 
   it('holds Gas Supply as a dash on a day Petrobangla has not filed, rather than substituting', () => {

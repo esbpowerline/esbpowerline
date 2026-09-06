@@ -97,7 +97,16 @@ describe('mergeHomeSnapshot', () => {
     // `liveValueFor` in the panel must return a figure for exactly these, and
     // no others — a label listed here but missing there waits forever.
     expect(LIVE_BACKED_LABELS).toEqual(
-      new Set(['Current Demand', 'Peak Demand', 'Load Shedding', 'Coal Generation', 'Grid Import']),
+      new Set([
+        'Current Demand',
+        'Peak Demand',
+        'Peak Generation',
+        'Load Shedding',
+        'Gas Generation',
+        'Coal Generation',
+        'Grid Import',
+        'Solar + Wind',
+      ]),
     );
   });
 

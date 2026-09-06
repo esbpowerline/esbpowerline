@@ -42,20 +42,48 @@ export interface HomeSnapshotStat {
   awaiting?: string;
 }
 
-/** Daily PGCB / Petrobangla / SREDA metrics — homepage snapshot (12 tiles). */
+/**
+ * The homepage snapshot's twelve tiles, in panel order.
+ *
+ * Ten of these are quantities NLDC posts every hour, so the panel now moves
+ * through the day instead of restating a workbook filed the morning after. The
+ * hourly page carries far more than the snapshot used to read from it — gas,
+ * liquid fuel, coal, hydro, solar, wind and four interconnectors, alongside
+ * demand, supply and load shed — and all of it has been in
+ * `GridHourlyObservation` since the NLDC capture was written. Only five tiles
+ * were reading it.
+ *
+ * What left, and why: `RE Installed` and `RE Grid Share` came from SREDA's
+ * National Database, which is a standing register of commissioned projects, not
+ * a time series — it answers "what is built", never "what is generating now".
+ * `Solar + Wind` replaces them with the renewable output NLDC actually reports
+ * for the hour. That is a different quantity under a different name, which is
+ * the only honest way to make the swap; the register still backs the Grid
+ * Explorer, where a capacity figure belongs.
+ *
+ * The last two are day quantities by nature and stay daily — a day's total
+ * generation and a day's unserved energy are not instantaneous readings, and
+ * pairing an integral with a spot figure under one label is the L2 mistake in
+ * `observation-window.ts`. `Gas Supply` and `Production Cost` are likewise the
+ * cadence their publishers file at: Petrobangla's 08:00-08:00 gas window, and
+ * BPDB's daily fuel cost.
+ *
+ * Twelve is a layout contract — a fixed 2x6. Changing this list means changing
+ * `SNAPSHOT_SLOTS` and the tests that pin both.
+ */
 export const DAILY_SNAPSHOT_LABELS = [
   'Current Demand',
-  'Peak Generation',
   'Peak Demand',
+  'Peak Generation',
   'Daily Generation',
   'Load Shedding',
   'Energy Unserved',
-  'Production Cost',
-  'Gas Supply',
+  'Gas Generation',
   'Coal Generation',
   'Grid Import',
-  'RE Installed',
-  'RE Grid Share',
+  'Solar + Wind',
+  'Gas Supply',
+  'Production Cost',
 ] as const;
 
 export type DailySnapshotLabel = (typeof DAILY_SNAPSHOT_LABELS)[number];
@@ -128,6 +156,20 @@ function sumImportPeakMw(data: GridDailyData): Figure {
   return mapFigure(total(rows.map((row) => known(row.peakFlow ?? 0)), 'PGCB'), Math.round);
 }
 
+/**
+ * Solar and wind as the daily report states them, for when the live feed is down.
+ *
+ * Summed with `total`, so a report carrying neither fuel row is absent rather
+ * than zero — a homepage tile reading "0 MW renewable" is a claim the archive
+ * has never made. A report that carries one and not the other sums what it has:
+ * that is what the day published.
+ */
+function renewableDailyAvgMw(data: GridDailyData): Figure {
+  const rows = (data.generationData ?? []).filter((g) => g.name === 'Solar' || g.name === 'Wind');
+  if (!rows.length) return awaiting('PGCB');
+  return mapFigure(total(rows.map((r) => known(r.gen)), 'PGCB'), gwhToAvgMw);
+}
+
 export function buildSredaSnapshotStats(sreda: SredaDailyData): HomeSnapshotStat[] {
   return [
     tile('RE Installed', mapFigure(fromNullable(sreda.totalRenewableMw, 'SREDA'), Math.round), {
@@ -166,6 +208,8 @@ export function buildHomeSnapshotFromDaily(
   );
   const loadShedding = peakLoadShedMw(data);
   const coalGeneration = fuelDailyAvgMw(data, 'Coal');
+  const gasGeneration = fuelDailyAvgMw(data, 'Gas');
+  const renewableGeneration = renewableDailyAvgMw(data);
   const gridImport = sumImportPeakMw(data);
 
   const pgcbStats: HomeSnapshotStat[] = [
@@ -183,8 +227,8 @@ export function buildHomeSnapshotFromDaily(
     // under its own name. Here the honest answer on a day with no live feed is
     // that nobody has published a current demand, which is what `awaiting` says.
     tile('Current Demand', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Activity' }),
-    tile('Peak Generation', known(Math.round(peakGeneration)), { unit: POWER_UNIT, icon: 'Zap' }),
     tile('Peak Demand', known(Math.round(peakDemand)), { unit: POWER_UNIT, icon: 'TrendingUp' }),
+    tile('Peak Generation', known(Math.round(peakGeneration)), { unit: POWER_UNIT, icon: 'Zap' }),
     // `GridSystemStats.totalEnergyGen` is explicitly nullable and says why:
     // PGCB leaves the cell empty on some days, and 42 days of early 2018
     // published a headline "0.0 MKWh" as a result. This read `== null ? 0`,
@@ -192,33 +236,40 @@ export function buildHomeSnapshotFromDaily(
     // invent. Zero national generation is a claim no report has ever made —
     // and with `Figure` it is a claim this function can no longer make by
     // accident, because there is no `?? 0` that type-checks.
+    //
+    // Stays a day quantity. NLDC posts power, not energy, and the live
+    // snapshot's own `hours` window is the last 24 POSTED rows rather than 24
+    // hours — averaging it and calling the result a daily figure is exactly
+    // what that field's comment forbids.
     tile('Daily Generation', dailyGeneration, { unit: POWER_UNIT, icon: 'TrendingUp' }),
     tile('Load Shedding', loadShedding, { unit: POWER_UNIT, icon: 'Activity' }),
     // Never shown as zero on days whose report does not publish unserved
     // energy — a homepage tile reading "0 MW" would assert that no load was
     // shed, which is not what an absent figure means.
     tile('Energy Unserved', energyUnserved, { unit: POWER_UNIT, icon: 'Gauge' }),
-    tile('Production Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
+    // Gas BURNED FOR POWER, which is not the Gas Supply tile below and must
+    // never be swapped for it. That substitution is the sharpest incident in
+    // the repo: the power sector's slice is about a third of national
+    // production, and standing in for it printed a 64% collapse that was only
+    // a change of source. Two tiles, two quantities, two names.
+    tile('Gas Generation', gasGeneration, { unit: POWER_UNIT, icon: 'Flame' }),
+    tile('Coal Generation', coalGeneration, { unit: POWER_UNIT, icon: 'Flame' }),
+    tile('Grid Import', gridImport, { unit: POWER_UNIT, icon: 'Cable' }),
+    // Renewable OUTPUT, not installed capacity. NLDC's solar and wind columns
+    // are the youngest on the page — 78.8% and 28.8% of stored hours carry
+    // them, because the columns postdate most of the archive. An hour without
+    // them is absent, not a night with no sun.
+    tile('Solar + Wind', renewableGeneration, { unit: POWER_UNIT, icon: 'Sun' }),
     // Petrobangla files its 08:00-08:00 window a day or two behind PGCB, so the
     // newest day routinely has grid figures and no gas. That is the ordinary
     // state, not an outage, and `awaiting` is what says so on the tile.
     tile('Gas Supply', gasSupply, { unit: 'MMCFD', icon: 'Flame' }),
-    tile('Coal Generation', coalGeneration, { unit: POWER_UNIT, icon: 'Flame' }),
-    tile('Grid Import', gridImport, { unit: POWER_UNIT, icon: 'Cable' }),
+    tile('Production Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
   ];
 
-  if (sreda) {
-    return [...pgcbStats, ...buildSredaSnapshotStats(sreda)];
-  }
-
-  // SREDA's is a standing register, not a daily filing, and it is occasionally
-  // unavailable when a day is built. These two tiles used to hardcode 0 for
-  // that case, which printed "0 MW installed" and "0% renewable share" over
-  // SREDA's name — a claim that the country has no renewable capacity at all,
-  // made on the days SREDA simply had not been read.
-  return [
-    ...pgcbStats,
-    tile('RE Installed', awaiting('SREDA'), { unit: POWER_UNIT, icon: 'Sun' }),
-    tile('RE Grid Share', awaiting('SREDA'), { unit: '%', isDecimal: true, icon: 'Leaf' }),
-  ];
+  // SREDA no longer appears in the snapshot. `buildSredaSnapshotStats` is kept
+  // and still tested — the register is the right source for installed capacity
+  // and the Grid Explorer reads it — but a standing register cannot answer the
+  // question this panel asks, which is what the grid is doing today.
+  return pgcbStats;
 }

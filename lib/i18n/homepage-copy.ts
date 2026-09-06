@@ -51,7 +51,11 @@ const PROFESSIONALS_CTA_BN = {
   secondaryLabel: 'সদস্য প্রবেশ',
 };
 
-const SNAPSHOT_LABEL_BN = 'লাইভ • বিপিডিবি • পিজিসিবি • এসআরইডিএ • পেট্রোবাংলা';
+// Mirrors HOMEPAGE_DEFAULTS.snapshotLabel: NLDC leads because ten of the
+// twelve tiles are its hourly pages, and SREDA left with the two register
+// tiles. Each agency here is keyed in `source-sites.ts` so the Bengali footer
+// links out exactly as the English one does.
+const SNAPSHOT_LABEL_BN = 'লাইভ • এনএলডিসি • পিজিসিবি • পেট্রোবাংলা • বিপিডিবি';
 
 const MARKET_PULSE_BN =
   'এলএনজি স্পট দাম বাড়ছে • সোলার মডিউল -২.১% সাপ্তাহিক • ডলার/টাকা ওঠানামায় আইপিপি মার্জিনে চাপ • কয়লা API২ $১০২ এ স্থির • ৮.৯৫ টাকা/ইউনিট বাল্ক ট্যারিফ কার্যকর';

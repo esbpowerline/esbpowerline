@@ -3077,11 +3077,39 @@ html.locale-bn .market-ticker-label {
   }
 }
 
+/*
+ * Wraps rather than clips, because the text here is not always the size we ask
+ * for.
+ *
+ * The meta column is `nowrap` and cannot shrink, so this header is sized by its
+ * content. That was survivable until the hourly stamp gained "(11 PM)" — after
+ * which, on a browser with a MINIMUM FONT SIZE set, the stamps ran past the
+ * card's right edge and the title ellipsised to "System Snap...".
+ *
+ * The minimum-font-size setting is the part worth remembering. This panel's meta
+ * text is `--text-ui-2xs`, 0.625rem = 10px, and a browser configured with a 12px
+ * floor silently renders it at 12px — every string here is then 20% wider than
+ * the design assumes, inside a card whose width has not changed. It reproduces
+ * as "fine on one machine, broken on another" with identical code, identical
+ * viewport and identical zoom, which is a genuinely confusing bug to be handed.
+ * No px value fixes it: everything we could shrink to is already below the floor
+ * and gets clamped back up.
+ *
+ * So the header gives way instead. With `flex-wrap`, a meta column that no
+ * longer fits beside the title drops to its own right-aligned row: unchanged on
+ * a browser rendering 10px as 10px, one row taller on a browser that will not.
+ * The title keeps its full width either way, which is the thing that must not
+ * degrade — a clipped panel name is worse than a taller header.
+ *
+ * `min-width` is deliberately NOT zeroed on the title: it has to keep its
+ * min-content width, or flexbox shrinks it to nothing and never wraps at all.
+ */
 .home-snapshot-segment__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
   min-height: auto;
   padding-bottom: 0px;
 }
@@ -3096,8 +3124,11 @@ html.locale-bn .market-ticker-label {
 .home-snapshot-segment__title-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
+  gap: 0.35rem;
+  /* No `min-width: 0` here on purpose. It let the title shrink to nothing, so
+     the header never wrapped — it just ellipsised the panel's own name instead.
+     Keeping min-content width is what makes the meta column drop to its own row
+     when it cannot fit beside the title. */
   color: inherit;
   text-decoration: none;
 }
@@ -3127,11 +3158,22 @@ html.locale-bn .market-ticker-label {
   transition: color 0.2s ease;
 }
 
+/* Invisible at rest (opacity-0 until the title is hovered) but it still
+   reserved 14px of the header, which is most of what pushed the hourly stamp
+   past the card's right edge once "(11 PM)" was added — the title ellipsised to
+   "System Snap...". Collapsed until hover: it costs nothing while you cannot
+   see it, and widens back with the same fade. */
 .home-snapshot-segment__title-arrow {
-  width: 0.875rem;
+  width: 0;
   height: 0.875rem;
   flex-shrink: 0;
+  overflow: hidden;
   color: hsl(var(--muted-foreground));
+  transition: width 200ms ease;
+}
+
+.home-snapshot-segment__title-link:hover .home-snapshot-segment__title-arrow {
+  width: 0.875rem;
 }
 
 .home-snapshot-segment__kicker {
@@ -3152,6 +3194,8 @@ html.locale-bn .market-ticker-label {
   justify-content: flex-start;
   gap: 0.2rem;
   flex-shrink: 0;
+  /* Right-aligned on its own row too, once the header wraps. */
+  margin-left: auto;
 }
 
 .home-snapshot-segment__updated {
@@ -3159,10 +3203,49 @@ html.locale-bn .market-ticker-label {
   font-size: var(--snapshot-meta-size, var(--text-ui-xs));
   font-weight: 600;
   line-height: 1.2;
-  letter-spacing: 0.04em;
+  /* 0.02em, not 0.04: the hourly stamp carries a second clock now and this is
+     a mono face, so tracking is pure width — 27 characters of it. */
+  letter-spacing: 0.02em;
   color: hsl(var(--muted-foreground) / 0.72);
   white-space: nowrap;
   text-align: right;
+}
+
+/* The two cadence stamps, colour-coded to the panel's own vocabulary: emerald
+   is what a live tile's dot wears, so the hourly stamp wears it; the daily
+   stamp takes rose, the slower half. Before this both were the same grey and
+   the reader had to read the words to tell which figures moved this hour. */
+.home-snapshot-segment__updated--hourly {
+  color: hsl(160 84% 32%);
+}
+
+.dark .home-snapshot-segment__updated--hourly {
+  color: hsl(158 64% 52%);
+}
+
+.home-snapshot-segment__updated--daily {
+  color: hsl(350 72% 48%);
+}
+
+.dark .home-snapshot-segment__updated--daily {
+  color: hsl(350 80% 66%);
+}
+
+/* The 12-hour reading of the same instant, for readers who do not think in
+   24-hour time. Same size and weight as the stamp it follows, so the two read
+   as one line rather than a figure with a footnote; the parentheses already do
+   the work of marking it as a restatement, and a deeper tone settles it behind
+   the 24-hour figure without shrinking it. */
+.home-snapshot-segment__clock12 {
+  margin-left: 0.22rem;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: hsl(160 84% 22%);
+}
+
+.dark .home-snapshot-segment__clock12 {
+  color: hsl(158 52% 42%);
 }
 
 .home-snapshot-segment__live {
@@ -3171,16 +3254,32 @@ html.locale-bn .market-ticker-label {
   gap: 0.25rem;
   padding: 0.12rem 0.38rem;
   border-radius: 0.25rem;
-  border: 1px solid hsl(350 80% 55% / 0.18);
-  background: hsl(350 80% 55% / 0.07);
+  border: 1px solid hsl(160 84% 39% / 0.22);
+  background: hsl(160 84% 39% / 0.08);
   font-family: var(--font-display);
-  font-size: var(--snapshot-live-size, var(--text-ui-2xs));
+  /* Inherits the footer's size. The badge used to sit in the header meta column
+     at its own scale; down here it is one of the source credits and reads as a
+     peer of them rather than as a louder heading. */
+  font-size: inherit;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: hsl(350 72% 48%);
+  /* Emerald, the same hue as the per-tile live dots. It was rose, which is the
+     colour this panel uses for a SIMULATED reading — so the one badge asserting
+     the data is real wore the palette's warning colour. */
+  color: hsl(160 84% 32%);
   white-space: nowrap;
+  /* Pushes the badge to the left edge while the sources stay right. Only bites
+     when the badge renders, so a panel with no live reading keeps its old
+     right-aligned footer exactly. */
+  margin-right: auto;
+}
+
+.dark .home-snapshot-segment__live {
+  color: hsl(158 64% 52%);
+  border-color: hsl(158 64% 52% / 0.28);
+  background: hsl(158 64% 52% / 0.1);
 }
 
 .home-snapshot-segment__live-dot {
@@ -3195,7 +3294,7 @@ html.locale-bn .market-ticker-label {
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  background: hsl(350 80% 60% / 0.75);
+  background: hsl(158 64% 52% / 0.75);
   animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -3205,7 +3304,7 @@ html.locale-bn .market-ticker-label {
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 9999px;
-  background: hsl(350 72% 52%);
+  background: hsl(160 84% 39%);
 }
 
 .home-snapshot-segment__body {
