@@ -6,6 +6,29 @@ import { getPublishedArticlesByTag, getPublicTagCounts } from '@/lib/category-co
 
 export const revalidate = 600;
 
+/**
+ * Prerender the busiest tags; let the rest generate on first request.
+ *
+ * Without a `generateStaticParams` at all, Next does not put a dynamic segment
+ * in the prerender manifest — the route is server-rendered on every request,
+ * which is what `ƒ /tags/[tag]` meant in the build table even though this page
+ * reads no cookies, headers or searchParams and its `revalidate` looked like
+ * ISR. Supplying even a small list changes the classification: the route enters
+ * the manifest with blocking fallback, so **every** tag, listed or not, is
+ * generated once and then cached for `revalidate`.
+ *
+ * Only the top slice is built, deliberately. There are 398 published tags and
+ * these pages are `robots: index:false` — prerendering all of them would spend
+ * 398 uncached `array_contains` queries of build time on pages search engines
+ * are told to ignore. The long tail costs one render each, once.
+ */
+const PRERENDERED_TAGS = 40;
+
+export async function generateStaticParams() {
+  const counts = await getPublicTagCounts();
+  return counts.slice(0, PRERENDERED_TAGS).map(({ tag }) => ({ tag }));
+}
+
 
 
 interface Props {

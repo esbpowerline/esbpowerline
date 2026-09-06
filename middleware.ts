@@ -167,6 +167,17 @@ export async function middleware(request: NextRequest) {
           : '/articles';
     return NextResponse.redirect(new URL(target, request.url), 308);
   }
+  // Author archives moved their pagination out of the query string for the same
+  // reason /articles did: reading `searchParams` opts a route out of static
+  // rendering, so every author page view was a server render. Page 1 is
+  // /authors/{slug}; page N is /authors/{slug}/page/{N}. Anything already
+  // linking to `?page=` — and Google holds these — is sent to its replacement.
+  if (/^\/authors\/[^/]+$/.test(pathname) && request.nextUrl.searchParams.has('page')) {
+    const n = Number.parseInt(request.nextUrl.searchParams.get('page') ?? '', 10);
+    const target = Number.isInteger(n) && n >= 2 ? `${pathname}/page/${n}` : pathname;
+    return NextResponse.redirect(new URL(target, request.url), 308);
+  }
+
   const ip = clientIpFromForwarded(
     request.headers.get('x-forwarded-for'),
     request.headers.get('x-real-ip'),
