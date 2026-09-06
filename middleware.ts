@@ -369,8 +369,38 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+/**
+ * What middleware is allowed to see.
+ *
+ * Middleware runs *before* the edge cache, so every matched request is an
+ * invocation whether or not the CDN answers it. Measured with a browser
+ * (2026-09-06): a category page cost 1, an article 3, the homepage 5.
+ *
+ * Two groups are excluded, and the distinction matters:
+ *
+ *   BY PREFIX — build output and asset directories that can never carry a
+ *     session, a role or a gated date. `__nextjs_font` is new here; it was
+ *     costing one invocation on every page that pulled a face.
+ *
+ *   BY EXTENSION — the same idea, generalised. Fonts, icons, stylesheets,
+ *     source maps, the manifest, the RSS feed, the two extra sitemaps
+ *     (news-sitemap.xml and grid-sitemap.xml, which crawlers hit constantly and
+ *     which the old prefix list missed because it named only `sitemap.xml`) and
+ *     the PDFs under /public/pdf. Anchored with `$`, so it matches a real file
+ *     extension at the end of a path and not a dot inside a slug.
+ *
+ * `.json` is deliberately NOT in the extension list, and must never be added.
+ * The Grid Explorer tier gate lives in this file and works on `/data/**.json`
+ * and its `/api/data/**` twin; excluding those would publish the whole archive.
+ * That is 41 of the 44 invocations one Grid Explorer view costs, and it is the
+ * price of the gate, not waste. CLAUDE.md records three separate occasions when
+ * a name-based exclusion around this data quietly unlocked it — most recently
+ * 1,979 locked days served to anyone — so the safe direction here is fewer
+ * requests from the client, not a wider hole in the matcher.
+ * `lib/test/middleware-matcher.test.ts` asserts both halves.
+ */
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|images|favicon.ico|robots.txt|sitemap.xml|api/cron).*)',
+    '/((?!_next/static|_next/image|__nextjs_font|images|api/cron|.*\.(?:ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2|ttf|otf|eot|css|js|mjs|map|txt|xml|webmanifest|pdf)$).*)',
   ],
 };
