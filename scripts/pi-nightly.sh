@@ -91,11 +91,20 @@ done
 
 # A missed Sunday — the Pi down, the lock held past the timeout — must not push
 # the full copy out by a week, so the age of the last one decides, not the day
-# alone.
-if [[ "$(date +%u)" == 7 ]] || ! find "$BACKUPS" -name 'esbpowerline-*-full.sql.gz' -mtime -7 | grep -q .; then
-    KIND=full; MIN=100000; EXCLUDE=()
+# alone. ESB_BACKUP_KIND overrides both, for a restore drill or a dump taken by
+# hand before a migration.
+KIND="${ESB_BACKUP_KIND:-}"
+if [[ -z "$KIND" ]]; then
+    if [[ "$(date +%u)" == 7 ]] || ! find "$BACKUPS" -name 'esbpowerline-*-full.sql.gz' -mtime -7 | grep -q .; then
+        KIND=full
+    else
+        KIND=core
+    fi
+fi
+if [[ "$KIND" == full ]]; then
+    MIN=100000; EXCLUDE=()
 else
-    KIND=core; MIN=20000
+    MIN=20000
     EXCLUDE=(--exclude-table-data='public."GridHourlyObservation"'
              --exclude-table-data='public."SourceDocument"')
 fi
