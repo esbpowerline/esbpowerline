@@ -90,7 +90,7 @@ Totals: **61 pages**, **28 route handlers** (25 under `app/api/`), **8 layouts**
 | `/energy-policy` | `app/(public)/energy-policy/page.tsx` | `revalidate = 3600` (`:9`) |
 | `/energy-policy/[slug]` | `app/(public)/energy-policy/[slug]/page.tsx` | `revalidate = 3600` (`:10`), `generateStaticParams` (`:37`) |
 | `/grid-explorer` | `app/(public)/grid-explorer/page.tsx` | `revalidate = 300` (`:18`) |
-| `/magazine` | `app/(public)/magazine/page.tsx` | `revalidate = 300` (`:6`) |
+| `/magazine` | `app/(public)/magazine/page.tsx` | `dynamic = 'force-dynamic'` (`:22`) — artwork arrives as 1h Supabase signed URLs, so a cached page would serve expired links |
 | `/search` | `app/(public)/search/page.tsx` | `revalidate = 600` (`:6`) |
 | `/sign-in/[[...sign-in]]` | `app/(public)/sign-in/[[...sign-in]]/page.tsx` | none |
 | `/sign-up/[[...sign-up]]` | `app/(public)/sign-up/[[...sign-up]]/page.tsx` | none |

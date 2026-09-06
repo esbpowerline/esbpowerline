@@ -20,41 +20,37 @@
 export const IS_DEMO = true;
 
 /**
- * Where the rendered page images are served from.
+ * Where the issue's artwork lives: a PRIVATE Supabase Storage bucket.
  *
- * They were staged on the Raspberry Pi (nginx on :8090, `/srv/magazine`), which
- * is reachable only over Tailscale. That was right for review and wrong the
- * moment the page shipped: an `http://` image on the deployed `https://` page is
- * blocked as mixed content, and next.config.ts's CSP `img-src` never listed that
- * origin — so the cover, all 48 thumbnails and the reader were blank for every
- * visitor, including anyone on the tailnet browsing the deployed site rather
- * than localhost. Mirrored to Supabase storage 2026-09-06 (97 objects, 20.9 MB)
- * by `scripts/upload-magazine-assets.ts`; the Supabase host is already allowed
- * by that CSP and by next.config's image `remotePatterns`.
+ * This used to be nginx on a Raspberry Pi (`http://esb-pi:8090`), reachable
+ * only over Tailscale. That meant every page image, the cover and the PDF 404'd
+ * for anyone off the tailnet, and broke outright whenever Tailscale was down —
+ * which is exactly what happened. The Pi keeps its real job (daily and hourly
+ * log collection); it is no longer in the path of anything a reader loads.
  *
- * Set NEXT_PUBLIC_MAGAZINE_ASSET_BASE to point somewhere else.
+ * The bucket stays private on purpose. The demo issue carries full-page mockup
+ * adverts for real companies (see the note above), so the artwork must not be
+ * fetchable by URL alone. Nothing here is a usable URL: these are object paths,
+ * and lib/magazine-assets.ts signs them per render. Do not make the bucket
+ * public to "simplify" this.
+ *
+ * Upload with scripts/upload-magazine-assets.mjs.
  */
-export const MAGAZINE_ASSET_BASE =
-  process.env.NEXT_PUBLIC_MAGAZINE_ASSET_BASE?.replace(/\/+$/, '') ||
-  'https://sxgokpmrbgdndstygapc.supabase.co/storage/v1/object/public/media/magazine/vol001-issue01';
+export const MAGAZINE_BUCKET = process.env.MAGAZINE_BUCKET?.trim() || 'magazine';
 
-export const magazineAsset = (path: string) =>
-  `${MAGAZINE_ASSET_BASE}/${path.replace(/^\/+/, '')}`;
+/** Object-path prefix within the bucket; one issue per prefix. */
+export const MAGAZINE_ISSUE_SLUG =
+  process.env.MAGAZINE_ISSUE_SLUG?.trim() || 'vol001-issue01';
+
+/** An object path inside MAGAZINE_BUCKET — not a URL. */
+export const magazineObject = (path: string) =>
+  `${MAGAZINE_ISSUE_SLUG}/${path.replace(/^\/+/, '')}`;
 
 /**
- * The full-resolution PDF, which did NOT move with the artwork.
- *
- * It is 106,933,904 bytes. The `media` bucket carries a 10 MB per-object limit
- * and Supabase's free plan caps a standard upload at 50 MB, so it cannot go
- * where the page images went; at 102 MB a download is also ~2% of the project's
- * 5 GB monthly egress, shared with every image on the site. It therefore stays
- * on the Pi and remains reachable only over Tailscale — the download button is
- * member-gated and will not resolve for a public reader. Point
- * NEXT_PUBLIC_MAGAZINE_PDF_URL at a real host to light it up.
+ * Cover shown when Storage is unreachable or unconfigured, so the page still
+ * has artwork instead of a broken image. Served from this app's own /public.
  */
-export const MAGAZINE_PDF_URL =
-  process.env.NEXT_PUBLIC_MAGAZINE_PDF_URL?.trim() ||
-  'http://esb-pi:8090/vol001-issue01/a-shift-in-power.pdf';
+export const MAGAZINE_FALLBACK_COVER = '/images/demo_magazine_cover.jpg';
 
 export const DEMO_ISSUE = {
   title: 'A Shift in Power',
@@ -70,11 +66,16 @@ export const DEMO_ISSUE = {
   /** Cover standfirst, transcribed verbatim. */
   standfirst:
     'Fuel loading begins at Rooppur as a distant war halves the LNG lifeline — the summer Bangladesh’s energy security was stress-tested.',
-  coverUrl: magazineAsset('cover.jpg'),
-  pdfUrl: MAGAZINE_PDF_URL,
-  /** The file's own size on disk. Worth warning about before someone taps it
-   *  on mobile data. This read 106_954_752 — a round 102 MiB, not the file. */
-  pdfBytes: 106_933_904,
+  coverPath: magazineObject('cover.jpg'),
+  /**
+   * The web edition, not the print master. The 102 MB master exceeds this
+   * Supabase project's 50 MB per-object limit and was a punishing download in
+   * any case; scripts/render-magazine-pdf.mjs rebuilds the issue from
+   * downsampled page renders at the same 587x803pt geometry.
+   */
+  pdfPath: magazineObject('a-shift-in-power-web.pdf'),
+  /** 20 MB. Still worth warning about before someone taps it on mobile data. */
+  pdfBytes: 21_424_118,
 } as const;
 
 /** The three figures printed on the cover. */
@@ -118,11 +119,13 @@ export const CONTENTS = [
   { page: 45, section: 'Climate · Global',     title: 'The Thermometer and the Ledger',        pages: 2 },
 ] as const;
 
-/** Every rendered page, 1..48, in order. */
-export const PAGE_IMAGES = Array.from({ length: DEMO_ISSUE.pageCount }, (_, i) =>
-  magazineAsset(`pages/page-${String(i + 1).padStart(2, '0')}.jpg`),
+const pageStem = (i: number) => `page-${String(i + 1).padStart(2, '0')}.jpg`;
+
+/** Every rendered page, 1..48, in order, as bucket object paths. */
+export const PAGE_OBJECTS = Array.from({ length: DEMO_ISSUE.pageCount }, (_, i) =>
+  magazineObject(`pages/${pageStem(i)}`),
 );
 
-export const THUMB_IMAGES = Array.from({ length: DEMO_ISSUE.pageCount }, (_, i) =>
-  magazineAsset(`thumbs/page-${String(i + 1).padStart(2, '0')}.jpg`),
+export const THUMB_OBJECTS = Array.from({ length: DEMO_ISSUE.pageCount }, (_, i) =>
+  magazineObject(`thumbs/${pageStem(i)}`),
 );
