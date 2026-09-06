@@ -26,7 +26,10 @@ export const metadata = {
 };
 
 export default async function MagazinePage() {
-  const dbIssue = await getLatestMagazineIssue();
+  // Skipped entirely under IS_DEMO: the row is not read, and the 2026-09-05
+  // deploy failed once already on Prisma exhausting the Supabase session pooler
+  // during prerender. No point spending a connection on an answer we discard.
+  const dbIssue = IS_DEMO ? null : await getLatestMagazineIssue();
 
   /**
    * While IS_DEMO holds, the page shows the demo issue rather than whatever the

@@ -15816,3 +15816,615 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 @media (prefers-reduced-motion: reduce) {
   .forecast-switch__thumb { transition-duration: 1ms; }
 }
+
+/* ==========================================================================
+   Magazine reader (components/news/MagazineFlipBook.tsx)
+
+   The spread is sized by aspect-ratio against the space the stage has, not by
+   a fixed pixel width. The previous reader used two hard-coded 380px boxes, so
+   a 48-page magazine was read through a window barely wider than a paperback
+   whatever the screen. `height: 100%` plus `aspect-ratio` lets the browser
+   solve for the largest spread that fits, and `max-width: 100%` hands the
+   constraint over to width on short, wide viewports.
+   ========================================================================== */
+
+.flipbook {
+  --flip-dur: 720ms;
+  --page-ar: 587 / 803;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  user-select: none;
+  -webkit-user-select: none;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(16, 185, 129, 0.07), transparent 60%),
+    radial-gradient(100% 70% at 50% 100%, rgba(56, 121, 255, 0.06), transparent 60%),
+    #06080b;
+}
+
+.flipbook__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ chrome */
+
+.flipbook__bar {
+  position: relative;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  flex: none;
+}
+
+.flipbook__bar--top {
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), transparent);
+}
+
+.flipbook__bar--bottom {
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.flipbook__id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.flipbook__title {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flipbook__sub {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 1px;
+}
+
+.flipbook__tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.flipbook__tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.flipbook__tool:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.flipbook__tool.is-on {
+  background: hsl(var(--primary) / 0.9);
+  border-color: transparent;
+  color: #fff;
+}
+
+.flipbook__tool--close:hover {
+  background: rgba(239, 68, 68, 0.85);
+  border-color: transparent;
+}
+
+/* ------------------------------------------------------------------- stage */
+
+/* Flex, not grid. With `display: grid` and auto tracks the track sizes itself
+   to the book, so the book's own `max-width: 100%` resolved against its own
+   width and clamped nothing: on a 390px phone the spread computed 511px wide
+   and ran off both edges. A flex container gives the item a containing block
+   that is the stage, which is what the constraint has to be measured against. */
+.flipbook__stage {
+  position: relative;
+  z-index: 10;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  touch-action: pan-y;
+  /* A leaf rotating toward the viewer is projected larger than the page it
+     came from — correct, and it was spilling ~110px past the spread at the
+     midpoint, over the toolbar and the page controls. Clipping at the stage
+     reads as the page passing behind the chrome. */
+  overflow: hidden;
+  /* Queried below to decide which of the book's two dimensions is the binding
+     one. `size` (not `inline-size`) because the answer depends on the stage's
+     height as much as its width. */
+  container-type: size;
+  container-name: flipstage;
+}
+
+.flipbook__book {
+  position: relative;
+  /* Default to height-bound, which is the case on any ordinary desktop window.
+     `max-width` alone cannot fix the other case: with `height: 100%` the height
+     is definite, so clamping the width leaves aspect-ratio nothing to solve for
+     and the box just goes out of shape — measured 354x699 on a 390px phone
+     where the page's own ratio wanted 354x484. The container queries below pick
+     the binding dimension instead, per mode, so the ratio always holds. */
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  aspect-ratio: 1174 / 803;
+  flex: 0 0 auto;
+  display: flex;
+  /* Perspective sits here rather than on the stage: the book carries its own
+     zoom transform, which would otherwise flatten the leaf's 3D context. */
+  perspective: 3000px;
+  perspective-origin: 50% 44%;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  filter: drop-shadow(0 34px 70px rgba(0, 0, 0, 0.6));
+}
+
+.flipbook__book--single {
+  aspect-ratio: 587 / 803;
+}
+
+/* Stage wider than the spread it holds → height binds (the default above).
+   Narrower → width binds. Each mode asks about its own ratio; the spread rule
+   excludes single so a tablet in one-page mode is not handed the spread's
+   answer. */
+@container flipstage (max-aspect-ratio: 1174 / 803) {
+  .flipbook__book:not(.flipbook__book--single) {
+    width: 100%;
+    height: auto;
+  }
+}
+
+@container flipstage (max-aspect-ratio: 587 / 803) {
+  .flipbook__book--single {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.flipbook__book.is-zoomed {
+  cursor: grab;
+  transition: none;
+}
+
+.flipbook__book.is-zoomed:active {
+  cursor: grabbing;
+}
+
+.flipbook__half {
+  position: relative;
+  width: 50%;
+  height: 100%;
+}
+
+.flipbook__book--single .flipbook__half--right {
+  width: 100%;
+}
+
+.flipbook-page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #0e1116;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flipbook__half--left .flipbook-page {
+  border-radius: 3px 0 0 3px;
+}
+
+.flipbook__half--right .flipbook-page {
+  border-radius: 0 3px 3px 0;
+}
+
+.flipbook__book--single .flipbook__half--right .flipbook-page {
+  border-radius: 3px;
+}
+
+.flipbook-page__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* The reverse of a sheet in one-page mode. There is no render of it — the
+   image set is one file per printed page — so it is drawn as paper rather than
+   guessed at with a page from elsewhere in the issue. */
+.flipbook-page--verso {
+  background:
+    repeating-linear-gradient(115deg, rgba(0, 0, 0, 0.02) 0 3px, transparent 3px 7px),
+    linear-gradient(100deg, #e9e4da, #f6f3ec 45%, #ded8cc);
+}
+
+.flipbook-page__blank {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.flipbook-page__blank--inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.flipbook-page__mark {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  color: hsl(var(--primary) / 0.75);
+}
+
+.flipbook-page__markSub {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* The gutter. Without it a spread reads as two unrelated images side by side
+   rather than one open magazine. */
+.flipbook__gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 7%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 4;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.28) 34%,
+    rgba(0, 0, 0, 0.5) 50%,
+    rgba(0, 0, 0, 0.28) 66%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.flipbook__zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 6;
+  border: 0;
+  background: transparent;
+}
+
+.flipbook__zone--prev {
+  left: 0;
+  cursor: w-resize;
+}
+
+.flipbook__zone--next {
+  right: 0;
+  cursor: e-resize;
+}
+
+.flipbook__book--single .flipbook__zone--prev {
+  width: 32%;
+}
+
+.flipbook__book--single .flipbook__zone--next {
+  width: 68%;
+}
+
+.flipbook__zone:disabled {
+  cursor: default;
+}
+
+/* A hint that the edge is live, without painting anything over the artwork. */
+.flipbook__zone--next:not(:disabled):hover {
+  background: linear-gradient(to left, rgba(255, 255, 255, 0.07), transparent 22%);
+}
+
+.flipbook__zone--prev:not(:disabled):hover {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.07), transparent 22%);
+}
+
+/* -------------------------------------------------------------------- leaf */
+
+.flipbook-leaf {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  z-index: 5;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.flipbook-leaf--next {
+  left: 50%;
+  transform-origin: left center;
+  animation: flipbook-turn-away var(--flip-dur) cubic-bezier(0.44, 0.02, 0.24, 1) forwards;
+}
+
+.flipbook-leaf--prev {
+  left: 0;
+  transform-origin: right center;
+  animation: flipbook-turn-back var(--flip-dur) cubic-bezier(0.44, 0.02, 0.24, 1) forwards;
+}
+
+/* One-page mode turns the whole sheet about its left edge either way: away to
+   reveal the next page, or in from the left to bring the previous one back. */
+.flipbook-leaf--single {
+  left: 0;
+  width: 100%;
+  transform-origin: left center;
+}
+
+.flipbook-leaf--single.flipbook-leaf--prev {
+  animation-name: flipbook-turn-in;
+}
+
+.flipbook-leaf__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+.flipbook-leaf__face--back {
+  transform: rotateY(180deg);
+}
+
+.flipbook-leaf__shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The sheet catching the light as it lifts, and losing it as it falls. */
+.flipbook-leaf__shade--front {
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.62), rgba(0, 0, 0, 0.06) 42%, rgba(255, 255, 255, 0.05));
+  animation: flipbook-shade-front var(--flip-dur) ease-in-out forwards;
+}
+
+.flipbook-leaf__shade--back {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.04) 46%, rgba(255, 255, 255, 0.04));
+  animation: flipbook-shade-back var(--flip-dur) ease-in-out forwards;
+}
+
+@keyframes flipbook-turn-away {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(-180deg); }
+}
+
+@keyframes flipbook-turn-back {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
+}
+
+@keyframes flipbook-turn-in {
+  from { transform: rotateY(-180deg); }
+  to { transform: rotateY(0deg); }
+}
+
+@keyframes flipbook-shade-front {
+  0% { opacity: 0; }
+  55% { opacity: 0.9; }
+  100% { opacity: 0.45; }
+}
+
+@keyframes flipbook-shade-back {
+  0% { opacity: 0.55; }
+  45% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+
+/* ---------------------------------------------------------------- controls */
+
+.flipbook__nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.flipbook__arrow {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.flipbook__arrow:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  transform: scale(1.06);
+}
+
+.flipbook__arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.flipbook__meter {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
+.flipbook__count {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.flipbook__of {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
+}
+
+.flipbook__track {
+  margin-top: 7px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.flipbook__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, hsl(var(--primary)), #10b981);
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.flipbook__hint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+}
+
+.flipbook__hint kbd {
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 640px) {
+  .flipbook__hint { display: none; }
+  .flipbook__sub { display: none; }
+  /* Width binds on a phone, so every pixel of stage padding comes straight off
+     the page. */
+  .flipbook__stage { padding: 8px 6px; }
+  .flipbook__bar--top { padding: 10px 12px; }
+}
+
+/* -------------------------------------------------------------- thumbnails */
+
+.flipbook__thumbs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 25;
+  transform: translateY(101%);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: rgba(6, 8, 11, 0.94);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.flipbook__thumbs.is-open {
+  transform: translateY(0);
+}
+
+.flipbook__thumbsInner {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  scrollbar-width: thin;
+}
+
+.flipbook__thumb {
+  flex: 0 0 auto;
+  width: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.55;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.flipbook__thumb img {
+  width: 100%;
+  aspect-ratio: 587 / 803;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0e1116;
+}
+
+.flipbook__thumb span {
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.flipbook__thumb:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.flipbook__thumb.is-current {
+  opacity: 1;
+}
+
+.flipbook__thumb.is-current img {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.35);
+}
+
+/* The turn is the point of the thing, so reduced motion collapses it to an
+   instant cut rather than removing the reader's only transition cue. */
+@media (prefers-reduced-motion: reduce) {
+  .flipbook-leaf,
+  .flipbook-leaf__shade {
+    animation-duration: 1ms !important;
+  }
+  .flipbook__book,
+  .flipbook__fill,
+  .flipbook__thumbs,
+  .flipbook__thumb,
+  .flipbook__arrow {
+    transition-duration: 1ms;
+  }
+}

@@ -20,22 +20,41 @@
 export const IS_DEMO = true;
 
 /**
- * Where the rendered page images and the original PDF are served from.
+ * Where the rendered page images are served from.
  *
- * Staged on the Raspberry Pi (nginx on :8090, /srv/magazine), which is reachable
- * **only over Tailscale**. That is deliberate for review — it means these assets
- * resolve for Hamim and anyone on the tailnet and 404 for everyone else, so a
- * stray deploy cannot publish the demo's artwork to the public.
+ * They were staged on the Raspberry Pi (nginx on :8090, `/srv/magazine`), which
+ * is reachable only over Tailscale. That was right for review and wrong the
+ * moment the page shipped: an `http://` image on the deployed `https://` page is
+ * blocked as mixed content, and next.config.ts's CSP `img-src` never listed that
+ * origin — so the cover, all 48 thumbnails and the reader were blank for every
+ * visitor, including anyone on the tailnet browsing the deployed site rather
+ * than localhost. Mirrored to Supabase storage 2026-09-06 (97 objects, 20.9 MB)
+ * by `scripts/upload-magazine-assets.ts`; the Supabase host is already allowed
+ * by that CSP and by next.config's image `remotePatterns`.
  *
- * Moving to a CDN later is this one value, not a rewrite. Set
- * NEXT_PUBLIC_MAGAZINE_ASSET_BASE to override.
+ * Set NEXT_PUBLIC_MAGAZINE_ASSET_BASE to point somewhere else.
  */
 export const MAGAZINE_ASSET_BASE =
   process.env.NEXT_PUBLIC_MAGAZINE_ASSET_BASE?.replace(/\/+$/, '') ||
-  'http://esb-pi:8090/vol001-issue01';
+  'https://sxgokpmrbgdndstygapc.supabase.co/storage/v1/object/public/media/magazine/vol001-issue01';
 
 export const magazineAsset = (path: string) =>
   `${MAGAZINE_ASSET_BASE}/${path.replace(/^\/+/, '')}`;
+
+/**
+ * The full-resolution PDF, which did NOT move with the artwork.
+ *
+ * It is 106,933,904 bytes. The `media` bucket carries a 10 MB per-object limit
+ * and Supabase's free plan caps a standard upload at 50 MB, so it cannot go
+ * where the page images went; at 102 MB a download is also ~2% of the project's
+ * 5 GB monthly egress, shared with every image on the site. It therefore stays
+ * on the Pi and remains reachable only over Tailscale — the download button is
+ * member-gated and will not resolve for a public reader. Point
+ * NEXT_PUBLIC_MAGAZINE_PDF_URL at a real host to light it up.
+ */
+export const MAGAZINE_PDF_URL =
+  process.env.NEXT_PUBLIC_MAGAZINE_PDF_URL?.trim() ||
+  'http://esb-pi:8090/vol001-issue01/a-shift-in-power.pdf';
 
 export const DEMO_ISSUE = {
   title: 'A Shift in Power',
@@ -52,9 +71,10 @@ export const DEMO_ISSUE = {
   standfirst:
     'Fuel loading begins at Rooppur as a distant war halves the LNG lifeline — the summer Bangladesh’s energy security was stress-tested.',
   coverUrl: magazineAsset('cover.jpg'),
-  pdfUrl: magazineAsset('a-shift-in-power.pdf'),
-  /** 102 MB. Worth warning about before someone taps it on mobile data. */
-  pdfBytes: 106_954_752,
+  pdfUrl: MAGAZINE_PDF_URL,
+  /** The file's own size on disk. Worth warning about before someone taps it
+   *  on mobile data. This read 106_954_752 — a round 102 MiB, not the file. */
+  pdfBytes: 106_933_904,
 } as const;
 
 /** The three figures printed on the cover. */

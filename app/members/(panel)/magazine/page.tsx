@@ -5,15 +5,29 @@ import { requireMemberSession } from '@/lib/member-auth';
 import { getAllMagazineIssues, getMagazineSavedState } from '@/lib/actions/members';
 import { SaveMagazineButton } from '@/components/members/SaveMagazineButton';
 import { formatDate } from '@/lib/utils';
+import { DEMO_ISSUE, IS_DEMO } from '@/lib/magazine-demo-issue';
 
 export const metadata = {
   title: 'Magazine archive | Member library',
 };
 
 export default async function MemberMagazinePage() {
+  /**
+   * While IS_DEMO holds there is no archive to list.
+   *
+   * This read MagazineIssue directly and so served the three seed rows from
+   * prisma/seed.ts — "Renewables Surge & Tariff Reform", "Grid Modernization &
+   * Nuclear Dawn", "Gas Security & Regional Trade" — as a member's back-issue
+   * library, each with a Download PDF button pointing at example.com. None of
+   * those issues exists. /magazine has ignored the same rows since it was
+   * written; this page and the homepage card had not caught up.
+   *
+   * The one real issue is the demo, and it has no MagazineIssue row to save
+   * against, so it is not listed here — it is linked instead.
+   */
   const [session, issues] = await Promise.all([
     requireMemberSession(),
-    getAllMagazineIssues(),
+    IS_DEMO ? Promise.resolve([]) : getAllMagazineIssues(),
   ]);
   const savedStates = await Promise.all(
     issues.map((issue) => getMagazineSavedState(issue.id)),
@@ -27,8 +41,19 @@ export default async function MemberMagazinePage() {
 
       {issues.length === 0 ? (
         <div className="member-empty">
-          <p>No magazine issues published yet.</p>
-          <Link href="/magazine" className="btn btn-secondary text-sm mt-4">View public magazine page</Link>
+          {IS_DEMO ? (
+            <p>
+              No edition has been published yet. The one issue the site carries &mdash;{' '}
+              <strong>{DEMO_ISSUE.title}</strong> ({DEMO_ISSUE.volume} &bull; {DEMO_ISSUE.issue}) &mdash; is a
+              sample produced to demonstrate the magazine&rsquo;s design, and it is readable in full on the
+              public page.
+            </p>
+          ) : (
+            <p>No magazine issues published yet.</p>
+          )}
+          <Link href="/magazine" className="btn btn-secondary text-sm mt-4">
+            {IS_DEMO ? 'Read the demo issue' : 'View public magazine page'}
+          </Link>
         </div>
       ) : (
         <ul className="member-magazine-list">

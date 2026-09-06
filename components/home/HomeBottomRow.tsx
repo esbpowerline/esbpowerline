@@ -15,6 +15,9 @@ type HomeBottomRowProps = {
     coverUrl: string;
   };
   magazineLabel: string;
+  /** The only issue the site has is a design demo; the card must say so before
+   *  a reader clicks through. See lib/magazine-demo-issue.ts. */
+  magazineIsDemo?: boolean;
   professionalsCta: {
     label: string;
     title: string;
@@ -29,6 +32,7 @@ export function HomeBottomRow({
   layout = 'split',
   magazine,
   magazineLabel,
+  magazineIsDemo = false,
   professionalsCta,
 }: HomeBottomRowProps) {
   const { locale, t } = useLocale();
@@ -46,6 +50,11 @@ export function HomeBottomRow({
         <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-500 mb-2.5">
           <BookOpen className="h-4 w-4" />
           <span className="section-kicker">{t('home.monthlyMagazine')}</span>
+          {magazineIsDemo ? (
+            <span className="rounded-full border border-amber-500/50 bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Demo
+            </span>
+          ) : null}
         </div>
         <div className={`flex gap-3.5 items-start ${isStack ? 'flex-col sm:flex-row' : ''}`}>
           <div className="w-16 sm:w-[4.5rem] shrink-0 relative">

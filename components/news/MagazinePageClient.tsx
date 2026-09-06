@@ -273,11 +273,13 @@ export function MagazinePageClient({
       </div>
 
       <MagazineFlipBook
-        coverUrl={coverUrl}
         pages={pageImages}
+        thumbs={thumbImages}
         startPage={startPage}
         isOpen={isFlipBookOpen}
         onClose={() => setIsFlipBookOpen(false)}
+        title={title}
+        issueLabel={volumeLabel ?? issueLabel}
       />
     </div>
   );

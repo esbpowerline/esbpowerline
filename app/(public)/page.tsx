@@ -42,6 +42,7 @@ import {
   getFeaturedArticles,
 } from '@/lib/category-content';
 import { getLatestYoutubeInterviews } from '@/lib/youtube-channel';
+import { DEMO_ISSUE, IS_DEMO } from '@/lib/magazine-demo-issue';
 import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
@@ -98,15 +99,37 @@ export default async function Home() {
     })
   );
 
-  const magazine = magazineRow ?? {
-    title: 'ESB PowerLine Monthly',
-    summary: 'In-depth analysis on Bangladesh power sector policy, projects and data.',
-    coverUrl: '/images/demo_magazine_cover.jpg',
-    issueDate: new Date(),
-  };
-  const magazineLabel = magazineRow
-    ? new Date(magazineRow.issueDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    : 'Latest';
+  /**
+   * The card must advertise the issue /magazine actually serves.
+   *
+   * It read the database directly, which still holds the three seed rows from
+   * prisma/seed.ts — so the homepage printed "Renewables Surge & Tariff Reform,
+   * May 2026", an issue that was never produced, and linked to /magazine, which
+   * has ignored those rows under IS_DEMO since it was written and shows
+   * "A Shift in Power". Two different titles either side of one link, and no
+   * demo badge on the one a reader sees first. Same source, same flag, both
+   * places now.
+   */
+  const magazine = IS_DEMO
+    ? {
+        title: DEMO_ISSUE.title,
+        summary: DEMO_ISSUE.standfirst,
+        coverUrl: DEMO_ISSUE.coverUrl,
+        issueDate: new Date(DEMO_ISSUE.producedOn),
+      }
+    : (magazineRow ?? {
+        title: 'ESB PowerLine Monthly',
+        summary: 'In-depth analysis on Bangladesh power sector policy, projects and data.',
+        coverUrl: '/images/demo_magazine_cover.jpg',
+        issueDate: new Date(),
+      });
+  // Feeds "Read {label} Issue" / "{label} সংখ্যা পড়ুন", so the volume alone —
+  // "Vol 001 • Issue 01" would render as "Read ... Issue 01 Issue".
+  const magazineLabel = IS_DEMO
+    ? DEMO_ISSUE.volume
+    : magazineRow
+      ? new Date(magazineRow.issueDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      : 'Latest';
   const snapshotLabel = getSnapshotLabel(settings);
   const professionalsCta = getProfessionalsCta(settings);
   const panelFlags = getPanelFlags(settings);
@@ -196,6 +219,7 @@ export default async function Home() {
             layout="split"
             magazine={magazine}
             magazineLabel={magazineLabel}
+            magazineIsDemo={IS_DEMO}
             professionalsCta={professionalsCta}
           />
         </div>
