@@ -196,6 +196,11 @@ const nextConfig: NextConfig = {
     // Pin host AND path. A bare `**.supabase.co` with no pathname turns
     // /_next/image into an open proxy: anyone could pass any Supabase project's
     // URL and bill this project's Vercel transformation quota.
+    //
+    // The `/storage/v1/render/image/public/**` pattern was removed on
+    // 2026-09-06: Image Transformations are disabled on the project and that
+    // endpoint answers 403, so nothing may construct such a URL. Allowlisting a
+    // path nothing is permitted to use only invites it back.
     remotePatterns: [
       ...(supabaseImageHost
         ? ([
@@ -203,11 +208,6 @@ const nextConfig: NextConfig = {
               protocol: 'https' as const,
               hostname: supabaseImageHost,
               pathname: '/storage/v1/object/public/**',
-            },
-            {
-              protocol: 'https' as const,
-              hostname: supabaseImageHost,
-              pathname: '/storage/v1/render/image/public/**',
             },
           ])
         : []),
