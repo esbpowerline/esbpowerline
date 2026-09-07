@@ -62,6 +62,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -422,10 +423,27 @@ def main() -> int:
     # extractor's own verdict is the discriminator, and the artifact check is
     # kept only as the corroborating case where the two do agree.
     extractor_step = next((s for s in steps if s["step"] == "extractor"), None)
-    said_gas_only = str((extractor_step or {}).get("detail", "")).startswith("GAS ONLY")
+    extractor_said = str((extractor_step or {}).get("detail", ""))
+    said_gas_only = extractor_said.startswith("GAS ONLY")
     gas_only = not (PUBLIC / "daily" / f"{iso}.json").exists() and (
         said_gas_only or (PUBLIC / "petrobangla" / "daily" / f"{iso}.json").exists()
     )
+
+    # The day the gas was actually FILED under, which is not always the day this
+    # run was asked for. A gas window is keyed by the window the document states
+    # (export.deploy_petrobangla), and on 2026-09-07 the document fetched for
+    # energy day 2026-09-06 turned out to be the 05->06 Sep window and was
+    # correctly filed as 2026-09-05. Reading the extractor's own line is how the
+    # rest of the chain follows it: the first run after that fix wrote the day
+    # to disk and then published nothing, because the timeline, the reserve
+    # model and the release step were all still looking under 2026-09-06.
+    gas_iso = iso
+    if said_gas_only:
+        m = re.search(r"published the (\d{4}-\d{2}-\d{2}) gas window", extractor_said)
+        if m:
+            gas_iso = m.group(1)
+            if gas_iso != iso:
+                say(f"      gas filed under {gas_iso}, not the requested {iso}")
 
     # Two workbooks matter, not one. The day's own workbook feeds the curve and
     # the station detail; the one PGCB filed the morning OF this day — that is
@@ -518,7 +536,7 @@ def main() -> int:
     # The gas archive only gains a day when Petrobangla has published the window
     # that opens on this energy day — it files that under the NEXT morning, so
     # the newest day routinely has no gas and the timeline needs no rebuild.
-    gas_day = PUBLIC / "petrobangla" / "daily" / f"{iso}.json"
+    gas_day = PUBLIC / "petrobangla" / "daily" / f"{gas_iso}.json"
     if gas_day.exists():
         say("[10/12] gas timeline …")
         steps.append(run("gas timeline", [str(SCRIPTS / "build_petrobangla_timeline.py")], timeout=900))
@@ -556,34 +574,45 @@ def main() -> int:
         })
     else:
         say("[12/12] publish …")
-        steps.append(publish_releases(iso, aggregates=gas_day.exists()))
+        # Publish the day that was written. On a gas-only run keyed to a
+        # different window that is `gas_iso`; on every ordinary day the two are
+        # the same string.
+        steps.append(publish_releases(gas_iso if gas_only else iso, aggregates=gas_day.exists()))
 
     return finish(
         iso,
         steps,
         args.json,
-        note=("gas only — PGCB has not filed this day; the gas window is published "
-              "and the grid half waits") if gas_only else None,
+        note=(f"gas only — PGCB has not filed this day; the {gas_iso} gas window is "
+              "published and the grid half waits") if gas_only else None,
+        gas_iso=gas_iso,
     )
 
 
-def artifacts_for(iso: str) -> dict:
-    """What the day actually has on disk once the chain has run."""
+def artifacts_for(iso: str, gas_iso: str | None = None) -> dict:
+    """What the day actually has on disk once the chain has run.
+
+    `gas_iso` is separate because a gas window is filed under the window the
+    document states, which is not always the day the run was asked for. Passing
+    the requested day for both would report `gas: false` on a run whose entire
+    output was a correctly filed gas day.
+    """
     return {
         "grid": (PUBLIC / "daily" / f"{iso}.json").exists(),
         "curve": (PUBLIC / "curves" / f"{iso}.json").exists(),
         "plants": (PUBLIC / "plants" / f"{iso}.json").exists(),
-        "gas": (PUBLIC / "petrobangla" / "daily" / f"{iso}.json").exists(),
+        "gas": (PUBLIC / "petrobangla" / "daily" / f"{gas_iso or iso}.json").exists(),
     }
 
 
-def finish(iso: str, steps: list[dict], as_json: bool, note: str | None = None) -> int:
+def finish(iso: str, steps: list[dict], as_json: bool, note: str | None = None,
+           gas_iso: str | None = None) -> int:
     failed = [s for s in steps if not s["ok"]]
     result = {
         "ok": not failed,
         "date": iso,
         "steps": steps,
-        "artifacts": artifacts_for(iso),
+        "artifacts": artifacts_for(iso, gas_iso),
         "note": note,
     }
 

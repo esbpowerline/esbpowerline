@@ -3104,21 +3104,45 @@ html.locale-bn .market-ticker-label {
  * `min-width` is deliberately NOT zeroed on the title: it has to keep its
  * min-content width, or flexbox shrinks it to nothing and never wraps at all.
  */
+/*
+ * Two columns, two rows, and every row on a shared baseline.
+ *
+ * This was a flex row of two stacked columns, top-aligned. The columns hold
+ * type of very different sizes — a 19px title over an 11px mono kicker on the
+ * left, two 11px mono stamps on the right — so top alignment lined up only the
+ * boxes, never the text. The result read as two things floating at different
+ * heights: "Daily Sep 5" sat most of a line above "GRID TELEMETRY", and the
+ * hourly stamp rode above the title it belongs beside.
+ *
+ * A grid places title/hourly on row 1 and kicker/daily on row 2, and
+ * `align-items: baseline` settles each row on its own baseline, so the pairing
+ * holds whatever the two type sizes are. The wrappers become `display: contents`
+ * so their children are the grid items — the DOM keeps its meaning and the
+ * layout stops depending on two columns happening to grow at the same rate.
+ */
 .home-snapshot-segment__head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: 0.75rem;
+  row-gap: 0.2rem;
   min-height: auto;
   padding-bottom: 0px;
 }
 
-.home-snapshot-segment__title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
+.home-snapshot-segment__title-block,
+.home-snapshot-segment__meta {
+  display: contents;
+}
+
+.home-snapshot-segment__title-link {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.home-snapshot-segment__kicker {
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .home-snapshot-segment__title-link {
@@ -3187,15 +3211,36 @@ html.locale-bn .market-ticker-label {
   color: hsl(var(--muted-foreground) / 0.62);
 }
 
-.home-snapshot-segment__meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 0.2rem;
-  flex-shrink: 0;
-  /* Right-aligned on its own row too, once the header wraps. */
-  margin-left: auto;
+/* The stamps are grid items now (their wrapper is `display: contents`), placed
+   explicitly so each sits beside the line it belongs to. The single-stamp form
+   — rendered when no live reading is loaded — carries neither modifier and
+   auto-places into row 1, beside the title, which is where one stamp belongs. */
+.home-snapshot-segment__updated {
+  grid-column: 2;
+  justify-self: end;
+}
+
+.home-snapshot-segment__updated--hourly {
+  grid-row: 1;
+}
+
+.home-snapshot-segment__updated--daily {
+  grid-row: 2;
+}
+
+/* Narrow panels stack instead of squeezing the title. The stamps keep their
+   own rows and stay right-aligned, which is what the flex version wrapped to. */
+@media (max-width: 520px) {
+  .home-snapshot-segment__head {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-snapshot-segment__updated,
+  .home-snapshot-segment__updated--hourly,
+  .home-snapshot-segment__updated--daily {
+    grid-column: 1;
+    grid-row: auto;
+  }
 }
 
 .home-snapshot-segment__updated {
@@ -5804,8 +5849,16 @@ html.theme-dark .locale-toggle__btn--active:hover {
 }
 
 /* The mask is a cue for a row that overflows. Once every tab fits there is
-   nothing past the edge, and fading the last one is just wrong. */
-@media (min-width: 1280px) {
+   nothing past the edge, and fading the last one is just wrong.
+   
+   1536px, not 1280px. The root font scales with the viewport up to 1536px
+   (clamp(10.67px, 1.0417vw, 16px)) and is fixed above it, so 1536 is where this
+   layout stops changing size and starts merely getting wider — the only width
+   at which "every tab fits" can be asserted once and stay true. At exactly
+   1280 it was false: the row still overflowed, but the cue had been removed, so
+   the last tab read as clipped rather than as scrollable. Measured at a 1280
+   viewport on 2026-09-07: "Technical Information" cut mid-word with no fade. */
+@media (min-width: 1536px) {
   .grid-explorer-tabs {
     -webkit-mask-image: none;
     mask-image: none;
