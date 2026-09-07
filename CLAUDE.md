@@ -224,6 +224,25 @@ Days that legitimately have no source live in
 `public/data/grid-verification/no-source-days.json`. Adding a day there is a published
 declaration, not a way to silence a check.
 
+**And the document says which day it is — never the filename, and never the caller.**
+Learned the hard way on 2026-09-07. `parse_petrobangla_archive.py` derived every date it
+wrote — `report_date_label`, `_start`, `_end`, `month_label`, even the summary prose —
+from the energy day the caller passed in, and never read the PDF's own `Date : DD-DD`
+header. So whatever day you asked for became the window the report claimed to cover, and
+the claim was internally consistent: `verify:data` reconciles citations against the date
+our own JSON carries, so it agreed with itself and could not see the error. It took
+refetching the source and reading it independently to find it.
+
+The trigger was Petrobangla skipping its 06.09.26 slot. The report served under 07.09.26
+states `Date : 05-06`, so it is the 05→06 Sep window — energy day 2026-09-05 — and the
+listing-key-minus-one rule filed it as 2026-09-06 under a fabricated "06-07 Sep, 2026"
+label. Both layers now read the document: `document_window()` is the single reader, the
+parser keys `report_date_start` off it, `deploy_petrobangla()` keys the file (and so the
+index entry and the citation) off that, and `download_petrobangla()` will accept a
+document from a neighbouring slot **only** when its own header states the window asked
+for. A listing slot is a hint about where to look; it is never a claim about what is
+inside.
+
 ### 6. Do not grade the forecast.
 
 Forecast-vs-actual is a **signed difference and nothing more**. No scoring, no accuracy
