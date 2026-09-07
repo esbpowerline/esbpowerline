@@ -283,9 +283,27 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
     # wrong day's gas against the grid data.
     index = petrobangla_report_index()
     listing_key = (energy + timedelta(days=1)).isoformat()
-    urls = [index[listing_key]] if listing_key in index else []
 
-    for url in urls:
+    # The exact slot first, then the days after it.
+    #
+    # Petrobangla does not always file every slot. It skipped 06.09.26, and the
+    # report served under 07.09.26 was the 05->06 Sep window — energy day
+    # 2026-09-05, whose own slot never existed. Asking only for energy+1 left
+    # that day gasless indefinitely while the document sat in the listing.
+    #
+    # A candidate is accepted ONLY if the PDF's own header states the window
+    # that was asked for. A near-miss slot is a hint about where to look, never
+    # a claim about what it holds — that distinction is the whole lesson of the
+    # 2026-09-07 mis-filing.
+    candidates = [listing_key] if listing_key in index else []
+    if not candidates:
+        for ahead in range(1, 4):
+            k = (energy + timedelta(days=1 + ahead)).isoformat()
+            if k in index:
+                candidates.append(k)
+
+    for key in candidates:
+        url = index[key]
         try:
             data = fetch(url, timeout=30)
         except Exception:
@@ -298,7 +316,11 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
         # "Petrobangla_2026-08-16.pdf" is a name only this archive uses, and
         # the Oracle object name ("a627934c-....pdf") is one nobody can use.
         # 46 days were published citing the latter before this was changed.
-        filed = energy + timedelta(days=1)
+        # Named by the slot it actually came from, which is Petrobangla's own
+        # name for it. Naming it energy+1 would invent a document name whenever
+        # that slot does not exist, and this name is the citation the site
+        # prints — a reader has to be able to ask Petrobangla for it.
+        filed = date.fromisoformat(key)
         stamp = f"{filed.day:02d}.{filed.month:02d}.{str(filed.year)[-2:]}"
         dest = dest_dir / f"Daily-Gas-Intake-Offtake-Report ({stamp}).pdf"
         _write_atomic(dest, data)
@@ -308,11 +330,40 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
             text = "\n".join((page.extract_text() or "") for page in pypdf.PdfReader(str(dest)).pages)
             if "II. Distribution" not in text:
                 continue
+            stated = _stated_window_start(text)
+            if stated is not None and stated != energy:
+                # A real document, for a different day. It stays on disk — the
+                # day it does cover may want it — but it is not handed to a run
+                # that asked for another window.
+                continue
             (dest_dir / "petrobangla_latest.txt").write_text(text, encoding="utf-8")
             return dest, url
         except Exception:
             continue
     return None, None
+
+
+def _stated_window_start(text: str):
+    """The window the PDF states, read by the parser's own reader.
+
+    Loaded from `parse_petrobangla_archive.py` rather than re-implemented: two
+    readings of Petrobangla's `Date : DD-DD` header that could drift apart is
+    exactly the failure this check exists to catch, so there is one reading.
+
+    Returns None when the header cannot be read — older scans genuinely lack it
+    — and None is treated as "cannot confirm", never as "does not match", so a
+    headerless document still resolves through the exact-slot path as before.
+    """
+    try:
+        import importlib.util
+
+        path = Path(__file__).resolve().parents[1] / "parse_petrobangla_archive.py"
+        spec = importlib.util.spec_from_file_location("_pb_archive_parser", str(path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.document_window(text)
+    except Exception:
+        return None
 
 
 # Where the publisher's own workbooks are kept. Searched before any mirror.
