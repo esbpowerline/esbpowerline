@@ -148,26 +148,55 @@ def deploy(
         update_available_dates(iso)
         written["available_dates"] = AVAILABLE_DATES
 
-    if petrobangla_data and petrobangla_data.get("meta", {}).get("parse_status") in ("ok", "partial"):
-        json_name = f"{iso}.json"
-        staging_path = PETROBANGLA_JSON_STAGING / json_name
-        staging_path.parent.mkdir(parents=True, exist_ok=True)
-        staging_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
-        update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_INDEX_STAGING)
+    written.update(deploy_petrobangla(energy, petrobangla_data, run_sync=run_sync))
+    return written
 
-        PETROBANGLA_PUBLIC.mkdir(parents=True, exist_ok=True)
-        pb_path = PETROBANGLA_PUBLIC / json_name
-        pb_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
-        update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_PUBLIC_ROOT / "_index.json")
-        written["pipeline_b"] = pb_path
 
-        if run_sync:
-            for script, key in (
-                (SYNC_PETROBANGLA, "sync_petrobangla_live"),
-                (BUILD_PETROBANGLA_TIMELINE, "build_petrobangla_timeline"),
-            ):
-                if script.exists():
-                    subprocess.run([sys.executable, str(script)], cwd=str(ROOT), check=True)
-                    written[key] = str(script)
+def deploy_petrobangla(
+    energy: date,
+    petrobangla_data: dict | None,
+    *,
+    run_sync: bool = True,
+) -> dict[str, Path | str]:
+    """Publish the gas half of a day, with no reference to the grid half.
+
+    Split out of `deploy()` on 2026-09-07 so a gas window can be published
+    without a PGCB workbook. Petrobangla and PGCB file on their own schedules
+    and neither waits for the other: on that date Petrobangla was serving the
+    window filed 07.09.26 (energy day 2026-09-06) while PGCB had not filed the
+    6th at all, and nothing in the chain could take the gas until it did.
+
+    This is the same code `deploy()` has always run — called from one place, so
+    the gas-only path cannot drift from the full one. It writes the staging
+    copy, the public copy and BOTH indexes, then rebuilds the live week and the
+    timeline, exactly as before.
+    """
+    written: dict[str, Path | str] = {}
+    if not petrobangla_data:
+        return written
+    if petrobangla_data.get("meta", {}).get("parse_status") not in ("ok", "partial"):
+        return written
+
+    iso = energy.isoformat()
+    json_name = f"{iso}.json"
+    staging_path = PETROBANGLA_JSON_STAGING / json_name
+    staging_path.parent.mkdir(parents=True, exist_ok=True)
+    staging_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_INDEX_STAGING)
+
+    PETROBANGLA_PUBLIC.mkdir(parents=True, exist_ok=True)
+    pb_path = PETROBANGLA_PUBLIC / json_name
+    pb_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_PUBLIC_ROOT / "_index.json")
+    written["pipeline_b"] = pb_path
+
+    if run_sync:
+        for script, key in (
+            (SYNC_PETROBANGLA, "sync_petrobangla_live"),
+            (BUILD_PETROBANGLA_TIMELINE, "build_petrobangla_timeline"),
+        ):
+            if script.exists():
+                subprocess.run([sys.executable, str(script)], cwd=str(ROOT), check=True)
+                written[key] = str(script)
 
     return written

@@ -29,6 +29,35 @@ describe('extractJsonPayload', () => {
     });
   });
 
+  it('reads a gas-only day as a success that says so', () => {
+    /*
+      A day PGCB has not filed but Petrobangla has. Since 2026-09-07 the chain
+      publishes the gas window alone rather than aborting, and reports it with
+      `ok: true` and a note — the eight grid steps are recorded as skipped, not
+      as failures, because PGCB being late is the premise of the run and not a
+      fault in it.
+
+      This is pinned because the payload's shape is the whole contract with the
+      admin surface, and `ok: true` alongside a note had never occurred before:
+      until now a note only ever accompanied a failure. Anything that reads
+      `ok` and ignores `note` will call this a complete day, and it is not one.
+    */
+    const stdout = JSON.stringify({
+      ok: true,
+      date: '2026-09-06',
+      steps: [
+        { step: 'extractor', ok: true, seconds: 34.6, detail: 'GAS ONLY — published the 2026-09-06 gas window' },
+        { step: 'energy curve', ok: true, seconds: 0, detail: 'skipped — PGCB has not filed this day' },
+      ],
+      artifacts: { grid: false, curve: false, plants: false, gas: true },
+      note: 'gas only — PGCB has not filed this day; the gas window is published and the grid half waits',
+    });
+
+    const parsed = extractJsonPayload(stdout);
+    expect(parsed).toMatchObject({ ok: true, artifacts: { grid: false, gas: true } });
+    expect((parsed as { note: string }).note).toMatch(/^gas only/);
+  });
+
   it('ignores parser chatter printed before the payload', () => {
     const stdout = [
       'reading Daily Report 20-08-2026.xlsx',

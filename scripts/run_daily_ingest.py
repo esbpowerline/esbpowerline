@@ -406,6 +406,19 @@ def main() -> int:
             # enrich; continuing would produce a half-day and report success.
             return finish(iso, steps, args.json, note="collection failed — chain stopped")
 
+    # Did the extractor publish a gas window for a day PGCB has not filed?
+    #
+    # Computed HERE, before the workbook lookup below, and not later where it
+    # reads more naturally. `ensure_source_workbook` reports a missing workbook
+    # as a failed step, which is right on an ordinary day and wrong on this one:
+    # PGCB not having filed yet is the premise of a gas-only run, not a fault in
+    # it, and recording it as a failure would make every gas-only day report as
+    # broken and count against the Pi's consecutive-failure alert.
+    gas_only = (
+        not (PUBLIC / "daily" / f"{iso}.json").exists()
+        and (PUBLIC / "petrobangla" / "daily" / f"{iso}.json").exists()
+    )
+
     # Two workbooks matter, not one. The day's own workbook feeds the curve and
     # the station detail; the one PGCB filed the morning OF this day — that is
     # the previous energy day's report — carries the forecast this day is
@@ -418,56 +431,81 @@ def main() -> int:
         SOURCE_INDEX.parent.mkdir(parents=True, exist_ok=True)
         SOURCE_INDEX.write_text("{}", encoding="utf-8")
 
-    held, problem = ensure_source_workbook(day)
-    if held:
-        say(f"      source workbook: {held}")
-    if problem:
-        say(f"      ! {problem}")
-        steps.append({"step": "source workbook", "ok": False, "seconds": 0.0, "detail": problem})
-    prior, _ = ensure_source_workbook(day - timedelta(days=1))
-    if prior:
-        say(f"      forecast issued in: {prior}")
+    if not gas_only:
+        held, problem = ensure_source_workbook(day)
+        if held:
+            say(f"      source workbook: {held}")
+        if problem:
+            say(f"      ! {problem}")
+            steps.append({"step": "source workbook", "ok": False, "seconds": 0.0, "detail": problem})
+        prior, _ = ensure_source_workbook(day - timedelta(days=1))
+        if prior:
+            say(f"      forecast issued in: {prior}")
 
-    say("[2/12] energy curve …")
-    # Both builders are told which index to read so they resolve the workbook
-    # this run just registered, wherever SOURCE_INDEX lives.
-    steps.append(run("energy curve", [str(SCRIPTS / "backfill_energy_curve.py"), "--apply", "--from", iso,
-                                      "--index-cache", str(SOURCE_INDEX)]))
+    # PGCB has not filed this energy day, but Petrobangla had filed the gas
+    # window that opens on it, and the extractor published that window alone.
+    #
+    # Steps 2..9 every one of them read the day's PGCB workbook — the curve, the
+    # station detail, the forecast, the archive fallback, the date index. With
+    # no workbook they would either fail or, worse, exit 0 having written
+    # nothing, which is the exact shape `gate()` exists to catch. Skipping them
+    # by name records honestly that they did not run and why, rather than
+    # reporting eight green steps that did nothing.
+    #
+    # They are not lost. When PGCB files the day, the trailing window brings it
+    # back through this chain and every one of these runs then, with the gas
+    # already on disk.
+    if gas_only:
+        say("gas only — PGCB has not filed this day; skipping the grid steps")
+        for name in ("energy curve", "split curve", "border imports", "plants",
+                     "forecast", "forward forecast", "archive fallback", "available dates"):
+            steps.append({
+                "step": name,
+                "ok": True,
+                "seconds": 0.0,
+                "detail": "skipped — PGCB has not filed this day; only the gas window was published",
+            })
+    else:
+        say("[2/12] energy curve …")
+        # Both builders are told which index to read so they resolve the workbook
+        # this run just registered, wherever SOURCE_INDEX lives.
+        steps.append(run("energy curve", [str(SCRIPTS / "backfill_energy_curve.py"), "--apply", "--from", iso,
+                                          "--index-cache", str(SOURCE_INDEX)]))
 
-    say("[3/12] split curve …")
-    steps.append(run("split curve", [str(SCRIPTS / "split_energy_curve.py"), "--apply"]))
-    # Both curve steps exit 0 with nothing to do when no source workbook was
-    # found, which is how days have shipped with no fuel curve under a clean
-    # run. The file is the only honest test of the step.
-    gate(steps, PUBLIC / "curves" / f"{iso}.json", "split curve",
-         "no curve written — the day's source workbook was not readable")
+        say("[3/12] split curve …")
+        steps.append(run("split curve", [str(SCRIPTS / "split_energy_curve.py"), "--apply"]))
+        # Both curve steps exit 0 with nothing to do when no source workbook was
+        # found, which is how days have shipped with no fuel curve under a clean
+        # run. The file is the only honest test of the step.
+        gate(steps, PUBLIC / "curves" / f"{iso}.json", "split curve",
+             "no curve written — the day's source workbook was not readable")
 
-    # After the curve, not before it: Nepal is the fourth interconnector and it
-    # is derived from the curve stack, so running this first finds nothing.
-    say("[4/12] border imports (Nepal) …")
-    steps.append(run("border imports", [str(SCRIPTS / "backfill_border_imports.py"), "--apply", "--from", iso]))
+        # After the curve, not before it: Nepal is the fourth interconnector and it
+        # is derived from the curve stack, so running this first finds nothing.
+        say("[4/12] border imports (Nepal) …")
+        steps.append(run("border imports", [str(SCRIPTS / "backfill_border_imports.py"), "--apply", "--from", iso]))
 
-    say("[5/12] per-station detail …")
-    steps.append(run("plants", [str(SCRIPTS / "build_daily_plants.py"), "--apply", "--only", iso,
-                                "--index-cache", str(SOURCE_INDEX)]))
-    gate(steps, PUBLIC / "plants" / f"{iso}.json", "plants",
-         "no station detail written — the day's source workbook was not readable")
+        say("[5/12] per-station detail …")
+        steps.append(run("plants", [str(SCRIPTS / "build_daily_plants.py"), "--apply", "--only", iso,
+                                    "--index-cache", str(SOURCE_INDEX)]))
+        gate(steps, PUBLIC / "plants" / f"{iso}.json", "plants",
+             "no station detail written — the day's source workbook was not readable")
 
-    # Anchors each held workbook's projection onto the day it DESCRIBES, so this
-    # fills the day's `forecast` key from the report filed that morning. Without
-    # it the archive keeps only what happened, never what was expected.
-    say("[6/12] forecast …")
-    steps.append(run("forecast", [str(SCRIPTS / "extract_forecasts.py"), "--apply"]))
+        # Anchors each held workbook's projection onto the day it DESCRIBES, so this
+        # fills the day's `forecast` key from the report filed that morning. Without
+        # it the archive keeps only what happened, never what was expected.
+        say("[6/12] forecast …")
+        steps.append(run("forecast", [str(SCRIPTS / "extract_forecasts.py"), "--apply"]))
 
-    # The forward half of the same projection, for the day still running.
-    say("[7/12] forward forecast …")
-    steps.append(run_forward_forecast(day))
+        # The forward half of the same projection, for the day still running.
+        say("[7/12] forward forecast …")
+        steps.append(run_forward_forecast(day))
 
-    say("[8/12] archive fallback …")
-    steps.append(run("archive fallback", [str(SCRIPTS / "rebuild_archive_fallback.py"), "--apply"]))
+        say("[8/12] archive fallback …")
+        steps.append(run("archive fallback", [str(SCRIPTS / "rebuild_archive_fallback.py"), "--apply"]))
 
-    say("[9/12] available dates …")
-    steps.append(run("available dates", [str(SCRIPTS / "sync_available_dates.py"), "--apply"]))
+        say("[9/12] available dates …")
+        steps.append(run("available dates", [str(SCRIPTS / "sync_available_dates.py"), "--apply"]))
 
     # The gas archive only gains a day when Petrobangla has published the window
     # that opens on this energy day — it files that under the NEXT morning, so
@@ -512,7 +550,13 @@ def main() -> int:
         say("[12/12] publish …")
         steps.append(publish_releases(iso, aggregates=gas_day.exists()))
 
-    return finish(iso, steps, args.json)
+    return finish(
+        iso,
+        steps,
+        args.json,
+        note=("gas only — PGCB has not filed this day; the gas window is published "
+              "and the grid half waits") if gas_only else None,
+    )
 
 
 def artifacts_for(iso: str) -> dict:

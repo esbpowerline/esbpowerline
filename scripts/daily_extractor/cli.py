@@ -7,7 +7,7 @@ from datetime import date, timedelta
 
 from .config import DAILY_REPORTS_ROOT, site_dir
 from .download import download_for_energy_day
-from .export import build_agent_bundle, deploy
+from .export import build_agent_bundle, deploy, deploy_petrobangla
 from .organize import organize_files
 from .parse import parse_all
 from .validate_grid import validate_grid_daily, validate_petrobangla_daily
@@ -39,6 +39,77 @@ def _prompt_choice(report_text: str) -> str:
         print("Please enter O, G, or A.")
 
 
+def _run_gas_only(energy: date, dl, *, deploy_files: bool, force: bool) -> int:
+    """Publish the gas window for a day PGCB has not filed yet.
+
+    Deliberately narrow. It parses and publishes Pipeline B and nothing else —
+    no grid JSON, no agent bundle, no verification against PGCB's own workbook,
+    because there is no workbook to verify against. Everything it does run is
+    the same function the full chain runs, so the two cannot drift.
+
+    Returns 0. A gas-only day is a real outcome, not a degraded one: the
+    publisher that had filed was read, and the publisher that had not was not
+    invented. The caller learns which happened from the printed result, and
+    `ingest_recent_days.py` reports it as gas-only rather than as a full day.
+    """
+    iso = energy.isoformat()
+    print(f"  PGCB: not filed yet — running the gas half alone")
+    print(f"  Petrobangla: {dl.petrobangla_pdf.name}")
+
+    work_dir = site_dir(energy, "pgcb")
+    parsed = parse_all(energy, None, dl.petrobangla_pdf, work_dir)
+    for w in parsed.warnings:
+        print(f"  WARN: {w}")
+    if not parsed.petrobangla_data:
+        print("ERROR: Petrobangla parse failed — nothing to publish.")
+        return 1
+
+    pb_val = validate_petrobangla_daily(parsed.petrobangla_data)
+    for e in pb_val.errors:
+        print(f"  ERROR [Pipeline B]: {e}")
+    for w in pb_val.warnings:
+        print(f"  warn [Pipeline B]: {w}")
+    if not pb_val.ok and not force:
+        print("ERROR: PetrobanglaDaily validation failed. Fix parser or use --force.")
+        return 1
+
+    status = parsed.petrobangla_data.get("meta", {}).get("parse_status")
+    fields = parsed.petrobangla_data.get("production", {}).get("field_count", "?")
+    print(f"  Pipeline B OK — status={status}, fields={fields}")
+
+    out_dir = site_dir(energy, "output")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    pb_path = out_dir / f"petrobangla_daily_{iso}.json"
+    pb_path.write_text(
+        json.dumps(parsed.petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+
+    if deploy_files:
+        written = deploy_petrobangla(energy, parsed.petrobangla_data)
+        for key, path in written.items():
+            print(f"  {key}: {path}")
+        if "pipeline_b" not in written:
+            print("ERROR: parse succeeded but nothing was written — refusing to report success.")
+            return 1
+    else:
+        print("  Skipped deploy (use --deploy for public/data/)")
+
+    organize_files(
+        energy,
+        pgcb_xlsx=None,
+        pgcb_text=None,
+        petrobangla_pdf=dl.petrobangla_pdf,
+        petrobangla_text=parsed.petrobangla_text_path,
+        grid_json=None,
+        petrobangla_json=pb_path,
+        agent_bundle=None,
+        verification_report=None,
+    )
+    print("")
+    print(f"GAS ONLY — published the {iso} gas window; the grid half waits on PGCB.")
+    return 0
+
+
 def run(
     energy: date,
     *,
@@ -57,7 +128,23 @@ def run(
     for err in dl.errors:
         print(f"  WARN: {err}")
     if not dl.pgcb_xlsx:
-        print("ERROR: Pipeline A requires PGCB daily report.")
+        # PGCB has not filed this energy day. That does NOT mean the day has
+        # nothing to publish: Petrobangla files a gas window on its own
+        # schedule, and the two publishers are routinely days apart.
+        #
+        # Until 2026-09-07 this returned 1 and the whole run ended here, so a
+        # window Petrobangla was already serving could not be taken until PGCB
+        # caught up — the site sat on gas that was publicly available, for as
+        # long as PGCB was late. Found that day: Petrobangla was serving the
+        # window filed 07.09.26 (energy day 2026-09-06), PGCB had not filed the
+        # 6th, and the newest gas on the site was the 4th.
+        #
+        # The grid half is not faked or filled in. It is simply absent until
+        # PGCB files, at which point a later run of this chain writes it with
+        # the gas already on disk.
+        if dl.petrobangla_pdf:
+            return _run_gas_only(energy, dl, deploy_files=deploy_files, force=force)
+        print("ERROR: neither PGCB nor Petrobangla has filed this day.")
         return 1
     # Say which store the day came from. "ERP id" was printed unconditionally,
     # which read as though every day came from the mirror even when the source

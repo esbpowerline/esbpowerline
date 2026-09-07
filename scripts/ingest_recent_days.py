@@ -121,7 +121,10 @@ def _summary(rows: list[dict]) -> str:
     for r in rows:
         a = r["artifacts"]
         cell = lambda k: "✓" if a.get(k) else "–"  # noqa: E731
-        result = "published" if r["ok"] else r["note"] or "failed"
+        # A note on a successful day is not decoration — it is how a gas-only
+        # day says so. Printing "published" over it would claim the grid half
+        # landed too, in the one table anyone reads to see whether it did.
+        result = (r["note"] or "published") if r["ok"] else (r["note"] or "failed")
         lines.append(f"| {r['day'].isoformat()} | {cell('grid')} | {cell('curve')} | {cell('plants')} | {cell('gas')} | {result} |")
     return "\n".join(lines)
 

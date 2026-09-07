@@ -223,6 +223,13 @@ def main() -> int:
         findings.append({"day": day, "source": source, "why": why, "attempts": rec.get("n", 0)})
 
     # PGCB. Nothing leaves this machine while the newest day is already held.
+    #
+    # `queued_grid` is what the gas pass below actually needs to know, and the
+    # distinction it draws is the whole bug it replaces. A day can be missing
+    # from the grid archive for two very different reasons: PGCB has filed it
+    # and we have not fetched it yet (queued here), or PGCB has not filed it at
+    # all (noted here and queued by nobody).
+    queued_grid: set[str] = set()
     for i in range(LOOKBACK_GRID, 0, -1):
         day = newest_possible - timedelta(days=i - 1)
         if day.isoformat() in held_grid:
@@ -230,6 +237,7 @@ def main() -> int:
         where = pgcb_has(day)
         if where:
             consider(day.isoformat(), "pgcb", where)
+            queued_grid.add(day.isoformat())
         else:
             notes.append(f"{day}: PGCB has not posted it yet")
 
@@ -244,10 +252,29 @@ def main() -> int:
             continue
         if day in held_gas:
             continue
-        # A day whose grid half is also missing is already queued above, and one
-        # run of the chain does both halves — do not ask for it twice.
-        if day not in held_grid:
+        # A day the PGCB pass just queued is already going to the chain, and one
+        # run of it does both halves — do not ask for it twice.
+        if day in queued_grid:
             continue
+        # Otherwise the day is one Petrobangla has filed and PGCB has not, and
+        # until 2026-09-07 it was dropped here in silence.
+        #
+        # The guard used to read `if day not in held_grid: continue`, on the
+        # stated assumption that such a day was "already queued above". It is
+        # not: the PGCB pass only queues a day `pgcb_has()` confirms, and when
+        # PGCB is late it appends a note and queues nothing. So a day where
+        # Petrobangla is early and PGCB is late fell through BOTH passes,
+        # emitting neither a finding nor a note — the watcher's log said only
+        # that PGCB had not posted, and never mentioned the gas sitting there.
+        #
+        # Found on 2026-09-07: Petrobangla was serving the window filed
+        # 07.09.26 (energy day 2026-09-06) while PGCB had not filed the 6th.
+        # The archive's newest gas was the 4th and nothing on the Pi was going
+        # to fetch the 6th, at any cadence, until PGCB caught up.
+        #
+        # It is worse than one late day. LOOKBACK_GAS is 14 and LOOKBACK_GRID
+        # is 4, so gas for any day PGCB is more than four days late on could
+        # never be queued at all, and the log would never say so.
         consider(day, "petrobangla", f"window filed as {key}")
 
     days = sorted({f["day"] for f in findings})
