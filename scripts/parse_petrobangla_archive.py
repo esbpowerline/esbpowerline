@@ -354,6 +354,58 @@ def parse_dist_plants(words):
     return plants, blocks
 
 
+
+# Month names as Petrobangla writes them, for reading the report's own header.
+_MONTHS = {m: i + 1 for i, m in enumerate(
+    ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])}
+
+
+def document_window(page_text):
+    """The window the PDF states about ITSELF, or None if it does not say.
+
+    Every date this parser wrote used to be derived from the energy day the
+    CALLER asked for — label, start, end, month, even the agent_summary prose.
+    The document's own header was never read, so whatever day you asked for was
+    the day the report claimed to cover, and the claim was internally
+    consistent: `verify:data` reconciles citations by the date our JSON carries,
+    so it agreed with itself perfectly and could not see the error.
+
+    It surfaced on 2026-09-07. Petrobangla skipped its 06.09.26 filing slot, so
+    the document served under 07.09.26 was the 05->06 Sep window; the
+    listing-key-minus-one rule filed it as energy day 2026-09-06 and this
+    function's absence let it be labelled "06-07 Sep, 2026" — a window nobody
+    published. Four neighbouring documents (listing 09-02..09-05 carrying
+    01-02, 02-03, 03-04, 04-05) confirm both the header format and the rule it
+    normally satisfies.
+
+    The header reads `Date : 05-06` with the month and year elsewhere on the
+    page, so both are searched independently and the day pair is the anchor.
+    Returns the START date — the calendar day containing the window's opening
+    instant, which is the anchor rule in observation-window.ts.
+    """
+    m = re.search(r'Date\s*:\s*(\d{1,2})\s*[-–]\s*(\d{1,2})', page_text)
+    if not m:
+        return None
+    mon = re.search(r'([A-Z][a-z]{2})[a-z]*,?\s*(20\d\d)', page_text)
+    if not mon:
+        return None
+    start_day, end_day = int(m.group(1)), int(m.group(2))
+    month, year = _MONTHS.get(mon.group(1)), int(mon.group(2))
+    if not month:
+        return None
+    # A window that crosses a month boundary prints the SECOND month in the
+    # header ("31-01 Sep" is the 31 Aug -> 01 Sep window), so a start day above
+    # the end day belongs to the month before the one printed.
+    if start_day > end_day:
+        month -= 1
+        if month == 0:
+            month, year = 12, year - 1
+    try:
+        return datetime.date(year, month, start_day)
+    except ValueError:
+        return None
+
+
 def main():
     pdf, energy_iso = sys.argv[1], sys.argv[2]
     out = sys.argv[3] if len(sys.argv) > 3 else None
@@ -411,7 +463,20 @@ def main():
             entities.append(dict(type='power_plant', name=p['name'], distribution_company=c['company_code'],
                                  demand_mmcfd=p['demand_mmcfd'], supply_mmcfd=p['supply_mmcfd']))
 
-    ed = datetime.date.fromisoformat(energy_iso)
+    # The window the DOCUMENT states, which outranks the day the caller asked
+    # for. Falls back to the request when the header cannot be read — some older
+    # scans genuinely do not carry it — and that fallback is recorded rather
+    # than assumed, so a day labelled from the request is distinguishable from
+    # one labelled from the source.
+    requested = datetime.date.fromisoformat(energy_iso)
+    stated = document_window(pg.get_text())
+    ed = stated or requested
+    window_source = 'document' if stated else 'request'
+    if stated and stated != requested:
+        dist_warnings.append(
+            f"window mismatch: this document states {stated.isoformat()}, "
+            f"the caller asked for {requested.isoformat()} — filed under the document's own window"
+        )
     end = ed + datetime.timedelta(days=1)
     # Within one month the month is written once ("30-31 Jul, 2026"); across a
     # month boundary both are spelled out, matching ingest_bridge.window_label.
@@ -432,6 +497,11 @@ def main():
                      # sourceFiles citation (2026-09-01, 2026-09-03).
                      source_pdf=pdf, source_filename=pdf.replace('\\', '/').rsplit('/', 1)[-1],
                      parsed_at=None, page_count=doc.page_count,
+                     # What the caller asked for, beside what the document says,
+                     # so a mis-keyed fetch is visible in the artifact itself.
+                     requested_energy_day=energy_iso,
+                     window_source=window_source,
+                     window_matches_request=(ed == requested),
                      parse_status=('ok' if not dist_warnings else 'partial'),
                      warnings=dist_warnings,
                      content_sha256=hashlib.sha256(raw).hexdigest(),

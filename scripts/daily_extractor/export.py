@@ -177,7 +177,20 @@ def deploy_petrobangla(
     if petrobangla_data.get("meta", {}).get("parse_status") not in ("ok", "partial"):
         return written
 
-    iso = energy.isoformat()
+    # Keyed by the window the DOCUMENT states, not the day the caller asked for.
+    #
+    # The two are the same on an ordinary day. They came apart on 2026-09-07:
+    # Petrobangla skipped its 06.09.26 slot, the report served under 07.09.26
+    # was the 05->06 Sep window, and the listing-key-minus-one rule asked for
+    # energy day 2026-09-06. Keying on the request filed that window as a day it
+    # does not cover and labelled it "06-07 Sep, 2026" — a window nobody
+    # published. The parser now reads the header and reports the real window;
+    # this is what makes the file, the index entry and the citation follow it.
+    report = petrobangla_data.get("report", {})
+    stated = report.get("report_date_start")
+    iso = stated if isinstance(stated, str) and len(stated) == 10 else energy.isoformat()
+    if iso != energy.isoformat():
+        print(f"  gas window: document states {iso}, not the requested {energy.isoformat()} — filing under {iso}")
     json_name = f"{iso}.json"
     staging_path = PETROBANGLA_JSON_STAGING / json_name
     staging_path.parent.mkdir(parents=True, exist_ok=True)

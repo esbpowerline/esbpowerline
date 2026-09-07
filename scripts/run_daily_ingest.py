@@ -414,9 +414,17 @@ def main() -> int:
     # PGCB not having filed yet is the premise of a gas-only run, not a fault in
     # it, and recording it as a failure would make every gas-only day report as
     # broken and count against the Pi's consecutive-failure alert.
-    gas_only = (
-        not (PUBLIC / "daily" / f"{iso}.json").exists()
-        and (PUBLIC / "petrobangla" / "daily" / f"{iso}.json").exists()
+    #
+    # The gas half is NOT looked for under `iso`. Since 2026-09-07 a gas window
+    # is filed under the day the document itself states, which is not always the
+    # day that was asked for — Petrobangla skipped a filing slot and the report
+    # served under 07.09.26 turned out to be the 05->06 Sep window. So the
+    # extractor's own verdict is the discriminator, and the artifact check is
+    # kept only as the corroborating case where the two do agree.
+    extractor_step = next((s for s in steps if s["step"] == "extractor"), None)
+    said_gas_only = str((extractor_step or {}).get("detail", "")).startswith("GAS ONLY")
+    gas_only = not (PUBLIC / "daily" / f"{iso}.json").exists() and (
+        said_gas_only or (PUBLIC / "petrobangla" / "daily" / f"{iso}.json").exists()
     )
 
     # Two workbooks matter, not one. The day's own workbook feeds the curve and

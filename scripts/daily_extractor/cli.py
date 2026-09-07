@@ -105,8 +105,14 @@ def _run_gas_only(energy: date, dl, *, deploy_files: bool, force: bool) -> int:
         agent_bundle=None,
         verification_report=None,
     )
+    # The day the DOCUMENT says it covers, which is what was actually filed.
+    # Printing `iso` here would restate the request and hide exactly the
+    # mismatch this path now exists to surface.
+    filed = (parsed.petrobangla_data.get("report", {}) or {}).get("report_date_start") or iso
     print("")
-    print(f"GAS ONLY — published the {iso} gas window; the grid half waits on PGCB.")
+    if filed != iso:
+        print(f"NOTE: asked for {iso}; the document states the {filed} window and was filed there.")
+    print(f"GAS ONLY — published the {filed} gas window; the grid half waits on PGCB.")
     return 0
 
 
