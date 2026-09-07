@@ -59,8 +59,8 @@ function HeroChart({ shape, seriesLabel }: { shape: HeroShape; seriesLabel: stri
   const capY = shape.capacityY !== null ? toY(shape.capacityY) : null;
 
   return (
-    <figure className="relative m-0">
-      <div className="relative h-[180px] w-full sm:h-[220px] lg:h-[260px]">
+    <figure className="event-hero__figure relative m-0">
+      <div className="event-hero__stage relative h-[180px] w-full sm:h-[220px] lg:h-[260px]">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           preserveAspectRatio="none"
@@ -83,7 +83,7 @@ function HeroChart({ shape, seriesLabel }: { shape: HeroShape; seriesLabel: stri
               x2={W}
               y1={capY}
               y2={capY}
-              className="stroke-muted-foreground/45"
+              className="stroke-muted-foreground/45 event-hero__rule"
               strokeWidth="1.5"
               strokeDasharray="7 6"
               vectorEffect="non-scaling-stroke"
@@ -96,27 +96,57 @@ function HeroChart({ shape, seriesLabel }: { shape: HeroShape; seriesLabel: stri
               x2={toX(shape.incidentX)}
               y1="0"
               y2={H}
-              className="stroke-rose-500/70"
+              className="stroke-rose-500/70 event-hero__break"
               strokeWidth="1.5"
               vectorEffect="non-scaling-stroke"
             />
           )}
 
+          {/* One group, one wipe.
+              
+              The first attempt drew the line with `pathLength={1}` and an
+              animated `stroke-dashoffset`. It does not survive this SVG: the
+              strokes carry `vector-effect: non-scaling-stroke` so the dash
+              pattern is resolved in screen units rather than path units, and
+              `pathLength` stops meaning anything — half the series rendered as
+              a pale dashed ghost and stayed that way, at 8s and at 60s.
+              
+              A clip wipe reveals the same drawing left to right and touches no
+              stroke geometry at all, so it is indifferent to both
+              `non-scaling-stroke` and `preserveAspectRatio="none"`. */}
+          <g className="event-hero__draw">
           {segments.map((seg) => (
-            <path key={`a${seg[0].x}`} d={areaPath(seg)} fill="url(#hero-fill)" />
+            <path key={`a${seg[0].x}`} d={areaPath(seg)} fill="url(#hero-fill)" className="event-hero__area" />
+          ))}
+          {/* A halo under the line — a second, wider stroke at low opacity.
+              Not a blur filter: this SVG is `preserveAspectRatio="none"`, so a
+              Gaussian would be stretched with the geometry and smear
+              horizontally. A plain wider stroke scales cleanly. */}
+          {segments.map((seg) => (
+            <path
+              key={`g${seg[0].x}`}
+              d={linePath(seg)}
+              fill="none"
+              className="stroke-primary/25 event-hero__glow"
+              strokeWidth="6"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
           ))}
           {segments.map((seg) => (
             <path
               key={`l${seg[0].x}`}
               d={linePath(seg)}
               fill="none"
-              className="stroke-primary"
+              className="stroke-primary event-hero__line"
               strokeWidth="2"
               strokeLinejoin="round"
               strokeLinecap="round"
               vectorEffect="non-scaling-stroke"
             />
           ))}
+          </g>
 
           {shape.low && (
             <circle
@@ -201,9 +231,16 @@ export default function EventHero({
   meta: Array<{ label: string; value: string }>;
 }) {
   return (
-    <header className="mb-10 border-b border-border/50 pb-8">
+    <header className="event-hero mb-10 border-b border-border/50 pb-8">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border/40 pb-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+        {/* The label as a mark, not as small print. "Analysis · event study"
+            names the kind of page this is — the one thing a reader needs before
+            the headline — and at 11px grey caps it was the least visible thing
+            in the frame. A tinted pill gives it the weight of a masthead
+            without adding a second typeface or a colour the page does not
+            already use. */}
+        <p className="event-hero__kicker">
+          <span className="event-hero__kicker-dot" aria-hidden />
           {kicker}
         </p>
         <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
@@ -211,11 +248,11 @@ export default function EventHero({
         </p>
       </div>
 
-      <h1 className="mt-5 text-[2rem] font-bold leading-[1.05] tracking-[-0.025em] text-foreground sm:text-[2.75rem] lg:text-[3.25rem]">
+      <h1 className="event-hero__title mt-5 text-[2.125rem] font-bold leading-[1.02] tracking-[-0.03em] text-foreground sm:text-[3rem] lg:text-[3.75rem]">
         {title}
       </h1>
 
-      <p className="mt-4 max-w-[64ch] text-[1.0625rem] leading-[1.65] text-foreground/85">
+      <p className="event-hero__standfirst mt-4 max-w-[64ch] text-[1.0625rem] leading-[1.65] text-foreground/85">
         {standfirst}
       </p>
 
@@ -229,8 +266,12 @@ export default function EventHero({
           an accessory to the story; these are the story's own headline numbers
           and they sit on the same axis as everything else. */}
       <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-border/50 pt-6 lg:grid-cols-4">
-        {facts.map((f) => (
-          <div key={f.label} className="lg:border-l lg:border-border/50 lg:pl-5 lg:first:border-l-0 lg:first:pl-0">
+        {facts.map((f, i) => (
+          <div
+            key={f.label}
+            className="event-hero__fact lg:border-l lg:border-border/50 lg:pl-5 lg:first:border-l-0 lg:first:pl-0"
+            style={{ '--i': i } as React.CSSProperties}
+          >
             <dt className="text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               {f.label} <GridProvenanceTag kind={f.provenance} />
             </dt>

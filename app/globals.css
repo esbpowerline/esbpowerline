@@ -5656,9 +5656,9 @@ html.theme-dark .locale-toggle__btn--active:hover {
    break the alignment those rules were written to fix. */
 .grid-explorer-kpi__mark {
   margin-left: 0.3rem;
-  width: 0.8125rem;
-  height: 0.8125rem;
-  font-size: 0.5625rem;
+  /* Size and raise are the tag's own defaults now. Only the extra lift stays:
+     this one rides an 18px figure rather than 10-11px label text, so it needs
+     more of a step to clear the same optical distance. */
   vertical-align: 0.5em;
 }
 
@@ -9264,22 +9264,36 @@ button.grid-explorer-link {
      fractional box size Chrome lays the dashes out across a sub-pixel edge and
      the box itself reads as lopsided before the letter inside it is even
      considered. */
-  width: 1rem;
-  height: 1rem;
+  /* 13px, down from 16px, and raised — see `vertical-align` below. */
+  width: 0.8125rem;
+  height: 0.8125rem;
   padding: 0;
   border: 1px solid currentColor;
   border-radius: 3px;
   /* Fixed rather than em-relative: the tag appears in label rows, legends and
      hover panels at three different text sizes, and a mark that shrinks with
-     its context stops being readable in the smallest of them. */
-  font-size: 0.625rem;
+     its context stops being readable in the smallest of them. Still fixed —
+     just one step down, since it is a superscript now (see below). */
+  font-size: 0.5625rem;
   font-weight: 800;
   line-height: 1;
   /* No letter-spacing: the content is always one character, so it added a
      trailing gap inside the box and pushed the glyph left of centre. */
   letter-spacing: 0;
   font-variant-numeric: normal;
-  vertical-align: middle;
+  /* A superscript, everywhere the mark appears.
+     
+     It was `middle`: the same optical height as the text beside it, which made
+     a 16px box read as a second element in the row rather than an annotation on
+     it — a badge parked next to the figure. The mark is a footnote on a number,
+     and a footnote marker is smaller than its base and rides above the line.
+     
+     Applied globally rather than scoped to headline figures, which is where it
+     started. The earlier worry was the hover panels and tables, where marks sit
+     in columns and `middle` was chosen so they line up: they still line up,
+     because every one of them raises by the same amount. What changes is that
+     the mark no longer competes with the value for the reader's eye. */
+  vertical-align: 0.42em;
   cursor: help;
   flex: none;
 }
@@ -16700,5 +16714,126 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   .flipbook__thumb,
   .flipbook__arrow {
     transition-duration: 1ms;
+  }
+}
+
+/* ══ Event study hero ══════════════════════════════════════════════════════
+   
+   Cinematic here means timing and depth, not decoration: the drawing arrives
+   rather than appearing, and the line sits on a ground with some air behind it.
+   Everything is CSS on server-rendered SVG — no library, no client JS, nothing
+   to hydrate, which is the property the hero was built around.
+   
+   The whole block is inert under `prefers-reduced-motion`, at the bottom. That
+   is not a courtesy: this page opens on a chart, and a reader who has asked for
+   stillness should get the finished frame immediately, not an empty one.
+*/
+
+.event-hero__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.28rem 0.6rem 0.28rem 0.5rem;
+  border: 1px solid hsl(var(--primary) / 0.25);
+  border-radius: 999px;
+  background: hsl(var(--primary) / 0.07);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+}
+
+/* A live dot, because an event study is a reading of something that happened —
+   it marks the label as a status rather than a category. Static under reduced
+   motion, where it stays a plain dot. */
+.event-hero__kicker-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.16);
+}
+
+/* Depth behind the drawing: a wash that lifts the line off the page without
+   drawing a box around it. Sized to the figure so it fades out before the
+   caption underneath. */
+.event-hero__figure {
+  position: relative;
+  isolation: isolate;
+}
+
+.event-hero__figure::before {
+  content: '';
+  position: absolute;
+  inset: -8% -2% 6% -2%;
+  z-index: -1;
+  /* Both gradients reach full transparency well inside the box (55%/58%), so
+     the wash never meets its own bounding edge. At 70% it did, and the result
+     read as a faintly tinted rectangle sitting behind the chart rather than as
+     light behind it. */
+  background:
+    radial-gradient(75% 85% at 28% 10%, hsl(var(--primary) / 0.09), transparent 55%),
+    radial-gradient(65% 75% at 88% 0%, hsl(var(--primary) / 0.055), transparent 58%);
+  pointer-events: none;
+}
+
+/* ── the arrival ────────────────────────────────────────────────────────── */
+
+/* The wipe. Reveals the drawing left to right without touching stroke
+   geometry — see the note in EventHero.tsx for why the dash-draw it replaced
+   could not work in this SVG. */
+.event-hero__draw {
+  clip-path: inset(0 100% 0 0);
+  animation: event-hero-wipe 1200ms cubic-bezier(0.22, 1, 0.36, 1) 150ms forwards;
+}
+
+.event-hero__rule,
+.event-hero__break {
+  opacity: 0;
+  animation: event-hero-fade 600ms ease-out 900ms forwards;
+}
+
+.event-hero__title,
+.event-hero__standfirst {
+  animation: event-hero-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.event-hero__standfirst {
+  animation-delay: 90ms;
+}
+
+/* The four headline figures land in sequence, left to right — the order a
+   reader takes them in anyway. 70ms apart: enough to read as motion, far too
+   short to be a wait. */
+.event-hero__fact {
+  animation: event-hero-rise 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(1000ms + var(--i, 0) * 70ms);
+}
+
+@keyframes event-hero-wipe {
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes event-hero-fade {
+  to { opacity: 1; }
+}
+
+@keyframes event-hero-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-hero__draw,
+  .event-hero__rule,
+  .event-hero__break,
+  .event-hero__title,
+  .event-hero__standfirst,
+  .event-hero__fact {
+    animation: none;
+    opacity: 1;
+    clip-path: none;
+    transform: none;
   }
 }
