@@ -45,6 +45,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -81,6 +82,41 @@ def held(subdir: str) -> set[str]:
     if not d.is_dir():
         return set()
     return {p.stem for p in d.glob("????-??-??.json")}
+
+
+def held_gas_documents() -> set[str]:
+    """The Petrobangla PDFs the gas archive already cites, by listing key.
+
+    Asked because a listing slot is not an energy day. `gas_days_published()`
+    maps a slot to slot-minus-one, which is right whenever Petrobangla files
+    every slot and wrong the moment it skips one: it skipped 06.09.26, so the
+    report under 07.09.26 is the 05->06 Sep window and belongs to energy day
+    2026-09-05. Keyed on days alone the watcher then asks forever for a
+    2026-09-06 that the listing cannot produce, spending MAX_ATTEMPTS chain
+    runs on it before backing off.
+
+    Each gas day records the document it was parsed from, and Petrobangla's own
+    filename carries the slot ("...Report (07.09.26).pdf"). So the honest
+    question is not "do we hold day K-1" but "have we already taken the document
+    served under slot K", and that is answerable from files the caller is
+    reading anyway — no fetch, which is the property that lets this run every
+    fifteen minutes.
+    """
+    d = PUBLIC / "petrobangla" / "daily"
+    if not d.is_dir():
+        return set()
+    seen: set[str] = set()
+    for p in d.glob("????-??-??.json"):
+        try:
+            meta = json.loads(p.read_text(encoding="utf-8")).get("meta", {})
+        except Exception:  # noqa: BLE001 — an unreadable day simply says nothing here
+            continue
+        name = str(meta.get("source_filename") or "")
+        m = re.search(r"\((\d{2})\.(\d{2})\.(\d{2})\)", name)
+        if m:
+            dd, mm, yy = m.groups()
+            seen.add(f"20{yy}-{mm}-{dd}")
+    return seen
 
 
 def load_state() -> dict:
@@ -246,7 +282,11 @@ def main() -> int:
     published_gas = gas_days_published()
     if not published_gas:
         notes.append("Petrobangla listing unreadable — gas unchecked this tick")
+    # Slots whose document the archive already cites, whatever day it landed on.
+    taken = held_gas_documents()
     for day, key in sorted(published_gas.items()):
+        if key in taken:
+            continue
         d = date.fromisoformat(day)
         if not (newest_possible - timedelta(days=LOOKBACK_GAS - 1) <= d <= newest_possible):
             continue
