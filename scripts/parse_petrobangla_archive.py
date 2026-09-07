@@ -511,7 +511,8 @@ def main():
                                             'sgfl.products', 'entities']),
         'report': dict(reference_no=None, period='8.00 to 8.00',
                        units=dict(gas='MMCFD', condensate='BBLD', lpg='Kg', products='BBLD'),
-                       report_date_label=label, report_date_start=energy_iso,
+                       # `ed`, not `energy_iso`: the window the document states.
+                       report_date_label=label, report_date_start=ed.isoformat(),
                        report_date_end=end.isoformat(), month_label=ed.strftime('%b, %Y')),
         'production': dict(fields=fields, subtotals=subtotals, grand_total=grand, field_count=len(fields)),
         'sgfl': dict(products={}, pipeline_metrics={}, pipeline_total=None),
