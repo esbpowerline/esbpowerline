@@ -18,7 +18,23 @@ export async function GET() {
     const snapshot = await getLiveGridSnapshot();
     return NextResponse.json(snapshot, {
       headers: {
-        'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+        /*
+          Kept in step with REVALIDATE_S in live-grid.server.ts, because the two
+          caches STACK. At 600s each a reader sat up to ~20 minutes behind NLDC,
+          and the hour-long `stale-while-revalidate` made the tail far worse on
+          a quiet day: SWR serves the stale copy immediately and refreshes
+          behind it, so the reader who triggers the refresh is not the one who
+          benefits from it.
+
+          Vercel consumes `s-maxage` for its edge cache and strips it from the
+          response, which is why the header a client sees is a bare
+          `Cache-Control: public`. That is worth knowing before checking this
+          from the outside: a request with a cache-busting query string skips
+          the edge entirely and will look fresh no matter how stale the cached
+          copy is. Ask for the URL the browser actually asks for, and read
+          `Age` and `X-Vercel-Cache`.
+        */
+        'Cache-Control': 'public, s-maxage=180, stale-while-revalidate=600',
       },
     });
   } catch (error) {
