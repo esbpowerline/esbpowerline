@@ -3256,12 +3256,33 @@ html.locale-bn .market-ticker-label {
    The stamps stay right-aligned when they drop, which is what the flex version
    wrapped to.
    
-   23rem is measured, not guessed: at a 16px root the title's min-content is
-   162px, the longest stamp ("Hourly Sep 7, 09:00 (9 AM)") is 155px, and the
-   column gap 12px — 329px of content, plus the card's 40px of padding. The
-   panel is 25.6rem at a 1920 viewport, so it keeps two columns there, and about
-   21.5rem at 1280, where it stacks rather than truncating. */
+   Both thresholds were found by probing the real container, after an estimate
+   derived from ink widths at a 1920 viewport proved wrong by more than 2rem —
+   the panel is ~20rem at a 1366 viewport, not the ~22.3rem that arithmetic
+   suggested, because `--snapshot-meta-size` is already a step smaller there.
+   Guessing this from a screenshot at one width does not work; if these move,
+   probe again rather than recompute.
+   
+   Measured: two columns fit down to about 19rem once the 12-hour restatement is
+   dropped, so 19rem is where the header finally stacks. Stacking earlier is not
+   free — it puts two lines between GRID TELEMETRY and the first tile, which
+   reads as a hole in the panel rather than as a wrap. */
+/* Before stacking, drop the 12-hour restatement.
+   
+   The header needs about 23rem for two columns and the 12-hour clock is nearly
+   2.6rem of that — "Hourly Sep 7, 12:00 (12 PM)" against "Hourly Sep 7, 12:00".
+   Stacking on its account cost two extra lines between GRID TELEMETRY and the
+   first tile, which read as a hole in the panel. The restatement is a
+   convenience for readers who do not think in 24-hour time, so it is the right
+   thing to spend first: the hour itself is still printed, in full, beside the
+   cadence that owns it. */
 @container home-snapshot (max-width: 23rem) {
+  .home-snapshot-segment__clock12 {
+    display: none;
+  }
+}
+
+@container home-snapshot (max-width: 19rem) {
   .home-snapshot-segment__head {
     grid-template-columns: minmax(0, 1fr);
   }
