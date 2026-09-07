@@ -7,7 +7,6 @@ import { EnergyDashboard } from '@/components/news/EnergyDashboard';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { formatSnapshotHeaderDate, localizeSnapshotLabel, localizeEnergyStatLabel } from '@/lib/i18n/homepage-copy';
 import { formatNumber } from '@/lib/utils';
-import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
 import { LIVE_BACKED_LABELS, mergeHomeSnapshot, type SnapshotSlot } from '@/lib/data/grid/home-snapshot-merge';
@@ -259,34 +258,28 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
     }),
   );
 
-  const simulateLive = isSimulatedTelemetryEnabled();
-
-  useEffect(() => {
-    if (!simulateLive) return;
-
-    const interval = setInterval(() => {
-      setStats(prev => prev.map((s) => {
-        // A tile carrying a real NLDC figure is never jittered — simulation
-        // exists to suggest movement where no live source was available.
-        if (live && liveValueFor(s.label, live) !== null) return s;
-        // Nor is one whose source has not filed: there is no figure to move,
-        // and `null + variation` is NaN.
-        if (s.value === null) return s;
-        if (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation') {
-          const variation = (Math.random() - 0.5) * 120;
-          const next = Math.max(12000, s.value + variation);
-          return { ...s, value: Math.round(next) };
-        }
-        if (s.label === 'Production Cost') {
-          const variation = (Math.random() - 0.5) * 0.04;
-          const next = Math.max(5.5, Math.min(7.5, s.value + variation));
-          return { ...s, value: parseFloat(next.toFixed(2)) };
-        }
-        return s;
-      }));
-    }, 24000);
-    return () => clearInterval(interval);
-  }, [simulateLive, live]);
+  /*
+    The simulated-movement loop is gone.
+    
+    It jittered a tile every 24s "to suggest movement where no live source was
+    available", skipping any tile the NLDC overlay had filled. But it did not
+    skip a tile filled from the PGCB daily report, which is just as much a
+    published figure — so Production Cost, read from `avgProductionCost`, was
+    being moved. Worse, it was clamped by `Math.min(7.5, …)`: on 2026-09-06 the
+    report states 7.548 Tk/kWh, the tile should read 7.55, and the panel showed
+    7.50. A hard bound silently capped a real figure.
+    
+    It ran only under `NODE_ENV !== 'production'`, so the live site never showed
+    an invented number. That is not much of a defence: development is where the
+    panel is read while it is being changed, and a fabricated figure there is
+    one that gets screenshotted and believed. It misled a review of this very
+    panel today.
+    
+    Nothing is left for it to do in any case. Ten of the twelve tiles are
+    live-backed, and the other two carry the daily report; a tile with no figure
+    is null and was skipped already. Every value on this panel now comes from a
+    source that published it.
+  */
 
   return (
     <div className="grid grid-cols-2 gap-[1px] bg-border/65 w-full h-full auto-rows-fr rounded-xl overflow-hidden border border-border/65">
@@ -325,7 +318,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
-                label={isLive ? liveTip : awaiting ? awaitingTip : simulateLive ? t('energy.simulated') : t('energy.indicative')}
+                label={isLive ? liveTip : awaiting ? awaitingTip : t('energy.indicative')}
                 alwaysShow
                 variant="chrome"
                 side="top"
@@ -335,11 +328,6 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                    </>
-                  ) : simulateLive && (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation' || s.label === 'Production Cost') ? (
-                    <>
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
                     </>
                   ) : (
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-muted-foreground/20 dark:bg-muted-foreground/10" />

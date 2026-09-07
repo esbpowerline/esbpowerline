@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { formatNumber } from '@/lib/utils';
 import { Zap, Activity, Leaf, Gauge, Flame, Cable, Sun, TrendingUp } from 'lucide-react';
-import { isSimulatedTelemetryEnabled } from '@/lib/telemetry-mode';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { localizeEnergyStatLabel } from '@/lib/i18n/homepage-copy';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
@@ -172,31 +171,12 @@ export function EnergyDashboard({
     }),
   );
 
-  const simulateLive = isSimulatedTelemetryEnabled();
-
-  useEffect(() => {
-    if (!simulateLive) return;
-
-    const interval = setInterval(() => {
-      setStats(prev => prev.map((s) => {
-        // Nothing to jitter on a tile whose source has not filed, and
-        // `null + variation` is NaN.
-        if (s.value === null) return s;
-        if (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation') {
-          const variation = (Math.random() - 0.5) * 120;
-          const next = Math.max(12000, s.value + variation);
-          return { ...s, value: Math.round(next) };
-        }
-        if (s.label === 'Production Cost') {
-          const variation = (Math.random() - 0.5) * 0.04;
-          const next = Math.max(5.5, Math.min(7.5, s.value + variation));
-          return { ...s, value: parseFloat(next.toFixed(2)) };
-        }
-        return s;
-      }));
-    }, 24000);
-    return () => clearInterval(interval);
-  }, [simulateLive]);
+  /* The simulated-movement loop is gone here for the same reason it is gone
+     from HomeSnapshotPanel: it moved figures that a source had published. This
+     copy had no NLDC guard at all, so it would jitter every non-null tile,
+     and its `Math.min(7.5, …)` clamp capped Production Cost below the 7.55
+     the 2026-09-06 report states. Dev-only, and a fabricated figure in dev is
+     still one that gets screenshotted and believed. */
 
   return (
     <div
@@ -229,23 +209,16 @@ export function EnergyDashboard({
                     ? locale === 'bn'
                       ? `${s.awaiting} এখনও এই দিনের হিসাব প্রকাশ করেনি`
                       : `${s.awaiting} has not published this day yet`
-                    : simulateLive
-                      ? t('energy.simulated')
-                      : t('energy.indicative')
+                    : t('energy.indicative')
                 }
                 alwaysShow
                 variant="chrome"
                 side="top"
               >
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
-                  {s.value !== null && simulateLive && (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation' || s.label === 'Production Cost') ? (
-                    <>
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />
-                    </>
-                  ) : (
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-muted-foreground/20 dark:bg-muted-foreground/10" />
-                  )}
+                  {/* No "simulated" state left to show — nothing on this panel
+                      is simulated now. */}
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-muted-foreground/20 dark:bg-muted-foreground/10" />
                 </span>
               </ModernTooltip>
             </span>
