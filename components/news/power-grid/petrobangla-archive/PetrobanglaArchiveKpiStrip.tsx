@@ -79,9 +79,8 @@ export function PetrobanglaArchiveKpiStrip({
   return (
     <>
       <div className={kpiShell} onClick={() => toggleTooltip('stress')}>
-        <Gauge className={cn('grid-explorer-kpi__icon shrink-0', stressClass)} />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Supply stress<GridProvenanceTag kind="D" className="ml-1.5" /></div>
+          <div className="grid-explorer-kpi__label"><Gauge className={cn("grid-explorer-kpi__icon", stressClass)} aria-hidden />Supply stress<GridProvenanceTag kind="D" className="ml-1.5" /></div>
           <div className={cn('grid-explorer-kpi__value', preview ? 'text-muted-foreground' : stressClass)}>
             {preview ? pending : kpis.stressScore}
           </div>
@@ -120,9 +119,8 @@ export function PetrobanglaArchiveKpiStrip({
       </div>
 
       <div className={kpiShell} onClick={() => toggleTooltip('total')}>
-        <Droplet className="grid-explorer-kpi__icon text-sky-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">National gas<GridProvenanceTag kind="P" className="ml-1.5" /></div>
+          <div className="grid-explorer-kpi__label"><Droplet className="grid-explorer-kpi__icon" aria-hidden />National gas<GridProvenanceTag kind="P" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{formatNumber(kpis.totalGas, 1)}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {kpis.totalGas < 2800 && <span className="text-red-500 font-bold">▼ </span>}
@@ -166,9 +164,8 @@ export function PetrobanglaArchiveKpiStrip({
       </div>
 
       <div className={kpiShell} onClick={() => toggleTooltip('power')}>
-        <Flame className="grid-explorer-kpi__icon text-red-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Power fulfillment<GridProvenanceTag kind="D" className="ml-1.5" /></div>
+          <div className="grid-explorer-kpi__label"><Flame className="grid-explorer-kpi__icon" aria-hidden />Power fulfillment<GridProvenanceTag kind="D" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">
             {preview ? pending : `${kpis.powerFulfillmentPct.toFixed(1)}%`}
           </div>
@@ -208,9 +205,8 @@ export function PetrobanglaArchiveKpiStrip({
       </div>
 
       <div className={kpiShell} onClick={() => toggleTooltip('lng')}>
-        <Layers className="grid-explorer-kpi__icon text-purple-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">LNG share<GridProvenanceTag kind="D" className="ml-1.5" /></div>
+          <div className="grid-explorer-kpi__label"><Layers className="grid-explorer-kpi__icon" aria-hidden />LNG share<GridProvenanceTag kind="D" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{preview ? pending : `${kpis.lngSharePct.toFixed(1)}%`}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {preview ? 'Loading production mix…' : `${formatNumber(kpis.lngGasMmcfd, 1)} MMCFD imported`}
@@ -241,9 +237,8 @@ export function PetrobanglaArchiveKpiStrip({
       </div>
 
       <div className={kpiShell} onClick={() => toggleTooltip('domestic')}>
-        <Activity className="grid-explorer-kpi__icon text-sky-600 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Domestic output<GridProvenanceTag kind="P" className="ml-1.5" /></div>
+          <div className="grid-explorer-kpi__label"><Activity className="grid-explorer-kpi__icon" aria-hidden />Domestic output<GridProvenanceTag kind="P" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{preview ? pending : formatNumber(kpis.domesticGas, 1)}</div>
           <p className="text-[9px] text-muted-foreground mt-1">
             {preview ? 'Loading field output…' : 'Own gas, excluding imports'}
@@ -278,9 +273,8 @@ export function PetrobanglaArchiveKpiStrip({
       </div>
 
       <div className={kpiShell} onClick={() => toggleTooltip('wells')}>
-        <AlertTriangle className="grid-explorer-kpi__icon text-amber-500 shrink-0" />
         <div className="min-w-0">
-          <div className="grid-explorer-kpi__label">Active wells<GridProvenanceTag kind="P" className="ml-1.5" /></div>
+          <div className="grid-explorer-kpi__label"><AlertTriangle className="grid-explorer-kpi__icon" aria-hidden />Active wells<GridProvenanceTag kind="P" className="ml-1.5" /></div>
           <div className="grid-explorer-kpi__value">{preview || kpis.activeWells == null ? pending : Math.round(kpis.activeWells)}</div>
           {mode !== 'simple' && (
             <p className="text-[9px] text-muted-foreground mt-1">

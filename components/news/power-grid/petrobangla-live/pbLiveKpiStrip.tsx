@@ -31,9 +31,9 @@ function PbLiveKpiCard({
 }) {
   return (
     <div className="grid-explorer-kpi stat group">
-      <Icon className={cn('grid-explorer-kpi__icon shrink-0', iconClassName)} />
       <div className="min-w-0">
         <GridKpiLabel>
+          <Icon className={cn('grid-explorer-kpi__icon', iconClassName)} aria-hidden />
           {label}
           <GridProvenanceTag kind={provenance} className="ml-1.5" />
         </GridKpiLabel>
@@ -67,7 +67,6 @@ export function PbLiveKpiStrip({
     <>
       <PbLiveKpiCard
         icon={Activity}
-        iconClassName="text-sky-500"
         label={
           <>
             {labelPrefix} Avg Gas

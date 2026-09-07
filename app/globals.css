@@ -5637,9 +5637,29 @@ html.theme-dark .locale-toggle__btn--active:hover {
 
 /* The mark sits against the figure, raised off its baseline so a 15px box does
    not sink below an 18px number. */
+/* The P/D mark as a true superscript, where it rides a headline figure.
+   
+   A superscript reads as one because it is SMALLER than its base, not only
+   because it is raised. At the shared 16px against an 18px figure the mark was
+   already offset 0.28em and still read as a badge parked beside the number:
+   nearly the cap height of the thing it annotates.
+   
+   This is a deliberate, scoped exception to the fixed 16px on
+   `.grid-provenance-tag`, whose reason — "a mark that shrinks with its context
+   stops being readable in the smallest of them" — is about label rows, legends
+   and hover panels. This is the opposite case: the largest text on the tile,
+   where 13px with a 9px glyph is still comfortably legible and is the only size
+   that reads as an annotation rather than a second element in the row.
+   
+   Scoped on purpose. The same mark sits in table cells and hover panels keyed
+   to `vertical-align: middle`, where marks stack in columns and a raise would
+   break the alignment those rules were written to fix. */
 .grid-explorer-kpi__mark {
-  margin-left: 0.35rem;
-  vertical-align: 0.28em;
+  margin-left: 0.3rem;
+  width: 0.8125rem;
+  height: 0.8125rem;
+  font-size: 0.5625rem;
+  vertical-align: 0.5em;
 }
 
 /* The text block sat at its natural width — 131px of content in a 237px tile,
@@ -8042,11 +8062,16 @@ html.theme-dark .reserve-verdict--blue { color: hsl(210 85% 68%); }
   text-transform: none !important;
 }
 
-/* The KPI label is a flex row (see above), so the badge is a flex item and the
-   superscript raise that suits a running heading only pushes it off the line. */
-.grid-explorer-kpi__label sup {
-  top: 0 !important;
-}
+/* Deleted, not amended: this cancelled the raise on the KPI label's cadence
+   badge, so "Daily" sat on the baseline as ordinary small text while the same
+   component rode raised against every heading in the explorer.
+   
+   Its premise had already expired. It read "the KPI label is a flex row, so the
+   badge is a flex item and the superscript raise only pushes it off the line" —
+   true when written, and the label was returned to normal flow in a later
+   commit precisely so its `<sup>` would behave. The override outlived the
+   layout it was compensating for, which is the whole hazard of a defensive
+   `!important`: nothing fails when the reason goes away. */
 
 .grid-explorer-chart-card__sub {
   @apply text-xs text-muted-foreground mt-0.5 leading-relaxed;
