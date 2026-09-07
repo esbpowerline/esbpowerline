@@ -62,7 +62,10 @@ export function EventStudyDateLink({ selectedDate }: { selectedDate: string }) {
             study ? 'text-white' : 'text-[hsl(249_48%_46%)] dark:text-[hsl(247_70%_82%)]',
           )}
         />
-        <span className="whitespace-nowrap">{study ? `In: ${study.title}` : 'Event studies'}</span>
+        {/* "Event Study", matching the label the page itself wears in its hero
+            kicker. The tooltip above stays plural — it describes the set of
+            studies built from this archive, which is a different statement. */}
+        <span className="whitespace-nowrap">{study ? `In: ${study.title}` : 'Event Study'}</span>
       </Link>
     </div>
   );
