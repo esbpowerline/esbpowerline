@@ -193,6 +193,20 @@ def file_from_extractor_drop(day: date) -> Path | None:
         # Nothing reachable to file into. The last entry is the local archive,
         # which is this machine's store whether or not it has been created yet.
         store = PGCB_SOURCE_DIRS[-1]
+        # ...unless it is a Windows path and this is not Windows.
+        #
+        # The defaults above are Hamim's desktop drives, used only when
+        # `ESB_PGCB_ARCHIVE` is unset. On the Pi that variable comes from
+        # `ingest.env`, which the runner exports — but a chain invoked by hand
+        # over SSH does not source it, and then `mkdir(parents=True)` created a
+        # directory literally named `C:\ESB-Grid-Archive-pgcb\...` in the
+        # repo root and filed a 525 KB workbook inside it. Harmless only because
+        # the scheduled poll had already filed the same day properly; on a
+        # machine where the variable is genuinely missing it would be a store
+        # nothing else looks in, which is the failure this whole function
+        # exists to prevent.
+        if os.name != "nt" and re.match(r"^[A-Za-z]:[\\/]", str(store)):
+            return None
         try:
             store.mkdir(parents=True, exist_ok=True)
         except Exception:  # noqa: BLE001
