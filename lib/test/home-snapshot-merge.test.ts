@@ -71,8 +71,8 @@ describe('mergeHomeSnapshot', () => {
   });
 
   it('carries a real figure through unchanged', () => {
-    const slots = mergeHomeSnapshot([stat('Peak Generation', 16181)]);
-    const peak = slots.find((s) => s.label === 'Peak Generation');
+    const slots = mergeHomeSnapshot([stat('Daily Generation', 16181)]);
+    const peak = slots.find((s) => s.label === 'Daily Generation');
     expect(peak?.value).toBe(16181);
     expect(peak?.awaiting).toBeUndefined();
   });
@@ -99,8 +99,8 @@ describe('mergeHomeSnapshot', () => {
     expect(LIVE_BACKED_LABELS).toEqual(
       new Set([
         'Current Demand',
-        'Peak Demand',
-        'Peak Generation',
+        'Current Supply',
+        'Current Generation',
         'Load Shedding',
         'Gas Generation',
         'Coal Generation',

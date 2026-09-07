@@ -199,16 +199,26 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
       return live.latest.demandMw;
     case 'Load Shedding':
       return live.latest.loadShedMw;
-    case 'Peak Demand':
-      return live.today.maxDemandMw;
+    // Supply as NLDC prints it for this hour, off the same row as demand and
+    // load shed — so the three reconcile on the panel: 15,463 − 13,247 = 2,216
+    // at 2026-09-07 12:00.
+    case 'Current Supply':
+      return live.latest.supplyMw;
     // Every case below comes off the generation table, which is the table the
     // reconciliation covers. When the printed total stops matching its own
     // components, that table is mis-parsed or mis-published, so the tile
     // falls back to the daily report rather than showing a confident green
     // dot over a number we cannot vouch for. The demand-side tiles above
     // are unaffected -- they are parsed from the other page.
-    case 'Peak Generation':
-      return live.reconciles === false ? null : live.today.maxGenerationMw;
+    // The generation table's own printed total for this hour — not a maximum
+    // derived across the window. It was `today.maxGenerationMw`, which is a
+    // real figure but a different one: on 2026-09-07 the page printed 14,230 at
+    // 12:00 while the tile showed 14,852, the day's high recorded at 00:00. The
+    // panel's fuel tiles are all current-hour, and they sum to exactly the
+    // printed total, so a reader adding them up found a 622 MW gap against the
+    // headline. The headline is now the same hour as its own components.
+    case 'Current Generation':
+      return live.reconciles === false ? null : live.latest.totalMw;
     case 'Gas Generation':
       return live.reconciles === false ? null : live.latest.byFuel.gasMw;
     case 'Coal Generation':
@@ -262,7 +272,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
         // Nor is one whose source has not filed: there is no figure to move,
         // and `null + variation` is NaN.
         if (s.value === null) return s;
-        if (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation') {
+        if (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
           return { ...s, value: Math.round(next) };
@@ -326,7 +336,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
                     </>
-                  ) : simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation' || s.label === 'Production Cost') ? (
+                  ) : simulateLive && (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation' || s.label === 'Production Cost') ? (
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />

@@ -182,7 +182,7 @@ export function EnergyDashboard({
         // Nothing to jitter on a tile whose source has not filed, and
         // `null + variation` is NaN.
         if (s.value === null) return s;
-        if (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation') {
+        if (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation') {
           const variation = (Math.random() - 0.5) * 120;
           const next = Math.max(12000, s.value + variation);
           return { ...s, value: Math.round(next) };
@@ -238,7 +238,7 @@ export function EnergyDashboard({
                 side="top"
               >
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
-                  {s.value !== null && simulateLive && (s.label === 'Current Demand' || s.label === 'Peak Demand' || s.label === 'Peak Generation' || s.label === 'Production Cost') ? (
+                  {s.value !== null && simulateLive && (s.label === 'Current Demand' || s.label === 'Current Supply' || s.label === 'Current Generation' || s.label === 'Production Cost') ? (
                     <>
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-500" />

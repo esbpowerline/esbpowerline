@@ -7,6 +7,12 @@ import { SAMPLE_DAILY_REPORT, SAMPLE_SREDA } from '@/lib/test/fixtures/daily-rep
  * The archive day page states its figures in a sentence, and a sentence is a
  * new place a figure can be invented.
  *
+ * The peaks in the sentence come from `systemStats` rather than from the tile
+ * list, since the homepage's tiles are a layout contract and two of them were
+ * replaced by hourly figures. `summaryFrom` below derives them the same way the
+ * server does, so the "even the peaks are missing" case still exercises the
+ * real path.
+ *
  * The tiles were already covered by `home-snapshot-absence` — that is why this
  * page reuses `buildHomeSnapshotFromDaily` rather than reading `systemStats`
  * itself. What is new here is the prose: it goes into the `<title>`'s sibling
@@ -16,11 +22,22 @@ import { SAMPLE_DAILY_REPORT, SAMPLE_SREDA } from '@/lib/test/fixtures/daily-rep
  * with a hedge.
  */
 
+const peaksFrom = (report: any) => {
+  const s = report?.systemStats ?? {};
+  const gen = Math.max(s.eveningPeakGen ?? 0, s.dayPeakGen ?? 0);
+  const dem = Math.max(s.eveningPeakDemand ?? 0, s.dayPeakDemand ?? 0);
+  return {
+    generationMw: gen > 0 ? Math.round(gen) : null,
+    demandMw: dem > 0 ? Math.round(dem) : null,
+  };
+};
+
 const summaryFrom = (report: unknown, overrides: Partial<ArchiveDaySummary> = {}): ArchiveDaySummary => ({
   date: '2024-08-12',
   stats: buildHomeSnapshotFromDaily(report as never, SAMPLE_SREDA as never).filter(
     (s) => s.label !== 'Current Demand',
   ),
+  peaks: peaksFrom(report),
   fuels: [],
   fuelTotalGwh: null,
   sources: {},
@@ -73,7 +90,13 @@ describe('archive day description', () => {
   it('falls back to naming the report when even the peaks are missing', () => {
     const noPeaks = {
       ...SAMPLE_DAILY_REPORT,
-      systemStats: { ...SAMPLE_DAILY_REPORT.systemStats, eveningPeakGen: 0, dayPeakGen: 0 },
+      systemStats: {
+        ...SAMPLE_DAILY_REPORT.systemStats,
+        eveningPeakGen: 0,
+        dayPeakGen: 0,
+        eveningPeakDemand: 0,
+        dayPeakDemand: 0,
+      },
     };
     const text = describeDay(summaryFrom(noPeaks));
     expect(text).toContain('12 August 2024');

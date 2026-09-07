@@ -73,8 +73,8 @@ export interface HomeSnapshotStat {
  */
 export const DAILY_SNAPSHOT_LABELS = [
   'Current Demand',
-  'Peak Demand',
-  'Peak Generation',
+  'Current Supply',
+  'Current Generation',
   'Daily Generation',
   'Load Shedding',
   'Energy Unserved',
@@ -189,8 +189,6 @@ export function buildHomeSnapshotFromDaily(
   sreda?: SredaDailyData | null,
 ): HomeSnapshotStat[] {
   const s = data.systemStats;
-  const peakDemand = Math.max(s.eveningPeakDemand, s.dayPeakDemand ?? 0);
-  const peakGeneration = Math.max(s.eveningPeakGen, s.dayPeakGen);
   // National gas production, and nothing else.
   //
   // This used to fall back to `totalGasSuppliedPower` when Petrobangla had not
@@ -227,8 +225,18 @@ export function buildHomeSnapshotFromDaily(
     // under its own name. Here the honest answer on a day with no live feed is
     // that nobody has published a current demand, which is what `awaiting` says.
     tile('Current Demand', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Activity' }),
-    tile('Peak Demand', known(Math.round(peakDemand)), { unit: POWER_UNIT, icon: 'TrendingUp' }),
-    tile('Peak Generation', known(Math.round(peakGeneration)), { unit: POWER_UNIT, icon: 'Zap' }),
+    // Both are `awaiting('NLDC')` here for the same reason `Current Demand`
+    // above is: a CURRENT figure exists only on the hourly page. The daily
+    // report publishes peaks — a maximum over the day, at an instant PGCB
+    // names — and printing one under a tile called "Current Generation" would
+    // be the substitution rule 2 of the doctrine forbids: a different quantity
+    // under an unchanged label.
+    //
+    // The peaks are not lost. `describeDay` reads them off the day's own
+    // `systemStats` now rather than off these tiles, and the Grid Explorer
+    // prints the evening and day peaks under their own names.
+    tile('Current Supply', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'TrendingUp' }),
+    tile('Current Generation', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Zap' }),
     // `GridSystemStats.totalEnergyGen` is explicitly nullable and says why:
     // PGCB leaves the cell empty on some days, and 42 days of early 2018
     // published a headline "0.0 MKWh" as a result. This read `== null ? 0`,

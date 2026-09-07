@@ -33,8 +33,14 @@ import { parseIsoDate } from '@/lib/data/grid/date-utils';
  * softer rule about what a missing figure means.
  */
 
-/** The live-only tile. Meaningless on a day that closed years ago. */
-const LIVE_ONLY_LABELS = new Set(['Current Demand']);
+/** The live-only tiles. Meaningless on a day that closed years ago.
+ *
+ * All three are hourly figures off NLDC's own pages, so `buildHomeSnapshotFromDaily`
+ * emits them as `awaiting('NLDC')` — correct on the homepage, where the live
+ * overlay fills them, and noise on an archive page that will never have a live
+ * feed. Supply and Generation joined the set when they replaced the two peak
+ * tiles: the peaks are still published, just not through here. */
+const LIVE_ONLY_LABELS = new Set(['Current Demand', 'Current Supply', 'Current Generation']);
 
 export interface ArchiveFuelRow {
   name: string;
@@ -49,6 +55,17 @@ export interface ArchiveFuelRow {
 export interface ArchiveDaySummary {
   date: string;
   stats: HomeSnapshotStat[];
+  /**
+   * The day's peaks, for the prose.
+   *
+   * Read straight off `systemStats` rather than looked up by label in `stats`,
+   * which is what `describeDay` used to do. That coupling was invisible and
+   * fragile: the homepage's tile list is a layout contract that changes for
+   * layout reasons, and when `Peak Generation` and `Peak Demand` were replaced
+   * by hourly tiles this page would have quietly dropped its opening sentence
+   * with nothing failing. A daily page should read the daily figures.
+   */
+  peaks: { generationMw: number | null; demandMw: number | null };
   fuels: ArchiveFuelRow[];
   /** Total of the published fuel rows, for the bar denominator only. */
   fuelTotalGwh: number | null;
@@ -127,15 +144,15 @@ export function describeDay(summary: ArchiveDaySummary): string {
   const readable = formatArchiveDate(summary.date);
   const parts: string[] = [];
 
-  const peakGen = statValue(summary.stats, 'Peak Generation');
-  const peakDemand = statValue(summary.stats, 'Peak Demand');
+  const peakGen = summary.peaks.generationMw;
+  const peakDemand = summary.peaks.demandMw;
   if (peakGen && peakDemand) {
     parts.push(
-      `Bangladesh's national grid reached a peak generation of ${number(peakGen)} MW against a peak demand of ${number(peakDemand)} MW on ${readable}.`,
+      `Bangladesh's national grid reached a peak generation of ${peakGen.toLocaleString('en-US')} MW against a peak demand of ${peakDemand.toLocaleString('en-US')} MW on ${readable}.`,
     );
   } else if (peakGen) {
     parts.push(
-      `Bangladesh's national grid reached a peak generation of ${number(peakGen)} MW on ${readable}.`,
+      `Bangladesh's national grid reached a peak generation of ${peakGen.toLocaleString('en-US')} MW on ${readable}.`,
     );
   } else {
     parts.push(`PGCB's daily report for Bangladesh's national grid on ${readable}.`);
@@ -188,9 +205,20 @@ export const loadArchiveDaySummary = cache(
 
     const { fuels, total } = fuelRows(data);
 
+    const sysStats = data.systemStats;
+    const peakGenerationMw = Math.max(sysStats.eveningPeakGen ?? 0, sysStats.dayPeakGen ?? 0);
+    const peakDemandMw = Math.max(sysStats.eveningPeakDemand ?? 0, sysStats.dayPeakDemand ?? 0);
+
     return {
       date: parsed,
       stats,
+      peaks: {
+        // `> 0`, not `!= null`: a day PGCB filed with both peaks empty reads 0
+        // through the maxima above, and a sentence claiming a peak of 0 MW is
+        // one no report has made.
+        generationMw: peakGenerationMw > 0 ? Math.round(peakGenerationMw) : null,
+        demandMw: peakDemandMw > 0 ? Math.round(peakDemandMw) : null,
+      },
       fuels,
       fuelTotalGwh: total,
       sources: {

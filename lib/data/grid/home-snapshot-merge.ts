@@ -38,8 +38,12 @@ export const SNAPSHOT_SLOTS: readonly SnapshotSlotSpec[] = [
   // it must not borrow the evening peak, which is a different quantity
   // measured at a different moment. (`Peak Demand` below carries that.)
   { label: 'Current Demand', unit: POWER_UNIT, icon: 'Activity', source: 'NLDC', liveBacked: true },
-  { label: 'Peak Demand', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB', liveBacked: true },
-  { label: 'Peak Generation', unit: POWER_UNIT, icon: 'Zap', source: 'PGCB', liveBacked: true },
+  // NLDC, not PGCB, and current rather than peak. Both are read straight off
+  // the hourly pages: supply from the demand/supply table, generation from the
+  // printed total on the generation table. The daily report has no figure for
+  // either, so with the live feed down they say who they are waiting on.
+  { label: 'Current Supply', unit: POWER_UNIT, icon: 'TrendingUp', source: 'NLDC', liveBacked: true },
+  { label: 'Current Generation', unit: POWER_UNIT, icon: 'Zap', source: 'NLDC', liveBacked: true },
   { label: 'Daily Generation', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB' },
   { label: 'Load Shedding', unit: POWER_UNIT, icon: 'Activity', source: 'PGCB', liveBacked: true },
   { label: 'Energy Unserved', unit: POWER_UNIT, icon: 'Gauge', source: 'PGCB' },

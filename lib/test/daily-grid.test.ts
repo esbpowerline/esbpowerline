@@ -258,8 +258,8 @@ describe('home-snapshot', () => {
     expect(stats).toHaveLength(12);
     expect(stats.map((s) => s.label)).toEqual([
       'Current Demand',
-      'Peak Demand',
-      'Peak Generation',
+      'Current Supply',
+      'Current Generation',
       'Daily Generation',
       'Load Shedding',
       'Energy Unserved',
@@ -276,8 +276,18 @@ describe('home-snapshot', () => {
     expect(stats[0].value).toBeNull();
     expect(stats[0].awaiting).toBe('NLDC');
     expect(stats[0].unit).toBe(POWER_UNIT);
-    expect(stats[2].label).toBe('Peak Generation');
-    expect(stats[2].value).toBe(16181);
+    // Current Supply and Current Generation are hourly figures off NLDC's own
+    // pages, so a daily report yields held places for both, exactly as it does
+    // for Current Demand above. They replaced the two peak tiles: a peak is a
+    // maximum over the day at an instant PGCB names, and printing one under a
+    // tile called "Current Generation" would put a different quantity under an
+    // unchanged label.
+    expect(stats[1].label).toBe('Current Supply');
+    expect(stats[1].value).toBeNull();
+    expect(stats[1].awaiting).toBe('NLDC');
+    expect(stats[2].label).toBe('Current Generation');
+    expect(stats[2].value).toBeNull();
+    expect(stats[2].awaiting).toBe('NLDC');
     expect(stats[2].unit).toBe(POWER_UNIT);
     expect(stats[3].value).toBe(gwhToAvgMw(354.94));
     expect(stats[3].unit).toBe(POWER_UNIT);

@@ -29,6 +29,10 @@ const ENERGY_STAT_LABELS_BN: Record<string, string> = {
   'RE Grid Share': 'নবায়নযোগ্য গ্রিড অংশ',
   'System Loss': 'সিস্টেম লস',
   'Gas Supply': 'গ্যাস সরবরাহ',
+  'Current Supply': 'বর্তমান সরবরাহ',
+  'Current Generation': 'বর্তমান উৎপাদন',
+  // Kept: the archive day pages and the Grid Explorer still print the peaks
+  // under their own names, and this map is shared.
   'Peak Demand': 'পিক চাহিদা',
   'Peak Generation': 'পিক উৎপাদন',
   'Energy Unserved': 'অপূরণীয় বিদ্যুৎ',
