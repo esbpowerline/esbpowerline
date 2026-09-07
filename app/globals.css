@@ -3220,11 +3220,16 @@ html.locale-bn .market-ticker-label {
   justify-self: end;
 }
 
-.home-snapshot-segment__updated--hourly {
+/* Daily beside the title, hourly beside the kicker — the pairing that keeps the
+   widest row as narrow as it can be. See the note in HomeSnapshotPanel.tsx: the
+   two long items are the title and the hourly stamp, so putting them on the same
+   row made that row the width of both. DOM order matches, so reading order and
+   visual order do not disagree. */
+.home-snapshot-segment__updated--daily {
   grid-row: 1;
 }
 
-.home-snapshot-segment__updated--daily {
+.home-snapshot-segment__updated--hourly {
   grid-row: 2;
 }
 

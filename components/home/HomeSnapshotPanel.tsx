@@ -455,17 +455,29 @@ function SnapshotSegment({
               // wears, so the hourly stamp wears it too, and the daily stamp
               // takes the slower colour. A reader can tell at a glance which
               // half of the panel a figure came from without reading a word.
+              //
+              // DAILY FIRST, and the order is load-bearing rather than a
+              // preference. The header is two columns and the widest row sets
+              // the width of the whole thing. Its four items are two long and
+              // two short: "System Snapshot" and "Hourly Sep 7, 09:00 (9 AM)"
+              // against "GRID TELEMETRY" and "Daily Sep 5". Pairing the two
+              // long ones on row 1 made that row the width of both, which is
+              // what pushed the header into wrapping and truncating at tighter
+              // widths. One long and one short per row is the shortest the
+              // widest row can be, so the truncation has nowhere left to come
+              // from. The stamps keep their own colours, so nothing about which
+              // cadence is which depends on the order.
               <>
+                <span className="home-snapshot-segment__updated home-snapshot-segment__updated--daily">
+                  {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
+                  <time dateTime={dailyDay ?? undefined}>{compactHeaderDate}</time>
+                </span>
                 <span className="home-snapshot-segment__updated home-snapshot-segment__updated--hourly">
                   {locale === 'bn' ? 'ঘণ্টাভিত্তিক ' : 'Hourly '}
                   <time dateTime={live!.asOf}>{liveStamp}</time>
                   {liveHour12 ? (
                     <span className="home-snapshot-segment__clock12">({liveHour12})</span>
                   ) : null}
-                </span>
-                <span className="home-snapshot-segment__updated home-snapshot-segment__updated--daily">
-                  {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
-                  <time dateTime={dailyDay ?? undefined}>{compactHeaderDate}</time>
                 </span>
               </>
             ) : (
