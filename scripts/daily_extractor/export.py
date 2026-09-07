@@ -152,6 +152,16 @@ def deploy(
     return written
 
 
+def _stated_window_iso(value: object) -> str | None:
+    """`value` as an ISO date string, or None if it is not one."""
+    if not isinstance(value, str):
+        return None
+    try:
+        return date.fromisoformat(value).isoformat()
+    except ValueError:
+        return None
+
+
 def deploy_petrobangla(
     energy: date,
     petrobangla_data: dict | None,
@@ -187,8 +197,15 @@ def deploy_petrobangla(
     # published. The parser now reads the header and reports the real window;
     # this is what makes the file, the index entry and the citation follow it.
     report = petrobangla_data.get("report", {})
-    stated = report.get("report_date_start")
-    iso = stated if isinstance(stated, str) and len(stated) == 10 else energy.isoformat()
+    # Parsed as a date, not measured. `len(stated) == 10` was the first version
+    # of this check and it validates nothing that matters: "../../../x" is
+    # exactly ten characters, and this value becomes a filename joined onto both
+    # the staging and the public directory. Nothing reaches here with a hostile
+    # payload today — the parser writes `ed.isoformat()` — but a length check
+    # that reads as validation and is not one is how that stops being true
+    # quietly. `date.fromisoformat` accepts exactly the shape we want and
+    # rejects every path separator.
+    iso = _stated_window_iso(report.get("report_date_start")) or energy.isoformat()
     if iso != energy.isoformat():
         print(f"  gas window: document states {iso}, not the requested {energy.isoformat()} — filing under {iso}")
     json_name = f"{iso}.json"
