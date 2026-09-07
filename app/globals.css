@@ -3067,6 +3067,11 @@ html.locale-bn .market-ticker-label {
     0 0 0 1px hsl(var(--primary) / 0.04) inset;
   overflow: hidden;
   isolation: isolate;
+  /* Named container for the header's stacking rule — see the
+     @container block below. `inline-size` only, so nothing about the
+     panel's height is contained. */
+  container-type: inline-size;
+  container-name: home-snapshot;
 }
 
 @media (min-width: 1024px) {
@@ -3122,7 +3127,14 @@ html.locale-bn .market-ticker-label {
  */
 .home-snapshot-segment__head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* `min-content`, NOT 0. A 0 minimum lets the title column shrink past the
+     word "Snapshot" and the panel ellipsises its own name — "System Sna…" at a
+     1280 viewport. That is the exact failure the note on __title-link below
+     has warned about since the flex version, and converting this to a grid
+     reintroduced it. The title keeps its min-content width; when the two
+     columns genuinely cannot both fit, the container query at the bottom of
+     this block stacks them instead of truncating anything. */
+  grid-template-columns: minmax(min-content, 1fr) auto;
   align-items: baseline;
   column-gap: 0.75rem;
   row-gap: 0.2rem;
@@ -3220,11 +3232,10 @@ html.locale-bn .market-ticker-label {
   justify-self: end;
 }
 
-/* Daily beside the title, hourly beside the kicker — the pairing that keeps the
-   widest row as narrow as it can be. See the note in HomeSnapshotPanel.tsx: the
-   two long items are the title and the hourly stamp, so putting them on the same
-   row made that row the width of both. DOM order matches, so reading order and
-   visual order do not disagree. */
+/* Daily beside the title, hourly beside the kicker. A balance choice — the two
+   columns are shared by both rows, so this changes where the whitespace falls
+   and not how much width the header needs. DOM order matches, so reading order
+   and visual order do not disagree. */
 .home-snapshot-segment__updated--daily {
   grid-row: 1;
 }
@@ -3233,9 +3244,24 @@ html.locale-bn .market-ticker-label {
   grid-row: 2;
 }
 
-/* Narrow panels stack instead of squeezing the title. The stamps keep their
-   own rows and stay right-aligned, which is what the flex version wrapped to. */
-@media (max-width: 520px) {
+/* Narrow panels stack instead of squeezing the title.
+   
+   Keyed on the PANEL, not the viewport. This header lives in the homepage's
+   right rail, whose width does not track the window in any simple way — at a
+   1280 viewport the rail is narrow while the viewport is not, which is why a
+   viewport media query never fired where the truncation actually happened. The
+   card declares itself a container (below) so the question asked is the only
+   one that matters: is there room in *this* panel.
+   
+   The stamps stay right-aligned when they drop, which is what the flex version
+   wrapped to.
+   
+   23rem is measured, not guessed: at a 16px root the title's min-content is
+   162px, the longest stamp ("Hourly Sep 7, 09:00 (9 AM)") is 155px, and the
+   column gap 12px — 329px of content, plus the card's 40px of padding. The
+   panel is 25.6rem at a 1920 viewport, so it keeps two columns there, and about
+   21.5rem at 1280, where it stacks rather than truncating. */
+@container home-snapshot (max-width: 23rem) {
   .home-snapshot-segment__head {
     grid-template-columns: minmax(0, 1fr);
   }

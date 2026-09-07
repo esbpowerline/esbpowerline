@@ -456,17 +456,21 @@ function SnapshotSegment({
               // takes the slower colour. A reader can tell at a glance which
               // half of the panel a figure came from without reading a word.
               //
-              // DAILY FIRST, and the order is load-bearing rather than a
-              // preference. The header is two columns and the widest row sets
-              // the width of the whole thing. Its four items are two long and
-              // two short: "System Snapshot" and "Hourly Sep 7, 09:00 (9 AM)"
-              // against "GRID TELEMETRY" and "Daily Sep 5". Pairing the two
-              // long ones on row 1 made that row the width of both, which is
-              // what pushed the header into wrapping and truncating at tighter
-              // widths. One long and one short per row is the shortest the
-              // widest row can be, so the truncation has nowhere left to come
-              // from. The stamps keep their own colours, so nothing about which
-              // cadence is which depends on the order.
+              // Daily first, so the long stamp sits under the short kicker
+              // rather than beside the long title.
+              //
+              // This is a balance choice and NOT what prevents truncation — an
+              // earlier version of this comment claimed it was, and that was
+              // wrong. The header's two columns are shared by both rows, so the
+              // width it needs is max(left items) + max(right items) whichever
+              // row each sits on; swapping them moves whitespace around and
+              // changes the total by nothing. What actually keeps the panel's
+              // own name intact is the title column's `min-content` floor and
+              // the container query that stacks the header when the panel is
+              // genuinely too narrow — both in globals.css.
+              //
+              // The stamps keep their own colours, so which cadence is which
+              // never depended on the order.
               <>
                 <span className="home-snapshot-segment__updated home-snapshot-segment__updated--daily">
                   {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
