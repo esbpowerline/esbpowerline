@@ -3139,7 +3139,21 @@ html.locale-bn .market-ticker-label {
   column-gap: 0.75rem;
   row-gap: 0.2rem;
   min-height: auto;
-  padding-bottom: 0px;
+  /* Balance the header in its own space.
+     
+     The card pads its top by --snapshot-pad and separates its three rows —
+     header, tiles, footer — by --hero-slot-gap, so the header sat 20px below
+     the card's edge and only 10px above the first tile. Measured at a 1920
+     viewport before this: 21px above the title's ink, 10px below the kicker's.
+     It read as a block pushed upward rather than a header sitting in a gap.
+     
+     Expressed against the two variables rather than as the 11px that would
+     have equalised it today: the space below the header is this padding plus
+     the row gap, so subtracting the gap from the card's own padding makes the
+     two sides the same by construction, at every breakpoint and whatever those
+     tokens are later retuned to. --snapshot-pad's floor (0.875rem) is above
+     --hero-slot-gap (0.625rem), so this cannot go negative. */
+  padding-bottom: calc(var(--snapshot-pad, 1.125rem) - var(--hero-slot-gap));
 }
 
 .home-snapshot-segment__title-block,
