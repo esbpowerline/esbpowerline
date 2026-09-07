@@ -335,7 +335,6 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
       <GridKpiCell
         icon={Activity}
-        iconClassName="text-amber-500"
         label={
           <>
             {/* P1's row, in full — the same reasoning as the generation tile
@@ -408,7 +407,6 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
       <GridKpiCell
         icon={TrendingDown}
-        iconClassName="text-destructive"
         // "Load Shedding" named a figure this is not. The value is
         // eveningPeakDemand - eveningPeakGen, which is why it carries a D: PGCB
         // prints load shedding of its own, zone by zone, and on 2026-08-14 that
@@ -486,7 +484,6 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
       <GridKpiCell
         icon={Factory}
-        iconClassName="text-violet-500"
         label={
           <>
             Capacity Idle
@@ -572,7 +569,6 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
       <GridKpiCell
         icon={Droplet}
-        iconClassName="text-sky-500"
         label={
           <>
             Gas Supply
@@ -702,7 +698,6 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
       <GridKpiCell
         icon={TakaIcon}
-        iconClassName="text-emerald-500"
         label={
           <>
             {/* P1's block title. "Cost of Power" was ours, and it named a rate

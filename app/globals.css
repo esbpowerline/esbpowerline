@@ -5549,8 +5549,21 @@ html.theme-dark .locale-toggle__btn--active:hover {
    figure 8px below theirs. Every tile is the same height, so aligning the
    content to the top of the box lines the labels and the figures up across the
    whole strip, which is the row a reader scans horizontally. */
+/* An icon gutter beside a LEFT-aligned text column.
+   
+   The text was centred — inherited, not set here — while the icon sat in a
+   gutter at the left edge. So the three lines each began at a different x
+   (label 505, value 528, hint further right again at a 1920 viewport) and the
+   icon floated alone against a ragged column with dead space between it and the
+   label it belongs to. That is what made a perfectly ordinary gutter layout
+   read as broken.
+   
+   Stated here rather than left to inherit: this tile owns its alignment. With
+   one left edge the icon reads as the head of the column instead of an
+   ornament parked in the corner. */
 .grid-explorer-kpi {
-  @apply flex items-start justify-start gap-3.5 relative overflow-visible transition-all duration-300;
+  @apply flex items-start justify-start gap-2.5 relative overflow-visible transition-all duration-300;
+  text-align: left;
   padding: 0.875rem 1rem !important;
   background-color: color-mix(in srgb, hsl(var(--card)) 92%, transparent) !important;
   border: 1px solid hsl(var(--border) / 0.55) !important;
@@ -5563,10 +5576,32 @@ html.theme-dark .locale-toggle__btn--active:hover {
   box-shadow: 0 12px 24px -10px hsl(var(--primary) / 0.15) !important;
 }
 
-/* Nudged to sit on the label's optical line now that the tile is top-aligned. */
+/* Sized to the label it heads, and recessive.
+   
+   It was 22px against a 10px label — the heaviest mark in the tile, and the
+   only thing at that scale, which is why it read as decoration rather than as
+   part of the row. 16px sits with the label's cap line and lets the figure be
+   the loudest thing in the tile, which is the whole point of a KPI tile.
+   
+   Colour is deliberately uniform and quiet. The six Overview tiles wore
+   amber / violet / sky / emerald / destructive on their icons, which spent five
+   hues on chrome that encodes nothing, and put a permanently red glyph on Peak
+   Deficit — asserting "bad" on a day the figure might be good. The delta
+   underneath is coloured by direction against a stated polarity, so it is the
+   only thing in the tile that should carry colour; when everything is coloured,
+   the one signal that means something stops standing out. */
 .grid-explorer-kpi__icon {
-  @apply h-[22px] w-[22px] text-primary shrink-0;
-  margin-top: -1px;
+  @apply h-[13px] w-[13px] shrink-0;
+  display: inline-block;
+  /* Sits on the label's cap line rather than its baseline: the label is 10px
+     uppercase, which has no descender to balance against. */
+  vertical-align: -0.18em;
+  margin-right: 0.3rem;
+  color: hsl(var(--foreground) / 0.42);
+}
+
+.grid-explorer-kpi:hover .grid-explorer-kpi__icon {
+  color: hsl(var(--primary) / 0.75);
 }
 
 /* Plain text, not a flex row.
@@ -5616,52 +5651,47 @@ html.theme-dark .locale-toggle__btn--active:hover {
   min-width: 0;
 }
 
-/* The page strip's six tiles (Peak Supply … Cost of Power) and the four-tile
-   strips inside the tabs (Generation, Imports, Regional, Stations, Renewables)
-   read centred as a stack: icon on top, then label, value and trend line, each
-   centred on the tile's axis. Centring the row layout instead left the icon
-   dangling at the edge of a text block whose width the long forecast line
-   sets, which read as misaligned. The tooltip panel is untouched: it is
-   absolutely positioned and states its own text-left. Desktop only — below
-   the fold breakpoint the page strip's lead tile is a full-width hero with
-   its own two-column layout, and centring it would fight that design. */
+/* One left edge, with the icon heading it.
+   
+   This layout has been round twice, and it is worth writing down why it landed
+   where it did. First the tile was a row: icon in a gutter, text block at its
+   NATURAL width. The block was narrower than the tile, so the icon sat against
+   a ragged edge whose width the long forecast line happened to set, and it read
+   as misaligned. The fix was to centre everything as a stack — icon on top,
+   then label, value, trend. That put 22px plus a gap above every label,
+   roughly a quarter of a 122px tile spent on something carrying no figure, so
+   the icon was then pulled out of flow into an absolute corner. The end state
+   was a 13px glyph parked in a corner with no relationship to a centred column
+   of text: two local fixes, each reasonable, arriving somewhere worse than
+   either started.
+   
+   The premise of the first fix has since expired. `.grid-explorer-kpi > div`
+   below sets `flex: 1 1 auto`, so the text block fills the tile rather than
+   sitting at its natural width — the ragged edge the centring was working
+   around no longer exists. A row gutter is safe again, and it costs no height,
+   because the icon sits BESIDE the text rather than above it.
+   
+   So: label, value and hint share one left edge, and the icon heads that
+   column. The tooltip panel is untouched — it is absolutely positioned and
+   states its own text-left. Desktop only; below the fold breakpoint the page
+   strip's lead tile is a full-width hero with its own two-column layout. */
 @media (min-width: 40.0625rem) {
   .grid-explorer-kpi-strip--six .grid-explorer-kpi,
   .grid-explorer-kpi-strip--four .grid-explorer-kpi {
-    flex-direction: column;
-    align-items: center;
-    /* flex-start, not center. Centring the stack meant every tile centred its
+    flex-direction: row;
+    /* flex-start on both axes. Centring the stack meant every tile centred its
        own content height, so a tile with a two-line trend line pushed its label
        down relative to its neighbours: measured at 1440px the six labels began
        at y=42, 42, 49, 49, 57 and 49 — a 15px stagger across the row a reader
-       scans horizontally. The comment on `.grid-explorer-kpi` above claims
-       top-alignment fixes exactly this, and this rule was quietly overriding
-       it. */
+       scans horizontally. */
+    align-items: flex-start;
     justify-content: flex-start;
-    gap: 0.25rem;
+    gap: 0;
   }
 
-  /* Out of the flow, into the corner.
-     The icon led the vertical stack, so 22px plus its gap sat above every
-     label and set roughly a quarter of a 122px tile's height without carrying
-     a figure. As a corner mark it still identifies the tile at a glance and
-     costs no height at all. The content block keeps symmetric inline padding
-     so its centred text stays centred while clearing the corner. */
-  .grid-explorer-kpi-strip--six .grid-explorer-kpi__icon,
-  .grid-explorer-kpi-strip--four .grid-explorer-kpi__icon {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.45rem;
-    height: 13px;
-    width: 13px;
-    margin-top: 0;
-    opacity: 0.55;
-  }
+  /* Nothing to reposition — the icon is inline inside the label now, so it
+     inherits the column's alignment and needs no rule of its own here. */
 
-  .grid-explorer-kpi-strip--six .grid-explorer-kpi:hover .grid-explorer-kpi__icon,
-  .grid-explorer-kpi-strip--four .grid-explorer-kpi:hover .grid-explorer-kpi__icon {
-    opacity: 0.85;
-  }
   /* :first-of-type keeps this off the hover briefing panel, which is also a
      direct div child of the tile (it renders after the content block) —
      width:100% was collapsing it from its own fixed width down to the tile's.
@@ -5670,9 +5700,9 @@ html.theme-dark .locale-toggle__btn--active:hover {
      every class composed from it, and those variants still match the panel. */
   .grid-explorer-kpi-strip--six .grid-explorer-kpi > div:first-of-type,
   .grid-explorer-kpi-strip--four .grid-explorer-kpi > div:first-of-type {
-    flex: 0 1 auto;
-    width: 100%;
-    text-align: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
     /* No inline padding. Symmetric padding cannot push centred text away from
        the corner icon — it leaves the centre where it was and only forces an
        earlier wrap, which is what it did: "Peak Generation" went to two lines
@@ -5688,7 +5718,8 @@ html.theme-dark .locale-toggle__btn--active:hover {
      lower than the other five, which is the same horizontal-scan break that
      `justify-content: center` used to cause for the labels. Costs no tile
      height — the row is already sized by the tallest tile. */
-  .grid-explorer-kpi-strip--six .grid-explorer-kpi__label {
+  .grid-explorer-kpi-strip--six .grid-explorer-kpi__label,
+  .grid-explorer-kpi-strip--four .grid-explorer-kpi__label {
     min-height: 2.5em;
   }
 }

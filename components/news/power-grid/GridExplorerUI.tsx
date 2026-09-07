@@ -652,14 +652,25 @@ export function GridKpiCell({
           : undefined
       }
     >
-      <Icon className={cn('grid-explorer-kpi__icon shrink-0', iconClassName)} />
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         {/* Only the cadence badge rides the label now. It is a <sup>, and the
             label was a flex container, which made it a flex item and threw the
             superscript away — the whole point of the badge everywhere else on
             the explorer, where it sits raised against an <h3>. The label is
             plain text again so it behaves the same here. */}
-        <GridKpiLabel>{label}</GridKpiLabel>
+        {/* The icon rides INSIDE the label, as its first inline box.
+            
+            It has been a gutter sibling and an absolutely-positioned corner
+            mark, and both detached it from the words it identifies. As a
+            gutter it also cost the label ~21px of width, which wrapped
+            "Evening Peak Generation" onto two lines and pushed that tile's
+            figure below its neighbours'. Inline it costs the column nothing:
+            the label still wraps to the tile's full width, and the icon sits
+            on the cap line of the text it belongs to. */}
+        <GridKpiLabel>
+          <Icon className={cn('grid-explorer-kpi__icon', iconClassName)} aria-hidden />
+          {label}
+        </GridKpiLabel>
         {/* The P/D mark belongs to the number, not to the name of the number.
             On the label it read as a claim about the words; against the value
             it says what this particular figure is, which is how the rest of the
