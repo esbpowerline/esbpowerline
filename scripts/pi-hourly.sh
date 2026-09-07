@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-# The hourly capture of NLDC's two paginated pages, from cron on the Pi.
+# The hourly capture of NLDC's four paginated pages, from cron on the Pi.
+#
+# Four since 2026-09-07: generation, demand/supply/load-shed, and the two
+# cross-border import pages (imported_power_india_bn, imported_power_nepal_bn).
+# The imports were added for the one figure PGCB publishes nowhere else — the
+# hourly FORECAST per interconnector, printed beside the actual. Nothing here
+# changed to take them: the script defaults to every series it knows, so the
+# invocation below is untouched and the `N failed` sum already spans whatever
+# series print a line.
 #
 # Why this exists at all: `scripts/ingest-nldc-hourly.ts` was written and
 # backfilled on 2026-09-05 and then never ran again. Nothing referenced it — no

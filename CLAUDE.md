@@ -367,6 +367,27 @@ refetched, and the next poll finishes whatever the last one did not.
 `ingest-nldc-hourly.ts --recent 2`. It writes rows to Postgres and **nothing
 else** — no commit, no push, no deploy.
 
+**Four NLDC pages since 2026-09-07**, not two: generation,
+demand/supply/load-shed, and PGCB's two cross-border import pages
+(`imported_power_india_bn`, `imported_power_nepal_bn`). The script defaults to
+every series it knows, so the runner and its cron line were untouched.
+
+The import pages were added for one figure. Every *actual* on them already
+appears on the generation table — checked column by column over 102 hours on
+2026-09-07, zero disagreements, and that comparison is now a test rather than an
+assumption. What appears nowhere else is NLDC's hourly **forecast**
+(পূর্বাভাস) per interconnector, printed beside the actual: Bheramara HVDC,
+Tripura and Adani separately on the India page, Nepal on its own. Doctrine rule
+6 governs the pair — the signed difference and nothing more, no scoring, because
+PGCB does not control the far side of the border. The actuals are stored anyway,
+as an independent check of a figure the site prints.
+
+Depth measured 2026-09-07: India goes back to **2015-04-17** (2,036 pages, the
+same depth as generation); Nepal to **2024-11-14** over 325 pages, which is when
+the Bangladesh-Nepal trade began rather than a retention cliff. Only the recent
+window is captured so far — a full India backfill would add a decade of hourly
+forecasts and has not been run.
+
 This is the most perishable stream in the archive: NLDC's demand/supply/load-shed
 page rolls off after ~145 days and nobody else in Bangladesh keeps it, so an hour
 missed inside that window is gone. It was listed "IMPLEMENTED 2026-09-05" and was
@@ -482,6 +503,26 @@ Two properties matter more than the cadence:
   cadence, so a window Petrobangla files four days late belongs to a day that left the
   window before the gas arrived. The watcher compares per source against the whole
   `LOOKBACK_GAS` span instead, and a day that fell out is still picked up.
+- **Gas does not wait on PGCB, in either layer.** Fixed 2026-09-07, after the site sat on
+  a gas window Petrobangla was publicly serving. Two independent things held it:
+
+  The watcher skipped any gas day whose grid half was missing, on the stated assumption
+  that such a day was "already queued above". It was not — the PGCB pass only queues a day
+  it can confirm PGCB has filed, so a day where **Petrobangla is early and PGCB is late**
+  fell through both passes and emitted neither a finding nor a note. With `LOOKBACK_GAS` at
+  14 and `LOOKBACK_GRID` at 4, gas for any day PGCB was more than four days late on could
+  never be queued at all, silently. The guard now skips only days the PGCB pass actually
+  queued.
+
+  And the chain itself aborted on `Pipeline A requires PGCB daily report`, so even a queued
+  day could not be taken. `daily_extractor` now falls through to a **gas-only run** when the
+  workbook is absent and the PDF is not: it parses, validates and publishes Pipeline B
+  through the same `deploy_petrobangla()` the full chain calls, and `run_daily_ingest.py`
+  records the eight grid steps as skipped rather than failed — PGCB being late is the
+  premise of the run, not a fault in it. The day reports `ok: true` **with a note**, which
+  had never happened before; anything reading `ok` and ignoring `note` will call it a
+  complete day, and it is not one. The grid half lands whenever PGCB files, from the
+  trailing window, with the gas already on disk.
 
 A day is emitted only once its publisher is confirmed to have it, so no run is spent on a
 day that does not exist yet. If a confirmed-available day is fired at `MAX_ATTEMPTS` times

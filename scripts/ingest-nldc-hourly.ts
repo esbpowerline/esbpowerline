@@ -56,6 +56,8 @@ import { createScriptPrismaClient } from '../prisma/client';
 import {
   parseNldcGenerationHtml,
   parseNldcDemandSupplyHtml,
+  parseNldcIndiaImportHtml,
+  parseNldcNepalImportHtml,
 } from '@/lib/data/grid/live-grid-parse';
 
 const prisma = createScriptPrismaClient();
@@ -89,7 +91,7 @@ const plausible = (d: Date) => {
 };
 
 /** Bumped when the parse changes shape, so a row says which code produced it. */
-const PARSER_VERSION = 'nldc-hourly@2026-09-05';
+const PARSER_VERSION = 'nldc-hourly@2026-09-07';
 
 /** Dhaka is UTC+06:00 all year, no DST — observation-window.ts. */
 const DHAKA_OFFSET = '+06:00';
@@ -102,6 +104,18 @@ const SERIES = {
   DEMAND_SUPPLY: {
     url: 'https://erp.powergrid.gov.bd/web/generations/view_demand_supply_loadshed_bn',
     label: 'demand/supply/load-shed',
+  },
+  // The two cross-border pages. Their actuals duplicate the generation table
+  // (verified over 102 hours, 0 disagreements, 2026-09-07) and are stored
+  // anyway as an independent check; what only they carry is NLDC's hourly
+  // forecast per interconnector. See parseNldcIndiaImportHtml.
+  INDIA_IMPORT: {
+    url: 'https://erp.powergrid.gov.bd/w/generations/imported_power_india_bn',
+    label: 'india imports',
+  },
+  NEPAL_IMPORT: {
+    url: 'https://erp.powergrid.gov.bd/w/generations/imported_power_nepal_bn',
+    label: 'nepal imports',
   },
 } as const;
 type SeriesKey = keyof typeof SERIES;
@@ -185,6 +199,29 @@ function rowsFor(series: SeriesKey, html: string): Row[] {
       },
     }));
   }
+  if (series === 'INDIA_IMPORT') {
+    // These pages carry no remark column — null, not '', so the row does not
+    // claim NLDC printed an empty remark where it printed no cell at all.
+    return parseNldcIndiaImportHtml(html).map((r) => ({
+      observedAt: toInstant(r.at),
+      remark: null,
+      values: {
+        bheramaraMw: r.bheramaraMw,
+        bheramaraForecastMw: r.bheramaraForecastMw,
+        tripuraMw: r.tripuraMw,
+        tripuraForecastMw: r.tripuraForecastMw,
+        adaniMw: r.adaniMw,
+        adaniForecastMw: r.adaniForecastMw,
+      },
+    }));
+  }
+  if (series === 'NEPAL_IMPORT') {
+    return parseNldcNepalImportHtml(html).map((r) => ({
+      observedAt: toInstant(r.at),
+      remark: null,
+      values: { nepalMw: r.nepalMw, nepalForecastMw: r.nepalForecastMw },
+    }));
+  }
   return parseNldcDemandSupplyHtml(html).map((r) => ({
     observedAt: toInstant(r.at),
     remark: r.remark || null,
@@ -236,6 +273,7 @@ function exclusionFor(series: SeriesKey, values: Record<string, number | null>, 
 const FIGURE_COLUMNS = [
   'totalMw', 'gasMw', 'liquidMw', 'coalMw', 'hydroMw', 'solarMw', 'windMw',
   'bheramaraMw', 'tripuraMw', 'adaniMw', 'nepalMw',
+  'bheramaraForecastMw', 'tripuraForecastMw', 'adaniForecastMw', 'nepalForecastMw',
   'demandMw', 'supplyMw', 'loadShedMw',
 ] as const;
 
@@ -397,10 +435,15 @@ const SERIES_FIELDS: Record<SeriesKey, readonly string[]> = {
     'bheramaraMw', 'tripuraMw', 'adaniMw', 'nepalMw', 'loadShedMw',
   ],
   DEMAND_SUPPLY: ['demandMw', 'supplyMw', 'loadShedMw'],
+  INDIA_IMPORT: [
+    'bheramaraMw', 'bheramaraForecastMw', 'tripuraMw', 'tripuraForecastMw',
+    'adaniMw', 'adaniForecastMw',
+  ],
+  NEPAL_IMPORT: ['nepalMw', 'nepalForecastMw'],
 };
 
 async function report() {
-  for (const series of ['GENERATION', 'DEMAND_SUPPLY'] as SeriesKey[]) {
+  for (const series of Object.keys(SERIES) as SeriesKey[]) {
     const agg = await prisma.gridHourlyObservation.aggregate({
       where: { series },
       _count: { _all: true },
@@ -512,9 +555,22 @@ async function main() {
     const i = argv.indexOf(f);
     return i >= 0 && argv[i + 1] ? Number(argv[i + 1]) : d;
   };
-  const which = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : 'both';
-  const seriesList: SeriesKey[] =
-    which === 'generation' ? ['GENERATION'] : which === 'demand' ? ['DEMAND_SUPPLY'] : ['GENERATION', 'DEMAND_SUPPLY'];
+  // `both` is kept as a spelling of "all of them" so the documented invocation
+  // and anything already in the Pi's crontab keep working now that there are
+  // four series rather than two.
+  const ALIASES: Record<string, SeriesKey[]> = {
+    generation: ['GENERATION'],
+    demand: ['DEMAND_SUPPLY'],
+    india: ['INDIA_IMPORT'],
+    nepal: ['NEPAL_IMPORT'],
+    imports: ['INDIA_IMPORT', 'NEPAL_IMPORT'],
+  };
+  const which = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : 'all';
+  const seriesList: SeriesKey[] = ALIASES[which] ?? (Object.keys(SERIES) as SeriesKey[]);
+  if (argv.includes('--series') && !ALIASES[which] && which !== 'all' && which !== 'both') {
+    console.error(`unknown --series ${which}; expected one of ${Object.keys(ALIASES).join(', ')}, all`);
+    process.exit(2);
+  }
 
   if (has('--report')) {
     await report();

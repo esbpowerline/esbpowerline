@@ -6,6 +6,8 @@ import {
   buildLiveGridSnapshot,
   parseNldcDemandSupplyHtml,
   parseNldcGenerationHtml,
+  parseNldcIndiaImportHtml,
+  parseNldcNepalImportHtml,
 } from '@/lib/data/grid/live-grid-parse';
 
 /**
@@ -237,5 +239,110 @@ describe('buildLiveGridSnapshot', () => {
     expect(genOnly.today.maxLoadShedMw).toBeNull();
     expect(genOnly.latest.demandMw).toBeNull();
     expect(genOnly.latest.supplyMw).toBeNull();
+  });
+});
+
+/**
+ * The two cross-border import pages, as served 2026-09-07 ~14:00 Dhaka.
+ *
+ * These pages are the only place NLDC publishes an hourly forecast per
+ * interconnector. The actuals beside them duplicate the generation table, and
+ * the last test here is the one that matters most: it pins that redundancy as a
+ * CHECK rather than trusting it. If PGCB ever changes what one page means
+ * without changing the other, this is what says so.
+ */
+describe('parseNldcIndiaImportHtml', () => {
+  const rows = parseNldcIndiaImportHtml(fixture('nldc-india-import.html'));
+
+  it('reads every data row and neither of the two header rows', () => {
+    // The header is two <tr>s deep — the interconnector names carry colspan=2
+    // over a প্রকৃত/পূর্বাভাস pair — and both must fall to the date check.
+    expect(rows).toHaveLength(51);
+    expect(rows.every((r) => /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(r.at))).toBe(true);
+  });
+
+  it('keeps the actual and the forecast apart, per interconnector', () => {
+    const r = rows[rows.length - 1];
+    expect(r.at).toBe('2026-09-07T08:00:00');
+    expect(r.bheramaraMw).toBe(738);
+    expect(r.bheramaraForecastMw).toBe(1000);
+    expect(r.tripuraMw).toBe(138);
+    expect(r.tripuraForecastMw).toBe(60);
+    expect(r.adaniMw).toBe(1020);
+    expect(r.adaniForecastMw).toBe(1436);
+  });
+
+  it('sorts oldest first, like every other NLDC parser here', () => {
+    expect([...rows].sort((a, b) => a.at.localeCompare(b.at))).toEqual(rows);
+  });
+});
+
+describe('parseNldcNepalImportHtml', () => {
+  const rows = parseNldcNepalImportHtml(fixture('nldc-nepal-import.html'));
+
+  it('reads every data row', () => {
+    expect(rows).toHaveLength(51);
+  });
+
+  it('keeps a printed zero as a measured zero, not an absence', () => {
+    // Nepal prints a literal ০ rather than blanking the cell for most hours.
+    // That is a statement that the line carried nothing, and it must survive as
+    // 0 — collapsing it to null would lose a measurement, exactly as reading a
+    // blank cell as 0 would invent one.
+    const r = rows[rows.length - 1];
+    expect(r.at).toBe('2026-09-07T08:00:00');
+    expect(r.nepalMw).toBe(0);
+    expect(r.nepalForecastMw).toBe(0);
+    expect(rows.every((x) => x.nepalMw !== null)).toBe(true);
+  });
+});
+
+describe('the import pages against the generation page', () => {
+  /*
+    Every actual on the two import pages also appears on view_generations_bn,
+    and on 2026-09-07 all three fixtures were captured within the same minute,
+    so they describe the same hours. 102 comparisons, 0 disagreements.
+
+    This is why the import pages are ingested for the FORECAST and not for the
+    actuals — and pinning it here turns the redundancy into the kind of check
+    that has caught every real defect in this repo: a figure held against
+    something else that should agree with it, rather than against the parser
+    that produced it.
+  */
+  it('agrees on every interconnector, for every hour both pages carry', () => {
+    // The 2026-09-07 generation capture, not `nldc-gen.html` (2026-08-23):
+    // all three of these were fetched in one pass so they describe the same
+    // hours. The older fixture is kept and still pins the 2026-08 layout.
+    const gen = new Map(
+      parseNldcGenerationHtml(fixture('nldc-gen-2026-09-07.html')).map((r) => [r.at, r]),
+    );
+    const india = parseNldcIndiaImportHtml(fixture('nldc-india-import.html'));
+    const nepal = parseNldcNepalImportHtml(fixture('nldc-nepal-import.html'));
+
+    const disagreements: string[] = [];
+    let compared = 0;
+    for (const r of india) {
+      const g = gen.get(r.at);
+      if (!g) continue;
+      compared += 1;
+      for (const k of ['bheramaraMw', 'tripuraMw', 'adaniMw'] as const) {
+        if (g[k] !== r[k]) disagreements.push(`${r.at} ${k}: gen ${g[k]} vs india ${r[k]}`);
+      }
+    }
+    for (const r of nepal) {
+      const g = gen.get(r.at);
+      if (!g) continue;
+      compared += 1;
+      if (g.nepalMw !== r.nepalMw) {
+        disagreements.push(`${r.at} nepalMw: gen ${g.nepalMw} vs nepal ${r.nepalMw}`);
+      }
+    }
+
+    expect(disagreements).toEqual([]);
+    // A guard on the guard: if the fixtures ever stop overlapping, the loop
+    // above compares nothing and passes vacuously. That is the failure mode
+    // gas-vs-archive had, which passed 4,529 days by reading two keys that
+    // existed in none of them.
+    expect(compared).toBeGreaterThan(0);
   });
 });

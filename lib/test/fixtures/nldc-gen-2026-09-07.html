@@ -1,0 +1,1734 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+
+
+<meta name="msapplication-TileColor" content=""/>
+
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="HandheldFriendly" content="True"/>
+<meta name="MobileOptimized" content="320"/>
+
+<!-- PWA  -->
+<meta name="theme-color" content="#6777ef"/>
+<link rel="apple-touch-icon" href="https://erp.powergrid.gov.bd/images/logo_r.png">
+
+
+
+    <!--<link rel="manifest" href="https://erp.powergrid.gov.bd/manifests/transgrid.json"> -->
+
+
+
+
+
+
+    <title>Power Grid Bangladesh PLC</title>
+    <link rel="icon" href="https://erp.powergrid.gov.bd/favicon.ico" type="image/x-icon"/>
+<link rel="shortcut icon" href="https://erp.powergrid.gov.bd/favicon.ico" type="image/x-icon"/>
+
+<link href="https://erp.powergrid.gov.bd/dist/css/tabler.min.css" rel="stylesheet"/>
+<link href="https://erp.powergrid.gov.bd/dist/css/tabler-flags.min.css" rel="stylesheet"/>
+<link href="https://erp.powergrid.gov.bd/dist/css/tabler-payments.min.css" rel="stylesheet"/>
+<link href="https://erp.powergrid.gov.bd/dist/css/tabler-vendors.min.css" rel="stylesheet"/>
+<link href="https://erp.powergrid.gov.bd/dist/css/demo.min.css" rel="stylesheet"/>
+<link href="https://erp.powergrid.gov.bd/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
+
+<!-- Styles -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.1/css/buttons.dataTables.min.css">
+
+<!-- Tabler CSS -->
+
+
+<!-- DataTables CSS -->
+<link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
+
+
+
+
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    .tooltip-inner {
+        white-space: pre-line;
+    }
+    .svg_small
+    {
+        transform: scale(0.7);
+    }
+    @font-face {
+        font-family: Kalpurush;
+        src: url(https://erp.powergrid.gov.bd/fonts/kalpurush.ttf);
+    }
+    @font-face {
+        font-family: SolaimanLipi;
+        src: url(https://erp.powergrid.gov.bd/fonts/SolaimanLipi.ttf);
+    }
+    .bn{
+        font-family: SolaimanLipi !important;
+    }
+    @import url('https://rsms.me/inter/inter.css');
+
+    :root {
+        --tblr-font-sans-serif: 'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+    }
+
+    body {
+        font-feature-settings: "cv03", "cv04", "cv11";
+    }
+
+    .delbtn{
+        text-decoration: none; border: none; background: none; color: darkred;
+    }
+
+</style>
+<style>
+    @import url('https://rsms.me/inter/inter.css');
+    :root {
+        --tblr-font-sans-serif:  'Inter Var', -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif;
+    }
+    body {
+        font-feature-settings: "cv03", "cv04", "cv11";
+    }
+</style>
+
+
+</head>
+<body>
+<!--<body class="layout-fluid">-->
+
+<div class="page">
+    <div class="sticky-top">
+        <header class="navbar navbar-expand-md navbar-light d-print-none">
+    <div class="container-xl">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
+                aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
+
+            <a href="https://pgcb.gov.bd/" style="font-size: 15px; font-weight: normal; text-decoration: none; font-family: Arial, Helvetica, sans-serif !important;">
+                <img class="navbar-brand-image" width="32" height="32" alt="PGCB"
+                     src="https://erp.powergrid.gov.bd/images/logo_r.png">
+                Back to Website
+            </a>
+        </h1>
+        <div class="navbar-nav flex-row order-md-last">
+                            <a href="https://erp.powergrid.gov.bd/login" class="nav-link d-flex lh-1 text-reset p-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-login" width="24"
+                         height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                        <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
+                        <path d="M20 12h-13l3 -3m0 6l-3 -3"></path>
+                    </svg> &nbsp; Sign in</a>
+                        </div>
+        <div class="collapse navbar-collapse" id="navbar-menu">
+            <div class="d-flex flex-column flex-md-row flex-fill align-items-stretch align-items-md-center">
+
+                <ul class="navbar-nav">
+                                    </ul>
+
+            </div>
+        </div>
+    </div>
+</header>
+    </div>
+    <div class="page-wrapper">
+        <div class="page-header d-print-none">
+            <div class="container-xl">
+                    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title" style="font-family: SolaimanLipi">
+                ঘন্টাপ্রতি উৎপাদন
+            </h2>
+        </div>
+    </div>
+            </div>
+        </div>
+
+        <div class="page-body">
+            <div class="container-xl">
+                    <style>
+        table, th, td {
+            text-align: center;
+            padding: 5px;
+            font-family: SolaimanLipi;
+        }
+    </style>
+    <div class="row">
+        <div class="col-sm-3">
+            <form method="GET" action="https://erp.powergrid.gov.bd/web/generations/view_generations_bn" accept-charset="UTF-8">
+            <input type="text" name="search" placeholder="তারিখ দিয়ে খুঁজুন" id="search" class="form-control"
+                   style="margin: 5px; margin-left: 0px; font-family: SolaimanLipi" value="">
+            <button type="submit" class="btn btn-sm btn-success" style="display: none">
+                Search
+            </button>
+
+            </form>
+        </div>
+        <div class="col-sm-9">
+
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <table class="table-bordered" style=" border-color: #e2e8f0; ">
+                <!-- <table class="table table-vcenter card-table ">-->
+                <thead>
+                <tr class="info">
+                    <th rowspan="2"style="width: 80px;">তারিখ</th>
+                    <th rowspan="2">সময়</th>
+                    <th rowspan="2">উৎপাদন(মেঃওঃ)</th>
+                    <!--th rowspan="2">চাহিদা(মেঃওঃ)</th-->
+                    <!-- <th>ঘাটতি</th>-->
+                <!-- <th rowspan="2">লোডশেড</th> -->
+                    <th rowspan="2">গ্যাস</th>
+                    <th rowspan="2">তরল জ্বালানী</th>
+                    <th rowspan="2">কয়লা</th>
+                    <th rowspan="2">হাইড্রো</th>
+                    <th rowspan="2">সৌর</th>
+                    <th rowspan="2">বায়ু</th>
+                    <th rowspan="1" colspan="3">ভারত</th>
+                    <th rowspan="2">নেপাল</th>
+                    <th rowspan="2" style="width: 100px;">মন্তব্য</th>
+                </tr>
+                <tr>
+                    <th rowspan="1" colspan="1" >ভেড়ামারা এইচভিডিসি</th>
+                    <th rowspan="1" colspan="1" >ত্রিপুরা</th>
+                    <th rowspan="1" colspan="1" >আদানি</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০৮:০০:০০</td>
+                        <td>১৩৩৪৪</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৩৪৪.০০</td>
+                        <td>১৭৩৯</td>-->
+
+                        <td>৪৭৫৭</td>
+                        <td>১৫০৭</td>
+                        <td>৪৭৬৬</td>
+                        <td>২২২</td>
+                        <td>১৯৬</td>
+                        <td>০</td>
+                        <td>৭৩৮</td>
+                        <td>১৩৮</td>
+                        <td>১০২০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০৭:০০:০০</td>
+                        <td>১৩২৮৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৩২৮৯.০০</td>
+                        <td>১৮৭৭</td>-->
+
+                        <td>৪৭৯৫</td>
+                        <td>১৪৬৯</td>
+                        <td>৪৮৪৩</td>
+                        <td>২২২</td>
+                        <td>৬৬</td>
+                        <td>০</td>
+                        <td>৭৩৮</td>
+                        <td>১৪৬</td>
+                        <td>১০১০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০৬:০০:০০</td>
+                        <td>১৩১০৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৩১০৯.০০</td>
+                        <td>২০১৮</td>-->
+
+                        <td>৪৭৯১</td>
+                        <td>১৫০৭</td>
+                        <td>৪৮০০</td>
+                        <td>২২২</td>
+                        <td>৬</td>
+                        <td>০</td>
+                        <td>৭৩৯</td>
+                        <td>১৪৪</td>
+                        <td>৯০০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০৫:০০:০০</td>
+                        <td>১৩৪৫৭</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৪৫৭.০০</td>
+                        <td>২০১৮</td>-->
+
+                        <td>৪৮৩৩</td>
+                        <td>১৫৯৪</td>
+                        <td>৪৮১১</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৯২৭</td>
+                        <td>১৪৬</td>
+                        <td>৯২৪</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০৪:০০:০০</td>
+                        <td>১৩৪৪৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৪৪৯.০০</td>
+                        <td>২২৯৭</td>-->
+
+                        <td>৪৮০৯</td>
+                        <td>১৬৬৪</td>
+                        <td>৪৮১৪</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৩৮</td>
+                        <td>৮৩৩</td>
+                        <td>১৫৪</td>
+                        <td>৯১৫</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০৩:০০:০০</td>
+                        <td>১৩৫২৫</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৫২৫.০০</td>
+                        <td>২৫৩৩</td>-->
+
+                        <td>৪৭১৫</td>
+                        <td>১৮৭০</td>
+                        <td>৪৮০৮</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৮৩৩</td>
+                        <td>১৫৮</td>
+                        <td>৯১৯</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০২:০০:০০</td>
+                        <td>১৩৫৭২</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৫৭২.০০</td>
+                        <td>২৬৭৪</td>-->
+
+                        <td>৪৮১৫</td>
+                        <td>১৯০৯</td>
+                        <td>৪৮০৯</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>১</td>
+                        <td>৭৩৭</td>
+                        <td>১৫৮</td>
+                        <td>৯২১</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০১:০০:০০</td>
+                        <td>১৩৭৬৮</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৭৬৮.০০</td>
+                        <td>২৬৬৬</td>-->
+
+                        <td>৪৮৩৪</td>
+                        <td>২০৬৫</td>
+                        <td>৪৮০০</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৬৩৮</td>
+                        <td>১৫৪</td>
+                        <td>১০৫৫</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৭-০৯-২০২৬</td>
+                        <td>০০:০০:০০</td>
+                        <td>১৪৮৫২</td>
+                        <!--td></td-->
+                    <!--<td>-১৪৮৫২.০০</td>
+                        <td>২১৩৫</td>-->
+
+                        <td>৪৯৭৬</td>
+                        <td>২৬৩৩</td>
+                        <td>৪৮৩৬</td>
+                        <td>২১৯</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭৩৯</td>
+                        <td>১৫৮</td>
+                        <td>১২৯১</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>২৩:০০:০০</td>
+                        <td>১৫১৪৩</td>
+                        <!--td></td-->
+                    <!--<td>-১৫১৪৩.০০</td>
+                        <td>১৮৬৪</td>-->
+
+                        <td>৪৯৬৮</td>
+                        <td>২৯০৬</td>
+                        <td>৪৮৩৮</td>
+                        <td>২১৯</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭৩৯</td>
+                        <td>১৬৬</td>
+                        <td>১৩০৭</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>২২:০০:০০</td>
+                        <td>১৫৩৬৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৫৩৬৬.০০</td>
+                        <td>১৫৯৪</td>-->
+
+                        <td>৫০৩৯</td>
+                        <td>৩০৪৭</td>
+                        <td>৪৮৪১</td>
+                        <td>২২০</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭৩৯</td>
+                        <td>১৭৪</td>
+                        <td>১৩০৬</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>২১:০০:০০</td>
+                        <td>১৫৩০৪</td>
+                        <!--td></td-->
+                    <!--<td>-১৫৩০৪.০০</td>
+                        <td>২১৩৫</td>-->
+
+                        <td>৪৯৩৪</td>
+                        <td>৩০৯২</td>
+                        <td>৪৮৪০</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭৩৯</td>
+                        <td>১৭০</td>
+                        <td>১৩০৭</td>
+                        <td>০</td>
+                        <td>
+                            সন্ধ্যা পিক
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>২০:০০:০০</td>
+                        <td>১৫২৬৩</td>
+                        <!--td></td-->
+                    <!--<td>-১৫২৬৩.০০</td>
+                        <td>১৭৬৬</td>-->
+
+                        <td>৪৮৭০</td>
+                        <td>৩১১৫</td>
+                        <td>৪৮৩৯</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭৩৮</td>
+                        <td>১৬২</td>
+                        <td>১৩১৭</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৯:৩০:০০</td>
+                        <td>১৫১৯০</td>
+                        <!--td></td-->
+                    <!--<td>-১৫১৯০.০০</td>
+                        <td>১৮২৮</td>-->
+
+                        <td>৪৮২৯</td>
+                        <td>৩০৯০</td>
+                        <td>৪৮৩৮</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭৩৯</td>
+                        <td>১৫৬</td>
+                        <td>১৩১৬</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৯:০০:০০</td>
+                        <td>১৫১৩৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৫১৩৬.০০</td>
+                        <td>১৬০৬</td>-->
+
+                        <td>৪৯২৯</td>
+                        <td>২৯৩৬</td>
+                        <td>৪৮৩৪</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৪</td>
+                        <td>৭৩৯</td>
+                        <td>১৬২</td>
+                        <td>১৩১০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৮:০০:০০</td>
+                        <td>১৪৪৩০</td>
+                        <!--td></td-->
+                    <!--<td>-১৪৪৩০.০০</td>
+                        <td>৬৬৬</td>-->
+
+                        <td>৪৮১৭</td>
+                        <td>২৩৩৯</td>
+                        <td>৪৭৫৩</td>
+                        <td>২২১</td>
+                        <td>৬</td>
+                        <td>১৪</td>
+                        <td>৯২৭</td>
+                        <td>১৬৪</td>
+                        <td>১১৮৯</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৭:০০:০০</td>
+                        <td>১৪৩৭১</td>
+                        <!--td></td-->
+                    <!--<td>-১৪৩৭১.০০</td>
+                        <td>৯৭২</td>-->
+
+                        <td>৪৯৩১</td>
+                        <td>২১০৬</td>
+                        <td>৪৭৯৪</td>
+                        <td>২২১</td>
+                        <td>১০২</td>
+                        <td>৬</td>
+                        <td>৯২৮</td>
+                        <td>১৬৮</td>
+                        <td>১১১৫</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৬:০০:০০</td>
+                        <td>১৩৯৭১</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯৭১.০০</td>
+                        <td>১০০৩</td>-->
+
+                        <td>৪৭১৭</td>
+                        <td>১৮১৭</td>
+                        <td>৪৭৭৪</td>
+                        <td>২২১</td>
+                        <td>২২৭</td>
+                        <td>১৩</td>
+                        <td>৯২৭</td>
+                        <td>১৬৮</td>
+                        <td>১১০৭</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৫:০০:০০</td>
+                        <td>১৪০২৩</td>
+                        <!--td></td-->
+                    <!--<td>-১৪০২৩.০০</td>
+                        <td>১৬৫৬</td>-->
+
+                        <td>৪৮৩৮</td>
+                        <td>১৭৭৬</td>
+                        <td>৪৬৬৯</td>
+                        <td>২২০</td>
+                        <td>৩০৬</td>
+                        <td>৩</td>
+                        <td>৯২৮</td>
+                        <td>১৮২</td>
+                        <td>১১০১</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৪:০০:০০</td>
+                        <td>১৪০৩৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৪০৩৬.০০</td>
+                        <td>১৩২২</td>-->
+
+                        <td>৪৮৪৫</td>
+                        <td>১৭২৭</td>
+                        <td>৪৬৭৩</td>
+                        <td>২২০</td>
+                        <td>৩২৮</td>
+                        <td>১২</td>
+                        <td>৯২৮</td>
+                        <td>১৭২</td>
+                        <td>১১৩১</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১৩:০০:০০</td>
+                        <td>১৩৯২২</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯২২.০০</td>
+                        <td>১২১০</td>-->
+
+                        <td>৪৭৬৩</td>
+                        <td>১৭০৩</td>
+                        <td>৪৬৯৩</td>
+                        <td>২২০</td>
+                        <td>৩৪১</td>
+                        <td>৬</td>
+                        <td>৯২৮</td>
+                        <td>১৬৬</td>
+                        <td>১১০২</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১২:০০:০০</td>
+                        <td>১৪২৩৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৪২৩৯.০০</td>
+                        <td>৭৬৫</td>-->
+
+                        <td>৫০৬৭</td>
+                        <td>১৭৩৪</td>
+                        <td>৪৭৩৯</td>
+                        <td>২১৯</td>
+                        <td>২৫৯</td>
+                        <td>৩</td>
+                        <td>৯২৮</td>
+                        <td>১৬৬</td>
+                        <td>১১২৪</td>
+                        <td>০</td>
+                        <td>
+                            ডে পিক
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১১:০০:০০</td>
+                        <td>১৩৯৯৮</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯৯৮.০০</td>
+                        <td>২৬</td>-->
+
+                        <td>৪৮৭৫</td>
+                        <td>১৭২৫</td>
+                        <td>৪৬৯১</td>
+                        <td>২১৯</td>
+                        <td>২৯৮</td>
+                        <td>১</td>
+                        <td>৯২৮</td>
+                        <td>১৫৮</td>
+                        <td>১১০৩</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>১০:০০:০০</td>
+                        <td>১৩৯১৪</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯১৪.০০</td>
+                        <td>২৬</td>-->
+
+                        <td>৪৮৮১</td>
+                        <td>১৬৫১</td>
+                        <td>৪৭৫৫</td>
+                        <td>২১৯</td>
+                        <td>২১৭</td>
+                        <td>০</td>
+                        <td>৯২৩</td>
+                        <td>১৫৪</td>
+                        <td>১১১৪</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৯:০০:০০</td>
+                        <td>১৩৭৬১</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৭৬১.০০</td>
+                        <td>৮০</td>-->
+
+                        <td>৪৭৮২</td>
+                        <td>১৫৯৭</td>
+                        <td>৪৮০২</td>
+                        <td>২২০</td>
+                        <td>১৯০</td>
+                        <td>০</td>
+                        <td>৯০৬</td>
+                        <td>১৫৬</td>
+                        <td>১১০৮</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৮:০০:০০</td>
+                        <td>১৩৪৯৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৪৯৬.০০</td>
+                        <td>২২২</td>-->
+
+                        <td>৪৭৯০</td>
+                        <td>১৪৯৬</td>
+                        <td>৪৮১৫</td>
+                        <td>২২০</td>
+                        <td>১০৩</td>
+                        <td>৫</td>
+                        <td>৬৫৯</td>
+                        <td>১৪৮</td>
+                        <td>১২৬০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৭:০০:০০</td>
+                        <td>১৩৬৭৮</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৬৭৮.০০</td>
+                        <td>২০২</td>-->
+
+                        <td>৪৯৭৮</td>
+                        <td>১৫২২</td>
+                        <td>৪৮০২</td>
+                        <td>২২২</td>
+                        <td>৫৬</td>
+                        <td>০</td>
+                        <td>৭০২</td>
+                        <td>১৩৪</td>
+                        <td>১২৬২</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৬:০০:০০</td>
+                        <td>১৩৬২৭</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৬২৭.০০</td>
+                        <td>৩১৫</td>-->
+
+                        <td>৪৮০২</td>
+                        <td>১৬১৫</td>
+                        <td>৪৮৫৩</td>
+                        <td>২২২</td>
+                        <td>৩</td>
+                        <td>৮</td>
+                        <td>৭০২</td>
+                        <td>১৫৬</td>
+                        <td>১২৬৬</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৫:০০:০০</td>
+                        <td>১৩৯৬০</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯৬০.০০</td>
+                        <td>৩২৮</td>-->
+
+                        <td>৫১৬২</td>
+                        <td>১৫৯৬</td>
+                        <td>৪৮৭৩</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৮</td>
+                        <td>৭০২</td>
+                        <td>১৫২</td>
+                        <td>১২৪৫</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৪:০০:০০</td>
+                        <td>১৩৮৪৪</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৮৪৪.০০</td>
+                        <td>১২৪২</td>-->
+
+                        <td>৪৮৪২</td>
+                        <td>১৭৯৯</td>
+                        <td>৪৮৬২</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>০</td>
+                        <td>৭০১</td>
+                        <td>১৬৪</td>
+                        <td>১২৫৪</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০৩:০০:০০</td>
+                        <td>১৪০২৪</td>
+                        <!--td></td-->
+                    <!--<td>-১৪০২৪.০০</td>
+                        <td>১৮৮১</td>-->
+
+                        <td>৫০০৮</td>
+                        <td>১৭৮৭</td>
+                        <td>৪৮৬৪</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৪</td>
+                        <td>৭০২</td>
+                        <td>১৬৬</td>
+                        <td>১২৭১</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০২:০০:০০</td>
+                        <td>১৪১০২</td>
+                        <!--td></td-->
+                    <!--<td>-১৪১০২.০০</td>
+                        <td>১৯৮৪</td>-->
+
+                        <td>৫০৩৯</td>
+                        <td>১৮৪৮</td>
+                        <td>৪৮৬৫</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৩</td>
+                        <td>৭০১</td>
+                        <td>১৭০</td>
+                        <td>১২৫৪</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৬-০৯-২০২৬</td>
+                        <td>০১:০০:০০</td>
+                        <td>১৪২৮৩</td>
+                        <!--td></td-->
+                    <!--<td>-১৪২৮৩.০০</td>
+                        <td>২১২২</td>-->
+
+                        <td>৫০৪৭</td>
+                        <td>১৯৮১</td>
+                        <td>৪৮৬২</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>১২</td>
+                        <td>৭০২</td>
+                        <td>১৭০</td>
+                        <td>১২৮৭</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>০০:০০:০০</td>
+                        <td>১৫২৩৫</td>
+                        <!--td></td-->
+                    <!--<td>-১৫২৩৫.০০</td>
+                        <td>১৯৯০</td>-->
+
+                        <td>৫০৮৬</td>
+                        <td>৩১০০</td>
+                        <td>৪৮৬৬</td>
+                        <td>২২১</td>
+                        <td>০</td>
+                        <td>১১</td>
+                        <td>৭৩৪</td>
+                        <td>১৬২</td>
+                        <td>১০৫৫</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>২৩:০০:০০</td>
+                        <td>১৫৪৩৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৫৪৩৬.০০</td>
+                        <td>১৭১৭</td>-->
+
+                        <td>৪৯৭৬</td>
+                        <td>৩৪১৯</td>
+                        <td>৪৮৬৮</td>
+                        <td>২২০</td>
+                        <td>০</td>
+                        <td>২</td>
+                        <td>৭৩৪</td>
+                        <td>১৬৮</td>
+                        <td>১০৪৯</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>২২:০০:০০</td>
+                        <td>১৫৩৬৩</td>
+                        <!--td></td-->
+                    <!--<td>-১৫৩৬৩.০০</td>
+                        <td>১৮৮০</td>-->
+
+                        <td>৪৮২৮</td>
+                        <td>৩৪৬০</td>
+                        <td>৪৮৯১</td>
+                        <td>২২০</td>
+                        <td>০</td>
+                        <td>১৮</td>
+                        <td>৭৩৪</td>
+                        <td>১৭৪</td>
+                        <td>১০৩৮</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>২১:০০:০০</td>
+                        <td>১৫৩৫৭</td>
+                        <!--td></td-->
+                    <!--<td>-১৫৩৫৭.০০</td>
+                        <td>২২৫৮</td>-->
+
+                        <td>৪৮৬০</td>
+                        <td>৩৫২৯</td>
+                        <td>৪৭৮৩</td>
+                        <td>২২১</td>
+                        <td>০</td>
+                        <td>১১</td>
+                        <td>৭৩৪</td>
+                        <td>১৭২</td>
+                        <td>১০৪৭</td>
+                        <td>০</td>
+                        <td>
+                            সন্ধ্যা পিক
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>২০:০০:০০</td>
+                        <td>১৫২৮৮</td>
+                        <!--td></td-->
+                    <!--<td>-১৫২৮৮.০০</td>
+                        <td>২০১১</td>-->
+
+                        <td>৪৮৫৭</td>
+                        <td>৩৪৭৬</td>
+                        <td>৪৭৮৬</td>
+                        <td>২২১</td>
+                        <td>০</td>
+                        <td>৬</td>
+                        <td>৭৩১</td>
+                        <td>১৭০</td>
+                        <td>১০৪১</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৯:৩০:০০</td>
+                        <td>১৫১৭০</td>
+                        <!--td></td-->
+                    <!--<td>-১৫১৭০.০০</td>
+                        <td>২২০২</td>-->
+
+                        <td>৪৭৬৬</td>
+                        <td>৩৪৫২</td>
+                        <td>৪৭৮৮</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৫</td>
+                        <td>৭৩১</td>
+                        <td>১৬৬</td>
+                        <td>১০৪০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৯:০০:০০</td>
+                        <td>১৫০৯১</td>
+                        <!--td></td-->
+                    <!--<td>-১৫০৯১.০০</td>
+                        <td>২০২৭</td>-->
+
+                        <td>৪৯২৯</td>
+                        <td>৩৩২৩</td>
+                        <td>৪৬৭৬</td>
+                        <td>২২২</td>
+                        <td>০</td>
+                        <td>৭</td>
+                        <td>৭২৭</td>
+                        <td>১৭৪</td>
+                        <td>১০৩৩</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৮:০০:০০</td>
+                        <td>১৪২০৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৪২০৬.০০</td>
+                        <td>৭৭৪</td>-->
+
+                        <td>৪৪৮১</td>
+                        <td>২৫০৬</td>
+                        <td>৪৬৮৬</td>
+                        <td>২২২</td>
+                        <td>৫</td>
+                        <td>৬</td>
+                        <td>৯১৭</td>
+                        <td>১৬৬</td>
+                        <td>১২১৭</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৭:০০:০০</td>
+                        <td>১৩৯১৩</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯১৩.০০</td>
+                        <td>১১৩১</td>-->
+
+                        <td>৪৫৫৩</td>
+                        <td>২০৯৯</td>
+                        <td>৪৭৩৮</td>
+                        <td>২২২</td>
+                        <td>৮৮</td>
+                        <td>১২</td>
+                        <td>৯১৮</td>
+                        <td>১৬৬</td>
+                        <td>১১১৭</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৬:০০:০০</td>
+                        <td>১৩৭০৮</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৭০৮.০০</td>
+                        <td>১৭২৫</td>-->
+
+                        <td>৪৮৭৪</td>
+                        <td>১৬৯০</td>
+                        <td>৪৭৪১</td>
+                        <td>২২২</td>
+                        <td>১৭০</td>
+                        <td>১৬</td>
+                        <td>৯১৭</td>
+                        <td>১৪৮</td>
+                        <td>৯৩০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৫:০০:০০</td>
+                        <td>১৩৮২৫</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৮২৫.০০</td>
+                        <td>১৮৮৬</td>-->
+
+                        <td>৪৮৯০</td>
+                        <td>১৬৭৯</td>
+                        <td>৪৭৩৯</td>
+                        <td>২২২</td>
+                        <td>২৮৮</td>
+                        <td>১৫</td>
+                        <td>৯১৮</td>
+                        <td>১৫৪</td>
+                        <td>৯২০</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৪:০০:০০</td>
+                        <td>১৩৮৪১</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৮৪১.০০</td>
+                        <td>১৩৯৫</td>-->
+
+                        <td>৪৭৭১</td>
+                        <td>১৭৩৩</td>
+                        <td>৪৭৫২</td>
+                        <td>২২২</td>
+                        <td>৩৫৭</td>
+                        <td>১৭</td>
+                        <td>৯১৫</td>
+                        <td>১৬০</td>
+                        <td>৯১৪</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১৩:০০:০০</td>
+                        <td>১৩৯২৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯২৯.০০</td>
+                        <td>১১৮০</td>-->
+
+                        <td>৪৭৯৬</td>
+                        <td>১৭০২</td>
+                        <td>৪৭২১</td>
+                        <td>২২২</td>
+                        <td>৫১৬</td>
+                        <td>৪</td>
+                        <td>৮৯০</td>
+                        <td>১৫৬</td>
+                        <td>৯২২</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১২:০০:০০</td>
+                        <td>১৩৯১০</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৯১০.০০</td>
+                        <td>৮৮৬</td>-->
+
+                        <td>৪৬৩৪</td>
+                        <td>১৭৪৩</td>
+                        <td>৪৭৩০</td>
+                        <td>২২২</td>
+                        <td>৬০৭</td>
+                        <td>৫</td>
+                        <td>৮৯০</td>
+                        <td>১৫৬</td>
+                        <td>৯২৩</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১১:০০:০০</td>
+                        <td>১৪০০১</td>
+                        <!--td></td-->
+                    <!--<td>-১৪০০১.০০</td>
+                        <td>৩১</td>-->
+
+                        <td>৪৯৫৪</td>
+                        <td>১৭০৪</td>
+                        <td>৪৬৯৪</td>
+                        <td>২২১</td>
+                        <td>৪৫৫</td>
+                        <td>১২</td>
+                        <td>৮৯১</td>
+                        <td>১৪৮</td>
+                        <td>৯২২</td>
+                        <td>০</td>
+                        <td>
+                            ডে পিক
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>১০:০০:০০</td>
+                        <td>১৩৭২৬</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৭২৬.০০</td>
+                        <td>২২</td>-->
+
+                        <td>৪৭৪৪</td>
+                        <td>১৭৫৭</td>
+                        <td>৪৬৩৫</td>
+                        <td>১৮১</td>
+                        <td>৪৫৯</td>
+                        <td>১১</td>
+                        <td>৮৯০</td>
+                        <td>১৩০</td>
+                        <td>৯১৯</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>০৯:০০:০০</td>
+                        <td>১৩৬৬৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৬৬৯.০০</td>
+                        <td>১১৩</td>-->
+
+                        <td>৪৯২২</td>
+                        <td>১৫৭৮</td>
+                        <td>৪৭৫৩</td>
+                        <td>১৮১</td>
+                        <td>২৮৩</td>
+                        <td>১০</td>
+                        <td>৮৯০</td>
+                        <td>১২৪</td>
+                        <td>৯২৮</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                
+                    <tr>
+                        <td class="text-nowrap">০৫-০৯-২০২৬</td>
+                        <td>০৮:০০:০০</td>
+                        <td>১৩৬০৯</td>
+                        <!--td></td-->
+                    <!--<td>-১৩৬০৯.০০</td>
+                        <td>৯৪</td>-->
+
+                        <td>৪৯৫৭</td>
+                        <td>১৫৪৩</td>
+                        <td>৪৭৪১</td>
+                        <td>১৮০</td>
+                        <td>২২৭</td>
+                        <td>১৭</td>
+                        <td>৮৯১</td>
+                        <td>১৩৮</td>
+                        <td>৯১৫</td>
+                        <td>০</td>
+                        <td>
+                             
+                                                    </td>
+                    </tr>
+
+                                </tbody>
+            </table>
+        </div>
+        <ul class="pagination">
+
+                    <li class="page-item disabled"><a class="page-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
+                         height="24" viewBox="0 0 24 24" stroke-width="2"
+                         stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z"
+                              fill="none"/>
+                        <path
+                                d="M15 6l-6 6l6 6"/>
+                    </svg>
+                </a></li>
+        
+                                                                                            <li class="page-item"><a class="page-link active">1</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=2">2</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=3">3</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=4">4</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=5">5</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=6">6</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=7">7</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=8">8</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=9">9</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=10">10</a></li>
+                                                                                    <li class="page-item"><a class="page-link">...</a></li>
+                                                                                                                    <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=2036">2036</a></li>
+                                                                                <li class="page-item"><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=2037">2037</a></li>
+                                                                            <li><a class="page-link" href="https://erp.powergrid.gov.bd/w/generations/view_generations_bn?page=2" rel="next">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                         stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                         stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M9 6l6 6l-6 6"/>
+                    </svg>
+                </a></li>
+            </ul>
+
+    </div>
+            </div>
+        </div>
+
+        <footer class="footer footer-transparent d-print-none">
+    <div class="container-xl">
+        <div class="row text-center align-items-center flex-row-reverse">
+            <div class="col-lg-auto ms-lg-auto">
+                <ul class="list-inline list-inline-dots mb-0">
+
+                    <li class="list-inline-item">
+                        <a href="#" class="link-secondary">About</a>
+                    </li>
+                    <li class="list-inline-item"><a href="#" class="link-secondary">Help</a></li>
+                    <li class="list-inline-item">
+                                            </li>
+                </ul>
+            </div>
+            <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                <ul class="list-inline list-inline-dots mb-0">
+                    <li class="list-inline-item font-weight-lighter">
+                        Copyright &copy; 2024
+                        <a href="http://pgcb.gov.bd/" class="link-secondary" style="font-weight: bold;">ICT, Power Grid</a>.
+                        All rights reserved.
+
+
+                    </li>
+                    <li class="list-inline-item">
+                        <a href="#" class="link-secondary" rel="noopener">
+
+
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>    </div>
+</div>
+<script src="https://erp.powergrid.gov.bd/js/printThis.js"></script>
+<script src="https://erp.powergrid.gov.bd/dist/js/demo-theme.min.js"></script>
+<script src="https://erp.powergrid.gov.bd/dist/libs/apexcharts/dist/apexcharts.min.js"></script>
+<script src="https://erp.powergrid.gov.bd/dist/libs/jsvectormap/dist/js/jsvectormap.min.js"></script>
+<script src="https://erp.powergrid.gov.bd/dist/libs/jsvectormap/dist/maps/world.js"></script>
+<script src="https://erp.powergrid.gov.bd/dist/libs/jsvectormap/dist/maps/world-merc.js"></script>
+<!-- Tabler Core -->
+<script src="https://erp.powergrid.gov.bd/dist/js/tabler.min.js"></script>
+<script src="https://erp.powergrid.gov.bd/dist/js/demo.min.js"></script>
+
+<script src="https://erp.powergrid.gov.bd/dist/libs/nouislider/dist/nouislider.min.js" defer></script>
+<script src="https://erp.powergrid.gov.bd/dist/libs/litepicker/dist/litepicker.js" defer></script>
+<script src="https://erp.powergrid.gov.bd/dist/libs/tom-select/dist/js/tom-select.base.min.js" defer></script>
+<!-- Libs JS -->
+<script src="./dist/libs/fslightbox/index.js?1674944800" defer></script>
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"
+        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.html5.min.js"></script>
+<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/buttons/2.0.1/js/buttons.print.min.js"></script>
+
+
+<link id="bsdp-css" href="https://unpkg.com/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker3.min.css" rel="stylesheet">
+<script src="https://unpkg.com/bootstrap-datepicker@1.9.0/dist/js/bootstrap-datepicker.min.js"></script>
+
+<script>
+
+
+    $(document).ready(function () {
+        $('.msg').each(function() {
+            var $msg = $(this);
+            setTimeout(function() {
+                $msg.fadeOut('fast', function() {
+                    $msg.remove();
+                });
+            }, 3000);
+        });
+
+        $(".readonly").on('keydown paste focus', function(e){
+            if(e.keyCode != 9) // ignore tab
+                e.preventDefault();
+        });
+        $('input[type="number"]').on('click', function() {
+            $(this).select();
+        });
+        $('.input-source').on('click', function() {
+            $(this).select();
+        });
+        // Function to format the number in the Bangladesh currency format
+        function formatBangladeshiCurrency(amount) {
+            if (!amount) return "";
+            amount = amount.toString().replace(/,/g, ""); // Remove existing commas
+            const parts = amount.split(".");
+            const integerPart = parts[0];
+            const decimalPart = parts[1] ? "." + parts[1] : "";
+
+            // Format the integer part with commas
+            const lastThree = integerPart.slice(-3);
+            const otherNumbers = integerPart.slice(0, -3);
+            const formattedInteger =
+                otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + (otherNumbers ? "," : "") + lastThree;
+
+            return formattedInteger + decimalPart;
+        }
+
+        // On input change, update the formatted value
+        $(".bdcurrency-input").on("input", function () {
+            const rawValue = $(this).val();
+            const formattedValue = formatBangladeshiCurrency(rawValue);
+            $(".bdcurrency-display").text(formattedValue); // Update the span
+            $(this).val(formattedValue); // Optionally update the input itself
+        });
+
+
+        $('.datepicker').datepicker({
+            format: 'dd-mm-yyyy',
+            autoclose: true,
+            todayBtn: "linked",
+            todayHighlight : true,
+            keyboardNavigation : true
+        });
+
+        //$('.msg').fadeOut(5000);
+        $('.select2').select2({
+            theme: "bootstrap-5",
+            selectionCssClass: "select2--small",
+            dropdownCssClass: "select2--small",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            closeOnSelect: true,
+        });
+        $('.select3').select2({
+            theme: "bootstrap-5",
+            selectionCssClass: "select2--small",
+            dropdownCssClass: "select2--small",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
+            placeholder: $(this).data('placeholder'),
+            closeOnSelect: false,
+        });
+
+        $('.erpdatatable').DataTable({
+            select: true,
+            "bPaginate": false,
+            "bLengthChange": false,
+            "bFilter": true,
+            "bInfo": false,
+            "pageLength": 250,
+            "ordering": false
+
+
+        });
+        var t = $('.searchdatatable').DataTable({
+
+            select: true,
+            "bPaginate": false,
+            "bLengthChange": false,
+            "bFilter": true,
+            "bInfo": true,
+            "pageLength": 250,
+            "ordering": true,
+            fixedHeader: true,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel','print',
+                {
+                    extend: 'pdfHtml5',
+                    text: 'Pdf A4 Portrait',
+
+                    exportOptions: {
+                        columns: ':visible:not(.no-display)', orthogonal: 'print'
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: 'Pdf A4 Landscape',
+                    orientation: 'landscape',
+
+                    exportOptions: {
+                        columns: ':visible:not(.no-display)', orthogonal: 'print'
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: 'Pdf Legal Portrait',
+                    pageSize: 'LEGAL',
+
+                    exportOptions: {
+                        columns: ':visible:not(.no-display)', orthogonal: 'print'
+                    }
+                },
+
+                {
+                    extend: 'pdfHtml5',
+                    text: 'Pdf Legal Landscape',
+                    pageSize: 'LEGAL',
+                    orientation: 'landscape',
+
+                    exportOptions: {
+                        columns: ':visible:not(.no-display)', orthogonal: 'print'
+                    }
+                }
+            ],
+
+
+        });
+
+
+
+    });
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+        }
+    });
+
+
+</script>
+<script src="https://erp.powergrid.gov.bd/sw.js"></script>
+<script>
+    if ("serviceWorker" in navigator) {
+        // Register a service worker hosted at the root of the
+        // site using the default scope.
+        navigator.serviceWorker.register("/sw.js").then(
+            (registration) => {
+            console.log("Service worker registration succeeded:", registration);
+    },
+        (error) => {
+            console.error('Service worker registration failed: ${error}');
+        },
+    );
+    } else {
+        console.error("Service workers are not supported.");
+    }
+</script>
+
+
+
+
+</body>
+</html>

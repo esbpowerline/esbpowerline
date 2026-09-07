@@ -904,6 +904,15 @@ enum AggregationExclusion {
 enum GridSeries {
   GENERATION
   DEMAND_SUPPLY
+  /// `imported_power_india_bn` — Bheramara HVDC, Tripura and Adani, each as an
+  /// actual beside NLDC's forecast for the same hour. Pages back to 2015-04-17,
+  /// the same depth as GENERATION (measured 2026-09-07).
+  INDIA_IMPORT
+  /// `imported_power_nepal_bn` — one interconnector, actual and forecast. Only
+  /// 325 pages deep, oldest row 2024-11-14: the Nepal trade began then, so this
+  /// is the series' true start rather than a retention window (measured
+  /// 2026-09-07).
+  NEPAL_IMPORT
 }
 
 /// One hour as NLDC published it, kept because NLDC will not keep it.
@@ -946,6 +955,17 @@ model GridHourlyObservation {
   tripuraMw   Decimal? @db.Decimal(12, 3)
   adaniMw     Decimal? @db.Decimal(12, 3)
   nepalMw     Decimal? @db.Decimal(12, 3)
+
+  // INDIA_IMPORT / NEPAL_IMPORT. The actual for each interconnector reuses the
+  // columns above — the import pages print the same MW the generation page
+  // does, verified identical over 102 hours on 2026-09-07 — so only the
+  // forecast needs new columns. It is stored beside the actual and NEVER
+  // graded against it: doctrine rule 6 allows the signed difference and
+  // nothing else, because PGCB does not control the far side of the border.
+  bheramaraForecastMw Decimal? @db.Decimal(12, 3)
+  tripuraForecastMw   Decimal? @db.Decimal(12, 3)
+  adaniForecastMw     Decimal? @db.Decimal(12, 3)
+  nepalForecastMw     Decimal? @db.Decimal(12, 3)
 
   // DEMAND_SUPPLY.
   demandMw   Decimal? @db.Decimal(12, 3)

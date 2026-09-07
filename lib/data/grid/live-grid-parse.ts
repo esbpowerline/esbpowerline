@@ -197,6 +197,94 @@ export function parseNldcDemandSupplyHtml(html: string): LiveDemandRow[] {
 }
 
 /**
+ * PGCB's two cross-border import pages, which the generation table does not
+ * replace.
+ *
+ * Every actual on these pages already appears on `view_generations_bn`, and was
+ * checked column by column against it on 2026-09-07 — identical for all 51
+ * hours on both pages. So these are NOT ingested for the actuals. They are
+ * ingested for the one figure that appears nowhere else in this archive: NLDC's
+ * hourly **forecast** (পূর্বাভাস) for each interconnector, printed beside the
+ * actual (প্রকৃত) it is to be read against.
+ *
+ * Storing the actual anyway is deliberate and cheap. Two PGCB pages stating the
+ * same MW for the same hour is an independent check of a figure the site
+ * prints, of exactly the kind that has caught every real defect in this repo —
+ * a number verified against something else that should agree with it, rather
+ * than against the parser that produced it.
+ *
+ * Rule 6 of the data doctrine governs what may be done with the pair: the
+ * forecast and the actual may be shown side by side and subtracted, and that
+ * signed difference is all. No accuracy percentage, no scoring, no grading.
+ * PGCB does not control the interconnector on the far side of the border.
+ */
+export type LiveIndiaImportRow = {
+  at: string;
+  bheramaraMw: number | null;
+  bheramaraForecastMw: number | null;
+  tripuraMw: number | null;
+  tripuraForecastMw: number | null;
+  adaniMw: number | null;
+  adaniForecastMw: number | null;
+};
+
+export type LiveNepalImportRow = {
+  at: string;
+  nepalMw: number | null;
+  nepalForecastMw: number | null;
+};
+
+/**
+ * `imported_power_india_bn` — 8 cells:
+ *   date, time, bheramara actual, bheramara forecast, tripura actual,
+ *   tripura forecast, adani actual, adani forecast
+ *
+ * The header is two <tr>s deep (the interconnector names carry colspan=2 over a
+ * প্রকৃত/পূর্বাভাস pair), and neither parses as a date, so `toIsoLocal` drops
+ * both without a cell-count rule that would break when PGCB adds a fourth
+ * interconnector. A row is kept on its timestamp alone: every figure here is
+ * nullable, because an interconnector PGCB is not reporting this hour must read
+ * absent and never 0 MW — 0 is a claim that the line was up and carrying
+ * nothing, which is a real and different operating state.
+ */
+export function parseNldcIndiaImportHtml(html: string): LiveIndiaImportRow[] {
+  const out: LiveIndiaImportRow[] = [];
+  for (const cells of tableRows(html)) {
+    if (cells.length < 8) continue;
+    const at = toIsoLocal(cells[0], cells[1]);
+    if (!at) continue;
+    out.push({
+      at,
+      bheramaraMw: num(cells[2]),
+      bheramaraForecastMw: num(cells[3]),
+      tripuraMw: num(cells[4]),
+      tripuraForecastMw: num(cells[5]),
+      adaniMw: num(cells[6]),
+      adaniForecastMw: num(cells[7]),
+    });
+  }
+  return out.sort((a, b) => a.at.localeCompare(b.at));
+}
+
+/**
+ * `imported_power_nepal_bn` — 4 cells: date, time, actual, forecast.
+ *
+ * Nepal prints a literal ০ for most hours rather than leaving the cell blank,
+ * and that zero is kept as a zero: NLDC is stating the line carried nothing,
+ * which is a measurement. `num` already separates it from an empty cell.
+ */
+export function parseNldcNepalImportHtml(html: string): LiveNepalImportRow[] {
+  const out: LiveNepalImportRow[] = [];
+  for (const cells of tableRows(html)) {
+    if (cells.length < 4) continue;
+    const at = toIsoLocal(cells[0], cells[1]);
+    if (!at) continue;
+    out.push({ at, nepalMw: num(cells[2]), nepalForecastMw: num(cells[3]) });
+  }
+  return out.sort((a, b) => a.at.localeCompare(b.at));
+}
+
+/**
  * Sum of the components the source actually reported, or null when it reported
  * none of them.
  *
