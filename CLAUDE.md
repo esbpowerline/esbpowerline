@@ -79,9 +79,14 @@ three real cases: the healthy 00:17 tick and a quiet tick stay silent, the
 now shows **0 days absent** across all 138 days of the demand series, with the
 largest remaining gap one hour.
 
-**A related trap:** `pi-ingest.sh` copies helper scripts down and installs cron
-lines, but nothing re-runs `prisma generate` when the schema changes. A migration
-that adds a column will silently break every script on the Pi the same way.
+**That related trap is now closed too.** `pi-ingest.sh` copied helper scripts down
+and installed cron lines, but nothing re-ran `prisma generate` when the schema
+changed — so a migration that added a column would silently break every script on
+the Pi the same way. The poll now hashes `prisma/schema.prisma` after the reset and
+regenerates when the hash moves, keyed on the hash rather than a timestamp so an
+ordinary poll skips it (generate is ~40 s on that hardware). A failure there is
+fatal and alerts: continuing against a stale client is exactly the silent case
+above. First exercised by migration 0021 on 2026-09-07.
 
 **3. The outage backfill is built, dry-run, and not applied.**
 

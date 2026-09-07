@@ -141,6 +141,33 @@ git fetch -q origin authenticating || { echo "! fetch failed"; notify error "ing
 git checkout -q authenticating
 git reset -q --hard origin/authenticating
 
+# Regenerate the Prisma client when, and only when, the schema has moved.
+#
+# This is the trap that took the hourly capture down for a day. On 2026-09-06
+# every tick logged "0 pages, 0 rows, 2 failed" on both series and exited 0,
+# and the cause was that `prisma/schema.prisma` carried `sourceUrl` while the
+# generated client on this Pi did not: 132 rejected writes, no alert, and the
+# most perishable stream in the archive stopped in silence. The checkout is
+# updated by the reset above; the client it generates was updated by nobody.
+#
+# Keyed on a hash of the schema rather than a timestamp, so it is skipped on
+# every ordinary poll — generate takes ~40 s on this hardware and the schema
+# changes a few times a month. A failure here is fatal on purpose: continuing
+# with a stale client is precisely the silent-corruption case above.
+SCHEMA_STAMP="$STATE/schema.sha256"
+SCHEMA_NOW=$(sha256sum prisma/schema.prisma | cut -d' ' -f1)
+if [[ "$SCHEMA_NOW" != "$(cat "$SCHEMA_STAMP" 2>/dev/null)" ]]; then
+    echo "schema changed — regenerating the Prisma client"
+    if PATH="$HOME/.local/node/bin:$PATH" timeout 300 npx prisma generate >/dev/null 2>&1; then
+        echo "$SCHEMA_NOW" >"$SCHEMA_STAMP"
+        echo "  prisma client regenerated"
+    else
+        echo "! prisma generate failed — refusing to run against a stale client"
+        notify error "ingest: prisma generate failed"             "schema.prisma moved but the client could not be regenerated; every script on this Pi would write against the old columns"
+        exit 1
+    fi
+fi
+
 if [[ -n "$DATES" ]]; then
     timeout 1500 "$ROOT/venv/bin/python" scripts/ingest_recent_days.py --dates "$DATES"
 else
