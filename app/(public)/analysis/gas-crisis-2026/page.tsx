@@ -298,7 +298,7 @@ export default async function GasCrisis2026Page() {
         caveat on everything below, so it reads as one.
       */}
       <aside className="mb-10 rounded-2xl border-l-4 border-l-primary border-y border-r border-border bg-card px-5 py-4 sm:px-6">
-        <p className="max-w-[76ch] text-[0.9375rem] leading-7 text-muted-foreground">
+        <p className="text-[0.9375rem] leading-7 text-muted-foreground">
           <strong className="font-semibold text-foreground">Petrobangla never names a cause.</strong>{' '}
           Its daily report carries one aggregated &ldquo;R-LNG Terminal&rdquo; row — no terminal, no
           vessel, no fault, on any day of this window. So this page does not assert one either.
@@ -312,7 +312,7 @@ export default async function GasCrisis2026Page() {
         <h2 id="deltas-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground mb-1">
           The window against its baseline
         </h2>
-        <p className="mb-5 max-w-[86ch] text-[13px] leading-6 text-muted-foreground">
+        <p className="mb-5 text-[13px] leading-6 text-muted-foreground">
           Signed differences of means, and nothing more — no scores, no percentages. Each mean is
           taken over the days a publisher actually filed in{' '}
           <span className="tabular-nums text-foreground/80">
@@ -338,7 +338,7 @@ export default async function GasCrisis2026Page() {
         <h2 id="timeline-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
           Day by day
         </h2>
-        <p className="mt-1.5 mb-2 max-w-[74ch] text-[13px] leading-6 text-muted-foreground">
+        <p className="mt-1.5 mb-2 text-[13px] leading-6 text-muted-foreground">
           {narrative.totals.windowDays} days, in order. The left column is the national record for
           that day and the change on the day before; the right column is what ESB PowerLine
           published that day, plus what the wider press reported, linked. Days marked{' '}
@@ -370,7 +370,7 @@ export default async function GasCrisis2026Page() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
               Also reported during the window · date not established
             </p>
-            <p className="mt-1 max-w-[74ch] text-[12px] leading-6 text-muted-foreground">
+            <p className="mt-1 text-[12px] leading-6 text-muted-foreground">
               These sit outside the day-by-day list on purpose. Placing a report on a day we could
               not establish would put a date on the record that nothing supports — the same
               standard the archive applies to its own figures.
@@ -495,7 +495,7 @@ export default async function GasCrisis2026Page() {
           <h2 id="outages-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
             What the outage log itself says
           </h2>
-          <p className="mt-1.5 mb-4 max-w-[74ch] text-[13px] leading-6 text-muted-foreground">
+          <p className="mt-1.5 mb-4 text-[13px] leading-6 text-muted-foreground">
             Every generating-plant outage in the window whose printed reason names the gas supply,
             quoted verbatim from PGCB&rsquo;s daily log. This is a reading of the log, not a
             statistic — most &ldquo;gas&rdquo; entries in it are SF6 breaker gas at substations,
@@ -532,7 +532,7 @@ export default async function GasCrisis2026Page() {
           <h2 id="hourly-h" className="text-[1.0625rem] font-bold tracking-[-0.01em] text-foreground">
             Hour by hour: load shedding
           </h2>
-          <p className="mt-1.5 mb-4 max-w-[74ch] text-[13px] leading-6 text-muted-foreground">
+          <p className="mt-1.5 mb-4 text-[13px] leading-6 text-muted-foreground">
             NLDC&rsquo;s hourly record across the window — the series peaked at 3,757 MW on 10
             August. NLDC and PGCB&rsquo;s workbook print this quantity from different pages and
             they do not always agree; this panel is NLDC&rsquo;s account, the daily card above is

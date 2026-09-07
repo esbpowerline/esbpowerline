@@ -252,7 +252,7 @@ export default function EventHero({
         {title}
       </h1>
 
-      <p className="event-hero__standfirst mt-4 max-w-[64ch] text-[1.0625rem] leading-[1.65] text-foreground/85">
+      <p className="event-hero__standfirst mt-4 text-[1.0625rem] leading-[1.65] text-foreground/85">
         {standfirst}
       </p>
 
