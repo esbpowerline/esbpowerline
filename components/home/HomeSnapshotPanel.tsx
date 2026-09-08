@@ -199,7 +199,53 @@ function useLiveGrid(): LiveGrid | null {
  * survival rule reads `LIVE_BACKED_LABELS` off that spec, so a tile listed
  * there but missing from this switch would keep its slot forever waiting.
  */
-function liveValueFor(label: string, live: LiveGrid): number | null {
+function pickPeak(
+  pair: { dayPeakMw: number | null; eveningPeakMw: number | null } | undefined,
+  phase: PeakPhase,
+): number | null {
+  if (!pair) return null;
+  const wanted = phase === 'day' ? pair.dayPeakMw : pair.eveningPeakMw;
+  const other = phase === 'day' ? pair.eveningPeakMw : pair.dayPeakMw;
+  return wanted ?? other ?? null;
+}
+
+/**
+ * Short forms for the narrow panel, stated rather than derived.
+ *
+ * The regex below ("Generation" -> "GEN") is not enough on its own: it leaves
+ * "Current Demand" at fourteen characters and "Current Generation" at eleven,
+ * and at a 1366 viewport the rail gives a tile about 113px for its label. An
+ * 18-character uppercase label does not fit there at any size a reader would
+ * thank us for — 9px was measured still clipping, and the size that would fit
+ * is around 7.5px.
+ *
+ * Written out per label because a short form has to stay unambiguous inside
+ * THIS panel. "GEN" alone belongs to none of Current, Gas and Coal Generation,
+ * so the qualifier is what survives the trim, never the noun. The full label is
+ * always one breakpoint away, and the tooltip names the source either way.
+ */
+const SHORT_LABELS: Record<string, string> = {
+  'Current Demand': 'Demand now',
+  'Current Supply': 'Supply now',
+  'Current Generation': 'Gen now',
+  'Forecast Demand': 'Demand fcst',
+  'Load Shedding': 'Load shed',
+  'Yesterday Peak Gen': 'Y-day peak',
+  'Gas Generation': 'Gas gen',
+  'Coal Generation': 'Coal gen',
+  'Grid Import': 'Import',
+  'Solar + Wind': 'Solar+wind',
+  'Gas Supply': 'Gas supply',
+  'Production Cost': 'Cost',
+};
+
+/** Which of PGCB's two published peaks the dual tiles are showing. */
+type PeakPhase = 'evening' | 'day';
+
+/** The two tiles PGCB publishes a day peak AND an evening peak for. */
+const DUAL_PEAK_LABELS = new Set(['Forecast Demand', 'Yesterday Peak Gen']);
+
+function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening'): number | null {
   switch (label) {
     case 'Current Demand':
       return live.latest.demandMw;
@@ -242,16 +288,23 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
       );
       return parts.length ? parts.reduce((a, b) => a + b, 0) : null;
     }
-    // PGCB's forecast board. The EVENING peak is the headline on both: it is
-    // Bangladesh's system peak, the hour the grid is judged on. The day peak is
-    // carried in the tile's tooltip rather than dropped.
+    // PGCB's forecast board publishes BOTH peaks for these two, and the tile
+    // has room for one number, so it alternates between them on a 5s cycle
+    // (see `peakPhase`). Evening leads because it is the system peak — the hour
+    // the grid is judged on — and is what the tile shows if the flip is off.
+    //
+    // Falls back to the other peak rather than to a dash: if PGCB printed only
+    // one of the pair, the tile shows the one that exists at every phase
+    // instead of blinking to em-dash and back every five seconds. That is not a
+    // substitution — both are the same quantity from the same row, and the
+    // suffix beside the figure always says which one is on screen.
     //
     // Not gated on `reconciles` — that flag is about the generation table's
     // total against its own components, and neither of these comes from it.
     case 'Forecast Demand':
-      return live.forecast?.forecastDemand.eveningPeakMw ?? null;
+      return pickPeak(live.forecast?.forecastDemand, phase);
     case 'Yesterday Peak Gen':
-      return live.forecast?.previousGeneration.eveningPeakMw ?? null;
+      return pickPeak(live.forecast?.previousGeneration, phase);
     default:
       return null;
   }
@@ -274,6 +327,47 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
       };
     }),
   );
+
+  /*
+    The dual-peak flip.
+
+    PGCB publishes a day peak AND an evening peak for the forecast board's two
+    rows, and a tile has room for one number. Rather than drop half of what the
+    source stated, the two tiles alternate every five seconds, and the suffix
+    beside the figure names which peak is on screen — the reader is never left
+    guessing which of the two they are looking at.
+
+    Off under `prefers-reduced-motion`, where the tile holds the evening peak.
+    An unannounced number that changes itself is exactly what that preference is
+    about, and nothing is lost: the tooltip states both peaks either way.
+
+    Read once and then watched, because a reader can change the setting with the
+    page open, and a panel that only checked at mount would keep flipping at
+    someone who had just asked it to stop.
+  */
+  const [peakPhase, setPeakPhase] = useState<PeakPhase>('evening');
+  const [flipEnabled, setFlipEnabled] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => setFlipEnabled(!mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  useEffect(() => {
+    if (!flipEnabled) {
+      setPeakPhase('evening');
+      return;
+    }
+    const id = setInterval(
+      () => setPeakPhase((p) => (p === 'evening' ? 'day' : 'evening')),
+      5000,
+    );
+    return () => clearInterval(id);
+  }, [flipEnabled]);
 
   /*
     The simulated-movement loop is gone.
@@ -303,7 +397,29 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
       {stats.map((s, i) => {
         const Icon = s.Icon;
 
-        const liveVal = live ? liveValueFor(s.label, live) : null;
+        const liveVal = live ? liveValueFor(s.label, live, peakPhase) : null;
+        // Only annotate a tile that is actually alternating: a dual tile where
+        // PGCB printed just one of the pair shows that one at every phase, and
+        // labelling it with the phase would name a peak it is not showing.
+        const pair =
+          s.label === 'Forecast Demand'
+            ? live?.forecast?.forecastDemand
+            : s.label === 'Yesterday Peak Gen'
+              ? live?.forecast?.previousGeneration
+              : undefined;
+        const isFlipping =
+          DUAL_PEAK_LABELS.has(s.label) &&
+          pair?.dayPeakMw != null &&
+          pair?.eveningPeakMw != null;
+        const peakSuffix = isFlipping
+          ? locale === 'bn'
+            ? peakPhase === 'day'
+              ? 'দিন'
+              : 'সন্ধ্যা'
+            : peakPhase === 'day'
+              ? 'day'
+              : 'evening'
+          : null;
         const isLive = liveVal !== null;
         const displayValue = isLive ? liveVal : s.value;
         // Live wins over waiting: a tile the daily report has not filed can
@@ -355,16 +471,19 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
         const fullLabel = localizeEnergyStatLabel(s.label, locale as any);
         let shortLabel = fullLabel;
         if (locale === 'en') {
-          shortLabel = shortLabel.replace(/Generation/g, 'GEN')
-                                 .replace(/Power/g, 'PWR')
-                                 .replace(/Frequency/g, 'FREQ')
-                                 .replace(/POWER/g, 'PWR');
+          shortLabel =
+            SHORT_LABELS[s.label] ??
+            shortLabel
+              .replace(/Generation/g, 'GEN')
+              .replace(/Power/g, 'PWR')
+              .replace(/Frequency/g, 'FREQ')
+              .replace(/POWER/g, 'PWR');
         }
 
         return (
           <div
             key={i}
-            className="group relative flex flex-row items-center w-full h-full gap-3 transition-all duration-200 px-3 md:px-4 py-2.5 bg-card hover:bg-muted/5 dark:hover:bg-white/[0.01]"
+            className="group relative flex flex-row items-center w-full h-full transition-all duration-200 px-3 md:px-4 py-2.5 bg-card hover:bg-muted/5 dark:hover:bg-white/[0.01]"
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
@@ -386,12 +505,23 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
               </ModernTooltip>
             </span>
 
-            <Icon className={`h-[11.25px] w-[11.25px] md:h-[13.5px] md:w-[13.5px] shrink-0 self-center transition-transform duration-200 group-hover:scale-110 ${s.iconClass}`} />
-            
             <div className="flex flex-col min-w-0 flex-1 justify-center gap-1">
-              <div className="font-semibold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors duration-150 select-none leading-none truncate w-full text-[9px] md:text-[10px]">
-                <span className="hidden md:inline">{fullLabel}</span>
-                <span className="inline md:hidden">{shortLabel}</span>
+              {/* The icon rides INSIDE the label, at the label's own size.
+                  
+                  It was a flex sibling in a gutter: 13.5px of icon plus a 12px
+                  gap, ~25px taken out of a label that carries `truncate` and is
+                  the longest string on the tile. "Current Generation" and
+                  "Yesterday Peak Gen" were losing their last characters to a
+                  glyph sitting outside the text it names. At `1em` it scales
+                  with the label at both breakpoints and costs the column only
+                  its own width. */}
+              <div className="home-snapshot-tile__label font-semibold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors duration-150 select-none leading-none truncate w-full text-[9px] md:text-[10px]">
+                <Icon
+                  aria-hidden
+                  className={`inline-block h-[1em] w-[1em] mr-[0.45em] align-[-0.15em] shrink-0 transition-transform duration-200 group-hover:scale-110 ${s.iconClass}`}
+                />
+                <span className="home-snapshot-tile__label-full">{fullLabel}</span>
+                <span className="home-snapshot-tile__label-short">{shortLabel}</span>
               </div>
               <div className="font-bold font-sans tabular-nums text-foreground/95 group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-xs md:text-sm">
                 {displayValue === null ? (
@@ -411,6 +541,9 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                     displayValue === null ? 'text-muted-foreground/50' : 'text-muted-foreground'
                   }`}
                 >
+                  {/* Which of the two peaks is on screen. Sits with the unit
+                      rather than in the label, where a 10px uppercase string
+                      already carries `truncate` and has no room for a suffix. */}
                   {/* The source name does not fit: the tile is a twelfth of a
                       480px panel, and "AWAITING PETROBANGLA" ran past its right
                       edge and clipped mid-word. The word alone fits, and the
@@ -421,6 +554,11 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                       : 'awaiting'
                     : s.unit}
                 </span>
+                {peakSuffix && displayValue !== null ? (
+                  <span className="ml-1 font-semibold lowercase tracking-normal text-[8px] md:text-[9px] text-muted-foreground/75">
+                    · {peakSuffix}
+                  </span>
+                ) : null}
               </div>
             </div>
           </div>

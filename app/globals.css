@@ -16837,3 +16837,57 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
     transform: none;
   }
 }
+
+/* Snapshot tile labels, sized against the PANEL rather than the window.
+   
+   The label carries `truncate` and is the longest string on a tile that is a
+   twelfth of the panel. Its size was keyed to `md:` — a viewport breakpoint —
+   and the panel does not track the viewport: it lives in the homepage's right
+   rail, about 20rem wide at a 1366 viewport, which is comfortably past `md`.
+   So every tile took the LARGER 10px label at exactly the width where it had
+   least room, and "Current Demand", "Coal Generation" and "Yesterday Peak Gen"
+   all clipped mid-word.
+   
+   Sized down here rather than abbreviated. A short form has to stay
+   unambiguous, and this panel already carries Gas Generation, Coal Generation
+   and Current Generation — "GEN" belongs to none of them on its own. Losing a
+   point of type costs nothing a reader notices; losing the end of the word
+   costs them the tile.
+   
+   The card declares the container (see .home-snapshot-segment__card). */
+@container home-snapshot (max-width: 23rem) {
+  .home-snapshot-tile__label {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+}
+
+@container home-snapshot (max-width: 19rem) {
+  .home-snapshot-tile__label {
+    font-size: 8.5px;
+    letter-spacing: 0.01em;
+  }
+}
+
+/* Full label by default; the short form once the panel cannot hold it.
+   
+   Switched on the CARD's width, not the window's. The old rule was `md:`, and
+   at a 1366 viewport — comfortably past `md` — the rail is about 20rem and every
+   tile took the LONGER label at exactly the width where it had least room.
+   
+   22rem is measured, not guessed: the card is ~20rem at 1366, where the long
+   labels clip at any readable size, and between 23 and 24rem at 1920, where
+   they fit. 24rem was tried first and swapped the labels at both. */
+.home-snapshot-tile__label-short {
+  display: none;
+}
+
+@container home-snapshot (max-width: 22rem) {
+  .home-snapshot-tile__label-full {
+    display: none;
+  }
+
+  .home-snapshot-tile__label-short {
+    display: inline;
+  }
+}
