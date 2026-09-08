@@ -16976,7 +16976,32 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
    costs them the tile.
    
    The card declares the container (see .home-snapshot-segment__card). */
+/* The label's size, published as a variable so the figure below it can hang
+   off the same measurement. The icon rides inside the label at 1em with a
+   0.45em gap, so the label's TEXT starts 1.45 label-ems in — and the figure
+   has to start there too, or it sits under the glyph instead of under the
+   first letter of the word it answers. Every rule that resizes the label
+   moves this with it; a font-size set here without the variable would put the
+   two out of step silently. */
+.home-snapshot-tile {
+  --snapshot-label-size: 9px;
+}
+
+@media (min-width: 768px) {
+  .home-snapshot-tile {
+    --snapshot-label-size: 10px;
+  }
+}
+
+.home-snapshot-tile__value {
+  padding-left: calc(var(--snapshot-label-size, 10px) * 1.45);
+}
+
 @container home-snapshot (max-width: 23rem) {
+  .home-snapshot-tile {
+    --snapshot-label-size: 9px;
+  }
+
   .home-snapshot-tile__label {
     font-size: 9px;
     letter-spacing: 0.02em;
@@ -16984,6 +17009,10 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 }
 
 @container home-snapshot (max-width: 19rem) {
+  .home-snapshot-tile {
+    --snapshot-label-size: 8.5px;
+  }
+
   .home-snapshot-tile__label {
     font-size: 8.5px;
     letter-spacing: 0.01em;

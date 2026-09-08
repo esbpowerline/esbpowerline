@@ -638,7 +638,7 @@ function LocalSnapshotDashboard({
         return (
           <div
             key={i}
-            className="group relative flex flex-row items-center w-full h-full transition-all duration-200 px-3 md:px-4 py-2 bg-card hover:bg-muted/[0.04] dark:hover:bg-white/[0.02]"
+            className="home-snapshot-tile group relative flex flex-row items-center w-full h-full transition-all duration-200 px-3 md:px-4 py-2 bg-card hover:bg-muted/[0.04] dark:hover:bg-white/[0.02]"
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
@@ -713,7 +713,14 @@ function LocalSnapshotDashboard({
                 <span className="home-snapshot-tile__label-full">{fullLabel}</span>
                 <span className="home-snapshot-tile__label-short">{shortLabel}</span>
               </div>
-              <div className="font-bold font-sans tabular-nums tracking-[-0.01em] text-foreground group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-[13px] md:text-[15px]">
+              {/* The figure hangs off the LABEL's text, not off the tile's
+                  edge — it starts under the Y of "Y-day Peak", not under the
+                  glyph in front of it. The indent is the icon's own footprint
+                  (1em wide plus a 0.45em gap) measured in the label's font
+                  size, which the container queries move between 10, 9 and
+                  8.5px; `--snapshot-label-size` is what keeps the two in step,
+                  so a label that resizes takes its figure with it. */}
+              <div className="home-snapshot-tile__value font-bold font-sans tabular-nums tracking-[-0.01em] text-foreground group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-[13px] md:text-[15px]">
                 {displayValue === null ? (
                   // An em dash, in the muted weight the rest of the site uses
                   // for an unpublished figure. Deliberately not "0" and not the
