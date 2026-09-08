@@ -26,16 +26,31 @@ const IconMap: Record<string, any> = {
   Droplet,
 };
 
+/*
+  One ink for every icon.
+
+  This was eight hues across twelve tiles — amber, rose, emerald, violet, sky,
+  cyan, yellow, primary — and none of them encoded anything. Meanwhile the only
+  colour on the panel that DOES carry meaning is the status dot: emerald for
+  NLDC's hourly feed, rose for PGCB's daily board. A rainbow of decorative
+  glyphs was competing with the one signal a reader needs to read.
+
+  The same pass was made on the Grid Explorer's KPI tiles, so this also settles
+  an inconsistency between the two surfaces. The `bg` entries are kept because
+  other components read them; nothing on this panel uses them.
+*/
+const SNAPSHOT_ICON_INK = 'text-muted-foreground/55 dark:text-muted-foreground/50';
+
 const ICON_STYLES: Record<string, { color: string; bg: string }> = {
-  Zap: { color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-500/10' },
-  Activity: { color: 'text-rose-500 dark:text-rose-400', bg: 'bg-rose-500/10' },
-  Leaf: { color: 'text-teal-500 dark:text-teal-400', bg: 'bg-teal-500/10' },
-  Gauge: { color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-500/10' },
-  Flame: { color: 'text-violet-500 dark:text-violet-400', bg: 'bg-violet-500/10' },
-  Droplet: { color: 'text-sky-500 dark:text-sky-400', bg: 'bg-sky-500/10' },
-  Cable: { color: 'text-cyan-500 dark:text-cyan-400', bg: 'bg-cyan-500/10' },
-  Sun: { color: 'text-yellow-500 dark:text-yellow-400', bg: 'bg-yellow-500/10' },
-  TrendingUp: { color: 'text-primary dark:text-primary-foreground', bg: 'bg-primary/10' },
+  Zap: { color: SNAPSHOT_ICON_INK, bg: 'bg-emerald-500/10' },
+  Activity: { color: SNAPSHOT_ICON_INK, bg: 'bg-rose-500/10' },
+  Leaf: { color: SNAPSHOT_ICON_INK, bg: 'bg-teal-500/10' },
+  Gauge: { color: SNAPSHOT_ICON_INK, bg: 'bg-amber-500/10' },
+  Flame: { color: SNAPSHOT_ICON_INK, bg: 'bg-violet-500/10' },
+  Droplet: { color: SNAPSHOT_ICON_INK, bg: 'bg-sky-500/10' },
+  Cable: { color: SNAPSHOT_ICON_INK, bg: 'bg-cyan-500/10' },
+  Sun: { color: SNAPSHOT_ICON_INK, bg: 'bg-yellow-500/10' },
+  TrendingUp: { color: SNAPSHOT_ICON_INK, bg: 'bg-primary/10' },
 };
 
 /** A merged slot plus the resolved lucide icon and its Tailwind classes. */
@@ -505,8 +520,11 @@ function LocalSnapshotDashboard({
     source that published it.
   */
 
+  // The separators carry the grid, so they are hairlines rather than rules: at
+  // border/65 the twelve cells read as a table of boxes, which is the one thing
+  // a glance-panel should not look like.
   return (
-    <div className="grid grid-cols-2 gap-[1px] bg-border/65 w-full h-full auto-rows-fr rounded-xl overflow-hidden border border-border/65">
+    <div className="grid grid-cols-2 gap-[1px] bg-border/35 dark:bg-border/45 w-full h-full auto-rows-fr rounded-xl overflow-hidden border border-border/45">
       {stats.map((s, i) => {
         const Icon = s.Icon;
 
@@ -621,7 +639,7 @@ function LocalSnapshotDashboard({
         return (
           <div
             key={i}
-            className="group relative flex flex-row items-center w-full h-full transition-all duration-200 px-3 md:px-4 py-2.5 bg-card hover:bg-muted/5 dark:hover:bg-white/[0.01]"
+            className="group relative flex flex-row items-center w-full h-full transition-all duration-200 px-3 md:px-4 py-2 bg-card hover:bg-muted/[0.04] dark:hover:bg-white/[0.02]"
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
@@ -678,7 +696,7 @@ function LocalSnapshotDashboard({
               </ModernTooltip>
             </span>
 
-            <div className="flex flex-col min-w-0 flex-1 justify-center gap-1">
+            <div className="flex flex-col min-w-0 flex-1 justify-center gap-[3px]">
               {/* The icon rides INSIDE the label, at the label's own size.
                   
                   It was a flex sibling in a gutter: 13.5px of icon plus a 12px
@@ -696,7 +714,7 @@ function LocalSnapshotDashboard({
                 <span className="home-snapshot-tile__label-full">{fullLabel}</span>
                 <span className="home-snapshot-tile__label-short">{shortLabel}</span>
               </div>
-              <div className="font-bold font-sans tabular-nums text-foreground/95 group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-xs md:text-sm">
+              <div className="font-bold font-sans tabular-nums tracking-[-0.01em] text-foreground group-hover:text-primary transition-colors duration-150 leading-none whitespace-nowrap text-[13px] md:text-[15px]">
                 {displayValue === null ? (
                   // An em dash, in the muted weight the rest of the site uses
                   // for an unpublished figure. Deliberately not "0" and not the
