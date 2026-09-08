@@ -60,9 +60,53 @@ const readGridSettingsCached = unstable_cache(
   { tags: [SITE_SETTINGS_CACHE_TAG], revalidate: CONTENT_CACHE_TTL },
 );
 
-export const getPublicSettingsMap = cache(() => readPublicSettingsCached());
+/**
+ * Settings read, degraded to defaults rather than fatal — and the failure is
+ * never cached.
+ *
+ * This is the second time a production build has died here, and both times the
+ * cause was the same: static prerender runs 374 pages across three workers,
+ * each holding Prisma connections against the Supabase session pooler that the
+ * live site and the Pi's hourly capture are also using, and the pooler runs
+ * out. Every `[releases]` read in the same window logged the identical timeout
+ * and fell soft to the static archive exactly as designed. `readSettingsMap`
+ * had no such fallback, so one timeout on `/about` ended the whole build —
+ * while the page it was rendering has a complete set of defaults sitting in
+ * HOMEPAGE_DEFAULTS.
+ *
+ * Deliberately NOT a bigger pool. The connection ceiling is shared with the
+ * running site, and raising it to survive a build is how a deploy starts
+ * costing readers their data.
+ *
+ * The catch sits OUTSIDE `unstable_cache` on purpose. Inside, a returned empty
+ * map would be stored under the settings key for the full day-long window, and
+ * one bad moment during a build would pin the site to its defaults long after
+ * the database recovered — the same trap live-grid.server.ts documents, where
+ * caching a soft failure once pinned "nothing is published" on the release
+ * manifest. A rejected promise is not cached, so the throw has to survive the
+ * cached layer and be caught here.
+ */
+async function settingsOrDefaults(
+  read: () => Promise<Record<string, unknown>>,
+  which: string,
+): Promise<Record<string, unknown>> {
+  try {
+    return await read();
+  } catch (error) {
+    console.warn(
+      `[settings] ${which} read failed, falling back to defaults: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+    return {};
+  }
+}
 
-export const getGridSettingsMap = cache(() => readGridSettingsCached());
+export const getPublicSettingsMap = cache(() =>
+  settingsOrDefaults(readPublicSettingsCached, 'public'),
+);
+
+export const getGridSettingsMap = cache(() => settingsOrDefaults(readGridSettingsCached, 'grid'));
 
 function mapCarouselArticle(
   a: {
