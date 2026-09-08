@@ -285,6 +285,73 @@ export function parseNldcNepalImportHtml(html: string): LiveNepalImportRow[] {
 }
 
 /**
+ * PGCB's forecast board — `w/forecasts/show_forecasts_bn`.
+ *
+ * The little table pgcb.gov.bd embeds in its homepage, four kilobytes of static
+ * HTML on the same ERP host as the hourly pages. It carries two rows the site
+ * has no other same-morning source for:
+ *
+ *   আজকের চাহিদার পূর্বাভাস   today's demand forecast, day and evening peak
+ *   গতকালের প্রকৃত উৎপাদন     yesterday's actual generation, day and evening
+ *
+ * Rows are matched on their Bengali label, never on position. A third row —
+ * উৎপাদন ক্ষমতা, generation capacity — sits in the markup COMMENTED OUT, so
+ * the row count is not stable and an index-based read would silently take
+ * capacity for a forecast the day PGCB uncomments it. `tableRows` strips
+ * comments before parsing, which is what keeps that row out entirely; the label
+ * match is the second guard.
+ *
+ * The page states its own date, and that date is read rather than assumed —
+ * `তারিখঃ ০৮-০৯-২০২৬`. It is the only thing that says which day the forecast
+ * is FOR, and therefore which day "yesterday" was. Taking the reader's clock
+ * for it would repeat the Petrobangla filing mistake in a new place: a document
+ * says which day it is, never the caller.
+ */
+export type PgcbForecastBoard = {
+  /** The date the page states for itself, ISO. The forecast is for this day. */
+  date: string;
+  /** The day BEFORE `date` — whose actual generation the second row carries. */
+  previousDate: string;
+  forecastDemand: { dayPeakMw: number | null; eveningPeakMw: number | null };
+  previousGeneration: { dayPeakMw: number | null; eveningPeakMw: number | null };
+};
+
+function shiftIsoDay(iso: string, days: number): string {
+  const t = Date.parse(`${iso}T00:00:00Z`);
+  if (Number.isNaN(t)) return iso;
+  return new Date(t + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+export function parsePgcbForecastHtml(html: string): PgcbForecastBoard | null {
+  const text = banglaToLatinDigits(html.replace(/<!--[\s\S]*?-->/g, ''));
+  const d = /(\d{2})-(\d{2})-(\d{4})/.exec(text);
+  if (!d) return null;
+  const date = `${d[3]}-${d[2]}-${d[1]}`;
+  if (Number.isNaN(Date.parse(`${date}T00:00:00Z`))) return null;
+
+  let forecast: { dayPeakMw: number | null; eveningPeakMw: number | null } | null = null;
+  let previous: { dayPeakMw: number | null; eveningPeakMw: number | null } | null = null;
+
+  for (const cells of tableRows(html)) {
+    if (cells.length < 3) continue;
+    const label = cells[0];
+    const pair = { dayPeakMw: num(cells[1]), eveningPeakMw: num(cells[2]) };
+    // পূর্বাভাস = forecast, প্রকৃত = actual. Both appear once.
+    if (label.includes('পূর্বাভাস')) forecast ??= pair;
+    else if (label.includes('প্রকৃত')) previous ??= pair;
+  }
+  if (!forecast && !previous) return null;
+
+  const none = { dayPeakMw: null, eveningPeakMw: null };
+  return {
+    date,
+    previousDate: shiftIsoDay(date, -1),
+    forecastDemand: forecast ?? none,
+    previousGeneration: previous ?? none,
+  };
+}
+
+/**
  * Sum of the components the source actually reported, or null when it reported
  * none of them.
  *
@@ -372,13 +439,28 @@ export type LiveGridSnapshot = {
   hours: LiveGridHour[];
   /** |total − sum of components| ≤ 1 MW on the latest row. */
   reconciles: boolean;
-  sources: { generation: string; demandSupply: string };
+  /**
+   * PGCB's forecast board, or null when that page could not be read.
+   *
+   * Optional on purpose, and fetched with its own catch. It is a different page
+   * on a daily cadence, and the hourly snapshot must not depend on it: a
+   * failure there would otherwise take down ten tiles that have nothing to do
+   * with it. Absent means absent — the two tiles it backs say so and name PGCB.
+   */
+  forecast: PgcbForecastBoard | null;
+  sources: { generation: string; demandSupply: string; forecast?: string };
 };
 
 export function buildLiveGridSnapshot(
   gen: LiveGenerationRow[],
   demand: LiveDemandRow[],
-  opts: { fetchedAt: string; generationUrl: string; demandSupplyUrl: string },
+  opts: {
+    fetchedAt: string;
+    generationUrl: string;
+    demandSupplyUrl: string;
+    forecast?: PgcbForecastBoard | null;
+    forecastUrl?: string;
+  },
 ): LiveGridSnapshot {
   if (gen.length === 0) throw new Error('NLDC generation page yielded no hourly rows');
 
@@ -444,6 +526,11 @@ export function buildLiveGridSnapshot(
     },
     hours,
     reconciles: componentSum !== null && Math.abs(latest.totalMw - componentSum) <= 1,
-    sources: { generation: opts.generationUrl, demandSupply: opts.demandSupplyUrl },
+    forecast: opts.forecast ?? null,
+    sources: {
+      generation: opts.generationUrl,
+      demandSupply: opts.demandSupplyUrl,
+      ...(opts.forecastUrl ? { forecast: opts.forecastUrl } : {}),
+    },
   };
 }

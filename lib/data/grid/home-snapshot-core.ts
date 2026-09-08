@@ -68,22 +68,30 @@ export interface HomeSnapshotStat {
  * cadence their publishers file at: Petrobangla's 08:00-08:00 gas window, and
  * BPDB's daily fuel cost.
  *
- * Twelve is a layout contract — a fixed 2x6. Changing this list means changing
- * `SNAPSHOT_SLOTS` and the tests that pin both.
+ * This list is what the BUILDER emits, and it is no longer the same list as the
+ * homepage panel's. `SNAPSHOT_SLOTS` is the panel's fixed 2x6 and selects from
+ * this one; the extra entries here are archive-grade figures the Grid
+ * Explorer's dated pages read directly (`archive-day.server.ts`) and the
+ * noticeboard does not carry. A label may appear here and not there; the
+ * reverse would be a bug, and the merge test pins that direction.
  */
 export const DAILY_SNAPSHOT_LABELS = [
   'Current Demand',
   'Current Supply',
   'Current Generation',
-  'Daily Generation',
+  'Forecast Demand',
   'Load Shedding',
-  'Energy Unserved',
+  'Yesterday Peak Gen',
   'Gas Generation',
   'Coal Generation',
   'Grid Import',
   'Solar + Wind',
   'Gas Supply',
   'Production Cost',
+  // Archive-grade, and NOT on the homepage panel — see the note above. Last in
+  // the list because the twelve before them are the panel's, in panel order.
+  'Daily Generation',
+  'Energy Unserved',
 ] as const;
 
 export type DailySnapshotLabel = (typeof DAILY_SNAPSHOT_LABELS)[number];
@@ -199,11 +207,11 @@ export function buildHomeSnapshotFromDaily(
   // stance Energy Unserved takes below and the same one the Grid Explorer's
   // own Gas Supply KPI takes when it prints "—".
   const gasSupply = sumGasProductionMmcf(data);
-  const dailyGeneration = mapFigure(fromNullable(s.totalEnergyGen, 'PGCB'), gwhToAvgMw);
-  const energyUnserved = mapFigure(fromNullable(s.totalEnergyUnserved, 'PGCB'), gwhToAvgMw);
   const fuelCost = mapFigure(fromNullable(s.avgProductionCost, 'PGCB'), (v) =>
     parseFloat(v.toFixed(2)),
   );
+  const dailyGeneration = mapFigure(fromNullable(s.totalEnergyGen, 'PGCB'), gwhToAvgMw);
+  const energyUnserved = mapFigure(fromNullable(s.totalEnergyUnserved, 'PGCB'), gwhToAvgMw);
   const loadShedding = peakLoadShedMw(data);
   const coalGeneration = fuelDailyAvgMw(data, 'Coal');
   const gasGeneration = fuelDailyAvgMw(data, 'Gas');
@@ -249,12 +257,23 @@ export function buildHomeSnapshotFromDaily(
     // snapshot's own `hours` window is the last 24 POSTED rows rather than 24
     // hours — averaging it and calling the result a daily figure is exactly
     // what that field's comment forbids.
-    tile('Daily Generation', dailyGeneration, { unit: POWER_UNIT, icon: 'TrendingUp' }),
+    // Both of the tiles that replaced Daily Generation and Energy Unserved come
+    // off PGCB's forecast board, which is HTML on a daily cadence — so they are
+    // `awaiting('PGCB')` here for the same reason the three NLDC tiles are
+    // `awaiting('NLDC')`: the daily workbook does not carry them in this shape.
+    //
+    // The two figures they replaced are not lost and were not wrong. A day's
+    // total energy and its unserved energy are archive quantities — the Grid
+    // Explorer prints both, under their own names, against the day they belong
+    // to. What they are not is noticeboard figures: this panel answers "what is
+    // happening now, and what is expected", and an integral over a day that
+    // closed yesterday answers neither.
+    tile('Forecast Demand', awaiting('PGCB'), { unit: POWER_UNIT, icon: 'TrendingUp' }),
     tile('Load Shedding', loadShedding, { unit: POWER_UNIT, icon: 'Activity' }),
     // Never shown as zero on days whose report does not publish unserved
     // energy — a homepage tile reading "0 MW" would assert that no load was
     // shed, which is not what an absent figure means.
-    tile('Energy Unserved', energyUnserved, { unit: POWER_UNIT, icon: 'Gauge' }),
+    tile('Yesterday Peak Gen', awaiting('PGCB'), { unit: POWER_UNIT, icon: 'Gauge' }),
     // Gas BURNED FOR POWER, which is not the Gas Supply tile below and must
     // never be swapped for it. That substitution is the sharpest incident in
     // the repo: the power sector's slice is about a third of national
@@ -273,6 +292,18 @@ export function buildHomeSnapshotFromDaily(
     // state, not an outage, and `awaiting` is what says so on the tile.
     tile('Gas Supply', gasSupply, { unit: 'MMCFD', icon: 'Flame' }),
     tile('Production Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
+    // Still built, still published, just not on the noticeboard.
+    //
+    // A day's total generation and its unserved energy are archive quantities:
+    // integrals over a day that has closed. The Grid Explorer's dated pages
+    // read this list directly (`archive-day.server.ts`) and print both under
+    // their own names, which is where a reader comparing days wants them. The
+    // homepage panel takes its twelve from `SNAPSHOT_SLOTS` and does not
+    // include them, so the two lists are no longer the same list — that is
+    // deliberate, and the test that used to pin them equal now pins the
+    // narrower relationship instead.
+    tile('Daily Generation', dailyGeneration, { unit: POWER_UNIT, icon: 'TrendingUp' }),
+    tile('Energy Unserved', energyUnserved, { unit: POWER_UNIT, icon: 'Gauge' }),
   ];
 
   // SREDA no longer appears in the snapshot. `buildSredaSnapshotStats` is kept

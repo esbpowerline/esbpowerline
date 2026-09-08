@@ -40,7 +40,15 @@ import { parseIsoDate } from '@/lib/data/grid/date-utils';
  * overlay fills them, and noise on an archive page that will never have a live
  * feed. Supply and Generation joined the set when they replaced the two peak
  * tiles: the peaks are still published, just not through here. */
-const LIVE_ONLY_LABELS = new Set(['Current Demand', 'Current Supply', 'Current Generation']);
+const LIVE_ONLY_LABELS = new Set([
+  'Current Demand',
+  'Current Supply',
+  'Current Generation',
+  // PGCB's forecast board is a today/yesterday page. It says nothing about a
+  // day that closed years ago, so these two would be permanent dashes here.
+  'Forecast Demand',
+  'Yesterday Peak Gen',
+]);
 
 export interface ArchiveFuelRow {
   name: string;

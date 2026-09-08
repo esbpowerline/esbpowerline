@@ -40,7 +40,13 @@ describe('snapshot label contract', () => {
   });
 
   it('the slot spec covers every declared label, once, in order', () => {
-    expect(SNAPSHOT_SLOTS.map((s) => s.label)).toEqual([...DAILY_SNAPSHOT_LABELS]);
+    // The two lists are no longer identical: the builder also emits archive
+    // figures (Daily Generation, Energy Unserved) that the Grid Explorer's
+    // dated pages read and the noticeboard does not carry. What must hold is
+    // the direction — every panel slot has to be something the builder emits,
+    // or that tile can never be filled from a daily report at all.
+    const emittedLabels = new Set<string>(DAILY_SNAPSHOT_LABELS);
+    for (const slot of SNAPSHOT_SLOTS) expect(emittedLabels.has(slot.label)).toBe(true);
   });
 
   it('every slot names the source that owes its figure', () => {
@@ -71,9 +77,9 @@ describe('mergeHomeSnapshot', () => {
   });
 
   it('carries a real figure through unchanged', () => {
-    const slots = mergeHomeSnapshot([stat('Daily Generation', 16181)]);
-    const peak = slots.find((s) => s.label === 'Daily Generation');
-    expect(peak?.value).toBe(16181);
+    const slots = mergeHomeSnapshot([stat('Production Cost', 7.55)]);
+    const peak = slots.find((s) => s.label === 'Production Cost');
+    expect(peak?.value).toBe(7.55);
     expect(peak?.awaiting).toBeUndefined();
   });
 
@@ -89,8 +95,12 @@ describe('mergeHomeSnapshot', () => {
   it('always renders twelve slots, however little the sources have filed', () => {
     // The panel is a fixed 2x6. A tile that disappears on the day Petrobangla
     // ran late reflows the other eleven, so the layout changed shape most days.
-    expect(mergeHomeSnapshot([]).map((s) => s.label)).toEqual([...DAILY_SNAPSHOT_LABELS]);
-    expect(mergeHomeSnapshot(null).map((s) => s.label)).toEqual([...DAILY_SNAPSHOT_LABELS]);
+    // Against SNAPSHOT_SLOTS, not DAILY_SNAPSHOT_LABELS: the panel is the fixed
+    // 2x6 and the builder now emits two archive figures beyond it.
+    const panel = SNAPSHOT_SLOTS.map((s) => s.label);
+    expect(panel).toHaveLength(12);
+    expect(mergeHomeSnapshot([]).map((s) => s.label)).toEqual(panel);
+    expect(mergeHomeSnapshot(null).map((s) => s.label)).toEqual(panel);
   });
 
   it('marks the live-backed tiles the NLDC overlay is allowed to fill', () => {
@@ -101,6 +111,8 @@ describe('mergeHomeSnapshot', () => {
         'Current Demand',
         'Current Supply',
         'Current Generation',
+        'Forecast Demand',
+        'Yesterday Peak Gen',
         'Load Shedding',
         'Gas Generation',
         'Coal Generation',

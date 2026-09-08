@@ -44,9 +44,11 @@ export const SNAPSHOT_SLOTS: readonly SnapshotSlotSpec[] = [
   // either, so with the live feed down they say who they are waiting on.
   { label: 'Current Supply', unit: POWER_UNIT, icon: 'TrendingUp', source: 'NLDC', liveBacked: true },
   { label: 'Current Generation', unit: POWER_UNIT, icon: 'Zap', source: 'NLDC', liveBacked: true },
-  { label: 'Daily Generation', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB' },
+  // PGCB's forecast board, not the daily workbook: today's demand forecast and
+  // yesterday's actual peaks, both as evening peak with the day peak alongside.
+  { label: 'Forecast Demand', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB', liveBacked: true },
   { label: 'Load Shedding', unit: POWER_UNIT, icon: 'Activity', source: 'PGCB', liveBacked: true },
-  { label: 'Energy Unserved', unit: POWER_UNIT, icon: 'Gauge', source: 'PGCB' },
+  { label: 'Yesterday Peak Gen', unit: POWER_UNIT, icon: 'Gauge', source: 'PGCB', liveBacked: true },
   { label: 'Gas Generation', unit: POWER_UNIT, icon: 'Flame', source: 'PGCB', liveBacked: true },
   { label: 'Coal Generation', unit: POWER_UNIT, icon: 'Flame', source: 'PGCB', liveBacked: true },
   { label: 'Grid Import', unit: POWER_UNIT, icon: 'Cable', source: 'PGCB', liveBacked: true },

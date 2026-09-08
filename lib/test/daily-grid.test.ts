@@ -255,20 +255,25 @@ describe('home-snapshot', () => {
         { source: 'Tripura Cumilla (India)', energy: 3.84, peakFlow: 177.9, type: 'East' },
       ],
     } as never, sredaSample);
-    expect(stats).toHaveLength(12);
+    // Fourteen, not twelve: the builder emits the panel's twelve plus the two
+    // archive figures the Grid Explorer's dated pages read and the noticeboard
+    // does not carry.
+    expect(stats).toHaveLength(14);
     expect(stats.map((s) => s.label)).toEqual([
       'Current Demand',
       'Current Supply',
       'Current Generation',
-      'Daily Generation',
+      'Forecast Demand',
       'Load Shedding',
-      'Energy Unserved',
+      'Yesterday Peak Gen',
       'Gas Generation',
       'Coal Generation',
       'Grid Import',
       'Solar + Wind',
       'Gas Supply',
       'Production Cost',
+      'Daily Generation',
+      'Energy Unserved',
     ]);
     // Current Demand is instantaneous and only NLDC publishes it, so a daily
     // report yields a held place, not a figure. It used to carry the evening
@@ -289,10 +294,23 @@ describe('home-snapshot', () => {
     expect(stats[2].value).toBeNull();
     expect(stats[2].awaiting).toBe('NLDC');
     expect(stats[2].unit).toBe(POWER_UNIT);
-    expect(stats[3].value).toBe(gwhToAvgMw(354.94));
-    expect(stats[3].unit).toBe(POWER_UNIT);
-    expect(stats[5].value).toBe(gwhToAvgMw(2.14));
-    expect(stats[5].unit).toBe(POWER_UNIT);
+    // Slots 3 and 5 are the forecast board's now — today's demand forecast and
+    // yesterday's peak generation — and no daily report carries either, so both
+    // are held places naming PGCB.
+    expect(stats[3].label).toBe('Forecast Demand');
+    expect(stats[3].value).toBeNull();
+    expect(stats[3].awaiting).toBe('PGCB');
+    expect(stats[5].label).toBe('Yesterday Peak Gen');
+    expect(stats[5].value).toBeNull();
+    expect(stats[5].awaiting).toBe('PGCB');
+    // The two archive figures they displaced are still built, at the end of the
+    // list, for the Grid Explorer's dated pages.
+    expect(stats[12].label).toBe('Daily Generation');
+    expect(stats[12].value).toBe(gwhToAvgMw(354.94));
+    expect(stats[12].unit).toBe(POWER_UNIT);
+    expect(stats[13].label).toBe('Energy Unserved');
+    expect(stats[13].value).toBe(gwhToAvgMw(2.14));
+    expect(stats[13].unit).toBe(POWER_UNIT);
     expect(stats[7].label).toBe('Coal Generation');
     expect(stats[7].value).toBe(gwhToAvgMw(129.21));
     expect(stats[7].unit).toBe(POWER_UNIT);

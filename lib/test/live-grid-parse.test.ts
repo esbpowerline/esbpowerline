@@ -8,6 +8,7 @@ import {
   parseNldcGenerationHtml,
   parseNldcIndiaImportHtml,
   parseNldcNepalImportHtml,
+  parsePgcbForecastHtml,
 } from '@/lib/data/grid/live-grid-parse';
 
 /**
@@ -344,5 +345,53 @@ describe('the import pages against the generation page', () => {
     // gas-vs-archive had, which passed 4,529 days by reading two keys that
     // existed in none of them.
     expect(compared).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * PGCB's forecast board, as served 2026-09-08 ~12:00 Dhaka.
+ *
+ * The board backs two homepage tiles and is the site's only same-morning source
+ * for today's demand forecast. It is small and it looks trivial to parse, which
+ * is exactly why the traps below are pinned.
+ */
+describe('parsePgcbForecastHtml', () => {
+  const board = parsePgcbForecastHtml(fixture('pgcb-forecast-board.html'))!;
+
+  it('reads the date the page states for itself, and derives yesterday from it', () => {
+    // Not the reader's clock. The page is the only thing that says which day
+    // the forecast is FOR, and therefore which day the second row describes.
+    expect(board.date).toBe('2026-09-08');
+    expect(board.previousDate).toBe('2026-09-07');
+  });
+
+  it('keeps the forecast and the actual apart, day peak from evening peak', () => {
+    expect(board.forecastDemand).toEqual({ dayPeakMw: 16470, eveningPeakMw: 17950 });
+    expect(board.previousGeneration).toEqual({ dayPeakMw: 14230, eveningPeakMw: 15473 });
+  });
+
+  it('does not read the commented-out capacity row', () => {
+    /*
+      The markup carries a third row — উৎপাদন ক্ষমতা, generation capacity, at
+      16015/16395 — inside an HTML comment. An index-based read would take it
+      for a forecast the day PGCB uncomments it, which is the same shape of
+      mistake the generation page's commented deficit columns caused. Rows are
+      matched on their Bengali label and comments are stripped first; this pins
+      that those capacity figures reach neither tile.
+    */
+    const raw = fixture('pgcb-forecast-board.html');
+    expect(raw).toContain('১৬০১৫');
+    const values = [
+      board.forecastDemand.dayPeakMw,
+      board.forecastDemand.eveningPeakMw,
+      board.previousGeneration.dayPeakMw,
+      board.previousGeneration.eveningPeakMw,
+    ];
+    expect(values).not.toContain(16015);
+    expect(values).not.toContain(16395);
+  });
+
+  it('returns null rather than a half-read board when the page is not the board', () => {
+    expect(parsePgcbForecastHtml('<html><body>maintenance</body></html>')).toBeNull();
   });
 });

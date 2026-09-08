@@ -60,6 +60,13 @@ function formatCompactDay(isoDay: string, locale: string): string {
 /** The slice of /api/data/live-grid this panel reads. */
 type LiveGrid = {
   asOf: string;
+  /** PGCB's forecast board, or null when that page could not be read. */
+  forecast?: {
+    date: string;
+    previousDate: string;
+    forecastDemand: { dayPeakMw: number | null; eveningPeakMw: number | null };
+    previousGeneration: { dayPeakMw: number | null; eveningPeakMw: number | null };
+  } | null;
   latest: {
     totalMw: number;
     demandMw: number | null;
@@ -235,6 +242,16 @@ function liveValueFor(label: string, live: LiveGrid): number | null {
       );
       return parts.length ? parts.reduce((a, b) => a + b, 0) : null;
     }
+    // PGCB's forecast board. The EVENING peak is the headline on both: it is
+    // Bangladesh's system peak, the hour the grid is judged on. The day peak is
+    // carried in the tile's tooltip rather than dropped.
+    //
+    // Not gated on `reconciles` — that flag is about the generation table's
+    // total against its own components, and neither of these comes from it.
+    case 'Forecast Demand':
+      return live.forecast?.forecastDemand.eveningPeakMw ?? null;
+    case 'Yesterday Peak Gen':
+      return live.forecast?.previousGeneration.eveningPeakMw ?? null;
     default:
       return null;
   }
@@ -293,10 +310,43 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
         // still be carried by NLDC, and then it is not waiting for anything.
         const awaiting = isLive ? undefined : s.awaiting;
         const liveWhen = liveStamp ?? (live ? live.asOf.slice(11, 16) : '');
+        /*
+          The two forecast-board tiles do not wear the hourly tooltip.
+
+          Ten of the twelve are NLDC's hourly pages and "NLDC hourly · as of
+          10:00" is true of them. It is false of these two: they come from
+          PGCB's daily forecast board, one is a forecast rather than a
+          measurement, and neither has anything to do with the 10:00 hour. A
+          tooltip is where a reader checks provenance, so a wrong one there is
+          worse than none.
+
+          It is also the only room on the tile for the DAY peak. The panel shows
+          one number and the evening peak is the right one to show — it is the
+          system peak, the hour the grid is judged on — but PGCB publishes both,
+          and the one not shown belongs somewhere rather than nowhere.
+        */
+        const board = live?.forecast ?? null;
+        const boardTip = (() => {
+          if (!board) return null;
+          if (s.label === 'Forecast Demand') {
+            const day = board.forecastDemand.dayPeakMw;
+            return locale === 'bn'
+              ? `পিজিসিবি পূর্বাভাস · ${board.date} · সন্ধ্যা পিক দেখানো হয়েছে${day !== null ? ` · দিনের পিক ${formatNumber(day)}` : ''}`
+              : `PGCB forecast for ${board.date} · evening peak shown${day !== null ? ` · day peak ${formatNumber(day)} MW` : ''}`;
+          }
+          if (s.label === 'Yesterday Peak Gen') {
+            const day = board.previousGeneration.dayPeakMw;
+            return locale === 'bn'
+              ? `পিজিসিবি · ${board.previousDate} এর প্রকৃত · সন্ধ্যা পিক${day !== null ? ` · দিনের পিক ${formatNumber(day)}` : ''}`
+              : `PGCB actual for ${board.previousDate} · evening peak${day !== null ? ` · day peak ${formatNumber(day)} MW` : ''}`;
+          }
+          return null;
+        })();
         const liveTip =
-          locale === 'bn'
+          boardTip ??
+          (locale === 'bn'
             ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveWhen} পর্যন্ত`
-            : `NLDC hourly · as of ${liveWhen}`;
+            : `NLDC hourly · as of ${liveWhen}`);
         const awaitingTip =
           locale === 'bn'
             ? `${awaiting} এখনও এই দিনের হিসাব প্রকাশ করেনি`
@@ -351,7 +401,7 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
                   // reporting one.
                   <span className="text-muted-foreground/70">—</span>
                 ) : s.isDecimal ? (
-                  displayValue.toFixed(s.label === 'Production Cost' || s.label === 'Energy Unserved' ? 2 : 1)
+                  displayValue.toFixed(s.label === 'Production Cost' ? 2 : 1)
                 ) : (
                   formatNumber(Math.round(displayValue))
                 )}

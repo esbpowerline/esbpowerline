@@ -5,6 +5,7 @@ import {
   buildLiveGridSnapshot,
   parseNldcDemandSupplyHtml,
   parseNldcGenerationHtml,
+  parsePgcbForecastHtml,
   type LiveGridSnapshot,
 } from '@/lib/data/grid/live-grid-parse';
 
@@ -23,6 +24,12 @@ export type { LiveGridSnapshot, LiveGridHour } from '@/lib/data/grid/live-grid-p
 
 const GENERATION_URL = 'https://erp.powergrid.gov.bd/w/generations/view_generations_bn';
 const DEMAND_SUPPLY_URL = 'https://erp.powergrid.gov.bd/web/generations/view_demand_supply_loadshed_bn';
+/**
+ * PGCB's forecast board — the 4 KB table pgcb.gov.bd embeds in its homepage.
+ * Daily rather than hourly, and read here because it is the only same-morning
+ * source for today's demand forecast and yesterday's peaks.
+ */
+const FORECAST_URL = 'https://erp.powergrid.gov.bd/w/forecasts/show_forecasts_bn';
 
 /**
  * How often the upstream pages may be re-read.
@@ -85,14 +92,22 @@ function fetchPage(url: string): Promise<string> {
 
 export const getLiveGridSnapshot = unstable_cache(
   async (): Promise<LiveGridSnapshot> => {
-    const [genHtml, dslHtml] = await Promise.all([
+    // The forecast board catches its own failure and the other two do not.
+    // Those two are what this snapshot IS — an empty parse there has to throw,
+    // or `unstable_cache` stores the emptiness. The board backs two tiles on a
+    // daily cadence, so losing it should cost those two tiles and nothing else.
+    const [genHtml, dslHtml, forecastHtml] = await Promise.all([
       fetchPage(GENERATION_URL),
       fetchPage(DEMAND_SUPPLY_URL),
+      fetchPage(FORECAST_URL).catch(() => null),
     ]);
+    const forecast = forecastHtml ? parsePgcbForecastHtml(forecastHtml) : null;
     return buildLiveGridSnapshot(
       parseNldcGenerationHtml(genHtml),
       parseNldcDemandSupplyHtml(dslHtml),
       {
+        forecast,
+        forecastUrl: FORECAST_URL,
         fetchedAt: new Date().toISOString(),
         generationUrl: GENERATION_URL,
         demandSupplyUrl: DEMAND_SUPPLY_URL,

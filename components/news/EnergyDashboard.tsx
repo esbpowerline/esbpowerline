@@ -112,7 +112,7 @@ function StatValue({ stat, unitClass }: { stat: Stat; unitClass: string }) {
   return (
     <>
       {stat.isDecimal
-        ? stat.value.toFixed(stat.label === 'Production Cost' || stat.label === 'Energy Unserved' ? 2 : 1)
+        ? stat.value.toFixed(stat.label === 'Production Cost' ? 2 : 1)
         : formatNumber(Math.round(stat.value))}{' '}
       <span className={unitClass}>{stat.unit}</span>
     </>
