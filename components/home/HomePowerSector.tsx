@@ -65,14 +65,6 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
   const startXRef = useRef(0);
   const currentTranslateRef = useRef(0);
   const dragOffsetRef = useRef(0);
-  // A flick is a short fast drag, and judging it on distance alone made the
-  // rail feel stuck: 55px thrown off in 80ms is unambiguously a swipe, and the
-  // old 60px threshold ignored it. Sampled per move rather than end-to-start,
-  // so a drag that wanders out and comes back is read by how it ENDED.
-  const lastXRef = useRef(0);
-  const lastTimeRef = useRef(0);
-  const velocityRef = useRef(0);
-  const slidePulseRef = useRef<NodeJS.Timeout | null>(null);
 
   const visibleCount = windowWidth >= 1024 ? 3 : windowWidth >= 768 ? 2 : 1;
   const maxIndex = Math.max(0, articles.length - visibleCount);
@@ -132,55 +124,26 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
 
 
 
-  /**
-   * Every way of changing slide went through its own copy of these three
-   * lines — arrows, dots, autoplay and the drag release, five in all, which is
-   * how the transition curve came to be written out five times. One mover now,
-   * and it does the thing none of the copies could: it announces the move.
-   *
-   * `data-sliding` is a pulse, not a state. The cards read it to run their
-   * trailing wave (globals.css), and it has to be removed and re-set with a
-   * reflow between, or a second slide inside the same 640ms would find the
-   * attribute already there and the animation would not restart.
-   */
-  const applySlide = useCallback(
-    (index: number, from: number) => {
-      const track = trackRef.current;
-      if (track) {
-        track.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-        track.style.transform = `translate3d(${getBaseTranslate(index)}px, 0px, 0px)`;
-      }
-      // A drag that did not travel far enough snaps back to where it was.
-      // That is a correction, not a slide, and the wave would claim otherwise.
-      const container = containerRef.current;
-      if (!container || index === from) return;
-      container.removeAttribute('data-sliding');
-      void container.offsetWidth;
-      container.setAttribute('data-sliding', index >= from ? 'fwd' : 'back');
-      if (slidePulseRef.current) clearTimeout(slidePulseRef.current);
-      slidePulseRef.current = setTimeout(() => {
-        container.removeAttribute('data-sliding');
-      }, 640);
-    },
-    [getBaseTranslate]
-  );
-
-  useEffect(() => () => {
-    if (slidePulseRef.current) clearTimeout(slidePulseRef.current);
-  }, []);
-
   const nextCard = () => {
     if (currentIndex >= maxIndex) return;
     const nextIdx = currentIndex + 1;
     setCurrentIndex(nextIdx);
-    applySlide(nextIdx, currentIndex);
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+      const targetTranslate = getBaseTranslate(nextIdx);
+      trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
+    }
   };
 
   const prevCard = () => {
     if (currentIndex <= 0) return;
     const nextIdx = currentIndex - 1;
     setCurrentIndex(nextIdx);
-    applySlide(nextIdx, currentIndex);
+    if (trackRef.current) {
+      trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+      const targetTranslate = getBaseTranslate(nextIdx);
+      trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
+    }
   };
 
   // Auto-swipe timer (disabled while dragging)
@@ -194,13 +157,17 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
         if (nextIdx > maxIndex) {
           nextIdx = 0;
         }
-        applySlide(nextIdx, prev);
+        if (trackRef.current) {
+          trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+          const targetTranslate = getBaseTranslate(nextIdx);
+          trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
+        }
         return nextIdx;
       });
     }, 5500);
 
     return () => clearInterval(timer);
-  }, [maxIndex, visibleCount, articles.length, applySlide]);
+  }, [maxIndex, visibleCount, articles.length, getBaseTranslate, currentIndex]);
 
   // Drag handlers
   const handleDragStart = (clientX: number) => {
@@ -212,9 +179,6 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     if (trackRef.current) {
       trackRef.current.style.transition = 'none';
     }
-    lastXRef.current = clientX;
-    lastTimeRef.current = performance.now();
-    velocityRef.current = 0;
     // The drag state lives in a ref, not in state, so the rail never re-renders
     // mid-gesture. The attribute is the only way the stylesheet can see it.
     containerRef.current?.setAttribute('data-dragging', 'true');
@@ -225,36 +189,11 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     const offset = clientX - startXRef.current;
     dragOffsetRef.current = offset;
 
-    const now = performance.now();
-    const dt = now - lastTimeRef.current;
-    if (dt > 0) {
-      // Smoothed, because a single frame's delta is noisy enough on a trackpad
-      // to read a steady drag as a flick.
-      const instant = (clientX - lastXRef.current) / dt;
-      velocityRef.current = velocityRef.current * 0.7 + instant * 0.3;
-      lastXRef.current = clientX;
-      lastTimeRef.current = now;
-    }
-
     const totalTranslate = currentTranslateRef.current + offset;
-
-    /* Past either end the rail resists rather than stops.
     
-       It used to allow a flat 80px of overshoot and then clamp dead, which is
-       the one moment a carousel tells you it is a div with a transform on it:
-       the hand keeps moving and the content does not. Beyond the end the drag
-       is scaled to a third, so the rail keeps answering the hand the whole way
-       out and the resistance builds — the same thing every native scroller
-       does, and the reason the end of a list feels like an edge instead of a
-       wall. The release below always lands back inside the bounds. */
-    const minBound = getBaseTranslate(maxIndex);
-    const maxBound = 0;
-    let boundedTranslate = totalTranslate;
-    if (totalTranslate > maxBound) {
-      boundedTranslate = maxBound + (totalTranslate - maxBound) * 0.32;
-    } else if (totalTranslate < minBound) {
-      boundedTranslate = minBound + (totalTranslate - minBound) * 0.32;
-    }
+    const minBound = getBaseTranslate(maxIndex) - 80;
+    const maxBound = 80;
+    const boundedTranslate = Math.max(minBound, Math.min(maxBound, totalTranslate));
 
     trackRef.current.style.transform = `translate3d(${boundedTranslate}px, 0px, 0px)`;
   };
@@ -264,29 +203,23 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     isDraggingRef.current = false;
     containerRef.current?.removeAttribute('data-dragging');
 
-    // Distance OR speed. 0.45 px/ms is about a deliberate flick and well clear
-    // of the drift at the end of a slow drag; either one alone commits the
-    // slide, so a short sharp gesture is not swallowed and a long slow one
-    // still counts even when it ends motionless.
-    const swipeThreshold = 60; // px
-    const flickVelocity = 0.45; // px/ms
-    const offset = dragOffsetRef.current;
-    const velocity = velocityRef.current;
-    const wantsNext = offset < -swipeThreshold || velocity < -flickVelocity;
-    const wantsPrev = offset > swipeThreshold || velocity > flickVelocity;
+    trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
 
+    const swipeThreshold = 60; // px
     let nextIndex = currentIndex;
-    if (wantsNext && !wantsPrev && currentIndex < maxIndex) {
+
+    if (dragOffsetRef.current < -swipeThreshold && currentIndex < maxIndex) {
       nextIndex = currentIndex + 1;
-    } else if (wantsPrev && !wantsNext && currentIndex > 0) {
+    } else if (dragOffsetRef.current > swipeThreshold && currentIndex > 0) {
       nextIndex = currentIndex - 1;
     }
 
     setCurrentIndex(nextIndex);
-    applySlide(nextIndex, currentIndex);
-
+    
+    const targetTranslate = getBaseTranslate(nextIndex);
+    trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
+    
     dragOffsetRef.current = 0;
-    velocityRef.current = 0;
   };
 
   // Mouse event listeners
@@ -343,8 +276,6 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       <div 
         ref={containerRef}
         className={`category-grid-track overflow-hidden w-full select-none pb-4 pt-1 ${isVisible ? 'is-visible' : ''}`}
-        data-at-start={currentIndex <= 0 ? 'true' : undefined}
-        data-at-end={currentIndex >= maxIndex ? 'true' : undefined}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUpOrLeave}
@@ -352,20 +283,18 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
+        style={{ cursor: 'grab' }}
       >
         <div 
           ref={trackRef}
           className="flex gap-6 py-2 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{ transform: `translate3d(${initialTranslate}px, 0px, 0px)`, willChange: 'transform' }}
         >
-          {displayArticles.map((article, cardIndex) => (
+          {displayArticles.map((article) => (
             <div 
               key={article.id} 
               className="article-card-wrapper flex-shrink-0 w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] pointer-events-none flex flex-col h-full"
-              // The card's place in the rail, so the trailing wave can run
-              // across it. nth-child would say the same thing, but only up to
-              // the handful of positions a stylesheet is willing to enumerate.
-              style={{ userSelect: 'none', '--card-i': cardIndex % 3 } as React.CSSProperties}
+              style={{ userSelect: 'none' }}
               onDragStart={(e) => e.preventDefault()}
             >
               <div className="pointer-events-auto flex-1 flex flex-col">
@@ -413,7 +342,11 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
                   else if (idx === 2) targetIdx = maxIndex;
 
                   setCurrentIndex(targetIdx);
-                  applySlide(targetIdx, currentIndex);
+                  if (trackRef.current) {
+                    trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
+                    const targetTranslate = getBaseTranslate(targetIdx);
+                    trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
+                  }
                 }}
                 // The button is the bar itself, so the three stay grouped in the
                 // row's 6px gap rather than being pushed ~50px apart by their own
