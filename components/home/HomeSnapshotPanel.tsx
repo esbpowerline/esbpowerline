@@ -27,30 +27,29 @@ const IconMap: Record<string, any> = {
 };
 
 /*
-  One ink for every icon.
+  A hue per icon family.
 
-  This was eight hues across twelve tiles — amber, rose, emerald, violet, sky,
-  cyan, yellow, primary — and none of them encoded anything. Meanwhile the only
-  colour on the panel that DOES carry meaning is the status dot: emerald for
-  NLDC's hourly feed, rose for PGCB's daily board. A rainbow of decorative
-  glyphs was competing with the one signal a reader needs to read.
+  Tried and reverted: one recessive ink for all twelve, on the argument that the
+  colours encode nothing and compete with the status dot, which does. The
+  argument holds on paper and the panel was worse for it — the tiles lost the
+  thing that let a reader find "the gas one" without reading, and a grid
+  noticeboard is scanned far more often than it is read.
 
-  The same pass was made on the Grid Explorer's KPI tiles, so this also settles
-  an inconsistency between the two surfaces. The `bg` entries are kept because
-  other components read them; nothing on this panel uses them.
+  The dots keep their meaning regardless: they are the only PULSING thing on the
+  panel and sit apart from the glyphs, so emerald-hourly and rose-daily still
+  separate. If that ever stops being true the answer is to make the dots louder,
+  not the icons quieter.
 */
-const SNAPSHOT_ICON_INK = 'text-muted-foreground/55 dark:text-muted-foreground/50';
-
 const ICON_STYLES: Record<string, { color: string; bg: string }> = {
-  Zap: { color: SNAPSHOT_ICON_INK, bg: 'bg-emerald-500/10' },
-  Activity: { color: SNAPSHOT_ICON_INK, bg: 'bg-rose-500/10' },
-  Leaf: { color: SNAPSHOT_ICON_INK, bg: 'bg-teal-500/10' },
-  Gauge: { color: SNAPSHOT_ICON_INK, bg: 'bg-amber-500/10' },
-  Flame: { color: SNAPSHOT_ICON_INK, bg: 'bg-violet-500/10' },
-  Droplet: { color: SNAPSHOT_ICON_INK, bg: 'bg-sky-500/10' },
-  Cable: { color: SNAPSHOT_ICON_INK, bg: 'bg-cyan-500/10' },
-  Sun: { color: SNAPSHOT_ICON_INK, bg: 'bg-yellow-500/10' },
-  TrendingUp: { color: SNAPSHOT_ICON_INK, bg: 'bg-primary/10' },
+  Zap: { color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-500/10' },
+  Activity: { color: 'text-rose-500 dark:text-rose-400', bg: 'bg-rose-500/10' },
+  Leaf: { color: 'text-teal-500 dark:text-teal-400', bg: 'bg-teal-500/10' },
+  Gauge: { color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-500/10' },
+  Flame: { color: 'text-violet-500 dark:text-violet-400', bg: 'bg-violet-500/10' },
+  Droplet: { color: 'text-sky-500 dark:text-sky-400', bg: 'bg-sky-500/10' },
+  Cable: { color: 'text-cyan-500 dark:text-cyan-400', bg: 'bg-cyan-500/10' },
+  Sun: { color: 'text-yellow-500 dark:text-yellow-400', bg: 'bg-yellow-500/10' },
+  TrendingUp: { color: 'text-primary dark:text-primary-foreground', bg: 'bg-primary/10' },
 };
 
 /** A merged slot plus the resolved lucide icon and its Tailwind classes. */
