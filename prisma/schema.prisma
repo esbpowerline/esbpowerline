@@ -851,9 +851,10 @@ model SourceDocument {
   /// Why a fetch or parse failed, or what the validator warned about.
   note             String?
 
-  observations Observation[]
-  plants       PowerPlant[]
-  gridHours    GridHourlyObservation[]
+  observations   Observation[]
+  plants         PowerPlant[]
+  gridHours      GridHourlyObservation[]
+  forecastBoards GridForecastBoard[]
 
   @@unique([publisher, contentSha256])
   @@index([publisher, windowStart])
@@ -927,6 +928,66 @@ enum GridSeries {
 ///
 /// `Observation` remains correct for sparse entity attributes. A dense
 /// fourteen-column hourly series is not that.
+/// PGCB's forecast board — the small table its ERP portal publishes once a day
+/// (`/w/forecasts/show_forecasts_bn`) and pgcb.gov.bd embeds on its homepage.
+///
+/// It is the only place NLDC states a demand forecast for the day ahead, and
+/// the board is REPLACED each morning: the forecast PGCB made for a day stops
+/// being served the moment the next one is posted, and nobody in Bangladesh
+/// keeps it. Two homepage tiles read it live, so until this table existed the
+/// site was the one party in a position to archive the figure and was throwing
+/// it away every twenty-four hours — the same mistake, and the same fix, as
+/// the hourly demand series.
+///
+/// The board carries two days at once. The forecast belongs to `boardDate`;
+/// the actual generation peaks beside it belong to the day BEFORE, which is
+/// why `previousDate` is stored rather than derived at read time — a board
+/// posted late would otherwise be reported against the wrong day.
+///
+/// Doctrine rule 6 governs what may be done with the pair. Forecast against
+/// actual is a signed difference and nothing else: no score, no accuracy
+/// percentage, no grade. PGCB forecasts a system it does not fully control.
+model GridForecastBoard {
+  id String @id @default(cuid())
+
+  /// The day the board states in its own header (তারিখঃ DD-MM-YYYY), read from
+  /// the document and never from the clock or the filename. Rule 5.
+  boardDate    DateTime @db.Date
+  /// The day the actual peaks below belong to — boardDate's predecessor as the
+  /// board itself frames it ("গতকালের প্রকৃত উৎপাদন").
+  previousDate DateTime @db.Date
+
+  /// When ESB read the board. Separate from boardDate for the same reason
+  /// GridHourlyObservation keeps fetchedAt: the distance is how late the
+  /// archive was, and it is not recoverable once collapsed.
+  fetchedAt DateTime
+
+  sourceDocumentId String
+  sourceDocument   SourceDocument @relation(fields: [sourceDocumentId], references: [id], onDelete: Cascade)
+
+  /// PGCB's demand forecast for boardDate. Nullable, because a cell the board
+  /// left blank is absent and absent is never zero.
+  forecastDayPeakMw     Decimal? @db.Decimal(12, 3)
+  forecastEveningPeakMw Decimal? @db.Decimal(12, 3)
+
+  /// The previous day's ACTUAL generation peaks, as PGCB states them. Kept
+  /// even though the hourly series can produce the same two numbers: an
+  /// independently published figure is what makes our own capture checkable,
+  /// and on 2026-09-08 the two agreed exactly (15,473 MW).
+  previousDayPeakMw     Decimal? @db.Decimal(12, 3)
+  previousEveningPeakMw Decimal? @db.Decimal(12, 3)
+
+  parserVersion String
+  createdAt     DateTime @default(now())
+
+  /// One board per day. Re-reading the same board updates it rather than
+  /// filing a second copy, so an hourly capture of a daily page is a no-op
+  /// after the first tick that sees it.
+  @@unique([boardDate])
+  @@index([previousDate])
+  @@index([sourceDocumentId])
+}
+
 model GridHourlyObservation {
   id     String     @id @default(cuid())
   series GridSeries
@@ -975,12 +1036,12 @@ model GridHourlyObservation {
   /// NLDC's own remark cell — "Day Peak", "Evening Peak" and the like.
   remark        String?
   /// Classified from `remark`, never from the timestamp. See ObservationKind.
-  kind          ObservationKind @default(REGULAR)
+  kind          ObservationKind       @default(REGULAR)
   /// NULL when the row may be aggregated. See AggregationExclusion.
   excluded      AggregationExclusion?
-  basis         ObservationBasis @default(REPORTED)
+  basis         ObservationBasis      @default(REPORTED)
   parserVersion String
-  createdAt     DateTime         @default(now())
+  createdAt     DateTime              @default(now())
 
   /// The idempotency key. Re-running a backfill, or a poll overlapping a
   /// previous one, must update the hour rather than duplicate it.

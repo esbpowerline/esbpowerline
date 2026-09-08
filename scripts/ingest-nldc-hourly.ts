@@ -58,6 +58,7 @@ import {
   parseNldcDemandSupplyHtml,
   parseNldcIndiaImportHtml,
   parseNldcNepalImportHtml,
+  parsePgcbForecastHtml,
 } from '@/lib/data/grid/live-grid-parse';
 
 const prisma = createScriptPrismaClient();
@@ -428,6 +429,173 @@ async function walk(series: SeriesKey, maxPages: number, dryRun: boolean, stopWh
   return { pagesFetched, totalRows, reusedDocs, failures };
 }
 
+/**
+ * PGCB's forecast board, captured beside the hourly series.
+ *
+ * Not a series: one page, one row, one day. It is here rather than in a runner
+ * of its own because it is the same publisher on the same host, and the daily
+ * polls are four fixed slots — a board posted between them would be read late,
+ * and a board REPLACED between them would be read never. The page is 4 KB and
+ * identical bytes are the same SourceDocument, so capturing it every hour costs
+ * one request and, after the first tick of the day that sees it, zero writes.
+ *
+ * The stakes are the same as the demand series and are worth stating plainly:
+ * the board is overwritten each morning and nothing else in Bangladesh keeps
+ * it, so a forecast not captured on its own day cannot be recovered on any
+ * later one. Two homepage tiles read it live.
+ *
+ * The line it prints deliberately matches the series format — `N pages, N rows,
+ * N documents already held, N failed` — because pi-hourly.sh sums the `failed`
+ * field across every line to decide whether a tick that exited 0 actually did
+ * anything. A capture that reported in its own shape would fail silently, which
+ * is precisely the bug that runner was written to close.
+ */
+const FORECAST_URL = 'https://erp.powergrid.gov.bd/w/forecasts/show_forecasts_bn';
+
+async function captureForecastBoard(dryRun: boolean) {
+  const t0 = Date.now();
+  const done = (pages: number, rows: number, reused: number, failed: number) => {
+    console.log(
+      `  forecast board: ${pages} pages, ${rows} rows, ${reused} documents already held, ` +
+        `${failed} failed, ${((Date.now() - t0) / 1000).toFixed(0)}s\n`,
+    );
+  };
+
+  let bytes: Buffer;
+  try {
+    bytes = await fetchWithRetry(FORECAST_URL);
+  } catch (e) {
+    console.log(`  ! forecast board: ${e instanceof Error ? e.message : String(e)}`);
+    done(0, 0, 0, 1);
+    return;
+  }
+
+  const board = parsePgcbForecastHtml(bytes.toString('utf8'));
+  if (!board) {
+    // A page that fetched and yielded nothing IS the finding. The live layer
+    // learned this the hard way when NLDC made a time cell responsive and a
+    // silent parse failure published a fallback instead.
+    console.log('  ! forecast board: fetched but no board parsed — the page may have changed shape');
+    done(1, 0, 0, 1);
+    return;
+  }
+
+  if (dryRun) {
+    console.log(
+      `  forecast board: ${board.date} forecast ${board.forecastDemand.dayPeakMw}/` +
+        `${board.forecastDemand.eveningPeakMw}, ${board.previousDate} actual ` +
+        `${board.previousGeneration.dayPeakMw}/${board.previousGeneration.eveningPeakMw}`,
+    );
+    done(1, 1, 0, 0);
+    return;
+  }
+
+  const digest = sha256(bytes);
+  const fetchedAt = new Date();
+  const boardDate = new Date(`${board.date}T00:00:00${DHAKA_OFFSET}`);
+  const previousDate = new Date(`${board.previousDate}T00:00:00${DHAKA_OFFSET}`);
+  if (!plausible(boardDate)) {
+    console.log(`  ! forecast board: implausible date ${board.date} — not stored`);
+    done(1, 0, 0, 1);
+    return;
+  }
+
+  try {
+    const existing = await prisma.sourceDocument.findUnique({
+      where: { publisher_contentSha256: { publisher: 'PGCB', contentSha256: digest } },
+      select: { id: true },
+    });
+    const doc =
+      existing ??
+      (await prisma.sourceDocument.create({
+        data: {
+          publisher: 'PGCB',
+          filename: `forecast board ${board.date}`,
+          contentSha256: digest,
+          sourceUrl: FORECAST_URL,
+          rawGzip: gzipSync(bytes),
+          rawByteLength: bytes.length,
+          windowStart: previousDate,
+          windowEnd: boardDate,
+          fetchedAt,
+          parserVersion: PARSER_VERSION,
+          ingestStatus: 'PARSED',
+          validationStatus: 'UNVALIDATED',
+        },
+        select: { id: true },
+      }));
+
+    const figures = {
+      previousDate,
+      fetchedAt,
+      sourceDocumentId: doc.id,
+      forecastDayPeakMw: board.forecastDemand.dayPeakMw,
+      forecastEveningPeakMw: board.forecastDemand.eveningPeakMw,
+      previousDayPeakMw: board.previousGeneration.dayPeakMw,
+      previousEveningPeakMw: board.previousGeneration.eveningPeakMw,
+      parserVersion: PARSER_VERSION,
+    };
+    await prisma.gridForecastBoard.upsert({
+      where: { boardDate },
+      create: { boardDate, ...figures },
+      update: figures,
+    });
+
+    await crossCheckPreviousPeak(board);
+    done(1, 1, existing ? 1 : 0, 0);
+  } catch (e) {
+    console.log(`  ! forecast board: ${e instanceof Error ? e.message : String(e)}`);
+    done(1, 0, 0, 1);
+  }
+}
+
+/**
+ * The board's "yesterday actual" against our own capture of that day.
+ *
+ * PGCB states the previous day's peak generation independently of the hourly
+ * table we scrape, so the two are a genuine cross-check on a figure the site
+ * prints — the kind that has caught every real defect in this archive, because
+ * it compares a number against something else that should agree with it rather
+ * than trusting the parser that produced it. On 2026-09-08 they agreed exactly
+ * (15,473 MW evening peak).
+ *
+ * REPORTED, NEVER REPAIRED. A disagreement is the source disagreeing with our
+ * reading of the source, and the answer is a line in the log for a human, not a
+ * correction written into either side.
+ */
+async function crossCheckPreviousPeak(board: ReturnType<typeof parsePgcbForecastHtml>) {
+  if (!board) return;
+  /* The board states two peaks for the previous day and our aggregate produces
+     one number — the day's maximum — so the comparable quantity is the greater
+     of the pair, not the evening figure alone. In Bangladesh the evening peak
+     is almost always the day's maximum (on 2026-09-07: 14,230 day against
+     15,473 evening), but "almost always" is not an identity, and matching the
+     wrong one would manufacture a disagreement out of a definition. */
+  const peaks = [
+    board.previousGeneration.dayPeakMw,
+    board.previousGeneration.eveningPeakMw,
+  ].filter((v): v is number => v !== null);
+  if (!peaks.length) return;
+  const stated = Math.max(...peaks);
+
+  const start = new Date(`${board.previousDate}T00:00:00${DHAKA_OFFSET}`);
+  const end = new Date(start.getTime() + 86_400_000);
+  const ours = await prisma.gridHourlyObservation.aggregate({
+    where: { series: 'GENERATION', observedAt: { gte: start, lt: end }, excluded: null },
+    _max: { totalMw: true },
+  });
+  const mine = ours._max.totalMw ? Number(ours._max.totalMw) : null;
+  if (mine === null) return;
+
+  const diff = mine - stated;
+  if (Math.abs(diff) < 1) return;
+  console.log(
+    `  note: PGCB states ${board.previousDate} peak generation as ${stated} MW; ` +
+      `our hourly capture maxes at ${mine} MW (${diff > 0 ? '+' : ''}${diff.toFixed(0)}). ` +
+      'Reported, not reconciled.',
+  );
+}
+
 /** The columns each series is actually capable of carrying. */
 const SERIES_FIELDS: Record<SeriesKey, readonly string[]> = {
   GENERATION: [
@@ -566,11 +734,20 @@ async function main() {
     imports: ['INDIA_IMPORT', 'NEPAL_IMPORT'],
   };
   const which = argv.includes('--series') ? argv[argv.indexOf('--series') + 1] : 'all';
-  const seriesList: SeriesKey[] = ALIASES[which] ?? (Object.keys(SERIES) as SeriesKey[]);
-  if (argv.includes('--series') && !ALIASES[which] && which !== 'all' && which !== 'both') {
-    console.error(`unknown --series ${which}; expected one of ${Object.keys(ALIASES).join(', ')}, all`);
+  // `board` is not a series: one page, one row, one day. It is named here
+  // rather than in ALIASES and selects nothing from the hourly walk.
+  const boardOnly = which === 'board';
+  const seriesList: SeriesKey[] = boardOnly ? [] : ALIASES[which] ?? (Object.keys(SERIES) as SeriesKey[]);
+  if (argv.includes('--series') && !boardOnly && !ALIASES[which] && which !== 'all' && which !== 'both') {
+    console.error(
+      `unknown --series ${which}; expected one of ${Object.keys(ALIASES).join(', ')}, board, all`,
+    );
     process.exit(2);
   }
+  // Every invocation that walks the hourly pages also takes the board, so the
+  // Pi's crontab line is untouched by its arrival, exactly as it was when the
+  // two import pages were added.
+  const wantsBoard = boardOnly || !argv.includes('--series') || which === 'all' || which === 'both';
 
   if (has('--report')) {
     await report();
@@ -580,7 +757,8 @@ async function main() {
   const dryRun = has('--dry-run');
   const maxPages = has('--recent') ? val('--recent', 3) : val('--max-pages', 3000);
   console.log(
-    `${dryRun ? 'DRY RUN — ' : ''}walking ${seriesList.length} series, up to ${maxPages} page(s) each\n`,
+    `${dryRun ? 'DRY RUN — ' : ''}walking ${seriesList.length} series, up to ${maxPages} page(s) each` +
+      `${wantsBoard ? ' + the forecast board' : ''}\n`,
   );
 
   const polling = has('--recent');
@@ -594,6 +772,8 @@ async function main() {
     );
     if (r.failures.length) for (const f of r.failures.slice(0, 10)) console.log(`      ${f}`);
   }
+
+  if (wantsBoard) await captureForecastBoard(dryRun);
 
   if (implausibleDates > 0) {
     console.log(`

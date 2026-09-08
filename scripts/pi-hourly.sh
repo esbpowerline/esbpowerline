@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
-# The hourly capture of NLDC's four paginated pages, from cron on the Pi.
+# The hourly capture of NLDC's four paginated pages and PGCB's forecast board,
+# from cron on the Pi.
 #
-# Four since 2026-09-07: generation, demand/supply/load-shed, and the two
+# Four pages since 2026-09-07: generation, demand/supply/load-shed, and the two
 # cross-border import pages (imported_power_india_bn, imported_power_nepal_bn).
 # The imports were added for the one figure PGCB publishes nowhere else — the
-# hourly FORECAST per interconnector, printed beside the actual. Nothing here
-# changed to take them: the script defaults to every series it knows, so the
-# invocation below is untouched and the `N failed` sum already spans whatever
-# series print a line.
+# hourly FORECAST per interconnector, printed beside the actual.
+#
+# The forecast board (show_forecasts_bn) joined them on 2026-09-08. It is not a
+# series — one page, one row, one day — but it is captured on this tick rather
+# than by the daily polls because it is REPLACED each morning: four fixed slots
+# would read a board posted between them late, and a board replaced between
+# them never. Two homepage tiles read it live, and nothing else in Bangladesh
+# keeps it, so a forecast missed on its own day cannot be recovered on any
+# later one.
+#
+# Nothing here changed to take any of them: the script defaults to everything
+# it knows, so the invocation below is untouched and the `N failed` sum already
+# spans whatever lines are printed — which is why the board reports in the
+# series' own `N pages, N rows, N documents already held, N failed` shape.
 #
 # Why this exists at all: `scripts/ingest-nldc-hourly.ts` was written and
 # backfilled on 2026-09-05 and then never ran again. Nothing referenced it — no

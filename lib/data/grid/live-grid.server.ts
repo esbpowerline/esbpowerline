@@ -1,12 +1,14 @@
 import 'server-only';
 import https from 'node:https';
 import { unstable_cache } from 'next/cache';
+import prisma from '@/lib/prisma';
 import {
   buildLiveGridSnapshot,
   parseNldcDemandSupplyHtml,
   parseNldcGenerationHtml,
   parsePgcbForecastHtml,
   type LiveGridSnapshot,
+  type PgcbForecastBoard,
 } from '@/lib/data/grid/live-grid-parse';
 
 export type { LiveGridSnapshot, LiveGridHour } from '@/lib/data/grid/live-grid-parse';
@@ -90,6 +92,67 @@ function fetchPage(url: string): Promise<string> {
   });
 }
 
+/**
+ * The board as last captured, when PGCB will not serve it.
+ *
+ * The Pi stores every board it sees (`ingest-nldc-hourly.ts`), which exists in
+ * the first place because the page is REPLACED each morning and nothing else in
+ * Bangladesh keeps it. Having the archive, refusing to read it while the
+ * publisher is briefly unreachable would blank two homepage tiles over a
+ * network blip.
+ *
+ * The window is today or yesterday in Dhaka, and that bound is the whole point.
+ * It is not a hedge — it is exactly the set of boards PGCB itself could be
+ * serving at this moment: the new board goes up during the morning, so before
+ * it does, the live page legitimately still shows yesterday's. Anything older
+ * than that is not a board that is late, it is a board that has been replaced,
+ * and printing it would be carrying a stale reading forward under a current
+ * label. That is the one thing this archive may never do.
+ *
+ * The row states its own dates, so whatever comes back is labelled with the day
+ * it belongs to rather than with today.
+ */
+async function storedForecastBoard(): Promise<PgcbForecastBoard | null> {
+  try {
+    // Dhaka is UTC+06:00 all year with no DST (observation-window.ts).
+    const dhakaToday = new Date(Date.now() + 6 * 3_600_000).toISOString().slice(0, 10);
+    const oldest = new Date(Date.parse(`${dhakaToday}T00:00:00Z`) - 86_400_000);
+
+    const row = await prisma.gridForecastBoard.findFirst({
+      where: { boardDate: { gte: oldest } },
+      orderBy: { boardDate: 'desc' },
+      select: {
+        boardDate: true,
+        previousDate: true,
+        forecastDayPeakMw: true,
+        forecastEveningPeakMw: true,
+        previousDayPeakMw: true,
+        previousEveningPeakMw: true,
+      },
+    });
+    if (!row) return null;
+
+    const mw = (v: unknown) => (v === null || v === undefined ? null : Number(v));
+    return {
+      date: row.boardDate.toISOString().slice(0, 10),
+      previousDate: row.previousDate.toISOString().slice(0, 10),
+      forecastDemand: {
+        dayPeakMw: mw(row.forecastDayPeakMw),
+        eveningPeakMw: mw(row.forecastEveningPeakMw),
+      },
+      previousGeneration: {
+        dayPeakMw: mw(row.previousDayPeakMw),
+        eveningPeakMw: mw(row.previousEveningPeakMw),
+      },
+    };
+  } catch {
+    // The same fail-soft posture as releases.server.ts and middleware: a
+    // database that is unavailable costs the tiles their fallback, never the
+    // page. The live figures do not touch Postgres at all.
+    return null;
+  }
+}
+
 export const getLiveGridSnapshot = unstable_cache(
   async (): Promise<LiveGridSnapshot> => {
     // The forecast board catches its own failure and the other two do not.
@@ -101,7 +164,11 @@ export const getLiveGridSnapshot = unstable_cache(
       fetchPage(DEMAND_SUPPLY_URL),
       fetchPage(FORECAST_URL).catch(() => null),
     ]);
-    const forecast = forecastHtml ? parsePgcbForecastHtml(forecastHtml) : null;
+    // A page that fetched and parsed to nothing is a failure, not an absence —
+    // the live layer's own scar (NLDC made a time cell responsive and a silent
+    // parse failure published a fallback). Either way the stored board answers.
+    const forecast =
+      (forecastHtml ? parsePgcbForecastHtml(forecastHtml) : null) ?? (await storedForecastBoard());
     return buildLiveGridSnapshot(
       parseNldcGenerationHtml(genHtml),
       parseNldcDemandSupplyHtml(dslHtml),
