@@ -492,9 +492,24 @@ async function captureForecastBoard(dryRun: boolean) {
 
   const digest = sha256(bytes);
   const fetchedAt = new Date();
-  const boardDate = new Date(`${board.date}T00:00:00${DHAKA_OFFSET}`);
-  const previousDate = new Date(`${board.previousDate}T00:00:00${DHAKA_OFFSET}`);
-  if (!plausible(boardDate)) {
+  /* Two different date objects for two different columns, and conflating them
+     files the board a day early.
+
+     boardDate and previousDate are `@db.Date` — a calendar day with no time and
+     no zone. Postgres takes the UTC date out of whatever instant it is handed,
+     so `2026-09-08T00:00:00+06:00` is 2026-09-07T18:00Z and lands as
+     2026-09-07. Caught on the first real capture: the board stating
+     `তারিখঃ ০৮-০৯-২০২৬` was stored under the 7th, with the 7th's forecast
+     recorded as the 6th's. A calendar day goes in as UTC midnight.
+
+     The SourceDocument window is a genuine instant, so it keeps Dhaka: the
+     board covers the evening of the previous day through the day it names. */
+  const dayKey = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  const boardDate = dayKey(board.date);
+  const previousDate = dayKey(board.previousDate);
+  const windowStart = new Date(`${board.previousDate}T00:00:00${DHAKA_OFFSET}`);
+  const windowEnd = new Date(`${board.date}T00:00:00${DHAKA_OFFSET}`);
+  if (!plausible(windowEnd)) {
     console.log(`  ! forecast board: implausible date ${board.date} — not stored`);
     done(1, 0, 0, 1);
     return;
@@ -515,8 +530,8 @@ async function captureForecastBoard(dryRun: boolean) {
           sourceUrl: FORECAST_URL,
           rawGzip: gzipSync(bytes),
           rawByteLength: bytes.length,
-          windowStart: previousDate,
-          windowEnd: boardDate,
+          windowStart,
+          windowEnd,
           fetchedAt,
           parserVersion: PARSER_VERSION,
           ingestStatus: 'PARSED',
@@ -540,6 +555,30 @@ async function captureForecastBoard(dryRun: boolean) {
       create: { boardDate, ...figures },
       update: figures,
     });
+
+    /* Read the row back and check it says the day the document says.
+
+       Not paranoia — this is the defect that shipped in the first version.
+       `@db.Date` drops the time, so a Dhaka-midnight instant landed on the
+       previous UTC day and the 08 board was filed as the 07, with the 07's
+       forecast recorded against the 06. Nothing else would have caught it: the
+       parse was right, the upsert succeeded, and every figure was correct
+       against a date that was wrong by one. One indexed read on a page already
+       fetched is a cheap price for the write meaning what it says. */
+    const stored = await prisma.gridForecastBoard.findUnique({
+      where: { boardDate },
+      select: { boardDate: true, previousDate: true },
+    });
+    const storedDay = stored?.boardDate.toISOString().slice(0, 10);
+    const storedPrev = stored?.previousDate.toISOString().slice(0, 10);
+    if (storedDay !== board.date || storedPrev !== board.previousDate) {
+      console.log(
+        `  ! forecast board: stored as ${storedDay}/${storedPrev} but the document ` +
+          `states ${board.date}/${board.previousDate} — a date column is being truncated`,
+      );
+      done(1, 0, 0, 1);
+      return;
+    }
 
     await crossCheckPreviousPeak(board);
     done(1, 1, existing ? 1 : 0, 0);
