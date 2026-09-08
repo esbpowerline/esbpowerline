@@ -396,6 +396,26 @@ demand/supply/load-shed, and PGCB's two cross-border import pages
 (`imported_power_india_bn`, `imported_power_nepal_bn`). The script defaults to
 every series it knows, so the runner and its cron line were untouched.
 
+**And PGCB's forecast board since 2026-09-08** (`show_forecasts_bn`, `--series
+board`). Not a series — one page, one row, one day, in `GridForecastBoard`
+(migration 0022) — but captured on this tick rather than by the daily polls
+because the board is *replaced* each morning: four fixed slots would read a
+board posted between them late and a board replaced between them never. Two
+snapshot tiles read it (Forecast Demand, Y-day Peak Gen) and until this table
+existed the site was reading a figure nobody keeps and storing none of it.
+`live-grid.server.ts` falls back to the stored row when PGCB will not serve the
+page, bounded to today or yesterday in Dhaka — exactly the set of boards PGCB
+itself could be serving, since the new one goes up during the morning.
+
+Two things about it are load-bearing. `boardDate`/`previousDate` are `@db.Date`
+and go in as **UTC midnight**: handed a Dhaka-midnight instant, Postgres takes
+the UTC date and files the day early, which is how the first capture stored the
+08 board as the 07. The capture reads the row back and fails the tick if the
+stored days disagree with the document's. And the board's stated previous-day
+peak is cross-checked against our own hourly maximum — 15,473 MW on 2026-09-07,
+exact — comparing the greater of its two peaks, since our aggregate is a day
+maximum. Reported, never reconciled.
+
 The import pages were added for one figure. Every *actual* on them already
 appears on the generation table — checked column by column over 102 hours on
 2026-09-07, zero disagreements, and that comparison is now a test rather than an
@@ -527,6 +547,19 @@ Two properties matter more than the cadence:
   cadence, so a window Petrobangla files four days late belongs to a day that left the
   window before the gas arrived. The watcher compares per source against the whole
   `LOOKBACK_GAS` span instead, and a day that fell out is still picked up.
+- **A skipped Petrobangla slot must not hide a day that is published.** Fixed 2026-09-08,
+  and it is the second half of the lesson below. Petrobangla files every slot one day
+  behind its own label whenever it drops one: on 2026-09-08 slot 07.09.26 held the 04→05
+  window and 08.09.26 held 05→06. `download.py` said "the exact slot first, then the days
+  after it" and did "the exact slot **or** the days after it" — so asked for the 6th it
+  found its exact slot present, fetched it, correctly rejected it on the header, and
+  stopped one slot short of the document that stated the day. The search now always
+  continues past a rejected slot, and stops early when a candidate states a *later*
+  window, which keeps a genuinely unfiled day to one fetch. The watcher had the mirror
+  fault — slot-minus-one — so it spent its four attempts on a 2026-09-07 no document
+  states and never once asked for the 6th; it offers both K-1 and K-2 now and lets the
+  document decide. Neither layer fetches a PDF to guess: a slot is a hint about where to
+  look.
 - **Gas does not wait on PGCB, in either layer.** Fixed 2026-09-07, after the site sat on
   a gas window Petrobangla was publicly serving. Two independent things held it:
 
