@@ -42,21 +42,36 @@ deploys nothing.** That is deliberate. Production ships from `main`, and pushing
 
 Delete an item when it is done; this section is a handover, not a changelog.
 
-**1. Released 2026-09-05.** 38 commits fast-forwarded to `main` and deployed: the four
-2026-09-04 fixes (NLDC demand parser, `avgProductionCost` marked D, Petrobangla aggregates
-gated by directory, outage causes split on the right marker), the NLDC hourly persistence
-layer and Time Machine, the dormant tariff engine, and the event-study page at
-`/analysis/gas-crisis-2026`. Migrations 0019/0020 were already applied to the production
-database before the merge, so the deploy carried no DDL.
+**1. Released 2026-09-08** (`eca705a4`). 24 commits fast-forwarded to `main`: the
+System Snapshot rebuilt around NLDC's hourly pages and PGCB's forecast board, the
+homepage hero and category-rail motion, the forecast-board capture and its stored
+fallback, and the two Petrobangla slot fixes. Production verified serving all twelve
+tiles, the board, and the per-interconnector import breakdown.
 
-**One thing to know about that deploy:** the first build failed and the second, identical,
-succeeded. During static prerender (318 pages, 3 workers) Prisma exhausted the Supabase
-session pooler and `/about` died on `lib/homepage-content.ts:38` — `prisma.siteSetting.findMany`
-has no fallback, so one timeout ends the build. Every `[releases]` read in the same window
-logged a timeout too and fell soft to the static archive exactly as designed, which is why
-only `/about` was fatal. If a deploy fails this way again it is not the commit: retry it, and
-if it recurs, give `readSettingsMap` the same fail-soft treatment `releases.server.ts` has
-rather than raising the pool ceiling.
+**Both of that release's build failures are now fixed in code, not worked around.**
+
+*The pooler.* This was the second build killed by it, and the previous entry here said
+what to do if it recurred, so it was done: `readSettingsMap` fails soft to
+`HOMEPAGE_DEFAULTS` now. Static prerender runs 374 pages over three workers against a
+session pooler shared with the live site and the Pi's hourly capture, and it runs out;
+every `[releases]` read logged the same timeout and degraded as designed, while
+`/about` — which has a full set of defaults available — took the whole build down. The
+catch sits **outside** `unstable_cache` deliberately: an empty map returned from inside
+would be stored under the settings key for the day-long window and pin the site to its
+defaults long after the database recovered. Do not answer this with a bigger pool; that
+ceiling is shared with readers.
+
+*The migration.* Migration 0022 was applied by hand through `scratch/db-apply.ts`
+before the release, so the build's `prisma migrate deploy` found it unrecorded, re-ran
+it, and died on its one non-idempotent statement — leaving a row with `finished_at`
+NULL, which blocks **every** later deploy until someone resolves it. The row is
+resolved and the constraint is guarded, but the lesson is upstream of both: this repo
+applies DDL on deploy (`build:vercel` runs `scripts/migrate-deploy-prod.mjs`), so
+`db-apply.ts` is for reading a change into the database ahead of a deploy that cannot
+wait — never for the migration the next deploy is about to run itself. Note also that
+`migrate-deploy-prod.mjs` pipes Prisma's output and prints none of it, so a migration
+failure shows up as a bare `exited with 1`; the cause has to be read out of
+`_prisma_migrations`.
 
 **2. The hourly NLDC ingest wrote nothing for a day, and said it succeeded.**
 Found 2026-09-06 night. Every tick that day logged `generation: 0 pages, 0 rows,
