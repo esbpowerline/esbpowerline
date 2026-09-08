@@ -310,7 +310,18 @@ function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening
   }
 }
 
-function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStats?: any[]; live: LiveGrid | null; liveStamp?: string | null }) {
+function LocalSnapshotDashboard({
+  initialStats,
+  live,
+  liveStamp,
+  archiveDay,
+}: {
+  initialStats?: any[];
+  live: LiveGrid | null;
+  liveStamp?: string | null;
+  /** The archive day the workbook-backed tiles belong to (Gas Supply, Cost). */
+  archiveDay?: string | null;
+}) {
   const { locale, t } = useLocale();
   // `mergeHomeSnapshot` folds the server's stats onto the twelve declared slots
   // and is the only thing that decides a tile's figure. It has no specimen
@@ -442,6 +453,8 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
           and the one not shown belongs somewhere rather than nowhere.
         */
         const board = live?.forecast ?? null;
+        /** Tiles fed by PGCB's daily board rather than NLDC's hourly pages. */
+        const isBoardTile = DUAL_PEAK_LABELS.has(s.label);
         const boardTip = (() => {
           if (!board) return null;
           if (s.label === 'Forecast Demand') {
@@ -487,16 +500,51 @@ function LocalSnapshotDashboard({ initialStats, live, liveStamp }: { initialStat
           >
             <span className="absolute top-1.5 right-1.5 flex h-1.5 w-1.5 z-20">
               <ModernTooltip
-                label={isLive ? liveTip : awaiting ? awaitingTip : t('energy.indicative')}
+                /*
+                  The header's "Daily" stamp shows the NEWEST daily date the
+                  panel carries, which since the forecast board arrived is
+                  today's. Gas Supply and Production Cost still come from the
+                  archive day before it, so they state their own day here rather
+                  than inherit one that is not theirs.
+                */
+                label={
+                  isLive
+                    ? liveTip
+                    : awaiting
+                      ? awaitingTip
+                      : archiveDay
+                        ? locale === 'bn'
+                          ? `পিজিসিবি দৈনিক প্রতিবেদন · ${archiveDay}`
+                          : `PGCB daily report for ${archiveDay}`
+                        : t('energy.indicative')
+                }
                 alwaysShow
                 variant="chrome"
                 side="top"
               >
+                {/* Three states, because the panel now carries three cadences.
+                    
+                    Emerald is NLDC's hourly feed — a figure that moves within
+                    the hour a reader is looking at it. Rose is PGCB's forecast
+                    board: live in the sense that it refreshes on its own, but
+                    on a DAILY cadence, so a reader who reads a pulsing dot as
+                    "this is the current hour" would be wrong about it. Grey is
+                    a figure nobody has filed. Both live states pulse, because
+                    both do update; the colour is what separates the cadence,
+                    and the tooltip on the dot states it in words. */}
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
                   {isLive ? (
                     <>
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                      <span
+                        className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                          isBoardTile ? 'bg-rose-400' : 'bg-emerald-400'
+                        }`}
+                      />
+                      <span
+                        className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
+                          isBoardTile ? 'bg-rose-500' : 'bg-emerald-500'
+                        }`}
+                      />
                     </>
                   ) : (
                     <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-muted-foreground/20 dark:bg-muted-foreground/10" />
@@ -608,6 +656,27 @@ function SnapshotSegment({
       ? `${formatCompactDay(liveDay, locale)}, ${liveHour}`
       : liveHour;
   const compactHeaderDate = headerDate.replace(/,?\s*[\d০-৯]{4}\s*$/, '');
+  /*
+    The "Daily" stamp names the newest daily date the panel carries.
+
+    It used to be the archive day alone — the newest PGCB workbook — and that
+    was the whole daily half. PGCB's forecast board is daily too and is a day
+    ahead of the workbook by construction: it publishes today's forecast on
+    today, while the workbook for today only appears tomorrow. Leaving the stamp
+    on the workbook's day printed "Daily Sep 7" over a tile stating a forecast
+    for Sep 8.
+
+    So the stamp follows whichever is newer. The tiles that are still the
+    workbook's — Gas Supply and Production Cost — name their own day in their
+    tooltip rather than inherit this one, because on any day the board is ahead
+    this stamp is not theirs.
+  */
+  const boardDay = live?.forecast?.date ?? null;
+  const dailyShownDay = boardDay && (!dailyDay || boardDay > dailyDay) ? boardDay : dailyDay;
+  const dailyShownLabel =
+    dailyShownDay && dailyShownDay !== dailyDay
+      ? formatCompactDay(dailyShownDay, locale)
+      : compactHeaderDate;
   const liveHour12 = liveHour ? to12Hour(liveHour) : null;
 
   return (
@@ -660,7 +729,7 @@ function SnapshotSegment({
               <>
                 <span className="home-snapshot-segment__updated home-snapshot-segment__updated--daily">
                   {locale === 'bn' ? 'দৈনিক ' : 'Daily '}
-                  <time dateTime={dailyDay ?? undefined}>{compactHeaderDate}</time>
+                  <time dateTime={dailyShownDay ?? undefined}>{dailyShownLabel}</time>
                 </span>
                 <span className="home-snapshot-segment__updated home-snapshot-segment__updated--hourly">
                   {locale === 'bn' ? 'ঘণ্টাভিত্তিক ' : 'Hourly '}
@@ -684,6 +753,7 @@ function SnapshotSegment({
             initialStats={snapshotStats as any[]}
             live={live}
             liveStamp={liveStamp}
+            archiveDay={dailyDay}
           />
         </div>
 
