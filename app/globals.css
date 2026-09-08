@@ -12817,97 +12817,103 @@ iframe::-webkit-scrollbar-track {
   }
 }
 
-/* Scroll-Reveal Animations for Category grids */
+/* ── A category row changes PAGE; it does not scroll ─────────────────────
+   The row used to be a strip that translated under the hand, and the motion
+   said the wrong thing about the content: these are three finished stories and
+   then three more, with no continuum between card three and card four for a
+   slide to express. Nothing travels sideways now. The trio on screen clears
+   and the next three arrive, column by column — the same move the hero above
+   makes, on purpose, because two rotation idioms on one page read as two
+   different sites.
+
+   The exit is a transition and the arrival is an animation, and that split is
+   load-bearing. The cards remount on a page change (the key carries the page
+   index), so the arrival has to be an animation — a transition has nothing to
+   transition from on a fresh node. The exit has to be a transition, because it
+   plays on the OLD nodes, which are not remounting. The arrival is `backwards`
+   and never `forwards`: it must release the element back to its resting style
+   when it finishes, or the exit transition would have nothing to move.
+
+   Timing: 320ms plus 60ms per column puts the last column out at 440ms, which
+   is exactly what goToPage waits before swapping. Change one, change both. */
 .category-grid-track {
   width: 100%;
+  cursor: grab;
 }
 
-/* The cards arrive rather than appear.
-   
-   This was an opacity fade and nothing else, staggered across the first three
-   cards. A rail whose cards only brighten reads as a static three-column grid
-   that happened to load late — the motion says nothing about the fact that it
-   slides. They rise and settle now, from slightly under and slightly small, on
-   the same easing the track itself uses when it moves, so the entrance and the
-   swipe feel like the same object. */
+.category-grid-track[data-paged='true'][data-dragging='true'] {
+  cursor: grabbing;
+}
+
+.category-grid-track:not([data-paged='true']) {
+  cursor: default;
+}
+
 .category-grid-track .article-card-wrapper {
-  opacity: 0;
-  transform: translate3d(0, 16px, 0) scale(0.985);
   will-change: opacity, transform;
   transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition-delay: calc(var(--card-i, 0) * 60ms);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .category-grid-track .article-card-wrapper {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
+/* Held until the row is scrolled to. Without this the first page would play
+   its arrival somewhere below the fold and a reader would meet a row that had
+   already finished moving. */
+.category-grid-track:not(.is-visible) .article-card-wrapper {
+  opacity: 0;
 }
 
 .category-grid-track.is-visible .article-card-wrapper {
-  opacity: 1;
-  transform: none;
+  animation: category-card-in 700ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation-delay: calc(var(--card-i, 0) * 90ms);
 }
 
-/* Dragging is physical: the rail gives a little under the hand and comes back.
-   Set on the container so it survives the inline `transform` the drag handler
-   writes to the track itself. */
-.category-grid-track {
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+.category-grid-track.is-swapping .article-card-wrapper {
+  /* Cancels an arrival still in flight. A page changed inside 700ms of the
+     last one would otherwise be held by the running animation until it ended,
+     and the exit would start late. */
+  animation: none;
+  opacity: 0;
+  transform: translate3d(calc(var(--page-dir, 1) * -18px), -14px, 0);
 }
 
-.category-grid-track[data-dragging='true'] {
-  transform: scale(0.988);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .category-grid-track,
-  .category-grid-track[data-dragging='true'] {
-    transition: none;
+/* 18px against the direction of travel, and 20px from below. The horizontal
+   component is small deliberately: it is there to say which way the page went,
+   not to imply a strip sliding past. */
+@keyframes category-card-in {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--page-dir, 1) * 18px), 20px, 0);
+  }
+  to {
+    opacity: 1;
     transform: none;
   }
 }
 
-/* Entrance stagger. It used to stop at three because the entrance was
-   opacity-only and three cards fill the row on lg; the rail renders more than
-   that, so cards four and up appeared with no delay at all and the sweep died
-   halfway across. The step is 70ms rather than the old 150ms: with a lift and a
-   scale now riding along, 150ms per card made the last card land almost a
-   second after the first. Capped at eight — beyond that it stops reading as one
-   gesture. */
-.category-grid-track.is-visible .article-card-wrapper:nth-child(1) {
-  transition-delay: 0ms;
+/* The give under a drag is written to this row as an inline transform, so it
+   needs its own snap-back curve; the handler sets the transition on release
+   and clears it on the next grab. */
+.category-grid-page {
+  will-change: transform;
 }
 
-.category-grid-track.is-visible .article-card-wrapper:nth-child(2) {
-  transition-delay: 70ms;
-}
+@media (prefers-reduced-motion: reduce) {
+  .category-grid-track .article-card-wrapper,
+  .category-grid-track.is-visible .article-card-wrapper {
+    animation: none;
+    transition: opacity 200ms ease-in;
+    transition-delay: 0ms;
+  }
 
-.category-grid-track.is-visible .article-card-wrapper:nth-child(3) {
-  transition-delay: 140ms;
-}
+  .category-grid-track:not(.is-visible) .article-card-wrapper {
+    opacity: 1;
+  }
 
-.category-grid-track.is-visible .article-card-wrapper:nth-child(4) {
-  transition-delay: 210ms;
-}
-
-.category-grid-track.is-visible .article-card-wrapper:nth-child(5) {
-  transition-delay: 280ms;
-}
-
-.category-grid-track.is-visible .article-card-wrapper:nth-child(6) {
-  transition-delay: 350ms;
-}
-
-.category-grid-track.is-visible .article-card-wrapper:nth-child(7) {
-  transition-delay: 420ms;
-}
-
-.category-grid-track.is-visible .article-card-wrapper:nth-child(n + 8) {
-  transition-delay: 490ms;
+  .category-grid-track.is-swapping .article-card-wrapper {
+    transform: none;
+  }
 }
 
 /* Remove default browser drag/focus outlines on carousel items */

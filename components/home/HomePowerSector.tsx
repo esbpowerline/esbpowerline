@@ -42,63 +42,85 @@ type CategoryWithArticles = PublicCategory & {
   articles: PublicArticleCard[];
 };
 
+/**
+ * A category row is PAGED, not scrolled.
+ *
+ * It used to be a strip that translated one card at a time under the hand —
+ * the carousel every site has, and recognisable as such before a reader has
+ * read a headline. Nothing about a horizontal strip suited what this row
+ * actually is, either: three finished stories, then three more. There is no
+ * continuum between card 3 and card 4 for a slide to express.
+ *
+ * So the trio is swapped in place. The three on screen lift out together, the
+ * next three arrive column by column, and nothing travels sideways. It is the
+ * same move the hero above makes, which is deliberate: two different rotation
+ * idioms on one page read as two different sites.
+ *
+ * The drag survives — it is how a phone expects to change page — but it moves
+ * nothing except a few pixels of elastic give, and what it commits is a page.
+ */
 function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  const [page, setPage] = useState(0);
   const [windowWidth, setWindowWidth] = useState(1024);
   const [isVisible, setIsVisible] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isSwapping, setIsSwapping] = useState(false);
+  // Which way the page went. The columns carry a small horizontal component
+  // off it — the only thing that says forward from back when nothing slides.
+  const [dir, setDir] = useState<1 | -1>(1);
+
+  const perPage = windowWidth >= 1024 ? 3 : windowWidth >= 768 ? 2 : 1;
+  const pageCount = Math.max(1, Math.ceil(articles.length / perPage));
+  const pageIndexRef = useRef(page);
+  const swapTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsExpanded(true), 3000);
-    return () => clearTimeout(timer);
+    pageIndexRef.current = page;
+  }, [page]);
+
+  /**
+   * 440ms is the exit: a 320ms fade-and-lift plus the 60ms-per-column stagger
+   * the last column waits out (`category-card-out` in globals.css). The swap
+   * must not land while a column is still on its way out, so the two numbers
+   * move together or not at all.
+   */
+  const goToPage = useCallback((next: number, explicitDir?: 1 | -1) => {
+    const from = pageIndexRef.current;
+    if (next === from) return;
+    if (swapTimeout.current) clearTimeout(swapTimeout.current);
+    setDir(explicitDir ?? (next < from ? -1 : 1));
+    setIsSwapping(true);
+    swapTimeout.current = setTimeout(() => {
+      setPage(next);
+      setIsSwapping(false);
+    }, 440);
   }, []);
 
-  const handleInteraction = () => {
-    if (!isExpanded) setIsExpanded(true);
-  };
+  // Wrapping is why the direction is passed explicitly: the last page to the
+  // first is forward even though the index goes down.
+  const nextPage = useCallback(() => {
+    goToPage((pageIndexRef.current + 1) % pageCount, 1);
+  }, [goToPage, pageCount]);
 
-  // High-performance drag references (bypass React state updates during drag)
+  const prevPage = useCallback(() => {
+    goToPage((pageIndexRef.current - 1 + pageCount) % pageCount, -1);
+  }, [goToPage, pageCount]);
+
+  // Drag references. The gesture never re-renders the row: it writes the give
+  // straight to the node, so a drag costs no React work at all.
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
-  const currentTranslateRef = useRef(0);
-  const dragOffsetRef = useRef(0);
-
-  const visibleCount = windowWidth >= 1024 ? 3 : windowWidth >= 768 ? 2 : 1;
-  const maxIndex = Math.max(0, articles.length - visibleCount);
-  const gap = 24; // px
-
-  // Calculate base translation for a given index (without dragging offset)
-  const getBaseTranslate = useCallback((index: number) => {
-    if (index === 0) return 0;
-    const container = containerRef.current;
-    if (!container) return 0;
-    const containerWidth = container.clientWidth;
-    // Get actual gap size based on fluid root font size (1.5rem = gap-6)
-    const gap = 1.5 * parseFloat(getComputedStyle(document.documentElement).fontSize);
-    
-    if (windowWidth >= 1024) {
-      return -index * ((containerWidth - gap * 2) / 3 + gap);
-    } else if (windowWidth >= 768) {
-      return -index * ((containerWidth - gap) / 2 + gap);
-    } else {
-      return -index * (containerWidth + gap);
-    }
-  }, [windowWidth]);
+  const offsetRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const velocityRef = useRef(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      if (trackRef.current) {
-        const base = getBaseTranslate(currentIndex);
-        trackRef.current.style.transform = `translate3d(${base}px, 0px, 0px)`;
-      }
-    };
-    
+    const handleResize = () => setWindowWidth(window.innerWidth);
     setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
 
@@ -120,162 +142,145 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
     };
-  }, [currentIndex, getBaseTranslate]);
+  }, []);
 
-
-
-  const nextCard = () => {
-    if (currentIndex >= maxIndex) return;
-    const nextIdx = currentIndex + 1;
-    setCurrentIndex(nextIdx);
-    if (trackRef.current) {
-      trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-      const targetTranslate = getBaseTranslate(nextIdx);
-      trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
-    }
-  };
-
-  const prevCard = () => {
-    if (currentIndex <= 0) return;
-    const nextIdx = currentIndex - 1;
-    setCurrentIndex(nextIdx);
-    if (trackRef.current) {
-      trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-      const targetTranslate = getBaseTranslate(nextIdx);
-      trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
-    }
-  };
-
-  // Auto-swipe timer (disabled while dragging)
+  // A narrower window fits fewer cards per page, so the page a reader is on
+  // may stop existing. Clamping beats resetting to zero: they keep roughly the
+  // stories they were looking at.
   useEffect(() => {
-    if (articles.length <= visibleCount) return;
+    setPage((prev) => Math.min(prev, pageCount - 1));
+  }, [pageCount]);
 
+  useEffect(
+    () => () => {
+      if (swapTimeout.current) clearTimeout(swapTimeout.current);
+    },
+    []
+  );
+
+  // Autoplay, paused while a finger is down. It wraps, so a row read to the end
+  // starts again rather than dead-ending on its last page.
+  useEffect(() => {
+    if (pageCount < 2) return;
     const timer = setInterval(() => {
       if (isDraggingRef.current) return;
-      setCurrentIndex((prev) => {
-        let nextIdx = prev + 1;
-        if (nextIdx > maxIndex) {
-          nextIdx = 0;
-        }
-        if (trackRef.current) {
-          trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-          const targetTranslate = getBaseTranslate(nextIdx);
-          trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
-        }
-        return nextIdx;
-      });
-    }, 5500);
-
+      nextPage();
+    }, 6500);
     return () => clearInterval(timer);
-  }, [maxIndex, visibleCount, articles.length, getBaseTranslate, currentIndex]);
+  }, [pageCount, nextPage]);
 
-  // Drag handlers
+  const setGive = (px: number) => {
+    if (pageRef.current) {
+      pageRef.current.style.transform = px === 0 ? '' : `translate3d(${px}px, 0, 0)`;
+    }
+  };
+
   const handleDragStart = (clientX: number) => {
+    if (pageCount < 2) return;
     isDraggingRef.current = true;
     startXRef.current = clientX;
-    currentTranslateRef.current = getBaseTranslate(currentIndex);
-    dragOffsetRef.current = 0;
-
-    if (trackRef.current) {
-      trackRef.current.style.transition = 'none';
-    }
-    // The drag state lives in a ref, not in state, so the rail never re-renders
-    // mid-gesture. The attribute is the only way the stylesheet can see it.
+    lastXRef.current = clientX;
+    lastTimeRef.current = performance.now();
+    offsetRef.current = 0;
+    velocityRef.current = 0;
+    if (pageRef.current) pageRef.current.style.transition = 'none';
     containerRef.current?.setAttribute('data-dragging', 'true');
   };
 
   const handleDragMove = (clientX: number) => {
-    if (!isDraggingRef.current || !trackRef.current) return;
+    if (!isDraggingRef.current) return;
     const offset = clientX - startXRef.current;
-    dragOffsetRef.current = offset;
+    offsetRef.current = offset;
 
-    const totalTranslate = currentTranslateRef.current + offset;
-    
-    const minBound = getBaseTranslate(maxIndex) - 80;
-    const maxBound = 80;
-    const boundedTranslate = Math.max(minBound, Math.min(maxBound, totalTranslate));
+    const now = performance.now();
+    const dt = now - lastTimeRef.current;
+    if (dt > 0) {
+      // Smoothed: one frame's delta on a trackpad is noisy enough to read a
+      // steady drag as a flick.
+      const instant = (clientX - lastXRef.current) / dt;
+      velocityRef.current = velocityRef.current * 0.7 + instant * 0.3;
+      lastXRef.current = clientX;
+      lastTimeRef.current = now;
+    }
 
-    trackRef.current.style.transform = `translate3d(${boundedTranslate}px, 0px, 0px)`;
+    // The row gives, it does not travel. The hand has to be answered — without
+    // that the gesture feels ignored until it suddenly isn't — but the give is
+    // damped hard and capped at 28px, because nothing here scrolls. What the
+    // drag is aiming at is a page, and a row that followed the finger properly
+    // would be promising a strip that does not exist.
+    const give = Math.sign(offset) * Math.min(28, Math.abs(offset) * 0.28);
+    setGive(give);
   };
 
   const handleDragEnd = () => {
-    if (!isDraggingRef.current || !trackRef.current) return;
+    if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     containerRef.current?.removeAttribute('data-dragging');
 
-    trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-
-    const swipeThreshold = 60; // px
-    let nextIndex = currentIndex;
-
-    if (dragOffsetRef.current < -swipeThreshold && currentIndex < maxIndex) {
-      nextIndex = currentIndex + 1;
-    } else if (dragOffsetRef.current > swipeThreshold && currentIndex > 0) {
-      nextIndex = currentIndex - 1;
+    if (pageRef.current) {
+      pageRef.current.style.transition = 'transform 320ms cubic-bezier(0.16, 1, 0.3, 1)';
     }
+    setGive(0);
 
-    setCurrentIndex(nextIndex);
-    
-    const targetTranslate = getBaseTranslate(nextIndex);
-    trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
-    
-    dragOffsetRef.current = 0;
+    // Distance OR speed. 0.45 px/ms is about a deliberate flick and well clear
+    // of the drift at the end of a slow drag, so a short sharp gesture is not
+    // swallowed and a long slow one still counts even when it ends motionless.
+    const offset = offsetRef.current;
+    const velocity = velocityRef.current;
+    const wantsNext = offset < -55 || velocity < -0.45;
+    const wantsPrev = offset > 55 || velocity > 0.45;
+
+    if (wantsNext && !wantsPrev) nextPage();
+    else if (wantsPrev && !wantsNext) prevPage();
+
+    offsetRef.current = 0;
+    velocityRef.current = 0;
   };
 
-  // Mouse event listeners
   const onMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
+    e.preventDefault();
     handleDragStart(e.clientX);
   };
-
-  const onMouseMove = (e: React.MouseEvent) => {
-    handleDragMove(e.clientX);
-  };
-
-  const onMouseUpOrLeave = () => {
-    handleDragEnd();
-  };
-
-  // Touch event listeners
-  const onTouchStart = (e: React.TouchEvent) => {
-    handleDragStart(e.touches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    handleDragMove(e.touches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    handleDragEnd();
-  };
+  const onMouseMove = (e: React.MouseEvent) => handleDragMove(e.clientX);
+  const onMouseUpOrLeave = () => handleDragEnd();
+  const onTouchStart = (e: React.TouchEvent) => handleDragStart(e.touches[0].clientX);
+  const onTouchMove = (e: React.TouchEvent) => handleDragMove(e.touches[0].clientX);
+  const onTouchEnd = () => handleDragEnd();
 
   if (!articles || articles.length === 0) return null;
 
-  const initialTranslate = getBaseTranslate(currentIndex);
-  const displayArticles = isExpanded ? articles : articles.slice(0, visibleCount + 2);
+  // Only the page on screen is rendered. The strip mounted every card in the
+  // row — up to 24 per category, images and all — and held them off-screen
+  // behind `overflow: hidden`. Three is what a reader can see, so three is what
+  // the browser is asked for.
+  const pageArticles = articles.slice(page * perPage, page * perPage + perPage);
+  const paged = pageCount > 1;
 
   return (
-    <div 
-      className="relative group/carousel w-full"
-      onMouseEnter={handleInteraction}
-      onTouchStart={handleInteraction}
-      onFocus={handleInteraction}
-    >
+    <div className="relative group/carousel w-full">
       {/* Left Arrow Button */}
-      {articles.length > visibleCount && currentIndex > 0 && (
+      {paged && page > 0 && (
         <button
-          onClick={prevCard}
+          onClick={prevPage}
           className="absolute left-1 top-[var(--category-nav-seam)] -translate-y-1/2 z-50 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto shadow-md"
-          aria-label="Previous slide"
+          aria-label="Previous stories"
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
       )}
 
-      {/* Carousel Container */}
-      <div 
+      <div
         ref={containerRef}
-        className={`category-grid-track overflow-hidden w-full select-none pb-4 pt-1 ${isVisible ? 'is-visible' : ''}`}
+        // Still clipped, though nothing scrolls any more. The server renders
+        // the desktop trio (it cannot know the viewport), so on a phone the
+        // three full-width cards sit side by side for the moment before
+        // hydration narrows the page to one — unclipped, that is a horizontal
+        // scrollbar on the whole document. The drag's give is clipped too,
+        // which is what give should look like: a row moving inside a window.
+        className={`category-grid-track overflow-hidden w-full select-none pb-4 pt-1 ${isVisible ? 'is-visible' : ''} ${
+          isSwapping ? 'is-swapping' : ''
+        }`}
+        data-paged={paged ? 'true' : undefined}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUpOrLeave}
@@ -283,18 +288,21 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
-        style={{ cursor: 'grab' }}
       >
-        <div 
-          ref={trackRef}
-          className="flex gap-6 py-2 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{ transform: `translate3d(${initialTranslate}px, 0px, 0px)`, willChange: 'transform' }}
-        >
-          {displayArticles.map((article) => (
-            <div 
-              key={article.id} 
+        <div ref={pageRef} className="category-grid-page flex gap-6 py-2">
+          {pageArticles.map((article, cardIndex) => (
+            <div
+              key={`${page}-${article.id}`}
               className="article-card-wrapper flex-shrink-0 w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] pointer-events-none flex flex-col h-full"
-              style={{ userSelect: 'none' }}
+              // The column's place in the trio and the direction the page went.
+              // Between them the stagger knows its order and its sign.
+              style={
+                {
+                  userSelect: 'none',
+                  '--card-i': cardIndex,
+                  '--page-dir': dir,
+                } as React.CSSProperties
+              }
               onDragStart={(e) => e.preventDefault()}
             >
               <div className="pointer-events-auto flex-1 flex flex-col">
@@ -320,56 +328,36 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
         </div>
       </div>
 
-      {articles.length > visibleCount && (
+      {/* One dot per page — a real count now, rather than the three buckets the
+          old strip mapped its slide index onto. */}
+      {paged && (
         <div className="category-carousel-dots">
-          {[0, 1, 2].map((idx) => {
-            let isActive = false;
-            if (maxIndex > 0) {
-              const ratio = currentIndex / maxIndex;
-              if (idx === 0) isActive = ratio < 0.25;
-              else if (idx === 2) isActive = ratio > 0.75;
-              else isActive = ratio >= 0.25 && ratio <= 0.75;
-            } else {
-              isActive = idx === 0;
-            }
-
-            return (
-              <button
-                key={idx}
-                onClick={() => {
-                  let targetIdx = 0;
-                  if (idx === 1) targetIdx = Math.round(maxIndex / 2);
-                  else if (idx === 2) targetIdx = maxIndex;
-
-                  setCurrentIndex(targetIdx);
-                  if (trackRef.current) {
-                    trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
-                    const targetTranslate = getBaseTranslate(targetIdx);
-                    trackRef.current.style.transform = `translate3d(${targetTranslate}px, 0px, 0px)`;
-                  }
-                }}
-                // The button is the bar itself, so the three stay grouped in the
-                // row's 6px gap rather than being pushed ~50px apart by their own
-                // boxes. Tapping room comes from a pseudo-element that grows only
-                // vertically (44px tall), which costs nothing visually. Width still
-                // tracks the bar, so these sit under the 24px WCAG 2.5.8 target
-                // minimum — a deliberate trade to keep the grouped look.
-                className={`relative h-1.5 rounded-full transition-all duration-300 before:absolute before:left-0 before:right-0 before:-top-[19px] before:-bottom-[19px] before:content-[''] ${
-                  isActive ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/30'
-                }`}
-                aria-label={`Go to section ${idx + 1}`}
-              />
-            );
-          })}
+          {Array.from({ length: pageCount }, (_, idx) => (
+            <button
+              key={idx}
+              onClick={() => goToPage(idx)}
+              aria-label={`Stories ${idx * perPage + 1} to ${Math.min((idx + 1) * perPage, articles.length)}`}
+              aria-current={idx === page ? 'true' : undefined}
+              // The button is the bar itself, so the dots stay grouped in the
+              // row's 6px gap rather than being pushed ~50px apart by their own
+              // boxes. Tapping room comes from a pseudo-element that grows only
+              // vertically (44px tall), which costs nothing visually. Width still
+              // tracks the bar, so these sit under the 24px WCAG 2.5.8 target
+              // minimum — a deliberate trade to keep the grouped look.
+              className={`relative h-1.5 rounded-full transition-all duration-300 before:absolute before:left-0 before:right-0 before:-top-[19px] before:-bottom-[19px] before:content-[''] ${
+                idx === page ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/30'
+              }`}
+            />
+          ))}
         </div>
       )}
 
       {/* Right Arrow Button */}
-      {articles.length > visibleCount && currentIndex < maxIndex && (
+      {paged && page < pageCount - 1 && (
         <button
-          onClick={nextCard}
+          onClick={nextPage}
           className="absolute right-1 top-[var(--category-nav-seam)] -translate-y-1/2 z-50 h-10 w-10 rounded-full bg-background/85 hover:bg-background border border-border/40 hover:border-border/80 flex items-center justify-center text-foreground hover:text-primary transition-all backdrop-blur-sm cursor-pointer opacity-100 pointer-events-auto shadow-md"
-          aria-label="Next slide"
+          aria-label="More stories"
         >
           <ChevronRight className="h-5 w-5" />
         </button>
