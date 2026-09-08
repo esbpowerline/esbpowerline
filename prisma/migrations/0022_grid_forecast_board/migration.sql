@@ -46,7 +46,18 @@ CREATE INDEX IF NOT EXISTS "GridForecastBoard_previousDate_idx"
 CREATE INDEX IF NOT EXISTS "GridForecastBoard_sourceDocumentId_idx"
     ON "GridForecastBoard"("sourceDocumentId");
 
-ALTER TABLE "GridForecastBoard"
-    ADD CONSTRAINT "GridForecastBoard_sourceDocumentId_fkey"
-    FOREIGN KEY ("sourceDocumentId") REFERENCES "SourceDocument"("id")
-    ON DELETE CASCADE ON UPDATE CASCADE;
+-- Guarded like the statements above it. Everything else here is
+-- IF NOT EXISTS and ADD CONSTRAINT is not, so a re-run got as far as the
+-- foreign key and died — which is exactly what happened when this table was
+-- created by hand before the deploy that carried the migration: `prisma
+-- migrate deploy` found it unrecorded, re-ran it, and left a failed row that
+-- blocks every later deploy until someone resolves it.
+DO $$
+BEGIN
+    ALTER TABLE "GridForecastBoard"
+        ADD CONSTRAINT "GridForecastBoard_sourceDocumentId_fkey"
+        FOREIGN KEY ("sourceDocumentId") REFERENCES "SourceDocument"("id")
+        ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
