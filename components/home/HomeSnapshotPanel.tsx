@@ -88,7 +88,13 @@ type LiveGrid = {
       solarMw: number | null;
       windMw: number | null;
     };
-    imports: { totalMw: number | null };
+    imports: {
+      totalMw: number | null;
+      bheramaraMw: number | null;
+      tripuraMw: number | null;
+      adaniMw: number | null;
+      nepalMw: number | null;
+    };
   };
   // Nullable: these come from NLDC's demand/supply page, which can be absent or
   // re-laid-out while the generation page keeps working. `maxDemandMw` used to
@@ -284,6 +290,48 @@ const SHORT_LABELS: Record<string, string> = {
   'Production Cost': 'Cost',
 };
 
+/**
+ * The Grid Import tile's rotation: the total, then each interconnector NLDC
+ * printed for this hour.
+ *
+ * The tile used to show only the sum, which answers "how much is imported" and
+ * not "from where" — and the where is the more interesting half on a grid that
+ * buys from three Indian links and one Nepali one on separate agreements.
+ *
+ * The total stays in the rotation, and leads it, for a reason beyond
+ * completeness: the six mix tiles sum to the Current Generation tile above
+ * them, and that only holds while this one is showing the total. The suffix
+ * beside the figure always says which is on screen, so nothing is claimed
+ * wrongly in between — but a reader adding the panel up wants the phase where
+ * it adds up, and it is the one they see first.
+ *
+ * An interconnector NLDC did not print is dropped from the rotation rather than
+ * shown as a dash: absent is absent, and a tile that blinks to em-dash every
+ * twenty seconds reads as broken. A printed zero is kept — Nepal is genuinely
+ * 0 MW for most hours, and that is a measurement.
+ */
+const IMPORT_LINKS = [
+  { key: 'bheramaraMw', name: 'bheramara', bn: 'ভেড়ামারা' },
+  { key: 'tripuraMw', name: 'tripura', bn: 'ত্রিপুরা' },
+  { key: 'adaniMw', name: 'adani', bn: 'আদানি' },
+  { key: 'nepalMw', name: 'nepal', bn: 'নেপাল' },
+] as const;
+
+type ImportPhase = { value: number | null; name: string; bn: string };
+
+function importPhases(live: LiveGrid | null): ImportPhase[] {
+  const imports = live?.latest.imports;
+  if (!imports) return [];
+  const phases: ImportPhase[] = [{ value: imports.totalMw, name: 'total', bn: 'মোট' }];
+  for (const link of IMPORT_LINKS) {
+    const value = imports[link.key];
+    if (value !== null && value !== undefined) {
+      phases.push({ value, name: link.name, bn: link.bn });
+    }
+  }
+  return phases;
+}
+
 /** Which of PGCB's two published peaks the dual tiles are showing. */
 type PeakPhase = 'evening' | 'day';
 
@@ -408,8 +456,13 @@ function LocalSnapshotDashboard({
     page open, and a panel that only checked at mount would keep flipping at
     someone who had just asked it to stop.
   */
-  const [peakPhase, setPeakPhase] = useState<PeakPhase>('evening');
+  const [tick, setTick] = useState(0);
   const [flipEnabled, setFlipEnabled] = useState(false);
+  // Derived from one counter rather than held separately, so the dual-peak
+  // tiles and the import tile turn on the same beat. Two timers drifting apart
+  // would have the panel changing under the reader twice as often for no
+  // reason.
+  const peakPhase: PeakPhase = flipEnabled && tick % 2 === 1 ? 'day' : 'evening';
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
@@ -422,13 +475,10 @@ function LocalSnapshotDashboard({
 
   useEffect(() => {
     if (!flipEnabled) {
-      setPeakPhase('evening');
+      setTick(0);
       return;
     }
-    const id = setInterval(
-      () => setPeakPhase((p) => (p === 'evening' ? 'day' : 'evening')),
-      5000,
-    );
+    const id = setInterval(() => setTick((n) => n + 1), 5000);
     return () => clearInterval(id);
   }, [flipEnabled]);
 
@@ -460,7 +510,13 @@ function LocalSnapshotDashboard({
       {stats.map((s, i) => {
         const Icon = s.Icon;
 
-        const liveVal = live ? liveValueFor(s.label, live, peakPhase) : null;
+        const imports = s.label === 'Grid Import' && flipEnabled ? importPhases(live) : [];
+        const importPhase = imports.length > 1 ? imports[tick % imports.length] : null;
+        const liveVal = importPhase
+          ? importPhase.value
+          : live
+            ? liveValueFor(s.label, live, peakPhase)
+            : null;
         // Only annotate a tile that is actually alternating: a dual tile where
         // PGCB printed just one of the pair shows that one at every phase, and
         // labelling it with the phase would name a peak it is not showing.
@@ -474,15 +530,19 @@ function LocalSnapshotDashboard({
           DUAL_PEAK_LABELS.has(s.label) &&
           pair?.dayPeakMw != null &&
           pair?.eveningPeakMw != null;
-        const peakSuffix = isFlipping
+        const peakSuffix = importPhase
           ? locale === 'bn'
-            ? peakPhase === 'day'
-              ? 'দিন'
-              : 'সন্ধ্যা'
-            : peakPhase === 'day'
-              ? 'day'
-              : 'evening'
-          : null;
+            ? importPhase.bn
+            : importPhase.name
+          : isFlipping
+            ? locale === 'bn'
+              ? peakPhase === 'day'
+                ? 'দিন'
+                : 'সন্ধ্যা'
+              : peakPhase === 'day'
+                ? 'day'
+                : 'evening'
+            : null;
         const isLive = liveVal !== null;
         const displayValue = isLive ? liveVal : s.value;
         // Live wins over waiting: a tile the daily report has not filed can
@@ -507,6 +567,18 @@ function LocalSnapshotDashboard({
         const board = live?.forecast ?? null;
         /** Tiles fed by PGCB's daily board rather than NLDC's hourly pages. */
         const isBoardTile = DUAL_PEAK_LABELS.has(s.label);
+        const importTip = (() => {
+          if (s.label !== 'Grid Import') return null;
+          const all = importPhases(live);
+          if (all.length < 2) return null;
+          const parts = all
+            .slice(1)
+            .map((ph) => `${locale === 'bn' ? ph.bn : ph.name} ${formatNumber(ph.value ?? 0)}`)
+            .join(' · ');
+          return locale === 'bn'
+            ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveWhen} · ${parts}`
+            : `NLDC hourly, ${liveWhen} · ${parts} MW`;
+        })();
         const boardTip = (() => {
           if (!board) return null;
           if (s.label === 'Forecast Demand') {
@@ -524,6 +596,7 @@ function LocalSnapshotDashboard({
           return null;
         })();
         const liveTip =
+          importTip ??
           boardTip ??
           (locale === 'bn'
             ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveWhen} পর্যন্ত`
