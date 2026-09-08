@@ -258,74 +258,66 @@ describe('home-snapshot', () => {
     // Fourteen, not twelve: the builder emits the panel's twelve plus the two
     // archive figures the Grid Explorer's dated pages read and the noticeboard
     // does not carry.
-    expect(stats).toHaveLength(14);
+    // Sixteen: the panel's twelve plus the four archive figures the Grid
+    // Explorer's dated pages read and the noticeboard does not carry.
+    expect(stats).toHaveLength(16);
     expect(stats.map((s) => s.label)).toEqual([
+      'Yesterday Peak Gen',
+      'Forecast Demand',
       'Current Demand',
       'Current Supply',
-      'Current Generation',
-      'Forecast Demand',
       'Load Shedding',
-      'Yesterday Peak Gen',
+      'Current Generation',
       'Gas Generation',
       'Coal Generation',
+      'Liquid Fuel',
+      'Hydro',
       'Grid Import',
       'Solar + Wind',
-      'Gas Supply',
-      'Production Cost',
       'Daily Generation',
       'Energy Unserved',
+      'Gas Supply',
+      'Production Cost',
     ]);
-    // Current Demand is instantaneous and only NLDC publishes it, so a daily
-    // report yields a held place, not a figure. It used to carry the evening
-    // peak under a label the panel never listened for; see the invariant below.
-    expect(stats[0].value).toBeNull();
-    expect(stats[0].awaiting).toBe('NLDC');
-    expect(stats[0].unit).toBe(POWER_UNIT);
-    // Current Supply and Current Generation are hourly figures off NLDC's own
-    // pages, so a daily report yields held places for both, exactly as it does
-    // for Current Demand above. They replaced the two peak tiles: a peak is a
-    // maximum over the day at an instant PGCB names, and printing one under a
-    // tile called "Current Generation" would put a different quantity under an
-    // unchanged label.
-    expect(stats[1].label).toBe('Current Supply');
-    expect(stats[1].value).toBeNull();
-    expect(stats[1].awaiting).toBe('NLDC');
-    expect(stats[2].label).toBe('Current Generation');
-    expect(stats[2].value).toBeNull();
-    expect(stats[2].awaiting).toBe('NLDC');
-    expect(stats[2].unit).toBe(POWER_UNIT);
-    // Slots 3 and 5 are the forecast board's now — today's demand forecast and
-    // yesterday's peak generation — and no daily report carries either, so both
-    // are held places naming PGCB.
-    expect(stats[3].label).toBe('Forecast Demand');
-    expect(stats[3].value).toBeNull();
-    expect(stats[3].awaiting).toBe('PGCB');
-    expect(stats[5].label).toBe('Yesterday Peak Gen');
-    expect(stats[5].value).toBeNull();
-    expect(stats[5].awaiting).toBe('PGCB');
-    // The two archive figures they displaced are still built, at the end of the
-    // list, for the Grid Explorer's dated pages.
-    expect(stats[12].label).toBe('Daily Generation');
-    expect(stats[12].value).toBe(gwhToAvgMw(354.94));
-    expect(stats[12].unit).toBe(POWER_UNIT);
-    expect(stats[13].label).toBe('Energy Unserved');
-    expect(stats[13].value).toBe(gwhToAvgMw(2.14));
-    expect(stats[13].unit).toBe(POWER_UNIT);
-    expect(stats[7].label).toBe('Coal Generation');
-    expect(stats[7].value).toBe(gwhToAvgMw(129.21));
-    expect(stats[7].unit).toBe(POWER_UNIT);
-    expect(stats[8].label).toBe('Grid Import');
-    expect(stats[8].value).toBe(2570);
-    expect(stats[8].unit).toBe(POWER_UNIT);
-    expect(stats[11].label).toBe('Production Cost');
-    expect(stats[11].value).toBe(6.5);
+    // Asserted by LABEL rather than by position from here on. These indices
+    // have now been renumbered three times by tile changes that had nothing to
+    // do with what the builder computes, and each time the test failed on the
+    // arithmetic rather than on the behaviour it exists to protect.
+    const at = (label: string) => {
+      const found = stats.find((x) => x.label === label);
+      expect(found, `no tile emitted for ${label}`).toBeDefined();
+      return found!;
+    };
+
+    // The forecast board's two and NLDC's three are held places: a CURRENT
+    // figure, and a same-morning forecast, exist only on those pages. A daily
+    // report yields the name and the owing source, never a substitute — it used
+    // to carry the evening peak under a label the panel never listened for.
+    for (const label of ['Current Demand', 'Current Supply', 'Current Generation', 'Liquid Fuel', 'Hydro']) {
+      expect(at(label).value).toBeNull();
+      expect(at(label).awaiting).toBe('NLDC');
+      expect(at(label).unit).toBe(POWER_UNIT);
+    }
+    for (const label of ['Forecast Demand', 'Yesterday Peak Gen']) {
+      expect(at(label).value).toBeNull();
+      expect(at(label).awaiting).toBe('PGCB');
+    }
+
+    // The archive figures the panel no longer carries are still built.
+    expect(at('Daily Generation').value).toBe(gwhToAvgMw(354.94));
+    expect(at('Daily Generation').unit).toBe(POWER_UNIT);
+    expect(at('Energy Unserved').value).toBe(gwhToAvgMw(2.14));
+    expect(at('Energy Unserved').unit).toBe(POWER_UNIT);
+    expect(at('Coal Generation').value).toBe(gwhToAvgMw(129.21));
+    expect(at('Coal Generation').unit).toBe(POWER_UNIT);
+    expect(at('Grid Import').value).toBe(2570);
+    expect(at('Grid Import').unit).toBe(POWER_UNIT);
+    expect(at('Production Cost').value).toBe(6.5);
     // National production, not the power sector's slice of it — and the two now
     // sit side by side, so the distinction has to survive being adjacent.
-    expect(stats[10].label).toBe('Gas Supply');
-    expect(stats[10].value).toBe(2388);
-    expect(stats[10].unit).toBe('MMCFD');
-    expect(stats[6].label).toBe('Gas Generation');
-    expect(stats[6].unit).toBe(POWER_UNIT);
+    expect(at('Gas Supply').value).toBe(2388);
+    expect(at('Gas Supply').unit).toBe('MMCFD');
+    expect(at('Gas Generation').unit).toBe(POWER_UNIT);
   });
 
   it('holds Gas Supply as a dash on a day Petrobangla has not filed, rather than substituting', () => {

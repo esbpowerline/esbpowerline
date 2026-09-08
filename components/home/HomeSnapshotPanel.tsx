@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowUpRight, BarChart3, Zap, Activity, Leaf, Gauge, Flame, Cable, Sun, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, BarChart3, Zap, Activity, Leaf, Gauge, Flame, Cable, Sun, TrendingUp, Droplet
+} from 'lucide-react';
 import { EnergyDashboard } from '@/components/news/EnergyDashboard';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { formatSnapshotHeaderDate, localizeSnapshotLabel, localizeEnergyStatLabel } from '@/lib/i18n/homepage-copy';
@@ -21,6 +22,9 @@ const IconMap: Record<string, any> = {
   Cable,
   Sun,
   TrendingUp,
+  // Hydro. Without this the tile fell back to Zap, which is the generation
+  // icon — three tiles in a row wearing the same bolt.
+  Droplet,
 };
 
 const ICON_STYLES: Record<string, { color: string; bg: string }> = {
@@ -29,6 +33,7 @@ const ICON_STYLES: Record<string, { color: string; bg: string }> = {
   Leaf: { color: 'text-teal-500 dark:text-teal-400', bg: 'bg-teal-500/10' },
   Gauge: { color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-500/10' },
   Flame: { color: 'text-violet-500 dark:text-violet-400', bg: 'bg-violet-500/10' },
+  Droplet: { color: 'text-sky-500 dark:text-sky-400', bg: 'bg-sky-500/10' },
   Cable: { color: 'text-cyan-500 dark:text-cyan-400', bg: 'bg-cyan-500/10' },
   Sun: { color: 'text-yellow-500 dark:text-yellow-400', bg: 'bg-yellow-500/10' },
   TrendingUp: { color: 'text-primary dark:text-primary-foreground', bg: 'bg-primary/10' },
@@ -79,6 +84,8 @@ type LiveGrid = {
     byFuel: {
       gasMw: number;
       coalMw: number;
+      liquidMw: number | null;
+      hydroMw: number | null;
       solarMw: number | null;
       windMw: number | null;
     };
@@ -233,6 +240,8 @@ const SHORT_LABELS: Record<string, string> = {
   'Yesterday Peak Gen': 'Y-day peak',
   'Gas Generation': 'Gas gen',
   'Coal Generation': 'Coal gen',
+  'Liquid Fuel': 'Liquid',
+  Hydro: 'Hydro',
   'Grid Import': 'Import',
   'Solar + Wind': 'Solar+wind',
   'Gas Supply': 'Gas supply',
@@ -275,6 +284,13 @@ function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening
       return live.reconciles === false ? null : live.latest.byFuel.gasMw;
     case 'Coal Generation':
       return live.reconciles === false ? null : live.latest.byFuel.coalMw;
+    // Nullable where gas and coal are not: NLDC has printed the two thermal
+    // columns for the whole life of the page and these two can be blank, so an
+    // hour without them is absent rather than a grid running on neither.
+    case 'Liquid Fuel':
+      return live.reconciles === false ? null : live.latest.byFuel.liquidMw;
+    case 'Hydro':
+      return live.reconciles === false ? null : live.latest.byFuel.hydroMw;
     case 'Grid Import':
       return live.reconciles === false ? null : live.latest.imports.totalMw;
     // Solar and wind are summed over whichever of the two NLDC printed, never

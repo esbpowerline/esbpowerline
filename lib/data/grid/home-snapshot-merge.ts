@@ -33,28 +33,29 @@ export interface SnapshotSlotSpec {
 }
 
 export const SNAPSHOT_SLOTS: readonly SnapshotSlotSpec[] = [
-  // Instantaneous demand exists only on the NLDC hourly page. No daily report
-  // publishes it, so with the live feed down this tile is genuinely waiting —
-  // it must not borrow the evening peak, which is a different quantity
-  // measured at a different moment. (`Peak Demand` below carries that.)
-  { label: 'Current Demand', unit: POWER_UNIT, icon: 'Activity', source: 'NLDC', liveBacked: true },
-  // NLDC, not PGCB, and current rather than peak. Both are read straight off
-  // the hourly pages: supply from the demand/supply table, generation from the
-  // printed total on the generation table. The daily report has no figure for
-  // either, so with the live feed down they say who they are waiting on.
-  { label: 'Current Supply', unit: POWER_UNIT, icon: 'TrendingUp', source: 'NLDC', liveBacked: true },
-  { label: 'Current Generation', unit: POWER_UNIT, icon: 'Zap', source: 'NLDC', liveBacked: true },
-  // PGCB's forecast board, not the daily workbook: today's demand forecast and
-  // yesterday's actual peaks, both as evening peak with the day peak alongside.
-  { label: 'Forecast Demand', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB', liveBacked: true },
-  { label: 'Load Shedding', unit: POWER_UNIT, icon: 'Activity', source: 'PGCB', liveBacked: true },
+  // The panel's twelve, in reading order: what the grid managed yesterday, what
+  // is expected of it today, what it is being asked for and delivering now,
+  // what is going unmet, and then what the generation is made of.
+  //
+  // Gas Supply and Production Cost are no longer here. The gas window is filed
+  // a day or two behind PGCB, so that tile was a dash most mornings, and the
+  // cost is derived over a closed day — neither belongs on a noticeboard. Both
+  // are still built, and the Grid Explorer's dated pages still print them.
   { label: 'Yesterday Peak Gen', unit: POWER_UNIT, icon: 'Gauge', source: 'PGCB', liveBacked: true },
+  { label: 'Forecast Demand', unit: POWER_UNIT, icon: 'TrendingUp', source: 'PGCB', liveBacked: true },
+
+  { label: 'Current Demand', unit: POWER_UNIT, icon: 'Activity', source: 'NLDC', liveBacked: true },
+  { label: 'Current Supply', unit: POWER_UNIT, icon: 'TrendingUp', source: 'NLDC', liveBacked: true },
+  { label: 'Load Shedding', unit: POWER_UNIT, icon: 'Activity', source: 'PGCB', liveBacked: true },
+  { label: 'Current Generation', unit: POWER_UNIT, icon: 'Zap', source: 'NLDC', liveBacked: true },
+
+  // These six sum to Current Generation above them.
   { label: 'Gas Generation', unit: POWER_UNIT, icon: 'Flame', source: 'PGCB', liveBacked: true },
   { label: 'Coal Generation', unit: POWER_UNIT, icon: 'Flame', source: 'PGCB', liveBacked: true },
+  { label: 'Liquid Fuel', unit: POWER_UNIT, icon: 'Flame', source: 'NLDC', liveBacked: true },
+  { label: 'Hydro', unit: POWER_UNIT, icon: 'Droplet', source: 'NLDC', liveBacked: true },
   { label: 'Grid Import', unit: POWER_UNIT, icon: 'Cable', source: 'PGCB', liveBacked: true },
   { label: 'Solar + Wind', unit: POWER_UNIT, icon: 'Sun', source: 'PGCB', liveBacked: true },
-  { label: 'Gas Supply', unit: 'MMCFD', icon: 'Flame', source: 'Petrobangla' },
-  { label: 'Production Cost', unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge', source: 'PGCB' },
 ] as const;
 
 /** The tiles the NLDC hourly overlay can carry on its own. */

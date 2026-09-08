@@ -77,19 +77,21 @@ describe('mergeHomeSnapshot', () => {
   });
 
   it('carries a real figure through unchanged', () => {
-    const slots = mergeHomeSnapshot([stat('Production Cost', 7.55)]);
-    const peak = slots.find((s) => s.label === 'Production Cost');
-    expect(peak?.value).toBe(7.55);
+    const slots = mergeHomeSnapshot([stat('Load Shedding', 2216)]);
+    const peak = slots.find((s) => s.label === 'Load Shedding');
+    expect(peak?.value).toBe(2216);
     expect(peak?.awaiting).toBeUndefined();
   });
 
   it('preserves an explicit awaiting from the builder', () => {
+    // Gas Supply left the panel, so a slot that can carry an explicit
+    // `awaiting` from the builder is now one of the NLDC-backed fuels.
     const slots = mergeHomeSnapshot([
-      stat('Gas Supply', null, { unit: 'MMCFD', awaiting: 'Petrobangla' }),
+      stat('Hydro', null, { unit: 'MW', awaiting: 'NLDC' }),
     ]);
-    const gas = slots.find((s) => s.label === 'Gas Supply');
-    expect(gas?.value).toBeNull();
-    expect(gas?.awaiting).toBe('Petrobangla');
+    const hydro = slots.find((s) => s.label === 'Hydro');
+    expect(hydro?.value).toBeNull();
+    expect(hydro?.awaiting).toBe('NLDC');
   });
 
   it('always renders twelve slots, however little the sources have filed', () => {
@@ -108,14 +110,16 @@ describe('mergeHomeSnapshot', () => {
     // no others — a label listed here but missing there waits forever.
     expect(LIVE_BACKED_LABELS).toEqual(
       new Set([
+        'Yesterday Peak Gen',
+        'Forecast Demand',
         'Current Demand',
         'Current Supply',
-        'Current Generation',
-        'Forecast Demand',
-        'Yesterday Peak Gen',
         'Load Shedding',
+        'Current Generation',
         'Gas Generation',
         'Coal Generation',
+        'Liquid Fuel',
+        'Hydro',
         'Grid Import',
         'Solar + Wind',
       ]),

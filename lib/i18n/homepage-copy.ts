@@ -29,6 +29,8 @@ const ENERGY_STAT_LABELS_BN: Record<string, string> = {
   'RE Grid Share': 'নবায়নযোগ্য গ্রিড অংশ',
   'System Loss': 'সিস্টেম লস',
   'Gas Supply': 'গ্যাস সরবরাহ',
+  'Liquid Fuel': 'তরল জ্বালানি',
+  'Hydro': 'জলবিদ্যুৎ',
   'Forecast Demand': 'চাহিদার পূর্বাভাস',
   'Yesterday Peak Gen': 'গতকালের সর্বোচ্চ উৎপাদন',
   'Current Supply': 'বর্তমান সরবরাহ',

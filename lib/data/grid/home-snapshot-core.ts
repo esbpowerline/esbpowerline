@@ -76,22 +76,33 @@ export interface HomeSnapshotStat {
  * reverse would be a bug, and the merge test pins that direction.
  */
 export const DAILY_SNAPSHOT_LABELS = [
+  // The panel's twelve, in the order a reader asks the questions: what the grid
+  // managed yesterday, what is expected of it today, what it is being asked for
+  // and delivering right now, what is going unmet — and only then what the
+  // generation is made of.
+  'Yesterday Peak Gen',
+  'Forecast Demand',
   'Current Demand',
   'Current Supply',
-  'Current Generation',
-  'Forecast Demand',
   'Load Shedding',
-  'Yesterday Peak Gen',
+  'Current Generation',
+  // The mix, which sums to Current Generation above it. Every fuel NLDC prints
+  // is here now: liquid is the third largest source on most hours and was not
+  // on the panel at all, and hydro completes the set. A reader can add the six
+  // tiles below and get the tile above them, which is a property worth having
+  // on a page that asks to be trusted with figures.
   'Gas Generation',
   'Coal Generation',
+  'Liquid Fuel',
+  'Hydro',
   'Grid Import',
   'Solar + Wind',
-  'Gas Supply',
-  'Production Cost',
-  // Archive-grade, and NOT on the homepage panel — see the note above. Last in
-  // the list because the twelve before them are the panel's, in panel order.
+  // Archive-grade, and NOT on the panel. The Grid Explorer's dated pages read
+  // this list directly and print all four under their own names.
   'Daily Generation',
   'Energy Unserved',
+  'Gas Supply',
+  'Production Cost',
 ] as const;
 
 export type DailySnapshotLabel = (typeof DAILY_SNAPSHOT_LABELS)[number];
@@ -232,78 +243,71 @@ export function buildHomeSnapshotFromDaily(
     // evening and day peaks, and the Grid Explorer prints the evening figure
     // under its own name. Here the honest answer on a day with no live feed is
     // that nobody has published a current demand, which is what `awaiting` says.
-    tile('Current Demand', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Activity' }),
-    // Both are `awaiting('NLDC')` here for the same reason `Current Demand`
-    // above is: a CURRENT figure exists only on the hourly page. The daily
-    // report publishes peaks — a maximum over the day, at an instant PGCB
-    // names — and printing one under a tile called "Current Generation" would
-    // be the substitution rule 2 of the doctrine forbids: a different quantity
-    // under an unchanged label.
+    // ── what happened, and what is expected ────────────────────────────
     //
-    // The peaks are not lost. `describeDay` reads them off the day's own
-    // `systemStats` now rather than off these tiles, and the Grid Explorer
-    // prints the evening and day peaks under their own names.
-    tile('Current Supply', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'TrendingUp' }),
-    tile('Current Generation', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Zap' }),
-    // `GridSystemStats.totalEnergyGen` is explicitly nullable and says why:
-    // PGCB leaves the cell empty on some days, and 42 days of early 2018
-    // published a headline "0.0 MKWh" as a result. This read `== null ? 0`,
-    // reintroducing on the homepage exactly the zero the parser refuses to
-    // invent. Zero national generation is a claim no report has ever made —
-    // and with `Figure` it is a claim this function can no longer make by
-    // accident, because there is no `?? 0` that type-checks.
-    //
-    // Stays a day quantity. NLDC posts power, not energy, and the live
-    // snapshot's own `hours` window is the last 24 POSTED rows rather than 24
-    // hours — averaging it and calling the result a daily figure is exactly
-    // what that field's comment forbids.
-    // Both of the tiles that replaced Daily Generation and Energy Unserved come
-    // off PGCB's forecast board, which is HTML on a daily cadence — so they are
-    // `awaiting('PGCB')` here for the same reason the three NLDC tiles are
+    // Both come off PGCB's forecast board — HTML on a daily cadence — so they
+    // are `awaiting('PGCB')` here for the same reason the NLDC tiles are
     // `awaiting('NLDC')`: the daily workbook does not carry them in this shape.
-    //
-    // The two figures they replaced are not lost and were not wrong. A day's
-    // total energy and its unserved energy are archive quantities — the Grid
-    // Explorer prints both, under their own names, against the day they belong
-    // to. What they are not is noticeboard figures: this panel answers "what is
-    // happening now, and what is expected", and an integral over a day that
-    // closed yesterday answers neither.
-    tile('Forecast Demand', awaiting('PGCB'), { unit: POWER_UNIT, icon: 'TrendingUp' }),
-    tile('Load Shedding', loadShedding, { unit: POWER_UNIT, icon: 'Activity' }),
-    // Never shown as zero on days whose report does not publish unserved
-    // energy — a homepage tile reading "0 MW" would assert that no load was
-    // shed, which is not what an absent figure means.
     tile('Yesterday Peak Gen', awaiting('PGCB'), { unit: POWER_UNIT, icon: 'Gauge' }),
-    // Gas BURNED FOR POWER, which is not the Gas Supply tile below and must
-    // never be swapped for it. That substitution is the sharpest incident in
-    // the repo: the power sector's slice is about a third of national
-    // production, and standing in for it printed a 64% collapse that was only
-    // a change of source. Two tiles, two quantities, two names.
+    tile('Forecast Demand', awaiting('PGCB'), { unit: POWER_UNIT, icon: 'TrendingUp' }),
+
+    // ── what is happening now ──────────────────────────────────────────
+    //
+    // All four are `awaiting('NLDC')`: a CURRENT figure exists only on the
+    // hourly page. The daily report publishes peaks — a maximum over the day,
+    // at an instant PGCB names — and printing one under a tile called "Current
+    // Generation" would be the substitution rule 2 forbids: a different
+    // quantity under an unchanged label. Load Shedding is the exception, being
+    // the one figure here the workbook also states for the day.
+    tile('Current Demand', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Activity' }),
+    tile('Current Supply', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'TrendingUp' }),
+    tile('Load Shedding', loadShedding, { unit: POWER_UNIT, icon: 'Activity' }),
+    tile('Current Generation', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Zap' }),
+
+    // ── what that generation is made of ────────────────────────────────
+    //
+    // The six below sum to Current Generation above them, which is the whole
+    // reason every fuel NLDC prints is now here: liquid runs third behind coal
+    // and gas on most hours and was not on the panel at all, and hydro closes
+    // the set. A panel whose parts add up to its own headline is one a reader
+    // can check.
+    //
+    // Gas BURNED FOR POWER, which is not the Gas Supply tile and must never be
+    // swapped for it. That substitution is the sharpest incident in the repo:
+    // the power sector's slice is about a third of national production, and
+    // standing in for it printed a 64% collapse that was only a change of
+    // source. Two tiles, two quantities, two names.
     tile('Gas Generation', gasGeneration, { unit: POWER_UNIT, icon: 'Flame' }),
     tile('Coal Generation', coalGeneration, { unit: POWER_UNIT, icon: 'Flame' }),
+    tile('Liquid Fuel', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Flame' }),
+    tile('Hydro', awaiting('NLDC'), { unit: POWER_UNIT, icon: 'Droplet' }),
     tile('Grid Import', gridImport, { unit: POWER_UNIT, icon: 'Cable' }),
     // Renewable OUTPUT, not installed capacity. NLDC's solar and wind columns
     // are the youngest on the page — 78.8% and 28.8% of stored hours carry
     // them, because the columns postdate most of the archive. An hour without
     // them is absent, not a night with no sun.
     tile('Solar + Wind', renewableGeneration, { unit: POWER_UNIT, icon: 'Sun' }),
-    // Petrobangla files its 08:00-08:00 window a day or two behind PGCB, so the
-    // newest day routinely has grid figures and no gas. That is the ordinary
-    // state, not an outage, and `awaiting` is what says so on the tile.
-    tile('Gas Supply', gasSupply, { unit: 'MMCFD', icon: 'Flame' }),
-    tile('Production Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
-    // Still built, still published, just not on the noticeboard.
+
+    // ── archive-grade, and NOT on the panel ────────────────────────────
     //
-    // A day's total generation and its unserved energy are archive quantities:
-    // integrals over a day that has closed. The Grid Explorer's dated pages
-    // read this list directly (`archive-day.server.ts`) and print both under
-    // their own names, which is where a reader comparing days wants them. The
-    // homepage panel takes its twelve from `SNAPSHOT_SLOTS` and does not
-    // include them, so the two lists are no longer the same list — that is
-    // deliberate, and the test that used to pin them equal now pins the
-    // narrower relationship instead.
+    // Still built and still published; the Grid Explorer's dated pages read
+    // this list directly (`archive-day.server.ts`) and print all four under
+    // their own names, which is where a reader comparing days wants them.
+    //
+    // Gas Supply and Production Cost left the noticeboard last: Petrobangla
+    // files its 08:00-08:00 window a day or two behind PGCB, so that tile was a
+    // dash on most mornings, and the cost is a derived figure (marked D) over a
+    // day that has closed. Neither answers "what is happening now".
+    //
+    // `totalEnergyGen` is explicitly nullable and says why: PGCB leaves the
+    // cell empty on some days, and 42 days of early 2018 published a headline
+    // "0.0 MKWh" as a result. Zero national generation is a claim no report has
+    // ever made, and with `Figure` it is one this function can no longer make
+    // by accident.
     tile('Daily Generation', dailyGeneration, { unit: POWER_UNIT, icon: 'TrendingUp' }),
     tile('Energy Unserved', energyUnserved, { unit: POWER_UNIT, icon: 'Gauge' }),
+    tile('Gas Supply', gasSupply, { unit: 'MMCFD', icon: 'Flame' }),
+    tile('Production Cost', fuelCost, { unit: 'Tk/kWh', isDecimal: true, icon: 'Gauge' }),
   ];
 
   // SREDA no longer appears in the snapshot. `buildSredaSnapshotStats` is kept

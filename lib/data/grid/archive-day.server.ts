@@ -48,6 +48,9 @@ const LIVE_ONLY_LABELS = new Set([
   // day that closed years ago, so these two would be permanent dashes here.
   'Forecast Demand',
   'Yesterday Peak Gen',
+  // Fuel columns NLDC prints hourly; the workbook has no equivalent row.
+  'Liquid Fuel',
+  'Hydro',
 ]);
 
 export interface ArchiveFuelRow {
