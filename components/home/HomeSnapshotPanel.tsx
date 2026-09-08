@@ -11,7 +11,6 @@ import { formatNumber } from '@/lib/utils';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
 import { LIVE_BACKED_LABELS, mergeHomeSnapshot, type SnapshotSlot } from '@/lib/data/grid/home-snapshot-merge';
-import { sourceSiteFor } from '@/lib/data/grid/source-sites';
 
 const IconMap: Record<string, any> = {
   Zap,
@@ -111,12 +110,49 @@ const LIVE_POLL_MS = 15 * 60 * 1000;
  * shout louder than a source line should. An agency `source-sites.ts` has no
  * URL for stays plain text: a guessed link is a fabricated citation.
  */
-function SourceCredits({ text }: { text: string }) {
-  const agencies = text.split(/\s*•\s*/).filter(Boolean);
+/**
+ * The pages this panel actually reads, each linked to itself.
+ *
+ * It used to render a string from site settings — "BPDB • PGCB • SREDA •
+ * Petrobangla" — and a settings string cannot know what the tiles do. By the
+ * time Gas Supply left the panel it was crediting three organisations whose
+ * data appears on it nowhere, and `sourceSiteFor` sent the two that remained to
+ * their corporate homepages rather than to the tables the figures came from.
+ *
+ * Credited by PAGE, not by organisation. All three are PGCB's, and naming the
+ * organisation three times would say less than naming what each one carries;
+ * more to the point, a reader following a credit wants the table, not a
+ * masthead they then have to navigate away from. These are the exact URLs
+ * `live-grid.server.ts` fetches — if a tile's source moves, this moves with it
+ * or the panel is crediting a page it does not read.
+ */
+const SNAPSHOT_SOURCES: ReadonlyArray<{ name: string; bn: string; href: string; carries: string }> = [
+  {
+    name: 'NLDC generation',
+    bn: 'এনএলডিসি উৎপাদন',
+    href: 'https://erp.powergrid.gov.bd/w/generations/view_generations_bn',
+    carries: 'hourly generation total and the fuel mix',
+  },
+  {
+    name: 'NLDC demand',
+    bn: 'এনএলডিসি চাহিদা',
+    href: 'https://erp.powergrid.gov.bd/web/generations/view_demand_supply_loadshed_bn',
+    carries: 'hourly demand, supply and load shed',
+  },
+  {
+    name: 'PGCB forecast',
+    bn: 'পিজিসিবি পূর্বাভাস',
+    href: 'https://erp.powergrid.gov.bd/w/forecasts/show_forecasts_bn',
+    carries: "today's demand forecast and yesterday's peaks",
+  },
+];
+
+function SourceCredits({ locale }: { locale: string }) {
+  const agencies = SNAPSHOT_SOURCES.map((src) => (locale === 'bn' ? src.bn : src.name));
   return (
     <span className="home-snapshot-segment__sources-text">
       {agencies.map((agency, idx) => {
-        const href = sourceSiteFor(agency);
+        const href = SNAPSHOT_SOURCES[idx].href;
         const style = 'text-muted-foreground/90 font-medium italic';
         return (
           <span key={`${agency}-${idx}`}>
@@ -126,7 +162,7 @@ function SourceCredits({ text }: { text: string }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={`${style} underline-offset-2 transition-colors hover:text-primary hover:underline`}
-                title={`Open ${agency} — check these figures at the source`}
+                title={`${agency} — ${SNAPSHOT_SOURCES[idx].carries}. Opens the page these figures are read from.`}
               >
                 {agency}
               </a>
@@ -650,8 +686,10 @@ function SnapshotSegment({
     .split(/\s*•\s*/)
     .map((part) => part.trim())
     .filter(Boolean);
-  const [liveWord, ...agencies] = parts;
-  const sourcesText = agencies.join(' • ');
+  // Only the leading word is still taken from the settings label. The source
+  // credits are `SNAPSHOT_SOURCES` now, so a string in the database can no
+  // longer disagree with what the tiles read.
+  const [liveWord] = parts;
 
   // With live tiles on the panel, a bare "Updated <daily date>" undersells the
   // hourly half and reads as stale next to a tile stamped with today's hour.
@@ -773,30 +811,29 @@ function SnapshotSegment({
           />
         </div>
 
-        {sourcesText || live ? (
-          <footer className="home-snapshot-segment__foot">
-            {/* The badge sits with the sources, at their size, because that is
-                what it is: a statement about where the figures came from. In
-                the header it competed with the two cadence stamps for the meta
-                column and pushed the tile grid down; here it costs no height
-                the footer was not already spending.
+        {/* The panel always has sources — they are the pages it is built from. */}
+        <footer className="home-snapshot-segment__foot">
+          {/* The badge sits with the sources, at their size, because that is
+              what it is: a statement about where the figures came from. In
+              the header it competed with the two cadence stamps for the meta
+              column and pushed the tile grid down; here it costs no height
+              the footer was not already spending.
 
-                It renders only while an NLDC hourly reading is actually loaded.
-                It used to render unconditionally from the settings string,
-                putting a pulsing "Live" over a panel where most tiles were
-                daily or standing-register figures (audit 2026-09-01). */}
-            {live ? (
-              <span className="home-snapshot-segment__live">
-                <span className="home-snapshot-segment__live-dot" aria-hidden>
-                  <span className="home-snapshot-segment__live-ping" />
-                  <span className="home-snapshot-segment__live-core" />
-                </span>
-                {liveWord}
+              It renders only while an NLDC hourly reading is actually loaded.
+              It used to render unconditionally from the settings string,
+              putting a pulsing "Live" over a panel where most tiles were
+              daily or standing-register figures (audit 2026-09-01). */}
+          {live ? (
+            <span className="home-snapshot-segment__live">
+              <span className="home-snapshot-segment__live-dot" aria-hidden>
+                <span className="home-snapshot-segment__live-ping" />
+                <span className="home-snapshot-segment__live-core" />
               </span>
-            ) : null}
-            <SourceCredits text={sourcesText} />
-          </footer>
-        ) : null}
+              {liveWord}
+            </span>
+          ) : null}
+          <SourceCredits locale={locale} />
+        </footer>
       </div>
     </section>
   );
@@ -821,8 +858,6 @@ export function HomeSnapshotPanel({
     .split(/\s*•\s*/)
     .map((part) => part.trim())
     .filter(Boolean);
-  const [, ...agencies] = parts;
-  const sourcesText = agencies.join(' • ');
   const headerDateToUse =
     snapshotHeaderDate ?? formatSnapshotHeaderDate(snapshotDate, locale);
 
@@ -864,19 +899,17 @@ export function HomeSnapshotPanel({
         <EnergyDashboard initialStats={snapshotStats as never} compact fillHeight={false} />
       </div>
 
-      {sourcesText && (
-        <div className="flex-shrink-0 pt-3 border-t border-border/10 dark:border-border/20 mt-2 relative z-10">
-          <div className="flex flex-col items-end w-full gap-0.5 text-[9px] xs:text-[10px] md:text-[11px] text-muted-foreground font-mono font-medium italic opacity-75 text-right">
-            <div className="flex items-center justify-end gap-1 w-full whitespace-nowrap">
-              <span className="font-semibold text-foreground/50 tracking-wider not-italic">{locale === 'bn' ? 'তথ্য সূত্র:' : 'DATA:'}</span>
-              {/* Same credits, same links. This is the non-segment layout; both
-                  render sites go through SourceCredits so a new agency needs one
-                  entry in source-sites.ts and nothing else. */}
-              <SourceCredits text={sourcesText} />
-            </div>
+      <div className="flex-shrink-0 pt-3 border-t border-border/10 dark:border-border/20 mt-2 relative z-10">
+        <div className="flex flex-col items-end w-full gap-0.5 text-[9px] xs:text-[10px] md:text-[11px] text-muted-foreground font-mono font-medium italic opacity-75 text-right">
+          <div className="flex items-center justify-end gap-1 w-full whitespace-nowrap">
+            <span className="font-semibold text-foreground/50 tracking-wider not-italic">{locale === 'bn' ? 'তথ্য সূত্র:' : 'DATA:'}</span>
+            {/* Same credits, same links. This is the non-segment layout; both
+                render sites go through SourceCredits so a new agency needs one
+                entry in source-sites.ts and nothing else. */}
+            <SourceCredits locale={locale} />
           </div>
         </div>
-      )}
+      </div>
     </section>
   );
 }
