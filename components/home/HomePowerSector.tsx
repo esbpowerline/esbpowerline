@@ -179,6 +179,9 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
     if (trackRef.current) {
       trackRef.current.style.transition = 'none';
     }
+    // The drag state lives in a ref, not in state, so the rail never re-renders
+    // mid-gesture. The attribute is the only way the stylesheet can see it.
+    containerRef.current?.setAttribute('data-dragging', 'true');
   };
 
   const handleDragMove = (clientX: number) => {
@@ -198,6 +201,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
   const handleDragEnd = () => {
     if (!isDraggingRef.current || !trackRef.current) return;
     isDraggingRef.current = false;
+    containerRef.current?.removeAttribute('data-dragging');
 
     trackRef.current.style.transition = 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)';
 

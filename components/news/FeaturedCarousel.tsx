@@ -100,6 +100,11 @@ export function FeaturedCarousel({
   const [current, setCurrent] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  // Which way the rotation just went, +1 forward and -1 back. The trio's exit
+  // and entrance carry a small horizontal component off this, so a reader can
+  // see the direction of travel; without it three columns fading up look the
+  // same whether you pressed the third tab or the first.
+  const [dir, setDir] = useState(1);
   const transitionTimeout = useRef<NodeJS.Timeout | null>(null);
   const currentRef = useRef(current);
 
@@ -107,16 +112,21 @@ export function FeaturedCarousel({
     currentRef.current = current;
   }, [current]);
 
-  const goTo = useCallback((index: number) => {
+  // `explicitDir` exists for the wrap: advancing from the last slide to the
+  // first is forward even though the index goes down, and inferring direction
+  // from the numbers alone made the final tick of every rotation reverse.
+  const goTo = useCallback((index: number, explicitDir?: 1 | -1) => {
     if (transitionTimeout.current) clearTimeout(transitionTimeout.current);
 
+    setDir(explicitDir ?? (index < currentRef.current ? -1 : 1));
     setIsTransitioning(true);
     transitionTimeout.current = setTimeout(() => {
       setCurrent(index);
 
       setIsTransitioning(false);
-      // 560ms matches the .is-swapping exit transition in globals.css — the
-      // swap must not happen while the outgoing trio is still on its way out.
+      // 560ms is the exit's 400ms transition plus the 80ms-per-column stagger
+      // the third column waits out (globals.css, featured-hero-story-in). The
+      // swap must not happen while a column is still on its way out.
     }, 560);
   }, []);
 
@@ -132,11 +142,11 @@ export function FeaturedCarousel({
   const slideCount = Math.max(1, Math.ceil(featured.length / PER_SLIDE));
 
   const next = useCallback(() => {
-    goTo((currentRef.current + 1) % slideCount);
+    goTo((currentRef.current + 1) % slideCount, 1);
   }, [slideCount, goTo]);
 
   const prev = useCallback(() => {
-    goTo((currentRef.current - 1 + slideCount) % slideCount);
+    goTo((currentRef.current - 1 + slideCount) % slideCount, -1);
   }, [slideCount, goTo]);
 
   useEffect(() => {
@@ -259,7 +269,7 @@ export function FeaturedCarousel({
                   key={`${current}-${item.slug}`}
                   href={`/articles/${item.slug}`}
                   className={`featured-hero__story group ${isTransitioning ? 'is-swapping' : ''}`}
-                  style={{ '--story-i': i } as React.CSSProperties}
+                  style={{ '--story-i': i, '--hero-dir': dir } as React.CSSProperties}
                 >
                   {/* One editorial column: chip and index, the whole artwork
                       at its full 16:9, the headline, and a byline pinned to
