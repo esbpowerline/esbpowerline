@@ -87,13 +87,12 @@ def held(subdir: str) -> set[str]:
 def held_gas_documents() -> set[str]:
     """The Petrobangla PDFs the gas archive already cites, by listing key.
 
-    Asked because a listing slot is not an energy day. `gas_days_published()`
-    maps a slot to slot-minus-one, which is right whenever Petrobangla files
-    every slot and wrong the moment it skips one: it skipped 06.09.26, so the
-    report under 07.09.26 is the 05->06 Sep window and belongs to energy day
-    2026-09-05. Keyed on days alone the watcher then asks forever for a
-    2026-09-06 that the listing cannot produce, spending MAX_ATTEMPTS chain
-    runs on it before backing off.
+    Asked because a listing slot is not an energy day. `gas_slot_candidates()`
+    offers a slot's two plausible days, because Petrobangla does not file every
+    slot: it skipped 06.09.26, so the report under 07.09.26 is the 05->06 Sep
+    window and belongs to energy day 2026-09-05. Keyed on days alone the
+    watcher asks forever for a 2026-09-06 that the listing cannot produce,
+    spending MAX_ATTEMPTS chain runs on it before backing off.
 
     Each gas day records the document it was parsed from, and Petrobangla's own
     filename carries the slot ("...Report (07.09.26).pdf"). So the honest
@@ -211,22 +210,38 @@ def _erp_has(day: date, report_date: date, span: int = 2) -> str | None:
     return None
 
 
-def gas_days_published() -> dict[str, str]:
-    """Energy day -> listing key, for every gas report Petrobangla is serving.
+def gas_slot_candidates() -> list[tuple[str, str]]:
+    """(energy day, listing key) pairs a slot could be holding, newest slot last.
 
     The listing labels a report by the END of its 08:00→08:00 window and the
-    archive keys it by the START — download.py says the same thing where it
-    resolves the URL — so the energy day is the listed date minus one. Getting
-    this backwards files one day's gas against another day's grid.
+    archive keys it by the START, so the obvious rule is "energy day = listed
+    date minus one" — and that rule is right only while Petrobangla files every
+    slot. It does not. It skipped 06.09.26, and on 2026-09-08 it was serving
+    slot 07.09.26 holding the 04→05 window and slot 08.09.26 holding 05→06:
+    every slot one day further behind than its label implies.
+
+    Under minus-one the watcher then asked, every fifteen minutes, for energy
+    day 2026-09-07 — which no document in the listing states — burnt its four
+    attempts on it and backed off, while the gas for the 6th sat in that same
+    listing and was never once requested. Two slots therefore, K-1 and K-2, and
+    the day nobody holds is the one worth handing to the chain.
+
+    This deliberately does NOT fetch the PDFs to find out which is true. The
+    watcher's whole economy is one listing fetch per tick, and it does not need
+    to know: `download_petrobangla` reads each candidate document's own header
+    and accepts it only if it states the day asked for. A slot is a hint about
+    where to look; the document is the only thing that says what it holds.
     """
     from daily_extractor.download import petrobangla_report_index
 
-    out: dict[str, str] = {}
-    for key in petrobangla_report_index():
+    out: list[tuple[str, str]] = []
+    for key in sorted(petrobangla_report_index()):
         try:
-            out[(date.fromisoformat(key) - timedelta(days=1)).isoformat()] = key
+            listed = date.fromisoformat(key)
         except ValueError:
             continue
+        for back in (1, 2):
+            out.append(((listed - timedelta(days=back)).isoformat(), key))
     return out
 
 
@@ -279,14 +294,20 @@ def main() -> int:
 
     # Petrobangla, asked independently: a window filed late still belongs to the
     # day it opened on, however far back that day now is.
-    published_gas = gas_days_published()
+    published_gas = gas_slot_candidates()
     if not published_gas:
         notes.append("Petrobangla listing unreadable — gas unchecked this tick")
     # Slots whose document the archive already cites, whatever day it landed on.
     taken = held_gas_documents()
-    for day, key in sorted(published_gas.items()):
+    seen_days: set[str] = set()
+    for day, key in published_gas:
         if key in taken:
             continue
+        # A day reachable from two slots is asked for once, under the earlier
+        # slot — the one whose document is more likely to state it.
+        if day in seen_days:
+            continue
+        seen_days.add(day)
         d = date.fromisoformat(day)
         if not (newest_possible - timedelta(days=LOOKBACK_GAS - 1) <= d <= newest_possible):
             continue

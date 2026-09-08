@@ -295,12 +295,22 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
     # that was asked for. A near-miss slot is a hint about where to look, never
     # a claim about what it holds — that distinction is the whole lesson of the
     # 2026-09-07 mis-filing.
+    # The exact slot first, THEN the days after it — not "or". This read
+    #     candidates = [listing_key] if listing_key in index else []
+    #     if not candidates: <the following slots>
+    # so the search past the exact slot ran only when that slot was missing
+    # entirely. The case it was written for is the opposite one: on 2026-09-08
+    # Petrobangla was serving slot 07.09.26 holding the 04->05 window and slot
+    # 08.09.26 holding 05->06, so a run asking for energy day 2026-09-06 found
+    # its exact slot present, fetched it, correctly rejected it on the header —
+    # and stopped, one slot short of the document that did state the day. Gas
+    # for the 6th sat in the listing unfetched through four scheduled polls and
+    # about thirty watcher ticks.
     candidates = [listing_key] if listing_key in index else []
-    if not candidates:
-        for ahead in range(1, 4):
-            k = (energy + timedelta(days=1 + ahead)).isoformat()
-            if k in index:
-                candidates.append(k)
+    for ahead in range(1, 4):
+        k = (energy + timedelta(days=1 + ahead)).isoformat()
+        if k in index:
+            candidates.append(k)
 
     for key in candidates:
         url = index[key]
@@ -335,6 +345,16 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
                 # A real document, for a different day. It stays on disk — the
                 # day it does cover may want it — but it is not handed to a run
                 # that asked for another window.
+                #
+                # A slot stating a LATER window ends the search. Petrobangla's
+                # slots and the windows inside them advance together, so once a
+                # candidate has passed the day being asked for, no slot further
+                # down the listing holds it. That is what keeps a day the
+                # publisher has genuinely not filed to one fetch rather than
+                # four: the common failing case, retried every fifteen minutes
+                # by the watcher, against 776 KB PDFs.
+                if stated > energy:
+                    break
                 continue
             (dest_dir / "petrobangla_latest.txt").write_text(text, encoding="utf-8")
             return dest, url
