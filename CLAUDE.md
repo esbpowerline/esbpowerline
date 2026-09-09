@@ -19,10 +19,41 @@ no port is forwarded and nothing of the Pi's is public.
 
 ---
 
+## Where the repo lives
+
+**`github.com/esbpowerline/esbpowerline`**, in the `esbpowerline` organization, since
+2026-09-09. It was `chiefhamim/esbpowerline`; GitHub redirects the old path for HTTPS git
+operations, but **deploy keys do not follow the redirect**, so anything authenticating with
+one needs its remote updated. Billing email is esbplbd@gmail.com. `chiefhamim` is the only
+org owner and `YeasinFiyaz` is a member with Write on this repo.
+
+**The transfer broke the Pi, silently, and the failure is worth recognising.** A new
+organization has deploy keys **disabled** by default
+(`deploy_keys_enabled_for_repositories`). The Pi's key came across with the repo and still
+authenticated — `ssh -T git@github.com` answered `Hi esbpowerline/esbpowerline!` — while
+every actual git operation returned `ERROR: Repository not found`. Auth succeeding and
+access failing look nothing alike in the logs, and no runner alerts on it. Fixed by
+enabling the org setting and re-registering the key; if it recurs, that pair of symptoms is
+the fingerprint.
+
+**Branch protection is still unavailable.** The org is on the Free plan, and rulesets and
+protected branches on a PRIVATE repo need Team ($4/user/mo) — moving from a personal
+account to a free org changed nothing here. So `main` is pushable by anyone with Write, and
+`main` auto-deploys production. The only thing standing between a collaborator and the live
+site is convention. Tested directly on 2026-09-09: both the classic protection API and the
+rulesets API return `403 Upgrade to GitHub Pro or make this repository public`.
+
 ## Branch
 
 Work happens on **`authenticating`**, not `main`. The name is historical; it stopped being
 an auth branch long ago and now carries the grid/ingest/CMS work.
+
+`yeasin` was branched off `authenticating` on 2026-09-09 for a second developer. It is
+opted out of Vercel deploys in `vercel.json` beside `authenticating` — a preview build runs
+`migrate-deploy-prod.mjs`, so an unprotected feature branch could otherwise move production's
+schema as a side effect of someone saving their work. Vercel reads `vercel.json` from the
+commit it is about to build, so that opt-out only works while it exists **on the branch
+itself**.
 
 **As of 2026-09-05 `main` == `authenticating` (`a9f33ef5`)** — the two are level and every
 merge so far has been a clean fast-forward. Keep it that way: `git push origin
@@ -606,11 +637,13 @@ poll `git reset --hard`s the tree.
 The four cron slots stay. They are the backstop for anything the watcher missed, and the
 only thing that runs the trailing window.
 
-GitHub Actions was tried first and **removed** (2026-09-03): every dispatch on this
-account ends in `startup_failure` — including a one-line `echo` workflow, so the block
-is account-level, not the file — and each scheduled tick emailed Hamim a failure. The
-workflow and its `DATABASE_URL` secret are deleted; do not re-add an Actions job
-without checking the account block is lifted. The Pi is the better host anyway — it is
+GitHub Actions was tried first and **removed** (2026-09-03): every dispatch under the
+old `chiefhamim` account ended in `startup_failure` — including a one-line `echo`
+workflow, so the block was account-level, not the file — and each scheduled tick
+emailed Hamim a failure. The workflow and its `DATABASE_URL` secret are deleted. The
+repo has since moved to the `esbpowerline` org, so that block may no longer apply;
+nobody has retested it. Prove it with a throwaway one-line workflow before re-adding a
+job that anything depends on. The Pi is the better host anyway — it is
 on a Bangladeshi connection, so PGCB's ERP and Petrobangla see a local visitor.
 
 Off the Windows box every archive path is an env var: `ESB_PGCB_ARCHIVE`,

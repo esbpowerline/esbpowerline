@@ -93,13 +93,29 @@ For the Supabase dashboard, SQL editor and logs, sign in at
 ## 4. The repo
 
 ```bash
-git clone <repo> && cd esbpowerline
+git clone --filter=blob:none https://github.com/esbpowerline/esbpowerline.git
+cd esbpowerline
 npm install
 vercel env pull .env.local
 npm run dev            # or npm run dev:all for the three surfaces
 ```
 
+`--filter=blob:none` is not optional advice on a slow connection: `public/data` is about
+11,600 files and 413 MB, and a full clone fetches every historical revision of all of it.
+
 Work happens on the **`authenticating`** branch, not `main`. See `CLAUDE.md`.
+
+**`vercel env pull` is for people who deploy this site, not for everyone who builds it.**
+The `DATABASE_URL` it writes points at the PRODUCTION Supabase instance, so a local CMS
+signed in against it edits, publishes and revokes on the live site. A contributor who only
+needs the UI should fill `.env.example` against their own Supabase project instead. Note
+that a *missing* key does not degrade: the env guard turns any unset name into a 500 on
+every dynamic route while the build and the static pages stay green, so a half-filled
+`.env.local` looks like a catastrophic breakage rather than a configuration gap.
+
+The repo moved from `chiefhamim/esbpowerline` to the `esbpowerline` org on 2026-09-09.
+HTTPS git operations against the old path still redirect; deploy keys do not. If a machine
+authenticates with one — the Pi does — point its remote at the new path explicitly.
 
 ---
 
