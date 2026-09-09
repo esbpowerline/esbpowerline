@@ -33,6 +33,33 @@ function getNonEmptyEnv(key) {
   return fromFile;
 }
 
+/**
+ * Only a PRODUCTION build may move the schema.
+ *
+ * `build:vercel` runs this on every deployment, and Vercel gives previews the
+ * same environment variables as production — including `DATABASE_URL`. So a
+ * preview build of any branch applied migrations to the live database. That was
+ * survivable while one person pushed to one branch; it stopped being survivable
+ * the moment a second developer had a branch of their own, because saving
+ * work-in-progress could alter production's schema as a side effect, with the
+ * author never being shown a migration at all.
+ *
+ * `VERCEL_ENV` is `production`, `preview` or `development`, and is set by the
+ * platform rather than by the repository — a branch cannot lie about it. Unset
+ * means this is not a Vercel build (a local run, or CI elsewhere), and those
+ * keep the old behaviour so `npm run build:vercel` still works by hand.
+ *
+ * A preview that genuinely needs a new column is a signal to deploy, not a
+ * reason to widen this.
+ */
+const vercelEnv = process.env.VERCEL_ENV?.trim();
+if (vercelEnv && vercelEnv !== 'production') {
+  console.log(
+    `[migrate-deploy-prod] VERCEL_ENV=${vercelEnv} — skipping migrations; only a production deployment may move the schema.`,
+  );
+  process.exit(0);
+}
+
 const directUrl = getNonEmptyEnv('DIRECT_URL') || getNonEmptyEnv('POSTGRES_URL_NON_POOLING');
 const databaseUrl = getNonEmptyEnv('DATABASE_URL') || getNonEmptyEnv('POSTGRES_PRISMA_URL');
 
