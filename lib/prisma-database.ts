@@ -74,7 +74,32 @@ export function createPgPoolConfig(connectionString: string) {
     // died with EAUTHTIMEOUT. Ten seconds to get a connection and fifteen
     // per statement is generous for this schema; past that the ISR layer
     // should serve the stale page it already has.
-    connectionTimeoutMillis: 10_000,
+    /*
+      Except during a build, where those ten seconds are the wrong trade.
+
+      `next build` prerenders 379 pages across three workers, each worker
+      holding this same two-connection pool, so every page queues behind the
+      others. Ten seconds is generous for one render and nothing at all for a
+      queue that deep: three production deploys in two days died here, each on
+      a different reader — /about on `readSettingsMap`, then on
+      `getPublicCategories` from the public layout — with the same
+      `timeout exceeded when trying to connect` underneath.
+
+      The reason the bound exists does not apply here. In a request it stops a
+      render waiting on the pooler until Vercel kills the function, and the ISR
+      layer has a stale page to serve meanwhile. A build has no stale page: the
+      only outcomes are "wait" and "the deploy fails".
+
+      So a build waits. Note what is NOT changed: `max` stays at 2. Raising it
+      would take connections from the live site sharing this pooler — the exact
+      trade refused when /about first failed. Queueing patiently costs the build
+      time and the running site nothing.
+
+      `NEXT_PHASE` is set by Next itself during `next build`, so this cannot
+      leak into request handling.
+    */
+    connectionTimeoutMillis:
+      process.env.NEXT_PHASE === 'phase-production-build' ? 120_000 : 10_000,
     query_timeout: 15_000,
     statement_timeout: 15_000,
   };
