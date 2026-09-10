@@ -11,6 +11,12 @@ Tailwind 3 + shadcn/ui · Vitest · Python 3.14 for every parser.
 `AUDIT-INVENTORY.md` is a file:line inventory of routes, env vars and data flow. Read it
 before a survey question — it is almost always faster than grepping.
 
+`docs/DESIGN-DIRECTION.md` is the standing brief for anything a reader sees — Swiss
+editorial × institutional data modernism, written by Hamim 2026-09-11. It binds a
+one-line hover fix as much as a page rebuild. Its header records how it is to be
+executed: in layers, homepage first, after reference designs from Hamim, never as one
+pass — the 2026-09-02 Grid Explorer redesign was rejected outright and that is why.
+
 `docs/REMOTE-ACCESS.md` is how to reach the Pi, Vercel and Supabase from a machine that
 has never seen this project. It holds **no secrets on purpose** — every credential is
 either a browser sign-in or comes down with `vercel env pull .env.local`, so nothing has
