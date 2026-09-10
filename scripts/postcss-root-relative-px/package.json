@@ -1,0 +1,7 @@
+{
+  "name": "postcss-root-relative-px",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rewrites px-authored layout values to calc(N * var(--px)) in the compiled CSS. A local package rather than a relative path because Turbopack resolves PostCSS plugins by bare name only; see index.cjs.",
+  "main": "index.cjs"
+}

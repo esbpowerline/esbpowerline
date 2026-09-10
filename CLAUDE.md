@@ -776,6 +776,33 @@ protects nothing on its own.
 **Middleware fails open on purpose.** An Upstash outage used to 500 every route. A limiter
 or session failure must degrade, never take the site down. Keep that shape.
 
+## One design, scaled — how the site sizes itself above 1536px
+
+The design was drawn at 1536px with a 16px root. Below that the root shrinks in
+proportion (`clamp(10.67px, 1.0417vw, 16px)`) and every px is a literal px — phones,
+tablets and laptops render exactly as they always have, measured identical to
+production at 393/768/1280/1366 on 2026-09-11. Above 1536 the root grows at **half**
+the viewport's rate (`10px + 0.390625vw`: 17.5 at 1920, 20 at 2560, 23.4 at 3440) and
+`--px` becomes `0.0625rem`, so the whole drawing scales together — content column,
+type, labels and the slots that hold them. The two rejected alternatives, and the
+measurements behind the choice, are in the "FLUID ROOT SCALE" comment in
+`app/globals.css`.
+
+The part that is easy to break: **every px you write in a layout property is
+root-relative above 1536, whether or not you asked for it.** `text-[10px]`,
+`w-[240px]`, `padding: 4px 12px` in either stylesheet — all of it is rewritten to
+`calc(N * var(--px))` at build time by `scripts/postcss-root-relative-px` (a local
+package; Turbopack cannot resolve a relative plugin path, and `next build` uses
+Turbopack). Borders, outlines, shadows, filters, transforms and `1px`/`0px` are left
+literal on purpose. If a label ever clips on a wide monitor again, the first question
+is whether its box is sized in a unit the plugin does not touch (`vw`, an inline
+`style={{width: 240}}`, a Recharts `fontSize: 10` prop — those are JS, not CSS, and
+still literal).
+
+`scratch/measure-widths.mjs` (gitignored) is the puppeteer sweep that produced those
+numbers; run it against `BASE=https://esbpowerline.com` and against `:3000` before
+claiming a layout fix, and read the `clipped=` column, not the screenshot.
+
 ## Gotchas
 
 - Windows host. Prefer the npm scripts over hand-rolled shell.

@@ -7,6 +7,15 @@
   here because the file goes through the same PostCSS pipeline.
  */
 
+/*
+ * This file scales with the same root as the public surface. It is dense with
+ * px-authored dashboard chrome — 207 font-sizes, 95 radii, fixed sidebars — and
+ * none of it was converted by hand; scripts/postcss-root-relative-px rewrites
+ * every layout px to `calc(N * var(--px))` at build time, so a wider
+ * root cannot pull a label out of the slot that holds it. Borders, shadows and
+ * backdrop blur stay literal px on purpose (see that file).
+ */
+
 .login-shell {
   @apply relative min-h-screen flex items-center justify-center bg-background px-4 py-8 sm:px-6 sm:py-12;
   --login-accent: 217 91% 60%;
