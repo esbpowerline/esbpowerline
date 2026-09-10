@@ -40,6 +40,38 @@ function isHubSectionActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+/**
+ * Home goes home — and when you are already there, it goes to the top.
+ *
+ * A `<Link href="/">` clicked from `/` is a navigation to the route you are
+ * already on, so nothing moves: the reader is four screens down the homepage,
+ * presses Home, and the page sits still. That reads as a broken control, and it
+ * is the one link a reader reaches for precisely when they are lost.
+ *
+ * Modifier clicks and anything that is not the primary button are left alone —
+ * ctrl/cmd/middle-click means "open in a new tab", and swallowing that to
+ * scroll the current page would be worse than doing nothing. Off the homepage
+ * the handler does nothing at all and the ordinary navigation runs, which
+ * already lands at the top.
+ */
+function useHomeClick() {
+  const pathname = usePathname();
+  return (event: React.MouseEvent<HTMLAnchorElement>, onNavigate?: () => void) => {
+    if (pathname !== '/') return;
+    if (event.defaultPrevented) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    onNavigate?.();
+    // Smooth unless the reader has asked for less motion, in which case a jump
+    // is the whole point rather than a compromise.
+    const reduce =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  };
+}
+
 function PublicNavLink({
   href,
   className,
@@ -54,7 +86,7 @@ function PublicNavLink({
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   'aria-current'?: 'page' | undefined;
   'aria-label'?: string;
   /**
@@ -116,6 +148,7 @@ export function PublicNavbar({
   }, [categories, locale]);
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const onHomeClick = useHomeClick();
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
   const activeScrollIdRef = useRef<number | null>(null);
@@ -244,7 +277,12 @@ export function PublicNavbar({
       <div className="site-banner-shell w-full flex justify-center">
         <div className="container container--shell px-0">
           <div className="site-banner-frame border-l border-r border-b border-border/40 overflow-hidden">
-            <PublicNavLink href="/" prefetch className="w-full block transition-opacity hover:opacity-95">
+            <PublicNavLink
+              href="/"
+              prefetch
+              className="w-full block transition-opacity hover:opacity-95"
+              onClick={(event) => onHomeClick(event, () => setMobileOpen(false))}
+            >
               {/* The illustrated banner, by Hamim's decision (2026-09-03): the
                   typographic masthead that replaced it on 1 Sep is retired. */}
               <ThemeBanner />
@@ -271,6 +309,7 @@ export function PublicNavbar({
                         pathname === '/' ? ' public-nav-bar__home--active' : ''
                       }`}
                       aria-label={t('nav.home')}
+                      onClick={(event) => onHomeClick(event, () => setMobileOpen(false))}
                     >
                       <Home className="icon-sm" aria-hidden />
                       <span className="public-nav-bar__pill-label">{t('nav.home')}</span>
