@@ -82,10 +82,24 @@ This is the step that removes the need to carry secrets at all:
 vercel env pull .env.local
 ```
 
-Vercel already stores every environment variable this project uses, so a fresh
-clone reconstructs its own `.env.local` — Supabase URL and keys, `DATABASE_URL`,
-`AUTH_SECRET`, `CRON_SECRET` and the rest. **Do not copy `.env` between machines
-by hand**, and never paste it into a chat, an issue or a commit.
+**It does not reconstruct a working `.env.local` on its own.** That was the claim here,
+and a fresh clone on 2026-09-11 proved it false: `vercel env pull` downloads the
+**`development`** environment, and that environment holds only the cPanel FTP keys,
+`NEXT_PUBLIC_CDN_URL`, the four `POSTGRES_*` values and `VERCEL_OIDC_TOKEN`. There is no
+`DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `CRON_SECRET` or Supabase URL/key in it,
+so the result starts, serves static pages, and 500s every dynamic route (see the last
+paragraph of this section). The rest are scoped to Production and Preview only.
+
+Until someone adds those keys to Development in the Vercel dashboard, the missing
+names have to come from an existing checkout on the **same machine**, merged in by
+name. Check them against what Vercel did send rather than trusting their age:
+`DATABASE_URL` should carry the same user, password and host as `POSTGRES_URL`, and
+`DIRECT_URL` the same as `POSTGRES_URL_NON_POOLING`. `vercel env pull
+--environment=production` is not the shortcut it looks like; it also writes
+`VERCEL_ENV=production` and the `VERCEL_GIT_*` set into a dev environment.
+
+**Do not copy `.env` between machines by hand**, and never paste it into a chat, an
+issue or a commit.
 
 For the Supabase dashboard, SQL editor and logs, sign in at
 <https://supabase.com/dashboard> with the same Google account.
