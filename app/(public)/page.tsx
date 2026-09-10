@@ -191,9 +191,19 @@ export default async function Home() {
              <aside className="home-editorial__rail" aria-label="Sidebar">
               <HomeTrendingSection trending={trending} layout="hero-rail" />
               
-              {/* Sidebar Ad Block */}
-              <Link prefetch={false} href="/contact#advertising" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block mt-8" suppressHydrationWarning>
-                <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
+              {/* Sidebar: the magazine's declaration announcement, in the slot
+                  that carried an ad. It links to /magazine because that is the
+                  thing the card is announcing. */}
+              <Link prefetch={false} href="/magazine" className="home-ad-space--sidebar rounded-2xl w-full overflow-hidden relative group hidden lg:block mt-8" suppressHydrationWarning>
+                <Image
+                  src="/images/cards/magazine-declaration.jpg"
+                  alt="Congratulations: Energy & Power Base, a monthly English magazine, gets its official declaration to publish. Farid Uddin Ahmed, Editor & Publisher, ESB Power Line."
+                  width={2163}
+                  height={2163}
+                  sizes="(max-width: 1023px) 0px, 26rem"
+                  className="w-full h-auto object-cover block"
+                  suppressHydrationWarning
+                />
               </Link>
 
               {panelFlags.importantLinks && <ImportantLinks data={resolveImportantLinks(settings)} />}
