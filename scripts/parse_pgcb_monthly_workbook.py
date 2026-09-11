@@ -697,10 +697,14 @@ def parse_fgmo(rows: list[list[Any]]) -> list[dict[str, Any]]:
 
 
 # --------------------------------------------------------------------------- #
-def main() -> None:
-    if len(sys.argv) < 2:
-        raise SystemExit(__doc__)
-    src = Path(sys.argv[1])
+def parse_workbook(src: Path) -> dict[str, Any]:
+    """The whole report as one document, keyed by the month the report itself states.
+
+    Split out of `main` so `ingest_pgcb_monthly.py` (the Pi's daily runner)
+    can call the parser in-process and read the document back, rather than
+    shelling out and re-reading a file it just wrote. `SystemExit` is kept for
+    the two refusals so the command line and the runner report them alike.
+    """
     sheets = load_report(src)
 
     sheet = sheet_getter(sheets)
@@ -777,17 +781,36 @@ def main() -> None:
     if events:
         doc["outage_events"] = events
 
-    out = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_OUT_DIR / f"{date_key}.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+    return doc
 
-    counts = {
+
+def section_counts(doc: dict[str, Any]) -> dict[str, int]:
+    """How many rows each section carries — the line-per-section summary."""
+    return {
         k: (len(v) if isinstance(v, list) else
             sum(len(x) for x in v.values()) if k == "daily_load_shedding" else
             len(v.get("circles", v.get("items", v.get("areas", [])))) if isinstance(v, dict) else 1)
         for k, v in doc.items()
-        if isinstance(v, (list, dict)) and k != "sheets_present"
+        if isinstance(v, (list, dict)) and k not in {"sheets_present", "source"}
     }
+
+
+def write_document(doc: dict[str, Any], out: Path) -> None:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False), encoding="utf-8")
+
+
+def main() -> None:
+    if len(sys.argv) < 2:
+        raise SystemExit(__doc__)
+    src = Path(sys.argv[1])
+    doc = parse_workbook(src)
+    date_key = doc["date_key"]
+
+    out = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_OUT_DIR / f"{date_key}.json"
+    write_document(doc, out)
+
+    counts = section_counts(doc)
     try:
         shown = out.relative_to(ROOT)
     except ValueError:  # an explicit output path outside the repo

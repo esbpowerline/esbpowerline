@@ -532,6 +532,57 @@ evidence retention window, not a bigger tier.
 One failed tick is not an alert: the hour is still inside NLDC's window and the next
 tick's two-page walk picks it up. Four consecutive failures are.
 
+### Once a day: PGCB's monthly report
+
+`scripts/pi-monthly.sh`, at 05:30 Dhaka from cron, running
+`scripts/ingest_pgcb_monthly.py`. PGCB posts one *System Operation Report* workbook a
+month on its ERP — the "Monthly Report" listing page, an opaque encrypted route id
+that has served every month since 2013 unchanged — some days into the following month
+and on no fixed date. Until 2026-09-11 that archive was fed by hand from a Desktop
+folder that no longer exists on any machine, and July 2026 sat on the ERP for weeks
+while Macro Trends showed June. A once-a-day look is the whole cost: the listing is
+one GET, and a month already held is never fetched again.
+
+The script is the same file whichever machine runs it: list the ERP, fetch what the
+archive lacks (signature-checked, whole-zip-checked, atomic), parse the headline record
+with `parse_monthly_reports.py` and the full detail with
+`parse_pgcb_monthly_workbook.py`, cross-check the two, append to
+`lib/pgcb-monthly-data.json`, write `lib/pgcb-monthly-detail/{key}.json`, and rebuild
+`public/data/pgcb-monthly/**` with `build_pgcb_monthly_public.py`. The runner then
+publishes `PGCB_MONTHLY`, `PGCB_MONTHLY_EVENTS` **and `PGCB_MONTHLY_SERIES`** through
+`publish-local.ts --month`, and only then commits and pushes. `--list`, `--dry-run`,
+`--month` (re-parse a held month) and `--file` (a workbook on disk) are the hand modes.
+
+Three things are load-bearing:
+
+- **The headline parser reads the markdown form, never `xlsx_to_text`.** It indexes
+  `parts[2..4]` of each row split on `|`, which is the label/value pair only when a
+  leading pipe pushes everything along by one. Fed the plain form it reads every
+  figure as 0.0 and reports nothing wrong — measured on June 2026 before this chain
+  was written. `xlsx_to_md` is the converter; the dump is kept beside the workbook.
+- **Two readers, and they must agree.** The headline record is read by label; the
+  detail by fixed column position. The chain compares peak generation, peak demand,
+  net generation and the nine zone loads between them and refuses to write on any
+  disagreement. It also checks the sheet's own "Previous Month" column against the
+  record already held — the check that confirmed the column indexing when June was
+  ingested by hand — and reports a disagreement as PGCB restating a figure, never
+  repairs it. A record of zeros is a parser that found nothing, not a month with no
+  generation, and is refused. July 2026: 12 of 12 agreed, previous month 3 of 3.
+- **The series release must be republished, or nothing changes.** A
+  `PGCB_MONTHLY_SERIES` row exists, and a release always wins over the static file —
+  so after the rebuild, even the *local* dev server kept opening Macro Trends on June,
+  read from the database. The runner publishes before it commits for this reason, and
+  if the publish fails it commits nothing: tomorrow's reset discards the parse and the
+  month is found unheld and done again, workbook already on disk.
+
+The document says which month it is, not the ERP's title: `date_key` comes from the
+report's own "Month:" header reconciled against the dates inside it, and a title that
+disagrees is printed. `ESB_MONTHLY_MONTHS="2026-07"` on the runner re-ingests a held
+month — after a parser fix, or to publish a month that reached the archive by hand.
+Fetched workbooks live in `~/esb-ingest/state/pgcb-monthly/` on the Pi and under the
+gitignored `scratch/pgcb-monthly/` here. The ERP lists only the trailing ~30 months;
+everything older is held and cannot be refetched from it.
+
 ### Checking the Pi from anywhere
 
 The Pi is on the tailnet as `esb-pi`, key expiry disabled, no port forwarded. If
@@ -542,7 +593,7 @@ config; nothing below needs a password.
 
 ```bash
 tailscale status | grep esb-pi              # is it on the tailnet at all
-ssh pi@esb-pi 'crontab -l | grep -v "^#"'   # all five runners scheduled?
+ssh pi@esb-pi 'crontab -l | grep -v "^#"'   # all six runners scheduled?
 ssh pi@esb-pi 'tail -20 ~/esb-ingest/logs/alerts.log'
 ssh pi@esb-pi 'timedatectl | grep -i synchron'   # a skewed clock refuses polls
 ```

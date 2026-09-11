@@ -236,7 +236,7 @@ if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
     chmod +x "$ROOT/pi-ingest.sh"
     echo "runner updated from the repo — effective next poll"
 fi
-for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh; do
+for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh pi-monthly.sh; do
     if [[ -f "$REPO/scripts/$helper" ]] && ! cmp -s "$REPO/scripts/$helper" "$ROOT/$helper"; then
         cp "$REPO/scripts/$helper" "$ROOT/$helper"; chmod +x "$ROOT/$helper"
         echo "$helper updated from the repo"
@@ -265,6 +265,9 @@ declare -a SCHEDULE=(
     "pi-hourly.sh|17 * * * *"
     "pi-nightly.sh|30 2 * * *"
     "pi-weekly.sh|30 3 * * 0"
+    # PGCB's monthly report, once a day. 05:30 sits after the nightly sweep
+    # (which can hold the lock for a while) and well before the 09:30 poll.
+    "pi-monthly.sh|30 5 * * *"
 )
 if command -v crontab >/dev/null; then
     cron_now="$(crontab -l 2>/dev/null || true)"

@@ -1138,9 +1138,13 @@ export function MacroTrendsTab({
                     All {PGCB_MONTHLY_VERIFICATION.figuresCompared} figures agreed, none disagreed
                   </strong>{' '}
                   — across the {PGCB_MONTHLY_VERIFICATION.monthsWithLocalSource} of{' '}
-                  {PGCB_MONTHLY_VERIFICATION.monthsInArchive} months whose source report is held
-                  here. The remaining months are shown as published but have not been
-                  re-read this way.
+                  {/* The archive count comes from the series, not the verification
+                      snapshot: it was a hand-typed 159 that went stale the day the
+                      Pi started ingesting months on its own (2026-09-11). Months
+                      ingested since are cross-read the same way by the chain. */}
+                  {pgcbMonthlyData.length || PGCB_MONTHLY_VERIFICATION.monthsInArchive} months
+                  whose source report is held here. The remaining months are shown as
+                  published but have not been re-read this way.
                 </span>
               </div>
               {/* Month/Year Selection Control Panel */}

@@ -7,6 +7,9 @@
 # all LF — so pin it there and let either machine write what it likes on disk.
 public/data/**/*.json text eol=lf
 lib/available-dates.json text eol=lf
+# The monthly chain writes these on the Pi too, since 2026-09-11.
+lib/pgcb-monthly-data.json text eol=lf
+lib/pgcb-monthly-detail/*.json text eol=lf
 
 # Executable as checked out, whichever machine clones it.
 scripts/pi-*.sh text eol=lf

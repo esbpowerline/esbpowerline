@@ -1,0 +1,492 @@
+#!/usr/bin/env python3
+"""Ingest PGCB's monthly System Operation Report from the ERP into the archive.
+
+One entry point for the whole monthly chain, so the Pi's daily runner and a
+session on the Windows box do exactly the same thing:
+
+  listing   which months PGCB serves            one GET of the ERP's report page
+  download  the workbook, signature-checked     PK header, whole zip, atomic write
+  parse     the headline record                 parse_monthly_reports, by label
+            the full detail                     parse_pgcb_monthly_workbook, by position
+  check     the two readings against each other, and the sheet's own
+            "previous month" column against the record already held
+  write     lib/pgcb-monthly-data.json, lib/pgcb-monthly-detail/{key}.json,
+            then public/data/pgcb-monthly/** rebuilt by build_pgcb_monthly_public
+
+Usage:
+  python scripts/ingest_pgcb_monthly.py                    every month the ERP serves and the archive lacks
+  python scripts/ingest_pgcb_monthly.py --month 2026-07    that month from the ERP, held or not (a re-parse)
+  python scripts/ingest_pgcb_monthly.py --file July-2026.xlsx   a workbook already on disk
+  python scripts/ingest_pgcb_monthly.py --list             the ERP against the archive; writes nothing
+  python scripts/ingest_pgcb_monthly.py --dry-run          parse and check, write nothing
+  python scripts/ingest_pgcb_monthly.py --month 2026-07 --out DIR
+                                                           write the record and detail under DIR, not the repo —
+                                                           for diffing one machine's parse against another's
+
+Exit 0 when everything asked for was ingested or nothing was new, 1 on any
+failure. The last line is always `ingested_months=<comma-separated keys>`
+(empty when none) so a runner reads what landed without parsing prose.
+
+Why this exists. Until 2026-09-11 the monthly archive was fed by hand: a
+workbook saved to the Desktop, converted to a pipe-table dump in a Desktop
+folder, parse_monthly_reports.py run over that folder, then the detail parser
+and the builder by hand. The folder no longer exists on any machine, and July
+2026 had been on the ERP for weeks while the Grid Explorer's Macro Trends sat
+on June. The parsers themselves are unchanged and reused — both reproduce the
+committed June 2026 files exactly from the ERP's own copy of that workbook
+(checked 2026-09-11) — this file only puts them in a row.
+
+Two things about the parse are easy to get wrong and are pinned here:
+
+  * The headline parser must be fed the MARKDOWN form of the workbook
+    (`xlsx_to_md`, outer pipes on every row), not `xlsx_to_text`. The parser
+    indexes `parts[2..4]` of each split row, which is only the label/value pair
+    when a leading pipe pushes everything along by one. Fed the plain form it
+    reads every figure as 0.0 and reports nothing wrong — the exact case that
+    was measured on June 2026 before this was written.
+
+  * The document says which month it is; the ERP's title does not. The detail
+    parser reads "Month: <name> <year>" from QF-MIS-03 and checks it against
+    the dates inside the report. The record is keyed off that, and a title that
+    disagrees is reported. Same rule as the daily chain (CLAUDE.md, doctrine 5).
+"""
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import hashlib
+import html
+import json
+import os
+import re
+import ssl
+import sys
+import urllib.request
+import warnings
+import zipfile
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
+sys.path.insert(0, str(HERE))
+# openpyxl warns "Cannot parse header or footer" on every print-formatted
+# PGCB sheet; two dozen of those per workbook bury the lines that matter.
+warnings.filterwarnings("ignore")
+
+import build_pgcb_monthly_public as builder  # noqa: E402
+import parse_monthly_reports as headline  # noqa: E402
+import parse_pgcb_monthly_workbook as detail  # noqa: E402
+from daily_extractor.report_convert import xlsx_to_md  # noqa: E402
+
+DATA = ROOT / "lib" / "pgcb-monthly-data.json"
+DETAIL_DIR = ROOT / "lib" / "pgcb-monthly-detail"
+PUBLIC_DIR = ROOT / "public" / "data" / "pgcb-monthly"
+
+# The ERP's "Monthly Report" page. The path segment is an opaque encrypted
+# route id, not a date — it has served every month since 2013 unchanged and is
+# the link Hamim downloads from by hand.
+LISTING_URL = os.environ.get("ESB_PGCB_MONTHLY_LISTING") or (
+    "https://erp.powergrid.gov.bd/w/report/"
+    "eyJpdiI6Ik53OTZRKzRRTVoxUUY4a3RMb250Y0E9PSIsInZhbHVlIjoiQmxnNjFqUUROVnk2RFh1OHJ0NGVkQT09IiwibWFjIjoiZDBlYmM3ZTUzMzBkNDM4NTNkZDQxYjc0YTc2NDQ3YTYzYmY1MjRjNDRjNTQ2MmQwOGM5MzY4MGRjNTIwYTFlYiIsInRhZyI6IiJ9"
+    "/show_report"
+)
+
+# One link per report, twice: the page prints each once as "July-2026" and
+# once as "July-2026_01-01-1970" (a template's unset date), both to the same
+# file id. The trailing quote keeps the second form's suffix out of the year.
+LINK_RE = re.compile(
+    r'href="(https://erp\.powergrid\.gov\.bd/web/files/download\?'
+    r"location=erp%2Fweb%2Freport_docs%2F(\d+)\.(xlsx|xlsm|xls)"
+    r'&(?:amp;)?title=([A-Za-z]+)-(\d{4}))"'
+)
+
+MONTHS = {m.lower(): i for i, m in enumerate(
+    ["January", "February", "March", "April", "May", "June",
+     "July", "August", "September", "October", "November", "December"], 1)}
+
+# The headline record spells three zones the old way; the detail parser the
+# new way. Same nine areas on QF-LDC-22 either way.
+ZONE_ALIAS = {"chittagong": "chattogram", "comilla": "cumilla", "barisal": "barishal"}
+
+# As in daily_extractor/download.py: the ERP's certificate chain does not
+# validate from the Pi, and the workbook is signature- and content-checked
+# rather than trusted on transport.
+CTX = ssl.create_default_context()
+CTX.check_hostname = False
+CTX.verify_mode = ssl.CERT_NONE
+USER_AGENT = "Mozilla/5.0 (esb-pi-ingest; +https://esbpowerline.com)"
+
+
+def log(msg: str) -> None:
+    print(msg, flush=True)
+
+
+def archive_dir() -> Path:
+    """Where fetched workbooks and their markdown dumps are kept.
+
+    The Pi sets ESB_PGCB_MONTHLY_ARCHIVE beside its daily workbook store; on
+    the Windows box the gitignored scratch/ tree is the default so a hand run
+    never leaves a workbook in the repo.
+    """
+    env = os.environ.get("ESB_PGCB_MONTHLY_ARCHIVE")
+    return Path(env) if env else ROOT / "scratch" / "pgcb-monthly"
+
+
+# --------------------------------------------------------------------------- #
+# the ERP
+# --------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class Listed:
+    key: str      # YYYY-MM, from the title — a hint, never the claim (see parse)
+    title: str    # "July-2026", the name PGCB gave the file
+    erp_id: int
+    ext: str
+    url: str
+
+
+def fetch(url: str, timeout: int = 90) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(req, context=CTX, timeout=timeout) as resp:
+        return resp.read()
+
+
+def list_erp() -> list[Listed]:
+    page = fetch(LISTING_URL).decode("utf-8", "replace")
+    seen: dict[str, Listed] = {}
+    for m in LINK_RE.finditer(page):
+        url, fid, ext, month, year = m.groups()
+        if month.lower() not in MONTHS:
+            continue
+        key = f"{year}-{MONTHS[month.lower()]:02d}"
+        seen.setdefault(key, Listed(key, f"{month}-{year}", int(fid), ext, html.unescape(url)))
+    if not seen:
+        # A login page, a redirect, or a relaid template all answer 200 with
+        # no report links. That is a finding, not an empty month.
+        raise SystemExit(
+            f"listing: no report links on {LISTING_URL} ({len(page)} bytes) — "
+            "the page is not the report list any more"
+        )
+    return sorted(seen.values(), key=lambda item: item.key)
+
+
+def workbook_is_whole(path: Path) -> bool:
+    """A .xlsx is a zip; one cut short by a power cut fails the directory read.
+
+    Same check as daily_extractor/download.py. Not imported from there because
+    that module resolves its Desktop-default paths at import time.
+    """
+    try:
+        with zipfile.ZipFile(path) as zf:
+            return zf.testzip() is None and any(n.startswith("xl/") for n in zf.namelist())
+    except Exception:
+        return False
+
+
+def download(item: Listed, dest_dir: Path) -> tuple[Path, str, bool]:
+    """The workbook on disk, its sha256, and whether this call fetched it."""
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / f"{item.title}.{item.ext}"
+    if item.ext == "xls":
+        raise SystemExit(f"{item.title}: the ERP serves a legacy .xls; this chain reads .xlsx only")
+    if dest.exists() and workbook_is_whole(dest):
+        return dest, hashlib.sha256(dest.read_bytes()).hexdigest(), False
+    dest.unlink(missing_ok=True)
+
+    data = fetch(item.url)
+    # Publisher sites serve HTML redirect pages under a .xlsx URL; a parser
+    # fed HTML produces confident nonsense (CLAUDE.md § Ingestion).
+    if data[:2] != b"PK" or len(data) < 20000:
+        raise SystemExit(
+            f"{item.title}: download is not a workbook "
+            f"({len(data)} bytes, starts {data[:12]!r})"
+        )
+    tmp = dest.with_name(dest.name + ".part")
+    tmp.write_bytes(data)
+    tmp.replace(dest)
+    if not workbook_is_whole(dest):
+        dest.unlink(missing_ok=True)
+        raise SystemExit(f"{item.title}: downloaded workbook is not a whole zip; discarded")
+    return dest, hashlib.sha256(data).hexdigest(), True
+
+
+# --------------------------------------------------------------------------- #
+# the archive
+# --------------------------------------------------------------------------- #
+def load_records() -> list[dict[str, Any]]:
+    records = json.loads(DATA.read_text(encoding="utf-8"))
+    records.sort(key=lambda r: r["date_key"])
+    return records
+
+
+def held_months(records: list[dict[str, Any]]) -> dict[str, str]:
+    """Month -> 'held' or what is missing. A month is held only when all three
+    artefacts exist; a partial month is re-ingested rather than assumed done."""
+    out: dict[str, str] = {}
+    for r in records:
+        key = r["date_key"]
+        missing = [
+            name for name, path in (
+                ("detail", DETAIL_DIR / f"{key}.json"),
+                ("public", PUBLIC_DIR / f"{key}.json"),
+            ) if not path.exists()
+        ]
+        out[key] = "held" if not missing else "missing " + " and ".join(missing)
+    return out
+
+
+def prev_key(key: str) -> str:
+    year, month = int(key[:4]), int(key[5:7])
+    return f"{year - 1}-12" if month == 1 else f"{year}-{month - 1:02d}"
+
+
+# --------------------------------------------------------------------------- #
+# parse and check
+# --------------------------------------------------------------------------- #
+def parse(xlsx: Path, source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    doc = detail.parse_workbook(xlsx)
+    doc["source"] = source
+
+    # The dump is written beside the workbook and kept: it is what the
+    # headline parser actually read, and its NAME is how that parser learns
+    # the month — so it is named for the month the document states, not the
+    # ERP title.
+    dump = xlsx.with_name(f"{doc['month']}-{doc['year']}.txt")
+    text, _ = xlsx_to_md(xlsx)
+    dump.write_text(text, encoding="utf-8")
+
+    record = headline.parse_report_file(str(dump))
+    if record is None:
+        raise SystemExit(f"{xlsx.name}: the headline parser could not read a month from {dump.name}")
+    record["filename"] = xlsx.name
+    record["month"], record["year"], record["date_key"] = doc["month"], doc["year"], doc["date_key"]
+    return record, doc
+
+
+def close(a: float | None, b: float | None) -> bool:
+    if a is None or b is None:
+        return False
+    return abs(a - b) <= 0.001
+
+
+def check(record: dict[str, Any], doc: dict[str, Any],
+          held: dict[str, dict[str, Any]]) -> tuple[list[str], list[str], list[str]]:
+    """Errors (we would publish a figure two readers disagree on), warnings
+    (PGCB disagrees with its own earlier report — reported, never repaired),
+    and the lines describing what agreed."""
+    errors: list[str] = []
+    warns: list[str] = []
+    notes: list[str] = []
+    keyed = doc.get("system", {}).get("keyed", {})
+
+    # parse_monthly_reports.clean_float answers 0.0 for a cell it cannot read,
+    # so a record of zeros is a parser that found nothing, not a month with no
+    # generation. Null is not zero; neither is a failed read.
+    zeros = [f for f in ("max_evening_peak_gen", "max_evening_peak_demand", "total_net_generation")
+             if not record.get(f)]
+    if zeros:
+        errors.append(f"headline parser read nothing for {', '.join(zeros)} (0.0 is its failure value)")
+
+    pairs = [
+        ("peak gen", record["max_evening_peak_gen"], keyed.get("max_evening_peak_gen_mw", {}).get("value")),
+        ("peak demand", record["max_evening_peak_demand"], keyed.get("max_evening_peak_demand_mw", {}).get("value")),
+        ("net generation", record["total_net_generation"], keyed.get("total_net_generation_mkwh", {}).get("value")),
+    ]
+    areas = {a["key"]: a.get("load_mw") for a in doc.get("area_supply_at_system_peak", {}).get("areas", [])}
+    for zone, value in record["regional_supply"].items():
+        pairs.append((f"zone {zone}", value, areas.get(ZONE_ALIAS.get(zone, zone))))
+
+    agreed = 0
+    for name, by_label, by_position in pairs:
+        if close(by_label, by_position):
+            agreed += 1
+        else:
+            errors.append(f"{name}: by label {by_label!r}, by position {by_position!r}")
+    notes.append(f"headline vs detail: {agreed} of {len(pairs)} figures agree "
+                 f"(peak gen, peak demand, net generation, {len(pairs) - 3} zones)")
+    notes.append("generation by fuel: single reading, not cross-checked")
+
+    # The sheet's own "Previous Month" column against the record we hold for
+    # that month. It confirmed the column indexing when June was ingested by
+    # hand; here it runs every time. A disagreement is PGCB restating a figure
+    # (which it does — see PGCB_MONTHLY_STALE_ROWS) and is reported as such.
+    prev = held.get(prev_key(record["date_key"]))
+    if prev:
+        prev_pairs = [
+            ("peak gen", keyed.get("max_evening_peak_gen_mw", {}).get("prev_month"), prev["max_evening_peak_gen"]),
+            ("peak demand", keyed.get("max_evening_peak_demand_mw", {}).get("prev_month"), prev["max_evening_peak_demand"]),
+            ("net generation", keyed.get("total_net_generation_mkwh", {}).get("prev_month"), prev["total_net_generation"]),
+        ]
+        ok = [n for n, a, b in prev_pairs if close(a, b)]
+        for n, a, b in prev_pairs:
+            if n not in ok:
+                warns.append(f"sheet says previous-month {n} was {a!r}; held {prev['date_key']} record says {b!r}")
+        notes.append(f"previous month per the sheet: agrees with held {prev['date_key']} on {len(ok)} of {len(prev_pairs)}")
+    else:
+        notes.append(f"previous month {prev_key(record['date_key'])} not held; no continuity check")
+
+    for name, entry in keyed.items():
+        if entry.get("suspect_date"):
+            warns.append(f"{name} is dated {entry.get('when')} — PGCB carried an earlier month's figure")
+    if doc.get("data_quality", {}).get("header_period_mismatch"):
+        mm = doc["data_quality"]["header_period_mismatch"]
+        warns.append(f"printed period {mm['printed']!r} disagreed with the dates inside; used {mm['resolved']!r}")
+    return errors, warns, notes
+
+
+# --------------------------------------------------------------------------- #
+# write
+# --------------------------------------------------------------------------- #
+def write(record: dict[str, Any], doc: dict[str, Any], out: Path | None) -> None:
+    key = record["date_key"]
+    if out is not None:
+        out.mkdir(parents=True, exist_ok=True)
+        (out / f"{key}.record.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
+        detail.write_document(doc, out / f"{key}.detail.json")
+        log(f"{key}: written under {out} (repo untouched)")
+        return
+
+    records = [r for r in load_records() if r["date_key"] != key] + [record]
+    records.sort(key=lambda r: r["date_key"])
+    # indent=2 and the default ensure_ascii, as parse_monthly_reports.py has
+    # always written this file — so the diff of an ingest is one record.
+    with DATA.open("w", encoding="utf-8", newline="\n") as fh:
+        json.dump(records, fh, indent=2)
+        fh.write("\n")
+    detail.write_document(doc, DETAIL_DIR / f"{key}.json")
+    builder.main()
+    log(f"{key}: written — {DATA.relative_to(ROOT)} ({len(records)} months), "
+        f"{(DETAIL_DIR / f'{key}.json').relative_to(ROOT)}, {PUBLIC_DIR.relative_to(ROOT)} rebuilt")
+
+
+# --------------------------------------------------------------------------- #
+def ingest_one(xlsx: Path, source: dict[str, Any], held: dict[str, dict[str, Any]],
+               *, expect_key: str | None, dry_run: bool, out: Path | None) -> str | None:
+    record, doc = parse(xlsx, source)
+    key = record["date_key"]
+    log(f"{key}: document states {doc['month']} {doc['year']}"
+        + (f" — the ERP titled it {expect_key}" if expect_key and expect_key != key else ""))
+    for section, n in detail.section_counts(doc).items():
+        log(f"  {section:28s} {n}")
+
+    errors, warns, notes = check(record, doc, held)
+    for line in notes:
+        log(f"  {line}")
+    for line in warns:
+        log(f"  WARN {line}")
+    for line in errors:
+        log(f"  ERROR {line}")
+    if errors:
+        log(f"{key}: not written — {len(errors)} error(s) above")
+        return None
+    if dry_run:
+        log(f"{key}: dry run — nothing written")
+        return key
+    write(record, doc, out)
+    return key
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--month", action="append", default=[], metavar="YYYY-MM",
+                    help="ingest this month from the ERP even if held (repeatable, or comma-separated)")
+    ap.add_argument("--file", type=Path, help="parse a workbook already on disk instead of asking the ERP")
+    ap.add_argument("--list", action="store_true", help="show the ERP against the archive; write nothing")
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--out", type=Path, help="write the parsed artefacts here instead of into the repo")
+    args = ap.parse_args()
+    wanted = [m for spec in args.month for m in spec.split(",") if m]
+    for m in wanted:
+        if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", m):
+            ap.error(f"--month {m!r} is not YYYY-MM")
+
+    records = load_records()
+    held_by_key = {r["date_key"]: r for r in records}
+    status = held_months(records)
+    newest_held = max(status) if status else None
+    ingested: list[str] = []
+    failed = 0
+
+    if args.file:
+        src = args.file
+        if not src.exists():
+            log(f"{src}: no such file")
+            log("ingested_months=")
+            return 1
+        source = {"path": str(src), "sha256": hashlib.sha256(src.read_bytes()).hexdigest()}
+        key = ingest_one(src, source, held_by_key, expect_key=None, dry_run=args.dry_run, out=args.out)
+        if key:
+            ingested.append(key)
+        else:
+            failed += 1
+    else:
+        listing = list_erp()
+        newest_listed = listing[-1]
+        log(f"listing: {len(listing)} reports on the ERP, newest {newest_listed.title} (id {newest_listed.erp_id}); "
+            f"archive holds {len(status)} months, newest {newest_held}")
+
+        if args.list:
+            for item in listing:
+                log(f"  {item.key}  {item.title:16s} id {item.erp_id:<6d} {status.get(item.key, 'NOT HELD')}")
+            unlisted = sorted(k for k in status if k not in {i.key for i in listing})
+            if unlisted:
+                log(f"  held but no longer on the ERP: {len(unlisted)} months ({unlisted[0]} .. {unlisted[-1]})")
+            log("ingested_months=")
+            return 0
+
+        by_key = {item.key: item for item in listing}
+        if wanted:
+            todo = []
+            for m in wanted:
+                if m not in by_key:
+                    log(f"{m}: the ERP does not list it — PGCB has not posted that month")
+                    failed += 1
+                else:
+                    todo.append(by_key[m])
+        else:
+            todo = [item for item in listing if status.get(item.key) != "held"]
+            for item in todo:
+                if item.key in status:
+                    log(f"{item.key}: held but {status[item.key]} — re-ingesting")
+
+        if not todo and not failed:
+            log("nothing new: every month the ERP serves is held")
+
+        for item in todo:
+            try:
+                xlsx, sha, fetched = download(item, archive_dir())
+            except SystemExit as e:
+                log(f"  ERROR {e}")
+                failed += 1
+                continue
+            except Exception as e:  # network
+                log(f"  ERROR {item.title}: download failed: {e}")
+                failed += 1
+                continue
+            log(f"{item.title}: {'fetched' if fetched else 'already on disk'} id {item.erp_id} "
+                f"({xlsx.stat().st_size:,} bytes, sha256 {sha[:12]}…) -> {xlsx}")
+            source = {
+                "erp_id": item.erp_id,
+                "title": item.title,
+                "url": item.url,
+                "sha256": sha,
+                "fetched_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            }
+            try:
+                key = ingest_one(xlsx, source, held_by_key, expect_key=item.key,
+                                 dry_run=args.dry_run, out=args.out)
+            except SystemExit as e:
+                log(f"  ERROR {e}")
+                key = None
+            if key:
+                ingested.append(key)
+            else:
+                failed += 1
+
+    log("ingested_months=" + ",".join(ingested))
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
