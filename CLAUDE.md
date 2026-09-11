@@ -596,6 +596,7 @@ tailscale status | grep esb-pi              # is it on the tailnet at all
 ssh pi@esb-pi 'crontab -l | grep -v "^#"'   # all six runners scheduled?
 ssh pi@esb-pi 'tail -20 ~/esb-ingest/logs/alerts.log'
 ssh pi@esb-pi 'timedatectl | grep -i synchron'   # a skewed clock refuses polls
+ssh pi@esb-pi 'tail -5 ~/esb-ingest/logs/monthly-$(date +%Y%m%d).log'   # "nothing new" is the normal day
 ```
 
 **Read the counts, not the exit code.** This is the lesson of open-work item 2:

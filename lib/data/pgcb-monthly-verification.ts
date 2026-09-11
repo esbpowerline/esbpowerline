@@ -16,6 +16,11 @@ export interface MonthlyStaleRow {
 }
 
 export const PGCB_MONTHLY_VERIFICATION = {
+  // The archive size at the time of the run. The Macro Trends footer prints
+  // the live series length instead and keeps this only as a fallback: it was
+  // a hand-typed 159 that went stale the day the Pi began ingesting months on
+  // its own (2026-09-11, July 2026). Months ingested since are cross-read the
+  // same way by scripts/ingest_pgcb_monthly.py before they are written.
   monthsInArchive: 159,
   monthsWithLocalSource: 124,
   figuresCompared: 247,
