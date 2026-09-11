@@ -29,6 +29,7 @@ import {
   useAdminDropdown,
 } from '@/components/admin/AdminDropdown';
 import { LiveArticleLink } from '@/components/shared/LiveArticleLink';
+import { AdminFormattedTime } from '@/components/admin/AdminFormattedTime';
 
 export type AdminArticleRow = {
   id: string;
@@ -733,7 +734,7 @@ export function AdminArticleManager({
                       a Bangladeshi desk reads as March. Day-month-year, short
                       month, and the year dropped inside the current one. */}
                   <TableCell className="text-muted-foreground text-[11.5px] whitespace-nowrap tabular-nums hidden md:table-cell">
-                    {formatDeskDate(a.updatedAt)}
+                    <AdminFormattedTime value={a.updatedAt || a.createdAt || ''} />
                   </TableCell>
                   {showBulkFlags && (
                     <TableCell className="hidden lg:table-cell">

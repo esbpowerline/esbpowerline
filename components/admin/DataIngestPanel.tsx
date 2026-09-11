@@ -2,8 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Download, FileSpreadsheet, FileText, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun, RefreshCw } from 'lucide-react';
+import { Upload, Download, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun, RefreshCw } from 'lucide-react';
 import { AdminCard } from '@/components/admin/AdminUI';
+import { IngestDropZone } from '@/components/admin/IngestDropZone';
 // The CMS date-picking vocabulary, verbatim: the year-on-year panel's calendar
 // and month picker replace the browser-drawn <input type="date">/<input
 // type="month">, which looked like nothing else in the admin surface.
@@ -287,15 +288,21 @@ function RefreshAllCard() {
   const full = result && 'days' in result ? result : null;
 
   return (
-    <AdminCard title="Refresh data" icon={RefreshCw}>
+    <AdminCard title="Catch the site up" icon={RefreshCw}>
       <div className="space-y-3">
         <p className="text-[12px] leading-snug text-muted-foreground">
-          One button for the daily round: checks which recent days the site is missing — a whole day,
-          or a day whose gas columns are still blank — downloads the sources from PGCB&apos;s report
-          portal and Petrobangla&apos;s listing where no copy is held, runs the full chain (grid day,
-          fuel curve, Nepal, station detail, gas archive, timeline, reserve model), publishes the
-          result to the live site, and refreshes the SREDA renewables snapshot. BPDB&apos;s daily
-          figures arrive inside PGCB&apos;s workbook, which reprints them.
+          One button for the whole daily round, and the same work the Pi does on its own four times
+          a day — so this is the one to press when the Pi is off. It finds every recent day the site
+          is short of, downloads what PGCB and Petrobangla have published, runs the full chain and
+          puts the result on the live site, then refreshes the SREDA register. A day the Pi has
+          already done is found complete and skipped, so pressing it costs nothing when there is
+          nothing to do. BPDB&apos;s daily figures arrive inside PGCB&apos;s workbook, which
+          reprints them.
+        </p>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          Fills, per day: <strong>Overview</strong> and <strong>Regional Grid</strong> (grid day) ·{' '}
+          <strong>Energy Curve</strong> · <strong>Power Stations</strong> ·{' '}
+          <strong>Gas &amp; LNG Supply</strong> · <strong>Renewables</strong> (SREDA).
         </p>
         <button
           onClick={run}
@@ -501,14 +508,19 @@ function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
   }
 
   return (
-    <AdminCard title="Publish what the local ingest produced" icon={Rocket}>
+    <AdminCard title="Do one particular day" icon={Rocket}>
       <div className="space-y-3">
         <p className="text-[12px] text-muted-foreground">
-          <strong>Run full ingest</strong> collects the day and runs the whole chain — grid day,
-          fuel curve, Nepal interconnector, per-station detail, gas day and the gas aggregates — so
-          the day is complete rather than just parsed. <strong>Publish to the site</strong> then
-          puts every file the chain wrote onto the live site with no deployment. Files the day does
-          not have yet are skipped, not failed.
+          <strong>Run full ingest</strong> collects that one day and runs the whole chain — grid
+          day, energy curve, Nepal interconnector, station detail, gas day and the gas aggregates —
+          so the day arrives complete rather than just parsed.{' '}
+          <strong>Publish to the site</strong> then puts every file the chain wrote on the live site
+          with no deployment. Artefacts the day does not have yet are skipped, not failed.
+        </p>
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          Use it to fill a single gap the strip above shows, or to re-do a day after a correction.
+          The optional month publishes that month&rsquo;s PGCB report to{' '}
+          <strong>Macro Trends → PGCB Monthly Archives</strong>; leave it empty for the day alone.
         </p>
         <div className="flex flex-wrap items-end gap-3">
           <div className="min-w-48">
@@ -749,9 +761,24 @@ export function DataIngestPanel({
           started by re-ingesting a day that was already published. */}
       <PublishLocalCard suggestedDay={suggestedNextDay || latestArchiveDate || ''} />
 
-      <SredaCard latestSredaDate={latestSredaDate} />
+      {/* ── doing one day by hand ──────────────────────────────────────────
+          Everything above is a whole day in one action. What follows is the
+          same day taken apart — collect or drop the documents, read the
+          figures, then publish — and it is the path to use when a parse needs
+          looking at, or when the automation is off and a specific day has to
+          go up. The three steps were numbered 1-2-3 while sitting *below* two
+          unnumbered cards that do the same job, which read as a five-step
+          sequence nobody was meant to follow in order. */}
+      <div className="rounded-xl border border-border/60 bg-muted/[0.15] px-4 py-3">
+        <p className="text-[13px] font-bold">Or take one day step by step</p>
+        <p className="mt-0.5 text-[11.5px] leading-relaxed text-muted-foreground">
+          Fetch or drop the day&rsquo;s documents, check what was parsed, then publish. Use this when
+          you want to read the figures before they go live — or when the Pi is off and a particular
+          day has to be put up by hand.
+        </p>
+      </div>
 
-      <AdminCard title="1 · Collect from the publishers" icon={Download}>
+      <AdminCard title="A · Collect from the publishers" icon={Download}>
         <div className="space-y-3">
           <p className="text-[12px] text-muted-foreground">
             Downloads the day&apos;s PGCB workbook from its ERP and the matching Petrobangla gas
@@ -785,55 +812,16 @@ export function DataIngestPanel({
         </div>
       </AdminCard>
 
-      <AdminCard title="2 · Or upload the files yourself" icon={Upload}>
+      <AdminCard title="B · Or drop the files in" icon={Upload}>
         <div className="space-y-4">
-          <div>
-            <label className="mb-1.5 flex items-center gap-2 text-[12px] font-semibold">
-              <FileSpreadsheet className="h-3.5 w-3.5" /> PGCB daily report — makes the grid day
-            </label>
-            <input
-              type="file"
-              accept=".xlsx,.xls,.xlsm,.docx,.pdf"
-              onChange={(e) => setPgcb(e.target.files?.[0] ?? null)}
-              className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px] file:mr-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1 file:text-[12px]"
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              The filename date is the publication date; the energy day is the day before. Override below if the name is unusual.
-            </p>
-            {/* The workbook is named first because it is the one that cannot go
-                wrong. A Word or PDF copy carries no sheet names, so the report's
-                sections have to be inferred from its headings — that works, and
-                is checked against a real report, but it is an inference and the
-                review step says so with a row count for every section it found. */}
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              <span className="font-semibold">.xlsx</span>, .xls or .xlsm is the workbook PGCB
-              files, and the surest option. <span className="font-semibold">.docx</span> and{' '}
-              <span className="font-semibold">.pdf</span> copies of the same report are read too —
-              their sections are worked out from the document's own headings, and the review step
-              lists what was found before you publish.
-            </p>
-          </div>
-
-          <div>
-            <label className="mb-1.5 flex items-center gap-2 text-[12px] font-semibold">
-              <FileText className="h-3.5 w-3.5" /> Petrobangla gas report (.pdf) — makes the gas day; can be uploaded alone
-            </label>
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={(e) => setPb(e.target.files?.[0] ?? null)}
-              className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-[12px] file:mr-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1 file:text-[12px]"
-            />
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Gas lags the grid by a day: energy day E needs the report whose 8am–8am window <em>starts</em> on E.
-              Without it the day publishes with empty gas figures.
-            </p>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              Uploaded <span className="font-semibold">alone</span>, the PDF is filed by its own printed
-              window — when that day&apos;s grid is already on the site, its empty gas rows are filled in;
-              when it is not, the gas archive publishes first and the grid follows with its workbook.
-            </p>
-          </div>
+          <IngestDropZone
+            files={{ pgcb, pb }}
+            onChange={(next) => {
+              setPgcb(next.pgcb);
+              setPb(next.pb);
+            }}
+            disabled={parsing || collecting}
+          />
 
           <div>
             <div className="flex items-end gap-2">
@@ -889,7 +877,7 @@ export function DataIngestPanel({
       )}
 
       {summary && (
-        <AdminCard title="3 · Review before publishing" icon={CheckCircle2}>
+        <AdminCard title="C · Review, then publish" icon={CheckCircle2}>
           <div className="space-y-4">
             {/* Graded, because a note saying "I corrected your data" must not
                 look like a note saying "this is the wrong day's file". Falls
@@ -1038,6 +1026,13 @@ export function DataIngestPanel({
           </div>
         </AdminCard>
       )}
+
+      {/* Last, and on its own: SREDA is a standing register rather than a day,
+          it publishes a web page rather than a document, and it is the one
+          action on this screen that works from the deployed site as well as
+          from here. It sat between the whole-day buttons and the step-by-step
+          flow, where it read as part of a sequence it has nothing to do with. */}
+      <SredaCard latestSredaDate={latestSredaDate} />
     </div>
   );
 }

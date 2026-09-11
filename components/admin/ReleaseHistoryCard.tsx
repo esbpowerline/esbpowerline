@@ -1,5 +1,9 @@
-import { History } from 'lucide-react';
+'use client';
+
+import React, { useMemo, useState } from 'react';
+import { Calendar, Check, ChevronDown, History, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ReleaseRevisionRow } from '@/lib/data/release-history.server';
 
 /**
@@ -25,19 +29,220 @@ function when(iso: string): string {
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     timeZone: 'Asia/Dhaka',
   }).format(d);
 }
 
+/** Formats ISO string into Asia/Dhaka YYYY-MM-DD date */
+function dhakaDateKey(iso: string): string {
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d);
+}
+
+function formatDayLabel(dateKey: string): string {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  if (!y || !m || !d) return dateKey;
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date);
+}
+
 export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRow[] }) {
+  // 'last-7-days', 'all', or a specific YYYY-MM-DD string
+  const [selectedFilter, setSelectedFilter] = useState<string>('last-7-days');
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  // Group dates present in revisions with counts
+  const { availableDates, dateCounts, sevenDaysCutoffIso } = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of revisions) {
+      const k = dhakaDateKey(r.publishedAt);
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    const sorted = [...counts.keys()].sort().reverse();
+
+    // 7 days ago timestamp in ms
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    return {
+      availableDates: sorted,
+      dateCounts: counts,
+      sevenDaysCutoffIso: cutoff,
+    };
+  }, [revisions]);
+
+  const filteredRevisions = useMemo(() => {
+    if (selectedFilter === 'last-7-days') {
+      return revisions.filter((r) => r.publishedAt >= sevenDaysCutoffIso);
+    }
+    if (selectedFilter === 'all') {
+      return revisions;
+    }
+    // Specific date key (YYYY-MM-DD)
+    return revisions.filter((r) => dhakaDateKey(r.publishedAt) === selectedFilter);
+  }, [revisions, selectedFilter, sevenDaysCutoffIso]);
+
+  // Label to show on the custom trigger
+  const triggerLabel = useMemo(() => {
+    if (selectedFilter === 'last-7-days') return 'Last 7 days';
+    if (selectedFilter === 'all') return `All recorded (${revisions.length})`;
+    return formatDayLabel(selectedFilter);
+  }, [selectedFilter, revisions.length]);
+
   return (
     <section className="rounded-xl border border-border/40 bg-card p-4">
-      <div className="mb-3 flex items-center gap-2">
-        <History className="h-4 w-4 text-muted-foreground" aria-hidden />
-        <h2 className="text-sm font-semibold">Publication history</h2>
-        <span className="text-[11px] text-muted-foreground">
-          append-only — a correction never overwrites what was published before it
-        </span>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <History className="h-4 w-4 text-muted-foreground" aria-hidden />
+          <h2 className="text-sm font-semibold">Publication history</h2>
+          <span className="text-[11px] text-muted-foreground">
+            append-only ledger
+          </span>
+        </div>
+
+        {/* Date Filter Controls — Modern Popover Dropdown */}
+        <div className="flex items-center gap-2">
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  'group inline-flex h-8 items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-2.5 text-[12px] font-medium shadow-sm backdrop-blur-sm transition',
+                  'hover:border-border hover:bg-muted/60 focus:outline-none focus:ring-1 focus:ring-primary/60',
+                  popoverOpen && 'border-primary/50 ring-1 ring-primary/40',
+                )}
+                aria-label="Filter publications by date"
+              >
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-foreground" />
+                <span className="truncate">{triggerLabel}</span>
+                <ChevronDown
+                  className={cn(
+                    'h-3.5 w-3.5 text-muted-foreground transition-transform duration-150',
+                    popoverOpen && 'rotate-180 text-foreground',
+                  )}
+                />
+              </button>
+            </PopoverTrigger>
+
+            <PopoverContent
+              align="end"
+              sideOffset={6}
+              className="z-[250] w-60 rounded-xl border border-border/60 bg-popover/95 p-1.5 shadow-xl backdrop-blur-md"
+            >
+              <div className="max-h-72 overflow-y-auto pr-0.5">
+                {/* Quick Presets */}
+                <div className="mb-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                  Quick View
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFilter('last-7-days');
+                    setPopoverOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-[12px] transition',
+                    selectedFilter === 'last-7-days'
+                      ? 'bg-primary/10 font-semibold text-primary'
+                      : 'text-foreground hover:bg-muted/70',
+                  )}
+                >
+                  <span className="flex items-center gap-2">
+                    <History className="h-3.5 w-3.5 opacity-70" />
+                    Last 7 days
+                  </span>
+                  {selectedFilter === 'last-7-days' && <Check className="h-3.5 w-3.5 text-primary" />}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedFilter('all');
+                    setPopoverOpen(false);
+                  }}
+                  className={cn(
+                    'flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-[12px] transition',
+                    selectedFilter === 'all'
+                      ? 'bg-primary/10 font-semibold text-primary'
+                      : 'text-foreground hover:bg-muted/70',
+                  )}
+                >
+                  <span>All recorded</span>
+                  <span className="text-[11px] tabular-nums text-muted-foreground">
+                    {revisions.length}
+                  </span>
+                </button>
+
+                {availableDates.length > 0 && (
+                  <>
+                    <div className="my-1.5 border-t border-border/40" />
+                    <div className="mb-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80">
+                      By Specific Date
+                    </div>
+
+                    <div className="space-y-0.5">
+                      {availableDates.map((dateKey) => {
+                        const active = selectedFilter === dateKey;
+                        const count = dateCounts.get(dateKey) ?? 0;
+                        return (
+                          <button
+                            key={dateKey}
+                            type="button"
+                            onClick={() => {
+                              setSelectedFilter(dateKey);
+                              setPopoverOpen(false);
+                            }}
+                            className={cn(
+                              'flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-left text-[12px] transition',
+                              active
+                                ? 'bg-primary/10 font-semibold text-primary'
+                                : 'text-foreground hover:bg-muted/70',
+                            )}
+                          >
+                            <span className="tabular-nums">{formatDayLabel(dateKey)}</span>
+                            <span
+                              className={cn(
+                                'rounded px-1.5 py-0.2 text-[10.5px] tabular-nums font-mono',
+                                active
+                                  ? 'bg-primary/20 text-primary font-medium'
+                                  : 'bg-muted/60 text-muted-foreground',
+                              )}
+                            >
+                              {count}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {selectedFilter !== 'last-7-days' && (
+            <button
+              type="button"
+              onClick={() => setSelectedFilter('last-7-days')}
+              className="inline-flex h-8 items-center gap-1 rounded-lg border border-border/60 bg-background px-2.5 text-[11px] font-semibold text-muted-foreground transition hover:bg-muted hover:text-foreground"
+              title="Reset to last 7 days"
+            >
+              <RotateCcw className="h-3 w-3" />
+              <span>Reset</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {revisions.length === 0 ? (
@@ -45,6 +250,19 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
           No revisions recorded yet, or the history is unreachable. Every publish from now on
           appears here with its reason and checksum chain.
         </p>
+      ) : filteredRevisions.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border/60 py-6 text-center">
+          <p className="text-xs text-muted-foreground">
+            No publications found for {selectedFilter === 'last-7-days' ? 'the last 7 days' : selectedFilter}.
+          </p>
+          <button
+            type="button"
+            onClick={() => setSelectedFilter('all')}
+            className="mt-2 text-[11px] font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            Show all recorded history ({revisions.length})
+          </button>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -59,7 +277,7 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
               </tr>
             </thead>
             <tbody>
-              {revisions.map((r) => (
+              {filteredRevisions.map((r) => (
                 <tr key={r.id} className="border-b border-border/20 align-top">
                   <td className="whitespace-nowrap py-1.5 pr-3 text-muted-foreground">
                     {when(r.publishedAt)}
@@ -92,6 +310,14 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
               ))}
             </tbody>
           </table>
+          <p className="mt-2 text-[10.5px] text-muted-foreground">
+            Showing {filteredRevisions.length} of {revisions.length} revision{revisions.length !== 1 ? 's' : ''}
+            {selectedFilter === 'last-7-days'
+              ? ' from the last 7 days'
+              : selectedFilter !== 'all'
+                ? ` on ${formatDayLabel(selectedFilter)}`
+                : ''}
+          </p>
         </div>
       )}
     </section>

@@ -23,6 +23,20 @@ export const metadata = {
   alternates: {
     canonical: '/categories',
   },
+  openGraph: {
+    title: 'Categories — ESB PowerLine',
+    description:
+      "Browse Bangladesh power & energy coverage by category — generation, renewables, policy, grid, projects and tenders.",
+    url: '/categories',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Categories — ESB PowerLine',
+    description:
+      "Browse Bangladesh power & energy coverage by category — generation, renewables, policy, grid, projects and tenders.",
+    images: ['/og-image.png'],
+  },
 };
 
 export default async function CategoriesIndex() {

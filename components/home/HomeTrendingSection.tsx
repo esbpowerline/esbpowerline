@@ -191,7 +191,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
                   {hasArticleImage(article.imageUrl) && !failedImages[article.imageUrl] ? (
                     <Image
                       src={article.imageUrl}
-                      alt=""
+                      alt={article.heroMeta?.alt || resolveDisplayTitle(article.title, article.shortTitle)}
                       fill
                       style={heroImageStyle(article.heroMeta || undefined)}
                       sizes="(max-width: 768px) 100vw, 280px"
@@ -488,7 +488,7 @@ export function HomeTrendingSection({
             {hasArticleImage(lead.imageUrl) ? (
               <Image
                 src={lead.imageUrl}
-                alt=""
+                alt={lead.heroMeta?.alt || resolveDisplayTitle(lead.title, lead.shortTitle)}
                 fill
                 style={heroImageStyle(lead.heroMeta || undefined)}
                 sizes="(max-width: 768px) 96px, 128px"

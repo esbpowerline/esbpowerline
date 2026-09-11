@@ -15,7 +15,7 @@ export default async function AdminDataPage() {
     getIngestStatus(),
     getLatestSredaDaily(),
     getIngestCoverage(),
-    getRecentReleaseRevisions(),
+    getRecentReleaseRevisions(150),
   ]);
 
   return (

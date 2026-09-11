@@ -6,6 +6,7 @@ import { RoleBadge } from '@/components/dashboard/RoleBadge';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Plus, Users, Pencil } from 'lucide-react';
+import { AdminFormattedTime } from '@/components/admin/AdminFormattedTime';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
 import { cn } from '@/lib/utils';
@@ -86,7 +87,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                     : u.articlesCount}
                 </TableCell>
                 <TableCell className="text-muted-foreground hidden lg:table-cell">
-                  {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : '—'}
+                  {u.lastLoginAt ? <AdminFormattedTime value={u.lastLoginAt} /> : '—'}
                 </TableCell>
                 <TableCell>
                   <Link

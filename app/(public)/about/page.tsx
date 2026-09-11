@@ -3,15 +3,32 @@ import { Award, ShieldCheck, FileText, Users, ArrowRight, Quote, CheckCircle2, C
 import { getServerSiteLocale } from '@/lib/locale-server';
 import { createTranslator } from '@/lib/i18n/messages';
 import { ScrollGeometryBackdrop } from '@/components/shared/ScrollGeometryBackdrop';
+import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
+import { safeJsonLd } from '@/lib/json-ld';
+import { ORGANIZATION_ID, SITE_URL } from '@/lib/seo';
 
 export const revalidate = 86400;
 
 export const metadata = {
-  title: 'About',
+  title: 'About Us — Bangladesh Power Sector Newsroom',
   description:
     "Who we are: ESB PowerLine is Bangladesh's dedicated power & energy newsroom, covering generation, renewables, policy, grid data and projects.",
   alternates: {
     canonical: '/about',
+  },
+  openGraph: {
+    title: 'About ESB PowerLine — Bangladesh Power Sector Newsroom',
+    description:
+      "Who we are: ESB PowerLine is Bangladesh's dedicated power & energy newsroom, covering generation, renewables, policy, grid data and projects.",
+    url: '/about',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About ESB PowerLine — Bangladesh Power Sector Newsroom',
+    description:
+      "Who we are: ESB PowerLine is Bangladesh's dedicated power & energy newsroom, covering generation, renewables, policy, grid data and projects.",
+    images: ['/og-image.png'],
   },
 };
 
@@ -19,8 +36,23 @@ export default async function AboutPage() {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);
 
+  const aboutJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    mainEntity: { '@id': ORGANIZATION_ID },
+    url: `${SITE_URL}/about`,
+    name: 'About ESB PowerLine',
+    description:
+      "ESB PowerLine is Bangladesh's dedicated power & energy newsroom, covering generation, renewables, policy, grid data and projects.",
+    publisher: { '@id': ORGANIZATION_ID },
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden isolate">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(aboutJsonLd) }}
+      />
       {/* Background dot pattern texture with a fade mask */}
       <div 
         className="absolute inset-0 hero-dot-pattern opacity-60 pointer-events-none -z-20"
@@ -37,6 +69,7 @@ export default async function AboutPage() {
       <ScrollGeometryBackdrop />
       
       <div className="container container--shell py-10 md:py-14 max-w-4xl mx-auto space-y-10 md:space-y-14 relative z-10">
+        <Breadcrumbs crumbs={[{ name: 'About' }]} />
         
         {/* SECTION 1: Hero Header */}
         <section className="text-center space-y-4">
@@ -53,6 +86,7 @@ export default async function AboutPage() {
 
         {/* SECTION 2: Pillars Feature Grid */}
         <section className="space-y-6">
+          <h2 className="sr-only">Our Core Focus Areas</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             
             {/* Feature 1 */}

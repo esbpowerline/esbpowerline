@@ -14,17 +14,21 @@ export function writeAdminTimeFormat(format: AdminTimeFormat) {
   window.dispatchEvent(new CustomEvent('admin-time-format-change', { detail: format }));
 }
 
-/** Time first, then abbreviated month · day · year — admin panels only. */
+/** Time first (with seconds), then abbreviated month · day · year — admin panels only. */
 export function formatAdminDateTime(
   value: string | Date,
   format: AdminTimeFormat = '12',
+  options?: { showSeconds?: boolean },
 ): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
 
+  const showSeconds = options?.showSeconds ?? true;
+
   const time = date.toLocaleTimeString('en-US', {
     hour: format === '24' ? '2-digit' : 'numeric',
     minute: '2-digit',
+    ...(showSeconds ? { second: '2-digit' } : {}),
     hour12: format === '12',
   });
 

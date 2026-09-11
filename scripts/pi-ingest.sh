@@ -203,7 +203,11 @@ print(f"recorded {day} {sha[:12]} for the next live check")
 PY
 
 # Commit only data paths. The chain must never be able to push code from here.
-git add public/data lib/available-dates.json
+# recent-artifacts.json is compiled into the admin bundle rather than read from
+# disk — it is the only way the deployed coverage screen can see that a day
+# shipped with its curve and station detail. The chain rewrites it; if it is not
+# committed the panel's strip goes stale while the site itself is fine.
+git add public/data lib/available-dates.json lib/data/grid/recent-artifacts.json
 if git diff --cached --quiet; then
     echo "no new files"
 else

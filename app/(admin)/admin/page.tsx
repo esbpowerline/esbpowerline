@@ -7,6 +7,8 @@ import {
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { getAdminOverview, getAuthorPublishingStats } from '@/lib/actions/analytics';
 import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
+import { getIngestCoverage } from '@/lib/data/grid/ingest-coverage.server';
+import { AutomationPulseRow } from '@/components/admin/AutomationPulseRow';
 import { AuthorProductivityPanel } from '@/components/admin/AuthorProductivityPanel';
 import { formatNumber } from '@/lib/utils';
 import {
@@ -22,11 +24,12 @@ import { Suspense } from 'react';
 import { AdminLoading } from '@/components/admin/AdminUI';
 
 async function AdminDashboardData() {
-  const [stats, authorStats, session, gridSnapshot] = await Promise.all([
+  const [stats, authorStats, session, gridSnapshot, coverage] = await Promise.all([
     getAdminOverview(),
     getAuthorPublishingStats(),
     auth(),
     getLatestHomeSnapshot(),
+    getIngestCoverage(),
   ]);
   const role = session?.user?.role;
 
@@ -41,21 +44,22 @@ async function AdminDashboardData() {
         description={`Platform health, content pipeline, and user activity at a glance. (Updated ${stalenessText})`}
       />
 
+      {/* Real-time Automation Pulse: Hourly Capture · Hours Last 24 · Forecast Board · Last Publish */}
+      <AutomationPulseRow pulse={coverage.pulse} degraded={coverage.degraded} />
+
+      {/* Primary Platform KPIs */}
       <AdminStatGrid>
         <AdminStatCard title="Total Articles" value={formatNumber(stats.articleCount)} icon={FileText} accent="rose" change={`${stats.publishedCount} published`} />
         <AdminStatCard title="Total Users" value={formatNumber(stats.userCount)} icon={Users} accent="violet" />
         <AdminStatCard title="Total Views" value={formatNumber(stats.totalViews)} icon={Eye} accent="sky" />
         <AdminStatCard title="Published Live" value={formatNumber(stats.publishedCount)} icon={CheckCircle} accent="emerald" change="Visible on public site" />
-      </AdminStatGrid>
-
-      {(stats.pendingComments > 0 || stats.memberCount > 0) && (
-        <AdminStatGrid cols={2}>
-          {stats.pendingComments > 0 && (
-            <AdminStatCard title="Pending Comments" value={formatNumber(stats.pendingComments)} icon={MessageSquare} accent="amber" change="Awaiting moderation" />
-          )}
+        {stats.memberCount > 0 && (
           <AdminStatCard title="Members" value={formatNumber(stats.memberCount)} icon={Users} accent="emerald" change="Subscriber accounts" />
-        </AdminStatGrid>
-      )}
+        )}
+        {stats.pendingComments > 0 && (
+          <AdminStatCard title="Pending Comments" value={formatNumber(stats.pendingComments)} icon={MessageSquare} accent="amber" change="Awaiting moderation" />
+        )}
+      </AdminStatGrid>
 
       <AdminCardGrid cols={3}>
         {/* Main Details (Left 2/3 Column) */}

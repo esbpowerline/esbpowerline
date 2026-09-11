@@ -1,8 +1,10 @@
 'use client';
 
-import { AlertTriangle, CalendarClock, CheckCircle2, CircleDashed, Database } from 'lucide-react';
+import { AlertTriangle, CalendarClock, CheckCircle2, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { DayRow, IngestCoverage } from '@/lib/data/grid/ingest-coverage.server';
+import type { IngestCoverage } from '@/lib/data/grid/ingest-coverage.server';
+import { IngestDayStrip } from '@/components/admin/IngestDayStrip';
+import { AutomationPulseRow } from '@/components/admin/AutomationPulseRow';
 
 /**
  * What the site holds, and what it still needs — before anything is uploaded.
@@ -13,6 +15,11 @@ import type { DayRow, IngestCoverage } from '@/lib/data/grid/ingest-coverage.ser
  * operator had no way to see a gap, or to see a day that was present but
  * incomplete — and a day held without its gas publishes with the gas columns
  * blank, silently.
+ *
+ * Since 2026-09-11 it also answers "who did this, and when" — the Pi publishes
+ * the same release rows this panel does, so the strip shows the automation's
+ * work and a hand ingest side by side, and a day done here during Pi
+ * maintenance appears in exactly the same place.
  */
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -25,38 +32,26 @@ function pretty(key: string | null): string {
   return m ? `${MONTHS[Number(m[2]) - 1]} ${m[1]}` : key;
 }
 
-/** One square per day: what the site holds for it, at a glance. */
-function DayCell({ row }: { row: DayRow }) {
-  const have = [row.grid, row.gas, row.plants].filter(Boolean).length;
-  const title =
-    `${pretty(row.date)}\n` +
-    `${row.grid ? '✓' : '✗'} grid day\n` +
-    `${row.gas ? '✓' : '✗'} gas day\n` +
-    `${row.plants ? '✓' : '✗'} station detail`;
-
-  return (
-    <span
-      title={title}
-      className={cn(
-        'ingest-day',
-        !row.grid && 'ingest-day--absent',
-        row.grid && have === 3 && 'ingest-day--full',
-        row.grid && have === 2 && 'ingest-day--most',
-        row.grid && have === 1 && 'ingest-day--thin',
-      )}
-      aria-label={title}
-    />
-  );
-}
-
 export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
-  const { datasets, recent, awaiting, gasMissing, plantsMissing, monthsMissing, daysBehind } =
-    coverage;
+  const {
+    datasets,
+    recent,
+    awaiting,
+    gasMissing,
+    plantsMissing,
+    curveMissing,
+    monthsMissing,
+    daysBehind,
+    pulse,
+    degraded,
+  } = coverage;
 
   const upToDate = awaiting.length === 0;
+  const complete = recent.filter((r) => r.heldCount === 4).length;
 
   return (
     <div className="space-y-4">
+      <AutomationPulseRow pulse={pulse} degraded={degraded} />
       {/* ── what to do next ─────────────────────────────────────────────── */}
       <div
         className={cn(
@@ -122,7 +117,7 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
       </div>
 
       {/* ── days held but incomplete ────────────────────────────────────── */}
-      {(gasMissing.length > 0 || plantsMissing.length > 0) && (
+      {(gasMissing.length > 0 || plantsMissing.length > 0 || curveMissing.length > 0) && (
         <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -138,16 +133,30 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
                   {gasMissing.length > 8 ? ` … +${gasMissing.length - 8}` : ''}
                 </p>
               )}
+              {curveMissing.length > 0 && (
+                <p className="mt-1 text-muted-foreground">
+                  <span className="font-semibold text-foreground">
+                    {curveMissing.length} day{curveMissing.length === 1 ? '' : 's'} with no energy
+                    curve
+                  </span>{' '}
+                  — the Energy Curve tab is empty for them: {curveMissing.slice(0, 8).join(', ')}
+                  {curveMissing.length > 8 ? ` … +${curveMissing.length - 8}` : ''}
+                </p>
+              )}
               {plantsMissing.length > 0 && (
                 <p className="mt-1 text-muted-foreground">
                   <span className="font-semibold text-foreground">
                     {plantsMissing.length} day{plantsMissing.length === 1 ? '' : 's'} with no station
                     detail
                   </span>{' '}
-                  — the per-station section is empty for them: {plantsMissing.slice(0, 8).join(', ')}
+                  — the Power Stations tab is empty for them: {plantsMissing.slice(0, 8).join(', ')}
                   {plantsMissing.length > 8 ? ` … +${plantsMissing.length - 8}` : ''}
                 </p>
               )}
+              <p className="mt-1.5 text-[11px] text-muted-foreground">
+                Run the full ingest for the day below — it produces all four and publishes them
+                together.
+              </p>
             </div>
           </div>
         </div>
@@ -181,6 +190,15 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
                     <span className="ml-1 text-[10.5px] font-normal text-muted-foreground">
                       {d.unit}
                     </span>
+                    {/* Said, not hidden: on the deployed panel this row can only
+                        be counted over the window the compiled index covers, and
+                        a total that silently means something narrower than the
+                        row beside it is worse than no total. */}
+                    {d.windowOnly && (
+                      <p className="mt-0.5 text-[10px] font-normal text-muted-foreground">
+                        recent window only
+                      </p>
+                    )}
                   </td>
                   <td className="whitespace-nowrap px-4 py-2.5 tabular-nums text-muted-foreground">
                     {pretty(d.first)} → {pretty(d.last)}
@@ -231,34 +249,29 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
 
         {/* ── the last stretch, day by day ──────────────────────────────── */}
         <div className="border-t border-border/50 px-4 py-3">
-          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Last {recent.length} energy days
+              <span className="ml-2 font-normal normal-case tracking-normal">
+                <span className="font-bold tabular-nums text-foreground">{complete}</span> complete
+              </span>
             </p>
             <div className="flex flex-wrap items-center gap-3 text-[10.5px] text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <span className="ingest-day ingest-day--full" /> complete
+              <span className="inline-flex items-center gap-1.5">
+                <span className="ingest-day ingest-day--full" /> all four
               </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="ingest-day ingest-day--most" /> grid + one
+              <span className="inline-flex items-center gap-1.5">
+                <span className="ingest-day ingest-day--partial" /> partial
               </span>
-              <span className="inline-flex items-center gap-1">
-                <span className="ingest-day ingest-day--thin" /> grid only
-              </span>
-              <span className="inline-flex items-center gap-1">
+              <span className="inline-flex items-center gap-1.5">
                 <span className="ingest-day ingest-day--absent" /> nothing
               </span>
             </div>
           </div>
-          {/* Oldest on the left, so it reads as time passing. */}
-          <div className="ingest-strip">
-            {[...recent].reverse().map((r) => (
-              <DayCell key={r.date} row={r} />
-            ))}
-          </div>
-          <p className="mt-2 flex items-center gap-1.5 text-[10.5px] text-muted-foreground">
-            <CircleDashed className="h-3 w-3" />
-            Hover a square for that day&rsquo;s three artifacts.
+          <IngestDayStrip recent={recent} />
+          <p className="mt-2.5 text-[10.5px] leading-relaxed text-muted-foreground">
+            A square is the energy day, not the filing date. Hover or tap one for its four
+            artefacts, who published each, and how many NLDC hours that day holds.
           </p>
         </div>
       </div>

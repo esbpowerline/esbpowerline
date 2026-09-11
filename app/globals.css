@@ -16138,32 +16138,37 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 .ingest-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: calc(3 * var(--px));
+  gap: calc(4 * var(--px));
 }
 
 .ingest-day {
   display: inline-block;
-  height: 0.85rem;
-  width: 0.85rem;
+  height: 1.05rem;
+  width: 1.05rem;
   flex: 0 0 auto;
-  border-radius: 0.2rem;
+  padding: 0;
+  border-radius: 0.25rem;
   border: 1px solid hsl(var(--border) / 0.55);
   background: hsl(var(--muted) / 0.4);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
+/* Three states, not four. The old strip graded by how many of THREE artefacts
+   it could see and had no idea the fuel curve existed; with four counted, the
+   only distinctions worth a colour are "the day is whole", "the day is on the
+   site but a tab of it is empty", and "nothing yet". The tooltip carries the
+   detail, which is where detail belongs. */
 .ingest-day--full {
   background: hsl(152 55% 42% / 0.85);
   border-color: hsl(152 55% 34%);
 }
 
-.ingest-day--most {
-  background: hsl(152 45% 55% / 0.55);
-  border-color: hsl(152 45% 45% / 0.7);
-}
-
-.ingest-day--thin {
-  background: hsl(38 92% 55% / 0.55);
-  border-color: hsl(38 80% 45% / 0.7);
+.ingest-day--partial {
+  background: hsl(38 92% 55% / 0.6);
+  border-color: hsl(38 80% 45% / 0.75);
 }
 
 /* Absent is drawn, not omitted: a missing day has to occupy its place in the
@@ -16172,6 +16177,188 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   background: transparent;
   border-style: dashed;
   border-color: hsl(var(--muted-foreground) / 0.45);
+}
+
+.ingest-day:hover,
+.ingest-day:focus-visible,
+.ingest-day--active {
+  transform: translateY(calc(-1 * var(--px)));
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 3px hsl(var(--primary) / 0.55);
+  outline: none;
+}
+
+/* ── the day card ─────────────────────────────────────────────────────────
+   Fixed, not absolute: the strip sits inside a card with its own overflow and
+   an absolutely-positioned tooltip was clipped by it on the right-hand third
+   of the run. Anchored to the square's own viewport rect, so it follows the
+   square whatever has scrolled. */
+.ingest-tip {
+  position: fixed;
+  z-index: 60;
+  transform: translate(-50%, calc(-100% - 10 * var(--px)));
+  width: max-content;
+  max-width: min(19rem, calc(100vw - 2rem));
+  pointer-events: none;
+  border-radius: 0.6rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow:
+    0 1px 2px hsl(var(--foreground) / 0.06),
+    0 12px 28px -8px hsl(var(--foreground) / 0.22);
+  padding: calc(9 * var(--px)) calc(11 * var(--px)) calc(8 * var(--px));
+  animation: ingest-tip-in 110ms ease-out;
+}
+
+@keyframes ingest-tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 4 * var(--px)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ingest-tip {
+    animation: none;
+  }
+
+  .ingest-day {
+    transition: none;
+  }
+}
+
+.ingest-tip__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(10 * var(--px));
+  padding-bottom: calc(6 * var(--px));
+  margin-bottom: calc(6 * var(--px));
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+}
+
+.ingest-tip__date {
+  font-size: calc(12.5 * var(--px));
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ingest-tip__pill {
+  font-size: calc(9.5 * var(--px));
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: calc(2 * var(--px)) calc(7 * var(--px));
+  white-space: nowrap;
+}
+
+.ingest-tip__pill--full {
+  background: hsl(152 55% 42% / 0.16);
+  color: hsl(152 60% 30%);
+}
+
+.ingest-tip__pill--partial {
+  background: hsl(38 92% 50% / 0.18);
+  color: hsl(30 85% 33%);
+}
+
+.ingest-tip__pill--absent {
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--muted-foreground));
+}
+
+:root:not([data-theme='light']) .ingest-tip__pill--full,
+[data-theme='dark'] .ingest-tip__pill--full {
+  color: hsl(152 55% 62%);
+}
+
+:root:not([data-theme='light']) .ingest-tip__pill--partial,
+[data-theme='dark'] .ingest-tip__pill--partial {
+  color: hsl(38 90% 65%);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .ingest-tip__pill--full {
+    color: hsl(152 60% 30%);
+  }
+
+  :root:not([data-theme='dark']) .ingest-tip__pill--partial {
+    color: hsl(30 85% 33%);
+  }
+}
+
+.ingest-tip__list {
+  display: grid;
+  gap: calc(3 * var(--px));
+}
+
+.ingest-tip__row {
+  display: grid;
+  grid-template-columns: calc(12 * var(--px)) minmax(0, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: calc(6 * var(--px));
+  font-size: calc(11 * var(--px));
+  line-height: 1.45;
+}
+
+.ingest-tip__mark {
+  height: calc(7 * var(--px));
+  width: calc(7 * var(--px));
+  border-radius: 999px;
+  justify-self: center;
+}
+
+.ingest-tip__mark--yes {
+  background: hsl(152 55% 42%);
+}
+
+.ingest-tip__mark--no {
+  background: transparent;
+  border: 1px dashed hsl(var(--muted-foreground) / 0.6);
+}
+
+.ingest-tip__label {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ingest-tip__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(4 * var(--px));
+  justify-self: end;
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ingest-tip__meta--absent {
+  color: hsl(38 70% 42%);
+}
+
+:root:not([data-theme='light']) .ingest-tip__meta--absent,
+[data-theme='dark'] .ingest-tip__meta--absent {
+  color: hsl(38 85% 62%);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) .ingest-tip__meta--absent {
+    color: hsl(38 70% 42%);
+  }
+}
+
+.ingest-tip__foot {
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--px));
+  margin-top: calc(7 * var(--px));
+  padding-top: calc(6 * var(--px));
+  border-top: 1px solid hsl(var(--border) / 0.6);
+  font-size: calc(10 * var(--px));
+  color: hsl(var(--muted-foreground));
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── live forecast card, regional bars, forecast curve ─────────────────────
