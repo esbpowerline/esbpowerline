@@ -466,12 +466,16 @@ def main() -> int:
                 continue
             log(f"{item.title}: {'fetched' if fetched else 'already on disk'} id {item.erp_id} "
                 f"({xlsx.stat().st_size:,} bytes, sha256 {sha[:12]}…) -> {xlsx}")
+            # Deterministic on purpose — no fetch time. The Pi's first run
+            # re-parsed a month this box had just committed and the two
+            # documents differed in nothing but a timestamp, which cost a
+            # commit and made "did the two machines parse it the same" a
+            # question instead of a diff. The time is in the log.
             source = {
                 "erp_id": item.erp_id,
                 "title": item.title,
                 "url": item.url,
                 "sha256": sha,
-                "fetched_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             }
             try:
                 key = ingest_one(xlsx, source, held_by_key, expect_key=item.key,
