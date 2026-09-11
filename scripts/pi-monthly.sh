@@ -51,6 +51,13 @@ def norm(o):
 def digest(o): return hashlib.sha256(json.dumps(norm(o), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
 state = json.load(open(sys.argv[1]))
 month, want = state["month"], state["sha256"]
+# Two runs seconds apart (a hand re-run after the scheduled one) compared a
+# fresh digest against a payload the edge had cached from the run before and
+# paged Telegram for nothing (2026-09-11 21:36). Inside the cache window the
+# answer is not known yet, and "not yet" is not a disagreement.
+import time
+if time.time() - state.get("published_at", 0) < 900:
+    print(f"live check: {month} was published under 15 minutes ago; the edge may still hold the old copy — skipped"); sys.exit(0)
 req = urllib.request.Request(f"{sys.argv[2]}/api/data/pgcb-monthly/{month}.json", headers={
     "User-Agent": "Mozilla/5.0 (esb-pi-verify)", "Referer": f"{sys.argv[2]}/grid-explorer"})
 try:
@@ -107,7 +114,7 @@ fi
 
 # Remember the newest month for tomorrow's live check.
 "$ROOT/venv/bin/python" - "$LAST" "${ingested##*,}" <<'PY'
-import hashlib, json, sys
+import hashlib, json, sys, time
 def norm(o):
     if isinstance(o, dict): return {k: norm(v) for k, v in o.items()}
     if isinstance(o, list): return [norm(v) for v in o]
@@ -116,7 +123,7 @@ def norm(o):
 month = sys.argv[2]
 doc = json.load(open(f"public/data/pgcb-monthly/{month}.json", encoding="utf-8"))
 sha = hashlib.sha256(json.dumps(norm(doc), sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-json.dump({"month": month, "sha256": sha}, open(sys.argv[1], "w"))
+json.dump({"month": month, "sha256": sha, "published_at": int(time.time())}, open(sys.argv[1], "w"))
 print(f"recorded {month} {sha[:12]} for the next live check")
 PY
 
