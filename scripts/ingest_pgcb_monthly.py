@@ -93,14 +93,23 @@ LISTING_URL = os.environ.get("ESB_PGCB_MONTHLY_LISTING") or (
     "/show_report"
 )
 
-# One link per report, twice: the page prints each once as "July-2026" and
-# once as "July-2026_01-01-1970" (a template's unset date), both to the same
-# file id. The trailing quote keeps the second form's suffix out of the year.
+# One link per report, twice — the page prints each once as "July-2026" and
+# once with a suffix ("July-2026_01-01-1970", "May-2023_19-06-2023",
+# "February-2023_"), both to the same file id. The titles were typed by hand
+# over thirteen years and come in four shapes, all seen on 2026-09-11:
+# "July-2026", "November-%202019", "January_2013", "June%202015". The first
+# walker matched only the first and so believed the ERP began in 2016; it
+# lists every month back to January 2013, 2013-01 .. 2017-08 as legacy .xls.
+# One entry is not a report at all: id 195, "x.php", sits where February 2013
+# should be — a broken upload, which is why that month has no source anywhere.
 LINK_RE = re.compile(
     r'href="(https://erp\.powergrid\.gov\.bd/web/files/download\?'
     r"location=erp%2Fweb%2Freport_docs%2F(\d+)\.(xlsx|xlsm|xls)"
-    r'&(?:amp;)?title=([A-Za-z]+)-(\d{4}))"'
+    r'&(?:amp;)?title=([A-Za-z]+)(?:%20|[-_ ])+(\d{4})(?:_[^"]*)?)"'
 )
+# "Showing 30 of 162": the listing is paginated, newest first, ?page=N.
+PAGE_SHOWING_RE = re.compile(r"Showing\s+(\d+)\s+of\s+(\d+)")
+MAX_PAGES = 20
 
 MONTHS = {m.lower(): i for i, m in enumerate(
     ["January", "February", "March", "April", "May", "June",
@@ -152,22 +161,43 @@ def fetch(url: str, timeout: int = 90) -> bytes:
         return resp.read()
 
 
-def list_erp() -> list[Listed]:
-    page = fetch(LISTING_URL).decode("utf-8", "replace")
+def list_erp(all_pages: bool = False) -> list[Listed]:
+    """Every report the ERP serves, one entry per month, newest id wins.
+
+    The daily runner reads page 1 only: it is newest-first, so a new month is
+    always there, and one GET a day is the whole cost. `all_pages` walks the
+    lot — for `--list`, `--verify` and a backfill.
+    """
     seen: dict[str, Listed] = {}
-    for m in LINK_RE.finditer(page):
-        url, fid, ext, month, year = m.groups()
-        if month.lower() not in MONTHS:
-            continue
-        key = f"{year}-{MONTHS[month.lower()]:02d}"
-        seen.setdefault(key, Listed(key, f"{month}-{year}", int(fid), ext, html.unescape(url)))
-    if not seen:
-        # A login page, a redirect, or a relaid template all answer 200 with
-        # no report links. That is a finding, not an empty month.
-        raise SystemExit(
-            f"listing: no report links on {LISTING_URL} ({len(page)} bytes) — "
-            "the page is not the report list any more"
-        )
+    total_claimed = None
+    for page_no in range(1, MAX_PAGES + 1):
+        url = LISTING_URL + (f"?page={page_no}" if page_no > 1 else "")
+        page = fetch(url).decode("utf-8", "replace")
+        if (m := PAGE_SHOWING_RE.search(page)) and total_claimed is None:
+            total_claimed = int(m.group(2))
+        found = 0
+        for m in LINK_RE.finditer(page):
+            url, fid, ext, month, year = m.groups()
+            found += 1
+            if month.lower() not in MONTHS:
+                continue
+            key = f"{year}-{MONTHS[month.lower()]:02d}"
+            # The title is normalised to "July-2026": it names the file on
+            # disk, and the four spellings are the ERP's typing, not PGCB's.
+            item = Listed(key, f"{month.capitalize()}-{year}", int(fid), ext, html.unescape(url))
+            if key not in seen or item.erp_id > seen[key].erp_id:
+                seen[key] = item
+        if page_no == 1 and not seen:
+            # A login page, a redirect, or a relaid template all answer 200
+            # with no report links. That is a finding, not an empty month.
+            raise SystemExit(
+                f"listing: no report links on {LISTING_URL} ({len(page)} bytes) — "
+                "the page is not the report list any more"
+            )
+        if not all_pages or found == 0:
+            break
+    if all_pages and total_claimed is not None:
+        log(f"listing: the ERP claims {total_claimed} entries; {len(seen)} distinct months read")
     return sorted(seen.values(), key=lambda item: item.key)
 
 
@@ -177,6 +207,10 @@ def workbook_is_whole(path: Path) -> bool:
     Same check as daily_extractor/download.py. Not imported from there because
     that module resolves its Desktop-default paths at import time.
     """
+    if path.suffix.lower() == ".xls":
+        # 2013-01 .. 2017-08 are legacy BIFF files, not zips. Read by xlrd,
+        # which both venvs carry since 2026-09-11.
+        return path.stat().st_size > 20000
     try:
         with zipfile.ZipFile(path) as zf:
             return zf.testzip() is None and any(n.startswith("xl/") for n in zf.namelist())
@@ -188,16 +222,17 @@ def download(item: Listed, dest_dir: Path) -> tuple[Path, str, bool]:
     """The workbook on disk, its sha256, and whether this call fetched it."""
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / f"{item.title}.{item.ext}"
-    if item.ext == "xls":
-        raise SystemExit(f"{item.title}: the ERP serves a legacy .xls; this chain reads .xlsx only")
     if dest.exists() and workbook_is_whole(dest):
         return dest, hashlib.sha256(dest.read_bytes()).hexdigest(), False
     dest.unlink(missing_ok=True)
 
     data = fetch(item.url)
     # Publisher sites serve HTML redirect pages under a .xlsx URL; a parser
-    # fed HTML produces confident nonsense (CLAUDE.md § Ingestion).
-    if data[:2] != b"PK" or len(data) < 20000:
+    # fed HTML produces confident nonsense (CLAUDE.md § Ingestion). A .xlsx
+    # is a zip ("PK"); the 2013-2017 .xls files are OLE2 compound documents
+    # and open with the D0 CF 11 E0 magic instead.
+    magic_ok = data[:8] == b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" if item.ext == "xls" else data[:2] == b"PK"
+    if not magic_ok or len(data) < 20000:
         raise SystemExit(
             f"{item.title}: download is not a workbook "
             f"({len(data)} bytes, starts {data[:12]!r})"
@@ -318,7 +353,10 @@ def check(record: dict[str, Any], doc: dict[str, Any],
             ("peak demand", keyed.get("max_evening_peak_demand_mw", {}).get("prev_month"), prev["max_evening_peak_demand"]),
             ("net generation", keyed.get("total_net_generation_mkwh", {}).get("prev_month"), prev["total_net_generation"]),
         ]
-        ok = [n for n, a, b in prev_pairs if close(a, b)]
+        # The sheet prints the previous month to two decimals; the record
+        # holds what that month's own sheet said in full (4238.82 against
+        # 4238.82139295 on 2019-01), so agree to the printed precision.
+        ok = [n for n, a, b in prev_pairs if a is not None and b is not None and abs(a - b) <= 0.01]
         for n, a, b in prev_pairs:
             if n not in ok:
                 warns.append(f"sheet says previous-month {n} was {a!r}; held {prev['date_key']} record says {b!r}")
@@ -361,6 +399,146 @@ def write(record: dict[str, Any], doc: dict[str, Any], out: Path | None) -> None
 
 
 # --------------------------------------------------------------------------- #
+# verify — the monthly twin of `npm run verify:source`
+# --------------------------------------------------------------------------- #
+LEDGER = ROOT / "verification" / "pgcb-monthly-ledger.json"
+
+# Fields of the headline record that the site prints as PGCB's own figures.
+INDICATOR_FIELDS = ("max_evening_peak_gen", "max_evening_peak_demand", "total_net_generation")
+
+
+def _flatten_record(r: dict[str, Any]) -> dict[str, float]:
+    out = {f: r[f] for f in INDICATOR_FIELDS}
+    out.update({f"generation_by_fuel.{k}": v for k, v in r["generation_by_fuel"].items()})
+    out.update({f"regional_supply.{k}": v for k, v in r["regional_supply"].items()})
+    return out
+
+
+def verify_month(item: Listed, committed_record: dict[str, Any]) -> dict[str, Any]:
+    """Refetch one month from the ERP, reparse it with today's parsers, and say
+    where it disagrees with what is committed.
+
+    Verdicts, worst first — the same scale as verify:source:
+      INDICATOR  a headline figure the site prints differs   fix now
+      DRIFT      a detail section differs                    triage
+      EVENTS     only the outage log differs                 triage (usually
+                 a sheet the old parse could not read)
+      MATCH      every figure and section agrees
+      UNFETCHED / UNPARSED  the ERP or the parser refused
+    Compared by value after the same normalisation the release layer applies,
+    never by bytes — the old dumps and the workbooks spell 17.0 and 17 alike.
+    """
+    key = item.key
+    entry: dict[str, Any] = {"month": key, "erp_id": item.erp_id, "title": item.title, "ext": item.ext}
+    try:
+        xlsx, sha, _ = download(item, archive_dir())
+    except SystemExit as e:
+        return {**entry, "verdict": "UNFETCHED", "note": str(e)}
+    except Exception as e:  # network
+        return {**entry, "verdict": "UNFETCHED", "note": f"download failed: {e}"}
+    entry["sha256"] = sha
+    try:
+        record, doc = parse(xlsx, {"erp_id": item.erp_id, "title": item.title, "url": item.url, "sha256": sha})
+    except SystemExit as e:
+        return {**entry, "verdict": "UNPARSED", "note": str(e)}
+    if record["date_key"] != key:
+        return {**entry, "verdict": "UNPARSED",
+                "note": f"the document states {record['date_key']}; the ERP titles it {key}"}
+
+    indicator = []
+    a, b = _flatten_record(committed_record), _flatten_record(record)
+    for f in a:
+        if not close(a[f], b.get(f)):
+            indicator.append({"field": f, "committed": a[f], "erp": b.get(f)})
+
+    committed_doc = json.loads((DETAIL_DIR / f"{key}.json").read_text(encoding="utf-8"))
+    sections: dict[str, Any] = {}
+    skip = {"source_file", "sheets_present", "source", "outage_events", "data_quality"}
+    for name in sorted((set(committed_doc) | set(doc)) - skip):
+        x, y = committed_doc.get(name), doc.get(name)
+        if _norm(x) == _norm(y):
+            continue
+        sections[name] = {"committed": _size(x), "erp": _size(y)}
+    # The event log is compared row by row, not by count: two parses of the
+    # same sheet can agree on 442 rows and still disagree on three of them
+    # (the old text dumps rendered a few cells differently), and a count
+    # cannot see that.
+    ev_committed = [_norm(e) for e in committed_doc.get("outage_events", [])]
+    ev_erp = [_norm(e) for e in doc.get("outage_events", [])]
+    ev_key = lambda e: json.dumps(e, sort_keys=True)  # noqa: E731
+    only_committed = sorted(set(map(ev_key, ev_committed)) - set(map(ev_key, ev_erp)))
+    only_erp = sorted(set(map(ev_key, ev_erp)) - set(map(ev_key, ev_committed)))
+    events = {"committed": len(ev_committed), "erp": len(ev_erp),
+              "only_committed": len(only_committed), "only_erp": len(only_erp)}
+
+    if indicator:
+        verdict = "INDICATOR"
+    elif sections:
+        verdict = "DRIFT"
+    elif only_committed or only_erp:
+        verdict = "EVENTS"
+    else:
+        verdict = "MATCH"
+    return {**entry, "verdict": verdict, "indicator": indicator, "sections": sections, "events": events}
+
+
+def _norm(o: Any) -> Any:
+    if isinstance(o, dict):
+        return {k: _norm(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [_norm(v) for v in o]
+    if isinstance(o, float) and o.is_integer():
+        return int(o)
+    return o
+
+
+def _size(o: Any) -> Any:
+    if isinstance(o, list):
+        return len(o)
+    if isinstance(o, dict):
+        return {k: _size(v) for k, v in o.items()} if len(o) <= 4 else len(o)
+    return o
+
+
+def verify(listing: list[Listed], held: dict[str, dict[str, Any]], wanted: list[str], force: bool) -> int:
+    ledger = json.loads(LEDGER.read_text(encoding="utf-8")) if LEDGER.exists() else {"months": {}}
+    months = ledger.setdefault("months", {})
+    todo = [i for i in listing if i.key in held and (not wanted or i.key in wanted)]
+    if not force:
+        # A month verified MATCH against this same ERP file need not be
+        # refetched — the ledger is audit evidence, as source-ledger.json is.
+        todo = [i for i in todo if not (months.get(i.key, {}).get("verdict") == "MATCH"
+                                        and months[i.key].get("erp_id") == i.erp_id)]
+    log(f"verify: {len(todo)} month(s) to refetch and reparse")
+    for item in todo:
+        entry = verify_month(item, held[item.key])
+        months[item.key] = entry
+        detail = ""
+        if entry["verdict"] == "INDICATOR":
+            detail = "; ".join(f"{d['field']} {d['committed']!r}->{d['erp']!r}" for d in entry["indicator"][:4])
+        elif entry["verdict"] == "DRIFT":
+            detail = ", ".join(f"{k} {v['committed']}->{v['erp']}" for k, v in entry["sections"].items())
+        elif entry["verdict"] == "EVENTS":
+            ev = entry["events"]
+            detail = (f"events {ev['committed']}->{ev['erp']} "
+                      f"({ev['only_committed']} only in the archive, {ev['only_erp']} only in the workbook)")
+        elif entry["verdict"] in ("UNFETCHED", "UNPARSED"):
+            detail = entry.get("note", "")
+        log(f"  {item.key}  {entry['verdict']:10s} {detail}")
+        # Written after every month so a cut mid-sweep keeps what was done.
+        ledger["generated_at"] = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        LEDGER.parent.mkdir(parents=True, exist_ok=True)
+        LEDGER.write_text(json.dumps(ledger, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    counts: dict[str, int] = {}
+    for k in held:
+        v = months.get(k, {}).get("verdict", "UNVERIFIED")
+        counts[v] = counts.get(v, 0) + 1
+    log("verify: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())))
+    log("ingested_months=")
+    return 1 if any(months.get(k, {}).get("verdict") in ("INDICATOR", "UNPARSED") for k in held) else 0
+
+
+# --------------------------------------------------------------------------- #
 def ingest_one(xlsx: Path, source: dict[str, Any], held: dict[str, dict[str, Any]],
                *, expect_key: str | None, dry_run: bool, out: Path | None) -> str | None:
     record, doc = parse(xlsx, source)
@@ -393,6 +571,10 @@ def main() -> int:
                     help="ingest this month from the ERP even if held (repeatable, or comma-separated)")
     ap.add_argument("--file", type=Path, help="parse a workbook already on disk instead of asking the ERP")
     ap.add_argument("--list", action="store_true", help="show the ERP against the archive; write nothing")
+    ap.add_argument("--verify", action="store_true",
+                    help="refetch every held month the ERP serves, reparse, diff against the archive, "
+                         "write verification/pgcb-monthly-ledger.json; --month narrows it, --force redoes MATCHes")
+    ap.add_argument("--force", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--out", type=Path, help="write the parsed artefacts here instead of into the repo")
     args = ap.parse_args()
@@ -421,10 +603,15 @@ def main() -> int:
         else:
             failed += 1
     else:
-        listing = list_erp()
+        # The daily run reads page 1 only (newest first, one GET); a walk of
+        # the whole listing is for looking, verifying and backfilling.
+        listing = list_erp(all_pages=args.list or args.verify or bool(wanted))
         newest_listed = listing[-1]
         log(f"listing: {len(listing)} reports on the ERP, newest {newest_listed.title} (id {newest_listed.erp_id}); "
             f"archive holds {len(status)} months, newest {newest_held}")
+
+        if args.verify:
+            return verify(listing, held_by_key, wanted, args.force)
 
         if args.list:
             for item in listing:

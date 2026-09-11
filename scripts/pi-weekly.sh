@@ -40,6 +40,25 @@ else
     notify warn "SREDA ingest failed" "ndre.sreda.gov.bd unreachable or layout changed; see $LOG"
 fi
 
+# --- 1b. PGCB monthly reports against the ERP ----------------------------------
+# The monthly twin of verify:source. Refetches only months the ledger does not
+# already hold as MATCH against the same ERP file id, so a normal week costs
+# six listing pages and nothing else — and a workbook PGCB re-uploads under a
+# new id is refetched and re-read. First sweep 2026-09-11: 160 of 160 months
+# agreed on every headline figure; the five that differed were outage rows the
+# old text dumps had lost, re-ingested from the workbooks that day.
+export ESB_PGCB_MONTHLY_ARCHIVE="$ROOT/state/pgcb-monthly"
+if timeout 3000 "$ROOT/venv/bin/python" scripts/ingest_pgcb_monthly.py --verify | tail -3; then
+    git add verification/pgcb-monthly-ledger.json
+    if ! git diff --cached --quiet; then
+        git commit -q -m "chore(verify): PGCB monthly ledger, weekly on the Pi"
+        git pull -q --rebase origin authenticating && git push -q origin HEAD:authenticating && echo "ledger pushed" \
+            || notify warn "monthly verify: push failed" "see $LOG"
+    fi
+else
+    notify error "PGCB monthly verify found a published figure that disagrees with the ERP" "see $LOG and verification/pgcb-monthly-ledger.json"
+fi
+
 # --- 2. media bucket mirror ----------------------------------------------------
 # Listing comes from Postgres, not the Storage API: the anon key can read
 # public objects but cannot LIST them (RLS, no anon policy), and the first

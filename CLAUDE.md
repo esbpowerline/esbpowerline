@@ -358,7 +358,9 @@ now) · `HASH` · `DRIFT` (unpublished values — triage) · `SHAPE` · `MATCH` 
 
 `verification/source-ledger.json` is audit evidence. **Commit it.** A day verified in August
 is a day you need not refetch in December, and the publisher may not still be serving that
-document by then.
+document by then. The monthly archive has the same layer —
+`scripts/ingest_pgcb_monthly.py --verify`, ledger `verification/pgcb-monthly-ledger.json`,
+weekly on the Pi — see "Once a day: PGCB's monthly report".
 
 When a check "passes", confirm it actually ran. `gas-vs-archive` read two keys that exist in
 none of the 2,295 archive files, and passed 4,529 days by never looking at them.
@@ -580,8 +582,35 @@ report's own "Month:" header reconciled against the dates inside it, and a title
 disagrees is printed. `ESB_MONTHLY_MONTHS="2026-07"` on the runner re-ingests a held
 month — after a parser fix, or to publish a month that reached the archive by hand.
 Fetched workbooks live in `~/esb-ingest/state/pgcb-monthly/` on the Pi and under the
-gitignored `scratch/pgcb-monthly/` here. The ERP lists only the trailing ~30 months;
-everything older is held and cannot be refetched from it.
+gitignored `scratch/pgcb-monthly/` here.
+
+**The ERP lists every month back to January 2013** — 161 of them, over six pages of
+thirty ("Showing 30 of 162"), under four hand-typed title shapes (`July-2026`,
+`November-%202019`, `January_2013`, `June%202015`); the 2013-01..2017-08 files are
+legacy `.xls`, read by xlrd. The first walker matched one shape on one page and
+believed the ERP began in 2016 — a listing that answers 200 with fewer rows than it
+claims is a parse failure, not a smaller archive. The daily run still reads page 1
+only (newest first); `--list`, `--verify` and `--month` walk the lot. **Three months
+have no source anywhere**: 2013-02 (uploaded as `x.php`, id 195), 2015-07 (never
+listed) and 2015-12 (listed as id 162, answers 404 while both neighbours serve). Do
+not fill them; they are gaps in what PGCB published.
+
+**`--verify` is the monthly twin of `verify:source`**, and `pi-weekly.sh` runs it every
+Sunday. Every held month is refetched from the ERP, reparsed with today's parsers and
+compared by value — the headline record field by field (`INDICATOR` if any disagrees:
+fix now), every detail section (`DRIFT`), the outage log row by row (`EVENTS`), else
+`MATCH` — into `verification/pgcb-monthly-ledger.json`, which is audit evidence:
+commit it. A month held as `MATCH` against the same ERP file id is not refetched
+again, so a normal week costs six listing pages; a workbook PGCB re-uploads under a
+new id is read afresh. The first sweep, 2026-09-11, on both machines: **160 of 160
+months agreed on every headline figure.** Five disagreed only in the outage log, and
+all five were the archive's fault — February 2019 (sheets named `DF-LDC-2x`, 0 of 274
+events read), May 2023 (table printed two columns to the right, 0 of 618), and four
+rows across June 2021 and June 2023 where the old text dumps rendered Excel times as
+`21:15:59.995000`. Fixed in the parser, re-ingested from the workbooks, verified
+MATCH. The outage reader now anchors on where the dates sit, by majority vote across
+the sheet — the first attempt anchored on the first dated row and one odd row in
+November 2019 shifted the other five hundred.
 
 ### Checking the Pi from anywhere
 

@@ -646,12 +646,35 @@ def parse_outage_events(rows: list[list[Any]], kind: str) -> list[dict[str, Any]
     """
     out: list[dict[str, Any]] = []
     circle: str | None = None
+    # The table is not always in column 0. May 2023 added a per-row circle
+    # column and a blank margin, so the substation sat in column 2 and the
+    # start date in 4; a reader pinned to column 0 saw blanks and returned
+    # nothing — 300 non-empty rows on QF-LDC-23 alone, zero events published,
+    # no error. The header cannot anchor it (its merged "Name of the" cells
+    # do not line up with the data), so anchor on the data: the first column
+    # in which a date appears is the start column, and everything is read
+    # relative to it. Every other month has the date in column 2 and moves
+    # nothing. The circle heading is taken wherever it sits on its row.
+    #
+    # Majority vote, not the first dated row: November 2019's scheduled
+    # sheet has an early row with a blank start and a filled finish, and
+    # anchoring on that one row read the whole sheet a column to the right
+    # — 200 real events dropped, 227 misaligned ones invented (equipment in
+    # the substation field, "0" as the cause). One odd row must not move
+    # the other five hundred.
+    votes: dict[int, int] = {}
     for row in rows:
-        first = clean_name(txt(cell(row, 0)))
-        equipment = txt(cell(row, 1))
-        start = cell(row, 2)
-        if first and "grid circle" in first.lower() and not equipment:
-            circle = first
+        dated = [i for i in range(2, 8) if is_date(cell(row, i))]
+        if dated:
+            votes[dated[0]] = votes.get(dated[0], 0) + 1
+    shift = (max(votes, key=votes.get) - 2) if votes else 0
+    for row in rows:
+        first = clean_name(txt(cell(row, shift)))
+        equipment = txt(cell(row, shift + 1))
+        start = cell(row, shift + 2)
+        heading = [txt(c) for c in row[:shift + 3] if txt(c)]
+        if len(heading) == 1 and "grid circle" in heading[0].lower() and not is_date(start):
+            circle = clean_name(heading[0])
             continue
         if not first or not is_date(start):
             continue
@@ -662,12 +685,12 @@ def parse_outage_events(rows: list[list[Any]], kind: str) -> list[dict[str, Any]
                 "substation": first,
                 "equipment": equipment or None,
                 "start": iso_when(start),
-                "finish": iso_when(cell(row, 3)),
-                "duration": txt(cell(row, 4)) or None,
-                "type": txt(cell(row, 5)) or None,
-                "cause": clean_name(txt(cell(row, 6))) or None,
-                "unserved_load_mw": num(cell(row, 7)),
-                "unserved_energy_mwh": num(cell(row, 8)),
+                "finish": iso_when(cell(row, shift + 3)),
+                "duration": txt(cell(row, shift + 4)) or None,
+                "type": txt(cell(row, shift + 5)) or None,
+                "cause": clean_name(txt(cell(row, shift + 6))) or None,
+                "unserved_load_mw": num(cell(row, shift + 7)),
+                "unserved_energy_mwh": num(cell(row, shift + 8)),
             }
         )
     return out
@@ -770,13 +793,15 @@ def parse_workbook(src: Path) -> dict[str, Any]:
         doc["data_quality"] = quality
 
     events: list[dict[str, Any]] = []
+    # February 2019 named all four "DF-LDC-2x" — a typo in the workbook that
+    # cost the month its entire outage log until 2026-09-11.
     for name, kind in [
         ("QF-LDC-23", "substation_emergency"),
         ("QF-LDC-24", "line_emergency"),
         ("QF-LDC-25", "substation_scheduled"),
         ("QF-LDC-26", "line_scheduled"),
     ]:
-        if (d := sheet(name)) is not None:
+        if (d := sheet(name, name.replace("QF-", "DF-"))) is not None:
             events.extend(parse_outage_events(d, kind))
     if events:
         doc["outage_events"] = events
