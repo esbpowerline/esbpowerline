@@ -2,8 +2,11 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, Download, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun, RefreshCw } from 'lucide-react';
-import { AdminCard } from '@/components/admin/AdminUI';
+import {
+  Upload, Download, CheckCircle2, AlertTriangle, Loader2, Rocket, Sun, RefreshCw,
+  CalendarClock, Database, Flame,
+} from 'lucide-react';
+import { AdminCard, AdminStatCard, AdminStatGrid } from '@/components/admin/AdminUI';
 import { IngestDropZone } from '@/components/admin/IngestDropZone';
 // The CMS date-picking vocabulary, verbatim: the year-on-year panel's calendar
 // and month picker replace the browser-drawn <input type="date">/<input
@@ -117,43 +120,42 @@ export type IngestStatus = {
 
 /** What the site has now, and precisely which file produces the next day. */
 function StatusBanner({ status }: { status: IngestStatus }) {
+  // Two stat tiles and a card. This was a tinted panel with its own 18px
+  // figures in a hand-rolled two-column grid — a third KPI style on a page
+  // that already had the pulse strip above it.
+  const gasBehind = status.gasBehindBy !== null && status.gasBehindBy > 0 ? status.gasBehindBy : 0;
   return (
-    <div className="rounded-xl border border-primary/30 bg-primary/[0.05] p-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Grid data on the site through</p>
-          <p className="text-[18px] font-bold tabular-nums">{status.latestGridDay ?? '—'}</p>
-          {status.runtimePublished.length > 0 && (
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {status.runtimePublished.length} day{status.runtimePublished.length > 1 ? 's' : ''} published without a deploy
-            </p>
-          )}
-        </div>
-        <div>
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Gas archive through</p>
-          <p className="text-[18px] font-bold tabular-nums">{status.latestGasDay ?? '—'}</p>
-          {status.gasBehindBy !== null && status.gasBehindBy > 0 && (
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {status.gasBehindBy} day{status.gasBehindBy > 1 ? 's' : ''} behind the grid
-            </p>
-          )}
-        </div>
-      </div>
+    <>
+      <AdminStatGrid>
+        <AdminStatCard
+          title="Grid data on the site through"
+          value={status.latestGridDay ?? '—'}
+          icon={Database}
+          change={
+            status.runtimePublished.length > 0
+              ? `${status.runtimePublished.length} day${status.runtimePublished.length > 1 ? 's' : ''} published without a deploy`
+              : undefined
+          }
+        />
+        <AdminStatCard
+          title="Gas archive through"
+          value={status.latestGasDay ?? '—'}
+          icon={Flame}
+          accent={gasBehind > 0 ? 'amber' : 'sky'}
+          change={gasBehind > 0 ? `${gasBehind} day${gasBehind > 1 ? 's' : ''} behind the grid` : undefined}
+        />
+      </AdminStatGrid>
 
       {status.nextGridDay && (
-        <div className="mt-3 border-t border-primary/20 pt-3">
-          <p className="text-[12px]">
-            <span className="text-muted-foreground">Next day needed: </span>
-            <span className="font-bold tabular-nums">{status.nextGridDay}</span>
-          </p>
-          <p className="mt-1 text-[11.5px] leading-snug text-muted-foreground">
+        <AdminCard title={`Next day needed: ${status.nextGridDay}`} icon={CalendarClock}>
+          <p className="text-[12px] leading-relaxed text-muted-foreground">
             Upload <span className="font-mono font-semibold text-foreground">{status.expectedWorkbookName}</span>
             {' '}— PGCB names the workbook for the day <em>after</em> the energy day it describes. Pair it with the gas
             report whose 8am–8am window <em>starts</em> on {status.nextGridDay}.
           </p>
-        </div>
+        </AdminCard>
       )}
-    </div>
+    </>
   );
 }
 
@@ -209,18 +211,18 @@ function SredaCard({ latestSredaDate }: { latestSredaDate: string | null }) {
         </button>
 
         {result?.ok === true && (
-          <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/[0.07] p-3 text-[12px]">
+          <div className="rounded-lg border border-[hsl(var(--staff-ok)/0.4)] bg-[hsl(var(--staff-ok)/0.07)] p-3 text-[12px]">
             {result.unchanged ? (
               <span className="text-muted-foreground">{result.message}</span>
             ) : (
-              <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+              <span className="font-semibold text-[hsl(var(--staff-ok))]">
                 Published {result.date} — {result.totalRenewableMw} MW renewable, {result.reGridSharePct}% of grid.
               </span>
             )}
           </div>
         )}
         {result?.ok === false && (
-          <div className="rounded-lg border border-rose-500/40 bg-rose-500/[0.06] p-3 text-[12px] text-muted-foreground">
+          <div className="rounded-lg border border-[hsl(var(--staff-bad)/0.4)] bg-[hsl(var(--staff-bad)/0.06)] p-3 text-[12px] text-muted-foreground">
             {result.error}
           </div>
         )}
@@ -251,10 +253,10 @@ type RefreshAllResult =
   | { ok: false; error: string };
 
 const REFRESH_MARK: Record<RefreshDayOutcome['status'], { mark: string; cls: string }> = {
-  ingested: { mark: '✓', cls: 'text-emerald-600 dark:text-emerald-400' },
+  ingested: { mark: '✓', cls: 'text-[hsl(var(--staff-ok))]' },
   'source-pending': { mark: '…', cls: 'text-muted-foreground' },
-  partial: { mark: '△', cls: 'text-amber-600 dark:text-amber-400' },
-  failed: { mark: '✗', cls: 'text-rose-600 dark:text-rose-400' },
+  partial: { mark: '△', cls: 'text-[hsl(var(--staff-warn))]' },
+  failed: { mark: '✗', cls: 'text-[hsl(var(--staff-bad))]' },
 };
 
 /**
@@ -321,7 +323,7 @@ function RefreshAllCard() {
         {full && (
           <div className="space-y-2 rounded-lg border border-border/60 bg-muted/30 p-3">
             {full.upToDate ? (
-              <p className="text-[12.5px] font-semibold text-emerald-700 dark:text-emerald-400">
+              <p className="text-[12.5px] font-semibold text-[hsl(var(--staff-ok))]">
                 Grid and gas are current through {full.checkedThrough} — nothing to ingest.
               </p>
             ) : (
@@ -365,7 +367,7 @@ function RefreshAllCard() {
           </div>
         )}
         {result && !('days' in result) && !result.ok && (
-          <div className="rounded-lg border border-rose-500/40 bg-rose-500/[0.06] p-3 text-[12px] text-muted-foreground">
+          <div className="rounded-lg border border-[hsl(var(--staff-bad)/0.4)] bg-[hsl(var(--staff-bad)/0.06)] p-3 text-[12px] text-muted-foreground">
             {result.error}
           </div>
         )}
@@ -408,7 +410,7 @@ function ArtifactRow({ artifacts }: { artifacts: IngestRunResult['artifacts'] })
     <div className="grid gap-1.5 sm:grid-cols-2">
       {items.map(([label, present, feeds]) => (
         <div key={label} className="flex items-baseline gap-2 text-[11.5px]">
-          <span className={present ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}>
+          <span className={present ? 'text-[hsl(var(--staff-ok))]' : 'text-muted-foreground'}>
             {present ? '✓' : '·'}
           </span>
           <span className="font-semibold">{label}</span>
@@ -564,7 +566,7 @@ function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
           <button
             onClick={run}
             disabled={busy || ingesting || (!day && !month)}
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
             {busy ? 'Publishing…' : 'Publish to the site'}
@@ -590,14 +592,14 @@ function PublishLocalCard({ suggestedDay }: { suggestedDay: string }) {
         )}
 
         {done && (
-          <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/[0.07] p-3">
-            <p className="text-[13px] font-bold text-emerald-700 dark:text-emerald-400">
+          <div className="rounded-lg border border-[hsl(var(--staff-ok)/0.4)] bg-[hsl(var(--staff-ok)/0.07)] p-3">
+            <p className="text-[13px] font-bold text-[hsl(var(--staff-ok))]">
               Live now — {done}.
             </p>
           </div>
         )}
         {error && (
-          <div className="rounded-lg border border-red-500/40 bg-red-500/[0.07] p-3 text-[12px] text-red-700 dark:text-red-400">
+          <div className="rounded-lg border border-[hsl(var(--staff-bad)/0.4)] bg-[hsl(var(--staff-bad)/0.07)] p-3 text-[12px] text-[hsl(var(--staff-bad))]">
             {error}
           </div>
         )}
@@ -751,7 +753,11 @@ export function DataIngestPanel({
   const blocking = notes.filter((n) => n.level === 'blocking');
 
   return (
-    <div className="space-y-4">
+    // The page's own section rhythm, not `space-y-4`: this panel and the
+    // coverage card above it each nested a 16px stack inside the page's 20px
+    // one, so the gap between two blocks depended on which component happened
+    // to own them.
+    <div className="admin-section-stack">
       <StatusBanner status={status} />
 
       <RefreshAllCard />
@@ -769,9 +775,11 @@ export function DataIngestPanel({
           go up. The three steps were numbered 1-2-3 while sitting *below* two
           unnumbered cards that do the same job, which read as a five-step
           sequence nobody was meant to follow in order. */}
-      <div className="rounded-xl border border-border/60 bg-muted/[0.15] px-4 py-3">
-        <p className="text-[13px] font-bold">Or take one day step by step</p>
-        <p className="mt-0.5 text-[11.5px] leading-relaxed text-muted-foreground">
+      {/* A heading between the two groups of cards, not a bordered box
+          sitting among them at its own padding. */}
+      <div className="admin-section-heading">
+        <h2 className="admin-section-heading__title">Or take one day step by step</h2>
+        <p className="admin-section-heading__desc">
           Fetch or drop the day&rsquo;s documents, check what was parsed, then publish. Use this when
           you want to read the figures before they go live — or when the Pi is off and a particular
           day has to be put up by hand.
@@ -865,11 +873,11 @@ export function DataIngestPanel({
       </AdminCard>
 
       {error && (
-        <div className="rounded-xl border border-rose-500/40 bg-rose-500/[0.06] p-4">
+        <div className="rounded-[var(--r-lg)] border border-[hsl(var(--staff-bad)/0.4)] bg-[hsl(var(--staff-bad)/0.06)] p-4">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--staff-bad))]" />
             <div className="min-w-0">
-              <p className="text-[13px] font-bold text-rose-700 dark:text-rose-400">Failed</p>
+              <p className="text-[13px] font-bold text-[hsl(var(--staff-bad))]">Failed</p>
               <p className="mt-1 break-words text-[12px] text-muted-foreground">{error}</p>
             </div>
           </div>
@@ -890,9 +898,9 @@ export function DataIngestPanel({
                   if (group.length === 0) return null;
                   const style =
                     level === 'blocking'
-                      ? { box: 'border-rose-500/50 bg-rose-500/[0.07]', text: 'text-rose-700 dark:text-rose-400', title: `Do not publish — ${group.length} problem${group.length > 1 ? 's' : ''}` }
+                      ? { box: 'border-[hsl(var(--staff-bad)/0.5)] bg-[hsl(var(--staff-bad)/0.07)]', text: 'text-[hsl(var(--staff-bad))]', title: `Do not publish — ${group.length} problem${group.length > 1 ? 's' : ''}` }
                       : level === 'caution'
-                        ? { box: 'border-amber-500/40 bg-amber-500/[0.07]', text: 'text-amber-700 dark:text-amber-400', title: `${group.length} thing${group.length > 1 ? 's' : ''} to check` }
+                        ? { box: 'border-[hsl(var(--staff-warn)/0.4)] bg-[hsl(var(--staff-warn)/0.07)]', text: 'text-[hsl(var(--staff-warn))]', title: `${group.length} thing${group.length > 1 ? 's' : ''} to check` }
                         : { box: 'border-border/50 bg-muted/25', text: 'text-muted-foreground', title: `${group.length} correction${group.length > 1 ? 's' : ''} applied automatically` };
                   return (
                     <div key={level} className={`rounded-lg border p-3 ${style.box}`}>
@@ -920,11 +928,11 @@ export function DataIngestPanel({
                   label="Date printed in the workbook"
                   value={
                     summary.sourceGridDate === summary.energyDay ? (
-                      <span className="text-emerald-600 dark:text-emerald-400">
+                      <span className="text-[hsl(var(--staff-ok))]">
                         {summary.sourceGridDate} — matches
                       </span>
                     ) : (
-                      <span className="text-rose-600 dark:text-rose-400">
+                      <span className="text-[hsl(var(--staff-bad))]">
                         {summary.sourceGridDate} — does NOT match
                       </span>
                     )
@@ -964,11 +972,11 @@ export function DataIngestPanel({
                   label="Reconciliation"
                   value={
                     gas.reconciled ? (
-                      <span className="text-emerald-600 dark:text-emerald-400">
+                      <span className="text-[hsl(var(--staff-ok))]">
                         passed ({gas.varianceMmcfd} MMCFD variance)
                       </span>
                     ) : (
-                      <span className="text-rose-600 dark:text-rose-400">
+                      <span className="text-[hsl(var(--staff-bad))]">
                         FAILED ({gas.varianceMmcfd} MMCFD)
                       </span>
                     )
@@ -991,8 +999,8 @@ export function DataIngestPanel({
             </details>
 
             {published ? (
-              <div className="rounded-lg border border-emerald-500/40 bg-emerald-500/[0.07] p-3">
-                <p className="text-[13px] font-bold text-emerald-700 dark:text-emerald-400">
+              <div className="rounded-lg border border-[hsl(var(--staff-ok)/0.4)] bg-[hsl(var(--staff-ok)/0.07)] p-3">
+                <p className="text-[13px] font-bold text-[hsl(var(--staff-ok))]">
                   Published {published} — live now, no deployment needed.
                 </p>
                 {steps.length > 0 && (
@@ -1017,7 +1025,7 @@ export function DataIngestPanel({
                 // beside an enabled button invites publishing anyway.
                 disabled={publishing || blocking.length > 0}
                 title={blocking.length > 0 ? 'Resolve the problems above before publishing' : undefined}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40"
               >
                 {publishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />}
                 {publishing ? 'Publishing…' : `Publish ${summary.energyDay} to the site`}

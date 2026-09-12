@@ -642,8 +642,13 @@
    ADMIN CONSOLE â€” capsule, sleek, functional
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 .admin-shell {
-  --admin-rose: 346 77% 58%;
-  --admin-violet: 262 72% 62%;
+  /* `rose` and `violet` were the admin console's accent pair, and the CMS
+     repainted both inline to sky and teal — so ~150 rules written against
+     them meant "this panel's accent", in two different colours. They now
+     ARE the accent, in both panels. Rose as a status is `--staff-bad`, and
+     no delete, danger or error rule reads either of these (checked). */
+  --admin-rose: var(--admin-blue);
+  --admin-violet: var(--admin-blue);
   --admin-red: 359 84% 62%;
   --admin-yellow: 42 94% 53%;
   --admin-blue: 217 91% 60%;
@@ -738,8 +743,8 @@
   --fs-page: 19px;
   --fs-display: 26px;
   background:
-    radial-gradient(ellipse 80% 50% at 0% 0%, hsl(var(--admin-rose) / 0.06), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 100% 100%, hsl(var(--admin-violet) / 0.05), transparent 50%),
+    radial-gradient(ellipse 80% 50% at 0% 0%, hsl(var(--staff-accent) / 0.06), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 100% 100%, hsl(var(--staff-accent) / 0.04), transparent 50%),
     var(--bg);
 }
 
@@ -852,15 +857,15 @@
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, hsl(var(--admin-rose) / 0.2), hsl(var(--admin-violet) / 0.15));
-  border: 1px solid hsl(var(--admin-rose) / 0.25);
-  color: hsl(var(--admin-rose));
+  background: hsl(var(--staff-accent) / 0.14);
+  border: 1px solid hsl(var(--staff-accent) / 0.28);
+  color: hsl(var(--staff-accent));
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 
 .admin-sidebar-brand a:hover .admin-brand-icon {
   transform: scale(1.05);
-  box-shadow: 0 0 20px hsl(var(--admin-rose) / 0.2);
+  box-shadow: 0 0 20px hsl(var(--staff-accent) / 0.2);
 }
 
 .admin-brand-badge {
@@ -1213,38 +1218,72 @@
   margin-bottom: 0;
 }
 
-/* `auto-fit` with a max track, not `repeat(n, 1fr)`.
-   The dashboard renders its second strip as a 3-column grid whose members are
-   conditional, so with two of them present each tile stretched to ~46% of the
-   page — a 14 and an 8 marooned in half a screen of white each. Capping the
-   track means a partly-filled strip keeps tile-sized tiles and simply leaves
-   the remainder empty, which is what the eye expects. */
-/* `1fr` as the max, not a fixed cap.
-   Capping the track at 17rem stopped the strip 192px short of the cards
-   below it, so the page had a ragged right edge that nothing else shared.
-   `minmax(10rem, 1fr)` fills the row at any count and wraps when it runs out;
-   the marooned-tile problem the cap was guarding against is gone anyway now
-   that the promotion counts live in this same strip rather than a separate
-   grid of their own. */
-.admin-stat-grid,
-.admin-stat-grid--cols-3,
-.admin-stat-grid--cols-2 {
+/* Columns from the tile count, not from the viewport.
+   Three generations of `auto-fit, minmax(Nrem, 1fr)` — at 9, 9.5, 10.25 and
+   11rem across four breakpoints — each chose how many tiles fit a row and
+   never how many tiles there were. Every strip here has conditional members,
+   so a six-tile day wrapped 5 + 1 at 1366px and a five-tile day 4 + 1: one
+   tile alone on a row of empty cells. StaffTileGrid now divides the count by
+   the row count first and hands the answer down per width band (4 → 4 or
+   2 + 2, 5 → 5 or 3 + 2, 6 → 6 or 3 + 3), and an item that would still sit
+   alone on the last row is given the whole row. The same grid carries card
+   rows (StaffCardRow) with lower maxima. The fallbacks serve the loading
+   skeletons, which use the bare class over four placeholders.
+
+   One gap, both ways, equal to a tile's own padding (--sp-5): the space
+   between two tiles is the space inside one, which is what makes the strip
+   read as a single evenly-spaced grid rather than boxes placed near each
+   other. The tablet and phone layers shrink the gap with the padding. */
+.admin-stat-grid {
   display: grid;
-  gap: var(--sp-4);
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--sp-5);
+  grid-template-columns: repeat(var(--stat-cols-sm, 2), minmax(0, 1fr));
+}
+
+/* The lone-orphan span, per band, worked out by StaffTileGrid. */
+.admin-stat-grid > :last-child {
+  grid-column: var(--stat-last-sm, auto);
+}
+
+@media (min-width: 640px) {
+  .admin-stat-grid {
+    grid-template-columns: repeat(var(--stat-cols-md, 2), minmax(0, 1fr));
+  }
+
+  .admin-stat-grid > :last-child {
+    grid-column: var(--stat-last-md, auto);
+  }
 }
 
 @media (min-width: 1024px) {
-  .admin-stat-grid,
-  .admin-stat-grid--cols-3,
-  .admin-stat-grid--cols-2 {
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  .admin-stat-grid {
+    grid-template-columns: repeat(var(--stat-cols-lg, 4), minmax(0, 1fr));
   }
+
+  .admin-stat-grid > :last-child {
+    grid-column: var(--stat-last-lg, auto);
+  }
+}
+
+@media (min-width: 1536px) {
+  .admin-stat-grid {
+    grid-template-columns: repeat(var(--stat-cols-xl, 4), minmax(0, 1fr));
+  }
+
+  .admin-stat-grid > :last-child {
+    grid-column: var(--stat-last-xl, auto);
+  }
+}
+
+/* Cards in one row share its height, so a short card does not leave a hole
+   under itself beside a tall one. */
+.admin-card-row {
+  align-items: stretch;
 }
 
 .admin-card-grid {
   display: grid;
-  gap: var(--sp-4);
+  gap: var(--sp-5);
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
@@ -1261,7 +1300,7 @@
    horizontally and 24px vertically — the uneven rhythm this replaces. */
 .admin-split {
   display: grid;
-  gap: var(--sp-4);
+  gap: var(--sp-5);
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
@@ -1270,7 +1309,9 @@
 .admin-split__rail {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  /* The same measure as the split's own column gap, so a card's distance to
+     the one beside it and to the one below it is identical. */
+  gap: var(--sp-5);
   min-width: 0;
 }
 
@@ -1320,8 +1361,7 @@
   }
 }
 @media (min-width: 1280px) {
-  .admin-shell,
-  .cms-shell {
+  .admin-shell {
     --shell-gutter: clamp(0.65rem, 0.75vw, 1rem);
     --shell-gap: clamp(0.5rem, 0.55vw, 0.75rem);
     /* Measured 9px between zones at 1366px, against 16px of padding inside
@@ -1395,16 +1435,6 @@
     height: 1rem;
   }
 
-  .admin-article-manager {
-    gap: 0.5rem;
-  }
-
-  .admin-filter-bar {
-    margin-bottom: 0.5rem;
-    padding: 0.25rem 0.35rem;
-    border-radius: 0.75rem;
-  }
-
   .admin-nav-item {
     padding: 0.4rem 0.65rem;
     font-size: 12px;
@@ -1422,8 +1452,7 @@
 }
 
 @media (min-width: 1536px) {
-  .admin-shell,
-  .cms-shell {
+  .admin-shell {
     --shell-gutter: 0.75rem;
     --shell-gap: 0.5625rem;
     /* Was 0.75rem — tighter than a card's own 1rem padding, so at the width
@@ -1434,31 +1463,8 @@
     --shell-sidebar-w: 15.25rem;
   }
 
-  /* `auto-fit`, not `auto-fill`.
-     auto-fill keeps the empty tracks it could not fill, and each one still
-     claims its 1fr — which is exactly why the six-tile strip stopped 192px
-     short of the cards below it and left the page with a ragged right edge.
-     auto-fit collapses the empties so the tiles divide the full row. */
-  .admin-stat-grid:not(.admin-stat-grid--cols-2):not(.admin-stat-grid--cols-3) {
-    grid-template-columns: repeat(auto-fit, minmax(10.25rem, 1fr));
-  }
-
   .admin-card-grid--cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .admin-analytics-insight-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--shell-gap);
-  }
-
-  .admin-analytics-footer-grid {
-    gap: var(--shell-gap);
-  }
-
-  .admin-analytics-quick-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
   }
 
   .cms-article-editor__workspace {
@@ -1468,36 +1474,20 @@
 }
 
 @media (min-width: 1920px) {
-  .admin-shell,
-  .cms-shell {
+  .admin-shell {
     --shell-gutter: 0.875rem;
     --shell-gap: 0.5rem;
     --shell-section: 1.25rem;
-  }
-
-  .admin-stat-grid:not(.admin-stat-grid--cols-2):not(.admin-stat-grid--cols-3) {
-    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
   }
 
   .admin-card-grid--cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .admin-card-grid--cols-3 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .admin-analytics-insight-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .admin-analytics-footer-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .admin-analytics-quick-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
+  /* `--cols-3` stays three columns here. It went to four at 1920px, and both
+     of its callers fill exactly three — the Member activity panel's three
+     cards, and once the Admin Overview's 2 + 1 — so the widest screens got an
+     empty fourth column down the right-hand side. */
 
   .cms-article-editor__workspace {
     grid-template-columns: minmax(0, 1fr) minmax(260px, 18%);
@@ -1752,21 +1742,20 @@ a.admin-card-footer:hover {
   transition: color 150ms ease;
 }
 
-.admin-shell .admin-card-footer--link:hover {
-  color: hsl(346 77% 65%);
-}
-
-.cms-shell .admin-card-footer--link {
+/* One link colour for both panels: the accent. The admin copy was a
+   hard-coded rose and the CMS copy a hard-coded sky, so the same footer link
+   changed colour depending on which panel you were in. */
+.admin-shell .admin-card-footer--link {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   font-weight: 500;
-  color: hsl(199 89% 48%);
+  color: hsl(var(--staff-accent));
   transition: color 150ms ease;
 }
 
-.cms-shell .admin-card-footer--link:hover {
-  color: hsl(199 89% 58%);
+.admin-shell .admin-card-footer--link:hover {
+  color: hsl(var(--staff-accent) / 0.8);
 }
 
 .admin-page-skeleton {
@@ -1775,45 +1764,23 @@ a.admin-card-footer:hover {
   gap: var(--shell-section);
 }
 
+/* Route placeholders, in the same radius as the cards they stand in for. */
+.admin-skeleton {
+  border-radius: var(--r-lg);
+  background: hsl(var(--muted) / 0.3);
+}
+
+.admin-skeleton--header {
+  height: 3.5rem;
+  background: hsl(var(--muted) / 0.4);
+}
+
+.admin-skeleton--card {
+  height: 24rem;
+}
+
 .admin-card-lead {
   margin-bottom: var(--shell-gap);
-}
-
-.admin-leaderboard-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--shell-gap);
-  padding: var(--shell-tight) var(--shell-gap);
-  border-radius: 0.625rem;
-  font-size: 13px;
-}
-
-.admin-leaderboard-row--you {
-  background: hsl(199 89% 48% / 0.08);
-  border: 1px solid hsl(199 89% 48% / 0.2);
-}
-
-.admin-leaderboard-row__main {
-  display: flex;
-  align-items: center;
-  gap: var(--shell-gap);
-  min-width: 0;
-}
-
-.admin-leaderboard-row__rank {
-  font-size: 11px;
-  font-weight: 700;
-  color: hsl(var(--muted-foreground));
-  width: 1.25rem;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
-}
-
-.admin-leaderboard-row__stats {
-  text-align: right;
-  flex-shrink: 0;
-  font-variant-numeric: tabular-nums;
 }
 
 /* Page header */
@@ -2105,15 +2072,15 @@ a.admin-card-footer:hover {
 
 .admin-action-pill--emerald,
 .admin-action-pill--primary {
-  border-color: hsl(199 89% 48% / 0.3);
-  background: hsl(199 89% 48% / 0.06);
+  border-color: hsl(var(--staff-accent) / 0.3);
+  background: hsl(var(--staff-accent) / 0.06);
 }
 
 .admin-action-pill--emerald .admin-action-icon,
 .admin-action-pill--primary .admin-action-icon {
-  background: hsl(199 89% 48% / 0.12);
+  background: hsl(var(--staff-accent) / 0.12);
   color: hsl(199 89% 40%);
-  border-color: hsl(199 89% 48% / 0.24);
+  border-color: hsl(var(--staff-accent) / 0.24);
 }
 
 .admin-action-pill--emerald .admin-action-label,
@@ -2124,14 +2091,14 @@ a.admin-card-footer:hover {
 
 .admin-action-pill--emerald:hover,
 .admin-action-pill--primary:hover {
-  background: hsl(199 89% 48% / 0.12);
-  border-color: hsl(199 89% 48% / 0.42);
-  box-shadow: 0 4px 12px hsl(199 89% 48% / 0.08);
+  background: hsl(var(--staff-accent) / 0.12);
+  border-color: hsl(var(--staff-accent) / 0.42);
+  box-shadow: 0 4px 12px hsl(var(--staff-accent) / 0.08);
 }
 
 .admin-action-pill--emerald:hover .admin-action-icon,
 .admin-action-pill--primary:hover .admin-action-icon {
-  background: hsl(199 89% 48% / 0.2);
+  background: hsl(var(--staff-accent) / 0.2);
   color: hsl(199 89% 38%);
 }
 
@@ -2141,21 +2108,9 @@ a.admin-card-footer:hover {
 }
 
 .admin-filter-tab--active {
-  color: hsl(var(--admin-rose));
-  border-color: hsl(var(--admin-rose) / 0.35);
-  background-color: hsl(var(--admin-rose) / 0.1);
-}
-
-.admin-filter-tab--active-blue {
-  color: hsl(var(--admin-blue));
-  border-color: hsl(var(--admin-blue) / 0.35);
-  background-color: hsl(var(--admin-blue) / 0.1);
-}
-
-.admin-filter-tab--active-green {
-  color: hsl(var(--admin-green));
-  border-color: hsl(var(--admin-green) / 0.35);
-  background-color: hsl(var(--admin-green) / 0.1);
+  color: hsl(var(--staff-accent));
+  border-color: hsl(var(--staff-accent) / 0.35);
+  background-color: hsl(var(--staff-accent) / 0.1);
 }
 
 .admin-filter-tab__count {
@@ -2163,9 +2118,41 @@ a.admin-card-footer:hover {
   background-color: hsl(var(--muted) / 0.55);
 }
 
+/* Comments and Messages: rows of one list inside the page's card, hairline
+   separated. They were bordered cards stacked inside that card — a panel in
+   a panel — 0.75rem apart on one page and 1rem on the other. */
+.admin-comment-list {
+  display: flex;
+  flex-direction: column;
+}
+
 .admin-comment-card {
-  @apply rounded-xl border border-border p-4;
-  background-color: hsl(var(--card) / 0.65);
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.admin-comment-card:first-child {
+  padding-top: 0;
+}
+
+.admin-comment-card:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* An unread message: an accent rule down its left edge. */
+.admin-comment-card--unread {
+  padding-left: var(--sp-4);
+  box-shadow: inset 3px 0 0 hsl(var(--staff-accent));
+}
+
+.admin-comment-article-link {
+  color: hsl(var(--staff-accent));
+  transition: opacity 150ms ease;
+}
+
+.admin-comment-article-link:hover {
+  opacity: 0.8;
 }
 
 .admin-comment-action {
@@ -2174,8 +2161,13 @@ a.admin-card-footer:hover {
 }
 
 .admin-comment-action--approve:hover {
-  border-color: hsl(160 84% 39% / 0.4);
-  color: hsl(160 84% 39%);
+  border-color: hsl(var(--staff-ok) / 0.4);
+  color: hsl(var(--staff-ok));
+}
+
+.admin-comment-action--primary {
+  border-color: hsl(var(--staff-accent) / 0.3);
+  color: hsl(var(--staff-accent));
 }
 
 .admin-comment-action--spam:hover,
@@ -2566,49 +2558,21 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 /* Analytics â€” dense operational dashboard */
-.admin-analytics-page {
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-}
-
-.admin-analytics-page .admin-page-header {
-  margin-bottom: 0;
-}
-
-.admin-analytics-header .admin-page-title {
-  font-size: 1.125rem;
-}
-
-.admin-analytics-header .admin-page-desc {
-  font-size: 11px;
-  line-height: 1.4;
-}
-
+/* The Analytics page takes its rhythm, header and card chrome from the shared
+   rules. It had a 0.875rem page stack, a smaller page title, and a scoped
+   override that cut every card header to 0.5rem of padding and an 11px
+   uppercase title — so its cards looked like no other card in the panel. */
 .admin-analytics-updated {
   font-size: 10px;
   color: hsl(var(--muted-foreground));
   font-variant-numeric: tabular-nums;
 }
 
-.admin-analytics-page .admin-card-header {
-  padding: 0.5rem 0.75rem 0;
-}
-
-.admin-analytics-page .admin-card-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-.admin-analytics-page .admin-card-icon {
-  width: 1.375rem;
-  height: 1.375rem;
-}
-
+/* Dense is tighter top and bottom, never at the sides: 0.75rem of side
+   padding under a 1rem header put a dense card's content 4px left of its own
+   title. */
 .admin-card-body--dense {
-  padding: 0.375rem 0.75rem 0.5rem !important;
+  padding: var(--sp-3) var(--sp-5) var(--sp-4) !important;
 }
 
 .admin-card-body--dense .admin-metric-row {
@@ -2786,95 +2750,6 @@ a.admin-list-row:hover .admin-list-title {
   font-weight: 600;
 }
 
-.admin-analytics-kpi-primary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.375rem;
-}
-
-@media (min-width: 768px) {
-  .admin-analytics-kpi-primary {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.admin-analytics-kpi-primary-cell {
-  padding: 0.45rem 0.55rem;
-  border-radius: 0.625rem;
-  border: 1px solid hsl(var(--border) / 0.45);
-  background: hsl(var(--card) / 0.55);
-}
-
-.admin-analytics-kpi-primary-top {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.admin-analytics-kpi-primary-label {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: hsl(var(--muted-foreground));
-}
-
-.admin-analytics-kpi-primary-value {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 1.125rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.admin-analytics-kpi-primary-hint {
-  display: block;
-  margin-top: 0.15rem;
-  font-size: 9px;
-  color: hsl(var(--muted-foreground) / 0.9);
-  line-height: 1.3;
-}
-
-.admin-analytics-kpi-secondary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.375rem;
-  padding: 0.35rem 0.5rem;
-  border-radius: 0.5rem;
-  border: 1px solid hsl(var(--border) / 0.35);
-  background: hsl(var(--muted) / 0.12);
-}
-
-.admin-analytics-kpi-secondary-cell {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.3rem;
-  padding-right: 0.5rem;
-  border-right: 1px solid hsl(var(--border) / 0.35);
-}
-
-.admin-analytics-kpi-secondary-cell:last-child {
-  border-right: none;
-  padding-right: 0;
-}
-
-.admin-analytics-kpi-secondary-label {
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: hsl(var(--muted-foreground));
-}
-
-.admin-analytics-kpi-secondary-value {
-  font-size: 11px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: hsl(var(--foreground));
-}
-
 .admin-analytics-flag-row {
   display: flex;
   flex-wrap: wrap;
@@ -2891,7 +2766,7 @@ a.admin-list-row:hover .admin-list-title {
   margin-top: 0.35rem;
   font-size: 10px;
   font-weight: 600;
-  color: hsl(var(--admin-rose));
+  color: hsl(var(--staff-accent));
 }
 
 .admin-analytics-mom-caption {
@@ -2981,75 +2856,6 @@ a.admin-list-row:hover .admin-list-title {
   background: hsl(var(--muted) / 0.35);
 }
 
-.admin-analytics-insight-grid {
-  display: grid;
-  gap: 0.75rem;
-  align-items: stretch;
-}
-
-@media (min-width: 1024px) {
-  .admin-analytics-insight-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.admin-analytics-insight-grid .admin-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.admin-analytics-insight-grid .admin-card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.admin-analytics-footer-grid {
-  display: grid;
-  gap: 0.5rem;
-  align-items: stretch;
-}
-
-@media (min-width: 1024px) {
-  .admin-analytics-footer-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.admin-analytics-footer-grid .admin-card {
-  height: 100%;
-}
-
-.admin-analytics-quick-grid {
-  display: grid;
-  gap: 0.375rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.admin-analytics-quick-grid--top {
-  margin-top: 0.125rem;
-}
-
-.admin-analytics-quick-grid .admin-action-pill {
-  padding: 0.4rem 0.5rem;
-  gap: 0.5rem;
-  border-radius: 0.625rem;
-}
-
-.admin-analytics-quick-grid .admin-action-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.admin-analytics-quick-grid .admin-action-label {
-  font-size: 11px;
-}
-
-.admin-analytics-quick-grid .admin-action-desc {
-  font-size: 9px;
-}
-
 .admin-analytics-month-menu {
   min-width: 15.5rem !important;
 }
@@ -3105,12 +2911,6 @@ a.admin-list-row:hover .admin-list-title {
   background: hsl(var(--muted) / 0.5);
 }
 
-@media (min-width: 1024px) {
-  .admin-analytics-quick-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
 /* The header band ran 966px wide to hold a 99px title — 814px of nothing.
    Where a card has somewhere to go, the link lives here and the band does
    work instead of holding air. */
@@ -3135,11 +2935,6 @@ a.admin-list-row:hover .admin-list-title {
   color: hsl(var(--staff-accent));
 }
 
-.admin-analytics-page .admin-card-action {
-  max-width: min(11rem, 46%);
-  line-height: 1.35;
-}
-
 .admin-card-body--fill {
   flex: 1 !important;
   display: flex !important;
@@ -3160,15 +2955,19 @@ a.admin-list-row:hover .admin-list-title {
   min-height: 0;
 }
 
+/* The chart rows are sections of the page, so they sit the page's section
+   gap apart, and the cards inside a row the grid gap — the same two measures
+   as everywhere else. Every two-card row splits 50/50 (it was 1 : 1.35 here
+   and 3 : 2 below), so the column edge runs straight down the page. */
 .admin-analytics-charts {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--shell-section);
 }
 
 .admin-analytics-row {
   display: grid;
-  gap: 0.75rem;
+  gap: var(--sp-5);
   align-items: stretch;
 }
 
@@ -3178,7 +2977,7 @@ a.admin-list-row:hover .admin-list-title {
 
 @media (min-width: 1024px) {
   .admin-analytics-row--mom {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
     min-height: 13.5rem;
   }
@@ -3224,7 +3023,7 @@ a.admin-list-row:hover .admin-list-title {
 
 @media (min-width: 1024px) {
   .admin-analytics-row--articles {
-    grid-template-columns: 3fr 2fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -3837,12 +3636,15 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 /* Form card */
+/* The form card in card tokens. It was its own 1.25rem radius, 1.5rem
+   padding and translucent fill, beside cards at 0.875rem and 1rem. */
 .admin-form-card {
   max-width: 32rem;
-  padding: 1.5rem;
-  border-radius: 1.25rem;
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.65);
+  padding: var(--sp-5);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
 }
 
 .admin-form-card label {
@@ -3855,7 +3657,7 @@ a.admin-list-row:hover .admin-list-title {
 .admin-form-card input,
 .admin-form-card select,
 .admin-form-card textarea {
-  border-radius: 0.875rem !important;
+  border-radius: var(--r-md);
 }
 
 /* Status badges inside admin */
@@ -3906,14 +3708,73 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 /* Article manager â€” filters, bulk bar, row actions */
+/* Filter bar, bulk bar, table and pager, one gap apart. It was 0.75rem here,
+   0.5rem from 1280px up, the filter bar's own margin on top, and the pager's
+   `mt-4` on top of that. */
 .admin-article-manager {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--sp-5);
 }
 
-.admin-article-filters {
-  margin-bottom: 0;
+/* The list pager: a panel in card tokens under the table. */
+.admin-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
+}
+
+.admin-pager-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: hsl(var(--background) / 0.3);
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-pager-step:hover:not(:disabled) {
+  background: hsl(var(--background) / 0.85);
+  color: hsl(var(--foreground));
+}
+
+.admin-pager-step:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.admin-pager-step--page {
+  width: auto;
+  min-width: 2rem;
+  padding: 0 0.375rem;
+}
+
+/* The current page is the accent, not a rose-to-violet gradient. */
+.admin-pager-step--current,
+.admin-pager-step--current:hover:not(:disabled) {
+  border-color: transparent;
+  background: hsl(var(--staff-accent));
+  color: hsl(0 0% 100%);
+}
+
+/* The row opened for review from a notice. Was sky, hard-coded. */
+.admin-table-row--review {
+  font-weight: 600;
+  background: hsl(var(--staff-accent) / 0.08);
+  box-shadow: inset 2px 0 0 hsl(var(--staff-accent));
 }
 
 .admin-bulk-bar {
@@ -4266,7 +4127,7 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .admin-shell .admin-form-card button[type="submit"] {
-  margin-top: calc(1.5rem - var(--shell-gap)) !important;
+  margin-top: var(--sp-2);
 }
 
 /* Category cards */
@@ -4315,23 +4176,41 @@ a.admin-list-row:hover .admin-list-title {
   border-color: hsl(var(--destructive) / 0.35);
 }
 
-.admin-category-manager .admin-category-row {
-  border-radius: 1rem;
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.55);
-  overflow: visible;
-  transition: border-color 180ms ease, background 180ms ease;
+/* Rows of one list in one card, hairline-separated — the list shape every
+   other staff list uses. Each row was its own bordered, rounded panel. */
+.admin-category-list {
+  display: flex;
+  flex-direction: column;
 }
 
-.admin-category-manager .admin-category-row:hover {
-  border-color: hsl(var(--admin-rose) / 0.22);
+.admin-category-manager .admin-category-row {
+  border-bottom: 1px solid var(--line-soft);
+  overflow: visible;
+}
+
+.admin-category-manager .admin-category-row:last-child {
+  border-bottom: 0;
 }
 
 .admin-category-row-main {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.8rem 1rem;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
+}
+
+.admin-category-create {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.admin-category-create input {
+  width: min(14rem, 42vw);
+}
+
+.admin-card-action:has(.admin-category-create) {
+  max-width: none;
 }
 
 .admin-category-row-main:not(.admin-category-row-main--editing) .admin-category-move,
@@ -4702,12 +4581,12 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .editor-settings-guidance__btn--pro {
-  border-color: hsl(199 89% 48% / 0.4);
-  background: hsl(199 89% 48% / 0.08);
+  border-color: hsl(var(--staff-accent) / 0.4);
+  background: hsl(var(--staff-accent) / 0.08);
 }
 
 .editor-settings-guidance__btn--pro svg {
-  color: hsl(199 89% 48%);
+  color: hsl(var(--staff-accent));
 }
 
 .editor-settings-row {
@@ -4760,7 +4639,7 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .editor-settings-switch--on {
-  background: hsl(199 89% 48% / 0.85);
+  background: hsl(var(--staff-accent) / 0.85);
   border-color: hsl(199 89% 42% / 0.5);
 }
 
@@ -5482,9 +5361,9 @@ a.admin-list-row:hover .admin-list-title {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 1rem;
+  padding: var(--sp-4) var(--sp-5);
   border: 1px dashed hsl(var(--border));
-  border-radius: 1rem;
+  border-radius: var(--r-lg);
   background: hsl(var(--muted) / 0.12);
 }
 
@@ -5498,9 +5377,9 @@ a.admin-list-row:hover .admin-list-title {
   flex-shrink: 0;
   padding: 0.35rem 0.7rem;
   border-radius: 999px;
-  border: 1px solid hsl(var(--primary) / 0.35);
-  background: hsl(var(--primary) / 0.1);
-  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--staff-accent) / 0.35);
+  background: hsl(var(--staff-accent) / 0.1);
+  color: hsl(var(--staff-accent));
   font-size: 0.72rem;
   font-weight: 650;
 }
@@ -6147,14 +6026,6 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 /* Editorial calendar */
-.editorial-calendar__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
 
 .editorial-calendar__nav {
   display: flex;
@@ -6178,16 +6049,7 @@ a.admin-list-row:hover .admin-list-title {
 .editorial-calendar__nav-btn:hover {
   background: hsl(var(--muted) / 0.45);
   color: hsl(var(--foreground));
-  border-color: hsl(199 89% 48% / 0.35);
-}
-
-.editorial-calendar__month {
-  margin: 0;
-  min-width: 10rem;
-  text-align: center;
-  font-size: 1.125rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  border-color: hsl(var(--staff-accent) / 0.35);
 }
 
 .editorial-calendar__today-btn {
@@ -6203,67 +6065,8 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .editorial-calendar__today-btn:hover {
-  background: hsl(199 89% 48% / 0.12);
-  color: hsl(199 89% 48%);
-}
-
-.editorial-calendar__stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--shell-gap);
-  margin-bottom: var(--shell-section);
-}
-
-.editorial-calendar__stat {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 1rem 1.125rem;
-  border-radius: 1rem;
-  border: 1px solid hsl(var(--border) / 0.45);
-  background: hsl(var(--card) / 0.6);
-  backdrop-filter: blur(8px);
-}
-
-.editorial-calendar__stat-head {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.editorial-calendar__stat[data-accent='sky'] svg { color: hsl(199 89% 48%); }
-.editorial-calendar__stat[data-accent='amber'] svg { color: hsl(38 92% 50%); }
-.editorial-calendar__stat[data-accent='emerald'] svg { color: hsl(142 71% 45%); }
-.editorial-calendar__stat[data-accent='violet'] svg { color: hsl(262 83% 58%); }
-
-.editorial-calendar__stat span {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-}
-
-.editorial-calendar__stat small {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: hsl(var(--muted-foreground));
-}
-
-.editorial-calendar__layout {
-  display: grid;
-  gap: var(--shell-section);
-}
-
-@media (min-width: 1024px) {
-  .editorial-calendar__layout {
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-    align-items: start;
-  }
+  background: hsl(var(--staff-accent) / 0.12);
+  color: hsl(var(--staff-accent));
 }
 
 .editorial-calendar__weekdays {
@@ -6314,13 +6117,13 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .editorial-calendar__cell--today .editorial-calendar__day-num {
-  background: hsl(199 89% 48% / 0.15);
-  color: hsl(199 89% 48%);
+  background: hsl(var(--staff-accent) / 0.15);
+  color: hsl(var(--staff-accent));
 }
 
 .editorial-calendar__cell--selected {
-  background: hsl(199 89% 48% / 0.08);
-  box-shadow: inset 0 0 0 1px hsl(199 89% 48% / 0.35);
+  background: hsl(var(--staff-accent) / 0.08);
+  box-shadow: inset 0 0 0 1px hsl(var(--staff-accent) / 0.35);
 }
 
 .editorial-calendar__day-num {
@@ -6403,101 +6206,48 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 /* Settings form tabs inside admin */
-.admin-shell .settings-tabs {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  margin-bottom: 1.5rem;
-  border-radius: 9999px;
-  background: hsl(var(--muted) / 0.4);
-  border: 1px solid hsl(var(--border) / 0.5);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.admin-shell .settings-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.admin-shell .settings-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  flex-shrink: 0;
-  height: 2rem;
-  padding: 0 0.875rem;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  white-space: normal;
-  color: hsl(var(--muted-foreground));
-  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
-  border: 1px solid transparent;
-}
-
-.admin-shell .settings-tab:hover {
-  color: hsl(var(--foreground));
-  background: hsl(var(--muted) / 0.6);
-}
-
-.admin-shell .settings-tab--active {
-  color: hsl(var(--foreground));
-  background: linear-gradient(90deg, hsl(var(--admin-rose) / 0.12), hsl(var(--admin-violet) / 0.08));
-  border-color: hsl(var(--admin-rose) / 0.2);
-  box-shadow: 0 1px 6px hsl(var(--admin-rose) / 0.08);
-}
-
-.admin-shell .settings-panel {
-  padding: 1.25rem;
-  border-radius: 1.25rem;
-  border: 1px solid hsl(var(--border) / 0.55);
-  background: hsl(var(--card) / 0.55);
-}
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CMS EDITORIAL SUITE â€” responsive polish
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
-.cms-shell .cms-main,
-.cms-shell .cms-sidebar,
-.cms-shell .admin-sidebar,
-.cms-shell .cms-article-editor__workspace {
+/* Thin scrollbars on both panels. These were scoped to `.cms-shell`, so the
+   admin console kept the browser's default gutter beside the same layout. */
+.admin-main,
+.admin-sidebar,
+.cms-article-editor__workspace {
   scrollbar-width: thin;
   scrollbar-color: var(--scroll-thumb) var(--scroll-track);
 }
 
+/* Below 1024px the window scrolls, not the main column (globals.css locks the
+   body only from 1024px up), so neither panel may turn it into a scroll box —
+   one would trap sticky headers inside it. Was CMS-only. */
 @media (max-width: 1023px) {
-  .cms-shell .cms-main {
+  .admin-main {
     overflow: visible !important;
   }
 }
 
-.cms-shell .cms-main::-webkit-scrollbar,
-.cms-shell .cms-sidebar::-webkit-scrollbar,
-.cms-shell .admin-sidebar::-webkit-scrollbar {
+.admin-main::-webkit-scrollbar,
+.admin-sidebar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.cms-shell .cms-main::-webkit-scrollbar-track,
-.cms-shell .cms-sidebar::-webkit-scrollbar-track,
-.cms-shell .admin-sidebar::-webkit-scrollbar-track {
+.admin-main::-webkit-scrollbar-track,
+.admin-sidebar::-webkit-scrollbar-track {
   background: var(--scroll-track);
 }
 
-.cms-shell .cms-main::-webkit-scrollbar-thumb,
-.cms-shell .cms-sidebar::-webkit-scrollbar-thumb,
-.cms-shell .admin-sidebar::-webkit-scrollbar-thumb {
+.admin-main::-webkit-scrollbar-thumb,
+.admin-sidebar::-webkit-scrollbar-thumb {
   background: var(--scroll-thumb);
   border-radius: 3px;
 }
 
-.cms-shell .cms-main::-webkit-scrollbar-thumb:hover,
-.cms-shell .cms-sidebar::-webkit-scrollbar-thumb:hover,
-.cms-shell .admin-sidebar::-webkit-scrollbar-thumb:hover {
+.admin-main::-webkit-scrollbar-thumb:hover,
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
   background: var(--scroll-thumb-hover);
 }
 
@@ -6524,29 +6274,22 @@ a.admin-list-row:hover .admin-list-title {
   border: 1px solid hsl(var(--border) / 0.45);
 }
 
-.cms-shell .cms-main-inner {
-  width: 100%;
-  max-width: 100%;
-  margin-inline: auto;
-  padding: var(--shell-gutter) !important;
-}
-
 .cms-shell .cms-main-inner--write {
   padding-top: clamp(0.5rem, 0.9vw, 0.75rem);
 }
 
-.cms-shell .cms-header-toolbar {
+.admin-header-toolbar {
   flex-wrap: nowrap;
   max-width: none;
   overflow: visible;
 }
 
-.cms-shell .cms-header-toolbar::-webkit-scrollbar {
+.admin-header-toolbar::-webkit-scrollbar {
   display: none;
 }
 
 @media (max-width: 639px) {
-  .cms-shell .cms-header-toolbar .admin-dropdown-trigger-label {
+  .admin-header-toolbar .admin-dropdown-trigger-label {
     display: none;
   }
 }
@@ -8409,7 +8152,7 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .cms-placement-switch--on.cms-placement-switch--sky {
-  background: hsl(199 89% 48%);
+  background: hsl(var(--staff-accent));
 }
 
 .cms-placement-switch--amber:focus-visible {
@@ -8450,8 +8193,8 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .cms-placement-icon--sky {
-  color: hsl(199 89% 48%);
-  background: hsl(199 89% 48% / 0.12);
+  color: hsl(var(--staff-accent));
+  background: hsl(var(--staff-accent) / 0.12);
 }
 
 .cms-placement-switch__thumb {
@@ -9280,14 +9023,99 @@ a.admin-list-row:hover .admin-list-title {
   opacity: 1;
 }
 
-/* Media library */
+/* Media library.
+   One column, one gap: toolbar, search, grid and hint sit var(--sp-5) apart.
+   The spacing used to come from stacked margins — the toolbar's 1.25rem, the
+   search panel's own mt-2/mb-5/pb-4, the hint's 1rem — so no two gaps on the
+   page matched. Shared by /admin/media and /cms/media. */
+.media-library--v2 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
 .media-library__toolbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  gap: var(--sp-4);
+}
+
+.media-library__search-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
+}
+
+.media-library__search-input {
+  width: 100%;
+  height: 2rem;
+  padding: 0 2.25rem;
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: var(--r-pill);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 12px;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.media-library__search-input::placeholder {
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+.media-library__search-input:focus {
+  border-color: hsl(var(--staff-accent) / 0.5);
+  box-shadow: 0 0 0 2px hsl(var(--staff-accent) / 0.15);
+}
+
+/* The date filter sits beside the kit's filter tabs, at their height. */
+.media-library__date-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-width: 8.75rem;
+  height: 2rem;
+  padding: 0 0.875rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--r-pill);
+  background: hsl(var(--muted) / 0.35);
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  font-weight: 600;
+  transition: color 150ms ease;
+}
+
+.media-library__date-trigger:hover {
+  color: hsl(var(--foreground));
+}
+
+.media-library__date-menu {
+  position: absolute;
+  right: 0;
+  z-index: 50;
+  width: 12rem;
+  margin-top: 0.5rem;
+  padding: 0.375rem 0;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-2);
+}
+
+.media-library__date-option--active {
+  background: hsl(var(--staff-accent) / 0.1);
+  color: hsl(var(--staff-accent));
+  font-weight: 600;
 }
 .media-library__summary {
   display: flex;
@@ -9311,24 +9139,25 @@ a.admin-list-row:hover .admin-list-title {
   text-align: center;
   color: hsl(var(--muted-foreground));
   border: 1px dashed hsl(var(--border) / 0.55);
-  border-radius: 1rem;
+  border-radius: var(--r-lg);
 }
 .media-library__hint {
-  margin-top: 1rem;
   font-size: 11px;
   color: hsl(var(--muted-foreground));
   line-height: 1.45;
 }
+/* In card tokens, like every other card. The border still answers the
+   pointer — these cards carry actions — but the shadow lift is gone. */
 .media-library-card {
-  border-radius: 0.875rem;
-  border: 1px solid hsl(var(--border) / 0.5);
-  background: hsl(var(--muted) / 0.12);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
   overflow: hidden;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 150ms ease;
 }
 .media-library-card:hover {
-  border-color: hsl(199 89% 48% / 0.35);
-  box-shadow: 0 8px 24px hsl(0 0% 0% / 0.08);
+  border-color: hsl(var(--staff-accent) / 0.35);
 }
 .media-library-card__preview {
   position: relative;
@@ -9457,10 +9286,11 @@ a.admin-list-row:hover .admin-list-title {
 
 /* Media library v2 */
 .media-library--v2 .media-library__toolbar {
-  padding: 0.75rem 0.875rem;
-  border-radius: 0.875rem;
-  border: 1px solid hsl(var(--border) / 0.45);
-  background: hsl(var(--muted) / 0.15);
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--line);
+  background: hsl(var(--surface));
+  box-shadow: var(--sh-1);
 }
 
 .media-library__summary-icon {
@@ -9470,8 +9300,8 @@ a.admin-list-row:hover .admin-list-title {
   width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
-  background: hsl(199 89% 48% / 0.12);
-  color: hsl(199 89% 48%);
+  background: hsl(var(--staff-accent) / 0.12);
+  color: hsl(var(--staff-accent));
 }
 
 .media-library__summary-title {
@@ -9487,9 +9317,10 @@ a.admin-list-row:hover .admin-list-title {
   color: hsl(var(--muted-foreground));
 }
 
+/* `auto-fill` stays — a library holds hundreds — but at the one gap. */
 .media-library__grid--v2 {
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  gap: 0.875rem;
+  gap: var(--sp-5);
 }
 
 @media (min-width: 1280px) {
@@ -9578,8 +9409,8 @@ a.admin-list-row:hover .admin-list-title {
 .media-library-card__usage {
   padding: 0.4375rem 0.5rem;
   border-radius: 0.5rem;
-  background: hsl(199 89% 48% / 0.06);
-  border: 1px solid hsl(199 89% 48% / 0.15);
+  background: hsl(var(--staff-accent) / 0.06);
+  border: 1px solid hsl(var(--staff-accent) / 0.15);
 }
 
 .media-library-card__usage-label {
@@ -9622,7 +9453,7 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .media-library-card__article-link:hover {
-  color: hsl(199 89% 48%);
+  color: hsl(var(--staff-accent));
 }
 
 .media-library-card__article-public {
@@ -9638,7 +9469,7 @@ a.admin-list-row:hover .admin-list-title {
 
 .media-library-card__article-public:hover {
   background: hsl(var(--muted) / 0.45);
-  color: hsl(199 89% 48%);
+  color: hsl(var(--staff-accent));
 }
 
 .media-library-card__article-more {
@@ -9681,29 +9512,14 @@ a.admin-list-row:hover .admin-list-title {
   cursor: pointer;
 }
 
-/* Subtle, authentic premium hover states matching their functions */
-.media-library-card__action-btn--copy:hover {
-  color: hsl(217 91% 60%);
-  background: hsl(217 91% 60% / 0.08);
-  border-color: hsl(217 91% 60% / 0.2);
-}
-
-.media-library-card__action-btn--open:hover {
-  color: hsl(142 76% 36%);
-  background: hsl(142 76% 36% / 0.08);
-  border-color: hsl(142 76% 36% / 0.2);
-}
-
-.media-library-card__action-btn--edit:hover {
-  color: hsl(38 92% 50%);
-  background: hsl(38 92% 50% / 0.08);
-  border-color: hsl(38 92% 50% / 0.2);
-}
-
-.media-library-card__action-btn--replace:hover {
-  color: hsl(262 83% 58%);
-  background: hsl(262 83% 58% / 0.08);
-  border-color: hsl(262 83% 58% / 0.2);
+/* One neutral hover for every action, and the bad colour for delete only.
+   Each button had its own hue — blue copy, green open, amber edit, violet
+   replace — five colours meaning nothing, amber among them reading as a
+   warning. */
+.media-library-card__action-btn:hover {
+  color: hsl(var(--foreground));
+  background: var(--hover-wash);
+  border-color: hsl(var(--border) / 0.7);
 }
 
 .media-library-card__action-btn--delete {
@@ -9711,9 +9527,9 @@ a.admin-list-row:hover .admin-list-title {
   border-color: hsl(var(--border) / 0.35);
 }
 .media-library-card__action-btn--delete:hover {
-  color: hsl(346 84% 50%);
-  background: hsl(346 84% 50% / 0.08);
-  border-color: hsl(346 84% 50% / 0.2);
+  color: hsl(var(--staff-bad));
+  background: hsl(var(--staff-bad) / 0.08);
+  border-color: hsl(var(--staff-bad) / 0.25);
 }
 
 .media-library-card__action-btn--lock {
@@ -9723,17 +9539,19 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 .media-library-card__usage-pill {
-  transition: all 150ms ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  color: hsl(var(--staff-accent));
+  background: hsl(var(--staff-accent) / 0.06);
+  border-color: hsl(var(--staff-accent) / 0.15);
 }
 .media-library-card__usage-pill:hover {
-  transform: translateY(-0.5px);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  background: hsl(var(--staff-accent) / 0.1);
 }
 
 @media (min-width: 1024px) {
+  /* A card's padding, not a hand-tuned 0.5/0.6875/0.5625rem forced with
+     !important. */
   .media-library-card__body {
-    padding: 0.5rem 0.6875rem 0.5625rem !important; /* reduce padding slightly to compensate for larger buttons */
+    padding: var(--sp-4);
   }
   .media-library-card__action-row {
     padding-top: 0.5rem;
@@ -9840,7 +9658,6 @@ a.admin-list-row:hover .admin-list-title {
 }
 
 /* Hide sidebar navigation completely during focus mode */
-.cms-shell:has(.cms-article-editor__workspace--focus) .cms-sidebar,
 .cms-shell:has(.cms-article-editor__workspace--focus) .admin-sidebar {
   display: none !important;
 }
@@ -9924,65 +9741,10 @@ a.admin-list-row:hover .admin-list-title {
   padding: 0 !important;
 }
 @media (max-width: 1023px) {
-  /* Auto-collapse the admin/cms sidebar to icon-only mode by default, but allow expanding */
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed {
-    width: var(--shell-header-h) !important;
-    max-width: var(--shell-header-h) !important;
-  }
-  
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .flex-1.truncate,
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-nav-group-label,
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-user-capsule__text,
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-sidebar-brand .min-w-0,
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .cms-brand-tagline,
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .cms-brand-workspace,
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-nav-item span:not(.admin-nav-icon),
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-nav-item svg:not(.admin-nav-icon svg),
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-sidebar-collapse-text {
-    display: none !important;
-  }
-  
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-nav-item {
-    justify-content: center !important;
-    padding: 0.5rem 0 !important;
-    margin: 0 !important;
-    background: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    width: 100% !important;
-  }
-  
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-sidebar-brand {
-    padding: 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-  }
-  
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-sidebar-footer {
-    padding: 1rem 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-  }
-  
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-user-avatar {
-    margin: 0 auto !important;
-  }
-  
-  .admin-sidebar:not(.admin-sidebar--drawer).admin-sidebar--collapsed .admin-user-capsule {
-    background: transparent !important;
-    border-color: transparent !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    min-height: 0 !important;
-  }
-
-  /* Two-column grid layouts for medium-sized tablet devices */
-  .admin-stat-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-  .admin-card-grid--cols-3 {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
+  /* No forced two-up here any more. `repeat(2) !important` beat the
+     count-balanced columns on every tablet and put the third card of a
+     three-card grid alone on its own row; below 1024px `.admin-card-grid`
+     is one column anyway, and the stat strip picks its own count. */
 }
 @media (max-width: 767px) {
   /* Prevent wide tables and logs lists from clipping or overflowing page width */
@@ -9993,17 +9755,18 @@ a.admin-list-row:hover .admin-list-title {
 }
 @media (max-width: 480px) {
   /* Single-column grid layouts on phone sizes to avoid horizontal crowding */
-  .admin-stat-grid,
+  /* The stat strip is not in this list: a single column of KPI tiles is a
+     scroll of big numbers, and two-up at 400px still leaves each tile ~180px. */
   .admin-card-grid,
   .admin-card-grid--cols-2,
   .admin-card-grid--cols-3,
   .admin-actions-grid {
     grid-template-columns: minmax(0, 1fr) !important;
-    gap: 0.625rem !important;
+    gap: 0.5rem !important;
   }
 
   /* Maximize input space by minimizing screen borders and padding */
-  .admin-shell, .cms-shell {
+  .admin-shell {
     --shell-gutter: 0.5rem !important;
     --shell-gap: 0.5rem !important;
   }
@@ -10012,7 +9775,6 @@ a.admin-list-row:hover .admin-list-title {
     padding: 0.5rem !important;
   }
 
-  .admin-shell .settings-panel,
   .admin-shell .admin-card,
   .admin-shell .cms-editor-panel {
     padding: 0.75rem !important;
@@ -10213,8 +9975,7 @@ a.admin-list-row:hover .admin-list-title {
 @media (min-width: 1024px) {
 
   /* Ensure the admin/cms shell fills the full viewport exactly and doesn't scroll the window */
-  .admin-shell,
-  .cms-shell {
+  .admin-shell {
     height: 100dvh !important;
     max-height: 100dvh !important;
     min-height: 100dvh !important;
@@ -10237,10 +9998,13 @@ a.admin-list-row:hover .admin-list-title {
   }
 }
 
+/* Phones get the drawer, not the rail. One header toggle drives both: it
+   collapses the rail from 768px up and opens the drawer below that. Hidden
+   here rather than with Tailwind's `hidden md:flex`, which never applied —
+   `.admin-sidebar { display: flex }` loads after the utilities and won. */
 @media (max-width: 767px) {
-  /* 1. Hide the traditional desktop collapse/expand sidebar button strictly on mobile */
-  .admin-collapse-toggle {
-    display: none !important;
+  .admin-sidebar:not(.admin-sidebar--drawer) {
+    display: none;
   }
 }
 
@@ -10281,8 +10045,7 @@ a.admin-list-row:hover .admin-list-title {
   }
 
   /* 5. rigid, uniform margins and card paddings on all 4 sides on tablets */
-  .admin-main-inner,
-  .cms-main-inner {
+  .admin-main-inner {
     padding: 0.75rem !important;
   }
   .admin-sidebar-footer {
@@ -10294,14 +10057,9 @@ a.admin-list-row:hover .admin-list-title {
     padding: 1rem 0 !important;
   }
 
-  .admin-shell .settings-panel,
   .admin-shell .admin-card,
   .admin-shell .admin-stat-card,
-  .admin-shell .cms-editor-panel,
-  .cms-shell .settings-panel,
-  .cms-shell .admin-card,
-  .cms-shell .admin-stat-card,
-  .cms-shell .cms-editor-panel {
+  .admin-shell .cms-editor-panel {
     padding: 0.75rem !important;
     border-radius: 0.75rem !important;
   }
@@ -10314,26 +10072,30 @@ a.admin-list-row:hover .admin-list-title {
   .admin-card-header {
     margin-bottom: 0.5rem !important;
   }
+
+  /* Gap follows the padding down: 0.75rem inside a card, 0.75rem between. */
+  .admin-stat-grid,
+  .admin-card-grid,
+  .admin-split,
+  .admin-split__main,
+  .admin-split__rail,
+  .admin-analytics-row {
+    gap: 0.75rem;
+  }
 }
 
 @media (max-width: 767px) {
   /* 6. rigid, uniform margins and card paddings on all 4 sides on mobile */
-  .admin-main-inner,
-  .cms-main-inner {
+  .admin-main-inner {
     padding: 0.5rem !important;
   }
   .admin-sidebar-footer {
     padding: 0.5rem !important;
   }
 
-  .admin-shell .settings-panel,
   .admin-shell .admin-card,
   .admin-shell .admin-stat-card,
-  .admin-shell .cms-editor-panel,
-  .cms-shell .settings-panel,
-  .cms-shell .admin-card,
-  .cms-shell .admin-stat-card,
-  .cms-shell .cms-editor-panel {
+  .admin-shell .cms-editor-panel {
     padding: 0.5rem !important;
     border-radius: 0.5rem !important;
   }
@@ -10345,6 +10107,15 @@ a.admin-list-row:hover .admin-list-title {
   }
   .admin-card-header {
     margin-bottom: 0.375rem !important;
+  }
+
+  .admin-stat-grid,
+  .admin-card-grid,
+  .admin-split,
+  .admin-split__main,
+  .admin-split__rail,
+  .admin-analytics-row {
+    gap: 0.5rem;
   }
 }
 
@@ -10586,4 +10357,486 @@ a.admin-list-row:hover .admin-list-title {
 
 .editor-settings__switch--on .editor-settings__switch-thumb {
   transform: translateX(0.8125rem);
+}
+
+/* ── Shared shell (components/staff/StaffShell.tsx) ─────────────────────────
+   Named classes for what AdminShell and CmsShell each spelled out in
+   Tailwind, so both panels take their sidebar and header from one place. */
+.admin-brand-label {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.admin-sidebar-nav {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  overflow-y: auto;
+}
+
+.admin-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.admin-header-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.admin-header-crumb-sep {
+  color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* On a phone the page title is the useful half of the breadcrumb. */
+@media (max-width: 639px) {
+  .admin-header-crumb,
+  .admin-header-crumb-sep {
+    display: none;
+  }
+}
+
+.admin-user-capsule {
+  width: 100%;
+  text-align: left;
+  transition: background-color 150ms ease;
+}
+
+.admin-user-capsule:hover {
+  background: hsl(var(--muted) / 0.5);
+}
+
+/* ── Story editor (TipTap) ──────────────────────────────────────────────────
+   Formerly app/cms.css, imported by the CMS layout alone — so the CMS ran on
+   two stylesheets and the admin console on one. One file serves both now. */
+/* TipTap editor â€“ keep functional but cleaner */
+.tiptap-editor {
+  border-radius: 0.625rem;
+  border: 1px solid hsl(var(--border) / 0.45);
+  background: hsl(var(--background) / 0.85);
+  overflow: hidden;
+}
+
+.tiptap-editor--sticky-toolbar {
+  overflow: visible !important;
+}
+
+.tiptap-toolbar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.25rem, 1fr));
+  gap: 0.35rem;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+  background: hsl(var(--muted) / 0.28);
+}
+
+.tiptap-toolbar--ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.4375rem 0.5625rem;
+  background: linear-gradient(180deg, hsl(var(--muted) / 0.32) 0%, hsl(var(--muted) / 0.18) 100%);
+  border-bottom: 1px solid hsl(var(--border) / 0.42);
+}
+
+.tiptap-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.0625rem;
+  padding: 0.125rem;
+  border-radius: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.32);
+  background: hsl(var(--background) / 0.55);
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar__group--end {
+  /* removed margin-left: auto for even wrapping */
+}
+
+.tiptap-toolbar__divider {
+  width: 1px;
+  height: 1.5rem;
+  background: hsl(var(--border) / 0.45);
+  margin: 0 0.0625rem;
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar--loading {
+  min-height: 2.75rem;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.tiptap-toolbar__zone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-height: 2rem;
+  min-width: 0;
+  padding: 0.15rem 0.2rem;
+  border-radius: 0.55rem;
+  border: 1px solid hsl(var(--border) / 0.28);
+  background: hsl(var(--background) / 0.38);
+}
+
+.tiptap-toolbar__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar__btn {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.375rem;
+  flex-shrink: 0;
+}
+
+.tiptap-toolbar__btn svg {
+  width: 1rem !important;
+  height: 1rem !important;
+}
+
+.tiptap-toolbar--ribbon .tiptap-toolbar__btn {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.375rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.tiptap-toolbar--ribbon .tiptap-toolbar__btn:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.55);
+  color: hsl(var(--foreground));
+}
+
+.tiptap-toolbar__btn--active {
+  background: hsl(var(--muted) / 0.65);
+  color: hsl(var(--foreground));
+}
+
+@media (max-width: 767px) {
+  .tiptap-toolbar--ribbon {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .tiptap-toolbar--ribbon::-webkit-scrollbar {
+    display: none !important;
+  }
+  .tiptap-toolbar__divider {
+    margin: 0 0.25rem !important;
+  }
+}
+
+.tiptap-editor__body {
+  min-height: 280px;
+  overflow: auto;
+}
+
+.tiptap-editor__body--loading {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.tiptap-editor__body .tiptap {
+  min-height: 280px;
+}
+
+.tiptap { @apply min-h-[280px] p-4 sm:p-5 outline-none text-[15px] leading-relaxed; }
+.tiptap p { @apply mb-4 text-foreground; }
+.tiptap h1 { @apply text-2xl font-semibold tracking-tight mb-4; }
+.tiptap h2 { @apply text-xl font-semibold tracking-tight mb-3 mt-5; }
+.tiptap h3 { @apply text-lg font-semibold tracking-tight mb-2 mt-4; }
+.tiptap ul, .tiptap ol { @apply pl-6 mb-4 space-y-1; }
+.tiptap blockquote { @apply border-l-4 border-primary/60 pl-5 italic text-muted-foreground my-4; }
+.tiptap img { @apply max-w-full rounded-xl my-4 shadow-sm; }
+.tiptap img.ProseMirror-selectednode {
+  outline: 2px solid hsl(var(--primary));
+  box-shadow: 0 0 0 4px hsla(var(--primary) / 0.2);
+}
+.tiptap a { @apply text-primary underline underline-offset-2 cursor-pointer; }
+.tiptap table { @apply w-full border-collapse my-4 text-sm relative; }
+.tiptap th, .tiptap td { @apply border border-border px-3 py-2 align-top relative; }
+.tiptap th { @apply bg-muted/40 font-semibold text-left; }
+.tiptap td.selectedCell, .tiptap th.selectedCell {
+  background-color: hsla(var(--primary) / 0.12) !important;
+}
+.tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: hsl(var(--primary));
+  pointer-events: none;
+}
+.tiptap hr { @apply my-6 border-border; }
+
+/* Real-time alignment previews */
+.tiptap .align-left, .article-body .align-left { text-align: left; }
+.tiptap .align-center, .article-body .align-center { text-align: center; }
+.tiptap .align-right, .article-body .align-right { text-align: right; }
+.tiptap .align-justify, .article-body .align-justify { text-align: justify; }
+
+/* Placeholder formatting */
+.tiptap p.is-editor-empty:first-child::before,
+.tiptap p.is-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground) / 0.45);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Pre & code blocks styles */
+.tiptap pre, .article-body pre {
+  background: hsl(var(--muted) / 0.6);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  overflow-x: auto;
+  margin: 1rem 0;
+  border: 1px solid hsl(var(--border) / 0.35);
+}
+.tiptap code, .article-body code {
+  background: hsl(var(--muted) / 0.6);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.3rem;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.9em;
+  border: 1px solid hsl(var(--border) / 0.2);
+}
+.tiptap pre code, .article-body pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+  border: none;
+}
+
+/* ── System section: Settings, Users, Grid Data Ingest ──────────────────────
+   The primitives those pages were each spelling out their own way. */
+
+/* Settings: one card gap on every tab, and a card body with the same gap. */
+.admin-settings-grid {
+  display: grid;
+  gap: var(--sp-5);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .admin-settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.admin-settings-stack,
+.admin-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+
+/* The 12-column editing rows (ticker, snapshot, grid tables) scroll sideways
+   on a narrow screen instead of crushing six inputs into 360px. */
+.admin-settings-body > div:has(> .grid-cols-12) {
+  overflow-x: auto;
+}
+
+.admin-settings-body .grid-cols-12 {
+  min-width: 40rem;
+}
+
+/* A small neutral icon button for row actions (reorder, pin, remove). The
+   interview reorder buttons borrowed `.admin-category-delete`, which is red. */
+.admin-row-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  background: hsl(var(--background) / 0.6);
+  color: hsl(var(--muted-foreground));
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.admin-row-btn:hover:not(:disabled) {
+  background: var(--hover-wash);
+  color: hsl(var(--foreground));
+}
+
+.admin-row-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.admin-row-btn--danger:hover:not(:disabled) {
+  color: hsl(var(--staff-bad));
+  background: hsl(var(--staff-bad) / 0.08);
+}
+
+.admin-native-select {
+  width: 100%;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 1px solid hsl(var(--input));
+  border-radius: var(--r-md);
+  background: hsl(var(--background));
+  font-size: 13px;
+}
+
+.admin-native-select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--staff-accent) / 0.3);
+}
+
+/* An inline link in the accent — the Users "Edit", Member activity's
+   "Moderate". Both were hard-coded rose. */
+.admin-text-link {
+  color: hsl(var(--staff-accent));
+  transition: opacity 150ms ease;
+}
+
+.admin-text-link:hover {
+  opacity: 0.8;
+}
+
+/* A card whose icon states a status: green when there is nothing to do,
+   amber when there is. The tint is on the icon only, as on stat cards. */
+.admin-card--ok .admin-card-icon {
+  color: hsl(var(--staff-ok));
+  background: hsl(var(--staff-ok) / 0.11);
+}
+
+.admin-card--warn .admin-card-icon {
+  color: hsl(var(--staff-warn));
+  background: hsl(var(--staff-warn) / 0.13);
+}
+
+/* A second part of a card body, under a hairline. */
+.admin-card-section {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line-soft);
+}
+
+/* A table inside a card: the shell's rows and header, run edge to edge of
+   the card rather than as a bordered box inside a bordered box. */
+.admin-table-shell--flush {
+  margin-inline: calc(-1 * var(--sp-5));
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* A heading between groups of cards. */
+.admin-section-heading__title {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+}
+
+.admin-section-heading__desc {
+  margin-top: 0.125rem;
+  font-size: var(--fs-meta);
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+
+
+/* ── Workspace section: Dashboard, Performance, Calendar ────────────────────
+   Rules for the rebuilt pages. Later in the file on purpose, so they win
+   over the Calendar's older rules of the same weight. */
+
+/* A list row marked as the reader's own (the Performance leaderboard). */
+.admin-list-row--highlight {
+  background: hsl(var(--staff-accent) / 0.07);
+  box-shadow: inset 2px 0 0 hsl(var(--staff-accent));
+}
+
+/* Editorial notices: rows of the card's list, hairline separated. Each was
+   a bordered, sky-washed box inside the card. */
+.editorial-notice-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.editorial-notice {
+  padding: var(--sp-4) 0;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 13px;
+}
+
+.editorial-notice:first-child {
+  padding-top: 0;
+}
+
+.editorial-notice:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.editorial-notice--pending {
+  padding-left: var(--sp-4);
+  box-shadow: inset 3px 0 0 hsl(var(--staff-accent));
+}
+
+/* Calendar: the month navigation now sits in the card header. */
+.editorial-calendar__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* The day list, as hairline rows like every other list. */
+.editorial-calendar__detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.editorial-calendar__detail-item {
+  padding: var(--sp-4) 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+}
+
+.editorial-calendar__detail-item:first-child {
+  padding-top: 0;
+}
+
+.editorial-calendar__detail-item:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* The legend is the month card's footer now, under a hairline. */
+.editorial-calendar__legend {
+  margin: 0;
+  padding: var(--sp-4) var(--sp-5);
+  border-top: 1px solid var(--line-soft);
 }

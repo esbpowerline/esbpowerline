@@ -9,7 +9,7 @@ import { acknowledgeNotice, resolveNotice, dismissNotice } from '@/lib/actions/n
 import { trashNotice } from '@/lib/actions/editor-trash';
 import { Button } from '@/components/ui/button';
 import { cn, formatEditorialTimestamp } from '@/lib/utils';
-import { CmsCard } from '@/components/cms/CmsUI';
+import { CmsCard, CmsCardFooter, CmsTagCapsule } from '@/components/cms/CmsUI';
 
 export type NoticeRow = {
   id: string;
@@ -46,15 +46,12 @@ function NoticeCard({
   const articleTitle = notice.article?.title ?? meta?.articleTitle;
 
   return (
-    <div
-      className={cn(
-        'rounded-xl border p-3.5 text-sm',
-        notice.status === 'PENDING' ? 'border-sky-500/30 bg-sky-500/5' : 'border-border/50 bg-muted/10',
-      )}
-    >
+    // A row of the card's list, not a bordered box inside the card; a pending
+    // notice carries the accent rule down its left edge instead of a sky wash.
+    <div className={cn('editorial-notice', notice.status === 'PENDING' && 'editorial-notice--pending')}>
       <div className="flex flex-wrap items-start justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-2 min-w-0">
-          <MessageSquare className="h-3.5 w-3.5 text-sky-500 shrink-0" />
+          <MessageSquare className="h-3.5 w-3.5 text-[hsl(var(--staff-accent))] shrink-0" />
           <span className="font-semibold text-[13px]">
             {TYPE_LABELS[notice.type] ?? notice.type}
           </span>
@@ -105,7 +102,7 @@ function NoticeCard({
         <Button
           size="sm"
           variant="ghost"
-          className="h-7 text-xs text-muted-foreground hover:text-red-500"
+          className="h-7 text-xs text-muted-foreground hover:text-[hsl(var(--staff-bad))]"
           disabled={pending}
           onClick={() => onAction(notice.id, 'trash')}
         >
@@ -175,13 +172,10 @@ export function EditorialNoticesPanel({
     <CmsCard
       title={showArchive ? 'Notice archive' : 'Editorial notices'}
       icon={showArchive ? Archive : Bell}
-      className="border-sky-500/20"
       action={
         <div className="flex items-center gap-2">
           {!showArchive && pendingCount > 0 && (
-            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-500">
-              {pendingCount} pending
-            </span>
+            <CmsTagCapsule className="admin-tag-capsule--xs">{pendingCount} pending</CmsTagCapsule>
           )}
           {archive.length > 0 && (
             <button
@@ -196,20 +190,18 @@ export function EditorialNoticesPanel({
       }
     >
       {list.length === 0 ? (
-        <p className="text-[13px] text-muted-foreground py-4 text-center">
+        <p className="text-[13px] text-muted-foreground py-2">
           {showArchive ? 'No archived notices yet.' : 'No active notices — you are caught up.'}
         </p>
       ) : (
-        <div className="admin-dense-list">
+        <div className="editorial-notice-list">
           {list.slice(0, limit).map((notice) => (
             <NoticeCard key={notice.id} notice={notice} pending={pending} onAction={run} />
           ))}
         </div>
       )}
       {fullPage && !showArchive && archive.length > 0 && (
-        <p className="text-[11px] text-muted-foreground mt-3">
-          Dismissed and resolved notices move to the archive tab.
-        </p>
+        <CmsCardFooter>Dismissed and resolved notices move to the archive tab.</CmsCardFooter>
       )}
     </CmsCard>
   );

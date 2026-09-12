@@ -184,23 +184,32 @@ export function CategoryManager({ categories }: { categories: CategoryRow[] }) {
 
   return (
     <div className="admin-category-manager">
-      <form onSubmit={handleCreate} className="flex flex-wrap gap-2 items-center">
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="New category name"
-          className="max-w-xs rounded-full h-9 text-[13px]"
-        />
-        <Button type="submit" disabled={loading} size="sm">
-          <Plus className="h-3.5 w-3.5 mr-1.5" />
-          Add category
-        </Button>
-        <p className="text-[11px] text-muted-foreground w-full sm:w-auto">
-          Order here controls navbar, footer, and /categories page.
+      {/* One card holding one list — the shape of the CMS Categories page.
+          This was a bare form above a stack of separately bordered row
+          panels 0.5rem apart, and shared no layout with the CMS page at all. */}
+      <AdminCard
+        title={`${formatNumber(categories.length)} ${categories.length === 1 ? 'category' : 'categories'}`}
+        icon={FolderOpen}
+        action={
+          <form onSubmit={handleCreate} className="admin-category-create">
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="New category name"
+              className="h-8 text-[13px]"
+            />
+            <Button type="submit" disabled={loading} size="sm">
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Add
+            </Button>
+          </form>
+        }
+      >
+        <p className="admin-card-lead text-[12px] text-muted-foreground">
+          The order here is the order of the navbar, the footer and the /categories page.
         </p>
-      </form>
 
-      <div className="space-y-2">
+      <div className="admin-category-list">
         {categories.map((c, index) => {
           const isEditing = editingId === c.id;
           const isDeleting = deleteTarget?.id === c.id;
@@ -497,11 +506,10 @@ export function CategoryManager({ categories }: { categories: CategoryRow[] }) {
         })}
 
         {categories.length === 0 && (
-          <AdminCard icon={FolderOpen} title="No categories">
-            <p className="text-[13px] text-muted-foreground">Create your first category above.</p>
-          </AdminCard>
+          <p className="text-[13px] text-muted-foreground py-2">No categories yet — add the first one above.</p>
         )}
       </div>
+      </AdminCard>
 
       <AdminSecureActionDialog
         open={secureDeleteOpen && !!deleteTarget}

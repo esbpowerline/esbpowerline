@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Activity, AlertTriangle, Bot, Clock3, Gauge } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { StaffStatGrid } from '@/components/staff/StaffUILayout';
+import { AdminCard, AdminStatCard } from '@/components/admin/AdminUI';
 import type { AutomationPulse } from '@/lib/data/grid/ingest-provenance.server';
 
 /**
@@ -24,12 +25,6 @@ import type { AutomationPulse } from '@/lib/data/grid/ingest-provenance.server';
 
 const HOUR = 3_600_000;
 
-function ageMs(iso: string | null): number | null {
-  if (!iso) return null;
-  const t = Date.parse(iso);
-  return Number.isFinite(t) ? Date.now() - t : null;
-}
-
 /** "just now", "12s ago", "14 min ago", "3 h ago", "2 days ago" — dynamic and precise */
 function formatAgo(iso: string | null, nowMs: number): string {
   if (!iso) return 'never';
@@ -47,8 +42,16 @@ function formatAgo(iso: string | null, nowMs: number): string {
 
 type Tone = 'ok' | 'warn' | 'bad' | 'idle';
 
+/** Tone tints the tile's icon in the status colours, and nothing else. */
+const TONE_ACCENT = { ok: 'emerald', warn: 'amber', bad: 'red', idle: 'sky' } as const;
+
+/**
+ * The shared KPI tile. This row had its own — a 10px label over a 14px value
+ * with the icon beside it — so the two strips at the top of the Admin
+ * Overview read at two different scales.
+ */
 function Stat({
-  icon: Icon,
+  icon,
   label,
   value,
   detail,
@@ -60,28 +63,7 @@ function Stat({
   detail: string;
   tone: Tone;
 }) {
-  return (
-    <div className="flex min-w-0 items-start gap-3 rounded-xl border border-border/40 bg-card/60 p-3 shadow-sm transition hover:border-border/80">
-      <span
-        className={cn(
-          'mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
-          tone === 'ok' && 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20',
-          tone === 'warn' && 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
-          tone === 'bad' && 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
-          tone === 'idle' && 'bg-muted text-muted-foreground border border-border/40',
-        )}
-      >
-        <Icon className="h-4 w-4" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/90">
-          {label}
-        </p>
-        <p className="truncate text-[14px] font-bold tracking-tight tabular-nums text-foreground">{value}</p>
-        <p className="truncate text-[11px] text-muted-foreground">{detail}</p>
-      </div>
-    </div>
-  );
+  return <AdminStatCard title={label} value={value} change={detail} icon={icon} accent={TONE_ACCENT[tone]} />;
 }
 
 export function AutomationPulseRow({
@@ -102,17 +84,13 @@ export function AutomationPulseRow({
 
   if (pulse.degraded || degraded) {
     return (
-      <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/[0.06] p-3.5 shadow-sm">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+      <AdminCard title="The release database could not be read" icon={AlertTriangle} className="admin-card--warn">
         <p className="text-[12px] leading-relaxed text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            The release database could not be read.
-          </span>{' '}
           Coverage below is what this machine holds on disk, which on the deployed panel is
           nothing. Nothing is wrong with the site — readers are served from the same rows this
           screen could not reach.
         </p>
-      </div>
+      </AdminCard>
     );
   }
 
@@ -135,7 +113,10 @@ export function AutomationPulseRow({
     pulse.hoursLast24 >= 20 ? 'ok' : pulse.hoursLast24 >= 12 ? 'warn' : 'bad';
 
   return (
-    <div className="admin-stat-grid sm:grid-cols-2 lg:grid-cols-4">
+    // The shared strip, not `admin-stat-grid sm:grid-cols-2 lg:grid-cols-4`:
+    // staff-surface.css loads after Tailwind's utilities, so those two
+    // classes never won and the row followed whatever the stylesheet did.
+    <StaffStatGrid>
       <Stat
         icon={Activity}
         label="Hourly capture"
@@ -182,6 +163,6 @@ export function AutomationPulseRow({
         }
         tone={publishTone}
       />
-    </div>
+    </StaffStatGrid>
   );
 }

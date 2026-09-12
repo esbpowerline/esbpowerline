@@ -16,7 +16,7 @@ import {
   CmsPageHeader, CmsStatCard, CmsCard, CmsActionPill, CmsCreateCapsule,
   CmsListRow, CmsMetricRow, CmsActivityItem,
   CmsSectionStack, CmsStatGrid, CmsActionsGrid,
-  CmsListStack, CmsScheduleList, CmsCardFooter,
+  CmsListStack, CmsCardFooter,
 } from '@/components/cms/CmsUI';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { CmsCategoryChip } from '@/components/cms/CmsCategoryChip';
@@ -208,39 +208,39 @@ async function CmsDashboardData() {
         </CmsCard>
 
         <CmsCard title="Coming Up" icon={Calendar}>
-          <CmsScheduleList>
+          {/* Kit rows, like the Pipeline card above — these were hand-rolled
+              12px flex lines of a different height. */}
+          <CmsListStack>
             {calendar.scheduled.slice(0, 5).map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-2 text-[12px]">
-                <Link href={`/cms/articles/${a.id}/edit`} className="font-medium line-clamp-1 hover:text-sky-400 min-w-0">
-                  {a.title}
-                </Link>
-                <span className="text-muted-foreground shrink-0 tabular-nums text-[11px]">
-                  {a.publishedAt ? formatDeskDate(a.publishedAt) : 'TBD'}
-                </span>
-              </div>
+              <CmsListRow
+                key={a.id}
+                title={a.title}
+                href={`/cms/articles/${a.id}/edit`}
+                value={a.publishedAt ? formatDeskDate(a.publishedAt) : 'TBD'}
+              />
             ))}
             {calendar.scheduled.length === 0 && (
-              <p className="text-[13px] text-muted-foreground">Nothing scheduled.</p>
+              <p className="text-[13px] text-muted-foreground py-2">Nothing scheduled.</p>
             )}
-          </CmsScheduleList>
+          </CmsListStack>
         </CmsCard>
 
 
         <CmsCard title="Recently Published" icon={Send}>
-          <div>
+          <CmsListStack>
             {calendar.published.slice(0, 6).map((a) => (
               <CmsActivityItem
                 key={a.id}
                 badge={<StatusBadge status="PUBLISHED" />}
                 date={formatDeskDateTime(a.publishedAt)}
                 message={
-                  <Link href={`/cms/articles/${a.id}/edit`} className="hover:text-sky-400">
+                  <Link href={`/cms/articles/${a.id}/edit`} className="admin-text-link">
                     {a.title}
                   </Link>
                 }
               />
             ))}
-          </div>
+          </CmsListStack>
         </CmsCard>
         </aside>
       </div>

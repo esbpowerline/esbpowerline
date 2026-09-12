@@ -16,7 +16,9 @@ import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { useEditorPreferences } from '@/components/cms/EditorPreferencesProvider';
 
-type Placement = 'top' | 'bottom';
+/** `right` sits beside the trigger — for an icon rail, where a label above
+ *  or below one icon would cover the next. It does not flip. */
+type Placement = 'top' | 'bottom' | 'right';
 
 type ModernTooltipProps = {
   label: string;
@@ -79,7 +81,10 @@ export function ModernTooltip({
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockedRef = useRef(false);
 
-  const isPro = guidanceMode === 'pro';
+  // Pro mode quiets guidance tooltips. An `alwaysShow` tooltip is not
+  // guidance — it is the only name an icon-only control has — so it keeps its
+  // own timing; a five-second wait made the collapsed nav unreadable.
+  const isPro = guidanceMode === 'pro' && !alwaysShow;
   const delay = isPro ? 5000 : showDelayMs;
   const fadeOutTime = isPro ? 0 : hideFadeMs;
 
@@ -104,6 +109,13 @@ export function ModernTooltip({
 
     const rect = el.getBoundingClientRect();
     const gap = 8;
+
+    if (side === 'right') {
+      setPlacement('right');
+      setCoords({ top: rect.top + rect.height / 2, left: rect.right + gap });
+      return;
+    }
+
     let nextPlacement: Placement = side;
 
     if (side === 'top' && rect.top < 72) {
@@ -252,13 +264,22 @@ export function ModernTooltip({
             variant === 'data' && 'modern-tooltip--data',
             closing && 'modern-tooltip--out',
             closing && clickFadeMs >= 400 && 'modern-tooltip--out-slow',
-            placement === 'top' ? 'modern-tooltip--top' : 'modern-tooltip--bottom',
+            placement === 'top'
+              ? 'modern-tooltip--top'
+              : placement === 'right'
+                ? 'modern-tooltip--right'
+                : 'modern-tooltip--bottom',
           )}
           style={{
             position: 'fixed',
             top: coords.top,
             left: coords.left,
-            transform: placement === 'top' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)',
+            transform:
+              placement === 'top'
+                ? 'translate(-50%, -100%)'
+                : placement === 'right'
+                  ? 'translate(0, -50%)'
+                  : 'translate(-50%, 0)',
             zIndex: 99999,
             ...(closing && clickFadeMs >= 400
               ? { animationDuration: `${clickFadeMs}ms` }

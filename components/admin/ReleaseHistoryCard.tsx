@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react';
 import { Calendar, Check, ChevronDown, History, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { AdminCard, AdminTableShell } from '@/components/admin/AdminUI';
 import type { ReleaseRevisionRow } from '@/lib/data/release-history.server';
 
 /**
@@ -15,11 +16,13 @@ import type { ReleaseRevisionRow } from '@/lib/data/release-history.server';
  * "payload replaced" is a prompt to write better reasons, not a decoration.
  */
 
+// The status colours: publish is fine, a correction wants a look, a revoke is
+// bad, and a restore is the accent. Raw Tailwind hues before, sky among them.
 const KIND_STYLE: Record<string, string> = {
-  PUBLISH: 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-  CORRECT: 'text-amber-600 dark:text-amber-400 border-amber-500/30',
-  REVOKE: 'text-rose-600 dark:text-rose-400 border-rose-500/30',
-  RESTORE: 'text-sky-600 dark:text-sky-400 border-sky-500/30',
+  PUBLISH: 'text-[hsl(var(--staff-ok))] border-[hsl(var(--staff-ok)/0.3)]',
+  CORRECT: 'text-[hsl(var(--staff-warn))] border-[hsl(var(--staff-warn)/0.3)]',
+  REVOKE: 'text-[hsl(var(--staff-bad))] border-[hsl(var(--staff-bad)/0.3)]',
+  RESTORE: 'text-[hsl(var(--staff-accent))] border-[hsl(var(--staff-accent)/0.3)]',
 };
 
 function when(iso: string): string {
@@ -100,17 +103,14 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
   }, [selectedFilter, revisions.length]);
 
   return (
-    <section className="rounded-xl border border-border/40 bg-card p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <History className="h-4 w-4 text-muted-foreground" aria-hidden />
-          <h2 className="text-sm font-semibold">Publication history</h2>
-          <span className="text-[11px] text-muted-foreground">
-            append-only ledger
-          </span>
-        </div>
-
-        {/* Date Filter Controls — Modern Popover Dropdown */}
+    // An AdminCard like every other panel on the page. It was a hand-built
+    // `rounded-xl p-4` box with its own header row, so it sat at a different
+    // radius, a different border weight and a different title size from the
+    // cards directly above it.
+    <AdminCard
+      title="Publication history"
+      icon={History}
+      action={
         <div className="flex items-center gap-2">
           <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>
@@ -243,7 +243,11 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
             </button>
           )}
         </div>
-      </div>
+      }
+    >
+      <p className="mb-3 text-[11px] text-muted-foreground">
+        Append-only ledger — every publish, correction, revoke and restore, with its reason.
+      </p>
 
       {revisions.length === 0 ? (
         <p className="text-xs text-muted-foreground">
@@ -264,7 +268,10 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <>
+          {/* The shell's table, flush in the card — this page had three
+              different table styles and this was the third. */}
+          <AdminTableShell className="admin-table-shell--flush">
           <table className="w-full text-left text-xs" style={{ fontVariantNumeric: 'tabular-nums' }}>
             <thead>
               <tr className="border-b border-border/40 text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -310,6 +317,7 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
               ))}
             </tbody>
           </table>
+          </AdminTableShell>
           <p className="mt-2 text-[10.5px] text-muted-foreground">
             Showing {filteredRevisions.length} of {revisions.length} revision{revisions.length !== 1 ? 's' : ''}
             {selectedFilter === 'last-7-days'
@@ -318,8 +326,8 @@ export function ReleaseHistoryCard({ revisions }: { revisions: ReleaseRevisionRo
                 ? ` on ${formatDayLabel(selectedFilter)}`
                 : ''}
           </p>
-        </div>
+        </>
       )}
-    </section>
+    </AdminCard>
   );
 }

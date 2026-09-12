@@ -12,19 +12,19 @@ import {
 } from 'lucide-react';
 import { POLICY_GROUPS, POLICY_STATUSES, type Policy, type PolicyStatus } from '@/lib/data/policy/policies';
 import { DEFAULT_IMPORTANT_LINKS } from '@/lib/data/important-links';
+import { AdminCard } from '@/components/admin/AdminUI';
 
 const STATUS_PILL: Record<PolicyStatus, string> = {
-  'In force': 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400',
-  Draft: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
-  Repealed: 'bg-rose-500/10 text-rose-700 dark:text-rose-400',
+  'In force': 'bg-[hsl(var(--staff-ok)/0.1)] text-[hsl(var(--staff-ok))]',
+  Draft: 'bg-[hsl(var(--staff-warn)/0.12)] text-[hsl(var(--staff-warn))]',
+  Repealed: 'bg-[hsl(var(--staff-bad)/0.1)] text-[hsl(var(--staff-bad))]',
   Superseded: 'bg-stone-500/15 text-stone-600 dark:text-stone-400',
 };
 
-const SELECT_CLASS =
-  'mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+const SELECT_CLASS = 'admin-native-select mt-1';
 
-/** Uniform circular icon button (matches .admin-category-delete geometry, neutral tone). */
-const ICON_BTN = 'inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/50 bg-background/60 text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground disabled:opacity-30 disabled:pointer-events-none';
+/** The shared row button (staff-surface.css `.admin-row-btn`). */
+const ICON_BTN = 'admin-row-btn';
 
 function slugify(input: string) {
   return input.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
@@ -87,17 +87,14 @@ export function PanelsEditor({
   const featuredCount = policyItems.filter((p) => p.featured).length;
 
   return (
-    <div className="admin-form-stack">
+    <div className="admin-settings-stack">
       {/* Visibility toggles */}
-      <div className="admin-card settings-panel p-6 space-y-4">
-        <div>
-          <h2 className="font-semibold flex items-center gap-2"><LayoutGrid className="h-4.5 w-4.5 text-primary" /> Sidebar Panel Visibility</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Show or hide each reference directory in the homepage sidebar.</p>
-        </div>
+      <AdminCard title="Sidebar Panel Visibility" icon={LayoutGrid} bodyClassName="admin-settings-body">
+        <p className="admin-card-lead text-[12px] text-muted-foreground">Show or hide each reference directory in the homepage sidebar.</p>
         <div className="flex flex-col gap-2.5">
           <div
             onClick={() => setPanelImportantLinks(!panelImportantLinks)}
-            className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 transition-colors hover:border-primary/30"
+            className="flex cursor-pointer items-center justify-between gap-3 rounded-[var(--r-md)] border border-border/60 bg-muted/20 px-4 py-3 transition-colors hover:border-primary/30"
           >
             <span>
               <span className="block text-sm font-medium">Important Official Links</span>
@@ -107,7 +104,7 @@ export function PanelsEditor({
           </div>
           <div
             onClick={() => setPanelPolicyFramework(!panelPolicyFramework)}
-            className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-4 py-3 transition-colors hover:border-primary/30"
+            className="flex cursor-pointer items-center justify-between gap-3 rounded-[var(--r-md)] border border-border/60 bg-muted/20 px-4 py-3 transition-colors hover:border-primary/30"
           >
             <span>
               <span className="block text-sm font-medium">Policy &amp; Regulatory Framework</span>
@@ -116,17 +113,12 @@ export function PanelsEditor({
             <Switch checked={panelPolicyFramework} onCheckedChange={setPanelPolicyFramework} onClick={(e) => e.stopPropagation()} aria-label="Toggle Policy & Regulatory Framework panel" />
           </div>
         </div>
-      </div>
+      </AdminCard>
 
       {/* Policy Framework structured editor */}
-      <div className="admin-card settings-panel p-6 space-y-4">
-        <div className="flex items-start justify-between gap-3 border-b pb-4">
-          <div>
-            <h2 className="font-semibold flex items-center gap-2"><Scale className="h-4.5 w-4.5 text-primary" /> Policy &amp; Regulatory Framework</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {policyItems.length} entries · {featuredCount} featured in sidebar. Featured entries show on the homepage; all appear in the /energy-policy library.
-            </p>
-          </div>
+      <AdminCard
+        title="Policy &amp; Regulatory Framework" icon={Scale} bodyClassName="admin-settings-body"
+        action={
           <button
             type="button"
             onClick={add}
@@ -134,7 +126,9 @@ export function PanelsEditor({
           >
             <Plus className="h-4 w-4" /> Add entry
           </button>
-        </div>
+        }
+      >
+        <p className="admin-card-lead text-[12px] text-muted-foreground">{policyItems.length} entries · {featuredCount} featured in sidebar. Featured entries show on the homepage; all appear in the /energy-policy library.</p>
 
         {policyItems.length === 0 && (
           <p className="rounded-lg border border-dashed border-border/60 py-8 text-center text-sm text-muted-foreground">
@@ -147,7 +141,7 @@ export function PanelsEditor({
             const isOpen = expanded === idx;
             const groupTitle = POLICY_GROUPS.find((g) => g.key === item.group)?.title ?? item.group;
             return (
-              <div key={idx} className={cn('rounded-xl border bg-card/40 transition-colors', isOpen ? 'border-primary/40' : 'border-border/60')}>
+              <div key={idx} className={cn('rounded-[var(--r-md)] border bg-card/40 transition-colors', isOpen ? 'border-primary/40' : 'border-border/60')}>
                 {/* Summary header row */}
                 <div className="flex items-center gap-2 px-3 py-2.5">
                   <button
@@ -164,7 +158,7 @@ export function PanelsEditor({
                   <div className="flex shrink-0 items-center gap-1">
                     <button type="button" title="Move up" onClick={() => move(idx, -1)} disabled={idx === 0} className={ICON_BTN}><ArrowUp className="h-3.5 w-3.5" /></button>
                     <button type="button" title="Move down" onClick={() => move(idx, 1)} disabled={idx === policyItems.length - 1} className={ICON_BTN}><ArrowDown className="h-3.5 w-3.5" /></button>
-                    <button type="button" title="Remove entry" onClick={() => remove(idx)} className="admin-category-delete opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button type="button" title="Remove entry" onClick={() => remove(idx)} className="admin-row-btn admin-row-btn--danger"><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
 
@@ -244,17 +238,12 @@ export function PanelsEditor({
             );
           })}
         </div>
-      </div>
+      </AdminCard>
 
       {/* Important Official Links JSON editor */}
-      <div className="admin-card settings-panel p-6 space-y-3">
-        <div className="flex items-start justify-between gap-3 border-b pb-4">
-          <div>
-            <h2 className="font-semibold flex items-center gap-2"><FileJson className="h-4.5 w-4.5 text-primary" /> Important Official Links</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Edit the nested ministry directory as JSON. Icon names: <code className="rounded bg-muted px-1 text-[11px]">Zap, Flame, Network, Fuel, Droplet, Mountain, Factory, Waypoints, ShieldCheck</code> · tints: <code className="rounded bg-muted px-1 text-[11px]">amber, sky, emerald, orange, teal, cyan, violet, stone</code>.
-            </p>
-          </div>
+      <AdminCard
+        title="Important Official Links" icon={FileJson} bodyClassName="admin-settings-body"
+        action={
           <button
             type="button"
             onClick={onIlReset}
@@ -262,16 +251,18 @@ export function PanelsEditor({
           >
             <RotateCcw className="h-3.5 w-3.5" /> Reset to default
           </button>
-        </div>
+        }
+      >
+        <p className="admin-card-lead text-[12px] text-muted-foreground">Edit the nested ministry directory as JSON. Icon names: <code className="rounded bg-muted px-1 text-[11px]">Zap, Flame, Network, Fuel, Droplet, Mountain, Factory, Waypoints, ShieldCheck</code> · tints: <code className="rounded bg-muted px-1 text-[11px]">amber, sky, emerald, orange, teal, cyan, violet, stone</code>.</p>
 
-        <div className={cn('flex items-center gap-1.5 text-xs font-medium', ilError ? 'text-rose-500' : 'text-emerald-600 dark:text-emerald-400')}>
+        <div className={cn('flex items-center gap-1.5 text-xs font-medium', ilError ? 'text-[hsl(var(--staff-bad))]' : 'text-[hsl(var(--staff-ok))]')}>
           {ilError ? <><AlertTriangle className="h-3.5 w-3.5 shrink-0" /> {ilError}</> : <><CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> Valid JSON — {DEFAULT_IMPORTANT_LINKS.sections.length} value-chain sections supported</>}
         </div>
 
         <Textarea
           value={ilText}
           onChange={(e) => onIlTextChange(e.target.value)}
-          className={cn('font-mono text-xs leading-relaxed', ilError && 'border-rose-500/50 focus-visible:ring-rose-500/40')}
+          className={cn('font-mono text-xs leading-relaxed', ilError && 'border-[hsl(var(--staff-bad)/0.5)] focus-visible:ring-[hsl(var(--staff-bad)/0.4)]')}
           rows={22}
           spellCheck={false}
         />
@@ -279,7 +270,7 @@ export function PanelsEditor({
         <a href="/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
           Preview on homepage <ExternalLink className="h-3.5 w-3.5" />
         </a>
-      </div>
+      </AdminCard>
     </div>
   );
 }

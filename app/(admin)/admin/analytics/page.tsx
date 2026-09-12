@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import {
-  AdminPageHeader, AdminCard, AdminListRow,
-  AdminMetricRow, AdminActionPill,
+  AdminPageHeader, AdminCard, AdminListRow, AdminMetricRow, AdminActionPill,
+  AdminSectionStack, AdminStatGrid, AdminStatCard, AdminTileGrid, AdminCardRow,
 } from '@/components/admin/AdminUI';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
 import { AdminAnalyticsUpdated } from '@/components/admin/AdminAnalyticsUpdated';
@@ -15,7 +15,7 @@ import type { AnalyticsPeriod } from '@/lib/analytics-period';
 import {
   BarChart3, Eye, FileText, Users, Megaphone,
   Image, BookOpen, AlertTriangle, Zap, Layers, Clock,
-  CheckCircle, PenLine,
+  CheckCircle, PenLine, CalendarRange,
 } from 'lucide-react';
 
 type PageProps = {
@@ -27,6 +27,17 @@ function pct(n: number, total: number) {
   return `${((n / total) * 100).toFixed(1)}%`;
 }
 
+/*
+ * The same kit, grid and card chrome as every other staff page.
+ *
+ * This page used to be its own design system inside the admin panel: a
+ * bespoke 4-cell KPI strip and a 6-cell inline "secondary" strip in place of
+ * the shared stat cards, three hand-rolled grids gapped at 0.375, 0.5 and
+ * 0.75rem against 1rem everywhere else, and a page-scoped rule that shrank
+ * every card header to 0.5rem of padding and an 11px uppercase title. Its
+ * wide-screen rules also went 5-up over six quick links (5 + 1) and 3-up over
+ * two footer cards, leaving an empty third column.
+ */
 export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const stats = await getAnalytics({ period: params.period, month: params.month ?? null });
@@ -40,8 +51,8 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
     { label: 'Queue', value: formatNumber(stats.pendingComments + stats.pendingNotices), hint: `${stats.pendingComments} comments · ${stats.pendingNotices} notices`, icon: AlertTriangle },
   ];
 
-  const secondaryKpis = [
-    { label: 'Subs', value: formatNumber(pm.subscribers) },
+  const periodTotals = [
+    { label: 'Subscribers', value: formatNumber(pm.subscribers) },
     { label: 'Comments', value: formatNumber(pm.comments) },
     { label: 'New users', value: formatNumber(pm.newUsers) },
     { label: 'Likes', value: formatNumber(stats.totalLikes) },
@@ -57,12 +68,11 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
   ];
 
   return (
-    <div className="admin-analytics-page">
+    <AdminSectionStack className="admin-analytics-page">
       <AdminPageHeader
         icon={BarChart3}
         title="Analytics"
         description="Operational metrics · filter by day, week, month, year, or focus a calendar month."
-        className="admin-analytics-header"
       >
         <AdminAnalyticsUpdated generatedAt={stats.generatedAt} />
       </AdminPageHeader>
@@ -76,38 +86,35 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
         />
       </Suspense>
 
-      <div className="admin-analytics-quick-grid admin-analytics-quick-grid--top">
+      <AdminTileGrid>
         <AdminActionPill href="/admin/articles" label="Articles" icon={FileText} description={`${stats.draftCount} drafts`} />
         <AdminActionPill href="/admin/media" label="Media" icon={Image} description={`${stats.mediaCount} files`} />
         <AdminActionPill href="/admin/magazine" label="Magazine" icon={BookOpen} description={`${stats.magazineCount} issues`} accent="emerald" />
         <AdminActionPill href="/admin/logs" label="Logs" icon={Clock} description="Audit trail" />
         <AdminActionPill href="/admin/comments" label="Comments" icon={PenLine} description={`${stats.pendingComments} pending`} />
         <AdminActionPill href="/admin/users?filter=members" label="Members" icon={Users} description="Subscriber accounts" accent="emerald" />
-      </div>
+      </AdminTileGrid>
 
-      <div className="admin-analytics-kpi-primary">
+      <AdminStatGrid>
         {primaryKpis.map((kpi) => (
-          <div key={kpi.label} className="admin-analytics-kpi-primary-cell">
-            <div className="admin-analytics-kpi-primary-top">
-              <kpi.icon className="icon-sm opacity-50" strokeWidth={2} />
-              <span className="admin-analytics-kpi-primary-label">{kpi.label}</span>
-            </div>
-            <span className="admin-analytics-kpi-primary-value">{kpi.value}</span>
-            <span className="admin-analytics-kpi-primary-hint">{kpi.hint}</span>
-          </div>
+          <AdminStatCard key={kpi.label} title={kpi.label} value={kpi.value} icon={kpi.icon} change={kpi.hint} />
         ))}
-      </div>
+      </AdminStatGrid>
 
-      <div className="admin-analytics-kpi-secondary">
-        {secondaryKpis.map((kpi) => (
-          <div key={kpi.label} className="admin-analytics-kpi-secondary-cell">
-            <span className="admin-analytics-kpi-secondary-label">{kpi.label}</span>
-            <span className="admin-analytics-kpi-secondary-value">{kpi.value}</span>
-          </div>
-        ))}
-      </div>
+      <AdminCardRow>
+        {/* Was a 9px inline strip under the KPIs; the same six figures, now
+            read the way every other metric on the page is. */}
+        <AdminCard
+          title="In this period"
+          icon={CalendarRange}
+          bodyClassName="admin-card-body--dense"
+          action={<span className="admin-analytics-summary">{stats.filters.rangeLabel}</span>}
+        >
+          {periodTotals.map((item) => (
+            <AdminMetricRow key={item.label} label={item.label} value={item.value} />
+          ))}
+        </AdminCard>
 
-      <div className="admin-analytics-insight-grid">
         <AdminCard title="Editorial" icon={AlertTriangle} bodyClassName="admin-card-body--dense">
           {healthItems.map((item) => (
             <AdminMetricRow key={item.label} label={item.label} value={formatNumber(item.value)} highlight={item.warn} />
@@ -149,7 +156,7 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
             <p className="admin-analytics-empty">No authors in period.</p>
           )}
         </AdminCard>
-      </div>
+      </AdminCardRow>
 
       <AdminAnalyticsChartsLazy
         filters={stats.filters}
@@ -162,7 +169,7 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
         periodComparison={stats.periodComparison}
       />
 
-      <div className="admin-analytics-footer-grid">
+      <AdminCardRow>
         <AdminCard title="Ads" icon={Megaphone} bodyClassName="admin-card-body--dense">
           {stats.ads.slots.length > 0 ? stats.ads.slots.map((ad) => (
             <AdminListRow
@@ -179,7 +186,7 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
         <AdminCard title="Activity" icon={Layers} bodyClassName="admin-card-body--dense">
           <AdminRecentActivity logs={stats.recentLogs} emptyLabel="No administrative events in range." />
         </AdminCard>
-      </div>
-    </div>
+      </AdminCardRow>
+    </AdminSectionStack>
   );
 }

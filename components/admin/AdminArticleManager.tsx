@@ -551,7 +551,7 @@ export function AdminArticleManager({
 
   return (
     <div className="admin-article-manager">
-      <div className="admin-filter-bar admin-article-filters">
+      <div className="admin-filter-bar">
         <div className="relative flex-1 min-w-[10rem]">
           <Search className="h-3.5 w-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <Input
@@ -675,7 +675,13 @@ export function AdminArticleManager({
           <TableBody>
             {paginatedArticles.length === 0 && (
               <TableRow>
-                <TableCell colSpan={showAuthorColumn ? 9 : 8} className="text-center text-muted-foreground py-10">
+                {/* Seven fixed columns, plus Author and Flags when shown — the
+                    old 9-or-8 ignored Flags, so a CMS non-lead's empty row
+                    ran one column short. */}
+                <TableCell
+                  colSpan={7 + (showAuthorColumn ? 1 : 0) + (showBulkFlags ? 1 : 0)}
+                  className="text-center text-muted-foreground py-10"
+                >
                   No articles match your filters.
                 </TableCell>
               </TableRow>
@@ -688,7 +694,7 @@ export function AdminArticleManager({
                   key={a.id}
                   className={cn(
                     isSelected && 'admin-table-row--selected',
-                    isBeingReviewed && 'bg-sky-500/10 border-l-2 border-l-sky-500 font-semibold'
+                    isBeingReviewed && 'admin-table-row--review'
                   )}
                 >
                   <TableCell>
@@ -764,9 +770,11 @@ export function AdminArticleManager({
         </Table>
       </AdminTableShell>
 
-      {/* Sleek Pagination Panel */}
+      {/* The pager sits in the manager's own 1rem rhythm. It carried an
+          extra `mt-4` on top of the flex gap (about 1.75rem below the table
+          against 0.75rem everywhere else) and its own radius and glass. */}
       {filtered.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 px-4 py-3 rounded-xl border border-border/40 bg-card/25 backdrop-blur-sm shadow-sm transition-all duration-300">
+        <div className="admin-pager flex-col sm:flex-row">
           
           {/* Left section: Showing range */}
           <div className="text-xs text-muted-foreground font-medium order-2 sm:order-1">
@@ -813,7 +821,7 @@ export function AdminArticleManager({
                   type="button"
                   disabled={activePage === 1 || pending}
                   onClick={() => setCurrentPage(1)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/30 bg-background/30 text-muted-foreground hover:bg-background/85 hover:text-foreground disabled:opacity-30 disabled:hover:bg-background/30 disabled:hover:text-muted-foreground disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="admin-pager-step"
                   title="First Page"
                 >
                   <ChevronsLeft className="h-3.5 w-3.5" />
@@ -824,7 +832,7 @@ export function AdminArticleManager({
                   type="button"
                   disabled={activePage === 1 || pending}
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/30 bg-background/30 text-muted-foreground hover:bg-background/85 hover:text-foreground disabled:opacity-30 disabled:hover:bg-background/30 disabled:hover:text-muted-foreground disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="admin-pager-step"
                   title="Previous Page"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
@@ -849,12 +857,8 @@ export function AdminArticleManager({
                         key={`page-${p}`}
                         type="button"
                         onClick={() => setCurrentPage(p as number)}
-                        className={cn(
-                          "flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-1.5 text-[11px] font-semibold transition-all shadow-sm",
-                          isCurrent
-                            ? "bg-gradient-to-br from-rose-500 to-violet-600 text-white border border-rose-500/25 shadow-md shadow-rose-500/10"
-                            : "border border-border/30 bg-background/30 text-muted-foreground hover:bg-background/85 hover:text-foreground"
-                        )}
+                        aria-current={isCurrent ? 'page' : undefined}
+                        className={cn('admin-pager-step admin-pager-step--page', isCurrent && 'admin-pager-step--current')}
                       >
                         {p}
                       </button>
@@ -872,7 +876,7 @@ export function AdminArticleManager({
                   type="button"
                   disabled={activePage === totalPages || pending}
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/30 bg-background/30 text-muted-foreground hover:bg-background/85 hover:text-foreground disabled:opacity-30 disabled:hover:bg-background/30 disabled:hover:text-muted-foreground disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="admin-pager-step"
                   title="Next Page"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -883,7 +887,7 @@ export function AdminArticleManager({
                   type="button"
                   disabled={activePage === totalPages || pending}
                   onClick={() => setCurrentPage(totalPages)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/30 bg-background/30 text-muted-foreground hover:bg-background/85 hover:text-foreground disabled:opacity-30 disabled:hover:bg-background/30 disabled:hover:text-muted-foreground disabled:cursor-not-allowed transition-all shadow-sm"
+                  className="admin-pager-step"
                   title="Last Page"
                 >
                   <ChevronsRight className="h-3.5 w-3.5" />

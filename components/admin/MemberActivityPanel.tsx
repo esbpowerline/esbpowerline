@@ -1,13 +1,16 @@
 import Link from 'next/link';
 import { Bookmark, Download, MessageSquare } from 'lucide-react';
-import { AdminCard, AdminCardGrid, AdminCardFooter } from '@/components/admin/AdminUI';
+import { AdminCard, AdminCardRow, AdminCardFooter } from '@/components/admin/AdminUI';
 import { StatusBadge } from '@/components/dashboard/StatusBadge';
 import { formatDate } from '@/lib/utils';
 import type { UserMemberActivity } from '@/lib/actions/users';
 
 export function MemberActivityPanel({ activity }: { activity: UserMemberActivity }) {
   return (
-    <AdminCardGrid cols={3}>
+    // A card row: three cards of one height, balanced by count. The 3-column
+    // card grid aligned them to the top, so a short "No downloads" card
+    // stood beside a long comment list with a hole under it.
+    <AdminCardRow>
       <AdminCard title="Saved items" icon={Bookmark} bodyClassName="admin-card-body--dense">
         {activity.savedItems.length === 0 ? (
           <p className="text-sm text-muted-foreground">No saved articles or magazine issues.</p>
@@ -41,7 +44,7 @@ export function MemberActivityPanel({ activity }: { activity: UserMemberActivity
                 </div>
                 <p className="text-foreground/90 line-clamp-2">{comment.content}</p>
                 {comment.articleSlug ? (
-                  <Link href={`/admin/comments?status=${comment.status}`} className="text-[11px] text-rose-400 hover:text-rose-300">
+                  <Link href={`/admin/comments?status=${comment.status}`} className="admin-text-link text-[11px]">
                     Moderate →
                   </Link>
                 ) : null}
@@ -68,6 +71,6 @@ export function MemberActivityPanel({ activity }: { activity: UserMemberActivity
           </ul>
         )}
       </AdminCard>
-    </AdminCardGrid>
+    </AdminCardRow>
   );
 }

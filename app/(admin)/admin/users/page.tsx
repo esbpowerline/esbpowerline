@@ -47,14 +47,10 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
           <Link
             key={tab.id}
             href={`/admin/users?filter=${tab.id}`}
-            className={cn(
-              'admin-filter-tab',
-              filter === tab.id && (
-                tab.id === 'editor' ? 'admin-filter-tab--active-blue' :
-                tab.id === 'members' ? 'admin-filter-tab--active-green' :
-                'admin-filter-tab--active'
-              )
-            )}
+            // One active colour. Editor lit blue and Members green, so the
+            // same control changed colour depending on which tab was chosen.
+            aria-current={filter === tab.id ? 'page' : undefined}
+            className={cn('admin-filter-tab', filter === tab.id && 'admin-filter-tab--active')}
           >
             {tab.label}
           </Link>
@@ -75,6 +71,13 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
+            {users.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center text-muted-foreground py-10">
+                  No users in this view.
+                </TableCell>
+              </TableRow>
+            )}
             {users.map((u) => (
               <TableRow key={u.id}>
                 <TableCell className="font-medium">{u.name}</TableCell>
@@ -92,7 +95,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                 <TableCell>
                   <Link
                     href={`/admin/users/${u.id}`}
-                    className="inline-flex items-center gap-1 text-[12px] font-medium text-rose-400 hover:text-rose-300 transition-colors"
+                    className="admin-text-link inline-flex items-center gap-1 text-[12px] font-medium"
                   >
                     <Pencil className="h-3 w-3" /> Edit
                   </Link>

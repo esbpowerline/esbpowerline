@@ -2,6 +2,7 @@
 
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AdminCard } from '@/components/admin/AdminUI';
 import { useAdminPreferences } from '@/components/admin/AdminPreferencesProvider';
 import type { AdminTimeFormat } from '@/lib/admin-time-format';
 import { formatAdminDateTime } from '@/lib/admin-time-format';
@@ -16,12 +17,8 @@ export function AdminTimeFormatSetting() {
   const preview = formatAdminDateTime(new Date(), timeFormat);
 
   return (
-    <div className="admin-card settings-panel p-6 space-y-4 lg:col-span-2">
-      <h2 className="font-semibold flex items-center gap-2">
-        <Clock className="h-4.5 w-4.5 text-primary" />
-        Admin workspace
-      </h2>
-      <p className="text-xs text-muted-foreground">
+    <AdminCard title="Admin workspace" icon={Clock} className="lg:col-span-2" bodyClassName="admin-settings-body">
+      <p className="admin-card-lead text-[12px] text-muted-foreground">
         Personal display preference for this browser. Affects timestamps across the admin console only — not the public site or editorial CMS.
       </p>
 
@@ -47,6 +44,6 @@ export function AdminTimeFormatSetting() {
       <p className="text-[11px] text-muted-foreground">
         Preview: <span className="font-medium text-foreground">{preview}</span>
       </p>
-    </div>
+    </AdminCard>
   );
 }

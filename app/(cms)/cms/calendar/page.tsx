@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth';
 import { getEditorialCalendarEvents } from '@/lib/actions/articles';
 import { can } from '@/lib/constants';
 import { Calendar } from 'lucide-react';
-import { CmsPageHeader, CmsSectionStack } from '@/components/cms/CmsUI';
+import { CmsLoading, CmsPageHeader, CmsSectionStack } from '@/components/cms/CmsUI';
 import { EditorialCalendar } from '@/components/cms/EditorialCalendar';
 
 type SearchParams = Promise<{ year?: string; month?: string }>;
@@ -38,7 +38,7 @@ export default async function CMSCalendarPage({
         }
         icon={Calendar}
       />
-      <Suspense fallback={<div className="text-[13px] text-muted-foreground py-8 text-center">Loading calendar…</div>}>
+      <Suspense fallback={<CmsLoading label="Loading calendar…" />}>
         <EditorialCalendar
           events={events}
           year={year}

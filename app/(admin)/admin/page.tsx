@@ -1,7 +1,7 @@
 import {
   AdminPageHeader, AdminStatCard, AdminCard, AdminActionPill,
   AdminListRow, AdminMetricRow,
-  AdminSectionStack, AdminStatGrid, AdminCardGrid, AdminActionsGrid,
+  AdminSectionStack, AdminStatGrid, AdminActionsGrid,
   AdminListStack, AdminCardFooter,
 } from '@/components/admin/AdminUI';
 import { AdminRecentActivity } from '@/components/admin/AdminRecentActivity';
@@ -49,7 +49,7 @@ async function AdminDashboardData() {
 
       {/* Primary Platform KPIs */}
       <AdminStatGrid>
-        <AdminStatCard title="Total Articles" value={formatNumber(stats.articleCount)} icon={FileText} accent="rose" change={`${stats.publishedCount} published`} />
+        <AdminStatCard title="Total Articles" value={formatNumber(stats.articleCount)} icon={FileText} change={`${stats.publishedCount} published`} />
         <AdminStatCard title="Total Users" value={formatNumber(stats.userCount)} icon={Users} accent="violet" />
         <AdminStatCard title="Total Views" value={formatNumber(stats.totalViews)} icon={Eye} accent="sky" />
         <AdminStatCard title="Published Live" value={formatNumber(stats.publishedCount)} icon={CheckCircle} accent="emerald" change="Visible on public site" />
@@ -61,9 +61,14 @@ async function AdminDashboardData() {
         )}
       </AdminStatGrid>
 
-      <AdminCardGrid cols={3}>
-        {/* Main Details (Left 2/3 Column) */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* The shared split, as the CMS dashboard and Performance page use.
+          This was a 3-column card grid holding a 2-span and a 1-span column,
+          each stacking its cards with `space-y-6`: 24px between cards
+          vertically, 12px between the columns — one gap measured two ways.
+          And at 1920px the grid went to four columns, leaving the fourth
+          empty down the right-hand side. */}
+      <div className="admin-split">
+        <div className="admin-split__main">
           <AdminCard title="Top Content by Views" icon={BarChart3}>
             <AdminListStack>
               {stats.topArticles.map((a: { id: string; slug: string; title: string; views: number }, i: number) => (
@@ -87,8 +92,7 @@ async function AdminDashboardData() {
           </AdminCard>
         </div>
 
-        {/* Sidebar Summary & Actions (Right 1/3 Column) */}
-        <div className="lg:col-span-1 space-y-6">
+        <aside className="admin-split__rail">
           <AdminCard title="Sector Snapshot" icon={Zap}>
             <AdminListStack>
               {/* The same figures the homepage serves, from the same loader —
@@ -137,8 +141,8 @@ async function AdminDashboardData() {
               )}
             </AdminActionsGrid>
           </AdminCard>
-        </div>
-      </AdminCardGrid>
+        </aside>
+      </div>
     </AdminSectionStack>
   );
 }

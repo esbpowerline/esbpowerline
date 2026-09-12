@@ -29,7 +29,10 @@ export function AdminLogsTable({ logs }: { logs: AdminLogRow[] }) {
               <AdminFormattedTime value={log.timestamp} />
             </TableCell>
             <TableCell className="hidden sm:table-cell">
-              <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-muted/60 border border-border/50">
+              {/* The kit's capsule. `inline-flex rounded-full` was caught by the
+                  global status-badge rule and uppercased, so a log type like
+                  `article.update` printed as ARTICLE.UPDATE. */}
+              <span className="admin-tag-capsule admin-tag-capsule--xs font-mono">
                 {log.type}
               </span>
             </TableCell>

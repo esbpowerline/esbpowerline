@@ -198,7 +198,7 @@ function ReplaceMediaModal({
         <div className="admin-secure-dialog-header border-b border-border/40 p-4">
           <div>
             <h3 className="admin-secure-dialog-title flex items-center gap-2">
-              <SlidersHorizontal className="h-4 w-4 text-sky-400" />
+              <SlidersHorizontal className="h-4 w-4 text-[hsl(var(--staff-accent))]" />
               Replace featured image details
             </h3>
             <p className="admin-secure-dialog-desc">
@@ -239,7 +239,7 @@ function ReplaceMediaModal({
               <div className="flex-1 min-w-0">
                 <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">Image source</span>
                 <span className="text-xs font-semibold text-foreground truncate block mt-0.5">{item.name}</span>
-                {newUrl && <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">New replacement file staged</span>}
+                {newUrl && <span className="text-[10px] text-[hsl(var(--staff-ok))] font-bold block mt-0.5">New replacement file staged</span>}
               </div>
               <Button
                 type="button"
@@ -266,15 +266,15 @@ function ReplaceMediaModal({
 
           <div className="space-y-3">
             {item.usedInArticles.length > 0 ? (
-              <div className="border border-border/40 rounded-xl bg-sky-500/5 p-3">
-                <span className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider block mb-1">Referenced in</span>
+              <div className="border border-border/40 rounded-xl bg-[hsl(var(--staff-accent)/0.05)] p-3">
+                <span className="text-[11px] font-semibold text-[hsl(var(--staff-accent))] uppercase tracking-wider block mb-1">Referenced in</span>
                 <ul className="space-y-1.5">
                   {item.usedInArticles.map((story: any) => (
                     <li key={story.baseSlug} className="text-xs font-medium flex flex-wrap items-center justify-between gap-2">
                       <span className="truncate text-foreground/80 flex-1 min-w-0">{story.titleEn || story.titleBn || story.title}</span>
                       <div className="flex gap-1.5 shrink-0">
                         {story.idEn && (
-                          <Link href={`/cms/articles/${story.idEn}/edit`} className="text-sky-400 hover:underline shrink-0 text-[10px]">Edit EN</Link>
+                          <Link href={`/cms/articles/${story.idEn}/edit`} className="text-[hsl(var(--staff-accent))] hover:underline shrink-0 text-[10px]">Edit EN</Link>
                         )}
                         {story.idBn && (
                           <Link href={`/cms/articles/${story.idBn}/edit`} className="text-purple-400 hover:underline shrink-0 text-[10px]">Edit BN</Link>
@@ -335,7 +335,7 @@ function ReplaceMediaModal({
                     onClick={() => { setFitMode('fit'); setZoom(100); }}
                     className={cn(
                       'text-[10px] font-bold px-2 py-0.5 rounded border border-border/60 transition-colors',
-                      fitMode === 'fit' ? 'border-sky-500 bg-sky-500/10 text-sky-400' : 'text-muted-foreground hover:border-border'
+                      fitMode === 'fit' ? 'border-[hsl(var(--staff-accent))] bg-[hsl(var(--staff-accent)/0.1)] text-[hsl(var(--staff-accent))]' : 'text-muted-foreground hover:border-border'
                     )}
                   >
                     Fit
@@ -345,7 +345,7 @@ function ReplaceMediaModal({
                     onClick={() => { setFitMode('fill'); setZoom(100); }}
                     className={cn(
                       'text-[10px] font-bold px-2 py-0.5 rounded border border-border/60 transition-colors',
-                      fitMode === 'fill' ? 'border-sky-500 bg-sky-500/10 text-sky-400' : 'text-muted-foreground hover:border-border'
+                      fitMode === 'fill' ? 'border-[hsl(var(--staff-accent))] bg-[hsl(var(--staff-accent)/0.1)] text-[hsl(var(--staff-accent))]' : 'text-muted-foreground hover:border-border'
                     )}
                   >
                     Fill
@@ -410,7 +410,7 @@ function ReplaceMediaModal({
                       className={cn(
                         'rounded-full border px-2.5 py-0.5 text-[9px] font-bold capitalize transition-colors',
                         filter === f
-                          ? 'border-sky-500/50 bg-sky-500/10 text-sky-400'
+                          ? 'border-[hsl(var(--staff-accent)/0.5)] bg-[hsl(var(--staff-accent)/0.1)] text-[hsl(var(--staff-accent))]'
                           : 'border-border/60 text-muted-foreground hover:border-border',
                       )}
                     >
@@ -430,7 +430,7 @@ function ReplaceMediaModal({
             size="sm"
             onClick={onClose}
             disabled={saving}
-            className="text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 border-rose-500/20 hover:border-rose-500/30"
+            className="text-[hsl(var(--staff-bad))] hover:text-[hsl(var(--staff-bad))] hover:bg-[hsl(var(--staff-bad)/0.1)] border-[hsl(var(--staff-bad)/0.2)] hover:border-[hsl(var(--staff-bad)/0.3)]"
           >
             Cancel
           </Button>
@@ -659,7 +659,7 @@ function ImageLightbox({
                   : "bg-muted/40 hover:bg-muted/60 text-foreground/90 hover:text-foreground border border-border/40"
               )}
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? <Check className="h-3.5 w-3.5 text-[hsl(var(--staff-ok))]" /> : <Copy className="h-3.5 w-3.5" />}
               <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
             </button>
             <button
@@ -672,7 +672,7 @@ function ImageLightbox({
                   : "bg-muted/40 hover:bg-muted/60 text-foreground/90 hover:text-foreground border border-border/40"
               )}
             >
-              {imageCopied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <FileImage className="h-3.5 w-3.5" />}
+              {imageCopied ? <Check className="h-3.5 w-3.5 text-[hsl(var(--staff-ok))]" /> : <FileImage className="h-3.5 w-3.5" />}
               <span>{imageCopied ? 'Copied Image' : 'Copy Image'}</span>
             </button>
             <button
@@ -786,7 +786,7 @@ function UsedInArticlesModal({
                         <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">Cover</span>
                       )}
                       {story.isBody && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">Body</span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[hsl(var(--staff-warn)/0.1)] text-[hsl(var(--staff-warn))] border border-[hsl(var(--staff-warn)/0.2)]">Body</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -938,7 +938,7 @@ function MediaCard({
           <div className={cn(
             "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider text-white backdrop-blur-[6px] shadow-sm border",
             item.placementType === 'cover' ? "bg-blue-600/75 border-blue-500/20" :
-            item.placementType === 'body' ? "bg-amber-600/75 border-amber-500/20" :
+            item.placementType === 'body' ? "bg-[hsl(var(--staff-warn)/0.75)] border-[hsl(var(--staff-warn)/0.2)]" :
             item.placementType === 'both' ? "bg-purple-600/75 border-purple-500/20" :
             "bg-neutral-600/75 border-neutral-500/20"
           )}>
@@ -959,18 +959,9 @@ function MediaCard({
             </ModernTooltip>
             <div className="flex items-center gap-1 mt-1 truncate">
               <span className="text-[10px] text-muted-foreground/75">by</span>
-              <span className={cn(
-                "text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider",
-                item.uploadedByRole === 'SUPER_ADMIN' || item.uploadedByRole === 'ADMIN'
-                  ? "text-rose-500 bg-rose-500/5 border-rose-500/12 dark:border-rose-500/20"
-                  : item.uploadedByRole === 'EDITOR'
-                  ? "text-blue-500 bg-blue-500/5 border-blue-500/12 dark:border-blue-500/20"
-                  : item.uploadedByRole === 'AUTHOR'
-                  ? "text-emerald-500 bg-emerald-500/5 border-emerald-500/12 dark:border-emerald-500/20"
-                  : item.uploadedByRole === 'CONTRIBUTOR'
-                  ? "text-purple-500 bg-purple-500/5 border-purple-500/12 dark:border-purple-500/20"
-                  : "text-muted-foreground bg-muted/10 border-border/12"
-              )}>
+              {/* One neutral chip. Colour-by-role painted every admin upload
+                  rose, the colour this surface reserves for "destructive". */}
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider text-muted-foreground bg-muted/20 border-border/40">
                 {item.uploadedByName ?? 'System'}
               </span>
             </div>
@@ -988,13 +979,9 @@ function MediaCard({
             <button
               type="button"
               onClick={() => onShowUsage?.(item)}
-              className={cn(
-                "media-library-card__usage-pill flex items-center justify-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 rounded-full transition-all border w-full cursor-pointer",
-                item.usageCount <= 1 ? "text-blue-500 bg-blue-500/5 border-blue-500/12 hover:bg-blue-500/10" :
-                item.usageCount === 2 ? "text-violet-500 bg-violet-500/5 border-violet-500/12 hover:bg-violet-500/10" :
-                item.usageCount === 3 ? "text-amber-500 bg-amber-500/5 border-amber-500/12 hover:bg-amber-500/10" :
-                "text-rose-500 bg-rose-500/5 border-rose-500/12 hover:bg-rose-500/10"
-              )}
+              // One colour whatever the count: rose at four uses read as an
+              // error, and being reused is not one.
+              className="media-library-card__usage-pill flex items-center justify-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 rounded-full transition-colors border w-full cursor-pointer"
             >
               <Newspaper className="h-3.5 w-3.5" />
               <span>Used in {item.usageCount} {item.usageCount === 1 ? 'story' : 'stories'}</span>
@@ -1233,30 +1220,25 @@ export function MediaUpload({ items }: { items: MediaLibraryItem[] }) {
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           {/* WebP Optimizer Toggle Switch */}
-          <div className="flex items-center gap-1 bg-muted/40 border border-border/30 p-1 rounded-xl text-[10px] font-bold shadow-sm">
+          {/* The kit's filter tabs. These were hand-rolled segments, sky when
+              converting and amber for raw — amber is the "needs attention"
+              colour, and a raw upload is a choice, not a warning. */}
+          <div className="admin-filter-tabs" role="group" aria-label="Upload format">
             <button
               type="button"
               onClick={() => handleToggleWebp(true)}
-              className={cn(
-                "px-2.5 py-1 rounded-lg transition-all",
-                convertToWebp 
-                  ? "bg-sky-500/15 text-sky-600 dark:text-sky-400 font-extrabold shadow-sm border border-sky-500/10" 
-                  : "text-muted-foreground/60 hover:text-foreground"
-              )}
+              aria-pressed={convertToWebp}
+              className={cn('admin-filter-tab', convertToWebp && 'admin-filter-tab--active')}
             >
               Convert to WebP
             </button>
             <button
               type="button"
               onClick={() => handleToggleWebp(false)}
-              className={cn(
-                "px-2.5 py-1 rounded-lg transition-all",
-                !convertToWebp 
-                  ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 font-extrabold shadow-sm border border-amber-500/10" 
-                  : "text-muted-foreground/60 hover:text-foreground"
-              )}
+              aria-pressed={!convertToWebp}
+              className={cn('admin-filter-tab', !convertToWebp && 'admin-filter-tab--active')}
             >
-              Raw Upload
+              Raw upload
             </button>
           </div>
 
@@ -1268,14 +1250,17 @@ export function MediaUpload({ items }: { items: MediaLibraryItem[] }) {
       </div>
 
       {items.length > 0 && (
-        <div className="media-library__search-panel flex flex-col md:flex-row gap-3.5 items-stretch md:items-center justify-between pb-4 border-b border-border/30 mb-5 mt-2 bg-muted/5 p-3 rounded-2xl border border-border/20 shadow-inner">
-          <div className="relative flex-1 min-w-[280px]">
+        // Styled in staff-surface.css. It carried Tailwind for a second panel
+        // style (1rem radius, inset shadow) plus `mt-2 mb-5 pb-4` stacked on
+        // the toolbar's own margin, so the gaps above and below it differed.
+        <div className="media-library__search-panel">
+          <div className="relative flex-1 min-w-[16rem]">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search filename, alt text, or connected articles..."
-              className="w-full h-10 text-xs bg-background border border-border/60 rounded-xl pl-9 pr-9 outline-none focus:border-sky-500/50 focus:ring-1 focus:ring-sky-500/20 placeholder:text-muted-foreground/60 transition-all text-foreground"
+              className="media-library__search-input"
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
@@ -1286,60 +1271,37 @@ export function MediaUpload({ items }: { items: MediaLibraryItem[] }) {
               <button
                 type="button"
                 onClick={() => setQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground/60 hover:text-rose-400 hover:scale-105 active:scale-95 transition-all"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-muted-foreground/70 hover:text-foreground transition-colors"
               >
                 Clear
               </button>
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3.5">
-            {/* Same-sized Select Buttons for Type Filter */}
-            <div className="flex items-center gap-1 bg-background border border-border/60 rounded-xl p-1 h-10 shadow-sm">
-              <button
-                type="button"
-                onClick={() => setTypeFilter('all')}
-                className={cn(
-                  'h-8 px-4 text-xs font-bold rounded-lg transition-all cursor-pointer',
-                  typeFilter === 'all' 
-                    ? 'bg-sky-500 text-white shadow-md shadow-sky-500/10' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-                )}
-              >
-                All Files
-              </button>
-              <button
-                type="button"
-                onClick={() => setTypeFilter('image')}
-                className={cn(
-                  'h-8 px-4 text-xs font-bold rounded-lg transition-all cursor-pointer',
-                  typeFilter === 'image' 
-                    ? 'bg-sky-500 text-white shadow-md shadow-sky-500/10' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-                )}
-              >
-                Images
-              </button>
-              <button
-                type="button"
-                onClick={() => setTypeFilter('file')}
-                className={cn(
-                  'h-8 px-4 text-xs font-bold rounded-lg transition-all cursor-pointer',
-                  typeFilter === 'file' 
-                    ? 'bg-sky-500 text-white shadow-md shadow-sky-500/10' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-                )}
-              >
-                Documents
-              </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="admin-filter-tabs" role="group" aria-label="File type">
+              {([
+                ['all', 'All files'],
+                ['image', 'Images'],
+                ['file', 'Documents'],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTypeFilter(value)}
+                  aria-pressed={typeFilter === value}
+                  className={cn('admin-filter-tab', typeFilter === value && 'admin-filter-tab--active')}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
-            {/* Same-sized Dropdown for Date Filter */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setDateDropdownOpen(!dateDropdownOpen)}
-                className="h-10 min-w-[140px] flex items-center justify-between gap-2.5 px-4 text-xs font-bold bg-background hover:bg-muted/20 border border-border/60 hover:border-border rounded-xl transition-all text-muted-foreground hover:text-foreground shadow-sm focus:outline-none cursor-pointer"
+                className="media-library__date-trigger"
               >
                 <span>{
                   datePreset === 'all' ? 'All Dates' :
@@ -1348,13 +1310,13 @@ export function MediaUpload({ items }: { items: MediaLibraryItem[] }) {
                   datePreset === '30d' ? 'Last 30 Days' :
                   'Last Year'
                 }</span>
-                <ChevronDown className={cn('h-4 w-4 opacity-75 transition-transform duration-300', dateDropdownOpen && 'rotate-180 text-sky-400')} />
+                <ChevronDown className={cn('h-3.5 w-3.5 opacity-75 transition-transform duration-300', dateDropdownOpen && 'rotate-180')} />
               </button>
 
               {dateDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setDateDropdownOpen(false)} />
-                  <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-card border border-border/60 shadow-2xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200 backdrop-blur-md">
+                  <div className="media-library__date-menu animate-in fade-in slide-in-from-top-2 duration-200">
                     {[
                       { value: 'all', label: 'All Dates' },
                       { value: '24h', label: 'Last 24 Hours' },
@@ -1372,12 +1334,12 @@ export function MediaUpload({ items }: { items: MediaLibraryItem[] }) {
                         className={cn(
                           'w-full text-left px-4 py-2 text-xs transition-colors flex items-center justify-between cursor-pointer',
                           datePreset === opt.value
-                            ? 'bg-sky-500/10 text-sky-400 font-bold'
+                            ? 'media-library__date-option--active'
                             : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                         )}
                       >
                         <span>{opt.label}</span>
-                        {datePreset === opt.value && <Check className="h-3.5 w-3.5 text-sky-400" />}
+                        {datePreset === opt.value && <Check className="h-3.5 w-3.5" />}
                       </button>
                     ))}
                   </div>
@@ -1397,15 +1359,16 @@ export function MediaUpload({ items }: { items: MediaLibraryItem[] }) {
           </Button>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="media-library__empty py-12 border border-dashed border-border/40 rounded-2xl bg-muted/5 flex flex-col items-center justify-center text-center">
-          <FileImage className="h-10 w-10 opacity-30 text-muted-foreground" />
-          <p className="text-sm font-medium text-muted-foreground mt-2">No matching assets found</p>
-          <p className="text-xs text-muted-foreground/60 max-w-[280px] mt-1">Adjust your search terms or filters to locate the media items.</p>
+        // One empty state for both cases — this one carried its own dashed
+        // panel and spacing over the shared class.
+        <div className="media-library__empty">
+          <FileImage className="h-10 w-10 opacity-30" />
+          <p>No matching assets found</p>
+          <p className="text-xs text-muted-foreground/70 max-w-[280px]">Adjust your search terms or filters to locate the media items.</p>
           <Button
             onClick={() => { setQuery(''); setTypeFilter('all'); setDatePreset('all'); }}
             variant="outline"
             size="sm"
-            className="mt-3.5 h-8 text-xs"
           >
             Reset all filters
           </Button>

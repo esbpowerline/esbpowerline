@@ -73,11 +73,14 @@ export function ContactMessagesTable({
   }
 
   if (messages.length === 0) {
-    return <p className="text-sm text-muted-foreground py-10 text-center">No contact messages yet.</p>;
+    return <p className="text-sm text-muted-foreground py-6 text-center">No contact messages yet.</p>;
   }
 
+  // The same rows as Comments. This page reused `.admin-comment-card` and then
+  // overrode it — 1rem radius and 1.25rem padding against Comments' 0.75rem
+  // and 1rem, 1rem apart against 0.75rem — so the two sibling pages differed.
   return (
-    <div className="space-y-4">
+    <div className="admin-comment-list">
       {messages.map((msg) => {
         const busy = pending && activeId === msg.id;
         const isExpanded = expandedId === msg.id;
@@ -85,10 +88,7 @@ export function ContactMessagesTable({
         return (
           <article
             key={msg.id}
-            className={cn(
-              'admin-comment-card transition-all duration-200 border border-border/40 hover:border-border/85 rounded-2xl p-5 bg-card/10',
-              !msg.read && 'border-l-4 border-l-primary bg-primary/[0.02]'
-            )}
+            className={cn('admin-comment-card', !msg.read && 'admin-comment-card--unread')}
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0 flex-1 space-y-1">
@@ -105,7 +105,7 @@ export function ContactMessagesTable({
                         href={getWhatsAppLink(msg.phone)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-green-500 hover:text-green-400 hover:underline transition-colors flex items-center gap-1 font-medium"
+                        className="admin-comment-article-link flex items-center gap-1 font-medium hover:underline"
                         title="Chat on WhatsApp"
                       >
                         <Phone className="h-3 w-3" /> {msg.phone}
@@ -131,23 +131,20 @@ export function ContactMessagesTable({
                   type="button"
                   disabled={busy}
                   onClick={() => toggleRead(msg.id, msg.read)}
-                  className={cn(
-                    'admin-comment-action flex items-center justify-center h-8 w-8 rounded-lg border border-border/40 hover:bg-muted transition-all',
-                    msg.read ? 'text-muted-foreground' : 'text-primary border-primary/20 bg-primary/5 hover:bg-primary/10'
-                  )}
+                  className={cn('admin-comment-action', !msg.read && 'admin-comment-action--primary')}
                   title={msg.read ? 'Mark as Unread' : 'Mark as Read'}
                 >
-                  {msg.read ? <RotateCcw className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                  {msg.read ? <RotateCcw className="h-3.5 w-3.5" /> : <Check className="h-3.5 w-3.5" />}
                 </button>
 
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => deleteMessage(msg.id)}
-                  className="admin-comment-action flex items-center justify-center h-8 w-8 rounded-lg border border-border/40 hover:bg-red-500/10 hover:border-red-500/20 text-muted-foreground hover:text-red-500 transition-all"
+                  className="admin-comment-action admin-comment-action--trash"
                   title="Delete message"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             </div>

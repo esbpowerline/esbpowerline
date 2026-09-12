@@ -37,7 +37,7 @@ export function AdminAccountSecurity({ email }: { email: string }) {
   }
 
   return (
-    <AdminCard title="Account security" icon={Lock} bodyClassName="admin-card-body--dense">
+    <AdminCard title="Account security" icon={Lock}>
       <p className="text-sm text-muted-foreground mb-4">
         Change the password for <strong>{email}</strong>. This updates both the platform database and Supabase Auth.
       </p>

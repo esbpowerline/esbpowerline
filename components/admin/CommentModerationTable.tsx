@@ -66,7 +66,7 @@ export function CommentModerationTable({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="admin-comment-list">
       {visibleComments.map((comment) => {
         const busy = pending && activeId === comment.id;
         return (
@@ -84,7 +84,7 @@ export function CommentModerationTable({
                     href={`/articles/${comment.articleSlug}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 block text-sm font-medium text-rose-400 hover:text-rose-300"
+                    className="admin-comment-article-link mt-1 block text-sm font-medium"
                   >
                     {comment.articleTitle}
                   </Link>

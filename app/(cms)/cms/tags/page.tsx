@@ -23,21 +23,23 @@ export default async function CMSTagsPage() {
       />
 
       <CmsCard title={`${tags.length} tags`} icon={Hash}>
-        <div className="admin-chip-grid">
-          {tags.map(({ tag, count }) => (
-            <Link key={tag} href={`/cms/articles?tag=${encodeURIComponent(tag)}`}>
-              <CmsTagCapsule className="hover:bg-sky-500/10 hover:border-sky-500/30 transition-colors cursor-pointer">
-                {tag}
-                <span className="ml-1.5 text-[10px] opacity-60 tabular-nums">{count}</span>
-              </CmsTagCapsule>
-            </Link>
-          ))}
-          {tags.length === 0 && (
-            <p className="text-[13px] text-muted-foreground flex items-center gap-2">
-              <Search className="h-4 w-4" /> No tags yet — add them when writing articles.
-            </p>
-          )}
-        </div>
+        {tags.length === 0 ? (
+          <p className="text-[13px] text-muted-foreground flex items-center gap-2">
+            <Search className="h-4 w-4" /> No tags yet — add them when writing articles.
+          </p>
+        ) : (
+          <div className="admin-chip-grid">
+            {/* The capsule's own hover, not a sky override on this page alone. */}
+            {tags.map(({ tag, count }) => (
+              <Link key={tag} href={`/cms/articles?tag=${encodeURIComponent(tag)}`}>
+                <CmsTagCapsule className="cursor-pointer">
+                  {tag}
+                  <span className="ml-1.5 text-[10px] opacity-60 tabular-nums">{count}</span>
+                </CmsTagCapsule>
+              </Link>
+            ))}
+          </div>
+        )}
       </CmsCard>
     </CmsSectionStack>
   );

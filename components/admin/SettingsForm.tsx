@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PanelsEditor } from '@/components/admin/PanelsEditor';
+import { AdminCard, AdminTagCapsule } from '@/components/admin/AdminUI';
 import { resolvePolicies, type Policy } from '@/lib/data/policy/policies';
 import { DEFAULT_IMPORTANT_LINKS, resolveImportantLinks } from '@/lib/data/important-links';
 import { cn } from '@/lib/utils';
@@ -382,7 +383,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
 
   return (
     <div className="admin-form-stack">
-      <div className="settings-tabs">
+      <div className="admin-filter-tabs" role="tablist" aria-label="Settings sections">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;
@@ -391,7 +392,9 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={cn('settings-tab', active && 'settings-tab--active')}
+              role="tab"
+              aria-selected={active}
+              className={cn('admin-filter-tab', active && 'admin-filter-tab--active')}
             >
               <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.25 : 2} />
               {tab.label}
@@ -400,14 +403,13 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
         })}
       </div>
 
-      <div className="mt-4">
+      <div>
         {/* Tab 1: General & SEO */}
         {activeTab === 'general' && (
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="admin-settings-grid">
             <AdminTimeFormatSetting />
 
-            <div className="admin-card settings-panel p-6 space-y-4">
-              <h2 className="font-semibold flex items-center gap-2"><Globe className="h-4.5 w-4.5 text-primary" /> Site Configuration</h2>
+            <AdminCard title="Site Configuration" icon={Globe} bodyClassName="admin-settings-body">
               <div>
                 <Label htmlFor="siteName">Site Name</Label>
                 <Input id="siteName" value={siteName} onChange={(e) => setSiteName(e.target.value)} className="mt-1" />
@@ -416,10 +418,9 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 <Label htmlFor="tagline">Tagline</Label>
                 <Input id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} className="mt-1" />
               </div>
-            </div>
+            </AdminCard>
 
-            <div className="admin-card settings-panel p-6 space-y-4">
-              <h2 className="font-semibold flex items-center gap-2"><Globe className="h-4.5 w-4.5 text-primary" /> SEO Defaults</h2>
+            <AdminCard title="SEO Defaults" icon={Globe} bodyClassName="admin-settings-body">
               <div>
                 <Label htmlFor="metaTitle">Meta Title</Label>
                 <Input id="metaTitle" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} className="mt-1" />
@@ -428,10 +429,9 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 <Label htmlFor="metaDescription">Meta Description</Label>
                 <Textarea id="metaDescription" value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} className="mt-1" rows={3} />
               </div>
-            </div>
+            </AdminCard>
 
-            <div className="admin-card settings-panel p-6 space-y-4 lg:col-span-2">
-              <h2 className="font-semibold flex items-center gap-2"><Globe className="h-4.5 w-4.5 text-primary" /> Homepage Controls</h2>
+            <AdminCard title="Homepage Controls" icon={Globe} className="lg:col-span-2" bodyClassName="admin-settings-body">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label>Homepage carousel</Label>
@@ -448,10 +448,9 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   <Textarea value={marketPulse} onChange={(e) => setMarketPulse(e.target.value)} className="mt-1" rows={2} />
                 </div>
               </div>
-            </div>
+            </AdminCard>
 
-            <div className="admin-card settings-panel p-6 space-y-4 lg:col-span-2">
-              <h2 className="font-semibold flex items-center gap-2"><Globe className="h-4.5 w-4.5 text-primary" /> Professionals CTA Block</h2>
+            <AdminCard title="Professionals CTA Block" icon={Globe} className="lg:col-span-2" bodyClassName="admin-settings-body">
               <div className="grid md:grid-cols-2 gap-4">
                 <div><Label>Section label</Label><Input value={ctaLabel} onChange={(e) => setCtaLabel(e.target.value)} className="mt-1" /></div>
                 <div className="md:col-span-2"><Label>Headline</Label><Input value={ctaTitle} onChange={(e) => setCtaTitle(e.target.value)} className="mt-1" /></div>
@@ -460,10 +459,9 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 <div><Label>Secondary button</Label><Input value={ctaSecondaryLabel} onChange={(e) => setCtaSecondaryLabel(e.target.value)} className="mt-1" /></div>
                 <div><Label>Secondary link</Label><Input value={ctaSecondaryHref} onChange={(e) => setCtaSecondaryHref(e.target.value)} className="mt-1" /></div>
               </div>
-            </div>
+            </AdminCard>
 
-            <div className="admin-card settings-panel p-6 space-y-4 lg:col-span-2">
-              <h2 className="font-semibold flex items-center gap-2"><Globe className="h-4.5 w-4.5 text-primary" /> Homepage Hero Section</h2>
+            <AdminCard title="Homepage Hero Section" icon={Globe} className="lg:col-span-2" bodyClassName="admin-settings-body">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="heroTitle">Hero Title</Label>
@@ -478,20 +476,15 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   <Textarea id="heroSubtitle" value={heroSubtitle} onChange={(e) => setHeroSubtitle(e.target.value)} className="mt-1" rows={2} />
                 </div>
               </div>
-            </div>
+            </AdminCard>
 
           </div>
         )}
 
         {/* Tab 2: Live Markets */}
         {activeTab === 'markets' && (
-          <div className="admin-card settings-panel p-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-semibold flex items-center gap-2"><TrendingUp className="h-4.5 w-4.5 text-primary" /> Live Markets Ticker</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">Manage real-time commodities and currencies displayed in the top marquee</p>
-              </div>
-            </div>
+          <AdminCard title="Live Markets Ticker" icon={TrendingUp} bodyClassName="admin-settings-body">
+        <p className="admin-card-lead text-[12px] text-muted-foreground">Manage real-time commodities and currencies displayed in the top marquee</p>
             
             <div className="space-y-4">
               <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-muted-foreground border-b pb-2 px-1">
@@ -525,16 +518,13 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 </div>
               ))}
             </div>
-          </div>
+          </AdminCard>
         )}
 
         {/* Tab 3: System Snapshot */}
         {activeTab === 'snapshot' && (
-          <div className="admin-card settings-panel p-6 space-y-5">
-            <div>
-              <h2 className="font-semibold flex items-center gap-2"><BarChart3 className="h-4.5 w-4.5 text-primary" /> Live System Snapshot</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Configure national power grid generation capacity, demand numbers, loss parameters, etc.</p>
-            </div>
+          <AdminCard title="Live System Snapshot" icon={BarChart3} bodyClassName="admin-settings-body">
+        <p className="admin-card-lead text-[12px] text-muted-foreground">Configure national power grid generation capacity, demand numbers, loss parameters, etc.</p>
             
             <div className="space-y-4">
               <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-muted-foreground border-b pb-2 px-1">
@@ -563,7 +553,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                     <select 
                       value={stat.icon} 
                       onChange={(e) => updateSnapshotField(idx, 'icon', e.target.value)}
-                      className="w-full bg-background border border-input rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="admin-native-select"
                     >
                       <option value="Zap">Zap</option>
                       <option value="Activity">Activity</option>
@@ -584,33 +574,34 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 </div>
               ))}
             </div>
-          </div>
+          </AdminCard>
         )}
 
         {/* Tab 4: Latest Interviews */}
         {activeTab === 'interviews' && (
-          <div className="admin-form-stack">
+          <div className="admin-settings-stack">
             {interviews.map((iv, idx) => (
-              <div key={iv.id} className="admin-card settings-panel p-6 space-y-4">
-                <div className="flex items-center justify-between border-b pb-2 gap-2">
-                  <h3 className="font-semibold text-sm flex items-center gap-2 min-w-0">
-                    <Play className="h-4 w-4 text-accent shrink-0" />
-                    <span className="truncate">Interview #{idx + 1}: {iv.guest || 'Untitled'}</span>
-                    {idx === 0 && <span className="admin-role-pill shrink-0">Pinned first</span>}
-                  </h3>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button type="button" className="admin-category-delete opacity-100" title="Pin to first" onClick={() => moveInterview(idx, 'first')}>
+              <AdminCard
+                key={iv.id}
+                title={`Interview #${idx + 1}: ${iv.guest || 'Untitled'}`}
+                icon={Play}
+                bodyClassName="admin-settings-body"
+                action={
+                  <div className="flex items-center gap-1">
+                    {idx === 0 && <AdminTagCapsule className="mr-1">Pinned first</AdminTagCapsule>}
+                    <button type="button" className="admin-row-btn" title="Pin to first" aria-label="Pin to first" onClick={() => moveInterview(idx, 'first')}>
                       <Pin className="h-3.5 w-3.5" />
                     </button>
-                    <button type="button" className="admin-category-delete opacity-100" title="Move up" onClick={() => moveInterview(idx, 'up')} disabled={idx === 0}>
+                    <button type="button" className="admin-row-btn" title="Move up" aria-label="Move up" onClick={() => moveInterview(idx, 'up')} disabled={idx === 0}>
                       <ArrowUp className="h-3.5 w-3.5" />
                     </button>
-                    <button type="button" className="admin-category-delete opacity-100" title="Move down" onClick={() => moveInterview(idx, 'down')} disabled={idx === interviews.length - 1}>
+                    <button type="button" className="admin-row-btn" title="Move down" aria-label="Move down" onClick={() => moveInterview(idx, 'down')} disabled={idx === interviews.length - 1}>
                       <ArrowDown className="h-3.5 w-3.5" />
                     </button>
                     <span className="font-mono text-xs text-muted-foreground ml-1">{iv.id}</span>
                   </div>
-                </div>
+                }
+              >
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label>Interview Title</Label>
@@ -642,7 +633,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                     <select
                       value={iv.provider ?? 'youtube'}
                       onChange={(e) => updateInterviewField(idx, 'provider', e.target.value)}
-                      className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      className="admin-native-select mt-1"
                     >
                       <option value="youtube">YouTube</option>
                       <option value="facebook">Facebook</option>
@@ -687,22 +678,15 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                     <Textarea value={iv.excerpt ?? ''} onChange={(e) => updateInterviewField(idx, 'excerpt', e.target.value)} className="mt-1" rows={2} />
                   </div>
                 </div>
-              </div>
+              </AdminCard>
             ))}
           </div>
         )}
 
         {/* Tab 6: All Coverage mosaic */}
         {activeTab === 'coverage' && (
-          <div className="admin-card settings-panel p-6 space-y-5">
-            <div>
-              <h2 className="font-semibold flex items-center gap-2">
-                <LayoutGrid className="h-4.5 w-4.5 text-primary" /> All Coverage Mosaic
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Choose which nine published stories appear in the All Coverage grid on the homepage. Cards use the same uniform style.
-              </p>
-            </div>
+          <AdminCard title="All Coverage Mosaic" icon={LayoutGrid} bodyClassName="admin-settings-body">
+        <p className="admin-card-lead text-[12px] text-muted-foreground">Choose which nine published stories appear in the All Coverage grid on the homepage. Cards use the same uniform style.</p>
 
             <div className="space-y-3">
               <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-muted-foreground border-b pb-2 px-1">
@@ -716,7 +700,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                     <select
                       value={slot.articleSlug}
                       onChange={(e) => updateCoverageArticle(idx, e.target.value)}
-                      className="w-full bg-background border border-input rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="admin-native-select"
                     >
                       <option value="">— Select article —</option>
                       {articlePickerList.map((article) => (
@@ -729,15 +713,14 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                 </div>
               ))}
             </div>
-          </div>
+          </AdminCard>
         )}
 
         {/* Tab 5: Grid Explorer Data */}
         {activeTab === 'grid' && (
-          <div className="admin-form-stack">
+          <div className="admin-settings-stack">
             {/* Grid Mix */}
-            <div className="admin-card settings-panel p-6 space-y-4">
-              <h2 className="font-semibold flex items-center gap-2"><Database className="h-4.5 w-4.5 text-primary" /> Generation Fuel Mix</h2>
+            <AdminCard title="Generation Fuel Mix" icon={Database} bodyClassName="admin-settings-body">
               <div className="space-y-3">
                 <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-muted-foreground border-b pb-2 px-1">
                   <div className="col-span-5">Fuel Source</div>
@@ -758,11 +741,10 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   </div>
                 ))}
               </div>
-            </div>
+            </AdminCard>
 
             {/* Grid Transmission Corridors */}
-            <div className="admin-card settings-panel p-6 space-y-4">
-              <h2 className="font-semibold flex items-center gap-2"><Database className="h-4.5 w-4.5 text-primary" /> Transmission Corridors</h2>
+            <AdminCard title="Transmission Corridors" icon={Database} bodyClassName="admin-settings-body">
               <div className="space-y-3">
                 <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-muted-foreground border-b pb-2 px-1">
                   <div className="col-span-4">Corridor / Line</div>
@@ -791,11 +773,10 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   </div>
                 ))}
               </div>
-            </div>
+            </AdminCard>
 
             {/* Grid Projects */}
-            <div className="admin-card settings-panel p-6 space-y-4">
-              <h2 className="font-semibold flex items-center gap-2"><Database className="h-4.5 w-4.5 text-primary" /> Major Infrastructure Projects</h2>
+            <AdminCard title="Major Infrastructure Projects" icon={Database} bodyClassName="admin-settings-body">
               <div className="space-y-3">
                 <div className="grid grid-cols-12 gap-3 text-xs font-semibold text-muted-foreground border-b pb-2 px-1">
                   <div className="col-span-5">Project Name</div>
@@ -820,7 +801,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
                   </div>
                 ))}
               </div>
-            </div>
+            </AdminCard>
           </div>
         )}
 
@@ -840,7 +821,7 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
         )}
       </div>
 
-      <div className="admin-settings-queue-hint mt-8">
+      <div className="admin-settings-queue-hint">
         <div className="admin-settings-queue-hint__copy">
           <Layers className="h-4 w-4 shrink-0 text-primary" />
           <p className="text-xs text-muted-foreground">

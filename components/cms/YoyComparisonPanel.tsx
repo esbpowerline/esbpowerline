@@ -165,8 +165,10 @@ function fmt(v: number | null): string {
   return Number.isInteger(v) ? String(v) : v.toFixed(2);
 }
 
+// The primary action colour, not green: on this surface green means "fine",
+// and a Generate button is not a status.
 const btnPrimary =
-  'inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-40';
+  'inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition hover:opacity-90 disabled:opacity-40';
 const btnGhost =
   'inline-flex items-center gap-2 rounded-lg border border-border/60 px-4 py-2 text-[13px] font-semibold transition hover:bg-muted/60 disabled:opacity-40';
 
@@ -176,7 +178,7 @@ function Notice({ tone, children }: { tone: 'warn' | 'info'; children: React.Rea
       className={cn(
         'flex items-start gap-2 rounded-lg border p-3 text-[12px]',
         tone === 'warn'
-          ? 'border-amber-500/40 bg-amber-500/[0.07] text-amber-700 dark:text-amber-400'
+          ? 'border-[hsl(var(--staff-warn)/0.4)] bg-[hsl(var(--staff-warn)/0.07)] text-[hsl(var(--staff-warn))]'
           : 'border-border/60 bg-muted/40 text-muted-foreground',
       )}
     >
@@ -264,7 +266,7 @@ function SaveToArchive({ filename, text, disabled }: { filename: string; text: s
         <span
           className={cn(
             'pb-2 text-[12px]',
-            state.tone === 'ok' ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400',
+            state.tone === 'ok' ? 'text-[hsl(var(--staff-ok))]' : 'text-[hsl(var(--staff-warn))]',
           )}
         >
           {state.message}
@@ -288,13 +290,13 @@ function SaveToArchive({ filename, text, disabled }: { filename: string; text: s
  */
 const VERDICT_STYLE = {
   up: {
-    chip: 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/20 dark:text-emerald-400',
-    text: 'text-emerald-700 dark:text-emerald-400',
+    chip: 'bg-[hsl(var(--staff-ok)/0.1)] text-[hsl(var(--staff-ok))] ring-[hsl(var(--staff-ok)/0.2)]',
+    text: 'text-[hsl(var(--staff-ok))]',
     Icon: ArrowUpRight,
   },
   down: {
-    chip: 'bg-rose-500/10 text-rose-700 ring-rose-500/20 dark:text-rose-400',
-    text: 'text-rose-700 dark:text-rose-400',
+    chip: 'bg-[hsl(var(--staff-bad)/0.1)] text-[hsl(var(--staff-bad))] ring-[hsl(var(--staff-bad)/0.2)]',
+    text: 'text-[hsl(var(--staff-bad))]',
     Icon: ArrowDownRight,
   },
   none: {
@@ -357,13 +359,13 @@ function SummaryStrip({ rows }: { rows: ComparisonRow[] }) {
     {
       n: incomparable,
       label: 'not like for like',
-      cls: 'bg-sky-500/10 text-sky-700 ring-sky-500/20 dark:text-sky-400',
+      cls: 'bg-[hsl(var(--staff-accent)/0.1)] text-[hsl(var(--staff-accent))] ring-[hsl(var(--staff-accent)/0.2)]',
       Icon: Scale,
     },
     {
       n: unpublished,
       label: 'not published',
-      cls: 'bg-amber-500/10 text-amber-700 ring-amber-500/20 dark:text-amber-400',
+      cls: 'bg-[hsl(var(--staff-warn)/0.1)] text-[hsl(var(--staff-warn))] ring-[hsl(var(--staff-warn)/0.2)]',
       Icon: AlertTriangle,
     },
   ];
@@ -417,7 +419,7 @@ function ComparisonTable({
 
   return (
     <>
-      <div className="max-h-[36rem] overflow-auto rounded-xl border border-border/60">
+      <div className="max-h-[36rem] overflow-auto rounded-[var(--r-lg)] border border-[var(--line)]">
         <table className="w-full min-w-[860px] border-separate border-spacing-0 text-[12px]">
           <thead>
             {/* Sticky: a 230-row comparison scrolls well past the headings, and
@@ -464,7 +466,7 @@ function ComparisonTable({
                       // to look like an ordinary row that happens to hold a
                       // dash. It is a gap in the record, and it should read as
                       // one at a glance.
-                      unpublished && 'bg-amber-500/[0.05]',
+                      unpublished && 'bg-[hsl(var(--staff-warn)/0.05)]',
                     )}
                   >
                     <td className={cn(cell, 'font-medium')}>{metricLabel(r.id, r.label, lang)}</td>
@@ -505,9 +507,9 @@ function ComparisonTable({
       {/* A colour that means "better" rather than "bigger" has to say so, or a
           reader seeing shedding fall in green assumes the table is broken. */}
       <p className="text-[11.5px] text-muted-foreground">
-        <span className="font-semibold text-emerald-700 dark:text-emerald-400">Green</span> is an
+        <span className="font-semibold text-[hsl(var(--staff-ok))]">Green</span> is an
         improvement for that metric and{' '}
-        <span className="font-semibold text-rose-700 dark:text-rose-400">red</span> a worsening — so
+        <span className="font-semibold text-[hsl(var(--staff-bad))]">red</span> a worsening — so
         shedding falling is green and shedding rising is red. Demand and temperature are never
         coloured: a change in either is neither good nor bad on its own.
       </p>
@@ -606,7 +608,7 @@ function DocumentButtons({
         {busy === 'pdf' ? 'Preparing…' : 'Download .pdf'}
       </button>
       {error && (
-        <span className="basis-full pb-1 text-[12px] text-amber-700 dark:text-amber-400">
+        <span className="basis-full pb-1 text-[12px] text-[hsl(var(--staff-warn))]">
           {error}
         </span>
       )}
@@ -645,7 +647,7 @@ function SheetTable({ result }: { result: Extract<YoyResult, { ok: true }> }) {
   const bn = result.lang === 'bn';
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/60">
+    <div className="overflow-hidden rounded-[var(--r-lg)] border border-[var(--line)]">
       <table className="w-full border-separate border-spacing-0 text-[13px]">
         <thead>
           <tr className="bg-muted/60">
@@ -777,7 +779,7 @@ function SheetMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap;
   }, [lang, date, generate, bootstrap.latestDate]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <p className="text-[12px] text-muted-foreground">
         The same day one year apart, in the fixed format the desk publishes. Grid and gas are both
         read from the chosen energy day — Petrobangla files the 08:00–08:00 window under the
@@ -1288,7 +1290,7 @@ function RangeMode({ bootstrap, archive, url }: { bootstrap: YoyBootstrap; archi
           </div>
 
           {bulkOk.skipped.length > 0 && (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-500/[0.07] p-3 text-[12px] text-amber-700 dark:text-amber-400">
+            <div className="rounded-lg border border-[hsl(var(--staff-warn)/0.4)] bg-[hsl(var(--staff-warn)/0.07)] p-3 text-[12px] text-[hsl(var(--staff-warn))]">
               <p className="font-semibold">
                 {bulkOk.skipped.length} day{bulkOk.skipped.length === 1 ? '' : 's'} in the range could not
                 produce a sheet:
@@ -1453,7 +1455,9 @@ function MonthsMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap
 
       {view === 'compare' && (
         <>
-          <div className="flex flex-wrap items-end gap-3">
+          {/* The same controls panel as the Sheet, Compare and Range tabs —
+              this tab's pickers sat bare in a flex row. */}
+          <div className="grid-controls">
             <GridMonthPicker
               label="First month"
               value={aMonth}
@@ -1599,7 +1603,7 @@ function MonthsMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap
             zero.
           </p>
 
-          <div className="flex flex-wrap items-end gap-3">
+          <div className="grid-controls">
             <GridMonthPicker
               label="Start month"
               value={rStart}
@@ -1738,7 +1742,8 @@ export function YoyComparisonPanel({ bootstrap }: { bootstrap: YoyBootstrap }) {
   }, [url, archive, bootstrap.months, bootstrap.sections, bootstrap.monthlySections]);
 
   return (
-    <CmsCard title="Grid comparison">
+    // No card title: it repeated the page header directly above it.
+    <CmsCard>
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CmsFilterTabs>
@@ -1774,23 +1779,16 @@ export function YoyComparisonPanel({ bootstrap }: { bootstrap: YoyBootstrap }) {
             <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Output
             </span>
-            <div
-              className="inline-flex items-center gap-1 rounded-lg border border-border/60 p-0.5"
-              role="group"
-              aria-label="Language of the preview and exports"
-            >
+            {/* The kit's filter tabs, like the mode tabs beside it. It was a
+                second segmented control with a green active state. */}
+            <div className="admin-filter-tabs" role="group" aria-label="Language of the preview and exports">
               {(['en', 'bn'] as const).map((code) => (
                 <button
                   key={code}
                   type="button"
                   onClick={() => setLang(code)}
                   aria-pressed={lang === code}
-                  className={cn(
-                    'rounded-md px-3 py-1.5 text-[12px] font-semibold transition',
-                    lang === code
-                      ? 'bg-emerald-600 text-white'
-                      : 'text-muted-foreground hover:bg-muted/60',
-                  )}
+                  className={cn('admin-filter-tab', lang === code && 'admin-filter-tab--active')}
                 >
                   {code === 'en' ? 'English' : 'বাংলা'}
                 </button>

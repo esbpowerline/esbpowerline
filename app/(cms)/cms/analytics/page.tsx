@@ -11,7 +11,6 @@ import {
   CmsSectionStack, CmsStatGrid, CmsListStack, CmsScheduleList,
 } from '@/components/cms/CmsUI';
 import { BarChart3, Eye, FileText, Heart, CheckCircle, Clock, Users, TrendingUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default async function CMSAnalyticsPage() {
   const session = await auth();
@@ -102,28 +101,19 @@ export default async function CMSAnalyticsPage() {
               Published stories ranked by total views. {vsLabel}.
             </p>
             <CmsListStack>
+              {/* The kit's row, so this list and Top Articles below it share one
+                  row height. It was a hand-rolled row with its own padding and
+                  a boxed "you" pill sitting inside a hairline list. */}
               {stats.peers.map((peer, i) => (
-                <div
+                <CmsListRow
                   key={peer.authorId}
-                  className={cn(
-                    'admin-leaderboard-row',
-                    peer.isYou && 'admin-leaderboard-row--you',
-                  )}
-                >
-                  <div className="admin-leaderboard-row__main">
-                    <span className="admin-leaderboard-row__rank">{i + 1}</span>
-                    <div className="min-w-0">
-                      <div className="font-medium truncate">{peer.name}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {peer.published} published · {formatNumber(peer.avgViews)} avg views
-                      </div>
-                    </div>
-                  </div>
-                  <div className="admin-leaderboard-row__stats">
-                    <div className="font-semibold">{formatNumber(peer.views)}</div>
-                    <div className="text-[10px] text-muted-foreground">{formatNumber(peer.likes)} likes</div>
-                  </div>
-                </div>
+                  rank={i + 1}
+                  title={peer.isYou ? `${peer.name} (you)` : peer.name}
+                  meta={`${peer.published} published · ${formatNumber(peer.avgViews)} avg views`}
+                  value={formatNumber(peer.views)}
+                  valueLabel={`${formatNumber(peer.likes)} likes`}
+                  highlight={peer.isYou}
+                />
               ))}
               {stats.peers.length === 0 && (
                 <p className="text-[13px] text-muted-foreground py-2">No published editors yet.</p>
