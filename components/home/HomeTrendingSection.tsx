@@ -11,12 +11,37 @@ import { NoImage } from '@/components/shared/NoImage';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { hasArticleImage } from '@/lib/article-image';
 import type { PublicArticleCard } from '@/lib/category-types';
-import { formatArticleDate } from '@/lib/utils';
 import { heroImageStyle } from '@/lib/hero-image';
 import { resolveDisplayTitle } from '@/lib/editorial-limits';
 
+/**
+ * "Sep 7" — the day only. The rail used the article page's full
+ * "September 7, 2026 at 11:50 AM", and beside "16 views this week · 5 min" in a
+ * 298px meta line that is one line tall, each piece wrapped and the second line
+ * was clipped away (19px of text in a 12px box, 2026-09-12). Pinned to Dhaka so
+ * the server render and the reader's browser name the same day.
+ */
 function formatTrendingTime(date: string, locale: 'en' | 'bn') {
-  return formatArticleDate(date).replace('Published on ', '');
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(locale === 'bn' ? 'bn-BD' : 'en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'Asia/Dhaka',
+  });
+}
+
+/**
+ * The read count a trending row prints. The list is ranked by reads in the
+ * trailing seven days, so that is the figure shown, under its own label — the
+ * lifetime total it used to print beside "Trending this week" was a different
+ * quantity under the heading's word. Lifetime only where a caller supplied no
+ * weekly count.
+ */
+function trendingReads(article: PublicArticleCard) {
+  return article.weekViews != null
+    ? { count: article.weekViews, key: 'common.viewsThisWeek' as const }
+    : { count: article.views, key: 'common.views' as const };
 }
 
 function TrendingListItem({
@@ -57,7 +82,7 @@ function TrendingListItem({
           <CategoryLabel name={article.category} />
           {showTime && timeAgo ? <> · {timeAgo}</> : null}
           {' · '}
-          {article.views.toLocaleString()} {t('common.views')}
+          {trendingReads(article).count.toLocaleString()} {t(trendingReads(article).key)}
         </p>
       </div>
     </Link>
@@ -226,7 +251,7 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
               <p className="home-trending-wave__meta flex items-center gap-1">
                 <span>{timeAgo}</span>
                 <span className="opacity-40" aria-hidden>·</span>
-                <span>{article.views.toLocaleString()} {t('common.views')}</span>
+                <span>{trendingReads(article).count.toLocaleString()} {t(trendingReads(article).key)}</span>
                 <span className="opacity-40" aria-hidden>·</span>
                 <span>{article.readTime} {t('common.min')}</span>
               </p>
@@ -297,7 +322,8 @@ function ArticlesTrendingRailItem({
               ·
             </span>
             <span>
-              {article.views.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')} {t('common.views')}
+              {trendingReads(article).count.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}{' '}
+              {t(trendingReads(article).key)}
             </span>
           </span>
         </span>
@@ -509,7 +535,7 @@ export function HomeTrendingSection({
               {resolveDisplayTitle(lead.title, lead.shortTitle)}
             </h3>
             <p className="text-xs text-muted-foreground mt-1.5">
-              {leadTimeAgo} · {lead.views.toLocaleString()} {t('common.views')}
+              {leadTimeAgo} · {trendingReads(lead).count.toLocaleString()} {t(trendingReads(lead).key)}
             </p>
           </div>
         </Link>

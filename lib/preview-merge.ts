@@ -31,6 +31,9 @@ function toCard(draft: DraftPreviewInput, id = 'preview-draft'): PublicArticleCa
     date: new Date().toISOString(),
     readTime: draft.readTime,
     views: 0,
+    // The trending rail prints reads this week beside every other row; a draft
+    // has had none, and without this it alone fell back to the lifetime label.
+    weekViews: 0,
     imageUrl: draft.imageUrl?.trim() || '',
     heroMeta: draft.heroMeta,
     isFeatured: draft.isFeatured,

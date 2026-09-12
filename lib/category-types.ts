@@ -20,7 +20,14 @@ export type PublicArticleCard = {
   author: string;
   date: string;
   readTime: number;
+  /** Lifetime reads. */
   views: number;
+  /**
+   * Reads in the trailing seven days, from the ArticleView ledger. Set only by
+   * the trending query, and printed under its own label — never in place of
+   * `views`, which is a different quantity.
+   */
+  weekViews?: number;
   imageUrl: string;
   heroMeta?: any;
   isFeatured?: boolean;

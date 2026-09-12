@@ -106,6 +106,7 @@ export type MessageKey =
   | 'about.ctaContact'
   | 'common.min'
   | 'common.views'
+  | 'common.viewsThisWeek'
   | 'common.esbStaff'
   | 'common.all'
   | 'common.close'
@@ -290,6 +291,7 @@ const EN: Record<MessageKey, string> = {
   'about.ctaContact': 'Get in Touch',
   'common.min': 'min',
   'common.views': 'views',
+  'common.viewsThisWeek': 'views this week',
   'common.esbStaff': 'ESB Staff',
   'common.all': 'All',
   'common.close': 'Close',
@@ -479,6 +481,7 @@ const BN: Record<MessageKey, string> = {
   'about.ctaContact': 'যোগাযোগ করুন',
   'common.min': 'মিনিট',
   'common.views': 'পাঠ',
+  'common.viewsThisWeek': 'পাঠ এই সপ্তাহে',
   'common.esbStaff': 'ইএসবি রিপোর্টার',
   'common.all': 'সব',
   'common.close': 'বন্ধ করুন',

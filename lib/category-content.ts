@@ -66,10 +66,10 @@ export type PublicMagazineIssue = {
 const CONTENT_CACHE_TTL = 86_400;
 
 /**
- * The exception. Trending is ordered by `views`, which `recordArticleView`
- * increments on every single article read and deliberately does NOT invalidate
- * — flushing the whole article cache on every page view would defeat the point
- * of having one. So this is the one cache whose input really does drift with no
+ * The exception. Trending is ordered by the week's ArticleView events, which
+ * `recordArticleView` writes on every single article read and deliberately does
+ * NOT invalidate on — flushing the whole article cache on every page view would
+ * defeat the point of having one. So this is the one cache whose input really does drift with no
  * hook to catch it, and it gets a real timer rather than a backstop.
  *
  * This also sets the floor for /articles, /articles/page/N and
@@ -344,28 +344,77 @@ export async function getRelatedPublishedArticles(
   }, ['related', slug, category, tags?.join(',') ?? '', String(limit), String(locale)], { revalidate: 3600, tags: [CONTENT_TAGS.articles] })();
 }
 
+/** "This week" is the trailing seven days, rolling \u2014 a calendar week would empty
+ *  the list every Saturday morning. */
+const TRENDING_WINDOW_MS = 7 * 86_400_000;
+
+/**
+ * "Trending this week": the stories read most in the trailing seven days.
+ *
+ * It was ordered by `isTrending`, then by lifetime `views`, so nothing ever
+ * aged out. On 2026-09-12 the rail led with two June stories an editor had
+ * flagged in June (27 and 15 reads in their whole lives) above September
+ * stories read 16 and 13 times that week, and printed each one's lifetime
+ * total beside the word "week". The ArticleView ledger has always carried a
+ * timestamp per read (one per visitor per dedup window, the same events
+ * `views` is incremented from), so the week can be counted rather than
+ * assumed.
+ *
+ * Order: an editor's Trending flag still leads, but only for a story published
+ * inside the window \u2014 a flag is a call about this week, not a permanent pin.
+ * Then reads this week, newest first on a tie. Then, if the week is quiet, the
+ * newest stories fill the remaining slots with their actual count this week
+ * (often 0), so the rail keeps its shape without claiming they trended.
+ * Featured and breaking stories stay out, as before: they render elsewhere.
+ */
 export const getTrendingPublishedArticles = unstable_cache(async (limit = 5, locale?: string): Promise<PublicArticleCard[]> => {
-  const articles = await prisma.article.findMany({
-    where: {
-      status: 'PUBLISHED',
-      isBreaking: false,
-      isFeatured: false,
-    },
-    select: ARTICLE_CARD_SELECT,
-    orderBy: [{ isTrending: 'desc' }, { views: 'desc' }],
-    take: limit * 2,
+  const since = new Date(Date.now() - TRENDING_WINDOW_MS);
+  const eligible = { status: 'PUBLISHED', isBreaking: false, isFeatured: false } as const;
+
+  // Over-fetched: some of the most-read will be featured, breaking or in the
+  // other language, and the article query below drops those.
+  const ranked = await prisma.articleView.groupBy({
+    by: ['articleId'],
+    where: { viewedAt: { gte: since } },
+    _count: { _all: true },
+    orderBy: { _count: { articleId: 'desc' } },
+    take: limit * 8,
   });
-  return articles
+  const weekReads = new Map(ranked.map((r) => [r.articleId, r._count._all]));
+
+  const [flagged, read, newest] = await Promise.all([
+    prisma.article.findMany({
+      where: { ...eligible, isTrending: true, publishedAt: { gte: since } },
+      select: ARTICLE_CARD_SELECT,
+      orderBy: { publishedAt: 'desc' },
+    }),
+    prisma.article.findMany({
+      where: { ...eligible, id: { in: [...weekReads.keys()] } },
+      select: ARTICLE_CARD_SELECT,
+    }),
+    prisma.article.findMany({
+      where: eligible,
+      select: ARTICLE_CARD_SELECT,
+      orderBy: { publishedAt: 'desc' },
+      take: limit * 4,
+    }),
+  ]);
+
+  const published = (a: { publishedAt: Date | null }) => a.publishedAt?.getTime() ?? 0;
+  read.sort((x, y) => (weekReads.get(y.id) ?? 0) - (weekReads.get(x.id) ?? 0) || published(y) - published(x));
+
+  const seen = new Set<string>();
+  return [...flagged, ...read, ...newest]
     .filter((a) => {
-      if (locale === 'bn') {
-        return !!a.titleBn || /[\u0980-\u09FF]/.test(a.title);
-      } else {
-        return !/[\u0980-\u09FF]/.test(a.title);
-      }
+      if (seen.has(a.id)) return false;
+      seen.add(a.id);
+      return locale === 'bn'
+        ? !!a.titleBn || /[\u0980-\u09FF]/.test(a.title)
+        : !/[\u0980-\u09FF]/.test(a.title);
     })
     .slice(0, limit)
-    .map((a) => mapArticle(a, locale));
-}, ['getTrendingPublishedArticles'], { revalidate: TRENDING_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
+    .map((a) => ({ ...mapArticle(a, locale), weekViews: weekReads.get(a.id) ?? 0 }));
+}, ['getTrendingPublishedArticles', 'week'], { revalidate: TRENDING_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
 export const getFeaturedArticles = unstable_cache(async (limit = 8, locale?: string): Promise<PublicArticleCard[]> => {
   const articles = await prisma.article.findMany({

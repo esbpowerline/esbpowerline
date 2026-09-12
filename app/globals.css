@@ -1766,6 +1766,22 @@ html.theme-midnight .featured-hero__timestamp {
   color: hsl(var(--muted-foreground));
 }
 
+/* One line, held. The box is one line tall and hides the rest, so a piece
+   that wraps is cut in half rather than moved down: "16 views this / week"
+   lost its second line on 2026-09-12. The pieces never wrap; the date is the
+   one allowed to give way, with an ellipsis. */
+.home-trending-wave__meta > span {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.home-trending-wave__meta > span:first-child {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .home-trending-wave__queue {
   --trending-queue-row-h: 2.5625rem;
   --trending-queue-pad-b: 0;
