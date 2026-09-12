@@ -65,10 +65,21 @@ export function AdminPreferencesProvider({ children }: { children: ReactNode }) 
   );
 }
 
+/**
+ * Outside a provider this answers with the default rather than throwing.
+ *
+ * It threw, and on 2026-09-12 that took down the CMS's All Articles page in
+ * production: the shared article manager started rendering its Updated column
+ * through AdminFormattedTime, only AdminShell mounted the provider, and every
+ * row on /cms/articles threw. A clock-format preference must never be able to
+ * take a page down — the same fail-soft stance middleware takes. CmsShell now
+ * mounts the provider too; this is the backstop for the next shared component.
+ */
+const FALLBACK_PREFERENCES: AdminPreferencesContextValue = {
+  timeFormat: '12',
+  setTimeFormat: writeAdminTimeFormat,
+};
+
 export function useAdminPreferences() {
-  const ctx = useContext(AdminPreferencesContext);
-  if (!ctx) {
-    throw new Error('useAdminPreferences must be used within AdminPreferencesProvider');
-  }
-  return ctx;
+  return useContext(AdminPreferencesContext) ?? FALLBACK_PREFERENCES;
 }

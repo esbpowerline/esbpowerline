@@ -13,6 +13,7 @@ import {
   EditorSettingsMenuLazy,
 } from '@/components/staff/StaffShellLazy';
 import { EditorPreferencesProvider } from '@/components/cms/EditorPreferencesProvider';
+import { AdminPreferencesProvider } from '@/components/admin/AdminPreferencesProvider';
 import { canAccessCmsRoute, canAccessAdminPanel } from '@/lib/cms-nav';
 
 /** The editorial suite's nav, brand and tools. Everything else is StaffShell. */
@@ -94,33 +95,39 @@ export function CmsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isWriteWorkspace = isWritePath(pathname);
 
+  // AdminPreferencesProvider carries the staff clock format (12/24h). The
+  // article manager both panels share renders its Updated column through
+  // AdminFormattedTime, and without this provider /cms/articles threw on every
+  // row in production (2026-09-12).
   return (
-    <EditorPreferencesProvider>
-      <StaffShell
-        surface="cms"
-        home="/cms"
-        brand={{ label: 'Editorial Suite', icon: Feather }}
-        crumb="Editorial"
-        groups={NAV_GROUPS}
-        canSee={canAccessCmsRoute}
-        isActive={isNavActive}
-        pageTitle={getPageTitle}
-        crossLink={(role, urls) =>
-          canAccessAdminPanel(role)
-            ? { group: 'Platform', href: urls.adminUrl, label: 'Full admin panel', icon: Layers }
-            : null
-        }
-        headerActions={
-          <>
-            {isWriteWorkspace ? <CmsWriteHeaderActionsLazy /> : null}
-            <EditorSettingsMenuLazy variant="header" />
-            <EditorialPlatformControlLazy />
-          </>
-        }
-        mainInnerClassName={isWriteWorkspace ? 'cms-main-inner--write' : undefined}
-      >
-        {isWriteWorkspace ? <CmsArticleEditorProvider>{children}</CmsArticleEditorProvider> : children}
-      </StaffShell>
-    </EditorPreferencesProvider>
+    <AdminPreferencesProvider>
+      <EditorPreferencesProvider>
+        <StaffShell
+          surface="cms"
+          home="/cms"
+          brand={{ label: 'Editorial Suite', icon: Feather }}
+          crumb="Editorial"
+          groups={NAV_GROUPS}
+          canSee={canAccessCmsRoute}
+          isActive={isNavActive}
+          pageTitle={getPageTitle}
+          crossLink={(role, urls) =>
+            canAccessAdminPanel(role)
+              ? { group: 'Platform', href: urls.adminUrl, label: 'Full admin panel', icon: Layers }
+              : null
+          }
+          headerActions={
+            <>
+              {isWriteWorkspace ? <CmsWriteHeaderActionsLazy /> : null}
+              <EditorSettingsMenuLazy variant="header" />
+              <EditorialPlatformControlLazy />
+            </>
+          }
+          mainInnerClassName={isWriteWorkspace ? 'cms-main-inner--write' : undefined}
+        >
+          {isWriteWorkspace ? <CmsArticleEditorProvider>{children}</CmsArticleEditorProvider> : children}
+        </StaffShell>
+      </EditorPreferencesProvider>
+    </AdminPreferencesProvider>
   );
 }
