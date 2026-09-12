@@ -5575,33 +5575,24 @@ html.theme-dark .locale-toggle__btn--active:hover {
   }
 }
 
-/* Content starts at the padding edge rather than being centred inside the tile.
-   Centring let every tile place its icon wherever its own text width happened to
-   put it — across the six Overview tiles the icons landed between 27.4px and
-   38px from their left edges, so no icon, label or number shared a vertical rule
-   with its neighbour. Left-aligned, all three line up down the row. */
-/* Top-aligned, not centred.
-   Centring each tile's own content made the row ragged: a tile whose hint runs
-   to two lines (or has none at all) centred a different block height, so on the
-   six-tile strip the Gas Supply label sat 8px below the five beside it and its
-   figure 8px below theirs. Every tile is the same height, so aligning the
-   content to the top of the box lines the labels and the figures up across the
-   whole strip, which is the row a reader scans horizontally. */
-/* An icon gutter beside a LEFT-aligned text column.
-   
-   The text was centred — inherited, not set here — while the icon sat in a
-   gutter at the left edge. So the three lines each began at a different x
-   (label 505, value 528, hint further right again at a 1920 viewport) and the
-   icon floated alone against a ragged column with dead space between it and the
-   label it belongs to. That is what made a perfectly ordinary gutter layout
-   read as broken.
-   
-   Stated here rather than left to inherit: this tile owns its alignment. With
-   one left edge the icon reads as the head of the column instead of an
-   ornament parked in the corner. */
+/* Centred across, anchored at the top — and the second half is the point.
+
+   Hamim asked for balanced tiles on 2026-09-12: label, figure and trend on
+   each tile's own centre line. This tile has been centred before and it went
+   wrong, but not because of the horizontal centring. It centred on BOTH axes,
+   so every tile centred its own content height and a tile whose hint ran to
+   two lines (or had none) sat its label and figure lower than its
+   neighbours' — Gas Supply's by 8px on the six-tile strip. And its icon was
+   out of flow in a corner, landing 27.4px to 38px from the tile edge
+   depending on the text width, so nothing shared a vertical rule.
+
+   Neither cause survives. Content is anchored to the top of the tile and
+   every label reserves two lines (below), so labels and figures share rows
+   across the strip whatever the hints do; the icon rides inline at the head
+   of the label, so it centres with the words it names. */
 .grid-explorer-kpi {
-  @apply flex items-start justify-start gap-2.5 relative overflow-visible transition-all duration-300;
-  text-align: left;
+  @apply flex items-start justify-center gap-2.5 relative overflow-visible transition-all duration-300;
+  text-align: center;
   padding: 0.875rem 1rem !important;
   background-color: color-mix(in srgb, hsl(var(--card)) 92%, transparent) !important;
   border: 1px solid hsl(var(--border) / 0.55) !important;
@@ -5700,6 +5691,49 @@ html.theme-dark .locale-toggle__btn--active:hover {
   vertical-align: 0.5em;
 }
 
+/* A centred line counts the P/D mark in its width, so the figure itself sat
+   ~9px left of the tile's centre with the mark trailing. The mark's width,
+   mirrored as padding on the other side, puts the number on the centre line
+   and leaves the mark hanging off it, as a superscript should. */
+.grid-explorer-kpi__value:has(.grid-explorer-kpi__mark) {
+  padding-left: calc(0.8125rem + 0.3rem);
+}
+
+/* The trend is an inline-flex row that can wrap; its items centre with the
+   tile rather than packing to the row's left edge. */
+.grid-explorer-kpi .grid-explorer-kpi__trend {
+  justify-content: center;
+}
+
+/* The cadence badge ("Daily", "Monthly") in the tile's top-right corner.
+   On a centred label the `<sup>` counted in the line's width, so the words sat
+   left of centre with the badge hanging high off the right — and when the label
+   wrapped, it rode the second line ("DEMAND Daily") nowhere near the first.
+   Out of flow and pinned to the corner, it sits in the same place on every
+   tile (Hamim, 2026-09-12), and the label centres on its own words. Outranks
+   the `.grid-explorer-kpi__label sup` raise further down, which is !important. */
+.grid-explorer-kpi .grid-explorer-kpi__label sup {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.75rem;
+  margin-left: 0 !important;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The label starts below the badge, so a long centred label ("EVENING PEAK
+   DEMAND" at 1280px fills the tile) can never run under the corner. */
+.grid-explorer-kpi:has(.grid-explorer-kpi__label sup) > div:first-of-type {
+  padding-top: 0.625rem;
+}
+
+/* Even line lengths, so a wrap never leaves one word alone: "outturn −491" over
+   a lone "MW" on a phone, "last filed" over "2,327.9 MMCFD on 10 Sept" at 1280. */
+.grid-explorer-kpi__label,
+.grid-explorer-kpi__hint {
+  text-wrap: balance;
+}
+
 /* The text block sat at its natural width — 131px of content in a 237px tile,
    so 45% of every tile was empty and a full-width hero was mostly nothing.
    It fills the tile now, which is also what lets a long label truncate
@@ -5709,41 +5743,22 @@ html.theme-dark .locale-toggle__btn--active:hover {
   min-width: 0;
 }
 
-/* One left edge, with the icon heading it.
-   
-   This layout has been round twice, and it is worth writing down why it landed
-   where it did. First the tile was a row: icon in a gutter, text block at its
-   NATURAL width. The block was narrower than the tile, so the icon sat against
-   a ragged edge whose width the long forecast line happened to set, and it read
-   as misaligned. The fix was to centre everything as a stack — icon on top,
-   then label, value, trend. That put 22px plus a gap above every label,
-   roughly a quarter of a 122px tile spent on something carrying no figure, so
-   the icon was then pulled out of flow into an absolute corner. The end state
-   was a 13px glyph parked in a corner with no relationship to a centred column
-   of text: two local fixes, each reasonable, arriving somewhere worse than
-   either started.
-   
-   The premise of the first fix has since expired. `.grid-explorer-kpi > div`
-   below sets `flex: 1 1 auto`, so the text block fills the tile rather than
-   sitting at its natural width — the ragged edge the centring was working
-   around no longer exists. A row gutter is safe again, and it costs no height,
-   because the icon sits BESIDE the text rather than above it.
-   
-   So: label, value and hint share one left edge, and the icon heads that
-   column. The tooltip panel is untouched — it is absolutely positioned and
-   states its own text-left. Desktop only; below the fold breakpoint the page
-   strip's lead tile is a full-width hero with its own two-column layout. */
+/* Desktop: one centred column, anchored to the top of the tile.
+   Why only horizontally is on `.grid-explorer-kpi` above. The tooltip panel is
+   untouched — it is absolutely positioned and states its own text-left. Below
+   the fold breakpoint the page strip's lead tile is a full-width hero with
+   rules of its own. */
 @media (min-width: 40.0625rem) {
   .grid-explorer-kpi-strip--six .grid-explorer-kpi,
   .grid-explorer-kpi-strip--four .grid-explorer-kpi {
     flex-direction: row;
-    /* flex-start on both axes. Centring the stack meant every tile centred its
-       own content height, so a tile with a two-line trend line pushed its label
-       down relative to its neighbours: measured at 1440px the six labels began
-       at y=42, 42, 49, 49, 57 and 49 — a 15px stagger across the row a reader
-       scans horizontally. */
+    /* flex-start vertically, always. Centring the stack vertically meant every
+       tile centred its own content height, so a tile with a two-line trend line
+       pushed its label down relative to its neighbours: measured at 1440px the
+       six labels began at y=42, 42, 49, 49, 57 and 49 — a 15px stagger across
+       the row a reader scans horizontally. */
     align-items: flex-start;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 0;
   }
 
@@ -5760,12 +5775,9 @@ html.theme-dark .locale-toggle__btn--active:hover {
   .grid-explorer-kpi-strip--four .grid-explorer-kpi > div:first-of-type {
     flex: 1 1 auto;
     min-width: 0;
-    text-align: left;
-    /* No inline padding. Symmetric padding cannot push centred text away from
-       the corner icon — it leaves the centre where it was and only forces an
-       earlier wrap, which is what it did: "Peak Generation" went to two lines
-       at 1280px and handed back the height the icon had just freed. The icon
-       buys its own clearance through its size and inset instead. */
+    text-align: center;
+    /* No inline padding: it moves no centre and only forces an earlier wrap —
+       "Evening Peak Generation" went to two lines at 1280px the last time. */
   }
 
   /* The label is plain text now, so it centres with text-align from the block
@@ -5823,25 +5835,21 @@ html.theme-dark .locale-toggle__btn--active:hover {
     line-height: 1.05;
   }
 
-  /* A hero spanning the full width has room for the movement to sit beside the
-     figure rather than under it. Left-aligned in a full-width box, the tile was
-     a number with 200px of nothing to its right. */
-  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi > div {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    column-gap: 0.75rem;
-  }
-
-  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi__label {
-    grid-column: 1 / -1;
-  }
-
+  /* The lead figure centres like every other tile (see `.grid-explorer-kpi`).
+     It used to sit the trend beside the figure in a two-column grid, because a
+     LEFT-aligned full-width tile was a number with 200px of nothing to its
+     right. Centred, that space is shared evenly on both sides, and the trend
+     reads under the figure exactly as it does on the tiles it folds above. */
   .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:first-child .grid-explorer-kpi > div > p {
-    grid-column: 2;
-    margin-top: 0;
-    text-align: right;
-    white-space: nowrap;
+    margin-top: 0.375rem;
+  }
+
+  /* The tiles under the hero pair up two to a row, and "Evening Peak Demand"
+     wraps where "Peak Deficit" beside it does not — so the demand figure sat
+     13px below the deficit figure it is read against (measured at 393px,
+     2026-09-12). The same two-line reserve the desktop row carries. */
+  .grid-explorer-kpi-strip--folds .grid-explorer-kpi-slot:not(:first-child) .grid-explorer-kpi__label {
+    min-height: 2.5em;
   }
 
   .grid-explorer-kpi-strip--folds:not([data-expanded='true'])
