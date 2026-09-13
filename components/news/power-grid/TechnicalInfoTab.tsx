@@ -499,7 +499,7 @@ export function TechnicalInfoTab({
                 {/* Historical Takeover */}
                 <div className="grid-explorer-chart-card card p-6 bg-gradient-to-b from-card to-muted/5 border-border/40 flex flex-col justify-between">
                   <div className="space-y-4">
-                    <div className="grid-explorer-chart-card__head">
+                    <div className="grid-explorer-chart-card__head !justify-start text-left">
                       <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
                         <FileText className="h-5 w-5 shrink-0" />
                       </div>
@@ -547,7 +547,7 @@ export function TechnicalInfoTab({
                 {/* Standing Assets up to June, 2026 */}
                 <div className="grid-explorer-chart-card card p-6 bg-gradient-to-b from-card to-muted/5 border-border/40 flex flex-col justify-between">
                   <div className="space-y-4">
-                    <div className="grid-explorer-chart-card__head">
+                    <div className="grid-explorer-chart-card__head !justify-start text-left">
                       <div className="p-2.5 bg-sky-500/10 text-sky-400 rounded-xl border border-sky-500/20">
                         <TrendingUp className="h-5 w-5 shrink-0" />
                       </div>
