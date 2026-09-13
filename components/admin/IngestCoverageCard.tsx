@@ -45,6 +45,7 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
     plantsMissing,
     curveMissing,
     monthsMissing,
+    monthsNeverPublished,
     daysBehind,
     pulse,
     degraded,
@@ -197,6 +198,15 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
                         )}
                       </>
                     )}
+                    {/* Counted apart, never folded into the number above: a hole
+                        the publisher left is a fact about the record, not work.
+                        Only the grid and monthly rows have that evidence, and
+                        both are PGCB's. */}
+                    {d.neverPublished > 0 && (
+                      <p className="mt-0.5 text-[10.5px] tabular-nums text-muted-foreground">
+                        +{d.neverPublished.toLocaleString()} PGCB never published
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -204,23 +214,37 @@ export function IngestCoverageCard({ coverage }: { coverage: IngestCoverage }) {
           </table>
         </AdminTableShell>
 
-        {/* What "missing" can and cannot mean here. Neither source keeps a
-            browsable archive — pgcb.gov.bd/reports/ returns nothing for any
-            date, including days the site holds, and Petrobangla's listing
-            carries a rolling ten days. So a gap older than that window cannot
-            be re-checked against the publisher, and the count below is what the
-            site lacks, not proof the report was never issued. */}
+        {/* What "missing" can and cannot mean here. It used to count every
+            hole, which read as a to-do list of 81 grid days and three monthly
+            reports when 67 of those days and all three months had already been
+            shown not to exist (2026-09-13). The publisher's holes are now
+            counted apart, from evidence; everything else stays "missing". */}
         <p className="admin-card-section text-[11px] leading-relaxed text-muted-foreground">
           <span className="font-semibold text-foreground">Missing</span> means the site does not
-          hold the day. It is not a claim the report was never published: neither publisher keeps a
-          browsable archive — Petrobangla&rsquo;s listing carries a rolling ten days, and PGCB&rsquo;s
-          report directory returns nothing for any date, including days already on the site. Only
-          gaps inside the last ten days can be re-checked upstream.
+          hold the slot and a source is, or may yet be, obtainable.{' '}
+          <span className="font-semibold text-foreground">Never published</span> is counted apart,
+          from evidence: for grid days, the site&rsquo;s own declaration of days PGCB&rsquo;s archive
+          does not index or cannot serve (grid-verification/no-source-days.json); for monthly
+          reports, PGCB&rsquo;s ERP. The gas, curve and station rows have no such evidence, so every
+          hole in them is counted as ours — Petrobangla&rsquo;s listing carries only a rolling ten
+          days, so an older gas gap cannot be re-checked upstream.
         </p>
 
         {monthsMissing.length > 0 && (
           <p className="admin-card-section text-[11.5px] text-muted-foreground">
             Monthly reports still to find: {monthsMissing.map((m) => pretty(m)).join(', ')}
+          </p>
+        )}
+        {monthsNeverPublished.length > 0 && (
+          <p className="admin-card-section text-[11px] leading-relaxed text-muted-foreground">
+            PGCB never published{' '}
+            {monthsNeverPublished.map((m, i) => (
+              <span key={m.month}>
+                {i > 0 && '; '}
+                <span className="font-semibold text-foreground">{pretty(m.month)}</span> ({m.why})
+              </span>
+            ))}
+            .
           </p>
         )}
 

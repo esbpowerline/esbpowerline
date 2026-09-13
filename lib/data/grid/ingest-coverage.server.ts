@@ -21,6 +21,16 @@ import {
 // (`scripts/sync_available_dates.py`), covering the last 120 days.
 import recentArtifacts from '@/lib/data/grid/recent-artifacts.json';
 import { availableDates } from '@/lib/data/grid/available-dates';
+// Compiled for the same reason as the index above: the deployed panel cannot
+// list pgcb-monthly/, and counting months from release rows alone reported 15
+// held and 148 missing on 2026-09-13, while the archive held 160 of 163 and
+// the other three were never published. Every month the site holds is here.
+import monthlyRecords from '@/lib/pgcb-monthly-data.json';
+import {
+  PGCB_DAYS_WITHOUT_SOURCE,
+  PGCB_MONTHS_NEVER_PUBLISHED,
+  splitGaps,
+} from '@/lib/data/grid/publisher-gaps';
 
 /**
  * What the site holds, and what it is still missing.
@@ -150,8 +160,13 @@ export type DatasetCoverage = {
   held: number;
   first: string | null;
   last: string | null;
-  /** Slots inside the held span that are absent. */
+  /**
+   * Slots inside the held span that the site lacks and a source is, or may
+   * yet be, obtainable for. Holes the publisher never issued are not here.
+   */
   missingInside: number;
+  /** Holes inside the span the publisher never issued, counted apart. */
+  neverPublished: number;
   /** The newest absences inside the span, newest first. */
   recentGaps: string[];
   /**
@@ -200,8 +215,10 @@ export type IngestCoverage = {
   plantsMissing: string[];
   /** Days held with no fuel curve: the Energy Curve tab is empty for them. */
   curveMissing: string[];
-  /** Months inside the monthly span with no report. */
+  /** Months inside the monthly span the site lacks and PGCB did publish. */
   monthsMissing: string[];
+  /** Months inside the span PGCB never published, with why. */
+  monthsNeverPublished: Array<{ month: string; why: string }>;
   /** How many days behind `newestPublishable` the newest held day is. */
   daysBehind: number | null;
 };
@@ -327,7 +344,11 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
   for (const key of publishedGas) if (ISO.test(key)) gasDays.add(key);
   const gas = [...gasDays].sort();
   const months = [
-    ...new Set([...monthFiles, ...publishedMonths.filter((k) => /^\d{4}-\d{2}$/.test(k))]),
+    ...new Set([
+      ...monthFiles,
+      ...monthlyRecords.map((m) => m.date_key),
+      ...publishedMonths.filter((k) => /^\d{4}-\d{2}$/.test(k)),
+    ]),
   ].sort();
 
   const heldSets: Record<DayFeedId, Set<string>> = {
@@ -364,6 +385,16 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
       gasFiledUnder: shift(r.date, 1),
     }));
 
+  // A hole is either ours or the publisher's. Only grid days and monthly
+  // reports have evidence for the second kind (see publisher-gaps.ts); for the
+  // gas, curve and station rows every hole is counted as the site's.
+  const gridGaps = splitGaps(gapsInside(grid, shift), (d) => PGCB_DAYS_WITHOUT_SOURCE.has(d));
+  const monthGaps = splitGaps(gapsInside(months, monthStep), (m) => m in PGCB_MONTHS_NEVER_PUBLISHED);
+  const ours = (keys: string[]) => ({ missing: gapsInside(keys, shift), neverPublished: [] as string[] });
+  const gasGaps = ours(gas);
+  const curveGaps = ours(curve);
+  const plantGaps = ours(plants);
+
   const datasets: DatasetCoverage[] = [
     {
       id: 'grid',
@@ -373,8 +404,9 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
       held: grid.length,
       first: grid[0] ?? null,
       last: latestGrid,
-      missingInside: gapsInside(grid, shift).length,
-      recentGaps: gapsInside(grid, shift).slice(-8).reverse(),
+      missingInside: gridGaps.missing.length,
+      recentGaps: gridGaps.missing.slice(-8).reverse(),
+      neverPublished: gridGaps.neverPublished.length,
     },
     {
       id: 'gas',
@@ -384,8 +416,9 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
       held: gas.length,
       first: gas[0] ?? null,
       last: gas[gas.length - 1] ?? null,
-      missingInside: gapsInside(gas, shift).length,
-      recentGaps: gapsInside(gas, shift).slice(-8).reverse(),
+      missingInside: gasGaps.missing.length,
+      recentGaps: gasGaps.missing.slice(-8).reverse(),
+      neverPublished: gasGaps.neverPublished.length,
       windowOnly: !hasArchiveOnDisk,
     },
     {
@@ -396,8 +429,9 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
       held: curve.length,
       first: curve[0] ?? null,
       last: curve[curve.length - 1] ?? null,
-      missingInside: gapsInside(curve, shift).length,
-      recentGaps: gapsInside(curve, shift).slice(-8).reverse(),
+      missingInside: curveGaps.missing.length,
+      recentGaps: curveGaps.missing.slice(-8).reverse(),
+      neverPublished: curveGaps.neverPublished.length,
       windowOnly: !hasArchiveOnDisk,
     },
     {
@@ -408,8 +442,9 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
       held: plants.length,
       first: plants[0] ?? null,
       last: plants[plants.length - 1] ?? null,
-      missingInside: gapsInside(plants, shift).length,
-      recentGaps: gapsInside(plants, shift).slice(-8).reverse(),
+      missingInside: plantGaps.missing.length,
+      recentGaps: plantGaps.missing.slice(-8).reverse(),
+      neverPublished: plantGaps.neverPublished.length,
       windowOnly: !hasArchiveOnDisk,
     },
     {
@@ -420,11 +455,10 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
       held: months.length,
       first: months[0] ?? null,
       last: months[months.length - 1] ?? null,
-      missingInside: gapsInside(months, monthStep).length,
-      recentGaps: gapsInside(months, monthStep).slice(-8).reverse(),
-      // Monthly release rows exist for every month the Pi has ingested, but the
-      // 2013-2024 back catalogue is files only.
-      windowOnly: !hasArchiveOnDisk,
+      missingInside: monthGaps.missing.length,
+      recentGaps: monthGaps.missing.slice(-8).reverse(),
+      neverPublished: monthGaps.neverPublished.length,
+      // Whole archive everywhere now: the month list is compiled in above.
     },
   ];
 
@@ -444,7 +478,11 @@ export const getIngestCoverage = cache(async (): Promise<IngestCoverage> => {
     gasMissing: missingWhereGridHeld('GAS_DAILY'),
     plantsMissing: missingWhereGridHeld('GRID_PLANTS'),
     curveMissing: missingWhereGridHeld('GRID_CURVE'),
-    monthsMissing: gapsInside(months, monthStep).slice(-6).reverse(),
+    monthsMissing: monthGaps.missing.slice(-6).reverse(),
+    monthsNeverPublished: monthGaps.neverPublished.map((month) => ({
+      month,
+      why: PGCB_MONTHS_NEVER_PUBLISHED[month],
+    })),
     daysBehind: latestGrid ? daysBetween(latestGrid, newestPublishable) : null,
   };
 });
