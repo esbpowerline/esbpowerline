@@ -148,8 +148,8 @@ export const REMAL_2024: EventStudyDefinition = {
   ],
 };
 
-// Order matters: the explorer's date control falls back to the first entry
-// when a day belongs to no study.
+// Declaration order is not display order: the /analysis grid sorts newest
+// first through `eventStudiesNewestFirst`.
 export const EVENT_STUDIES: EventStudyDefinition[] = [GAS_CRISIS_2026, REMAL_2024];
 
 export function findEventStudy(slug: string): EventStudyDefinition | undefined {
@@ -173,4 +173,25 @@ export function findEventStudyForDate(iso: string): EventStudyDefinition | undef
     const { start, end } = eventWindow(def);
     return iso >= start && iso <= end;
   });
+}
+
+/** Every study, most recent break first, the order the /analysis grid shows. */
+export function eventStudiesNewestFirst(): EventStudyDefinition[] {
+  return [...EVENT_STUDIES].sort((a, b) => (a.incidentDate < b.incidentDate ? 1 : -1));
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * "21 May – 5 Oct 2024": the window a study covers, lead-in included.
+ * The year is printed once when both ends share it, on each end when not.
+ */
+export function eventDateline(def: EventStudyDefinition): string {
+  const { start, end } = eventWindow(def);
+  const part = (iso: string, withYear: boolean) => {
+    const [y, m, d] = iso.split('-');
+    return `${Number(d)} ${MONTHS[Number(m) - 1]}${withYear ? ` ${y}` : ''}`;
+  };
+  const sameYear = start.slice(0, 4) === end.slice(0, 4);
+  return `${part(start, !sameYear)} – ${part(end, true)}`;
 }

@@ -18,7 +18,12 @@ import {
   loadGasSupplyOutageQuotes,
 } from '@/lib/data/analysis/event-study.server';
 import { EVENING_PEAK_CHAIN_CARDS } from '@/lib/data/analysis/event-study';
-import { REMAL_2024, findEventStudyForDate } from '@/lib/data/analysis/event-registry';
+import {
+  REMAL_2024,
+  eventDateline,
+  eventStudiesNewestFirst,
+  findEventStudyForDate,
+} from '@/lib/data/analysis/event-registry';
 import { keyFacts } from '@/lib/data/analysis/event-narrative';
 import { loadEventStudy, loadOutageQuotes } from '@/lib/data/analysis/event-study.server';
 
@@ -310,7 +315,10 @@ describe('the Remal 2024 study', () => {
     const study = await loadEventStudy(REMAL_2024);
     const narrative = buildNarrative(REMAL_2024, study, [], ['gasNational', 'gasGen'], [], true);
     expect(narrative.totals.intensityPeak).toEqual({ date: '2024-09-09', value: 1973 });
-    const worst = keyFacts(REMAL_2024, study, narrative).find((f) => f.label === 'Worst day for load shedding');
+    const worst = keyFacts(REMAL_2024, study, narrative).find((f) => f.key === 'worst-shed');
+    // Named for its own quantity, so the /analysis grid never shows MW and
+    // GWh side by side under one label.
+    expect(worst?.label).toBe('Largest load shed at evening peak');
     expect(worst?.provenance).toBe('D');
     expect(worst?.note).toMatch(/^load shed at evening peak on 9 Sep/);
     expect(worst?.note).not.toMatch(/energy unserved/i);
@@ -328,4 +336,16 @@ describe('the Remal 2024 study', () => {
     expect(titas?.reason).toBe('due to Low gas pressure for leakage at Titas gas line.');
     expect(quotes.filter((q) => q.subject === 'the cyclone')).toHaveLength(3);
   }, 60_000);
+});
+
+describe('the /analysis grid', () => {
+  it('lists every study, most recent break first', () => {
+    expect(eventStudiesNewestFirst().map((d) => d.slug)).toEqual(['gas-crisis-2026', 'remal-2024']);
+  });
+
+  it('prints each window with the lead-in and the year once', () => {
+    expect(eventDateline(GAS_CRISIS_2026)).toBe('18 Jul – 31 Aug 2026');
+    expect(eventDateline(REMAL_2024)).toBe('21 May – 5 Oct 2024');
+    expect(eventDateline({ ...REMAL_2024, endDate: '2025-01-10' })).toBe('21 May 2024 – 10 Jan 2025');
+  });
 });

@@ -318,6 +318,11 @@ export function positionLabel(position: DayPosition): string {
 /* ── the masthead's key facts ─────────────────────────────────────────────── */
 
 export interface KeyFact {
+  /**
+   * Stable across studies, so a caller can pick a fact without matching its
+   * label. The label changes with the quantity; the key does not.
+   */
+  key: 'lowest' | 'capacity' | 'below-half' | 'worst-shed';
   label: string;
   value: string;
   /** Where it came from, in one line — rendered under the figure. */
@@ -369,6 +374,7 @@ export function keyFacts(
 
   if (low) {
     facts.push({
+      key: 'lowest',
       label: 'Lowest day',
       value: `${n1(low.value)} ${headline.unit}`,
       // The headline value is published; the comparison beside it is a mean
@@ -387,6 +393,7 @@ export function keyFacts(
   const capMax = capValues.length ? Math.max(...capValues) : null;
   if (capMax !== null && low) {
     facts.push({
+      key: 'capacity',
       label: 'Printed capacity',
       value: `${n0(capMax)} ${capacity.unit}`,
       // Stated only when it is true of every published day. It was typed as a
@@ -400,6 +407,7 @@ export function keyFacts(
     });
     const belowHalf = published.filter((p) => p.value < capMax / 2).length;
     facts.push({
+      key: 'below-half',
       label: 'Days under half capacity',
       value: `${belowHalf} of ${published.length}`,
       note: `days the delivered line sat below ${n0(capMax / 2)} ${capacity.unit}`,
@@ -415,8 +423,18 @@ export function keyFacts(
     // misdescribed on both counts.
     const intensity = study.series[def.intensitySeries];
     facts.push({
-      label: 'Worst day for load shedding',
-      value: `${n0(narrative.totals.intensityPeak.value)} ${narrative.totals.intensityUnit}`,
+      key: 'worst-shed',
+      // Named for its own quantity. One label over 72 GWh of energy unserved
+      // in 2026 and 1,973 MW shed at one hour in 2024 put two different
+      // quantities side by side on the /analysis grid under a single name,
+      // which is the Gas Supply tile incident (2,366 -> 856 MMCFD) again.
+      label:
+        intensity.id === 'unserved'
+          ? 'Most energy unserved in a day'
+          : `Largest ${intensity.label.toLowerCase()}`,
+      // Whole megawatts, as PGCB prints them; energy keeps its tenth, so the
+      // 2026 study's printed 71.776 GWh reads 71.8 and not a rounded 72.
+      value: `${(narrative.totals.intensityUnit === 'MW' ? n0 : n1)(narrative.totals.intensityPeak.value)} ${narrative.totals.intensityUnit}`,
       note: `${intensity.label.toLowerCase()} on ${prettyDay(narrative.totals.intensityPeak.date)} — the highest of the window`,
       provenance: intensity.provenance === 'D' ? 'D' : 'P',
     });

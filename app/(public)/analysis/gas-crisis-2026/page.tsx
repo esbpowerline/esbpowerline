@@ -222,16 +222,18 @@ export default async function GasCrisis2026Page() {
     temporalCoverage: `${GAS_CRISIS_WINDOW.start}/${GAS_CRISIS_WINDOW.end}`,
     spatialCoverage: { '@type': 'Place', name: 'Bangladesh' },
   };
-  // Two levels, deliberately: /analysis has no index page yet, and a crumb the
-  // nav does not honour would be a structured-data claim the site does not keep.
+  // Three levels since /analysis became the index of every study. It was two
+  // while no index existed, because a crumb the site does not honour would be
+  // a structured-data claim it does not keep.
   const breadcrumbLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'Event studies', item: `${baseUrl}/analysis` },
       {
         '@type': 'ListItem',
-        position: 2,
+        position: 3,
         name: 'The R-LNG Shortfall, July–August 2026',
         item: `${baseUrl}/analysis/gas-crisis-2026`,
       },
@@ -265,6 +267,12 @@ export default async function GasCrisis2026Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 
       {/* ── hero ───────────────────────────────────────────────────────── */}
+      <nav aria-label="Breadcrumb" className="mb-4 text-[12px] text-muted-foreground">
+        <Link prefetch={false} href="/analysis" className="underline-offset-4 hover:text-foreground hover:underline">
+          All event studies
+        </Link>
+      </nav>
+
       <EventHero
         kicker="Analysis · event study"
         title="The R-LNG shortfall"

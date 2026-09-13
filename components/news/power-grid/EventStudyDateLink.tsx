@@ -23,14 +23,15 @@ import { EVENT_STUDIES, findEventStudyForDate } from '@/lib/data/analysis/event-
  */
 export function EventStudyDateLink({ selectedDate }: { selectedDate: string }) {
   const study = findEventStudyForDate(selectedDate);
-  const fallback = EVENT_STUDIES[0];
-  if (!study && !fallback) return null;
+  // A day inside no study opens the grid of all of them, not whichever study
+  // happened to be declared first.
+  if (!study && EVENT_STUDIES.length === 0) return null;
 
   return (
     <div className="w-full sm:w-auto">
       <Link
         prefetch={false}
-        href={study ? `/analysis/${study.slug}#day-${selectedDate}` : `/analysis/${fallback.slug}`}
+        href={study ? `/analysis/${study.slug}#day-${selectedDate}` : '/analysis'}
         /*
           Always carries the accent, never transparent.
           Sitting between Latest and the Year/Month/Day dropdowns — all of them

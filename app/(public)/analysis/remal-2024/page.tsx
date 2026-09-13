@@ -210,7 +210,8 @@ export default async function Remal2024Page() {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
-      { '@type': 'ListItem', position: 2, name: 'The R-LNG Line After Cyclone Remal, 2024', item: `${baseUrl}${PATH}` },
+      { '@type': 'ListItem', position: 2, name: 'Event studies', item: `${baseUrl}/analysis` },
+      { '@type': 'ListItem', position: 3, name: 'The R-LNG Line After Cyclone Remal, 2024', item: `${baseUrl}${PATH}` },
     ],
   };
 
@@ -240,6 +241,12 @@ export default async function Remal2024Page() {
     <main className="container container--shell py-8 md:py-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
+
+      <nav aria-label="Breadcrumb" className="mb-4 text-[12px] text-muted-foreground">
+        <Link prefetch={false} href="/analysis" className="underline-offset-4 hover:text-foreground hover:underline">
+          All event studies
+        </Link>
+      </nav>
 
       <EventHero
         kicker="Analysis · event study"
