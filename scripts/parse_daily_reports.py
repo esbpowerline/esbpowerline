@@ -167,6 +167,15 @@ def labelled_value(block, pattern, reject=None):
     temperature in Dhaka 34.4 C" (tomorrow), and only the anchor stands
     between them.
     """
+    return labelled_quantity(block, pattern, reject)[0]
+
+
+def labelled_quantity(block, pattern, reject=None):
+    """`labelled_value`, plus the unit cell PGCB prints right after the number.
+
+    Returns (value, unit): unit is the next cell's text, or '' when the row
+    ends at the number. Same anchoring and rejection rules as above.
+    """
     for line in block.split('\n'):
         cells = split_cells(line)
         for idx, cell in enumerate(cells):
@@ -174,12 +183,35 @@ def labelled_value(block, pattern, reject=None):
             if reject and re.search(reject, text):
                 continue
             if re.search(pattern, text):
-                for nxt in cells[idx + 1:]:
-                    val = clean_float(nxt)
+                for j in range(idx + 1, len(cells)):
+                    val = clean_float(cells[j])
                     if val > 0.0:
-                        return val
+                        unit = cells[j + 1].strip() if j + 1 < len(cells) else ''
+                        return val, unit
                 break
-    return None
+    return None, ''
+
+
+def energy_mkwh(block, pattern):
+    """An energy figure from P1, in MKWh whatever unit the sheet printed it in.
+
+    P1 prints its unit in the cell after each energy figure, and PGCB has used
+    both. 2025-01-01..01-18 print "Energy Unserverd | 268 | MWHr" and "Energy
+    Demand | 207460.39619 | MWHr"; from 2025-01-24 the same rows read
+    "0.203 | MKWHr.". Taking the number at face value published those 16 days'
+    demand at ~210,000 GWh and put 2025-01-04 (0.268 GWh unserved, as printed)
+    at the top of the archive's shedding ranking at 268 GWh -- a thousandfold
+    claim no source made. The Zone-wise Generation Summary caption had the same
+    trap for the same weeks (see `energy_div` below). Read the unit, never
+    assume it. A row with no unit keeps the figure as it stands: MKWh is what
+    every other layout prints.
+    """
+    val, unit = labelled_quantity(block, pattern)
+    if val is None:
+        return None
+    if re.sub(r'[^a-z]', '', unit.lower()).startswith('mwh'):
+        return val / 1000.0
+    return val
 
 def lcurve_total_series(content):
     """Half-hourly national generation from the L-Curve sheet, keyed by "HH:MM".
@@ -651,8 +683,8 @@ def published_demand_stats(p1, forecast):
     block = p1 + "\n" + forecast_reported_section(forecast)
     return {
         'dayPeakDemand': labelled_value(block, r'^day peak demand'),
-        'totalEnergyUnserved': labelled_value(block, r'^energy unserve'),
-        'totalEnergyDemand': labelled_value(block, r'^energy demand'),
+        'totalEnergyUnserved': energy_mkwh(block, r'^energy unserve'),
+        'totalEnergyDemand': energy_mkwh(block, r'^energy demand'),
         # "probable" is tomorrow's forecast and sits in the same block.
         'maxTemp': labelled_value(block, r'^max(imum)?\.? temp', reject=r'probable|forecast'),
     }
@@ -1465,7 +1497,18 @@ def parse_pgcb_file(filepath, op_date):
             elif 'maximum generation' in cell_lower:
                 note_time('maxGen', parts, idx)
             elif 'energy generated' in cell_lower or 'total gen.' in cell_lower or 'total gen (' in cell_lower:
-                if idx + 1 < len(parts): total_energy_gen = clean_float(parts[idx+1])
+                if idx + 1 < len(parts):
+                    total_energy_gen = clean_float(parts[idx+1])
+                    # The unit follows the number, and 2025-01-01..01-18 print
+                    # "Energy Generated | 207192.39619 | MWHr" where every
+                    # other day prints MKWHr. Read raw, a reparse of those days
+                    # republished generation a thousandfold too high -- the
+                    # archive only held 207.19 because an earlier repair had
+                    # fixed the stored figure, not this reader. Same rule as
+                    # `energy_mkwh`.
+                    unit = next((c.strip() for c in parts[idx+2:] if c.strip()), '')
+                    if re.sub(r'[^a-z]', '', unit.lower()).startswith('mwh'):
+                        total_energy_gen = total_energy_gen / 1000.0
             elif 'total gas supplied' in cell_lower or 'gas consumed' in cell_lower:
                 if idx + 1 < len(parts):
                     val = clean_float(parts[idx+1])

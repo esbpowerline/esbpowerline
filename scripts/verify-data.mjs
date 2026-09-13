@@ -263,6 +263,47 @@ for (const day of days) {
     }
   }
 
+  // 1b. P1's energy figures are MKWh, and PGCB has printed them in MWh too.
+  //
+  //     2025-01-01..01-18 print "Energy Unserverd | 268 | MWHr". Read at face
+  //     value that shipped 16 days of demand at ~210,000 GWh and put
+  //     2025-01-04 at the top of the archive's shedding ranking at 268 GWh
+  //     against 0.268 as printed. Nothing caught it for twenty months because
+  //     nothing compared the three energy figures with each other. Demand is
+  //     generation plus unserved, so neither can dwarf generation: an order of
+  //     magnitude apart is a unit the archive got wrong, never the source.
+  if (runs('energy-units') && num(ss.totalEnergyGen)) {
+    const gen = ss.totalEnergyGen;
+    const dem = num(ss.totalEnergyDemand);
+    const un = num(ss.totalEnergyUnserved);
+    if (dem !== null && dem > gen * 5) {
+      record('energy-units', 'ERROR', day,
+        `energy demand ${dem} is ${(dem / gen).toFixed(0)}x energy generated ${gen} — MWh stored as MKWh`);
+    }
+    if (un !== null && un > gen * 0.5) {
+      record('energy-units', 'ERROR', day,
+        `energy unserved ${un} against ${gen} generated — MWh stored as MKWh`);
+    }
+  }
+
+  // 1c. P1's "Maximum Generation" is the peak of the day's own load curve, by
+  //     PGCB's definition (see daily_extremes in parse_daily_reports.py).
+  //     2019-11-28 prints 580,945 MW at "24:00" while that workbook's L-Curve
+  //     peaks at 9,051 MW at 19:00. Every other day of 2,068 compared sits
+  //     within 3% of its hourly peak, because a half-hour peak can fall
+  //     between the stored hours. The printed figure is PGCB's and stays
+  //     published; this is the source disagreeing with itself.
+  if (runs('max-vs-curve') && num(ss.maxGen)) {
+    const gens = hourly.map((h) => num(h.generation)).filter((v) => v !== null);
+    if (gens.length >= 12) {
+      const peak = Math.max(...gens);
+      if (ss.maxGen > peak * 1.1) {
+        record('max-vs-curve', 'WARN', day,
+          `P1 prints maximum generation ${ss.maxGen} MW; the day's own load curve peaks at ${peak} MW`);
+      }
+    }
+  }
+
   // 2. demand = generation + shedding, on every published hourly row.
   //    PGCB breaks this constantly; it is reported, never repaired.
   if (runs('hourly-balance') && hourly.length) {
