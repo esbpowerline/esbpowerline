@@ -11,6 +11,7 @@ import { formatNumber } from '@/lib/utils';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { POWER_UNIT } from '@/lib/data/grid/home-snapshot-core';
 import { LIVE_BACKED_LABELS, mergeHomeSnapshot, type SnapshotSlot } from '@/lib/data/grid/home-snapshot-merge';
+import { generationRowIntegrity, type GenerationRowIntegrity } from '@/lib/data/grid/live-row-integrity';
 
 const IconMap: Record<string, any> = {
   Zap,
@@ -118,6 +119,8 @@ type LiveGrid = {
   today: { maxDemandMw: number | null; maxGenerationMw: number | null };
   /** buildLiveGridSnapshot's check: printed total === sum of fuels + imports. */
   reconciles?: boolean;
+  /** The sum of the parts the latest row reported — how far it is from its total. */
+  componentSumMw?: number | null;
 };
 
 const LIVE_POLL_MS = 15 * 60 * 1000;
@@ -219,24 +222,37 @@ function to12Hour(hhmm: string): string | null {
 
 /**
  * NLDC posts hourly generation and demand/supply/load-shed pages on PGCB's
- * portal; /api/data/live-grid parses them behind a shared 10-minute cache.
+ * portal; /api/data/live-grid parses them behind a shared 3-minute cache.
  * This hook keeps the panel on the newest posted hour while the page is open.
- * On any failure it simply reports null and the tiles stay on the daily
- * figures — live is an upgrade, never a dependency.
+ *
+ * It reports whether the feed could be read as well as what it said. The
+ * tiles used to "stay on the daily figures" when it could not, which put a
+ * 24-hour average or a day's peak under a current-hour label — the
+ * substitution doctrine rule 2 forbids. A live tile now shows the live figure
+ * or nothing, and needs to know which kind of nothing to say: still loading,
+ * or the pages could not be read.
  */
-function useLiveGrid(): LiveGrid | null {
+function useLiveGrid(): { live: LiveGrid | null; unreachable: boolean } {
   const [live, setLive] = useState<LiveGrid | null>(null);
+  const [unreachable, setUnreachable] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       try {
         const res = await fetch('/api/data/live-grid');
-        if (!res.ok) return;
-        const json = (await res.json()) as LiveGrid & { ok?: false };
-        if (!cancelled && json?.asOf && json.latest) setLive(json);
+        const json = res.ok ? ((await res.json()) as LiveGrid & { ok?: false }) : null;
+        if (cancelled) return;
+        if (json?.asOf && json.latest) {
+          setLive(json);
+          setUnreachable(false);
+        } else {
+          // A last good snapshot, if there is one, stays on screen; the flag
+          // only matters to tiles that have nothing else to show.
+          setUnreachable(true);
+        }
       } catch {
-        // Source down or offline — the daily tiles carry on.
+        if (!cancelled) setUnreachable(true);
       }
     }
     load();
@@ -247,7 +263,7 @@ function useLiveGrid(): LiveGrid | null {
     };
   }, []);
 
-  return live;
+  return { live, unreachable };
 }
 
 /**
@@ -352,7 +368,24 @@ type PeakPhase = 'evening' | 'day';
 /** The two tiles PGCB publishes a day peak AND an evening peak for. */
 const DUAL_PEAK_LABELS = new Set(['Forecast Demand', 'Yesterday Peak Gen']);
 
-function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening'): number | null {
+/** The tiles that come off NLDC's generation table — the row `generationRowIntegrity` judges. */
+const GENERATION_TABLE_LABELS = new Set([
+  'Current Generation',
+  'Gas Generation',
+  'Coal Generation',
+  'Liquid Fuel',
+  'Hydro',
+  'Grid Import',
+  'Solar + Wind',
+]);
+
+function liveValueFor(
+  label: string,
+  live: LiveGrid,
+  phase: PeakPhase,
+  integrity: GenerationRowIntegrity,
+): number | null {
+  const withheld = integrity.state === 'unusable';
   switch (label) {
     case 'Current Demand':
       return live.latest.demandMw;
@@ -364,11 +397,14 @@ function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening
     case 'Current Supply':
       return live.latest.supplyMw;
     // Every case below comes off the generation table, which is the table the
-    // reconciliation covers. When the printed total stops matching its own
-    // components, that table is mis-parsed or mis-published, so the tile
-    // falls back to the daily report rather than showing a confident green
-    // dot over a number we cannot vouch for. The demand-side tiles above
-    // are unaffected -- they are parsed from the other page.
+    // reconciliation covers. A row whose parts miss its printed total by a
+    // margin NLDC's own arithmetic can explain is shown AS FILED, and the tile
+    // says so (`generationRowIntegrity`, doctrine rule 4). It used to be hidden
+    // at a 1 MW miss: NLDC's 11:00 row on 2026-09-13 printed 14,854 MW over
+    // parts summing to 14,584, every cell read correctly, and seven tiles went
+    // blank or fell back to the daily report. Only a row too far off to be read
+    // as published is withheld. The demand-side tiles above are unaffected --
+    // they are parsed from the other page.
     // The generation table's own printed total for this hour — not a maximum
     // derived across the window. It was `today.maxGenerationMw`, which is a
     // real figure but a different one: on 2026-09-07 the page printed 14,230 at
@@ -377,26 +413,26 @@ function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening
     // printed total, so a reader adding them up found a 622 MW gap against the
     // headline. The headline is now the same hour as its own components.
     case 'Current Generation':
-      return live.reconciles === false ? null : live.latest.totalMw;
+      return withheld ? null : live.latest.totalMw;
     case 'Gas Generation':
-      return live.reconciles === false ? null : live.latest.byFuel.gasMw;
+      return withheld ? null : live.latest.byFuel.gasMw;
     case 'Coal Generation':
-      return live.reconciles === false ? null : live.latest.byFuel.coalMw;
+      return withheld ? null : live.latest.byFuel.coalMw;
     // Nullable where gas and coal are not: NLDC has printed the two thermal
     // columns for the whole life of the page and these two can be blank, so an
     // hour without them is absent rather than a grid running on neither.
     case 'Liquid Fuel':
-      return live.reconciles === false ? null : live.latest.byFuel.liquidMw;
+      return withheld ? null : live.latest.byFuel.liquidMw;
     case 'Hydro':
-      return live.reconciles === false ? null : live.latest.byFuel.hydroMw;
+      return withheld ? null : live.latest.byFuel.hydroMw;
     case 'Grid Import':
-      return live.reconciles === false ? null : live.latest.imports.totalMw;
+      return withheld ? null : live.latest.imports.totalMw;
     // Solar and wind are summed over whichever of the two NLDC printed, never
     // over a blank read as zero: the wind column is present in 28.8% of stored
     // hours and solar in 78.8%, because both postdate most of the archive. An
     // hour carrying neither is absent -- not a grid running on no renewables.
     case 'Solar + Wind': {
-      if (live.reconciles === false) return null;
+      if (withheld) return null;
       const parts = [live.latest.byFuel.solarMw, live.latest.byFuel.windMw].filter(
         (v): v is number => typeof v === 'number',
       );
@@ -413,8 +449,8 @@ function liveValueFor(label: string, live: LiveGrid, phase: PeakPhase = 'evening
     // substitution — both are the same quantity from the same row, and the
     // suffix beside the figure always says which one is on screen.
     //
-    // Not gated on `reconciles` — that flag is about the generation table's
-    // total against its own components, and neither of these comes from it.
+    // Not gated on the generation row's integrity — that is about the
+    // generation table's total against its own parts, and neither comes from it.
     case 'Forecast Demand':
       return pickPeak(live.forecast?.forecastDemand, phase);
     case 'Yesterday Peak Gen':
@@ -429,12 +465,15 @@ function LocalSnapshotDashboard({
   live,
   liveStamp,
   archiveDay,
+  liveUnreachable = false,
 }: {
   initialStats?: any[];
   live: LiveGrid | null;
   liveStamp?: string | null;
   /** The archive day the workbook-backed tiles belong to (Gas Supply, Cost). */
   archiveDay?: string | null;
+  /** The live feed could not be read and no earlier snapshot is held. */
+  liveUnreachable?: boolean;
 }) {
   const { locale, t } = useLocale();
   // `mergeHomeSnapshot` folds the server's stats onto the twelve declared slots
@@ -519,6 +558,9 @@ function LocalSnapshotDashboard({
     source that published it.
   */
 
+  // Judged once per render: the seven generation-table tiles share one row.
+  const integrity = live ? generationRowIntegrity(live) : null;
+
   // The separators carry the grid, so they are hairlines rather than rules: at
   // border/65 the twelve cells read as a table of boxes, which is the one thing
   // a glance-panel should not look like.
@@ -527,12 +569,16 @@ function LocalSnapshotDashboard({
       {stats.map((s, i) => {
         const Icon = s.Icon;
 
-        const imports = s.label === 'Grid Import' && flipEnabled ? importPhases(live) : [];
+        /** Tiles fed by PGCB's daily board rather than NLDC's hourly pages. */
+        const isBoardTile = DUAL_PEAK_LABELS.has(s.label);
+        const fromGenerationTable = GENERATION_TABLE_LABELS.has(s.label);
+        const imports =
+          s.label === 'Grid Import' && flipEnabled && integrity?.state !== 'unusable' ? importPhases(live) : [];
         const importPhase = imports.length > 1 ? imports[tick % imports.length] : null;
         const liveVal = importPhase
           ? importPhase.value
-          : live
-            ? liveValueFor(s.label, live, peakPhase)
+          : live && integrity
+            ? liveValueFor(s.label, live, peakPhase, integrity)
             : null;
         // Only annotate a tile that is actually alternating: a dual tile where
         // PGCB printed just one of the pair shows that one at every phase, and
@@ -561,11 +607,24 @@ function LocalSnapshotDashboard({
                 : 'evening'
             : null;
         const isLive = liveVal !== null;
-        const displayValue = isLive ? liveVal : s.value;
-        // Live wins over waiting: a tile the daily report has not filed can
-        // still be carried by NLDC, and then it is not waiting for anything.
-        const awaiting = isLive ? undefined : s.awaiting;
+        const liveBacked = LIVE_BACKED_LABELS.has(s.label);
+        // A live tile shows the live figure or nothing. The server's value for
+        // these slots is the daily report's — a 24-hour average for the fuels,
+        // the day's peak for imports and load shed — and printing it under a
+        // current-hour label is the substitution doctrine rule 2 forbids. On
+        // 2026-09-13 it put 5,254 MW under "Gas gen" while NLDC printed 5,028.
+        const displayValue = isLive ? liveVal : liveBacked ? null : s.value;
         const liveWhen = liveStamp ?? (live ? live.asOf.slice(11, 16) : '');
+        // Why a tile shows what it shows, in the order a reader needs it said:
+        //   flagged  — NLDC's figure as filed, from a row that does not add up
+        //   held     — withheld: the row is too far off to be read as published
+        //   pending  — the live feed has not arrived, or could not be read
+        //   awaiting — the source was read and left this figure blank
+        const flagged = isLive && fromGenerationTable && integrity?.state === 'inconsistent';
+        const held = !isLive && fromGenerationTable && integrity?.state === 'unusable';
+        const pending = !isLive && liveBacked && !live;
+        const owner = isBoardTile ? 'PGCB' : 'NLDC';
+        const awaiting = isLive || held || pending ? undefined : liveBacked ? owner : s.awaiting;
         /*
           The two forecast-board tiles do not wear the hourly tooltip.
 
@@ -582,8 +641,6 @@ function LocalSnapshotDashboard({
           and the one not shown belongs somewhere rather than nowhere.
         */
         const board = live?.forecast ?? null;
-        /** Tiles fed by PGCB's daily board rather than NLDC's hourly pages. */
-        const isBoardTile = DUAL_PEAK_LABELS.has(s.label);
         const importTip = (() => {
           if (s.label !== 'Grid Import') return null;
           const all = importPhases(live);
@@ -618,10 +675,46 @@ function LocalSnapshotDashboard({
           (locale === 'bn'
             ? `এনএলডিসি ঘণ্টাভিত্তিক · ${liveWhen} পর্যন্ত`
             : `NLDC hourly · as of ${liveWhen}`);
-        const awaitingTip =
-          locale === 'bn'
+        // Says what is actually missing. It used to read "<source> has not
+        // published this day yet" for every empty tile, including the ones the
+        // site had hidden itself while NLDC had published them.
+        const awaitingTip = !liveBacked
+          ? locale === 'bn'
             ? `${awaiting} এখনও এই দিনের হিসাব প্রকাশ করেনি`
-            : `${awaiting} has not published this day yet`;
+            : `${awaiting} has not published this day yet`
+          : isBoardTile
+            ? locale === 'bn'
+              ? 'পিজিসিবি এখনও আজকের পূর্বাভাস বোর্ড প্রকাশ করেনি'
+              : "PGCB has not posted today's forecast board yet"
+            : locale === 'bn'
+              ? `এনএলডিসি ${liveWhen} এর জন্য এই সংখ্যাটি প্রকাশ করেনি`
+              : `NLDC has not posted this figure for ${liveWhen}`;
+        const rowFacts = integrity && integrity.state !== 'consistent' ? integrity : null;
+        const flagTip =
+          rowFacts && rowFacts.partsMw !== null
+            ? locale === 'bn'
+              ? `${liveTip} · এনএলডিসির ${liveWhen} সারির অংশগুলোর যোগফল ${formatNumber(rowFacts.partsMw)} মেগাওয়াট, প্রকাশিত মোট ${formatNumber(rowFacts.totalMw)} মেগাওয়াট — এনএলডিসি যেভাবে প্রকাশ করেছে সেভাবেই দেখানো হলো`
+              : `${liveTip} · NLDC's ${liveWhen} row does not add up: its parts sum to ${formatNumber(rowFacts.partsMw)} MW against a printed total of ${formatNumber(rowFacts.totalMw)} MW. Shown as NLDC published it.`
+            : liveTip;
+        const heldTip =
+          rowFacts && rowFacts.partsMw !== null
+            ? locale === 'bn'
+              ? `এনএলডিসির ${liveWhen} সারি নিজের মোট থেকে ${formatNumber(Math.abs(rowFacts.totalMw - rowFacts.partsMw))} মেগাওয়াট দূরে (অংশ ${formatNumber(rowFacts.partsMw)}, মোট ${formatNumber(rowFacts.totalMw)}) — তাই দেখানো হয়নি`
+              : `NLDC's ${liveWhen} row is ${formatNumber(Math.abs(rowFacts.totalMw - rowFacts.partsMw))} MW from its own total (parts ${formatNumber(rowFacts.partsMw)}, printed ${formatNumber(rowFacts.totalMw)}) — too far to be a slip in NLDC's arithmetic, so it is not shown.`
+            : locale === 'bn'
+              ? `এনএলডিসির ${liveWhen} সারিতে মোট আছে কিন্তু কোনো অংশ নেই, তাই দেখানো হয়নি`
+              : `NLDC's ${liveWhen} row printed a total but none of its parts, so it is not shown.`;
+        const pendingTip = liveUnreachable
+          ? locale === 'bn'
+            ? 'এই মুহূর্তে এনএলডিসির পাতা পড়া যায়নি। তার জায়গায় পুরোনো কোনো সংখ্যা দেখানো হয়নি।'
+            : "NLDC's pages could not be read just now. No older figure is shown in their place."
+          : isBoardTile
+            ? locale === 'bn'
+              ? 'পিজিসিবির পূর্বাভাস বোর্ড আসছে…'
+              : "Loading PGCB's forecast board…"
+            : locale === 'bn'
+              ? 'এনএলডিসির ঘণ্টাভিত্তিক সংখ্যা আসছে…'
+              : "Loading NLDC's hourly figures…";
 
         const fullLabel = localizeEnergyStatLabel(s.label, locale as any);
         let shortLabel = fullLabel;
@@ -650,10 +743,16 @@ function LocalSnapshotDashboard({
                   than inherit one that is not theirs.
                 */
                 label={
-                  isLive
-                    ? liveTip
-                    : awaiting
-                      ? awaitingTip
+                  flagged
+                    ? flagTip
+                    : isLive
+                      ? liveTip
+                      : held
+                        ? heldTip
+                        : pending
+                          ? pendingTip
+                          : awaiting
+                            ? awaitingTip
                       : archiveDay
                         ? locale === 'bn'
                           ? `পিজিসিবি দৈনিক প্রতিবেদন · ${archiveDay}`
@@ -671,7 +770,9 @@ function LocalSnapshotDashboard({
                     board: live in the sense that it refreshes on its own, but
                     on a DAILY cadence, so a reader who reads a pulsing dot as
                     "this is the current hour" would be wrong about it. Grey is
-                    a figure nobody has filed. Both live states pulse, because
+                    a figure nobody has filed. Amber is NLDC's figure shown as
+                    filed from a row that does not add up — still live, so it
+                    still pulses, and its tooltip gives both sums. Both live states pulse, because
                     both do update; the colour is what separates the cadence,
                     and the tooltip on the dot states it in words. */}
                 <span className="relative flex h-1.5 w-1.5 cursor-help">
@@ -679,12 +780,12 @@ function LocalSnapshotDashboard({
                     <>
                       <span
                         className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                          isBoardTile ? 'bg-rose-400' : 'bg-emerald-400'
+                          flagged ? 'bg-amber-400' : isBoardTile ? 'bg-rose-400' : 'bg-emerald-400'
                         }`}
                       />
                       <span
                         className={`relative inline-flex rounded-full h-1.5 w-1.5 ${
-                          isBoardTile ? 'bg-rose-500' : 'bg-emerald-500'
+                          flagged ? 'bg-amber-500' : isBoardTile ? 'bg-rose-500' : 'bg-emerald-500'
                         }`}
                       />
                     </>
@@ -749,7 +850,11 @@ function LocalSnapshotDashboard({
                     ? locale === 'bn'
                       ? 'অপেক্ষমাণ'
                       : 'awaiting'
-                    : s.unit}
+                    : displayValue === null && held
+                      ? locale === 'bn'
+                        ? 'স্থগিত'
+                        : 'held'
+                      : s.unit}
                 </span>
                 {peakSuffix && displayValue !== null ? (
                   <span className="ml-1 font-semibold lowercase tracking-normal text-[8px] md:text-[9px] text-muted-foreground/75">
@@ -777,7 +882,7 @@ function SnapshotSegment({
   headerDate: string;
 }) {
   const { locale, t } = useLocale();
-  const live = useLiveGrid();
+  const { live, unreachable: liveUnreachable } = useLiveGrid();
   const localizedSnapshotLabel = localizeSnapshotLabel(snapshotLabel, locale);
   const parts = localizedSnapshotLabel
     .split(/\s*•\s*/)
@@ -905,6 +1010,7 @@ function SnapshotSegment({
             live={live}
             liveStamp={liveStamp}
             archiveDay={dailyDay}
+            liveUnreachable={liveUnreachable}
           />
         </div>
 

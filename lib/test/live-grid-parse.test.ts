@@ -192,6 +192,9 @@ describe('buildLiveGridSnapshot', () => {
     expect(snapshot.latest.loadShedMw).toBe(501);
     expect(snapshot.latest.imports.indiaMw).toBe(902 + 112 + 828);
     expect(snapshot.reconciles).toBe(true);
+    // Sent so the panel can say how far a row is from its own total, not just that it is.
+    expect(snapshot.componentSumMw).not.toBeNull();
+    expect(Math.abs(snapshot.latest.totalMw - (snapshot.componentSumMw ?? 0))).toBeLessThanOrEqual(1);
   });
 
   it('caps the hour list at 24 and keeps it oldest-first', () => {

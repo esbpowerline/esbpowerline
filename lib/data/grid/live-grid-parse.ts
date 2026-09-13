@@ -440,6 +440,14 @@ export type LiveGridSnapshot = {
   /** |total − sum of components| ≤ 1 MW on the latest row. */
   reconciles: boolean;
   /**
+   * The sum of the components the latest row reported, or null when it
+   * reported none. Sent beside `reconciles` so a reader can be told HOW FAR
+   * NLDC's row is from its own total, not just that it is: on 2026-09-13 the
+   * 11:00 row printed 14,854 MW against parts summing to 14,584, and the panel
+   * could only say the row was wrong, by hiding it.
+   */
+  componentSumMw: number | null;
+  /**
    * PGCB's forecast board, or null when that page could not be read.
    *
    * Optional on purpose, and fetched with its own catch. It is a different page
@@ -526,6 +534,7 @@ export function buildLiveGridSnapshot(
     },
     hours,
     reconciles: componentSum !== null && Math.abs(latest.totalMw - componentSum) <= 1,
+    componentSumMw: componentSum,
     forecast: opts.forecast ?? null,
     sources: {
       generation: opts.generationUrl,
