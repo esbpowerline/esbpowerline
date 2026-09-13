@@ -66,6 +66,8 @@ def _gas_from_json(path: Path) -> dict | None:
     return {
         "gasProductionData": data["gasProductionData"],
         "gasDistributionData": data.get("gasDistributionData", []),
+        "citation": (data.get("sourceFiles") or {}).get("petrobangla"),
+        "window": (data.get("observationWindows") or {}).get("petrobangla"),
     }
 
 
@@ -88,6 +90,14 @@ def _apply_gas_fallback(grid_data: dict, energy: date, warnings: list[str]) -> N
     if preserved:
         grid_data["gasProductionData"] = preserved["gasProductionData"]
         grid_data["gasDistributionData"] = preserved["gasDistributionData"]
+        # The figures keep the document that published them. Keeping the rows
+        # alone is how 2026-09-06 lost its citation: a re-parse with no PDF in
+        # reach carried 2329.4 MMCFD forward, enrich had no document to name, and
+        # verify:data raised a provenance ERROR every night from 2026-09-10.
+        if preserved["citation"]:
+            grid_data.setdefault("sourceFiles", {})["petrobangla"] = preserved["citation"]
+        if preserved["window"]:
+            grid_data.setdefault("observationWindows", {})["petrobangla"] = preserved["window"]
         warnings.append("Petrobangla unavailable — kept existing gas sections for this energy day")
         return
     # Absent, not zero. The docstring above argued zero was "honest", and the

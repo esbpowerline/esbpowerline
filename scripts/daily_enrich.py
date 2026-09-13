@@ -236,9 +236,14 @@ def enrich_grid_daily(
     if source_files:
         payload["sourceFiles"] = source_files
 
+    prior_gas_window = (payload.get("observationWindows") or {}).get("petrobangla")
     payload["observationWindows"] = observation_windows(
         energy, source_files.get("pgcb"), petrobangla if has_gas else None
     )
+    # No document this run, but the gas it carried forward still has one: keep
+    # that window beside the citation rather than rebuilding the block without it.
+    if has_gas and not petrobangla and prior_gas_window and source_files.get("petrobangla"):
+        payload["observationWindows"]["petrobangla"] = prior_gas_window
 
     forecast = forecast_for(energy)
     if forecast:
