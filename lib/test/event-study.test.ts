@@ -17,6 +17,10 @@ import {
   loadGasCrisisStudy,
   loadGasSupplyOutageQuotes,
 } from '@/lib/data/analysis/event-study.server';
+import { EVENING_PEAK_CHAIN_CARDS } from '@/lib/data/analysis/event-study';
+import { REMAL_2024, findEventStudyForDate } from '@/lib/data/analysis/event-registry';
+import { keyFacts } from '@/lib/data/analysis/event-narrative';
+import { loadEventStudy, loadOutageQuotes } from '@/lib/data/analysis/event-study.server';
 
 /**
  * These tests read the real archive on purpose, like petrobangla-day.test.ts:
@@ -248,4 +252,80 @@ describe('a failed newsroom read is not an empty newsroom', () => {
     expect(quiet.coverageAvailable).toBe(true);
     expect(quiet.totals.coverageCount).toBe(0);
   });
+});
+
+/**
+ * The second study, Cyclone Remal 2024. Values pinned here are quoted in
+ * EVENT_STUDY_REMAL_2024.md and were read from the committed archive.
+ */
+describe('the Remal 2024 study', () => {
+  it('its window belongs to it and to no other study', () => {
+    expect(findEventStudyForDate('2024-05-24')?.slug).toBe('remal-2024');
+    expect(findEventStudyForDate('2024-10-05')?.slug).toBe('remal-2024');
+    expect(findEventStudyForDate('2024-10-06')).toBeUndefined();
+    expect(findEventStudyForDate('2026-07-21')?.slug).toBe('gas-crisis-2026');
+  });
+
+  it('its evening-peak cards pass comparable()', () => {
+    expect(() => assertCardsComparable(EVENING_PEAK_CHAIN_CARDS)).not.toThrow();
+    const shortfall = EVENING_PEAK_CHAIN_CARDS.find((c) => c.key === 'peak-shortfall');
+    expect(shortfall?.seriesIds).toEqual(['eveningPeakDemand', 'eveningPeakGen', 'eveningShed']);
+  });
+
+  it('marks the zone-shed sum D and the printed peaks P', () => {
+    expect(EVENT_STUDY_SERIES.eveningShed.provenance).toBe('D');
+    expect(EVENT_STUDY_SERIES.eveningPeakDemand.provenance).toBe('P');
+    expect(EVENT_STUDY_SERIES.eveningPeakGen.provenance).toBe('P');
+  });
+
+  it('reads the break, the floor and the landfall day from the archive', async () => {
+    const study = await loadEventStudy(REMAL_2024);
+    const at = (id: keyof typeof study.series, date: string) =>
+      study.series[id].points.find((p) => p.date === date)?.value ?? null;
+
+    expect(study.window).toEqual({ start: '2024-05-21', end: '2024-10-05' });
+    expect(study.series.gasRlng.points).toHaveLength(138);
+    expect(at('gasRlng', '2024-05-23')).toBe(1039.0);
+    expect(at('gasRlng', '2024-05-24')).toBe(646.7);
+    expect(at('gasRlng', '2024-05-25')).toBe(325.5);
+    expect(at('gasRlngCapacity', '2024-05-25')).toBe(1100);
+    // The storm's day: demand at the evening peak, as PGCB printed it.
+    expect(at('eveningPeakDemand', '2024-05-27')).toBe(4554);
+  }, 60_000);
+
+  it('keeps an absent zone table null and a printed zero as zero', async () => {
+    const study = await loadEventStudy(REMAL_2024);
+    const at = (date: string) =>
+      study.series.eveningShed.points.find((p) => p.date === date)?.value;
+    // No zone table on 21 May: no reading, never 0.
+    expect(at('2024-05-21')).toBeNull();
+    // Nine zones each printing 0 on 28 May is PGCB's zero, and stays one.
+    expect(at('2024-05-28')).toBe(0);
+    expect(at('2024-06-25')).toBe(1727);
+    // A Petrobangla report not held is a gap, not a reading.
+    expect(study.series.gasRlng.points.find((p) => p.date === '2024-07-18')?.value).toBeNull();
+  }, 60_000);
+
+  it('names the intensity series in the masthead instead of assuming energy unserved', async () => {
+    const study = await loadEventStudy(REMAL_2024);
+    const narrative = buildNarrative(REMAL_2024, study, [], ['gasNational', 'gasGen'], [], true);
+    expect(narrative.totals.intensityPeak).toEqual({ date: '2024-09-09', value: 1973 });
+    const worst = keyFacts(REMAL_2024, study, narrative).find((f) => f.label === 'Worst day for load shedding');
+    expect(worst?.provenance).toBe('D');
+    expect(worst?.note).toMatch(/^load shed at evening peak on 9 Sep/);
+    expect(worst?.note).not.toMatch(/energy unserved/i);
+  }, 60_000);
+
+  it('quotes the outage rows verbatim, cyclone rows first', async () => {
+    const quotes = await loadOutageQuotes(REMAL_2024);
+    expect(quotes).toHaveLength(9);
+    expect(quotes[0]).toMatchObject({
+      date: '2024-05-26',
+      reason: 'Due to Bad weather, Cyclone Remal.',
+      subject: 'the cyclone',
+    });
+    const titas = quotes.find((q) => q.plant.includes('Meghnaghat 450 MW CCPP (MPL) GT-1'));
+    expect(titas?.reason).toBe('due to Low gas pressure for leakage at Titas gas line.');
+    expect(quotes.filter((q) => q.subject === 'the cyclone')).toHaveLength(3);
+  }, 60_000);
 });

@@ -179,7 +179,7 @@ function HeroChart({ shape, seriesLabel }: { shape: HeroShape; seriesLabel: stri
               transform: shape.incidentX > 0.8 ? 'translateX(-100%)' : 'translateX(4px)',
             }}
           >
-            21 Jul · the break
+            {shape.incidentDate ? `${heroDay(shape.incidentDate)} · the break` : 'the break'}
           </span>
         )}
 
@@ -299,4 +299,11 @@ export default function EventHero({
       </dl>
     </header>
   );
+}
+
+/** "24 May" from an ISO day, for the break label on the drawing. */
+function heroDay(iso: string): string {
+  const [, m, d] = iso.split('-');
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${Number(d)} ${months[Number(m) - 1]}`;
 }

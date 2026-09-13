@@ -74,6 +74,20 @@ export interface EventStudyDayInput {
   /** The documents this day cites, named as the publishers name them. */
   pgcbSourceFile: string | null;
   petrobanglaSourceFile: string | null;
+  /**
+   * P1's evening-peak readings, MW, instants. Optional because they were added
+   * for the second study: PGCB printed no daily energy unserved before 2025,
+   * so a 2024 window's shortfall has to be read at the evening peak, which P1
+   * has printed in every era.
+   */
+  eveningPeakDemandMw?: number | null;
+  eveningPeakGenMw?: number | null;
+  /**
+   * The nine zone load-shed rows at the evening peak hour, summed. PGCB prints
+   * the rows and not the total, so the sum is DERIVED, and it is null unless
+   * every row printed a number — a partial sum would understate the hour.
+   */
+  eveningShedMw?: number | null;
 }
 
 export type EventStudySeriesId =
@@ -88,7 +102,10 @@ export type EventStudySeriesId =
   | 'demand'
   | 'unserved'
   | 'dailyCost'
-  | 'avgCost';
+  | 'avgCost'
+  | 'eveningPeakDemand'
+  | 'eveningPeakGen'
+  | 'eveningShed';
 
 interface SeriesMeta {
   id: EventStudySeriesId;
@@ -242,6 +259,42 @@ export const EVENT_STUDY_SERIES: Record<EventStudySeriesId, SeriesMeta> = {
     provenance: 'D',
     sourceNote: 'totalDailyCost ÷ totalEnergyGen — the source never states this rate',
     pick: (d) => d.avgCostTkPerKwh,
+    windowFor: (date, f) => pgcbEnergyDay(date, f),
+  },
+  eveningPeakDemand: {
+    id: 'eveningPeakDemand',
+    label: 'Evening peak demand',
+    publisher: 'PGCB',
+    unit: 'MW',
+    alignment: 'instant',
+    provenance: 'P',
+    sourceNote: 'P1 "Evening Peak Demand"',
+    pick: (d) => d.eveningPeakDemandMw ?? null,
+    windowFor: (date, f) => pgcbEnergyDay(date, f),
+  },
+  eveningPeakGen: {
+    id: 'eveningPeakGen',
+    label: 'Evening peak generation',
+    publisher: 'PGCB',
+    unit: 'MW',
+    alignment: 'instant',
+    provenance: 'P',
+    sourceNote: 'P1 "Evening Peak Generation"',
+    pick: (d) => d.eveningPeakGenMw ?? null,
+    windowFor: (date, f) => pgcbEnergyDay(date, f),
+  },
+  eveningShed: {
+    id: 'eveningShed',
+    label: 'Load shed at evening peak',
+    publisher: 'PGCB',
+    unit: 'MW',
+    alignment: 'instant',
+    // PGCB prints nine zone rows at the evening peak hour and no total. The
+    // sum is ours, so it is marked D and says so.
+    provenance: 'D',
+    sourceNote:
+      'the sum of P1’s nine zone-wise load-shed rows at the evening peak hour — PGCB prints the rows, not the total',
+    pick: (d) => d.eveningShedMw ?? null,
     windowFor: (date, f) => pgcbEnergyDay(date, f),
   },
 };
@@ -445,6 +498,31 @@ export const CHAIN_CARDS: ChainCard[] = [
     seriesIds: ['dailyCost'],
   },
 ];
+
+/**
+ * The same reading order, with the shortfall read at the evening peak.
+ *
+ * For windows before 2025. PGCB printed no daily energy demand or energy
+ * unserved in that era, so the default shortfall card would draw three empty
+ * lines. Evening-peak demand and generation are printed in every era, and all
+ * three series here are instants at the same hour, so they may share an axis.
+ */
+export const EVENING_PEAK_CHAIN_CARDS: ChainCard[] = CHAIN_CARDS.map((card) =>
+  card.key === 'shortfall'
+    ? {
+        key: 'peak-shortfall',
+        question: 'What was the shortfall at the evening peak?',
+        seriesIds: ['eveningPeakDemand', 'eveningPeakGen', 'eveningShed'],
+      }
+    : card,
+);
+
+export type ChainCardSet = 'daily-energy' | 'evening-peak';
+
+export const CHAIN_CARD_SETS: Record<ChainCardSet, ChainCard[]> = {
+  'daily-energy': CHAIN_CARDS,
+  'evening-peak': EVENING_PEAK_CHAIN_CARDS,
+};
 
 /** Throws when any card pairs series that must not share an axis. */
 export function assertCardsComparable(cards: ChainCard[] = CHAIN_CARDS): void {

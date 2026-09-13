@@ -154,7 +154,11 @@ export default function EventStudyChart({
             stroke={chartTheme.ink.gridline}
           />
           <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: shortDate, minTickGap: 26 })} />
-          <YAxis {...gridChartYAxisProps(chartTheme, { splitUnit: unit })} />
+          {/* Whole-number ticks only. The split-unit tick rounds each value to an
+              integer, so a 0-3 bn Tk axis with ticks at 0.75 steps printed "1"
+              twice (Remal 2024 cost card). Every other card is in MW, MMCFD or
+              GWh, where the ticks were whole numbers already. */}
+          <YAxis {...gridChartYAxisProps(chartTheme, { splitUnit: unit, allowDecimals: false })} />
 
           {/* The ordinary days before the break, shaded so the reader can see
               what the level was before there was an event to talk about. */}
@@ -181,7 +185,9 @@ export default function EventStudyChart({
               stroke={chartTheme.ink.muted}
               strokeDasharray="6 4"
               label={{
-                value: `baseline mean ${baselineMean.toLocaleString('en-US', { maximumFractionDigits: 0 })} (derived)`,
+                // One decimal below 10: the cost card is in billions, and a
+                // 1.9 bn Tk mean printed as "2" is a rounding the reader cannot see.
+                value: `baseline mean ${baselineMean.toLocaleString('en-US', { maximumFractionDigits: Math.abs(baselineMean) < 10 ? 1 : 0 })} (derived)`,
                 fontSize: 10,
                 position: 'insideBottomRight',
                 fill: chartTheme.ink.muted,

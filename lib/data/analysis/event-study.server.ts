@@ -37,7 +37,11 @@ import {
   type EventStudyDayInput,
   type EventStudyResult,
 } from '@/lib/data/analysis/event-study';
-import { GAS_CRISIS_2026, eventWindow } from '@/lib/data/analysis/event-registry';
+import {
+  GAS_CRISIS_2026,
+  eventWindow,
+  type EventStudyDefinition,
+} from '@/lib/data/analysis/event-registry';
 
 /**
  * The study window: three ordinary days, then the R-LNG break (gas day
@@ -82,6 +86,26 @@ function num(v: unknown): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? v : null;
 }
 
+/**
+ * The nine zone load-shed rows at the evening peak, summed, or null.
+ *
+ * Null unless every zone row printed a number. A day whose zone table is
+ * absent (2024-05-21, 05-22 and 05-26 among others) has no reading, and a sum
+ * over whichever rows happen to be present would state a smaller shortfall
+ * than PGCB measured. A zone printing 0 is PGCB's 0 and is kept.
+ */
+function eveningShedSum(data: GridDailyData): number | null {
+  const zones = data.regionalDemandData ?? [];
+  if (zones.length === 0) return null;
+  let sum = 0;
+  for (const z of zones) {
+    const v = num((z as { loadShed?: unknown }).loadShed);
+    if (v === null) return null;
+    sum += v;
+  }
+  return sum;
+}
+
 async function loadDayInput(date: string): Promise<EventStudyDayInput> {
   const empty: EventStudyDayInput = {
     date,
@@ -99,6 +123,9 @@ async function loadDayInput(date: string): Promise<EventStudyDayInput> {
     avgCostTkPerKwh: null,
     pgcbSourceFile: null,
     petrobanglaSourceFile: null,
+    eveningPeakDemandMw: null,
+    eveningPeakGenMw: null,
+    eveningShedMw: null,
   };
 
   const [grid, gas] = await Promise.all([
@@ -118,6 +145,9 @@ async function loadDayInput(date: string): Promise<EventStudyDayInput> {
     input.unservedGwh = num(s.totalEnergyUnserved);
     input.totalDailyCostTk = num(s.totalDailyCost);
     input.avgCostTkPerKwh = num(s.avgProductionCost);
+    input.eveningPeakDemandMw = num(s.eveningPeakDemand);
+    input.eveningPeakGenMw = num(s.eveningPeakGen);
+    input.eveningShedMw = eveningShedSum(grid.data);
     input.pgcbSourceFile = grid.data.sourceFiles?.pgcb ?? null;
   }
   if (gas) {
@@ -140,6 +170,11 @@ export async function loadGasCrisisStudy(
   return buildEventStudy(days, window, baseline);
 }
 
+/** Any registered event: its own window and baseline, read the same way. */
+export function loadEventStudy(def: EventStudyDefinition): Promise<EventStudyResult> {
+  return loadGasCrisisStudy(eventWindow(def), def.baseline);
+}
+
 /* ── the quoted outage rows ──────────────────────────────────────────────── */
 
 /**
@@ -153,15 +188,48 @@ export async function loadGasCrisisStudy(
  * verbatim. The `reasonMustMatch` guard means that if a republish ever changes
  * the underlying text, the row drops out rather than being quoted wrongly.
  */
-const GAS_SUPPLY_OUTAGE_KEYS: Array<{
+interface OutageQuoteKey {
   date: string;
   plantIncludes: string;
   reasonMustMatch: RegExp;
-}> = [
+  /** What the printed reason names, for the page to group by. */
+  subject?: 'gas supply' | 'coal supply' | 'the cyclone';
+}
+
+const GAS_SUPPLY_OUTAGE_KEYS: OutageQuoteKey[] = [
   { date: '2026-07-22', plantIncludes: 'Sirajgonj 225MW', reasonMustMatch: /low gas pressure/i },
   { date: '2026-07-23', plantIncludes: 'JERA Meghnaghat', reasonMustMatch: /gas shortage/i },
   { date: '2026-08-14', plantIncludes: 'Unique Meghnaghat', reasonMustMatch: /low gas pressure/i },
 ];
+
+/**
+ * Remal 2024: every row in the window whose printed reason names the cyclone
+ * or a fuel supply, found by reading the log (EVENT_STUDY_REMAL_2024.md §4).
+ *
+ * The three cyclone rows are transmission trips, not generation: the log never
+ * ties Remal to a gas or LNG outage. "Meghnaghat Summit CCPP" is a power
+ * station owned by the same group as the Summit LNG terminal. It is a
+ * different asset, and the page says so beside the quote. Of the three
+ * identical Meghnaghat 450 MW rows on 11 July (GT-1, GT-2, ST) only GT-1 is
+ * quoted, because one printed reason repeated three times would read as three
+ * events. Rampal's coal shortage is kept because coal is what ran instead.
+ */
+const REMAL_2024_OUTAGE_KEYS: OutageQuoteKey[] = [
+  { date: '2024-05-26', plantIncludes: 'Barishal-Bhandaria 132 kV Ckt-1', reasonMustMatch: /cyclone remal/i, subject: 'the cyclone' },
+  { date: '2024-05-26', plantIncludes: 'Barishal-Patuakhali', reasonMustMatch: /cyclone remal/i, subject: 'the cyclone' },
+  { date: '2024-05-28', plantIncludes: 'Barishal-Bhandaria 132 kV Ckt-1', reasonMustMatch: /cyclone remal/i, subject: 'the cyclone' },
+  { date: '2024-07-02', plantIncludes: 'Meghnaghat Summit CCPP 335MW GT2', reasonMustMatch: /gas shortage/i, subject: 'gas supply' },
+  { date: '2024-07-02', plantIncludes: 'Rampal 1320 MW', reasonMustMatch: /coal shortage/i, subject: 'coal supply' },
+  { date: '2024-07-05', plantIncludes: 'Ghorashal # 5', reasonMustMatch: /gas shortage/i, subject: 'gas supply' },
+  { date: '2024-07-09', plantIncludes: 'Meghnaghat CCPP(Summit)', reasonMustMatch: /gas pressure low/i, subject: 'gas supply' },
+  { date: '2024-07-11', plantIncludes: 'Meghnaghat 450 MW CCPP (MPL) GT-1', reasonMustMatch: /titas gas line/i, subject: 'gas supply' },
+  { date: '2024-07-14', plantIncludes: 'Ashuganj 420 MW CCPP(East)', reasonMustMatch: /low gas pressure/i, subject: 'gas supply' },
+];
+
+const OUTAGE_KEYS_BY_EVENT: Record<string, OutageQuoteKey[]> = {
+  'gas-crisis-2026': GAS_SUPPLY_OUTAGE_KEYS,
+  'remal-2024': REMAL_2024_OUTAGE_KEYS,
+};
 
 export interface GasSupplyOutageQuote {
   date: string;
@@ -170,12 +238,19 @@ export interface GasSupplyOutageQuote {
   /** Verbatim from the archive — never paraphrased. */
   reason: string;
   pgcbSourceFile: string | null;
+  subject: OutageQuoteKey['subject'] | null;
 }
 
 export async function loadGasSupplyOutageQuotes(): Promise<GasSupplyOutageQuote[]> {
+  return loadOutageQuotes(GAS_CRISIS_2026);
+}
+
+/** The curated, verbatim outage rows for one event, in key order. */
+export async function loadOutageQuotes(def: EventStudyDefinition): Promise<GasSupplyOutageQuote[]> {
+  const keysForEvent = OUTAGE_KEYS_BY_EVENT[def.slug] ?? [];
   const quotes: GasSupplyOutageQuote[] = [];
-  const byDate = new Map<string, typeof GAS_SUPPLY_OUTAGE_KEYS>();
-  for (const key of GAS_SUPPLY_OUTAGE_KEYS) {
+  const byDate = new Map<string, OutageQuoteKey[]>();
+  for (const key of keysForEvent) {
     byDate.set(key.date, [...(byDate.get(key.date) ?? []), key]);
   }
   for (const [date, keys] of byDate) {
@@ -192,6 +267,7 @@ export async function loadGasSupplyOutageQuotes(): Promise<GasSupplyOutageQuote[
             time: row.time ?? null,
             reason,
             pgcbSourceFile: grid.data.sourceFiles?.pgcb ?? null,
+            subject: key.subject ?? null,
           });
         }
       }

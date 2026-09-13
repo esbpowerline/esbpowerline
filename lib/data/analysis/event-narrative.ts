@@ -329,6 +329,9 @@ export interface KeyFact {
 const n0 = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 0 });
 const n1 = (v: number) => v.toLocaleString('en-US', { maximumFractionDigits: 1 });
 
+const COUNT_WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+const countWord = (n: number) => COUNT_WORDS[n] ?? String(n);
+
 function prettyDay(iso: string): string {
   const [, m, d] = iso.split('-');
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -373,7 +376,7 @@ export function keyFacts(
       // P mark cover both.
       note:
         leadInMean !== null
-          ? `${prettyDay(low.date)} — the three days before the break averaged ${n0(leadInMean)} (derived)`
+          ? `${prettyDay(low.date)} — the ${countWord(leadIn.length)} days before the break averaged ${n0(leadInMean)} (derived)`
           : prettyDay(low.date),
       provenance: 'P',
     });
@@ -386,7 +389,13 @@ export function keyFacts(
     facts.push({
       label: 'Printed capacity',
       value: `${n0(capMax)} ${capacity.unit}`,
-      note: `unchanged every day of the window, including the day ${n1(low.value)} was delivered`,
+      // Stated only when it is true of every published day. It was typed as a
+      // constant for the first study, where it happened to hold; a window whose
+      // printed capacity moved would have had the masthead say otherwise.
+      note:
+        capValues.every((v) => v === capMax)
+          ? `unchanged every day of the window, including the day ${n1(low.value)} was delivered`
+          : `the highest printed in the window; the delivered low was ${n1(low.value)}`,
       provenance: 'P',
     });
     const belowHalf = published.filter((p) => p.value < capMax / 2).length;
@@ -400,11 +409,16 @@ export function keyFacts(
 
   // The consequence, at its worst.
   if (narrative.totals.intensityPeak) {
+    // Named and marked from the event's own intensity series. This read
+    // "energy unserved" and P as constants, which a 2024 window — where the
+    // series is a derived sum of zone rows at the evening peak — would have
+    // misdescribed on both counts.
+    const intensity = study.series[def.intensitySeries];
     facts.push({
       label: 'Worst day for load shedding',
-      value: `${n1(narrative.totals.intensityPeak.value)} ${narrative.totals.intensityUnit}`,
-      note: `energy unserved on ${prettyDay(narrative.totals.intensityPeak.date)} — the highest of the window`,
-      provenance: 'P',
+      value: `${n0(narrative.totals.intensityPeak.value)} ${narrative.totals.intensityUnit}`,
+      note: `${intensity.label.toLowerCase()} on ${prettyDay(narrative.totals.intensityPeak.date)} — the highest of the window`,
+      provenance: intensity.provenance === 'D' ? 'D' : 'P',
     });
   }
 
@@ -421,6 +435,12 @@ export interface HeroShape {
   capacityValue: number | null;
   /** The incident day's x position, and its label. */
   incidentX: number | null;
+  /**
+   * The incident day itself, so the drawing labels the break with its own date.
+   * The label was typed as "21 Jul" for the first study and read the same on
+   * the second, whose break is 24 May 2024.
+   */
+  incidentDate: string | null;
   /** The lowest published point, for a direct label on the drawing. */
   low: { x: number; y: number; value: number; date: string } | null;
   /** The first and last published points, likewise. */
@@ -487,6 +507,7 @@ export function heroShape(
     capacityY: capacityValue !== null ? norm(capacityValue) : null,
     capacityValue,
     incidentX: incidentIdx >= 0 ? xOf(incidentIdx) : null,
+    incidentDate: incidentIdx >= 0 ? incidentDate : null,
     low: mark(lowEntry),
     first: mark(firstEntry),
     last: mark(lastEntry),

@@ -106,10 +106,18 @@ function DayRow({
   day,
   intensityMax,
   coverageAvailable,
+  emptyDayNote,
 }: {
   day: NarrativeDay;
   intensityMax: number | null;
   coverageAvailable: boolean;
+  /**
+   * What an empty day says, when the page knows better than the default.
+   * "No coverage filed on this date" is true of a newsroom that was covering
+   * the event; on a window from before the newsroom existed, with a hand-built
+   * press selection, it would read as a claim that nobody reported anything.
+   */
+  emptyDayNote?: string;
 }) {
   const isIncident = day.position.kind === 'incident';
   const isLeadIn = day.position.kind === 'lead-in';
@@ -167,7 +175,7 @@ function DayRow({
           {day.coverage.length === 0 && day.external.length === 0 ? (
             <p className="text-xs italic leading-5 text-muted-foreground">
               {coverageAvailable
-                ? 'No coverage filed on this date.'
+                ? (emptyDayNote ?? 'No coverage filed on this date.')
                 : 'Newsroom coverage could not be loaded — this is not a statement that none was filed.'}
             </p>
           ) : (
@@ -244,7 +252,13 @@ function ExternalList({ items }: { items: ExternalCoverageItem[] }) {
   );
 }
 
-export default function EventTimeline({ narrative }: { narrative: EventNarrative }) {
+export default function EventTimeline({
+  narrative,
+  emptyDayNote,
+}: {
+  narrative: EventNarrative;
+  emptyDayNote?: string;
+}) {
   const max = narrative.totals.intensityPeak?.value ?? null;
   return (
     <ol className="space-y-3">
@@ -254,6 +268,7 @@ export default function EventTimeline({ narrative }: { narrative: EventNarrative
           day={day}
           intensityMax={max}
           coverageAvailable={narrative.coverageAvailable}
+          emptyDayNote={emptyDayNote}
         />
       ))}
     </ol>
