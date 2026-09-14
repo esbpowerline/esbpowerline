@@ -10,7 +10,7 @@ open.
 ## Infrastructure
 - [x] `/api/cron/notifications` runs in production: first heartbeat written by `trigger: cron` at 2026-09-14 06:35:34Z — 2026-09-14
 - [x] That run reported no errors, released its lease and set `newsSince` — 2026-09-14
-- [ ] The Vercel plan runs a `*/5` schedule (the existing `*/15` cron suggests it does; confirm after release)
+- [x] The Vercel plan runs the `*/5` schedule: consecutive cron heartbeats at 06:35:34Z and 06:40:08Z, both clean — 2026-09-14
 - [x] No change to the Raspberry Pi — 2026-09-14, by design (DISCOVERY §6, DEPLOYMENT)
 
 ## Database migration
@@ -58,7 +58,7 @@ open.
 ## Worker supervision
 - [x] Not applicable: no long-running worker. Delivery runs in `after()` and a Vercel cron; commands run in the webhook — 2026-09-14, by design
 - [x] A run that dies mid-send leaves its delivery UNCERTAIN, never re-sent (tested) — 2026-09-14
-- [ ] Heartbeat observed updating every 5 minutes in production
+- [x] Heartbeat observed updating every 5 minutes in production (06:35:34Z, 06:40:08Z) — 2026-09-14
 
 ## Logging
 - [x] Structured JSON lines with event, delivery and article ids — 2026-09-14
@@ -70,10 +70,12 @@ open.
 
 ## Health
 - [x] `/api/cron/notifications/health` implemented, bearer-protected, 200/503 by status — 2026-09-14
+- [x] Live in production: `/api/cron/notifications/health` and `/api/cron/notifications/setup` answer 401 without the bearer; the webhook answers 405 to GET and 404 to POST while unconfigured — 2026-09-14
 - [ ] An uptime monitor pointed at it
 
 ## Admin controls
 - [x] `/admin/notifications` requires `notifications.manage` on the page and in every action; changes audited — 2026-09-14, reviewed
+- [x] Logged out, `/admin/notifications` redirects to `/login` (307) in production — 2026-09-14
 - [ ] Page viewed in a browser by an administrator (not done: no admin session could be created in this environment)
 - [ ] Pause and resume exercised from the dashboard and from `/pause` and `/resume`
 
