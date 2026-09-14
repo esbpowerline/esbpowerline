@@ -8,6 +8,7 @@ import {
   isStaffRole,
 } from '@/lib/auth-routing';
 import { isCronAuthorized } from '@/lib/api/cron-auth';
+import { TELEGRAM_WEBHOOK_PATH } from '@/lib/notifications/paths';
 import { isProxyProtectedApi } from '@/lib/api/protected-routes';
 import { resolveEdgeSession } from '@/lib/supabase/edge-session-gate';
 import { can, type Role } from '@/lib/constants';
@@ -319,6 +320,14 @@ export async function middleware(request: NextRequest) {
 
     response.headers.set('Cache-Control', 'private, no-store');
     return response;
+  }
+
+  // Telegram's webhook POSTs carry no browser user agent, so the guard below
+  // would refuse every update. Exactly one path and one method are let
+  // through; the route rejects anything without the webhook secret header
+  // before it reads the body. The matcher is not widened.
+  if (pathname === TELEGRAM_WEBHOOK_PATH && request.method === 'POST') {
+    return NextResponse.next({ request });
   }
 
   const userAgent = request.headers.get('user-agent') || '';
