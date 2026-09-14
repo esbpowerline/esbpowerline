@@ -176,6 +176,18 @@ the gating surface was checked directly (path-prefix bypass closed, `%`-encoding
 routes, injection and secrets were **not**. Run those serially in small batches; four parallel
 fan-outs died on session limits with zero agents completing.
 
+
+**7. Telegram notifications are built, not live.** On `feature/telegram-notifications`
+(opted out of Vercel builds on the branch itself). Everything is in `docs/telegram-bot/`:
+start with `DISCOVERY.md` and `ARCHITECTURE.md`, then `SETUP.md`. It runs entirely on
+Vercel — a five-minute cron and a webhook — and reads the grid rows the Pi already writes;
+nothing on the Pi changed. Migration `0023_notifications` is additive and is applied by the
+release build: do not apply it by hand. Remaining: merge and release, create the bot and
+channels (`SETUP.md`), then every step of `TESTING.md` → "Live verification", recorded in
+`PRODUCTION_CHECKLIST.md`. Until then it is implementation-ready, not live-verified. Two
+things not to undo: only the production deployment may process the queue (dev machines share
+the production database), and an UNCERTAIN delivery is never retried automatically.
+
 ---
 
 ## Commands
@@ -404,8 +416,8 @@ Python parsers own every number on the site. They carry years of source-quirk kn
   under a `.pdf` URL, and a parser fed HTML produces confident nonsense.
 - A step that wrote nothing must **fail**, not report success.
 - `/api/cron/ingest` is **disabled on Vercel** (returns 503); the Python chain exceeds
-  serverless compute limits. Only `/api/cron/publish-scheduled` runs on Vercel, every
-  15 min.
+  serverless compute limits. Only `/api/cron/publish-scheduled` (every 15 min) and
+  `/api/cron/notifications` (every 5 min, `docs/telegram-bot/`) run on Vercel.
 
 ### The Pi runs ingest, and nothing else
 
