@@ -15,6 +15,8 @@ export const ADMIN_NAV_PERMISSIONS: Record<string, string> = {
   '/admin/comments': 'comment.moderate_any',
   '/admin/settings': 'settings.view',
   '/admin/logs': 'logs.view',
+  // Without an entry the item defaults to visible for every admin.
+  '/admin/notifications': 'notifications.manage',
 };
 
 export function canAccessAdminRoute(role: Role | undefined, href: string): boolean {

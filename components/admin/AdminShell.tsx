@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation';
 import type { MouseEvent } from 'react';
 import {
   LayoutGrid, UsersRound, LibraryBig, Activity, Settings2, FileClock, Database,
-  Images, Tag, BookOpenText, Zap, Shapes, MessageCircleReply, Mail,
+  Images, Tag, BookOpenText, Zap, Shapes, MessageCircleReply, Mail, BellRing,
 } from 'lucide-react';
 import { StaffShell, type StaffNavGroup } from '@/components/staff/StaffShell';
 import { PlatformControlLazy } from '@/components/staff/StaffShellLazy';
@@ -40,6 +40,7 @@ const NAV_GROUPS: StaffNavGroup[] = [
     label: 'System',
     items: [
       { href: '/admin/data', label: 'Grid Data Ingest', icon: Database },
+      { href: '/admin/notifications', label: 'Notifications', icon: BellRing },
       { href: '/admin/users', label: 'Users', icon: UsersRound },
       { href: '/admin/settings', label: 'Settings', icon: Settings2 },
       { href: '/admin/logs', label: 'Activity Logs', icon: FileClock },
@@ -58,6 +59,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/comments': 'Comments',
   '/admin/messages': 'Contact Messages',
   '/admin/data': 'Grid Data Ingest',
+  '/admin/notifications': 'Notifications',
   '/admin/users': 'Users',
   '/admin/users/new': 'New User',
   '/admin/settings': 'Settings',

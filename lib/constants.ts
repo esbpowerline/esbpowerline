@@ -96,6 +96,7 @@ export const PERMISSION_MATRIX: Record<string, readonly Role[]> = {
   // Grid/gas data releases. Publishing writes straight to the live homepage
   // numbers, so it sits at the admin level rather than with editorial roles.
   'data.publish':         ['SUPER_ADMIN', 'ADMIN'],
+  'notifications.manage': ['SUPER_ADMIN', 'ADMIN'],
   'data.revoke':          ['SUPER_ADMIN', 'ADMIN'],
 };
 
@@ -112,6 +113,7 @@ export const LEGACY_PERMISSION_LEVELS: Record<string, number> = {
   'settings.view': 80, 'settings.edit': 80, 'logs.view': 80,
   'category.manage': 60, 'analytics.view_own': 20, 'analytics.view_all': 60,
   'ads.manage': 80, 'data.publish': 80, 'data.revoke': 80,
+  'notifications.manage': 80,
 };
 
 /** Optimized 10-category editorial structure */
