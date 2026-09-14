@@ -1073,3 +1073,117 @@ model Observation {
   @@index([subjectType, subjectId, metric, windowStart])
   @@index([sourceDocumentId])
 }
+
+// ── Notifications ───────────────────────────────────────────────────────────
+//
+// The outbound notification layer (docs/telegram-bot/ARCHITECTURE.md). Three
+// tables, additive only: nothing here references or alters an existing table,
+// so the whole layer can be dropped without touching content or grid data.
+//
+// "Notification" (above) is the unused per-user inbox from 0001_init. These
+// models are deliberately named apart from it.
+
+/// Something ESB did or observed that may be worth telling a reader about.
+/// Only types the product actually emits are listed — a type with no producer
+/// is an invitation to build a producer nobody asked for.
+enum NotificationEventType {
+  ARTICLE_PUBLISHED
+  /// The headline, standfirst, category or URL of an announced article changed.
+  /// Handled by editing the original message, never by posting again.
+  ARTICLE_UPDATED
+  /// An announced article is no longer published.
+  ARTICLE_WITHDRAWN
+  GRID_HOURLY_SNAPSHOT
+  GRID_ALERT
+  DAILY_GRID_SUMMARY
+  /// Sent only to the test destination, from the dashboard or /test.
+  TEST_MESSAGE
+}
+
+/// Where a delivery goes. One value today; a new platform is a new value plus
+/// an adapter, and nothing about events, retries or idempotency changes.
+enum NotificationChannel {
+  TELEGRAM
+}
+
+/// A delivery's life. UNCERTAIN is load-bearing: Telegram has no idempotency
+/// key, so an attempt whose outcome is unknown — a timeout after the request
+/// left, a worker that died holding the lease — is parked for a person to
+/// check rather than re-sent. A missed post can be recovered; a duplicate on a
+/// public channel cannot.
+enum NotificationDeliveryStatus {
+  PENDING
+  SENDING
+  SENT
+  UNCERTAIN
+  DEAD
+  CANCELLED
+  SKIPPED
+}
+
+model NotificationEvent {
+  id        String                @id @default(cuid())
+  type      NotificationEventType
+  /// The idempotency key: "article.published:{articleId}",
+  /// "grid.hourly:{observedAt}", … An event emitted twice — a double-clicked
+  /// Publish, two overlapping cron runs, a retried request — is one row.
+  dedupeKey String                @unique
+  /// The article id, energy day or hour the event is about, for lookups.
+  entityId  String?
+  /// Validated against the type's zod schema on write and again on render.
+  payload   Json
+  createdAt DateTime              @default(now())
+
+  deliveries NotificationDelivery[]
+
+  @@index([type, createdAt])
+  @@index([entityId])
+}
+
+model NotificationDelivery {
+  id                String                     @id @default(cuid())
+  eventId           String
+  channel           NotificationChannel
+  /// A logical destination ("public", "test"), resolved to a chat id from the
+  /// environment at send time, so changing the channel re-routes what is queued.
+  destination       String
+  status            NotificationDeliveryStatus @default(PENDING)
+  /// Higher first. Breaking articles outrank routine posts.
+  priority          Int                        @default(0)
+  attemptCount      Int                        @default(0)
+  nextAttemptAt     DateTime                   @default(now())
+  /// The lease: which run claimed the row, and when.
+  lockedAt          DateTime?
+  lockedBy          String?
+  /// Redacted before storage — never contains the bot token.
+  lastError         String?
+  lastErrorCode     String?
+  /// Where it actually went, and Telegram's id for it (needed to edit it).
+  externalChatId    String?
+  externalMessageId String?
+  /// "photo" or "text": which Bot API edit call applies.
+  messageKind       String?
+  /// Hash of the rendered content, to tell a real headline edit from no change.
+  contentHash       String?
+  sentAt            DateTime?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+
+  event NotificationEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  /// One delivery per event, channel and destination, however often it is queued.
+  @@unique([eventId, channel, destination])
+  /// The claim query: due rows in status order.
+  @@index([status, nextAttemptAt])
+  @@index([sentAt])
+}
+
+/// Runtime notification state: the dashboard's switches and thresholds, alert
+/// state machines, the heartbeat and scheduler leases. Kept out of SiteSetting,
+/// whose rows are all handed to the site settings form and whose save flushes
+/// every public page. Never holds a secret — secrets live in the environment.
+model NotificationSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
