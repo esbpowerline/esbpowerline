@@ -177,14 +177,20 @@ routes, injection and secrets were **not**. Run those serially in small batches;
 fan-outs died on session limits with zero agents completing.
 
 
-**7. Telegram notifications are built, not live.** On `feature/telegram-notifications`
-(opted out of Vercel builds on the branch itself). Everything is in `docs/telegram-bot/`:
+**7. Telegram notifications are released, not live.** In production since 2026-09-14
+(`10687fa2`); the cron runs every five minutes and sends nothing until configured. The bot
+(@ESBPowerLineBot) and both channels (`@esbpowerline`, private "ESB PowerLine — staging")
+exist. Open, in order: the six `TELEGRAM_*` variables in Vercel Production, the bot made a
+Post-messages-only admin of both channels — **Hamim does both; the auto-mode classifier
+refuses them to Claude** — then redeploy, register, test on staging, switch on hourly /
+daily / alerts, and promote to the public channel. `scripts/telegram-preview.ts` prints
+today's posts from real data without sending. Everything is in `docs/telegram-bot/`:
 start with `DISCOVERY.md` and `ARCHITECTURE.md`, then `SETUP.md`. It runs entirely on
 Vercel — a five-minute cron and a webhook — and reads the grid rows the Pi already writes;
 nothing on the Pi changed. Migration `0023_notifications` is additive and is applied by the
-release build: do not apply it by hand. Remaining: merge and release, create the bot and
-channels (`SETUP.md`), then every step of `TESTING.md` → "Live verification", recorded in
-`PRODUCTION_CHECKLIST.md`. Until then it is implementation-ready, not live-verified. Two
+release build, and was (06:31Z on 2026-09-14). Live verification is every step of
+`TESTING.md` → "Live verification", recorded in `PRODUCTION_CHECKLIST.md`; until those are
+ticked it is released, not live-verified. Two
 things not to undo: only the production deployment may process the queue (dev machines share
 the production database), and an UNCERTAIN delivery is never retried automatically.
 

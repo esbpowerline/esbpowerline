@@ -31,9 +31,15 @@ open.
 - [ ] No Telegram variable in Vercel Preview or Development
 
 ## Telegram bot
-- [ ] Bot created with @BotFather; `getMe` answers `ok`
-- [ ] Joining groups disabled; description, picture and public command list set
-- [ ] A different bot from the Pi's ops-alert bot
+- [x] Bot created with @BotFather; `getMe` answers `ok` — 2026-09-14: @ESBPowerLineBot, id 8812692312, `can_join_groups: false`
+- [x] Joining groups disabled; description, about text and public command list set — 2026-09-14
+- [ ] Profile picture set (the ESB PowerLine mark)
+- [x] A different bot from the Pi's ops-alert bot — 2026-09-14, created new
+- [x] Token rotated after exposure — 2026-09-14, twice (17:58, 18:52): it leaked into a session transcript through screenshots of the BotFather chat. The live token is the 18:52 one.
+
+## Channels
+- [x] Public channel `@esbpowerline` ("ESB PowerLine") exists and is public — 2026-09-14, checked from t.me
+- [x] Private staging channel "ESB PowerLine — staging" exists — 2026-09-14; Bot API id probably `-1003946310243` (read from Telegram Web; confirm with the setup GET)
 
 ## Channel permissions
 - [ ] Bot is an administrator of the public channel with **Post messages** only
