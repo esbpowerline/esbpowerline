@@ -12,6 +12,48 @@ Vercel and, briefly, into your own terminal. If it leaks, see "Rotate the token"
 
 ---
 
+## The short path: assisted setup
+
+Most of the manual steps below exist to read Telegram's answers: the staging channel's
+id, your user id, and the webhook registration. The server can do all of that itself
+with the token that lives in Vercel, so nobody has to read the token or the webhook
+secret back once they are stored.
+
+**What only a person can do:**
+
+1. Create the bot with @BotFather (step 3), the public channel (step 1) and the staging
+   channel (step 2). Add the bot to both channels as an administrator with **Post
+   messages** only (step 4).
+2. In Vercel → Settings → Environment Variables, add two variables for
+   **Production**, both marked **Sensitive**, then redeploy:
+   - `TELEGRAM_BOT_TOKEN`: the token from BotFather.
+   - `TELEGRAM_WEBHOOK_SECRET`: the output of
+     `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
+     Paste it straight in; it never needs to be seen again.
+3. Post any message in **each** channel, then open the bot in Telegram and press
+   **Start**. Everyone who should administer the bot presses Start too.
+
+**What the server does**, called with the `CRON_SECRET` bearer:
+
+```
+GET  /api/cron/notifications/setup                          # bot, channels it can post to, people who pressed Start
+POST /api/cron/notifications/setup  {"action":"register"}   # sets the webhook and the command list
+POST /api/cron/notifications/setup  {"action":"test"}       # sends a test to the test destination
+```
+
+The GET lists the channels the bot has seen with their ids, and the user ids of everyone
+who pressed Start. Put those into `TELEGRAM_CHANNEL_ID` (staging first),
+`TELEGRAM_TEST_CHAT_ID` and `TELEGRAM_ADMIN_USER_IDS`, set `TELEGRAM_ENABLED=true`,
+redeploy, then POST `register` and `test`. The GET also checks that the bot really can
+post in each configured channel.
+
+The recent-chat list is only available until the webhook is registered. That is
+Telegram's rule, not ours. So run the GET before `register`.
+
+The manual steps follow, for reference or if you would rather do it by hand.
+
+---
+
 ## 1. Create the public channel
 
 In the Telegram app: **New Channel**.

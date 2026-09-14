@@ -215,3 +215,31 @@ export const getMe = (token: string, opts?: CallOptions) => callTelegram<BotIden
 
 export const getChat = (token: string, chatId: string, opts?: CallOptions) =>
   callTelegram<{ id: number; type: string; title?: string; username?: string }>(token, 'getChat', { chat_id: chatId }, opts);
+
+/* ── setup and diagnosis (docs/telegram-bot/SETUP.md, assisted setup) ────── */
+
+export interface WebhookInfo {
+  url: string;
+  pending_update_count: number;
+  last_error_date?: number;
+  last_error_message?: string;
+  allowed_updates?: string[];
+}
+
+export const getWebhookInfo = (token: string, opts?: CallOptions) => callTelegram<WebhookInfo>(token, 'getWebhookInfo', {}, opts);
+
+export const setWebhook = (
+  token: string,
+  params: { url: string; secret_token: string; allowed_updates: string[]; drop_pending_updates: boolean },
+  opts?: CallOptions,
+) => callTelegram<true>(token, 'setWebhook', params, opts);
+
+export const setMyCommands = (token: string, commands: Array<{ command: string; description: string }>, opts?: CallOptions) =>
+  callTelegram<true>(token, 'setMyCommands', { commands }, opts);
+
+/** Only answers while no webhook is set — which is exactly when setup needs it. */
+export const getUpdates = (token: string, opts?: CallOptions) =>
+  callTelegram<unknown[]>(token, 'getUpdates', { limit: 100, timeout: 0, allowed_updates: ['message', 'channel_post', 'my_chat_member'] }, opts);
+
+export const getChatMember = (token: string, chatId: string, userId: number, opts?: CallOptions) =>
+  callTelegram<{ status: string; can_post_messages?: boolean }>(token, 'getChatMember', { chat_id: chatId, user_id: userId }, opts);

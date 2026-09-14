@@ -8,8 +8,8 @@ that needs Telegram credentials, the release, or a person looking at the channel
 open.
 
 ## Infrastructure
-- [ ] `/api/cron/notifications` appears in Vercel → Cron Jobs after the release
-- [ ] Its runs answer 200 (Vercel → Cron Jobs → run history)
+- [x] `/api/cron/notifications` runs in production: first heartbeat written by `trigger: cron` at 2026-09-14 06:35:34Z — 2026-09-14
+- [x] That run reported no errors, released its lease and set `newsSince` — 2026-09-14
 - [ ] The Vercel plan runs a `*/5` schedule (the existing `*/15` cron suggests it does; confirm after release)
 - [x] No change to the Raspberry Pi — 2026-09-14, by design (DISCOVERY §6, DEPLOYMENT)
 
@@ -17,8 +17,8 @@ open.
 - [x] `0023_notifications` is additive: three new tables and three new types, nothing altered — 2026-09-14, reviewed
 - [x] Every statement is re-runnable — 2026-09-14, reviewed (guarded `CREATE TYPE` and `ADD CONSTRAINT`, `IF NOT EXISTS` elsewhere)
 - [x] The SQL matches what Prisma generates for the schema change (`prisma migrate diff`, statement for statement) — 2026-09-14
-- [ ] Executed against a real PostgreSQL (not done: no non-production database was available)
-- [ ] Applied by the production release build; `_prisma_migrations` shows `0023_notifications` with `finished_at` set
+- [x] Executed against a real PostgreSQL: the production release applied it cleanly (above) — 2026-09-14
+- [x] Applied by the production release build: `_prisma_migrations` shows `0023_notifications` started 06:31:42Z, finished 06:31:43Z, the three tables present — 2026-09-14
 - [x] Rollback SQL written (DEPLOYMENT.md) — 2026-09-14
 
 ## Secrets
