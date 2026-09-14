@@ -274,7 +274,10 @@ export function renderDailySummary(p: PayloadFor<'DAILY_GRID_SUMMARY'>, opts: { 
       .sort((a, b) => b.gwh - a.gwh)
       .map((f) => ({ name: f.name, pct: Math.round((f.gwh / total) * 100) }))
       .filter((f) => f.pct >= 1);
-    lines.push(`Generation mix: ${esc(shares.map((s) => `${s.name.toLowerCase()} ${s.pct}%`).join(', '))}.`);
+    // Lower-case the words for prose, never the fuel codes: PGCB's "HFO" and "HSD"
+    // printed as "hfo 15%, hsd 2%" in the first preview (2026-09-14) and read as typos.
+    const fuel = (name: string) => (/^[A-Z]{2,}$/.test(name) ? name : name.toLowerCase());
+    lines.push(`Generation mix: ${esc(shares.map((s) => `${fuel(s.name)} ${s.pct}%`).join(', '))}.`);
   }
   if (p.eveningPeakTime) lines.push(`Evening peak at ${esc(p.eveningPeakTime)}.`);
   if (p.energyUnservedGwh === null) lines.push('<i>PGCB’s report for this day prints no energy-not-served figure.</i>');

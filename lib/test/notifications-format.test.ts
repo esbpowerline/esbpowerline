@@ -220,7 +220,8 @@ describe('daily summary', () => {
     expect(r.html).toContain('<b>DAILY SUMMARY</b> · 13 Sep 2026');
     expect(r.html).toMatch(/Energy not served\s+24\.6 GWh/);
     expect(r.html).toContain('Daily Report 14-09-2026.xlsx');
-    expect(r.html).toContain('Generation mix: gas 50%, coal 33%, hfo 17%.');
+    // Words are lower-cased for prose; PGCB's fuel codes are not.
+    expect(r.html).toContain('Generation mix: gas 50%, coal 33%, HFO 17%.');
   });
 
   it('says the figure is not printed rather than showing zero', () => {
