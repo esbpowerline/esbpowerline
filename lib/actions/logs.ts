@@ -1,6 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
+import { announceArticles } from '@/lib/notifications/articles';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
@@ -134,6 +135,14 @@ export async function undoAuditLogAction(logId: string) {
   // page but the card data it reads comes from the tagged cache, which has to
   // be expired separately or the re-render just paints the same stale rows.
   revalidateArticleContent();
+
+  // Undo can put an article back on the site. It is announced only if it
+  // passes the same gate as any publication — never announced before, and
+  // recent enough — so undoing a trash does not re-post yesterday's story.
+  const undoneIds = Array.isArray(payload?.articles)
+    ? (payload.articles as Array<{ id?: unknown }>).map((a) => a.id).filter((id): id is string => typeof id === 'string')
+    : [];
+  if (undoneIds.length > 0) await announceArticles(undoneIds);
 
   return { ok: true };
 }

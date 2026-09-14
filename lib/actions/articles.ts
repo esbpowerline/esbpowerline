@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { announceArticles } from '@/lib/notifications/articles';
 import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
@@ -534,6 +535,9 @@ export async function bulkArticleAction(
   if (publiclyAffected) {
     revalidatePublicContent(articles.map((a) => a.slug));
   }
+  // Bulk publish re-publishes rows that were already live; the announcement
+  // key is per article, so those are not announced twice.
+  if (action === 'publish') await announceArticles(articles.map((a) => a.id));
 
   return { affected, action };
 }
@@ -617,6 +621,9 @@ export async function createArticle(data: ArticleInput) {
   revalidatePath('/admin/articles');
   revalidatePath('/admin/media');
   if (parsed.status === 'PUBLISHED') revalidatePublicContent([article.slug]);
+  // After the write and the revalidation: the channel is told, the editor's
+  // request never waits for it, and a Telegram outage cannot fail a publish.
+  if (parsed.status === 'PUBLISHED') await announceArticles([article.id]);
   return article;
 }
 
@@ -696,6 +703,9 @@ export async function updateArticle(id: string, data: ArticleInput) {
   const wasPublished = existing.status === 'PUBLISHED';
   const isPublished = parsed.status === 'PUBLISHED';
   if (wasPublished || isPublished) revalidatePublicContent(slugs);
+  // Only a transition into PUBLISHED is announced. Edits to a live article are
+  // picked up by the notification cron, which edits the post in place.
+  if (!wasPublished && isPublished) await announceArticles([article.id]);
   return article;
 }
 
@@ -870,6 +880,7 @@ export async function bulkOwnArticleAction(ids: string[], action: OwnBulkAction)
   if (action === 'publish' || hadPublished) {
     revalidatePublicContent(articles.map((a) => a.slug));
   }
+  if (action === 'publish') await announceArticles(articles.map((a) => a.id));
 
   return { affected, action };
 }

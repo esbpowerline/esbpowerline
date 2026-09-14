@@ -2,6 +2,7 @@ import 'server-only';
 
 import { revalidatePath } from 'next/cache';
 import prisma from '@/lib/prisma';
+import { announceArticles } from '@/lib/notifications/articles';
 import {
   formatPublishBlockerMessage,
   getPublishBlockers,
@@ -43,6 +44,7 @@ export async function publishDueScheduledArticles(now = new Date()): Promise<Pub
   });
 
   const published: string[] = [];
+  const publishedIds: string[] = [];
   const skipped: PublishScheduledResult['skipped'] = [];
 
   for (const article of due) {
@@ -81,14 +83,20 @@ export async function publishDueScheduledArticles(now = new Date()): Promise<Pub
       continue;
     }
 
-    await prisma.article.update({
-      where: { id: article.id },
+    // Conditional on the row still being SCHEDULED. The select above and this
+    // write are separate statements, so two overlapping runs — or an editor
+    // unscheduling the article in between — used to both "publish" it. Now
+    // exactly one write matches, and only that one counts as a publication.
+    const { count } = await prisma.article.updateMany({
+      where: { id: article.id, status: 'SCHEDULED' },
       data: {
         status: 'PUBLISHED',
         publishedAt: article.publishedAt ?? now,
       },
     });
+    if (count !== 1) continue;
     published.push(article.slug);
+    publishedIds.push(article.id);
   }
 
   if (published.length > 0) {
@@ -100,6 +108,7 @@ export async function publishDueScheduledArticles(now = new Date()): Promise<Pub
     revalidatePublicContent(published);
     revalidatePath('/cms/articles/scheduled');
     revalidatePath('/admin/articles');
+    await announceArticles(publishedIds);
   }
 
   return { published, skipped };
