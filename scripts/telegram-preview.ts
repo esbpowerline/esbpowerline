@@ -83,19 +83,56 @@ async function latestDaily(now: Date): Promise<{ payload: PayloadFor<'DAILY_GRID
   return { payload, source: fromRelease ? 'DataRelease' : 'static file' };
 }
 
+/**
+ * --send <chat> posts the news, daily and hourly messages to one chat through the
+ * Bot API, exactly as rendered: HTML parse mode, the inline button, the article's
+ * image as a photo when it has an absolute URL (text if Telegram refuses it). For
+ * a staging channel or an admin's private chat — never the public channel, which
+ * belongs to the production queue and its dedupe. The token comes from
+ * --token-file or TELEGRAM_BOT_TOKEN and is never printed. The past-alert example
+ * is preview-only: an old alert in a real chat reads as a current one.
+ */
+function arg(name: string): string | null {
+  const i = process.argv.indexOf(name);
+  return i > -1 && process.argv[i + 1] ? process.argv[i + 1] : null;
+}
+
+type Outgoing = { label: string; message: RenderedMessage; photoUrl?: string | null };
+
+async function send(chatId: string, token: string, items: Outgoing[]) {
+  const call = async (method: string, body: Record<string, unknown>) => {
+    const r = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    }).catch((e: Error) => ({ json: async () => ({ ok: false, description: e.message.replace(token, '<TOKEN>') }) }));
+    return (await r.json()) as { ok: boolean; description?: string; result?: { message_id: number } };
+  };
+  for (const it of items) {
+    const reply_markup = it.message.buttons.length
+      ? { inline_keyboard: [it.message.buttons.map((b) => ({ text: b.text, url: b.url }))] }
+      : undefined;
+    let res = it.photoUrl
+      ? await call('sendPhoto', { chat_id: chatId, photo: it.photoUrl, caption: it.message.html, parse_mode: 'HTML', reply_markup })
+      : null;
+    if (!res || !res.ok) {
+      if (res) console.log(`  ${it.label}: photo refused (${res.description}); sending as text`);
+      res = await call('sendMessage', {
+        chat_id: chatId,
+        text: it.message.html,
+        parse_mode: 'HTML',
+        link_preview_options: { is_disabled: true },
+        reply_markup,
+      });
+    }
+    console.log(`sent ${it.label}: ${res.ok ? `message ${res.result?.message_id}` : `FAILED — ${res.description}`}`);
+    await new Promise((r) => setTimeout(r, 1200));
+  }
+}
+
 async function main() {
   const now = new Date();
-
-  const hour = await readNewestHour();
-  if (hour) show('Hourly grid update', renderGridHourly(hour, { siteUrl: SITE }));
-  else console.log('\n(no stored NLDC hour)');
-
-  const daily = await latestDaily(now);
-  if (daily) {
-    show('Daily summary', renderDailySummary(daily.payload, { siteUrl: SITE }), `energy day ${daily.payload.energyDay}, from the ${daily.source}`);
-  } else {
-    console.log(`\n(no PGCB day within ${DAILY_SUMMARY_MAX_AGE_DAYS} days — the daily summary would not post)`);
-  }
+  const outgoing: Outgoing[] = [];
 
   const a = await prisma.article.findFirst({
     where: { status: 'PUBLISHED', editorTrash: false, publishedAt: { not: null } },
@@ -103,11 +140,28 @@ async function main() {
     select: { slug: true, title: true, excerpt: true, category: true, isBreaking: true, publishedAt: true, imageUrl: true },
   });
   if (a && a.publishedAt) {
-    show(
-      'News post',
-      renderArticle({ ...a, publishedAt: a.publishedAt }, { siteUrl: SITE, asCaption: Boolean(a.imageUrl), now }),
-      a.imageUrl ? 'posts as a photo with this caption' : undefined,
-    );
+    const photoUrl = a.imageUrl && /^https?:\/\//.test(a.imageUrl) ? a.imageUrl : null;
+    const m = renderArticle({ ...a, publishedAt: a.publishedAt }, { siteUrl: SITE, asCaption: Boolean(photoUrl), now });
+    show('News post', m, photoUrl ? 'posts as a photo with this caption' : undefined);
+    outgoing.push({ label: 'news', message: m, photoUrl });
+  }
+
+  const daily = await latestDaily(now);
+  if (daily) {
+    const m = renderDailySummary(daily.payload, { siteUrl: SITE });
+    show('Daily summary', m, `energy day ${daily.payload.energyDay}, from the ${daily.source}`);
+    outgoing.push({ label: `daily summary ${daily.payload.energyDay}`, message: m });
+  } else {
+    console.log(`\n(no PGCB day within ${DAILY_SUMMARY_MAX_AGE_DAYS} days — the daily summary would not post)`);
+  }
+
+  const hour = await readNewestHour();
+  if (hour) {
+    const m = renderGridHourly(hour, { siteUrl: SITE });
+    show('Hourly grid update', m);
+    outgoing.push({ label: `hourly ${hour.observedAt}`, message: m });
+  } else {
+    console.log('\n(no stored NLDC hour)');
   }
 
   const shed = await prisma.gridHourlyObservation.findFirst({
@@ -124,6 +178,18 @@ async function main() {
       ),
       'the most recent real crossing, shown as an example',
     );
+  }
+
+  const chat = arg('--send');
+  if (chat) {
+    if (chat.toLowerCase() === '@esbpowerline') {
+      throw new Error('refusing to send to the public channel: it is fed by the production queue, which dedupes what it has posted');
+    }
+    const tokenFile = arg('--token-file');
+    const token = tokenFile ? fs.readFileSync(tokenFile, 'utf8').trim() : process.env.TELEGRAM_BOT_TOKEN?.trim();
+    if (!token) throw new Error('--send needs --token-file <path> or TELEGRAM_BOT_TOKEN');
+    console.log(`\nsending ${outgoing.length} posts to ${chat}`);
+    await send(chat, token, outgoing);
   }
 }
 
