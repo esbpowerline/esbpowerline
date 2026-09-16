@@ -240,7 +240,7 @@ if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
     chmod +x "$ROOT/pi-ingest.sh"
     echo "runner updated from the repo — effective next poll"
 fi
-for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh pi-monthly.sh; do
+for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh pi-monthly.sh pi-boot.sh; do
     if [[ -f "$REPO/scripts/$helper" ]] && ! cmp -s "$REPO/scripts/$helper" "$ROOT/$helper"; then
         cp "$REPO/scripts/$helper" "$ROOT/$helper"; chmod +x "$ROOT/$helper"
         echo "$helper updated from the repo"
@@ -272,6 +272,13 @@ declare -a SCHEDULE=(
     # PGCB's monthly report, once a day. 05:30 sits after the nightly sweep
     # (which can hold the lock for a while) and well before the 09:30 poll.
     "pi-monthly.sh|30 5 * * *"
+    # Once per boot, because cron has no memory: a slot inside a power cut is
+    # never run, and on this supply that is a matter of when, not if. On
+    # 2026-09-16 the Pi lost power around 10:20 and returned at 10:28, between
+    # the 09:30 and 12:30 polls; nothing but the watcher ran in between. The
+    # runner waits for the clock and the network, skips the poll when one has
+    # just run, and relies on the same locks as every other job.
+    "pi-boot.sh|@reboot"
 )
 if command -v crontab >/dev/null; then
     cron_now="$(crontab -l 2>/dev/null || true)"
