@@ -451,7 +451,12 @@ a clock guard, and at the start of every poll it fetches the day it published la
 from the live site and compares every value. Two more jobs share the lock:
 `scripts/pi-nightly.sh` (02:30 — `verify:data`, `verify:source` over the trailing week
 with the ledger committed, gzipped `pg_dump` kept 14 deep) and `scripts/pi-weekly.sh`
-(Sunday 03:30 — SREDA register, media-bucket mirror). Every failure goes through
+(Sunday 03:30 — the ERP verify sweep and the media-bucket mirror). SREDA left that
+runner on 2026-09-16 for `scripts/pi-sreda.sh` at 06:30 daily: the register is a stock
+as of a date, so there is nothing hourly to ask for, but its "as of" date moved nine
+times between 29 June and 10 September and both weekly runs since the runner began
+produced a new one — weekly was sampling it rather than following it. A quiet day
+costs one pass over a dozen pages and writes nothing. Every failure goes through
 `scripts/pi-notify.sh`: always `~/esb-ingest/logs/alerts.log`, Telegram if
 `~/esb-ingest/notify.env` holds a token. Power-cut behaviour is documented at the top of
 `pi-ingest.sh`; the short version is that downloads are atomic, torn workbooks are
@@ -570,6 +575,23 @@ evidence retention window, not a bigger tier.
 One failed tick is not an alert: the hour is still inside NLDC's window and the next
 tick's two-page walk picks it up. Four consecutive failures are.
 
+**`lib/data/macro/gas.ts` is generated, not written.**
+`scripts/build_gas_mix_yearly.py` derives the Macro Trends LNG chart's year series
+from `public/data/petrobangla/timeline-summary.json`, and runs at the end of
+`build_petrobangla_timeline.py` — **not** from `build_aggregates.py`, which the four
+scheduled polls never call (`daily_extractor/config.py` names the timeline script and
+`export.py` runs it directly). A derived artefact hooked into the wrong one goes stale
+on every poll while the file it derives from is rebuilt beside it. It runs
+unconditionally, because a year's mean moves when a day is *corrected*, not only when
+one is added, and it writes nothing when no figure moved.
+
+Each year is the **mean of the daily MMCFD Petrobangla stated**, over the days it
+filed — a rate, never a total; `days` carries the count and `partial` marks a year the
+archive does not cover end to end. The five hand-typed rows it replaced on 2026-09-16
+were wrong against our own archive: imported LNG overstated by 245 MMCFD in 2022, 245
+in 2024 and 161 in 2026. The old 2018 row is absent rather than re-derived — the
+archive starts 2020-01-12, and a row with no source here is not guessed at.
+
 ### Once a day: PGCB's monthly report
 
 `scripts/pi-monthly.sh`, at 05:30 Dhaka from cron, running
@@ -658,7 +680,7 @@ config; nothing below needs a password.
 
 ```bash
 tailscale status | grep esb-pi              # is it on the tailnet at all
-ssh pi@esb-pi 'crontab -l | grep -v "^#"'   # all six runners scheduled?
+ssh pi@esb-pi 'crontab -l | grep -v "^#"'   # all eight lines? (six runners, SREDA, @reboot)
 ssh pi@esb-pi 'tail -20 ~/esb-ingest/logs/alerts.log'
 ssh pi@esb-pi 'timedatectl | grep -i synchron'   # a skewed clock refuses polls
 ssh pi@esb-pi 'tail -5 ~/esb-ingest/logs/monthly-$(date +%Y%m%d).log'   # "nothing new" is the normal day
