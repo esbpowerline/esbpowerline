@@ -1,8 +1,10 @@
 import { cache } from 'react';
 import { DEFAULT_INTERVIEWS, type Interview } from '@/lib/interview-content';
 
-export const ESB_YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@ESBPowerLine';
-export const ESB_YOUTUBE_CHANNEL_ID = 'UCan3s1leb_khUlnntZcEkmA';
+// @esbplbd is a different channel from the old @ESBPowerLine (UCan3s1leb_khUlnntZcEkmA),
+// not a rename — so the feed id changes with the URL (2026-09-16).
+export const ESB_YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@esbplbd';
+export const ESB_YOUTUBE_CHANNEL_ID = 'UCkf1jM8-ebkMnYaGftvj6OA';
 const ESB_YOUTUBE_RSS_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${ESB_YOUTUBE_CHANNEL_ID}`;
 
 const CHANNEL_GUEST = 'ESB Power Line';

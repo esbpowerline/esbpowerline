@@ -7,7 +7,7 @@ export const OFFICIAL_SOCIAL_LINKS = {
     label: 'Facebook',
   },
   youtube: {
-    href: 'https://www.youtube.com/@ESBPowerLine',
+    href: 'https://www.youtube.com/@esbplbd',
     label: 'YouTube',
   },
 } as const;

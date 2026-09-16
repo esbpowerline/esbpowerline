@@ -102,7 +102,7 @@ export default function ContactPage() {
                       <h5 className="font-semibold text-sm text-foreground/70 uppercase tracking-wider mb-1">
                         Editorial & Office Address
                       </h5>
-                      <p className="text-base text-foreground font-medium">ESB Media Limited</p>
+                      <p className="text-base text-foreground font-medium">ESB Power Line</p>
                       <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
                         House #36/1, Avenue #01, Block-A, Section-10, Mirpur, Pallabi, Dhaka-1216, Bangladesh.
                       </p>

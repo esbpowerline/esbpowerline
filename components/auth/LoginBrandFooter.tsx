@@ -11,7 +11,7 @@ export function LoginBrandFooter() {
   return (
     <div className="login-portal-footer">
       <div className="login-portal-footer__identity">
-        <span className="login-portal-footer__publisher">ESB Media Limited</span>
+        <span className="login-portal-footer__publisher">ESB Power Line</span>
         <span className="login-portal-footer__location">Mirpur, Dhaka · Bangladesh</span>
       </div>
 

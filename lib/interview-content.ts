@@ -21,92 +21,82 @@ export type Interview = {
   videoUrl?: string;
 };
 
+/**
+ * The YouTube half of the rail: the current channel's own uploads, from its
+ * official feed (youtube.com/feeds/videos.xml, channel UCkf1jM8-ebkMnYaGftvj6OA,
+ * @esbplbd). Titles are the videos' own, verbatim. The feed gives no duration.
+ *
+ * Replaced 2026-09-16. The four entries before this paired invented
+ * energy-sector titles and guests ("Dr. Tariq Rahman, Grid Modernization
+ * Specialist") with real video ids from the old @ESBPowerLine channel — and
+ * those ids opened unrelated political videos. A card must describe the video
+ * it plays, in that video's words.
+ */
 export const DEFAULT_INTERVIEWS: Interview[] = [
   {
-    id: 'yt-smart-grid-2026',
-    title: 'Exclusive: The Future of Bangladesh\'s National Grid and Smart Transmission Networks',
-    guest: 'Dr. Tariq Rahman',
-    role: 'Grid Modernization Specialist',
-    duration: '15:24',
-    date: 'Jun 24',
-    thumbnail: '/images/yt_tm_1.jpg',
-    youtubeId: '9ngsY7vBm_Y',
-    excerpt: 'An in-depth discussion on shifting from conventional to digital substations, minimizing transmission losses, and integrating grid-scale solar.',
+    id: 'yt-P2_wGjesKQ',
+    title: 'সক্ষমতা আছে, উৎপাদন নেই—বাড়ছে লোকসান ড  এনামুল হক',
+    guest: 'ESB Power Line',
+    role: 'YouTube',
+    duration: '—',
+    date: 'Sep 14',
+    thumbnail: '/images/interviews/youtube-2026-09-14.jpg',
+    youtubeId: '-P2_wGjesKQ',
+    excerpt: '',
   },
   {
-    id: 'yt-lng-crisis-2026',
-    title: 'Addressing the Fuel Crisis: LNG Imports, Domestic Gas Exploration & Policy Reforms',
-    guest: 'Nasrul Hamid',
-    role: 'Energy Policy Advisor',
-    duration: '18:40',
-    date: 'Jun 18',
-    thumbnail: '/images/yt_tm_2.jpg',
-    youtubeId: 'VWAOGfPdLcE',
-    excerpt: 'Can Bangladesh secure long-term energy stability? Exploring strategic terminal expansion, import costs, and deep-sea exploration prospects.',
-  },
-  {
-    id: 'yt-green-energy-2041',
-    title: 'Scaling Renewables: Transitioning to 40% Green Energy by 2041',
-    guest: 'Fahmida Khatun',
-    role: 'Renewable Energy Director',
-    duration: '12:15',
-    date: 'Jun 10',
-    thumbnail: '/images/yt_tm_3.jpg',
-    youtubeId: '4HwoHJshSt8',
-    excerpt: 'A critical analysis of the incentives, land availability constraints, and corporate power purchase agreements driving the green transition.',
-  },
-  {
-    id: 'yt-cross-border-trade',
-    title: 'The Cross-Border Power Trade: Importing Hydroelectricity from Nepal and Bhutan',
-    guest: 'Salehuddin Ahmed',
-    role: 'Regional Trade Economist',
-    duration: '14:50',
-    date: 'May 28',
-    thumbnail: '/images/yt_tm_1.jpg',
-    youtubeId: 'd37OcTjLv9Q',
-    excerpt: 'How regional grid connectivity and tripartite agreements will help Bangladesh secure clean, low-cost hydropower from the Himalayas.',
+    id: 'yt-0PpigU6MgLk',
+    title: 'সিপিডির আলোচনা সভায় শিল্পপতিদের গ্যাসও বিদ্যুৎ নিয়ে আলোচনা',
+    guest: 'ESB Power Line',
+    role: 'YouTube Short',
+    duration: '—',
+    date: 'Sep 13',
+    thumbnail: '/images/interviews/youtube-2026-09-13-short.jpg',
+    youtubeId: '0PpigU6MgLk',
+    excerpt: '',
   },
 ];
 
 /**
  * Interviews pinned to the front of the rail, newest-first left to right.
  *
- * Titles, guest and role are taken verbatim from each video's own Open Graph
- * data — nothing here is written by us. Facebook truncates the guest's full
- * description ("... ও সাবেক সহ-সভাপতি, …"), so `role` stops at the part the
- * source actually states. Duration and publish date are not exposed by
- * Facebook's metadata, hence the em dash.
+ * Every field is copied from the video's own Open Graph data, in the words and
+ * spelling it uses (including "জালানী") — nothing here is written by us. Both are
+ * the same Express Talk episode: the first is marked LIVE and resolves to a reel,
+ * the second is the recorded video, which Facebook canonicalises to News
+ * Express's page. Facebook's metadata exposes no duration or publish date, so
+ * both are left absent rather than guessed.
  *
  * Thumbnails are copied into /public because fbcdn URLs are signed and expire.
  */
 export const PINNED_INTERVIEWS: Interview[] = [
   {
-    id: 'fb-express-talk-manpower-1',
-    title: 'Manpower Export: Crisis and Potential — Express Talk',
-    guest: 'Alhaj A K M Moazzem Hossain',
-    role: 'Chairman & Managing Director, Anik Industrial Enterprise Ltd',
-    programme: 'Express Talk',
-    duration: '38:53',
-    date: 'Jul 19',
-    thumbnail: '/images/interviews/express-talk-manpower-part1.jpg',
+    id: 'fb-express-talk-energy-crisis-live',
+    title: 'বর্তমান জ্বালানী সংকট ও উত্তরনের উপায়',
+    guest: 'অধ্যাপক আনু মুহাম্মদ',
+    role: 'অর্থনীতি ও জালানী বিশেষজ্ঞ',
+    programme: 'এক্সপ্রেস টক · LIVE',
+    duration: '—',
+    date: '',
+    thumbnail: '/images/interviews/express-talk-energy-crisis-live.jpg',
     youtubeId: '',
-    excerpt: 'Part one of Express Talk on the crisis and the potential in Bangladesh’s manpower export.',
+    excerpt: 'উপস্থাপনা- ফরিদ উদ্দিন আহমেদ · সৌজন্যে- নিউজ এক্সপ্রেস ও ইএসবি পাওয়ার লাইন',
     provider: 'facebook',
-    videoUrl: 'https://www.facebook.com/newsexpressofficial/videos/970961285991321/',
+    videoUrl: 'https://www.facebook.com/esbpowerlineofficial/videos/1550945206292721',
   },
   {
-    id: 'fb-express-talk-manpower-2',
-    title: 'Manpower Export: Crisis and Potential, Part 2 — Express Talk',
-    guest: 'Alhaj A K M Moazzem Hossain',
-    role: 'Chairman & Managing Director, Anik Industrial Enterprise Ltd',
-    programme: 'Express Talk',
-    duration: '34:24',
-    date: 'Jul 21',
-    thumbnail: '/images/interviews/express-talk-manpower-part2.jpg',
+    id: 'fb-express-talk-energy-crisis',
+    title: 'বর্তমান জ্বালানী সংকট ও উত্তরনের উপায়',
+    guest: 'অধ্যাপক আনু মুহাম্মদ',
+    role: 'অর্থনীতি ও জালানী বিশেষজ্ঞ',
+    programme: 'এক্সপ্রেস টক',
+    duration: '—',
+    date: '',
+    thumbnail: '/images/interviews/express-talk-energy-crisis.jpg',
     youtubeId: '',
-    excerpt: 'The second part of the same conversation.',
+    excerpt: 'উপস্থাপনা- ফরিদ উদ্দিন আহমেদ · সৌজন্যে- নিউজ এক্সপ্রেস ও ইএসবি পাওয়ার লাইন',
     provider: 'facebook',
-    videoUrl: 'https://www.facebook.com/newsexpressofficial/videos/1598169481936488/',
+    videoUrl: 'https://www.facebook.com/esbpowerlineofficial/videos/28273693645615960',
   },
 ];
 

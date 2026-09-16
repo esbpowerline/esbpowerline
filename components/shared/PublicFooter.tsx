@@ -130,7 +130,7 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
               </ContactItem>
 
               <ContactItem icon={MapPin} label={t('footer.officeAddress')}>
-                <p className="font-medium text-foreground">ESB Media Limited</p>
+                <p className="font-medium text-foreground">ESB Power Line</p>
                 <p className="text-foreground/70">
                   House #36/1, Avenue #01, Block-A, Section-10, Mirpur, Pallabi, Dhaka-1216, Bangladesh.
                 </p>
