@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -89,6 +90,27 @@ def main():
         print(f"Wrote {len(rows)} days to {OUT}")
     else:
         print(f"Unchanged: {len(rows)} days already in {OUT}")
+
+    # The LNG chart's year series is derived from the file just written, and it
+    # is rebuilt HERE rather than in build_aggregates.py because the daily chain
+    # calls this script directly (daily_extractor/export.py) — a hook there
+    # would leave lib/data/macro/gas.ts stale on every scheduled poll.
+    #
+    # Run unconditionally: a year's mean moves when a day's figures are
+    # corrected, not only when a day is added, so "timeline unchanged" is not
+    # "series unchanged". The generator writes nothing when no figure moved.
+    gas_mix = subprocess.run(
+        [sys.executable, str(Path(__file__).resolve().parent / "build_gas_mix_yearly.py")],
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
+    if gas_mix.returncode != 0:
+        # Loud, not fatal: the timeline above is written and correct, and a
+        # stale chart must not look like a failed archive rebuild.
+        print(f"! gas mix rebuild failed: {gas_mix.stderr.strip()[-300:]}", file=sys.stderr)
+    else:
+        print(gas_mix.stdout.strip().splitlines()[-1] if gas_mix.stdout.strip() else "gas mix: no output")
 
 
 if __name__ == "__main__":

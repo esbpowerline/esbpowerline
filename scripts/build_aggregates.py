@@ -172,28 +172,13 @@ def main() -> None:
 
     timeline = json.loads(TIMELINE.read_text(encoding="utf-8"))
 
-    # --- lib/data/macro/gas.ts : the year series behind the LNG chart --------
-    # Derived from the timeline just rebuilt, so the chart follows the archive
-    # instead of being retyped. It read five hand-typed rows until 2026-09-16,
-    # which overstated imported LNG by up to 245 MMCFD against our own days.
-    gas_mix = subprocess.run(
-        [sys.executable, str(Path(__file__).parent / "build_gas_mix_yearly.py")],
-        capture_output=True,
-        text=True,
-        timeout=300,
-    )
-    if gas_mix.returncode != 0:
-        print(json.dumps({"ok": False, "error": f"Gas mix rebuild failed: {gas_mix.stderr[-300:]}"}))
-        return
-    try:
-        gas_mix_result = json.loads(gas_mix.stdout.strip().splitlines()[-1])
-    except (ValueError, IndexError):
-        gas_mix_result = {"ok": False, "error": "unreadable output"}
+    # The year series behind the LNG chart is rebuilt inside
+    # build_petrobangla_timeline.py, not here: the daily chain calls that script
+    # directly (daily_extractor/export.py), so hooking it here would leave
+    # lib/data/macro/gas.ts stale on every scheduled poll.
 
     print(json.dumps({
         "ok": True,
-        "gasMixYears": gas_mix_result.get("years"),
-        "gasMixChanged": gas_mix_result.get("changed"),
         "indexUpdated": existed,
         "indexAdded": len(entries) - existed,
         "indexDays": index["total_days"],
