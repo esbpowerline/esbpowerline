@@ -184,7 +184,11 @@ exist. Open, in order: the six `TELEGRAM_*` variables in Vercel Production, the 
 Post-messages-only admin of both channels — **Hamim does both; the auto-mode classifier
 refuses them to Claude** — then redeploy, register, test on staging, switch on hourly /
 daily / alerts, and promote to the public channel. `scripts/telegram-preview.ts` prints
-today's posts from real data without sending. Everything is in `docs/telegram-bot/`:
+today's posts from real data, and `--send <chat> --token-file <path>` posts them to a
+test chat — never the public channel, which the queue feeds and dedupes. The bot's
+token was rotated twice on 2026-09-14 after leaking into a session transcript through
+screenshots of the BotFather chat; Telegram Web draws a token as two spans, so
+redacting text alone does not cover it. Everything is in `docs/telegram-bot/`:
 start with `DISCOVERY.md` and `ARCHITECTURE.md`, then `SETUP.md`. It runs entirely on
 Vercel — a five-minute cron and a webhook — and reads the grid rows the Pi already writes;
 nothing on the Pi changed. Migration `0023_notifications` is additive and is applied by the

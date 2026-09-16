@@ -21,6 +21,10 @@ open.
 - [x] Applied by the production release build: `_prisma_migrations` shows `0023_notifications` started 06:31:42Z, finished 06:31:43Z, the three tables present — 2026-09-14
 - [x] Rollback SQL written (DEPLOYMENT.md) — 2026-09-14
 
+## Message formatting
+- [x] Fuel codes stay in capitals in the daily summary ("HFO 15%, HSD 2%", not "hfo"/"hsd") — 2026-09-14, found in the first real preview; released to production 2026-09-16 (`de9f8262`)
+- [x] `scripts/telegram-preview.ts` prints today's posts from real data, and `--send <chat>` posts them to a test chat — 2026-09-14, used against an admin's private chat before any variable existed. It refuses the public channel, which the production queue feeds and dedupes.
+
 ## Secrets
 - [x] No Telegram token in any tracked file (sweep of `git grep` for token-shaped strings; test fixtures are fake) — 2026-09-14
 - [x] `.env.example` carries names only, commented out — 2026-09-14

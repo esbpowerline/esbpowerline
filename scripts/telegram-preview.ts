@@ -45,7 +45,7 @@ function show(label: string, m: RenderedMessage, note?: string) {
 
 const num = (v: unknown): number | null => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 
-async function latestDaily(now: Date): Promise<{ payload: PayloadFor<'DAILY_GRID_SUMMARY'>; source: string } | null> {
+export async function latestDaily(now: Date): Promise<{ payload: PayloadFor<'DAILY_GRID_SUMMARY'>; source: string } | null> {
   const rel = await prisma.dataRelease.findFirst({
     where: { feed: 'GRID_DAILY', revokedAt: null },
     orderBy: { key: 'desc' },
@@ -193,9 +193,13 @@ async function main() {
   }
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-  })
-  .finally(() => prisma.$disconnect());
+// Run only when invoked directly: other scripts import latestDaily, and an import
+// must not print a preview — or send one.
+if (/telegram-preview\.ts$/.test(process.argv[1] ?? '')) {
+  main()
+    .catch((e) => {
+      console.error(e);
+      process.exitCode = 1;
+    })
+    .finally(() => prisma.$disconnect());
+}
