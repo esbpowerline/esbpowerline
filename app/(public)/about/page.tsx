@@ -279,7 +279,7 @@ export default async function AboutPage() {
                     </span>
                     <span>
                       <h3 className="font-display font-bold text-base text-foreground leading-tight">Newsroom</h3>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5 font-sans">2 members</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5 font-sans">3 members</p>
                     </span>
                   </span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-open:rotate-180" />
@@ -312,10 +312,27 @@ export default async function AboutPage() {
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div>
                             <h4 className="font-display font-bold text-base text-foreground truncate">Mehedi Hasan Hamim</h4>
-                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">Reporter &amp; Sub-Editor</p>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">IT Developer &amp; Sub-Editor</p>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed font-light">
                             Leads content curation and energy sector research, tracking policy revisions, aggregating data points, and compiling valuable briefs for the monthly publications.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="relative group/card overflow-hidden rounded-2xl border border-border/40 bg-card/15 p-5 hover:border-indigo-500/40 transition-all duration-300">
+                      <div className="absolute top-0 right-0 h-24 w-24 bg-indigo-500/5 rounded-bl-full -mr-6 -mt-6 blur-xl" />
+                      <div className="flex items-start gap-4 relative z-10">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-white flex items-center justify-center shadow shrink-0 ring-4 ring-indigo-500/10">
+                          <UserRound className="h-6 w-6" />
+                        </div>
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div>
+                            <h4 className="font-display font-bold text-base text-foreground truncate">Yeasin Fiyaz</h4>
+                            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mt-0.5 font-sans">Sub-Editor &amp; Analyst</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed font-light">
+                            Edits and fact-checks copy before publication and analyses power and energy sector data, turning official figures into clear context for readers.
                           </p>
                         </div>
                       </div>
@@ -369,7 +386,7 @@ export default async function AboutPage() {
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div>
                             <h4 className="font-display font-bold text-base text-foreground truncate">Mehedi Hasan Hamim</h4>
-                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">IT Developer</p>
+                            <p className="text-[10px] font-bold text-blue-500 uppercase tracking-wider mt-0.5 font-sans">IT Developer &amp; Sub-Editor</p>
                           </div>
                           <p className="text-xs text-muted-foreground leading-relaxed font-light">
                             Develops and maintains the ESB PowerLine platform — the newsroom CMS, the Petrobangla and PGCB data pipelines, and the Grid Explorer analytics suite.
