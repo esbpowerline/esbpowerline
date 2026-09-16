@@ -39,7 +39,7 @@ exec >>"$LOG" 2>&1
 
 notify() { [[ -x "$NOTIFY" ]] && "$NOTIFY" "$@"; }
 
-echo "=== $(date -Is) — boot catch-up (up $(uptime -p)) ==="
+echo "=== $(date -Is) — boot catch-up ($(uptime -p)) ==="
 
 # The network stack and NTP are usually seconds behind the login that starts
 # this; the loop below is the guard, this is just politeness towards them.

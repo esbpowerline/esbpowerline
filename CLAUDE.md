@@ -457,6 +457,24 @@ with the ledger committed, gzipped `pg_dump` kept 14 deep) and `scripts/pi-weekl
 `pi-ingest.sh`; the short version is that downloads are atomic, torn workbooks are
 refetched, and the next poll finishes whatever the last one did not.
 
+**A cut that swallows a slot is caught up on boot** (`scripts/pi-boot.sh`, `@reboot`,
+added 2026-09-16). cron has no memory: the Pi lost power around 10:20 that morning and
+returned at 10:28, between the 09:30 and 12:30 polls, so nothing but the watcher ran
+while both publishers were filing. The runner waits up to ten minutes for a
+synchronised clock and a reachable host — **esbpowerline.com or github.com, never
+pgcb.gov.bd, whose certificate plain `curl` refuses** (that mistake made the first
+version wait the full ten minutes and give up on every boot) — then takes one hourly
+capture and one poll, skipping the poll when one ran in the last 40 minutes. Both
+runners hold their own locks, so a boot landing on a scheduled slot costs nothing.
+
+**And a cut can corrupt the checkout itself, which stops every runner at its first
+step.** Same morning: six loose objects were left zero-length, including the commit
+`HEAD` pointed at. The fingerprint is `error: object file .git/objects/xx/… is empty`
+repeated, then `fatal: bad object HEAD`, with `pi-watch.sh` logging `fetch failed —
+comparing against the local tree instead` every tick. Nothing is lost if the commit
+reached GitHub: `find .git/objects -type f -size 0 -delete`, `git fetch origin`, `git
+reset --hard origin/authenticating`, `git fsck`.
+
 ### Every hour: the NLDC capture
 
 `scripts/pi-hourly.sh`, at :17 from cron, running
