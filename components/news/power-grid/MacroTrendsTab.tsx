@@ -950,7 +950,7 @@ export function MacroTrendsTab({
                       <Droplet className="h-5 w-5 shrink-0 text-sky-500" />
                       <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">Gas Supply Transition: Domestic vs. Imported LNG</h3>
-                        <p className="grid-explorer-chart-card__sub">Historical shift towards imported liquefied natural gas (MMCFD) — <span className="text-primary font-semibold text-xs">Tracked since 2000</span></p>
+                        <p className="grid-explorer-chart-card__sub">Yearly mean of Petrobangla&rsquo;s daily reports (MMCFD) — <span className="text-primary font-semibold text-xs">2020 onwards, current year to date</span></p>
                       </div>
                     </div>
                     <span className="grid-explorer-chip">LNG Reliance</span>
@@ -1005,8 +1005,8 @@ export function MacroTrendsTab({
                                     Calculation: LNG Reliance % = (LNG / Total Supply) * 100
                                   </div>
                                   <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                                    <div><strong>Source:</strong> <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Petrobangla Annual Reports</a></div>
-                                    <div>As published. Not independently audited.</div>
+                                    <div><strong>Source:</strong> <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Petrobangla daily gas reports</a></div>
+                                    <div>Yearly mean of the days filed. As published. Not independently audited.</div>
                                   </div>
                                 </div>
                               );
@@ -1025,19 +1025,19 @@ export function MacroTrendsTab({
                   {/* Card Explanation Block */}
                   <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
                     <p><strong>What is being shown?</strong></p>
-                    <p className="leading-relaxed">This chart shows the volume (MMCFD) of natural gas supplied to the grid from local fields versus imported Liquefied Natural Gas (LNG) since 2018.</p>
+                    <p className="leading-relaxed">This chart shows the volume (MMCFD) of natural gas supplied from local fields versus imported Liquefied Natural Gas (LNG). Each year is the mean of the daily figures Petrobangla published that year, from 12 January 2020, when this archive begins; the current year runs to the newest report held.</p>
                     <p className="leading-relaxed"><strong>Analytical Insight:</strong> The visual depicts a major structural dependency shift: domestic gas production is stagnant or declining, while imported LNG share is rising to meet energy demand. Because imported LNG is purchased at volatile global spot prices (linked to Brent oil and Platts JKM), this shift directly exposes Bangladesh's power generation costs to global commodity shocks and foreign exchange reserves pressure.</p>
                   </div>
 
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
-                    <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Balance Sheets &amp; Daily MIS Reports</a></span>
+                    <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla daily gas reports</a></span>
                     <span>
-                      Domestic and LNG volumes are Petrobangla&apos;s. The total and the two
-                      share percentages are ours, summed and divided from those volumes.
-                      Not independently audited.
+                      Domestic and LNG volumes are Petrobangla&apos;s, stated daily. Each year is
+                      their mean over the days it filed — a rate, not a total — and the shares
+                      are ours, divided from those volumes. Not independently audited.
                     </span>
-                    <span className="font-medium">Reporting Period: Historical Reserves Log (2018 - 2026)</span>
+                    <span className="font-medium">Reporting Period: daily reports, 12 Jan 2020 onwards (current year to date)</span>
                   </GridCardFooter>
                 </div>
                 <ChartDataTable
