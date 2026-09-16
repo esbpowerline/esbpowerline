@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # Weekly on the Pi: the slow-moving sources and the media backup.
 #
-#   SREDA    a standing register, not a daily series — a stock as of a date.
-#            Refetched weekly from ndre.sreda.gov.bd, written under
-#            public/data/sreda/, published as SREDA_DAILY for that date.
+#   monthly  every held month refetched from the ERP and reparsed (--verify).
 #   media    the Supabase `media` bucket (47 MB, ~660 files) mirrored to the
 #            Pi. The bucket is public, so its listing needs only the anon key
 #            that every visitor's browser already carries.
@@ -23,24 +21,11 @@ export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/esb_deploy_key -o IdentitiesOnly=yes"
 cd "$REPO" || exit 1
 git fetch -q origin authenticating && git reset -q --hard origin/authenticating
 
-# --- 1. SREDA register -------------------------------------------------------
-if timeout 900 npx tsx lib/data/sreda/ingest-sreda.ts; then
-    DAY=$(python3 -c "import json;print(json.load(open('lib/sreda-available-dates.json'))[-1])")
-    echo "SREDA register as of $DAY"
-    git add public/data/sreda lib/sreda-available-dates.json
-    if ! git diff --cached --quiet; then
-        timeout 600 npx tsx --conditions react-server scripts/publish-local.ts --date "$DAY" --no-aggregates | tail -2
-        git commit -q -m "chore(data): SREDA register as of $DAY, weekly on the Pi"
-        git pull -q --rebase origin authenticating && git push -q origin HEAD:authenticating && echo "pushed" \
-            || notify warn "sreda: push failed" "see $LOG"
-    else
-        echo "SREDA unchanged since last week"
-    fi
-else
-    notify warn "SREDA ingest failed" "ndre.sreda.gov.bd unreachable or layout changed; see $LOG"
-fi
+# SREDA moved to pi-sreda.sh, daily, on 2026-09-16: the register's "as of" date
+# changes oftener than once a week, so a weekly fetch was sampling it rather
+# than following it.
 
-# --- 1b. PGCB monthly reports against the ERP ----------------------------------
+# --- 1. PGCB monthly reports against the ERP ----------------------------------
 # The monthly twin of verify:source. Refetches only months the ledger does not
 # already hold as MATCH against the same ERP file id, so a normal week costs
 # six listing pages and nothing else — and a workbook PGCB re-uploads under a
