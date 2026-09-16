@@ -45,13 +45,22 @@ echo "=== $(date -Is) — boot catch-up (up $(uptime -p)) ==="
 # this; the loop below is the guard, this is just politeness towards them.
 sleep 20
 
+# Probe hosts this job actually depends on, and only ones that answer a plain
+# TLS check: pgcb.gov.bd serves a certificate curl refuses ("self-signed
+# certificate", measured from this Pi 2026-09-16) — download.py talks to it
+# through its own fetch(), but as a reachability probe it never succeeds, so a
+# first version of this loop waited the full ten minutes on every boot.
 waited=0
 while :; do
     clock_ok=no
     net_ok=no
     timedatectl show -p NTPSynchronized --value 2>/dev/null | grep -qx yes && clock_ok=yes
-    curl -sSfI --max-time 15 https://www.pgcb.gov.bd >/dev/null 2>&1 && net_ok=yes
+    for host in https://esbpowerline.com https://github.com; do
+        curl -sSfI --max-time 15 "$host" >/dev/null 2>&1 && { net_ok=yes; break; }
+    done
     [[ "$clock_ok" == yes && "$net_ok" == yes ]] && break
+    # Say so while waiting: a silent loop looks identical to a hung one.
+    (( waited % 120 == 0 )) && echo "  waiting ${waited}s: clock_synchronised=$clock_ok network=$net_ok"
     if (( waited >= WAIT_LIMIT_SEC )); then
         echo "giving up after ${waited}s: clock_synchronised=$clock_ok network=$net_ok"
         # A run with an unsynchronised clock is refused by pi-ingest.sh anyway,
