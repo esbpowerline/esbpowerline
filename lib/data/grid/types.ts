@@ -225,7 +225,8 @@ export interface PlantActual {
    * evening peak alone — the day peak is a 2025+ Forecast-sheet column.
    */
   dayPeakMw: number | null;
-  eveningPeakMw: number;
+  /** Null where PGCB left the cell blank — not a measured zero. */
+  eveningPeakMw: number | null;
   /**
    * The station's output over the whole day, in kWh. Published by P2 in every
    * era and read by nothing until now. It says what the peak columns cannot: a
@@ -240,16 +241,21 @@ export interface PlantActual {
 /** Hourly output per station, from the GenLog sheet (2025+ reports only). */
 export interface GenLogStation {
   name: string;
-  capacityMw: number;
-  /** One value per entry in `hours`. */
-  hourlyMw: number[];
+  /** Null on the 2018-2024 YesterdayGen sheet, which prints no capacity row. */
+  capacityMw: number | null;
+  /**
+   * One value per entry in `hours`. Null where PGCB left the cell blank — from
+   * 2018 to 2024 whole stations are blank all day, which is not generation of
+   * zero.
+   */
+  hourlyMw: (number | null)[];
 }
 
 export interface GenLog {
   hours: string[];
   stations: GenLogStation[];
   /** PGCB's own roll-up columns, kept so the station figures can be checked. */
-  totals: { national?: number[]; eastern?: number[]; western?: number[] };
+  totals: { national?: (number | null)[]; eastern?: (number | null)[]; western?: (number | null)[] };
 }
 
 /**

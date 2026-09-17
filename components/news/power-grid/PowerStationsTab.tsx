@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Building2, Check, ChevronDown, Clock3, Factory, Gauge, Search, Target } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Building2, Check, ChevronDown, Clock3, Factory, Gauge, Search, Target } from 'lucide-react';
 import {
   GridCardFooter,
   GridExplanationBlock,
@@ -164,15 +164,86 @@ function SortMenu({
   );
 }
 
-type SortKey = 'name' | 'eveningPeakMw' | 'dayPeakMw' | 'installedMw';
+type TextSortKey = 'name' | 'fuel' | 'producer';
+type NumberSortKey = 'installedMw' | 'presentCapacityMw' | 'dayPeakMw' | 'eveningPeakMw' | 'energyKwh';
+type SortKey = TextSortKey | NumberSortKey;
+type SortDir = 'asc' | 'desc';
+
+const TEXT_SORT_KEYS: readonly SortKey[] = ['name', 'fuel', 'producer'];
 
 // The control prints its own "Sort" prefix, so the labels no longer repeat it.
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'eveningPeakMw', label: 'Evening peak' },
   { value: 'dayPeakMw', label: 'Day peak' },
+  { value: 'energyKwh', label: 'Day’s energy' },
   { value: 'installedMw', label: 'Installed MW' },
+  { value: 'presentCapacityMw', label: 'Present MW' },
+  { value: 'fuel', label: 'Fuel' },
+  { value: 'producer', label: 'Producer' },
   { value: 'name', label: 'Station name' },
 ];
+
+/** Names read A→Z first; figures read largest first. */
+const defaultDir = (key: SortKey): SortDir => (TEXT_SORT_KEYS.includes(key) ? 'asc' : 'desc');
+
+/**
+ * Station comparator. A missing value sorts last in both directions: a station
+ * the sheet gave no figure for is not the smallest station, and reversing the
+ * sort must not float every blank row to the top of the table.
+ */
+function compareStations(a: PlantActual, b: PlantActual, key: SortKey, dir: SortDir): number {
+  const sign = dir === 'asc' ? 1 : -1;
+  if (TEXT_SORT_KEYS.includes(key)) {
+    const av = (a[key as TextSortKey] || '').trim();
+    const bv = (b[key as TextSortKey] || '').trim();
+    if (!av || !bv) return av ? -1 : bv ? 1 : a.name.localeCompare(b.name);
+    return sign * av.localeCompare(bv) || a.name.localeCompare(b.name);
+  }
+  const av = a[key as NumberSortKey];
+  const bv = b[key as NumberSortKey];
+  if (av == null || bv == null) return av != null ? -1 : bv != null ? 1 : a.name.localeCompare(b.name);
+  return sign * (av - bv) || a.name.localeCompare(b.name);
+}
+
+/** A column heading that sorts the table; a second click reverses it. */
+function SortHeader({
+  column,
+  sort,
+  dir,
+  onSort,
+  align = 'left',
+  children,
+}: {
+  column: SortKey;
+  sort: SortKey;
+  dir: SortDir;
+  onSort: (key: SortKey) => void;
+  align?: 'left' | 'right';
+  children: React.ReactNode;
+}) {
+  const active = sort === column;
+  const Icon = !active ? ArrowUpDown : dir === 'asc' ? ArrowUp : ArrowDown;
+  return (
+    <th
+      className={align === 'right' ? 'text-right' : undefined}
+      aria-sort={active ? (dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+    >
+      <button
+        type="button"
+        onClick={() => onSort(column)}
+        className={cn(
+          'inline-flex items-center gap-1 rounded transition-colors hover:text-foreground',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/45',
+          align === 'right' && 'flex-row-reverse',
+          active && 'text-foreground',
+        )}
+      >
+        <Icon className={cn('h-3 w-3 shrink-0', active ? 'text-primary' : 'opacity-40')} aria-hidden />
+        <span>{children}</span>
+      </button>
+    </th>
+  );
+}
 
 /**
  * A group of station rows summed together — by fuel or by producer. Every
@@ -284,6 +355,25 @@ export function PowerStationsTab({
   const [state, setState] = useState<'loading' | 'ready' | 'absent'>('loading');
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('eveningPeakMw');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+
+  // A header click on the current column reverses it; any other column, and
+  // any pick from the Sort menu, starts in that column's natural direction.
+  const sortBy = useCallback(
+    (key: SortKey) => {
+      if (key === sort) {
+        setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSort(key);
+        setSortDir(defaultDir(key));
+      }
+    },
+    [sort],
+  );
+  const pickSort = useCallback((key: SortKey) => {
+    setSort(key);
+    setSortDir(defaultDir(key));
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -309,10 +399,8 @@ export function PowerStationsTab({
             p.producer.toLowerCase().includes(q),
         )
       : plants;
-    return [...filtered].sort((a, b) =>
-      sort === 'name' ? a.name.localeCompare(b.name) : (b[sort] ?? 0) - (a[sort] ?? 0),
-    );
-  }, [detail, query, sort]);
+    return [...filtered].sort((a, b) => compareStations(a, b, sort, sortDir));
+  }, [detail, query, sort, sortDir]);
 
   // 149 stations on a normal day. Paged, or the card is one long scroll and a
   // reader looking for a named plant has nothing but the browser's find.
@@ -446,7 +534,7 @@ export function PowerStationsTab({
                 className="pl-8 pr-3 py-1.5 w-56 text-xs font-medium rounded-xl border border-border/40 bg-transparent text-foreground placeholder:text-muted-foreground/70 transition-colors hover:border-border/70 focus:outline-none focus:ring-2 focus:ring-primary/45 focus:border-transparent"
               />
             </div>
-            <SortMenu value={sort} onChange={setSort} options={SORT_OPTIONS} />
+            <SortMenu value={sort} onChange={pickSort} options={SORT_OPTIONS} />
           </div>
         </div>
 
@@ -454,20 +542,30 @@ export function PowerStationsTab({
           <table className="grid-explorer-table">
             <thead>
               <tr>
-                <th>Station</th>
-                <th>
+                <SortHeader column="name" sort={sort} dir={sortDir} onSort={sortBy}>Station</SortHeader>
+                <SortHeader column="fuel" sort={sort} dir={sortDir} onSort={sortBy}>
                   Fuel
                   <GridProvenanceTag kind="P" className="ml-1" />
-                </th>
-                <th>
+                </SortHeader>
+                <SortHeader column="producer" sort={sort} dir={sortDir} onSort={sortBy}>
                   Producer
                   <GridProvenanceTag kind="P" className="ml-1" />
-                </th>
-                <th className="text-right">Installed (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
-                <th className="text-right">Present (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
-                <th className="text-right">Day peak (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
-                <th className="text-right">Evening peak (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
-                <th className="text-right">Day&apos;s energy (MWh)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                </SortHeader>
+                <SortHeader column="installedMw" sort={sort} dir={sortDir} onSort={sortBy} align="right">
+                  Installed (MW)<GridProvenanceTag kind="P" className="ml-1" />
+                </SortHeader>
+                <SortHeader column="presentCapacityMw" sort={sort} dir={sortDir} onSort={sortBy} align="right">
+                  Present (MW)<GridProvenanceTag kind="P" className="ml-1" />
+                </SortHeader>
+                <SortHeader column="dayPeakMw" sort={sort} dir={sortDir} onSort={sortBy} align="right">
+                  Day peak (MW)<GridProvenanceTag kind="P" className="ml-1" />
+                </SortHeader>
+                <SortHeader column="eveningPeakMw" sort={sort} dir={sortDir} onSort={sortBy} align="right">
+                  Evening peak (MW)<GridProvenanceTag kind="P" className="ml-1" />
+                </SortHeader>
+                <SortHeader column="energyKwh" sort={sort} dir={sortDir} onSort={sortBy} align="right">
+                  Day&apos;s energy (MWh)<GridProvenanceTag kind="P" className="ml-1" />
+                </SortHeader>
               </tr>
             </thead>
             <tbody>
@@ -765,9 +863,11 @@ export function PowerStationsTab({
                       {s.hourlyMw.map((v, i) => (
                         <td
                           key={i}
-                          className={`text-right tabular-nums px-1.5 ${v === 0 ? 'text-muted-foreground/40' : ''}`}
+                          className={`text-right tabular-nums px-1.5 ${v === 0 || v == null ? 'text-muted-foreground/40' : ''}`}
                         >
-                          {v === 0 ? '·' : Math.round(v)}
+                          {/* A dot is a published zero; a dash is a cell PGCB
+                              left blank. They are different claims. */}
+                          {v == null ? '—' : v === 0 ? '·' : Math.round(v)}
                         </td>
                       ))}
                     </tr>
@@ -777,7 +877,7 @@ export function PowerStationsTab({
                     <td className="sticky left-0 bg-muted/20 pl-3">National Grid Total</td>
                     {genlog.totals.national.map((v, i) => (
                       <td key={i} className="text-right tabular-nums px-1.5">
-                        {Math.round(v)}
+                        {v == null ? '—' : Math.round(v)}
                       </td>
                     ))}
                   </tr>

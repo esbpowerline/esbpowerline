@@ -27,6 +27,7 @@ import {
 } from '@/components/news/power-grid/GridExplorerUI';
 import { formatNumber } from '@/lib/utils';
 import { fetchPlantDetail } from '@/lib/data/grid/plant-detail.client';
+import { countBySector, SECTOR_LABEL } from '@/lib/data/grid/producer-sector';
 import type { DailyPlantDetail, GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
 
 type SourceFiles = { pgcb?: string; petrobangla?: string };
@@ -637,6 +638,12 @@ export function StationsKpiStrip({
   const read = plants.filter((p) => p.eveningPeakMw != null);
   const running = read.filter((p) => (p.eveningPeakMw || 0) > 0);
   const still = read.filter((p) => (p.eveningPeakMw || 0) === 0);
+  // Ownership from the producer code on each row. Joint ventures, imports and
+  // unrecognised codes are shown as themselves only when present, so the
+  // rows always add up to the station count above them.
+  const sectors = countBySector(plants.map((p) => p.producer)).filter(
+    (s) => s.count > 0 || s.sector === 'government' || s.sector === 'private',
+  );
 
   if (state === 'absent') return null;
 
@@ -658,9 +665,18 @@ export function StationsKpiStrip({
           <GridKpiTooltipRow provenance="P" label="Rows on the sheet:" value={`${plants.length}`} />
           <GridKpiTooltipRow provenance="P" label="With a stated rating:" value={`${rated.length}`} />
           <GridKpiTooltipRow provenance="P" label="With a peak reading:" value={`${read.length}`} />
+          {sectors.map(({ sector, count }) => (
+            <GridKpiTooltipRow key={sector} provenance="D" label={`${SECTOR_LABEL[sector]}:`} value={`${count}`} />
+          ))}
           <GridKpiTooltipAudit>
             A count of the station rows this day&rsquo;s sheet prints, not of the national fleet.
-            Stations the sheet omits are absent from every figure on this strip.
+            Stations the sheet omits are absent from every figure on this strip. Ownership is
+            read from the producer code PGCB prints on each row (PDB, APSCL, EGCB&hellip; are
+            government; IPP, QRPP, RPP, SIPP are private); PGCB publishes no ownership column,
+            so the split is ours. Producers that are part state and part foreign, such as
+            Payra&rsquo;s BCPCL, are counted as joint ventures rather than on either side. The
+            split follows the code as printed: a station PGCB files under PDB counts as
+            government, whoever else holds a share in it.
           </GridKpiTooltipAudit>
           <PgcbRef part="Station-wise generation sheet" sourceFiles={sourceFiles} date={systemStats.date} />
         </GridKpiTooltipBody>
