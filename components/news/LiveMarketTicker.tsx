@@ -26,6 +26,13 @@ export interface TickerItem {
    * Absent for admin-entered items, which name no publisher.
    */
   source?: string | null;
+  /**
+   * Decimal places to print, exactly. A gazetted rate is printed to the digits
+   * its instrument uses: BERC fixes BPDB's 33 kV bulk rate at 9.4115, and the
+   * default formatting (at most three places) would publish 9.412, a figure
+   * BERC never stated.
+   */
+  decimals?: number;
 }
 
 /**
@@ -144,7 +151,12 @@ export function LiveMarketTicker({
         <span className={cn('font-semibold text-neutral-900 dark:text-neutral-50', textSize)}>{item.name}</span>
         <span className={cn('font-mono font-bold tabular-nums text-neutral-900 dark:text-neutral-50', textSize)}>
           {item.prefix}
-          {item.value?.toLocaleString(locale === 'bn' ? 'bn-BD' : 'en-US')}
+          {item.value?.toLocaleString(
+            locale === 'bn' ? 'bn-BD' : 'en-US',
+            item.decimals == null
+              ? undefined
+              : { minimumFractionDigits: item.decimals, maximumFractionDigits: item.decimals },
+          )}
           {item.unit && <span className="ml-0.5 text-neutral-500 dark:text-neutral-400 font-normal">{item.unit}</span>}
         </span>
         {/* The publishing body, named on the figure itself. */}

@@ -160,14 +160,18 @@ byte, asserted per file. Afterwards: republish the ~90 days holding `DataRelease
 means reparsing the source workbooks (`reingest_from_archive.py`), which is a different and
 much larger job. Do not guess at them; that would be inventing text.
 
-**5. The commodities strip is three hand-typed yearly rows.** `live-ticker.server.ts` carries
-Bulk Electricity (BERC), Diesel and Octane (BPC), read from `lib/data/macro/economics.ts` —
-one row per year, hand-maintained, no official document cited. Hamim asked for the real list of
-energy commodities the government imports or administers, each with its gazetted price, issuer,
-instrument and effective date. The research was started and lost to session limits; nothing
-usable survives. Note BPC moved to a **monthly automatic pricing formula in 2024** and BERC
-reprices LPG monthly, so a yearly table cannot be right by construction. Do not answer this
-from memory — the strip's own header says it carries gazetted prices and nothing else.
+**5. The commodities strip: electricity is sourced, fuels are not.** Since 2026-09-17 the
+strip's electricity tariffs come from `lib/data/tariff/berc-electricity-2026.ts` — lifeline 4.63
+and first step 5.26 (amendment notification memo …26.2569) and the Appendix-ka bulk rates per
+distributor and voltage (Reconsideration Order 2026/01), each read off the archived scan and
+printed to the digits the order uses. The one-day 8.39 national average is gone; there is no
+national bulk figure after 4 June. **Diesel and Octane are still hand-typed yearly rows** from
+`lib/data/macro/economics.ts`, "BPC · 2026", no document cited. BPC moved to a **monthly
+automatic pricing formula in 2024**, and BERC's notices page now also carries monthly LPG, jet
+fuel and furnace-oil price orders — none of which the strip reads yet. Do not answer this from
+memory: add a fuel only with the instrument that sets it. Also still carrying the superseded
+3 June figures: `lib/data/companies/berc.ts` / `macro/tariff.ts` (the Macro Trends bulk-tariff
+chart's `Jun 2026: 8.39`) and `lib/data/policy/policies.ts:689`.
 
 **6. The audit and security sweeps are partial.** `GRID_EXPLORER_AUDIT.md` and
 `CONTENT_INVENTORY.md` are from 2026-09-03 and predate everything since. Of the security pass,

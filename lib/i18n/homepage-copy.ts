@@ -1,5 +1,6 @@
 import type { SiteLocale } from '@/lib/locale';
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
+import { BULK_RATES, RESIDENTIAL_RATES } from '@/lib/data/tariff/berc-electricity-2026';
 
 /**
  * Keyed by `TickerItem.id`, so it has to be rekeyed whenever the strip's
@@ -16,6 +17,9 @@ const ENERGY_TICKER_LABELS_BN: Record<string, string> = {
   'energy-unserved': 'অপূরণীয় বিদ্যুৎ',
   'gas-prod': 'গ্যাস উৎপাদন',
   tariff: 'বাল্ক ট্যারিফ',
+  // BERC tariffs: labels come from the rate records themselves, so the
+  // Bengali names stay beside the figures they describe.
+  ...Object.fromEntries([...RESIDENTIAL_RATES, ...BULK_RATES].map((r) => [r.id, r.labelBn])),
   'diesel-bpc': 'ডিজেল',
   'octane-bpc': 'অকটেন',
   fx: 'ডলার/টাকা',

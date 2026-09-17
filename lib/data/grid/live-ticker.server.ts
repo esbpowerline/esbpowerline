@@ -1,8 +1,8 @@
 import 'server-only';
 
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
-import { macroTariffData } from '@/lib/data/macro/tariff';
 import { macroEconomicData } from '@/lib/data/macro/economics';
+import { BULK_RATES, RESIDENTIAL_RATES, type TariffRate } from '@/lib/data/tariff/berc-electricity-2026';
 
 /**
  * The commodities strip: things bought and sold at a rate somebody official set.
@@ -41,19 +41,33 @@ import { macroEconomicData } from '@/lib/data/macro/economics';
 
 const round = (v: number, d = 2) => Number(v.toFixed(d));
 
+/**
+ * "BERC 2026/01 · from Jun 2026 bill": the issuer, the instrument and the bill
+ * month it took effect, which is the only date a tariff can honestly carry.
+ */
+function tariffSource(rate: TariffRate): string {
+  const ref = rate.instrument.reference.replace(/^BERC (Reconsideration Order |amendment notification, )/, '');
+  const short = /^\d{4}\/\d+$/.test(ref) ? `BERC ${ref}` : 'BERC 4 Jun 2026';
+  return `${short} · from ${rate.instrument.effectiveFrom.replace(/^bill month (\w{3})\w* (\d{4})$/, '$1 $2')} bill`;
+}
+
 export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
   const items: TickerItem[] = [];
 
-  const tariffRow = macroTariffData[macroTariffData.length - 1];
-  if (tariffRow?.tariff) {
+  // BERC's electricity tariffs, each read from the instrument that fixed it
+  // (lib/data/tariff/berc-electricity-2026.ts). The single "Bulk Electricity
+  // 8.39" that stood here was a weighted average in force for one day; bulk is
+  // fixed per distributor and voltage level, so it is quoted that way.
+  for (const rate of [...RESIDENTIAL_RATES, ...BULK_RATES]) {
     items.push({
-      id: 'tariff',
-      name: 'Bulk Electricity',
-      value: round(tariffRow.tariff),
+      id: rate.id,
+      name: rate.label,
+      value: rate.value,
+      decimals: rate.decimals,
       unit: 'Tk/kWh',
       change: null,
       prefix: '',
-      source: `BERC · ${tariffRow.year}`,
+      source: tariffSource(rate),
     });
   }
 
