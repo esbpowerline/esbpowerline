@@ -27,6 +27,52 @@ def clean_float(val_str):
     except ValueError:
         return 0.0
 
+def station_float(val_str):
+    """A station figure, or None where the cell states no number.
+
+    `clean_float` reads a blank cell as 0.0, which is right for nothing on a
+    station row: 0 MW says the plant was measured and produced nothing, a blank
+    says PGCB entered no figure. Measured 2026-09-17 across the archive, about
+    one P2 figure in two hundred is blank, and from 2018 to 2024 four to forty
+    stations a day have an entirely empty column in the hourly log — all of it
+    published as generation of zero. "-", "N/A" and unit labels ("MW") state no
+    number either.
+    """
+    if not re.search(r'\d', str(val_str or '')):
+        return None
+    return clean_float(val_str)
+
+
+def sheet_stated_day(content, sheet_name, rows=8):
+    """The ISO date a sheet prints about itself near its top, or None.
+
+    P2 writes "Date : | 2019-06-10" (or "01-04-2025"); YesterdayGen puts a bare
+    date cell on its first row. What the date means is not uniform — from 2020
+    to 2024 P2 often carries the filing date, the day after the one it
+    describes — so a caller must never act on it alone. It is the evidence that
+    turns a figure disagreement into a finding about which day a sheet is.
+    """
+    body = get_sheet_content(content, sheet_name)
+    for line in body.split('\n')[:rows]:
+        for cell in (c.strip() for c in line.split('|')):
+            m = re.match(r'^(\d{4})-(\d{2})-(\d{2})(?:\s|$)', cell)
+            if m:
+                return f'{m.group(1)}-{m.group(2)}-{m.group(3)}'
+            m = re.match(r'^(\d{1,2})[-./](\d{1,2})[-./](\d{4})$', cell)
+            if m:
+                try:
+                    return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1))).isoformat()
+                except ValueError:
+                    return None
+    return None
+
+
+def _sum_present(values):
+    """Sum of the figures that were stated; None when none were."""
+    stated = [v for v in values if v is not None]
+    return sum(stated) if stated else None
+
+
 def parse_date_from_filename(f):
     m = re.search(r'(\d{1,2})[-. ](\d{1,2})[-. ](\d{2,4})', f)
     if not m:
@@ -355,11 +401,11 @@ def hourly_shed_from_yesterday_gen(content):
         {
             'time': hour,
             'generation': national[i],
-            'loadShed': round(shortage[i], 2) if i < len(shortage) else None,
+            'loadShed': round(shortage[i], 2) if i < len(shortage) and shortage[i] is not None else None,
             'demand': None,
         }
         for i, hour in enumerate(log['hours'])
-        if national[i] > 0
+        if national[i] is not None and national[i] > 0
     ]
 
 # Every series the En-Curve sheet has carried, under one set of names. Held as a
@@ -668,6 +714,338 @@ def _hhmm(text):
     return int(hh) + int(mm) / 60
 
 
+def _sheet_rows(sheet):
+    """A sheet's pipe-table rows as cell lists, each opening on its first column.
+
+    The same leading-delimiter normalisation `parse_ewic` does, for the same
+    reason: the markdown form opens every row with '|', the plain-text form
+    does not, and indexing off one silently shifts the other by a column.
+    """
+    for line in sheet.split('\n'):
+        if '|' not in line:
+            continue
+        if not line.lstrip().startswith('|'):
+            line = '|' + line
+        parts = [c.strip() for c in line.split('|')]
+        yield parts[1:-1] if len(parts) > 1 and parts[-1] == '' else parts[1:]
+
+
+def _sheet_iso_date(cells):
+    """The date a sheet's own "Date" row prints, as ISO, or None.
+
+    Three renderings reach here: "28-05-2026" typed as text, "2021-02-28
+    00:00:00" from a date cell, and the bare Excel serial "40967.0" that the
+    older .xls converters leave behind.
+    """
+    for cell in cells:
+        m = re.match(r'^(\d{4})-(\d{2})-(\d{2})', cell)
+        if m:
+            return f'{m.group(1)}-{m.group(2)}-{m.group(3)}'
+        m = re.match(r'^(\d{1,2})[-./](\d{1,2})[-./](\d{4})$', cell)
+        if m:
+            try:
+                return datetime.date(int(m.group(3)), int(m.group(2)), int(m.group(1))).isoformat()
+            except ValueError:
+                return None
+        m = re.match(r'^(\d{5})(?:\.0+)?$', cell)
+        if m:
+            return (datetime.date(1899, 12, 30) + datetime.timedelta(days=int(m.group(1)))).isoformat()
+    return None
+
+
+# The load curve's split by grid half. Each column is located from the header
+# row, never by position, because the header moved: the 2014-2018 "L.curve"
+# reads TIME | E-W INT. | EAST GRID | WEST GRID | TOTAL and the later "L-Curve"
+# drops the interconnector column. `lcurve_total_series` learned that the hard
+# way — a fixed index there silently returned West Grid as national generation.
+LCURVE_COLUMNS = (
+    ('east', re.compile(r'^EAST(\s+GRID)?$')),
+    ('west', re.compile(r'^WEST(\s+GRID)?$')),
+    ('total', re.compile(r'^TOTAL$')),
+    ('eastWestInterchange', re.compile(r'^E\s*-?\s*W\b')),
+)
+
+# East + West against the printed TOTAL. The sheet's own arithmetic, so the
+# only slack is the half-megawatt its interpolated rows are printed to.
+LCURVE_SUM_TOLERANCE_MW = 1.0
+
+
+def parse_load_curve_grids(content):
+    """The L-Curve sheet split by grid half: East Grid, West Grid and their total.
+
+    `lcurve_total_series` has always read this sheet for its TOTAL column alone,
+    and the two halves printed beside it were discarded. They are the only
+    half-hourly statement of where in the country the power was generated —
+    zone demand is printed once, at the evening peak. On 2026-05-28 the East
+    carried 7,209 MW of 12,518 at 23:00.
+
+    The 2014-2018 layout also prints the East-West interconnector's flow in its
+    own column, years before PGCB gave the interconnector a sheet of its own
+    (`parse_ewic`, 2026-04-24 on). Its sign is PGCB's and is kept as printed.
+
+    **Most half hours are PGCB's interpolation, not readings.** 2026-05-28 00:30
+    East is 4,866.5 = (4,912 + 4,821) / 2, and so on through the day — except
+    19:30, the evening peak, which is logged. On 146 sheets sampled across
+    2014-2026, 121 interpolate 22 of their 23 half hours and 25 interpolate 21.
+    Which is which is
+    tested per row and listed in `interpolatedHalfHours`, so nothing downstream
+    presents a straight line between two readings as a measurement.
+
+    A blank cell is None, never 0. The 24:00 row the older sheets close on is
+    left out, for the reason `lcurve_total_series` gives. East + West is compared
+    with the printed TOTAL and a disagreement is reported in `checks`, never
+    corrected.
+
+    Returns {'sheetDate', 'series', 'rows', 'interpolatedHalfHours', 'checks'}
+    or None when the sheet or its East/West columns are absent.
+    """
+    sheet = get_sheet_content(content, 'L-Curve')
+    if not sheet:
+        return None
+
+    sheet_date = None
+    columns = None
+    rows = []
+    for cells in _sheet_rows(sheet):
+        if not cells:
+            continue
+        if cells[0].lower().rstrip(':') == 'date' and sheet_date is None:
+            sheet_date = _sheet_iso_date(cells[1:])
+            continue
+        if columns is None:
+            if cells[0].upper() == 'TIME':
+                found = {}
+                for i, cell in enumerate(cells):
+                    for key, pattern in LCURVE_COLUMNS:
+                        if key not in found and pattern.match(' '.join(cell.upper().split())):
+                            found[key] = i
+                if 'east' not in found or 'west' not in found:
+                    return None
+                columns = found
+            continue
+        m = re.match(r'^(\d{1,2}):(\d{2})(?::\d{2})?$', cells[0])
+        if not m:
+            continue
+        time = f'{int(m.group(1)):02d}:{m.group(2)}'
+        if time == '24:00':
+            continue
+        row = {'time': time}
+        for key in columns:
+            idx = columns[key]
+            row[key] = _ewic_num(cells[idx]) if idx < len(cells) else None
+        if all(row[k] is None for k in columns):
+            continue
+        rows.append(row)
+
+    if not rows:
+        return None
+
+    checks = []
+    for row in rows:
+        east, west, total = row['east'], row['west'], row.get('total')
+        if None in (east, west, total):
+            continue
+        if abs(east + west - total) > LCURVE_SUM_TOLERANCE_MW:
+            checks.append({
+                'scope': row['time'],
+                'message': (f'{row["time"]}: East {east:,.1f} + West {west:,.1f} = '
+                            f'{east + west:,.1f} MW, but the sheet prints a total of {total:,.1f} MW.'),
+            })
+
+    # A half hour whose East and West are both exactly the mean of the hours
+    # either side. Named per row, not claimed for the sheet: 19:30 is a real
+    # evening-peak reading (2026-05-28 totals 12,359 MW, not the 11,818.5 its
+    # neighbours average to), and a few sheets log one more.
+    by_time = {r['time']: r for r in rows}
+    interpolated = []
+    for row in rows:
+        hh, mm = row['time'].split(':')
+        if mm != '30':
+            continue
+        before = by_time.get(f'{int(hh):02d}:00')
+        after = by_time.get(f'{int(hh) + 1:02d}:00')
+        if not before or not after:
+            continue
+        if all(None not in (row[k], before[k], after[k])
+               and abs((before[k] + after[k]) / 2 - row[k]) <= 0.01
+               for k in ('east', 'west')):
+            interpolated.append(row['time'])
+
+    return {
+        'sheetDate': sheet_date,
+        'series': [k for k, _ in LCURVE_COLUMNS if k in columns],
+        'rows': rows,
+        'interpolatedHalfHours': interpolated,
+        'checks': checks,
+    }
+
+
+# Nominal kV for each block heading the voltage sheet prints. Used only to say
+# which level a row belongs to and to flag a reading no bus at that level can
+# carry — never to alter one.
+VOLTAGE_LEVEL = re.compile(r'^(\d{2,3})\s*kv$', re.IGNORECASE)
+
+# ±30% of nominal. The check is for figures mistyped into the sheet —
+# 2021-02-28 gives Bheramara 400 kV a maximum of 4,052, 2022-02-12 Shyampur
+# 230 kV a minimum of 24 — and it must not fire on a stressed bus. ±15% was
+# tried first and flagged 9,748 readings across the archive, nearly all of them
+# 132 kV minima of 105-112 kV at the western ends (Chuadanga, Jhenida, Magura):
+# real undervoltage, which a typo check has no business reporting and which
+# buried the actual typos under it. How low a bus ran is for the reader to see
+# in the figures, not for the parser to grade.
+VOLTAGE_PLAUSIBLE_BAND = 0.30
+
+
+def parse_voltage(content):
+    """The Voltage sheet: each grid substation's maximum and minimum bus voltage.
+
+    One row per substation per voltage level — 400, 230 and 132 kV — with the
+    day's highest and lowest reading and the hour each was logged. It is the
+    only place the daily report says anything about power quality at the
+    substations: 2026-05-28 put Mongla 132 kV at 114 kV at 19:00, 14% under
+    nominal, while its neighbours held 130.
+
+    The table is printed as two side-by-side blocks of five columns, each with
+    its own level headings, and the right-hand block is shorter. Block starts
+    are located from the header row ("Substation" / "Sub-Station") rather than
+    fixed, because the 2021 layout carries a leading empty column and the 2026
+    one does not.
+
+    Everything is reproduced as printed. "N/A" and blank cells are None; a
+    substation listed with nothing against it is kept, because the listing is
+    itself what the sheet says. Three things are reported in `checks`, never
+    repaired, since which figure PGCB meant is PGCB's to say:
+
+      * a reading outside ±30% of the level's nominal voltage (2021-02-28,
+        Bheramara 400 kV maximum printed as 4,052)
+      * a reading of exactly 0 kV — Kaptai and Modern Steel both print
+        "0 at 01:00, 0 at 02:00" on 2021-02-28, which reads as a placeholder
+        for a station out of service rather than a measured dead bus
+      * a maximum below its own minimum
+
+    Returns {'sheetDate', 'rows', 'checks'} or None when the sheet is absent or
+    yields no substation.
+    """
+    sheet = ''
+    for name in ('Voltage', 'Volt'):
+        sheet = get_sheet_content(content, name)
+        if sheet:
+            break
+    if not sheet:
+        return None
+
+    sheet_date = None
+    starts = None
+    levels = {}
+    section = 0
+    rows = []
+    for cells in _sheet_rows(sheet):
+        if not any(cells):
+            continue
+        if sheet_date is None:
+            for i, cell in enumerate(cells):
+                if cell.lower().rstrip(': ') == 'date':
+                    sheet_date = _sheet_iso_date(cells[i + 1:])
+                    break
+        if starts is None:
+            found = [i for i, c in enumerate(cells)
+                     if re.sub(r'[^a-z]', '', c.lower()) == 'substation']
+            if found:
+                starts = found
+            continue
+        blocks = {start: (cells[start:start + 5] + [''] * 5)[:5] for start in starts}
+        # A level heading applies to every block on its row. The two blocks
+        # are one alphabetical list printed in two halves, so they change level
+        # together — and from 2023-03 to 2024-01 only the left block says so:
+        # the right one's "132 kV" is blank, or overtyped with a station name
+        # ("Tongi | KV | | KV", or a bare "Tongi"). Trusting each block's own
+        # name filed ~90 132 kV rows a day under 230 kV and flagged every one
+        # as implausible. Whatever sits in a block on a heading row is part of
+        # the heading, not a substation reading.
+        row_level = next((int(m.group(1)) for b in blocks.values()
+                          if (m := VOLTAGE_LEVEL.match(' '.join(b[0].split())))), None)
+        if row_level is not None:
+            section += 1
+            for start, block in blocks.items():
+                m = VOLTAGE_LEVEL.match(' '.join(block[0].split()))
+                levels[start] = int(m.group(1)) if m else row_level
+            continue
+        for start, block in blocks.items():
+            name = ' '.join(block[0].split())
+            if not name or start not in levels:
+                continue
+            rows.append({
+                'level': levels[start],
+                'substation': name,
+                'max': _voltage_num(block[1]),
+                'maxTime': _voltage_time(block[2]),
+                'min': _voltage_num(block[3]),
+                'minTime': _voltage_time(block[4]),
+                '_key': (section, start, len(rows)),
+                '_printed': any(block[1:]),
+            })
+
+    # Read order is the sheet's: each level's left column top to bottom, then
+    # its right column — not the row-by-row interleaving the table is scanned in.
+    rows.sort(key=lambda r: r['_key'])
+
+    # A footer ("Executive Engineer", "Network Operation Division") has a name
+    # and no figures, exactly like a listed substation with nothing filled in.
+    # A listed substation sits among rows that carry figures; a footer comes
+    # after all of them. So an empty row is kept only when a filled row follows
+    # it in the same column — the right column is shorter, and a footer printed
+    # there sits beside readings still running down the left.
+    last_filled = {}
+    for i, r in enumerate(rows):
+        if r['_printed']:
+            last_filled[r['_key'][1]] = i
+    rows = [r for i, r in enumerate(rows)
+            if r['_printed'] or i < last_filled.get(r['_key'][1], -1)]
+    for r in rows:
+        del r['_printed'], r['_key']
+    if not any(r['max'] is not None or r['min'] is not None for r in rows):
+        return None
+
+    checks = []
+    for r in rows:
+        label = f"{r['substation']} {r['level']} kV"
+        nominal = r['level']
+        for key in ('max', 'min'):
+            v = r[key]
+            if v is None:
+                continue
+            if v == 0:
+                checks.append({'scope': label,
+                               'message': f'{label}: {key}imum printed as 0 kV at {r[key + "Time"] or "no stated time"}.'})
+            elif abs(v - nominal) / nominal > VOLTAGE_PLAUSIBLE_BAND:
+                checks.append({'scope': label,
+                               'message': (f'{label}: {key}imum printed as {v:,g} kV, outside ±30% of nominal. '
+                                           'Reproduced as published.')})
+        if r['max'] is not None and r['min'] is not None and r['max'] < r['min']:
+            checks.append({'scope': label,
+                           'message': f'{label}: maximum {r["max"]:,g} kV is below its minimum {r["min"]:,g} kV.'})
+
+    return {'sheetDate': sheet_date, 'rows': rows, 'checks': checks}
+
+
+def _voltage_num(cell):
+    """A kV reading, or None for a blank or an "N/A"."""
+    return _ewic_num(cell)
+
+
+def _voltage_time(cell):
+    """The hour a reading was logged, as HH:MM, or None.
+
+    "05:00:00", "7:00:00" and "24:00" all occur. 24:00 is kept as printed: it
+    is PGCB's end-of-day stamp, and rewriting it to 00:00 would move the reading
+    to the start of the day.
+    """
+    m = re.match(r'^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$', (cell or '').strip())
+    if not m or int(m.group(1)) > 24 or int(m.group(2)) > 59:
+        return None
+    return f'{int(m.group(1)):02d}:{m.group(2)}'
+
+
 def published_demand_stats(p1, forecast):
     """Figures P1 states outright that the site used to estimate instead.
 
@@ -828,6 +1206,12 @@ GENLOG_AGGREGATES = {
 }
 GENLOG_IGNORED = {'water level', 'hour', ''}
 
+# Columns PGCB keeps in the hourly matrix as placeholders — a retired plant's
+# slot and the spacer beside each grid total. They carry no figure on any hour,
+# and until 2026-09-17 every 2018-2024 day published four to forty of them as
+# power stations generating 0 MW around the clock.
+PLACEHOLDER_STATION = re.compile(r'^plant\s*removed$|blank$', re.IGNORECASE)
+
 
 def parse_genlog(content):
     """Hourly generation per power station, from the GenLog sheet.
@@ -859,7 +1243,7 @@ def parse_genlog(content):
     stations, aggregates = [], {}
     for col, name in enumerate(header):
         key = name.lower().strip()
-        if col == hour_col or key in GENLOG_IGNORED:
+        if col == hour_col or key in GENLOG_IGNORED or PLACEHOLDER_STATION.search(key):
             continue
         if key in GENLOG_AGGREGATES:
             aggregates[GENLOG_AGGREGATES[key]] = col
@@ -867,7 +1251,7 @@ def parse_genlog(content):
             stations.append({
                 'col': col,
                 'name': name,
-                'capacityMw': clean_float(capacity[col]) if col < len(capacity) else 0.0,
+                'capacityMw': station_float(capacity[col]) if col < len(capacity) else None,
             })
     if not stations:
         return None
@@ -886,7 +1270,7 @@ def parse_genlog(content):
             continue
         hours.append(stamp)
         for col in values:
-            values[col].append(clean_float(cells[col]) if col < len(cells) else 0.0)
+            values[col].append(station_float(cells[col]) if col < len(cells) else None)
 
     if not hours:
         return None
@@ -906,7 +1290,11 @@ def parse_genlog(content):
 # plant doubles that section's contribution — matching only "area|zone|grid
 # total" let the 2014 sector rows through and put the day 79% over its own
 # published peak. Any row whose name ends in "total" is a roll-up.
-P2_TOTAL_ROW = re.compile(r'\btotals?\s*[:.]?\s*$|\b(area|zone|grid)\s+total\b', re.I)
+#
+# Including PGCB's own misspelling: 48 workbooks of 2015 close the sheet on a
+# row labelled "Totel", which was read as a 6,213 MW power station, doubled the
+# day, and got every one of those days refused by the reconciliation.
+P2_TOTAL_ROW = re.compile(r'\btot[ae]ls?\s*[:.]?\s*$|\b(area|zone|grid)\s+tot[ae]l\b', re.I)
 
 
 def _p2_header_columns(lines, name_row):
@@ -1007,14 +1395,26 @@ def parse_p2_stations(content):
         return cells[idx].strip() if idx is not None and idx < len(cells) else ''
 
     units, totals = [], {}
+    # Bumped at every roll-up row, so unit grouping never reaches across an
+    # area total (see _p2_group_units).
+    section = 0
     for line in lines[name_row + 1:]:
         cells = line.split('|')
         name = re.sub(r'\s*<br>\s*', ' ', cell(cells, name_col)).strip()
 
-        peak = clean_float(cell(cells, peak_col))
-        energy = clean_float(cell(cells, energy_col))
-        present = clean_float(cell(cells, present_col))
+        peak = station_float(cell(cells, peak_col))
+        energy = station_float(cell(cells, energy_col))
+        present = station_float(cell(cells, present_col))
         if not any(cell(cells, c) for c in (peak_col, energy_col, present_col)):
+            continue
+        # The header's last line — "Unit No. X Capacity | MW | MW | MW" — has
+        # text in every value column, so it passed the test above as an
+        # unnamed unit and was folded into the first station: 1,519 days of
+        # 2018-2024 publish Ghorasal's installed capacity as "Unit No. X
+        # Capacity+2*55". A row with no name and no digit anywhere it could
+        # hold a figure is a heading, not a unit.
+        if not name and not any(re.search(r'\d', cell(cells, c))
+                                for c in (peak_col, energy_col, present_col, installed_col)):
             continue
 
         # Roll-up rows do not always sit in the station-name column: on the 2025
@@ -1029,16 +1429,24 @@ def parse_p2_stations(content):
             if key:
                 totals[key] = {'presentCapacityMw': present, 'eveningPeakMw': peak, 'energyKwh': energy}
             # Area totals are recorded nowhere and simply skipped.
+            section += 1
             continue
 
         units.append({
+            'section': section,
             'name': name if len(name) >= 3 else '',
             'producer': cell(cells, producer_col),
             'installedCapacity': cell(cells, installed_col),
             'presentCapacityMw': present,
             'eveningPeakMw': peak,
             'energyKwh': energy,
-            'remarks': cell(cells, remarks_col),
+            # The 2014-2017 header prints "Remarks" one column to the right of
+            # where the remarks are typed, so the named column is empty on every
+            # row and "Long term maint." / "Under maint." were dropped from each
+            # day of that era. The remark is the first text after the energy.
+            'remarks': cell(cells, remarks_col) or next(
+                # Words only: 2017 sheets carry a stray "0" out there too.
+                (c.strip() for c in cells[energy_col + 1:] if re.search(r'[A-Za-z]', c)), ''),
         })
 
     stations = _p2_group_units(units)
@@ -1079,20 +1487,41 @@ def _p2_group_units(units):
         if unit['name']:
             groups[i].append(i)
             continue
-        earlier = [j for j in named if j < i]
-        groups[earlier[-1] if earlier else named[0]].append(i)
+        # Never across an area total. On the 2014 layout a region's first
+        # station is often centred below its first unit, so that unit follows
+        # the previous area's total row — and "the named row above" was the
+        # last station of the previous area. Checked against the raw cells of
+        # 2014-01-02: Malancha (Chittagong) was published at 76 MW for its
+        # printed 26, holding Ashuganj's 50 MW unit, and Sylhet 11 MW RPP at 25
+        # for 10, holding the next area's GT-1. Totals were unaffected, so no
+        # reconciliation could see it.
+        same = [j for j in named if units[j].get('section') == unit.get('section')]
+        earlier = [j for j in same if j < i]
+        later = [j for j in same if j > i]
+        if earlier:
+            head = earlier[-1]
+        elif later:
+            head = later[0]
+        else:
+            before = [j for j in named if j < i]
+            head = before[-1] if before else named[0]
+        groups[head].append(i)
 
     stations = []
     for head in named:
         rows = [units[i] for i in sorted(groups[head])]
-        capacity = sum(r['presentCapacityMw'] for r in rows)
+        capacity = _sum_present(r['presentCapacityMw'] for r in rows)
+        peak = _sum_present(r['eveningPeakMw'] for r in rows)
+        energy = _sum_present(r['energyKwh'] for r in rows)
         stations.append({
             'name': units[head]['name'],
             'producer': next((r['producer'] for r in rows if r['producer']), ''),
             'installedCapacity': '+'.join(r['installedCapacity'] for r in rows if r['installedCapacity']),
-            'presentCapacityMw': round(capacity, 2) or None,
-            'eveningPeakMw': round(sum(r['eveningPeakMw'] for r in rows), 2),
-            'energyKwh': round(sum(r['energyKwh'] for r in rows), 2),
+            # A printed 0 is kept: "Contract Expired" plants carry 0 MW of
+            # present capacity, and that is PGCB's statement, not an absence.
+            'presentCapacityMw': round(capacity, 2) if capacity is not None else None,
+            'eveningPeakMw': round(peak, 2) if peak is not None else None,
+            'energyKwh': round(energy, 2) if energy is not None else None,
             'remarks': next((r['remarks'] for r in rows if r['remarks']), ''),
         })
     return stations
@@ -1132,7 +1561,8 @@ def parse_yesterday_gen(content):
     name_col = next((i for i, h in enumerate(header) if re.search(r'plant name', norm_text(h))), 0)
 
     stations = [{'name': h, 'col': i} for i, h in enumerate(header[:stop])
-                if h and i != name_col and not set(h) <= set(':- ')]
+                if h and i != name_col and not set(h) <= set(':- ')
+                and not PLACEHOLDER_STATION.search(h.strip())]
     aggregates = {}
     for i, h in enumerate(header):
         key = ('eastern' if re.search(r'eastern grid total', norm_text(h)) else
@@ -1160,16 +1590,17 @@ def parse_yesterday_gen(content):
             continue
         hours.append(hour)
         for col in values:
-            values[col].append(clean_float(cells[col]) if col < len(cells) else 0.0)
+            values[col].append(station_float(cells[col]) if col < len(cells) else None)
         for key, col in aggregates.items():
-            totals[key].append(clean_float(cells[col]) if col < len(cells) else 0.0)
+            totals[key].append(station_float(cells[col]) if col < len(cells) else None)
 
     if len(hours) < 20:
         return None
     return {
         'hours': hours,
         'stations': [
-            {'name': s['name'], 'capacityMw': 0, 'hourlyMw': values[s['col']]}
+            # The sheet prints no capacity row; 0 would claim one of zero MW.
+            {'name': s['name'], 'capacityMw': None, 'hourlyMw': values[s['col']]}
             for s in stations
         ],
         'totals': totals,
@@ -1246,11 +1677,13 @@ def parse_plant_actuals(forecast):
             # "Installed Capacity" spans two sub-columns: the unit breakdown
             # ("1*210") and its total in MW.
             'installedCapacity': cell(installed_col),
-            'installedMw': clean_float(cell(installed_col + 1 if installed_col is not None else None)) or None,
-            'presentCapacityMw': clean_float(cell(present_col)) or None,
+            'installedMw': station_float(cell(installed_col + 1 if installed_col is not None else None)),
+            # A printed 0 is PGCB's statement ("Contract Expired"); only a
+            # blank is an absence.
+            'presentCapacityMw': station_float(cell(present_col)),
             # The two columns immediately under "Actual Generation on <date>".
-            'dayPeakMw': clean_float(cell(actual_col)),
-            'eveningPeakMw': clean_float(cell(actual_col + 1)),
+            'dayPeakMw': station_float(cell(actual_col)),
+            'eveningPeakMw': station_float(cell(actual_col + 1)),
         })
     return plants or None
 

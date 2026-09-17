@@ -46,15 +46,63 @@ from parse_daily_reports import (  # noqa: E402
     parse_plant_actuals,
     parse_pgcb_file,
     parse_yesterday_gen,
+    sheet_stated_day,
 )
 
 REPO = Path(__file__).resolve().parent.parent
 # The station total at a peak should reproduce P1's figure for that peak.
 # A megawatt of slack absorbs the sheet's own rounding.
 PEAK_TOLERANCE_MW = 1.5
+DUPLICATE_SUSPECTS = DAILY.parent / "grid-verification" / "duplicate-suspect-days.json"
 
 
-def plants_from_p2(text):
+def _declared_duplicates() -> set[frozenset[str]]:
+    try:
+        pairs = json.loads(DUPLICATE_SUSPECTS.read_text(encoding="utf-8")).get("pairs") or []
+    except (OSError, ValueError):
+        return set()
+    return {frozenset(p) for p in pairs}
+
+
+def p2_describes_another_day(text, day, stats):
+    """The day P2 describes when it is demonstrably not `day`, else None.
+
+    The builder never read the date P2 prints about itself, and checked its
+    station total against P1 with a percent of slack. Both gaps were live
+    (source sweep, 2026-09-17, 2,247 workbooks):
+
+      * 2015-12-14 published 2015-12-13's station table. PGCB left P2 un-updated
+        in the 15-12-15 workbook — it says "Date : 2015-12-13" and totals 6,706
+        MW, which is the 13th's evening peak; the 14th's is 6,749. A 0.6% gap
+        sat inside the 1% allowance.
+      * 2026-04-03 took its per-station energy from a P2 dated 2026-04-04 whose
+        total is the 4th's 14,939.9 MW, so every station's day energy on the
+        3rd belonged to the 4th (+2.6% against the day's published energy).
+      * 2022-02-28 and 2022-07-10 carry workbooks whose P2 (and YesterdayGen and
+        L-Curve) name the day before, and the daily figures for each pair are
+        identical — the declared duplicates. No figure test can see those.
+
+    The printed date is not enough on its own: 2020-2024 P2 sheets often carry
+    the filing date, and 2016-01-09 / 2017-01-16 / 2024-10-12 / 2024-11-17 carry
+    typos, yet all twelve reproduce their own day's P1 to the megawatt. So a
+    sheet is ruled another day's only when its date says so AND either its
+    total fails this day's P1 or the day it names is a declared duplicate of
+    this one.
+    """
+    stated = sheet_stated_day(text, "P2")
+    if not stated or stated == day:
+        return None
+    if frozenset((day, stated)) in _declared_duplicates():
+        return stated
+    p2 = parse_p2_stations(text) or {}
+    printed = ((p2.get("totals") or {}).get("national") or {}).get("eveningPeakMw")
+    published = (stats or {}).get("eveningPeakGen")
+    if printed is None or published is None:
+        return None
+    return stated if abs(float(printed) - float(published)) > PEAK_TOLERANCE_MW else None
+
+
+def plants_from_p2(text, day=None, stats=None):
     """The Forecast sheet's per-plant table, or P2's where the day has none.
 
     Forecast carries "Actual Generation on <day>" from 2025 and nothing before,
@@ -66,9 +114,14 @@ def plants_from_p2(text):
     Returns (plants, p2_totals). `dayPeakMw` is None on the P2 path: that column
     exists only on the Forecast sheet, and inventing it from the evening peak
     would be a measurement the report never made.
+
+    Given `day` and its `stats`, a P2 that describes another day is not used
+    at all — neither as the plant table nor for the Forecast rows' energy.
     """
     plants = parse_plant_actuals(get_sheet_content(text, "Forecast"))
     p2 = parse_p2_stations(text)
+    if p2 and day and p2_describes_another_day(text, day, stats):
+        p2 = None
 
     if plants:
         # Even where Forecast supplies the peaks, only P2 has the day's energy.
@@ -179,7 +232,7 @@ def reconcile(plants, genlog, stats, curve):
             off = [
                 (h, n, curve[h])
                 for h, n in zip(hours, published)
-                if h in curve and abs(n - curve[h]) > PEAK_TOLERANCE_MW
+                if h in curve and n is not None and abs(n - curve[h]) > PEAK_TOLERANCE_MW
             ]
             # East and West are each a part of the whole, so only the national
             # column is expected to reproduce the curve. The other two are
@@ -187,7 +240,7 @@ def reconcile(plants, genlog, stats, curve):
             if series != "national" or not off:
                 continue
             summed_ok = stations and all(
-                abs(sum(s["hourlyMw"][i] for s in stations) - curve[h]) <= PEAK_TOLERANCE_MW
+                abs(sum(s["hourlyMw"][i] or 0 for s in stations) - curve[h]) <= PEAK_TOLERANCE_MW
                 for i, h in enumerate(hours)
                 if h in curve
             )
@@ -277,9 +330,18 @@ def main() -> None:
             stats["source unreadable"] += 1
             continue
 
-        plants, p2_totals = plants_from_p2(text)
+        system_stats = parsed.get("systemStats") or {}
+        other_day = p2_describes_another_day(text, day, system_stats)
+        if other_day:
+            stats["P2 describes another day — not used"] += 1
+            flagged.append(f"{day}: P2 states {other_day} and does not reproduce this day")
+        plants, p2_totals = plants_from_p2(text, day, system_stats)
         # GenLog from 2025, the same matrix transposed as YesterdayGen before it.
         genlog = parse_genlog(text) or parse_yesterday_gen(text)
+        # The hourly matrix of the same workbook, when it names the same other
+        # day, is that day's too (2022-02-28, 2022-07-10).
+        if genlog and other_day and sheet_stated_day(text, "YesterdayGen") == other_day:
+            genlog = None
         if not plants and not genlog:
             stats["neither sheet present"] += 1
             continue
@@ -290,7 +352,6 @@ def main() -> None:
         if genlog:
             doc["genlog"] = genlog
 
-        system_stats = parsed.get("systemStats") or {}
         problems = reconcile(plants, genlog, system_stats, lcurve_total_series(text))
         # A day whose peaks come from P2 cannot be checked the Forecast way —
         # there is no day-peak column — so it is checked against P2's own

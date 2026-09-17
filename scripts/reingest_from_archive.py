@@ -149,7 +149,7 @@ def build_plants(pgcb: Path, day: str, stats: dict) -> tuple[dict | None, list[s
     # Same selection as build_daily_plants, so a day collected here and a day
     # rebuilt from the archive carry the same fields — including the per-station
     # day energy, which only P2 states and which this path used to drop.
-    plants, p2_totals = plants_from_p2(text)
+    plants, p2_totals = plants_from_p2(text, day, stats)
     genlog = parse_genlog(text) or parse_yesterday_gen(text)
     if not plants and not genlog:
         return None, []
