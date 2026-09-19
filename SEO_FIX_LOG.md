@@ -1096,3 +1096,96 @@ documented. Editorial items unchanged.
 
 This section is committed to `authenticating` only; `main` carries the code and is one
 docs commit behind, which the next release closes.
+
+### 10.8 The www redirect, closed from the CLI (2026-09-19)
+
+S9-5 was "dashboard only". It was not. `vercel api` (beta) had been refusing every path
+because Git Bash rewrites a leading `/v9/…` into a Windows path; with
+`MSYS_NO_PATHCONV=1` it works. The project had **only the apex** attached
+(`GET /v9/projects/esbpowerline/domains`: one entry, no redirect), so the 307 on
+`www.esbpowerline.com` was Vercel's default for a host on its DNS that belongs to no
+project — which is also why the `vercel.json` host rule never ran: the request never
+reached the project. Fix: attach the host to the project as a redirect,
+
+```
+vercel api /v10/projects/esbpowerline/domains -X POST \
+  -f name=www.esbpowerline.com -f redirect=esbpowerline.com -F redirectStatusCode=308
+```
+
+verified immediately (Vercel DNS, same account). Live 15 s later: `https://www.` → 308
+`https://esbpowerline.com/` (path preserved), `http://www.` → 308 `https://www.` → 308
+apex. Still two hops on plain-http www, which is the HSTS-preload shape and stays.
+Reversible with `DELETE /v9/projects/esbpowerline/domains/www.esbpowerline.com`.
+S9-5: **deployed and verified in production**; Google's redirect list is unchanged
+until recrawl.
+
+While the API was open: the team `teamesb` is on the **Pro** plan, billing period
+2026-09-13 → 2026-10-13 (`GET /v2/teams?slug=teamesb`). The usage figures themselves
+are not exposed by the public API; the dashboard read is still owed.
+
+### 10.9 S10-4 and S10-5, fixed by two agents in worktrees (2026-09-19)
+
+Both measured on a local production build, before and after, with Puppeteer driving
+Edge under a real Chrome user-agent; both cherry-picked onto `authenticating` and the
+merged tree re-verified (91 files, 968 tests; `tsc`, `eslint` clean).
+
+**S10-5 — homepage cold weight** (`bfa614fe0`, `perf(home)`). Five causes, all
+evidenced in the network log rather than guessed:
+
+1. `HomeTrendingSection` "prewarmed" five images with `new window.Image().src =
+   originalUrl` — the raw Supabase Storage originals, a different URL from the
+   `/_next/image` candidates the `<Image>` actually renders, so nothing could reuse
+   them. 535 KB of the 738 KB of images on a cold phone load, fetched while the LCP
+   image was still downloading. Removed.
+2. The masthead link prefetched `/` from `/` — 64 KB of RSC for a click that only
+   scrolls to the top on the homepage. `prefetch={pathname !== '/'}`.
+3. Source Serif 4 was preloaded on every page and used by no rendered element (the
+   typographic masthead was retired 2026-09-03). 51 KB ahead of the LCP. `preload:
+   false`; the face stays registered.
+4. The hero image's preload carried no `fetchPriority`; added `high` on the first
+   slide. Observed LCP-image load 790 ms → 11 ms.
+5. Six promotional images had no `sizes` (the browser chose the 2560 px candidate for a
+   24 rem slot) and interview thumbnails claimed `100vw` for a 2–4 column grid. Each
+   now describes its slot.
+
+| Cold mobile load, local production build | Before | After |
+|---|---:|---:|
+| Requests | 63 | 55 |
+| Transfer | 1,765 KB | 1,101 KB |
+| Images | 14 / 738 KB | 9 / 181 KB |
+| Fonts | 4 / 164 KB | 3 / 113 KB |
+| RSC / fetch | 12 / 140 KB | 10 / 84 KB |
+| Lighthouse mobile LCP | 7.1 s | 5.3–5.6 s |
+
+What remains of LCP is render delay behind the 87 KB blocking stylesheet and hydration
+of a document carrying 24 articles × 10 categories in its RSC payload — structural, and
+not touched. Script weight was examined and left: nothing heavy reaches the homepage
+bundle that is not needed above the fold; gtag (174 KB) is already `lazyOnload`.
+
+**S10-4 — Grid Explorer duplicate fetches** (`3d869f6ee`, `perf(grid)`). Cause: the
+Overview's prior-seven-days walker keys its effect on `systemStats`, a fresh object on
+every resolution of the explorer's own refresh fetch, so it re-ran up to three times a
+view; and every result cache above the fetch layer is filled only after a response
+lands, so a day still in flight was asked again — and a 403 day, never cached by
+design, on every run. Fix: one in-flight promise map keyed by URL at the fetch layer
+(`lib/data/json-request-dedupe.ts`), deliberately not a result cache; a non-OK response
+reaches every waiter as a status with no body read and is never held. `/api/data` vs
+`/data` order, `refresh` revalidation, the 404/network-only archive fallback and the
+tier gate are unchanged; five tests pin the helper.
+
+| Same-origin `/api/data` requests (total / distinct / duplicate) | Before | After |
+|---|---|---|
+| First load | 13 / 10 / 3 | 11 / 10 / 1 |
+| After Overview → Gas → Power Stations → Overview | 17 / 12 / 5 | 15 / 12 / 3 |
+| A tier-locked day (`?date=2026-09-01`) | 26 / 9 / 17 | 10 / 9 / 1 |
+
+KPIs byte-identical before and after; the locked day still shows the locked state and
+never requests its own file. The remaining duplicate is the locked eighth day back asked
+once per sequential walker run, which is a 403 and stays uncached on purpose.
+
+**Found on the way, not fixed — a doctrine defect (S10-6).** Under the visitor lock the
+Overview skeleton prints "Evening Peak Gen: 0 MW / Total Energy Gen: 0.00 MKWh" for a
+day it never fetched — a zero where rule 1 wants a dash. Present in production today;
+needs its own change in the Overview's empty state.
+
+State: both **fixed in code, verified on a local production build, not yet released**.
