@@ -176,7 +176,10 @@ export default async function Home() {
               {/* Mobile/Tablet Inline Ad block for 004.png */}
               <div className="block lg:hidden home-ad-space--sidebar mb-8 max-w-sm mx-auto" suppressHydrationWarning>
                 <Link prefetch={false} href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
-                  <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} className="w-full h-auto object-cover block" suppressHydrationWarning />
+                  {/* Without `sizes` the browser assumed the viewport and
+                      picked the 2560px candidate for a slot capped at 24rem
+                      (measured 2026-09-19). Hidden from lg up, so 0px there. */}
+                  <Image src="/images/promotions/004.png" alt="Advertisement" width={1248} height={1200} sizes="(max-width: 1023px) 24rem, 0px" className="w-full h-auto object-cover block" suppressHydrationWarning />
                 </Link>
               </div>
 
@@ -217,10 +220,10 @@ export default async function Home() {
           {/* 2-Column Pre-Footer Ad Space */}
           <div className="home-ad-space--pre-footer grid grid-cols-1 md:grid-cols-2 gap-6" suppressHydrationWarning>
             <Link prefetch={false} href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group block" suppressHydrationWarning>
-              <Image src="/images/promotions/006.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+              <Image src="/images/promotions/006.png" alt="Advertisement" width={2184} height={480} sizes="(max-width: 767px) 100vw, (max-width: 1536px) 50vw, 768px" className="w-full h-auto object-cover block" suppressHydrationWarning />
             </Link>
             <Link prefetch={false} href="/contact#advertising" className="rounded-2xl w-full overflow-hidden relative group hidden md:block" suppressHydrationWarning>
-              <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} className="w-full h-auto object-cover block" suppressHydrationWarning />
+              <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} sizes="(max-width: 767px) 0px, (max-width: 1536px) 50vw, 768px" className="w-full h-auto object-cover block" suppressHydrationWarning />
             </Link>
           </div>
 

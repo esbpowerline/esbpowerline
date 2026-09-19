@@ -140,14 +140,16 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
     }, remainder);
   }, [clearTimer, getCycleRemainder, trending.length]);
 
-  useEffect(() => {
-    trending.forEach((item) => {
-      if (hasArticleImage(item.imageUrl)) {
-        const img = new window.Image();
-        img.src = item.imageUrl;
-      }
-    });
-  }, [trending]);
+  // No image prewarm. This used to run `new window.Image().src = item.imageUrl`
+  // for every trending row on mount, to spare the rotation a blank frame. It
+  // never could: the rendered <Image> asks /_next/image for a resized
+  // candidate, a different URL and different bytes, so the browser had nothing
+  // to reuse and the rotation loaded its picture from scratch anyway. What it
+  // did do was pull the five originals — full-size WebPs straight from
+  // Supabase Storage, bypassing the optimizer — on every cold load: 535 KB of
+  // the homepage's 738 KB of images on a phone, measured 2026-09-19 on a
+  // production build, all of it fetched while the hero (the LCP) was still
+  // downloading. Nothing visible depends on it.
 
   useEffect(() => {
     rotationAnchorRef.current = 0;

@@ -181,7 +181,10 @@ export function InterviewsSection({
                 src={encodeInterviewAssetUrl(iv.thumbnail)}
                 alt={iv.title}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                // The grid is 2 / 3 / 4 columns (globals.css), never one:
+                // "100vw" on a phone fetched the 1080px candidate for a
+                // 159px slot (Lighthouse image-delivery, 2026-09-19).
+                sizes="(max-width: 767px) 50vw, (max-width: 1023px) 33vw, 20vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                 loading="lazy"
               />

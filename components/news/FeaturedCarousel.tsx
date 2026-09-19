@@ -302,6 +302,14 @@ export function FeaturedCarousel({
                         alt={item.title}
                         fill
                         priority={i === 0}
+                        // `priority` alone preloads the image but leaves the
+                        // preload's fetchPriority unset — next/image only copies
+                        // this prop onto it — so the LCP image queued behind
+                        // three preloaded fonts and the stylesheet at default
+                        // priority (Lighthouse "fetchpriority=high should be
+                        // applied to the image preload request", 2026-09-19).
+                        // ThemeBanner passes the same pair for the same reason.
+                        fetchPriority={i === 0 ? 'high' : undefined}
                         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                         style={heroImageStyle({ fitMode: 'fill', ...(item.heroMeta ?? {}) })}
                         sizes="(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 420px"

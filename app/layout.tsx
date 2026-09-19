@@ -24,7 +24,12 @@ const notoSansBengali = Noto_Sans_Bengali({ subsets: ['bengali'], variable: '--f
 // Masthead only. The design directive (Phase B §B8) retires the illustrated
 // banner for a typographic nameplate — serious publications are typography —
 // and none of the loaded faces is a serif. One face, two weights, latin subset.
-const sourceSerif = Source_Serif_4({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-masthead', display: 'swap' });
+// Not preloaded: the typographic masthead was itself retired on 2026-09-03
+// (PublicNavbar), and `.masthead__wordmark` is the only rule that uses this
+// face — no public page renders it. The preload still shipped the 51 KB file
+// ahead of the LCP image on every cold load (2026-09-19). The face stays
+// registered; the browser fetches it the day something sets it.
+const sourceSerif = Source_Serif_4({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-masthead', display: 'swap', preload: false });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com'),

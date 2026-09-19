@@ -279,7 +279,13 @@ export function PublicNavbar({
           <div className="site-banner-frame border-l border-r border-b border-border/40 overflow-hidden">
             <PublicNavLink
               href="/"
-              prefetch
+              // Prefetch home from every page but home. Next prefetches the
+              // current route like any other, and the homepage's full RSC
+              // payload is the largest on the site — 64 KB, fetched by the
+              // homepage on every cold load of itself (2026-09-19, production
+              // build, phone viewport) to warm a navigation this link cannot
+              // make: on `/` it scrolls to the top instead (useHomeClick).
+              prefetch={pathname !== '/'}
               className="w-full block transition-opacity hover:opacity-95"
               onClick={(event) => onHomeClick(event, () => setMobileOpen(false))}
             >
