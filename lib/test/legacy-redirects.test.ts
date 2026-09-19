@@ -43,4 +43,11 @@ describe('legacy redirects', () => {
     expect(find(list, '/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})/:slug')?.destination).toBe('/articles/:slug');
     expect(find(list, '/power-grid')?.destination).toBe('/grid-explorer');
   });
+
+  it('sends slugless WordPress date archives and the duplicate category slug home', async () => {
+    const list = await redirects();
+    expect(find(list, '/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})')?.destination).toBe('/articles');
+    expect(find(list, '/:year(\\d{4})/:month(\\d{2})')?.destination).toBe('/articles');
+    expect(find(list, '/categories/grid-transmission-2')?.destination).toBe('/categories/grid-transmission');
+  });
 });

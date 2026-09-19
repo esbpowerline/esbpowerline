@@ -303,6 +303,28 @@ const nextConfig: NextConfig = {
         destination: '/articles/:slug',
         permanent: true,
       },
+      // WordPress date archives with no slug — /2026/06/08/, /2026/04/ — are
+      // listings of the news of that day or month. The nearest page here is
+      // the news index; Search Console's "Not found (404)" list (read
+      // 2026-09-19) still carries them. A slugged date URL is handled above.
+      {
+        source: '/:year(\\d{4})/:month(\\d{2})/:day(\\d{2})',
+        destination: '/articles',
+        permanent: true,
+      },
+      {
+        source: '/:year(\\d{4})/:month(\\d{2})',
+        destination: '/articles',
+        permanent: true,
+      },
+      // WordPress minted `grid-transmission-2` when a second category took a
+      // slug already used; the content is the one Grid & Transmission
+      // category. Same Search Console list.
+      {
+        source: '/categories/grid-transmission-2',
+        destination: '/categories/grid-transmission',
+        permanent: true,
+      },
       {
         source: '/posts/all',
         destination: '/articles',
