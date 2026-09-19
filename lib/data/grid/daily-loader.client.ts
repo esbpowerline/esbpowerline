@@ -8,6 +8,7 @@ import {
 import { runtimeDailyReportPath } from '@/lib/data/grid/date-utils';
 import { getCachedDailyReport, setCachedDailyReport } from '@/lib/data/grid/daily-cache';
 import { warnIfInvalidDailyReport } from '@/lib/data/grid/validate-daily-report';
+import { fetchJsonDeduped } from '@/lib/data/json-request-dedupe';
 import { isPathPublished } from '@/lib/data/runtime-data.client';
 
 export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loader-core';
@@ -26,9 +27,11 @@ export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loa
  */
 async function loadRuntimeRelease(isoDate: string): Promise<GridDailyData | null> {
   try {
-    const res = await fetch(runtimeDailyReportPath(isoDate), { cache: 'default' });
+    const res = await fetchJsonDeduped<GridDailyData>(runtimeDailyReportPath(isoDate), {
+      cache: 'default',
+    });
     if (!res.ok) return null;
-    return (await res.json()) as GridDailyData;
+    return res.data;
   } catch {
     return null;
   }
@@ -69,7 +72,13 @@ export async function fetchDailyReport(
   }
 
   try {
-    const res = await fetch(dailyReportPath(parsed), { cache: 'default' });
+    // Shared with any other reader asking for this day right now — the Overview
+    // strip's seven-day walk re-runs while its first pass is still in flight
+    // (json-request-dedupe.ts). A settled request is not held, so `refresh`
+    // above still revalidates.
+    const res = await fetchJsonDeduped<GridDailyData>(dailyReportPath(parsed), {
+      cache: 'default',
+    });
     if (!res.ok) {
       if (shouldUseArchiveFallback(res.status)) {
         // Not in the shipped archive — it may have been published since the last
@@ -87,7 +96,7 @@ export async function fetchDailyReport(
       }
       return { ok: false, error: `HTTP ${res.status}`, status: res.status };
     }
-    const data = (await res.json()) as GridDailyData;
+    const data = res.data;
     warnIfInvalidDailyReport(data, parsed);
     setCachedDailyReport(parsed, data);
     return { ok: true, data, source: 'network' };

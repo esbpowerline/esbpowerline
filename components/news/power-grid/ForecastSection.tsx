@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { fetchJsonDeduped } from '@/lib/data/json-request-dedupe';
 import type { GridForecast, GridSystemStats, HourlyLoadItem } from '@/lib/data/grid/types';
 import { ForecastVsActualPanel } from '@/components/news/power-grid/ForecastVsActualPanel';
 import { LiveForecastPanel } from '@/components/news/power-grid/LiveForecastPanel';
@@ -180,9 +181,12 @@ export function ForecastSection({
     async function load() {
       let liveJson: LiveGridResponse | null = null;
       try {
-        const res = await fetch('/api/data/live-grid');
+        // Through the in-flight map: this section is remounted on every return
+        // to the Overview tab and was measured asking twice per mount
+        // (json-request-dedupe.ts). Same URL, same 15-minute poll.
+        const res = await fetchJsonDeduped<LiveGridResponse>('/api/data/live-grid');
         if (!res.ok) return;
-        liveJson = (await res.json()) as LiveGridResponse;
+        liveJson = res.data;
       } catch {
         return; // Source down; the settled card carries on alone.
       }
@@ -194,10 +198,10 @@ export function ForecastSection({
 
       let forwardJson: ForwardForecast | null = null;
       try {
-        const res = await fetch(`/data/forecast/${day}.json`);
+        const res = await fetchJsonDeduped<ForwardForecast>(`/data/forecast/${day}.json`);
         // 404 is the ordinary case before the day's workbook is published.
         if (!res.ok) return;
-        forwardJson = (await res.json()) as ForwardForecast;
+        forwardJson = res.data;
       } catch {
         return;
       }

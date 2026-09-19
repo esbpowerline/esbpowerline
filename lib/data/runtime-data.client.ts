@@ -21,6 +21,7 @@ import {
   staticDataUrl,
   type DataFeedName,
 } from '@/lib/data/feed-paths';
+import { fetchJsonDeduped } from '@/lib/data/json-request-dedupe';
 
 type Manifest = { generatedAt: string; feeds: Partial<Record<DataFeedName, string[]>> };
 
@@ -83,13 +84,17 @@ export async function fetchDataJson<T>(
 ): Promise<DataFetchResult<T>> {
   const published = await isPublished(relPath);
 
+  // Every request below goes through the in-flight map, so two readers asking
+  // for the same file in the same render share one round trip. What comes
+  // back is exactly what fetch answered — a 403 is still reported as
+  // tier_locked, never held — see json-request-dedupe.ts for the measurement.
   if (published) {
     try {
       // `default`, not `no-store`: the route sets max-age=0, so the browser
       // revalidates by ETag and only re-downloads a changed body. no-store
       // re-pulled a 1.6 MB timeline on every tab switch.
-      const res = await fetch(runtimeDataUrl(relPath), { ...init, cache: 'default' });
-      if (res.ok) return { ok: true, data: (await res.json()) as T, source: 'runtime' };
+      const res = await fetchJsonDeduped<T>(runtimeDataUrl(relPath), { ...init, cache: 'default' });
+      if (res.ok) return { ok: true, data: res.data, source: 'runtime' };
       // A revoked release between manifest and read: fall through to static.
       if (res.status === 403) return { ok: false, status: 403, error: 'tier_locked' };
     } catch {
@@ -98,13 +103,13 @@ export async function fetchDataJson<T>(
   }
 
   try {
-    const res = await fetch(staticDataUrl(relPath), init);
-    if (res.ok) return { ok: true, data: (await res.json()) as T, source: 'static' };
+    const res = await fetchJsonDeduped<T>(staticDataUrl(relPath), init);
+    if (res.ok) return { ok: true, data: res.data, source: 'static' };
     if (res.status === 403) return { ok: false, status: 403, error: 'tier_locked' };
     if (res.status === 404 && !published) {
       // Published a moment ago, before the manifest caught up.
-      const runtime = await fetch(runtimeDataUrl(relPath), { cache: 'default' });
-      if (runtime.ok) return { ok: true, data: (await runtime.json()) as T, source: 'runtime' };
+      const runtime = await fetchJsonDeduped<T>(runtimeDataUrl(relPath), { cache: 'default' });
+      if (runtime.ok) return { ok: true, data: runtime.data, source: 'runtime' };
     }
     return { ok: false, status: res.status, error: `HTTP ${res.status}` };
   } catch (error) {
