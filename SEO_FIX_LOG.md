@@ -696,3 +696,136 @@ entry rather than issuing a query per day; the figures come from the daily JSON
 already traced into the bundle. Day pages carry `revalidate = 86400` and 60 recent
 days are prerendered, so the common case is a CDN hit and the rare case is one
 disk read.
+
+---
+
+## Stage 9 — Re-audit against production, 2026-09-19
+
+Stages 1–8 are all live: production is `9852aeeda` (main), and `authenticating` is
+four data/ledger commits ahead of it with no code difference. This stage re-measured
+the live site against every rule those stages set, fixed what had drifted, and
+recorded what cannot be measured from this machine.
+
+### 9.1 Access — what was and was not available
+
+| Source | State | Consequence |
+|---|---|---|
+| Live site (curl, browser UA; Googlebot/Bingbot UA as a diagnostic) | available | every finding below that names a URL was reproduced here |
+| Repository, dev servers (`dev:all`), tests, typecheck | available | fixes verified locally |
+| Vercel CLI (`esbplbd`, team `teamesb`, project `esbpowerline`) | available for deployments and domains; **no usage/billing** | cost baseline is unverified; the CLI exposes no usage figures and `vercel api` refused every path form |
+| Supabase Postgres (read-only query via the script client) | available | database size below; no egress/bandwidth figures |
+| **Search Console** | **blocked** — the browser has no Google session; `search.google.com/search-console` lands on the marketing page | every report the brief names (Page indexing, Sitemaps, CWV, HTTPS, enhancements, crawl stats, manual actions, security) is unobserved this stage |
+| **Bing Webmaster Tools** | blocked, same reason | unobserved |
+| **PageSpeed Insights / CrUX field data** | blocked — the anonymous API quota is exhausted for the day (`Queries per day` for the shared consumer) | no field LCP/INP/CLS; stage 7's lab numbers stand |
+| Vercel / Supabase dashboards (usage, spend controls) | blocked, no browser session | spend settings unreviewed; nothing was changed |
+| schema.org validator | available | article and grid-day pages: 0 errors, 0 warnings |
+
+Nothing was installed beyond the Playwright MCP browser binary the session already
+declared. No paid service, plan change or scheduled job was added.
+
+### 9.2 Baseline, production, 2026-09-19 (browser UA unless stated)
+
+| Check | Result |
+|---|---|
+| `robots.txt` | as `app/robots.ts`; three sitemaps declared |
+| `sitemap.xml` | 220 URLs: 171 articles, 26 policy, 11 categories, 5 authors, 7 static — **`/magazine` listed while the page is `noindex`; `/analysis` and both event studies absent** |
+| `news-sitemap.xml` | 6 URLs, matching the 6 rows published in the last 48 h |
+| `grid-sitemap.xml` | 4,578 URLs (archive index, 14 years, 4,563 days to 2026-09-17) |
+| Googlebot / Bingbot UA | 200 on `/`, an article, a grid day, `sitemap.xml`, `/articles` |
+| `http://` → `https://` | 308 |
+| trailing slash (`/about/`) | 308 → `/about` |
+| **`https://www.` → apex** | **307**, set by the Vercel domain configuration ahead of the `vercel.json` rule that asks for 308 |
+| `http://www.` → apex | 308 → `https://www.` → 307 → apex (two hops) |
+| unknown path, unknown grid date, future grid date, page/999 | 404 (hard) |
+| legacy `/category/news/x`, `/articles?page=2` | 308 to the canonical page |
+| `/grid-explorer?tab=gas` | 200, canonical `/grid-explorer` |
+| `/analysis` `<title>` | **`Event studies — ESB PowerLine \| ESB PowerLine`** — the page string carried the site name and the layout template appended it again |
+| Homepage HTML | 792 KB raw / 90 KB compressed (504 KB markup, 275 KB RSC; 81 images all with alt text, 67 article links) — unchanged from stage 4's deferral |
+| `/analysis/remal-2024` HTML | 1.13 MB raw / 61 KB compressed, served from the CDN (`HIT`) |
+| Structured data, validator | grid day: Dataset + BreadcrumbList + NewsMediaOrganization + WebSite, 0/0; article: NewsArticle + BreadcrumbList + Organization + WebSite, 0/0 |
+| Database | **172 MB** (was 142 MB on 2026-09-06): `GridHourlyObservation` 73, `SourceDocument` 39, `DataReleaseRevision` 23, `DailyReport` 14 |
+| Articles (database) | 205 published; **33 Bengali-titled** (404 on the site); 142 English titles over 60 chars, 95 with an editor's meta title |
+
+### 9.3 Issue register
+
+| ID | Priority | Observed | Family / URLs | Actual vs intended | Cause | Change | State |
+|---|---|---|---|---|---|---|---|
+| S9-1 | high | 2026-09-19, live sitemap | `/magazine` | submitted in `sitemap.xml` while serving `<meta name="robots" content="noindex, follow">` | `app/sitemap.ts` listed it unconditionally; the page gates `robots` on `IS_DEMO` | entry gated on the same `IS_DEMO` flag | **fixed in code, verified on dev** (0 magazine entries) |
+| S9-2 | high | 2026-09-19, live sitemap | `/analysis`, `/analysis/gas-crisis-2026`, `/analysis/remal-2024` | indexable pages (canonical, 200, ISR 3600) with no sitemap entry and only in-page discovery | pages shipped 2026-09-13 without a sitemap change | entries derived from `EVENT_STUDIES`, undated | **fixed in code, verified on dev** (3 entries) |
+| S9-3 | medium | 2026-09-19, live HTML | `/analysis` | doubled site name in `<title>` | page title contained "ESB PowerLine"; public layout template appends it | title rewritten without the name; says "Bangladesh" | **fixed in code, verified on dev** |
+| S9-4 | low | 2026-09-19, live JSON-LD | `/grid-explorer/{date}` (4,563 pages) | `Dataset.publisher` an inline `Organization` beside the root `NewsMediaOrganization` of the same name | written before `ORGANIZATION_ID` existed | publisher by `@id` | **fixed in code, verified on dev** |
+| S9-5 | medium | 2026-09-19, headers | `https://www.esbpowerline.com/*` | 307 (temporary) redirect to the apex; `vercel.json` asks for 308 | Vercel's domain-level redirect runs first and is set to 307 in the project's Domains settings | change the www domain's redirect status to 308 in Vercel → Project → Settings → Domains (dashboard only; the CLI exposes no setter) | **blocked — needs Hamim in the dashboard**; Google consolidates either way, so this is hygiene, not an outage |
+| S9-6 | editorial | database | 33 published Bengali-titled articles | published in the CMS, 404 on the site, absent from the sitemap by design | server locale pinned to `en`; no `/bn` route exists | product decision: a Bengali URL space, or unpublish | **editorial/product** — unchanged since stage 3 |
+| S9-7 | editorial | database | 142 articles with titles over 60 chars | 95 now carry an editor's meta title (rendered since stage 5); 47 still show the long headline as `<title>` | field not filled | fill `seo.metaTitle` in the CMS | **editorial** |
+| S9-8 | monitor | unverifiable this stage | all | Core Web Vitals field data | PSI quota, no GSC session | none | **blocked** — read CWV in Search Console when signed in |
+| S9-9 | monitor | 2026-09-19 | homepage | 792 KB raw HTML (90 KB on the wire) | 60-card "show more" sections, stage 4 deferral | none — content readers see; compressed size is acceptable | **intentional, watch** |
+| S9-10 | monitor | 2026-09-19 | `/analysis/remal-2024` | 1.13 MB raw (61 KB on the wire), CDN hit | RSC payload for the day-by-day charts | none — no per-request cost; revisit only if field LCP says so | **intentional, watch** |
+
+Not found, and checked: no 5xx on any probed URL; no soft 404 (unknown grid dates,
+years, pagination and authors all hard-404); no redirect loop; no `X-Robots-Tag`; no
+`noindex` on any page the sitemap lists apart from S9-1; no page without a canonical;
+`lang="en"` on every page; no hreflang (none is warranted — the Bengali toggle is a
+client-side rendering of the same URL, not a separate language version); no video
+pages exist on the site, so no `VideoObject` is claimed.
+
+### 9.4 Route policy (what each family is meant to do; stage 8's Grid Explorer decision stands)
+
+| Family | Eligibility | Canonical | Discovery | Sitemap | Rendering / cache | Freshness |
+|---|---|---|---|---|---|---|
+| `/` | index | self | — | yes, daily | ISR 180 s | publish + snapshot |
+| `/articles/{slug}` | index | self | index, categories, related, feed | yes, `lastmod = publishedAt` | ISR 600 s, 200 newest prerendered | edit → tag revalidate |
+| `/articles`, `/articles/page/N`, `/articles/popular` | index | per page | rel prev/next | index only | ISR | publish |
+| `/categories/{slug}` | index while it has a published article, else `noindex,follow` | self | nav, footer, breadcrumbs | only with articles | ISR 600 s | publish |
+| `/authors/{slug}` (+ `/page/N`) | index | self | bylines | first page only | ISR | publish |
+| `/energy-policy`, `/energy-policy/{slug}` | index | self | footer, article policy links | yes, undated | ISR 3600 s | manual |
+| `/analysis`, `/analysis/{slug}` | index | self | nav, cards | **yes (S9-2)**, undated | ISR 3600 s | DataRelease correction |
+| `/grid-explorer` | index, one URL; `?tab=` canonicalises to it | self | nav | yes | static, ISR 300 s | new day |
+| `/grid-explorer/{date}` | index — public headline figures, prose summary, sources; hourly/plant/zone detail stays with the plans | self | archive year pages, prev/next | `grid-sitemap.xml`, `lastmod = date` | ISR 86 400 s, 60 newest prerendered | DataRelease correction |
+| `/grid-explorer/archive`, `/archive/{year}` | index | self | explorer | grid sitemap | ISR | new day |
+| `/magazine` | `noindex,follow` while `IS_DEMO`; index when a real issue ships | self | nav | **only when not demo (S9-1)** | dynamic (signed asset URLs) | per request |
+| `/titas-gas`, `/about`, `/contact`, `/annual-reports/financials` | index | self | footer | yes, undated | ISR | manual |
+| `/tags`, `/tags/{tag}` | `noindex,follow` | self | article tag chips | no | ISR | publish |
+| `/search` (+ `?q=`) | `noindex,follow`; `?q=` robots-disallowed | self | nav | no | ISR | — |
+| `/login`, `/members/login`, `/sign-in`, `/sign-up`, `/auth/*` | robots-disallowed, `noindex` | self | none in HTML (`nofollow` on the buttons) | no | dynamic | — |
+| `/admin`, `/cms`, `/members`, `/api`, `/data/*` | robots-disallowed; auth/tier gated in middleware | — | none | no | dynamic / gated | — |
+| `feed.xml`, `news-sitemap.xml`, `grid-sitemap.xml` | feeds | — | robots, `<link rel=alternate>` | — | 900 / 600 / 86 400 s | publish |
+
+### 9.5 Cost
+
+No change to any query, cache window, cron or plan. The three code changes touch
+sitemap generation (one array of three static entries, one conditional) and two
+metadata strings; the sitemap's database reads are unchanged and it remains
+`revalidate = 3600`. Workload model unchanged: origin work ≈ public requests × the
+CDN miss rate × one ISR render, plus the Pi's ingest, which does not touch Vercel.
+Monetary figures are **unverified** — no billing surface was reachable — and nothing
+here claims a saving. The database grew 30 MB in 13 days (172 MB of the 500 MB tier),
+faster than the ~130 MB/year projected on 2026-09-06; `DataReleaseRevision` (23 MB)
+is new to the top table and worth a look before the retention question in
+`STRATEGIC_AUDIT_2026-09.md` §U becomes urgent.
+
+### 9.6 Verification
+
+- `tsc --noEmit`: clean. `eslint` on the four changed files: clean.
+- `vitest run`: **88 files, 955 tests pass**, including the new `lib/test/sitemap.test.ts`
+  (7 cases: Bengali titles excluded, magazine gated on `IS_DEMO` both ways, every
+  registry study listed and undated, `lastModified` only where a real date exists,
+  no robots-blocked or noindex family listed, news-desk author de-duplicated).
+- Dev server (`:3000`): `sitemap.xml` 224 URLs, 3 `/analysis` entries, 0 `/magazine`;
+  `/analysis` `<title>` "Event studies — Bangladesh grid and gas events, day by day |
+  ESB PowerLine"; `/grid-explorer/2019-06-15` `publisher: {"@id": ".../#organization"}`.
+
+### 9.7 Rollout, rollback, follow-up
+
+**Release** is the usual `git push origin authenticating:main`; the build runs
+`migrate-deploy-prod.mjs` and there is no migration in this change. **Rollback** is
+reverting the one commit; nothing here writes to the database or changes a URL, so no
+redirect or index state needs unwinding. After release: fetch `sitemap.xml` (expect the
+three `/analysis` entries and no `/magazine`), `/analysis` `<title>`, and a grid day's
+JSON-LD from production; then, signed in, resubmit `sitemap.xml` in Search Console once.
+Do not request indexing for the grid archive.
+
+**Day 7**: Search Console → Sitemaps (the three files read without error, discovered
+counts ≈ 223 / a handful / ~4,580); Page indexing → "Submitted URL marked noindex" should
+lose `/magazine`; Core Web Vitals report read for the first time. **Day 28**: Page
+indexing trend for `/analysis/*` and the grid archive; the www 307 (S9-5) done;
+Supabase database size against the 400 MB warning in `pi-hourly.sh`.

@@ -11,6 +11,7 @@ import {
   type ArchiveDaySummary,
 } from '@/lib/data/grid/archive-day.server';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
+import { ORGANIZATION_ID } from '@/lib/seo';
 
 /**
  * One indexable page per archive day.
@@ -145,7 +146,11 @@ export default async function ArchiveDayPage({
       '@type': 'Organization',
       name: 'Power Grid Company of Bangladesh (PGCB)',
     },
-    publisher: { '@type': 'Organization', name: 'ESB PowerLine' },
+    // By id, not a second inline Organization: the root layout declares the
+    // NewsMediaOrganization once, and every other page's publisher points at
+    // it. Two entities with the same name and no link between them is how a
+    // publisher fails to resolve in the structured-data report.
+    publisher: { '@id': ORGANIZATION_ID },
     spatialCoverage: { '@type': 'Place', name: 'Bangladesh' },
     variableMeasured: summary.stats
       .filter((s) => s.value !== null)

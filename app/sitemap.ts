@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { POLICIES } from '@/lib/data/policy/policies';
+import { EVENT_STUDIES } from '@/lib/data/analysis/event-registry';
+import { IS_DEMO } from '@/lib/magazine-demo-issue';
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import { slugify } from '@/lib/utils';
 
@@ -94,13 +96,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.4,
   }));
 
-  const magazineUrls = [
-    {
-      url: `${baseUrl}/magazine`,
-      ...(latestMagazine ? { lastModified: latestMagazine.createdAt } : {}),
+  // /magazine declares `noindex` while IS_DEMO holds (the page shows a demo
+  // issue, not an edition), yet it was submitted here regardless — the exact
+  // "Submitted URL marked noindex" contradiction Search Console flags. A
+  // sitemap lists what we want indexed; a page that says "do not index me"
+  // must not be in it. The entry returns the day IS_DEMO is switched off.
+  const magazineUrls: MetadataRoute.Sitemap = IS_DEMO
+    ? []
+    : [
+        {
+          url: `${baseUrl}/magazine`,
+          ...(latestMagazine ? { lastModified: latestMagazine.createdAt } : {}),
+          changeFrequency: 'monthly' as const,
+          priority: 0.6,
+        },
+      ];
+
+  // Event studies: /analysis and one page per registry entry. Derived from
+  // EVENT_STUDIES so a study added to the registry is submitted without a
+  // second list to keep in step — both live pages were absent from here for
+  // the six days after they shipped (2026-09-13 → 2026-09-19). No lastmod:
+  // the registry records the event's dates, not the page's, and stating the
+  // incident date as a modification time would be the stage-2 mistake again.
+  const analysisUrls: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/analysis`, changeFrequency: 'monthly', priority: 0.7 },
+    ...EVENT_STUDIES.map((study) => ({
+      url: `${baseUrl}/analysis/${study.slug}`,
       changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    },
+      priority: 0.7,
+    })),
   ];
 
   // Policy pages are hand-maintained reference documents with no stored
@@ -143,6 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...categoryUrls,
     ...authorUrls,
     ...magazineUrls,
+    ...analysisUrls,
     ...policyUrls,
   ];
 }

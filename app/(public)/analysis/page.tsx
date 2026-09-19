@@ -23,7 +23,11 @@ import EventStudyCard from '@/components/analysis/EventStudyCard';
 export const revalidate = 3600;
 
 export const metadata = {
-  title: 'Event studies — ESB PowerLine',
+  // No site name here: the public layout's template appends " | ESB PowerLine",
+  // and this string carried the name itself, so production served
+  // "Event studies — ESB PowerLine | ESB PowerLine" (live check, 2026-09-19).
+  // "Bangladesh" is what a reader searching for these would type.
+  title: 'Event studies — Bangladesh grid and gas events, day by day',
   description:
     'Day-by-day accounts of what happened on Bangladesh’s grid and gas network during specific events, built from the official PGCB and Petrobangla records.',
   alternates: { canonical: '/analysis' },
