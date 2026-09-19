@@ -207,17 +207,35 @@ PY
 # disk — it is the only way the deployed coverage screen can see that a day
 # shipped with its curve and station detail. The chain rewrites it; if it is not
 # committed the panel's strip goes stale while the site itself is fine.
-git add public/data lib/available-dates.json lib/data/grid/recent-artifacts.json
+# `lib/data/macro/gas.ts` is generated, not written: build_gas_mix_yearly.py
+# derives it from the Petrobangla timeline and runs at the end of
+# build_petrobangla_timeline.py, which every poll calls. It was not in this
+# list, so a poll that moved a year's mean rewrote it, left it unstaged, and
+# the next poll's `git reset --hard` threw the change away — while the
+# unstaged file made `git pull --rebase` refuse ("cannot pull with rebase: You
+# have unstaged changes") and killed the push with it. That is what stopped
+# 2026-09-16..18 reaching GitHub.
+git add public/data lib/available-dates.json lib/data/grid/recent-artifacts.json lib/data/macro/gas.ts
 if git diff --cached --quiet; then
     echo "no new files"
 else
     days=$(git diff --cached --name-only -- public/data/daily | sed -E 's#.*/([0-9-]+)\.json#\1#' | sort | tr '\n' ' ')
     git commit -q -m "chore(data): ingest energy day(s) ${days:-refresh} from the scheduled poll"
-    if git pull -q --rebase origin authenticating && git push -q origin HEAD:authenticating; then
+    # --autostash so an unstaged file the chain wrote outside the paths above
+    # can never again block the rebase and lose the commit. The stash is
+    # disposable by construction: the next poll opens with `git reset --hard`.
+    # Whatever is left dirty is printed rather than swallowed, because a
+    # generated artifact nothing commits is the bug above waiting to recur.
+    if git pull -q --rebase --autostash origin authenticating && git push -q origin HEAD:authenticating; then
         echo "pushed: ${days:-refresh}"
     else
         echo "! push failed — the release rows are live, the commit is not"
         notify warn "ingest: push failed" "release rows are live; commit for ${days:-refresh} not pushed"
+    fi
+    leftover=$(git status --porcelain --untracked-files=no | head -5)
+    if [ -n "$leftover" ]; then
+        echo "  note: the chain also modified, and nothing committed:"
+        echo "$leftover" | sed 's/^/    /'
     fi
 fi
 
