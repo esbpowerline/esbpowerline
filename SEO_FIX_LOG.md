@@ -1288,3 +1288,18 @@ remains an open product question, not a defect.
 | Google recrawl | Sitemaps submitted 2026-09-19. Read Page indexing, Sitemaps, Datasets and Core Web Vitals around 26 September and 17 October. |
 
 Nothing else found in this pass is both actionable and unfixed.
+
+### 11.6 Production verification of the locked-day fix
+
+`5a86383fa` built as `dpl_Duec8GEBvekAUf85oieYKSHQw9Ct`. Read in a real browser
+(`scratch/check-locked-day.mjs`, Edge, browser UA, nine-second settle — the date is
+applied client-side, so curl of the server HTML shows the default day and cannot
+answer this):
+
+| URL | Overview strip | Zeros |
+|---|---|---|
+| `/grid-explorer?date=2026-09-01` (locked) | "PEAK SUPPLY — locked for this plan" and the same for the other five tiles; six dashes; the upgrade notice below | **none** |
+| `/grid-explorer` (newest day) | "Evening Peak Gen: 15,934 MW · Day Peak 13,759 · 24-Hour Average 14,238 · Total Energy 341.70 MKWh · Max 16,256 · Min 12,623 · forecast 15,390" | none |
+
+The unlocked day is unchanged, which is the half of this that could have broken. The
+dash count on the unlocked page is the collapsed tiles' own chrome, not figures.
