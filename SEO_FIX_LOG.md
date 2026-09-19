@@ -939,8 +939,9 @@ Lighthouse 13.4.1 via Edge, one run per cell, same machine and hour:
 
 Lab, simulated slow 4G on mobile; single runs, so ±10% is noise. These say what a
 Lighthouse run says and nothing about rankings. The one number that stands out is the
-homepage mobile LCP at 6.2 s, driven by the image and script weight above; the article
-and grid-day pages are inside or near the 2.5 s target on the same profile. **Field
+homepage mobile LCP at 6.2 s, driven by the image and script weight above. On the same
+profile the article and grid-day pages sit at 3.5-3.6 s, a second past the 2.5 s target,
+and every desktop run is under 1.1 s. **Field
 data (CrUX) is still unverified** — the anonymous PageSpeed quota was exhausted and
 Search Console's CWV report needs the signed-in window.
 
