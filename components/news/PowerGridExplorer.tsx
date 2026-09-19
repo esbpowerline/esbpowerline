@@ -48,7 +48,7 @@ import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
 import { pendingDays, isBeyondToday, type PendingDay } from '@/lib/data/grid/pending-days';
 import { backlogBadge } from '@/lib/data/grid/backlog-badge';
-import { PendingDayPanel, FutureDatePanel } from '@/components/news/power-grid/PendingDayPanel';
+import { PendingDayPanel, FutureDatePanel, AbsentFiguresStrip } from '@/components/news/power-grid/PendingDayPanel';
 import { UnitCostBadge } from '@/components/news/power-grid/UnitCostBadge';
 import { useUnitCostAuthentication, type UnitCostFact } from '@/components/news/power-grid/useUnitCostAuthentication';
 import { EnergyCurveChart } from '@/components/news/power-grid/EnergyCurveChart';
@@ -1121,8 +1121,11 @@ export function PowerGridExplorer({
   // false "Petrobangla has nothing for this day" into the HTML for a day that
   // has 2,275 MMCFD of it. Absence has to be verified before it is asserted,
   // so until the payload matches the selection every tab renders unmarked.
-  const availabilityKnown = Boolean(activeData) && activeDataDate === selectedDate;
-  const availability = availabilityKnown ? tabAvailability(activeData) : null;
+  // True only when the payload in hand IS the selected day's: `activeData`
+  // keeps the previous day while a new selection resolves. Governs the tab
+  // availability map and, below, whether any figure may be printed at all.
+  const figuresHeldForSelected = Boolean(activeData) && activeDataDate === selectedDate;
+  const availability = figuresHeldForSelected ? tabAvailability(activeData) : null;
 
   // The same verdict the tab bar dims on, listed in full so a reader who never
   // clicks an empty tab still learns the day is thinner than the layout looks.
@@ -1501,7 +1504,13 @@ export function PowerGridExplorer({
           there is none, and rendering it anyway prints this strip's fallbacks
           under a date nobody has measured. PendingDayPanel below carries the
           same six tiles with every figure a dash instead. */}
-      {!pendingForSelected && (
+      {/* Nothing read for this day: the strip's zero-filled fallback printed
+          "Evening Peak Gen: 0 MW" on a locked day (production, 2026-09-19).
+          Dashes hold the layout instead — see AbsentFiguresStrip. */}
+      {!pendingForSelected && !figuresHeldForSelected && (
+        <AbsentFiguresStrip hint={tierLockRequired !== null ? 'locked for this plan' : 'loading'} />
+      )}
+      {!pendingForSelected && figuresHeldForSelected && (
       <GridLockedContent
         locked={tierLockRequired !== null}
         requiredTier={tierLockRequired as any}

@@ -19,6 +19,36 @@ import { isoDateToLegacy } from '@/lib/data/grid/date-utils';
  * can otherwise only conclude the site has stopped updating. It has not — PGCB
  * publishes a day on the morning after it ends.
  */
+/**
+ * The Overview's six tiles with every figure a dash, and one line saying what
+ * the reader is waiting on.
+ *
+ * Exported because a day whose payload is NOT held has exactly the same
+ * problem as a pending day, and used to answer it differently: the Overview
+ * strip fell back to a hand-written object of zeros
+ * (PowerGridExplorer.tsx, `activeData ?? { systemStats: { eveningPeakGen: 0,
+ * … } }`), so a tier-locked day printed "Evening Peak Gen: 0 MW / Total Energy
+ * Gen: 0.00 MKWh" for figures it had never fetched — live in production until
+ * 2026-09-19, and precisely the claim doctrine rule 1 forbids: zero says the
+ * measurement happened and came out zero. One dash strip, two callers.
+ */
+export function AbsentFiguresStrip({ hint }: { hint: string }) {
+  return (
+    <GridKpiStrip layer="page" className="grid-explorer-kpi-strip--six" collapsibleAfter={3}>
+      {PENDING_TILES.map((t) => (
+        <GridKpiCell
+          key={t.label}
+          icon={t.icon}
+          iconClassName="opacity-40"
+          label={t.label}
+          value="—"
+          hint={hint}
+        />
+      ))}
+    </GridKpiStrip>
+  );
+}
+
 export function PendingDayPanel({ pending }: { pending: PendingDay }) {
   const legacy = isoDateToLegacy(pending.date) ?? pending.date;
   const dueLegacy = isoDateToLegacy(pending.dueDate) ?? pending.dueDate;
@@ -29,18 +59,7 @@ export function PendingDayPanel({ pending }: { pending: PendingDay }) {
 
   return (
     <div className="grid-explorer-panel space-y-6">
-      <GridKpiStrip layer="page" className="grid-explorer-kpi-strip--six" collapsibleAfter={3}>
-        {PENDING_TILES.map((t) => (
-          <GridKpiCell
-            key={t.label}
-            icon={t.icon}
-            iconClassName="opacity-40"
-            label={t.label}
-            value="—"
-            hint={`awaiting ${pending.publisher}`}
-          />
-        ))}
-      </GridKpiStrip>
+      <AbsentFiguresStrip hint={`awaiting ${pending.publisher}`} />
 
       <div className="grid-explorer-chart-card card p-6 flex flex-col items-center justify-center text-center gap-3 min-h-[16rem]">
         <div className="p-4 rounded-full bg-muted/20 text-muted-foreground">
