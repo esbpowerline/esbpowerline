@@ -574,11 +574,18 @@ hand, or change the table. Retiming a runner therefore means editing both.
 
 **The tier ceiling is announced, not discovered.** The script prints `db_size_mb=`
 on the connection it already has open and the runner warns once a day past 400 MB.
-Measured 2026-09-06: the database is **142 MB** of Supabase's 500 MB free tier —
-`GridHourlyObservation` 72 MB, `SourceDocument` 30 MB — growing ~130 MB/year, almost
-all of it evidence bytes. Roughly two and a half years of headroom. When it gets
-close the answer is the object-storage move in `STRATEGIC_AUDIT_2026-09.md` §U or an
-evidence retention window, not a bigger tier.
+Measured 2026-09-19: the database is **172 MB**, `GridHourlyObservation` 73 MB,
+`SourceDocument` 39 MB, `DataReleaseRevision` 23 MB, growing ~130 MB/year, almost all
+of it evidence bytes.
+
+**The 500 MB free-tier ceiling that figure used to be read against is gone.** The
+Supabase org is on **Pro**, and the usage page (read 2026-09-19) allows **100 GB** of
+database storage — 0.1% used — with egress 4.2 of 250 GB and no quota exceeded. So
+the 400 MB warning in `pi-hourly.sh` is no longer a cliff edge; it is a growth tripwire,
+and worth keeping as one. Compute, not storage, is what Pro meters here: 386 Micro
+compute-hours a month against $10 of credit. When storage does matter the answer is
+still the object-storage move in `STRATEGIC_AUDIT_2026-09.md` §U or an evidence
+retention window — but that decision is now years out, not two and a half.
 
 One failed tick is not an alert: the hour is still inside NLDC's window and the next
 tick's two-page walk picks it up. Four consecutive failures are.
