@@ -593,8 +593,14 @@ Footer carries "Energy Policy Library" on every public page. `tsc`, `eslint` cle
 Single runs; Lighthouse's simulated numbers vary ±10% between runs (the article desktop
 LCP moved the other way inside that band). Consistent across all eight: CSS on the wire
 down 28%, render-blocking time down ~150 ms, FCP down ~150 ms on every page but the
-homepage, LCP down 0.5–0.9 s on six of eight. Font files per page 5 → 4 (Bengali no longer
-preloaded); the mono change (row 5) was applied after this table.
+homepage. LCP fell 0.5–0.9 s on **five** of eight (homepage desktop 0.53, policy mobile
+0.75, policy desktop 0.84, Grid Explorer mobile 0.63, Grid Explorer desktop 0.78), by
+0.2 s on homepage mobile, by 0.97 s on article mobile, and **rose** 1.07 s on article
+desktop — so one run is inside the noise and the "six of eight" this paragraph first
+claimed was a miscount (corrected 2026-09-19, stage 10). These are local-build lab
+numbers from 2026-09-03 and are not evidence about production today; stage 10 holds the
+current production runs. Font files per page 5 → 4 (Bengali no longer preloaded); the
+mono change (row 5) was applied after this table.
 
 What still holds LCP: on every page the largest paint is text set in a web font, so under
 Lighthouse's slow-4G model LCP waits for the CSS (82 KB) and the display fonts, then the
@@ -756,7 +762,7 @@ declared. No paid service, plan change or scheduled job was added.
 | S9-4 | low | 2026-09-19, live JSON-LD | `/grid-explorer/{date}` (4,563 pages) | `Dataset.publisher` an inline `Organization` beside the root `NewsMediaOrganization` of the same name | written before `ORGANIZATION_ID` existed | publisher by `@id` | **fixed in code, verified on dev** |
 | S9-5 | medium | 2026-09-19, headers | `https://www.esbpowerline.com/*` | 307 (temporary) redirect to the apex; `vercel.json` asks for 308 | Vercel's domain-level redirect runs first and is set to 307 in the project's Domains settings | change the www domain's redirect status to 308 in Vercel → Project → Settings → Domains (dashboard only; the CLI exposes no setter) | **blocked — needs Hamim in the dashboard**; Google consolidates either way, so this is hygiene, not an outage |
 | S9-6 | editorial | database | 33 published Bengali-titled articles | published in the CMS, 404 on the site, absent from the sitemap by design | server locale pinned to `en`; no `/bn` route exists | product decision: a Bengali URL space, or unpublish | **editorial/product** — unchanged since stage 3 |
-| S9-7 | editorial | database | 142 articles with titles over 60 chars | 95 now carry an editor's meta title (rendered since stage 5); 47 still show the long headline as `<title>` | field not filled | fill `seo.metaTitle` in the CMS | **editorial** |
+| S9-7 | editorial | database | 142 articles with headlines over ~60 chars | 95 carry an editor's search title (rendered since stage 5); 47 show the headline as `<title>`. Length is a display consideration — Google truncates around 60 characters on a desktop result and rewrites titles it finds unhelpful — not a rule: a long, accurate headline beats a short vague one, and nothing in code enforces a limit | editors have not written a search title where one would read better | offer, per story, a search title only where the headline truncates badly; never shorten for its own sake | **editorial, optional** |
 | S9-8 | monitor | unverifiable this stage | all | Core Web Vitals field data | PSI quota, no GSC session | none | **blocked** — read CWV in Search Console when signed in |
 | S9-9 | monitor | 2026-09-19 | homepage | 792 KB raw HTML (90 KB on the wire) | 60-card "show more" sections, stage 4 deferral | none — content readers see; compressed size is acceptable | **intentional, watch** |
 | S9-10 | monitor | 2026-09-19 | `/analysis/remal-2024` | 1.13 MB raw (61 KB on the wire), CDN hit | RSC payload for the day-by-day charts | none — no per-request cost; revisit only if field LCP says so | **intentional, watch** |
@@ -829,3 +835,164 @@ counts ≈ 223 / a handful / ~4,580); Page indexing → "Submitted URL marked no
 lose `/magazine`; Core Web Vitals report read for the first time. **Day 28**: Page
 indexing trend for `/analysis/*` and the grid archive; the www 307 (S9-5) done;
 Supabase database size against the 400 MB warning in `pi-hourly.sh`.
+
+---
+
+## Stage 10 — Timestamps, cost, measurement and redirects, 2026-09-19
+
+Same day as stage 9, after review of it. Production is still `dpl_GtVooFAyJNLiagjfEVZ8EGHF2RWY`
+(`main` at `9852aeeda`), so **every stage 9 code fix is still unreleased** and the
+"production verification" column below is honest about that.
+
+### 10.1 Access this stage
+
+The route to Search Console is Hamim's own Edge, started with a remote-debugging port
+and signed in there; the stage-9 scripts in `scratch/gsc*.mjs` attach to it, open a tab
+of their own, read it and detach. No such window was open this session (Edge is running,
+port 9222 is not), so Search Console, Bing, the Vercel usage page and the Supabase usage
+page remain **unobserved**. To open it:
+
+```powershell
+& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --remote-debugging-port=9222 --user-data-dir="$env:LOCALAPPDATA\esb-gsc-profile" https://search.google.com/search-console
+```
+
+Sign in to Google (and Vercel, Supabase) in that window once. It is a separate profile
+because a normally-running Edge refuses the port. Then `node scratch/gsc.mjs` lists its
+tabs and every check in §10.5 can be driven in front of you.
+
+What was measurable without it: the live site through Puppeteer driving Edge with a real
+browser user-agent (request counts, transfer bytes, edge-cache states per request), a
+bounded Lighthouse set against production (Edge, `CHROME_PATH`), read-only Postgres
+queries, and the repository.
+
+### 10.2 The five concerns
+
+**1. `lastmod` — grid sitemap and articles.** The grid sitemap stamped every day with
+the observation date: when PGCB measured, not when this site published or changed the
+page, and on a 2019 day seven years wrong. Articles used `publishedAt`, and the page's
+`dateModified` used `updatedAt` — a Prisma `@updatedAt` that pinning, trashing, status
+moves, media re-pointing and the admin view reconcile all bump: 171 of 205 published rows
+carried one more than an hour past publication and 30 had moved in the previous week,
+while only 16 have an actual body revision after publishing.
+
+Both now read the ledgers that record real change. `DataReleaseRevision` appends a row
+only when bytes change (PUBLISH / CORRECT / RESTORE, `release-write.ts`), so a grid day's
+`lastmod` is its newest non-revoke revision time, across `GRID_DAILY` and `GAS_DAILY`,
+and a day with no revision row — every day before 2026-08-21, held only in the static
+archive — carries none. `Revision` is written only when an article's body changes
+(`lib/actions/articles.ts`), so an article's `lastmod`, `dateModified` and
+`og:modified_time` are the later of publication and its newest body revision. Dev
+server: 30 of 4,578 archive entries dated, 4,548 undated; the sampled article's
+`dateModified` equals its `datePublished`, which is true. A title-only edit does not move
+these dates; that is the ledger's limit and it is stated in the code.
+
+**2. Cost, measured rather than asserted.** "CDN hit means no per-request cost" was
+wrong in two ways: a hit still transfers bytes, and middleware runs before the cache on
+every matched request. Measured on production with Puppeteer + Edge, browser UA, cold
+profile, one load each:
+
+| Page | Requests | Transfer | Doc | Images | Fonts | Script | RSC/fetch | Same-origin `/api` calls | Edge state of those |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| `/` | 74 | 1,825 KB | 90 KB | 23 / 739 KB | 5 / 265 KB | 29 / 501 KB | 11 / 119 KB | 1 | STALE |
+| article | 53 | 240 KB | 22 KB | 3 / 76 KB | cached | 28 / 24 KB | 12 / 118 KB | 1 | MISS |
+| `/grid-explorer` | 90 | 579 KB | 34 KB | — | cached | 35 / 250 KB | 43 / 294 KB | **25 (10 distinct, 15 duplicates)** | 24 HIT, 1 STALE |
+| grid day | 48 | 151 KB | 17 KB | 2 / 8 KB | cached | cached | 11 / 126 KB | 0 | — |
+| `/analysis/remal-2024` | 52 | 204 KB | 60 KB | — | cached | 30 / 26 KB | 11 / 118 KB | 0 | — |
+
+Fonts and script show as cached on later pages because the profile persisted across the
+five loads; the homepage row is the true cold cost. Two findings with a cost:
+
+- **The Grid Explorer asks for the same day's JSON up to four times in one view** —
+  `/api/data/daily/2026-09-12.json` four times, three other days three times. 25
+  requests for 10 files. Each is a middleware invocation (the tier gate, by design)
+  plus an edge lookup; on a STALE or MISS it is also a function run and a Postgres read.
+  The fix is client-side de-duplication of the fetch, which is Grid Explorer code and
+  outside this stage's scope; it is the largest per-view request cost on the site.
+- **The homepage transfers 1.8 MB cold, 739 KB of it images** across 23 requests. Every
+  one is served through `/_next/image`, cached a year, so the cost is bandwidth rather
+  than transformations — but it is the page's LCP budget (below).
+
+Origin work per route, from the code (not the dashboard): `sitemap.xml` is four Postgres
+queries per hour at most (one more sub-select per article for the revision, inside the
+same `findMany`); `grid-sitemap.xml` is one cached release read per day; a grid day page
+is zero database work on a hit and one catalogue read otherwise; an article is zero for
+anonymous readers after its ISR window. **Plans and money remain unverified**: neither
+the Vercel nor the Supabase usage page was reachable (§10.1), the CLI exposes no usage,
+and no figure here is a billing figure. Database size 172 MB of Supabase's 500 MB free
+tier (stage 9).
+
+**3. Lighthouse.** Stage 7's paragraph miscounted (corrected in place: five of eight LCP
+improvements in the 0.5–0.9 s band, not six, and one regression), and its numbers were a
+local build on 2026-09-03 — not evidence about production now. Current production,
+Lighthouse 13.4.1 via Edge, one run per cell, same machine and hour:
+
+| Page | Form | Score | LCP | FCP | TBT | CLS | Speed Index | Bytes |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| `/` | mobile | 66 | 6.2 s | 2.0 s | 410 ms | 0.000 | 3.0 s | 1,644 KB |
+| `/` | desktop | 99 | 0.96 s | 0.54 s | 2 ms | 0.001 | 0.88 s | 1,954 KB |
+| article | mobile | 89 | 3.6 s | 1.7 s | 54 ms | 0.000 | 1.7 s | 883 KB |
+| article | desktop | 99 | 0.83 s | 0.49 s | 0 ms | 0.000 | 0.71 s | 1,180 KB |
+| `/grid-explorer` | mobile | 67 | 5.1 s | 1.7 s | 461 ms | 0.070 | 3.3 s | 1,398 KB |
+| `/grid-explorer` | desktop | 95 | 1.1 s | 0.51 s | 6 ms | 0.100 | 0.99 s | 1,511 KB |
+| grid day | mobile | 90 | 3.5 s | 1.7 s | 60 ms | 0.000 | 1.7 s | 912 KB |
+| grid day | desktop | 100 | 0.81 s | 0.49 s | 0 ms | 0.000 | 0.62 s | 1,031 KB |
+
+Lab, simulated slow 4G on mobile; single runs, so ±10% is noise. These say what a
+Lighthouse run says and nothing about rankings. The one number that stands out is the
+homepage mobile LCP at 6.2 s, driven by the image and script weight above; the article
+and grid-day pages are inside or near the 2.5 s target on the same profile. **Field
+data (CrUX) is still unverified** — the anonymous PageSpeed quota was exhausted and
+Search Console's CWV report needs the signed-in window.
+
+**4. Title length.** Reframed (S9-7 edited in place): ~60 characters is where a desktop
+result truncates, not a requirement, and nothing in the code enforces one. A search
+title is worth writing only where the headline truncates badly; a long accurate
+headline is better than a short vague one.
+
+**5. Legacy author redirects.** `/author/:name` → `/articles` sent every old author
+archive to a page about something else — a soft 404 that also lost the reader. The
+WordPress login slugs survive as the e-mail local part the importer minted
+(`rasel@esbpowerline.com`, `admin@esbpowerline.com`; `hamim` special-cased), so the
+three that carried published stories now redirect to their own author pages, which
+exist and answer 200 in production. Every other `/author/*` falls through to the branded
+404 rather than a guess. Old logins with no evidence in the database (there may be
+others in Search Console's 404 list) can be added the same way when that list is read.
+
+### 10.3 Per-issue status
+
+| ID | Issue | Code | Production | Google's observed status | Measured cost impact |
+|---|---|---|---|---|---|
+| S9-1 | `/magazine` submitted while noindex | fixed, tested | **not deployed** | unobserved (no GSC session) | none: one array entry |
+| S9-2 | `/analysis*` absent from sitemap | fixed, tested | not deployed | unobserved | none |
+| S9-3 | `/analysis` doubled title | fixed, verified on dev | not deployed | unobserved | none |
+| S9-4 | grid-day publisher by `@id` | fixed, verified on dev | not deployed | unobserved | none |
+| S9-5 | www 307 | n/a (dashboard) | **open** | unobserved | none |
+| S10-1 | grid sitemap `lastmod` = observation date | fixed, tested, dev-verified (30 dated / 4,548 undated) | not deployed | unobserved | +1 cached query per day on the sitemap |
+| S10-2 | article `dateModified` = `updatedAt` | fixed, tested, dev-verified | not deployed | unobserved | +1 sub-select inside two existing queries |
+| S10-3 | `/author/*` → news index | fixed, tested | not deployed | unobserved | unknown slugs now cost a 404 render instead of an edge redirect; volume in stage 3's logs was a handful a week |
+| S10-4 | Grid Explorer duplicate data fetches | **not fixed** — documented | live | n/a | 15 redundant middleware invocations per explorer view |
+| S10-5 | homepage cold weight 1.8 MB / mobile LCP 6.2 s lab | not fixed — measured | live | field unverified | bandwidth per cold visit |
+
+### 10.4 Verification
+
+- `tsc --noEmit` clean; `eslint` on the nine changed files clean.
+- `vitest run`: **90 files, 962 tests** — `sitemap.test.ts` (8, revision-based lastmod
+  added), new `grid-sitemap.test.ts` (3: revision time only, never the observation date,
+  undated on a failed read), new `legacy-redirects.test.ts` (3: each known login to its
+  author page, no catch-all guess, content-equivalent mappings intact).
+- Dev server: figures in §10.2 (1). `next.config` redirects are read at server start, so
+  the author mappings are verified by the config test, not by the running dev instance.
+
+### 10.5 Release and what to check after it
+
+Release is `git push origin authenticating:main` — no migration, no data write, rollback
+is one revert. Then, in production with a browser UA: `grid-sitemap.xml` (about 30
+`<lastmod>` elements, none equal to a bare date), `sitemap.xml` (three `/analysis`,
+no `/magazine`), an article's `dateModified`, `/author/rasel` → 308
+`/authors/sheikh-rasel`, `/author/unknown` → 404. Then, in the 9222 window, in this
+order: Page indexing (classify each reason; export "Submitted URL marked noindex" and
+"Not found" — the latter is where any further `/author/*` logins will be), Sitemaps
+(resubmit the three once), Core Web Vitals (the first field numbers this work has had),
+the Vercel usage page (function invocations, edge requests, bandwidth, image
+transformations for the current period) and the Supabase usage page (egress, database
+size), recorded here as the before for whatever comes next.

@@ -107,6 +107,51 @@ export function getPublishedKeys(feed: DataFeed): Promise<string[]> {
 }
 
 /**
+ * When each published key's payload last changed, for the feeds given.
+ *
+ * Read from `DataReleaseRevision`, not `DataRelease.updatedAt`: the revision
+ * ledger appends a row only when bytes change (PUBLISH, CORRECT, RESTORE —
+ * `release-write.ts`), whereas `updatedAt` is a Prisma `@updatedAt` that any
+ * write bumps. A day held only in the static archive has no row here and is
+ * absent from the map — which is the answer, not a gap: the grid sitemap
+ * used to stamp every day's `lastmod` with the observation date, a value
+ * that says when PGCB measured, not when this page changed. Undated is
+ * honest; a date a crawler learns to distrust is worse than none
+ * (SEO_FIX_LOG stage 10).
+ *
+ * One query per call site, cached a day on the release tag, so a crawler
+ * walking 4,500 sitemap entries costs one read.
+ */
+export function getReleaseRevisionTimes(feeds: DataFeed[]): Promise<Record<string, string>> {
+  return unstable_cache(
+    async () => {
+      const rows = await prisma.dataRelease.findMany({
+        where: { revokedAt: null, feed: { in: feeds } },
+        select: {
+          key: true,
+          revisions: {
+            where: { kind: { not: 'REVOKE' } },
+            orderBy: { revision: 'desc' },
+            take: 1,
+            select: { publishedAt: true },
+          },
+        },
+      });
+      const out: Record<string, string> = {};
+      for (const row of rows) {
+        const at = row.revisions[0]?.publishedAt;
+        if (!at) continue;
+        const iso = at.toISOString();
+        if (!out[row.key] || out[row.key] < iso) out[row.key] = iso;
+      }
+      return out;
+    },
+    ['data-release-revision-times', ...feeds],
+    { tags: [RELEASE_CACHE_TAG, ...feeds.map(feedCacheTag)], revalidate: 86_400 },
+  )();
+}
+
+/**
  * Every published key, for every feed, in one query.
  *
  * The manifest previously asked `getPublishedKeys` once per feed — thirteen

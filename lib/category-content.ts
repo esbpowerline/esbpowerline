@@ -15,6 +15,16 @@ export type PublicArticleDetail = PublicArticleCard & {
   collaborators?: { id: string; name: string }[];
   /** ISO timestamp — feeds NewsArticle.dateModified, which Google uses for freshness. */
   updatedAt: string;
+  /**
+   * When the body last changed, per the `Revision` ledger — else the
+   * publication time. Not `updatedAt`: that is a Prisma `@updatedAt` bumped by
+   * pinning, trashing, media re-pointing, status moves and the admin view-count
+   * reconcile, none of which is an edit. 171 of 205 published rows carried an
+   * `updatedAt` more than an hour past publication and 30 had moved in the
+   * previous week, while only 16 have a body revision after publishing
+   * (database, 2026-09-19). `dateModified` and `og:modified_time` read this.
+   */
+  contentModifiedAt: string;
   /** The editor's search title / description from the article's seo JSON; null when unset. */
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -255,10 +265,22 @@ export const getPublishedArticlesForPublic = unstable_cache(async (limit = 60, l
     .map((a) => mapArticle(a, locale));
 }, ['getPublishedArticlesForPublic'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 
+/**
+ * The later of publication and the newest body revision. A revision written
+ * before publication (drafting) is not a modification of the published page.
+ */
+export function latestContentChange(publishedAt: Date | null, revisionAt: Date | undefined): Date {
+  const published = publishedAt ?? new Date(0);
+  return revisionAt && revisionAt > published ? revisionAt : published;
+}
+
 export const getPublishedArticleBySlug = unstable_cache(async function getPublishedArticleBySlug(slug: string, locale?: string): Promise<PublicArticleDetail | null> {
   const article = await prisma.article.findFirst({
     where: { slug, status: 'PUBLISHED' },
-    include: { author: { select: { name: true } } },
+    include: {
+      author: { select: { name: true } },
+      revisions: { orderBy: { createdAt: 'desc' }, take: 1, select: { createdAt: true } },
+    },
   });
   if (!article) return null;
 
@@ -302,6 +324,7 @@ export const getPublishedArticleBySlug = unstable_cache(async function getPublis
     imageCredit: article.imageCredit,
     collaborators,
     updatedAt: article.updatedAt.toISOString(),
+    contentModifiedAt: latestContentChange(article.publishedAt, article.revisions[0]?.createdAt).toISOString(),
   };
 }, ['getPublishedArticleBySlug'], { revalidate: CONTENT_CACHE_TTL, tags: [CONTENT_TAGS.articles] });
 

@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       images: [{ url: image, width: 1200, alt: article.heroImage?.alt ?? article.title }],
       type: 'article',
       publishedTime: article.date,
-      modifiedTime: article.updatedAt ?? article.date,
+      modifiedTime: article.contentModifiedAt,
       authors: [`${SITE_URL}/authors/${slugify(article.author)}`],
       section: article.category,
       ...(tags ? { tags } : {}),
@@ -136,7 +136,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     // through the site's optimizer, not the storage origin (see shareImageUrl).
     ...(heroImage ? { image: [shareImageUrl(heroImage)] } : {}),
     datePublished: article.date,
-    dateModified: article.updatedAt ?? article.date,
+    // The body's last revision, never the row's updatedAt (see
+    // PublicArticleDetail.contentModifiedAt): a dateModified that moves when an
+    // editor pins a story is a freshness signal the page has not earned.
+    dateModified: article.contentModifiedAt,
     author: {
       '@type': 'Person',
       name: article.author,

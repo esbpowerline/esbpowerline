@@ -5,6 +5,7 @@ import { EVENT_STUDIES } from '@/lib/data/analysis/event-registry';
 import { IS_DEMO } from '@/lib/magazine-demo-issue';
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import { slugify } from '@/lib/utils';
+import { latestContentChange } from '@/lib/category-content';
 
 export const revalidate = 3600; // revalidate sitemap every hour
 
@@ -28,7 +29,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Failures are logged, not swallowed. With `revalidate`, a thrown error
   // keeps the previously generated copy in service, which is the right
   // fallback — but a silent one hid a sitemap frozen since 2026-08-30.
-  let publishedArticles: { slug: string; title: string; publishedAt: Date | null; authorId: string; postAsNewsDesk: boolean }[];
+  let publishedArticles: {
+    slug: string;
+    title: string;
+    publishedAt: Date | null;
+    authorId: string;
+    postAsNewsDesk: boolean;
+    revisions: { createdAt: Date }[];
+  }[];
   let categories: { slug: string; createdAt: Date }[];
   let latestMagazine: { createdAt: Date } | null;
   let authors: { name: string }[];
@@ -41,7 +49,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [publishedArticles, categories, latestMagazine] = await Promise.all([
       prisma.article.findMany({
         where: { status: 'PUBLISHED' },
-        select: { slug: true, title: true, publishedAt: true, authorId: true, postAsNewsDesk: true },
+        select: {
+          slug: true,
+          title: true,
+          publishedAt: true,
+          authorId: true,
+          postAsNewsDesk: true,
+          // The newest body revision: the content-edit timestamp stage 2 said
+          // did not exist yet. It did — the `Revision` ledger, written only
+          // when the body actually changes.
+          revisions: { orderBy: { createdAt: 'desc' }, take: 1, select: { createdAt: true } },
+        },
         orderBy: { publishedAt: 'desc' },
       }),
       // A category with nothing published renders "no articles yet" — a soft
@@ -73,10 +91,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Non-ASCII slugs must be percent-encoded to be a valid <loc>.
   const articleUrls = articles.map((article) => ({
     url: `${baseUrl}/articles/${encodeURIComponent(article.slug)}`,
-    // publishedAt, not updatedAt: the only date on the row that means what a
-    // crawler thinks lastmod means. A content-edit timestamp would be better
-    // and does not exist yet.
-    ...(article.publishedAt ? { lastModified: article.publishedAt } : {}),
+    // The later of publication and the newest body revision — never
+    // `updatedAt`, which pinning or a status move also bumps.
+    ...(article.publishedAt
+      ? { lastModified: latestContentChange(article.publishedAt, article.revisions[0]?.createdAt) }
+      : {}),
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));

@@ -319,9 +319,7 @@ const nextConfig: NextConfig = {
       { source: '/rss.xml', destination: '/feed.xml', permanent: true },
       { source: '/rss', destination: '/feed.xml', permanent: true },
       // WordPress nested categories (/category/news/power-generation): the
-      // leaf is the category. Tag and paginated-index URLs map directly; the
-      // old author slugs (WordPress logins) have no counterpart here, so they
-      // land on the news index rather than on a guessed byline.
+      // leaf is the category. Tag and paginated-index URLs map directly.
       {
         source: '/category/:parent/:slug',
         destination: '/categories/:slug',
@@ -332,11 +330,19 @@ const nextConfig: NextConfig = {
         destination: '/tags/:tag',
         permanent: true,
       },
-      {
-        source: '/author/:name',
-        destination: '/articles',
-        permanent: true,
-      },
+      // WordPress author archives. The old login slugs survive as the local
+      // part of the e-mail the importer minted for each byline
+      // (`scripts/import-esbpowerline-news.ts`: `${wpUser.slug}@esbpowerline.com`,
+      // with `hamim` special-cased), so the three that carried published
+      // stories map to real author pages. Until 2026-09-19 every /author/*
+      // went to the news index — a redirect to a page about something else,
+      // which Google treats as a soft 404 and which sent nobody where they
+      // asked to go. Slugs with no evidence get no guess: they fall through to
+      // the branded 404 like any other retired URL.
+      { source: '/author/hamim', destination: '/authors/mehedi-hasan-hamim', permanent: true },
+      { source: '/author/rasel', destination: '/authors/sheikh-rasel', permanent: true },
+      { source: '/author/admin', destination: '/authors/esb-news-desk', permanent: true },
+      { source: '/author/esb-news-desk', destination: '/authors/esb-news-desk', permanent: true },
       {
         source: '/page/:n(\\d+)',
         destination: '/articles?page=:n',

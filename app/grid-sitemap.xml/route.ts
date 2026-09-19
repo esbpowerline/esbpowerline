@@ -1,5 +1,6 @@
 import { SITE_URL } from '@/lib/seo';
 import { getArchiveCatalogue } from '@/lib/data/grid/archive-day.server';
+import { getReleaseRevisionTimes } from '@/lib/data/releases.server';
 
 /**
  * The archive's own sitemap: one entry per day, plus the year indexes.
@@ -11,18 +12,23 @@ import { getArchiveCatalogue } from '@/lib/data/grid/archive-day.server';
  * separately, which is the only way to tell which of the two Google is actually
  * taking — and it follows the convention `news-sitemap.xml` already set.
  *
- * `lastmod` is stated once, per day, as the day itself. An archive day's
- * figures do not change after publication; when a correction ships as a
- * DataRelease the date is unchanged but the payload is not, which is what the
- * page's own 24-hour revalidation covers. Stamping every entry with the
- * generation time was the exact mistake stage 2 of the SEO work removed from
- * the main sitemap — a lastmod Google learns to distrust is worth less than
- * an honest one.
+ * `lastmod` is the moment the day's payload last changed on this site, read
+ * from the release revision ledger — and stated only for days that have one.
+ * Until 2026-09-19 every entry carried the observation date instead: the day
+ * PGCB measured, which is not when this page was published or corrected, and
+ * on a 2019 day is off by seven years. That is the same dishonest-lastmod
+ * mistake stage 2 removed from the editorial sitemap, in different clothes.
+ * A day held only in the static archive has no revision row and no lastmod;
+ * the sitemap is not the place to guess.
  */
 export const revalidate = 86400;
 
 export async function GET() {
-  const catalogue = await getArchiveCatalogue();
+  const [catalogue, revised] = await Promise.all([
+    getArchiveCatalogue(),
+    // GAS_DAILY too: the day page prints the gas window beside the grid.
+    getReleaseRevisionTimes(['GRID_DAILY', 'GAS_DAILY']).catch(() => ({}) as Record<string, string>),
+  ]);
   const years = [...new Set(catalogue.map((d) => d.slice(0, 4)))].sort();
 
   const entries: string[] = [
@@ -31,10 +37,10 @@ export async function GET() {
       (year) =>
         `<url><loc>${SITE_URL}/grid-explorer/archive/${year}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
     ),
-    ...catalogue.map(
-      (date) =>
-        `<url><loc>${SITE_URL}/grid-explorer/${date}</loc><lastmod>${date}</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>`,
-    ),
+    ...catalogue.map((date) => {
+      const lastmod = revised[date] ? `<lastmod>${revised[date]}</lastmod>` : '';
+      return `<url><loc>${SITE_URL}/grid-explorer/${date}</loc>${lastmod}<changefreq>yearly</changefreq><priority>0.6</priority></url>`;
+    }),
   ];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>

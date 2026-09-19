@@ -25,11 +25,15 @@ const SITE = 'https://esbpowerline.com';
 beforeEach(() => {
   vi.clearAllMocks();
   db.article.findMany.mockResolvedValue([
-    { slug: 'english-story', title: 'An English story', publishedAt: new Date('2026-09-10T00:00:00Z'), authorId: 'u1', postAsNewsDesk: false },
+    { slug: 'english-story', title: 'An English story', publishedAt: new Date('2026-09-10T00:00:00Z'), authorId: 'u1', postAsNewsDesk: false, revisions: [] },
+    // Edited after publication: lastmod is the revision, not publishedAt.
+    { slug: 'revised-story', title: 'A revised story', publishedAt: new Date('2026-09-01T00:00:00Z'), authorId: 'u1', postAsNewsDesk: false, revisions: [{ createdAt: new Date('2026-09-05T12:00:00Z') }] },
+    // Drafted (revision) before publication: the draft is not a modification.
+    { slug: 'drafted-story', title: 'A drafted story', publishedAt: new Date('2026-09-08T00:00:00Z'), authorId: 'u1', postAsNewsDesk: false, revisions: [{ createdAt: new Date('2026-09-07T00:00:00Z') }] },
     // Rejected by getPublishedArticleBySlug while the server locale is 'en',
     // so it 404s — "Submitted URL not found" if it is listed.
-    { slug: 'বাংলা-শিরোনাম', title: 'বাংলা শিরোনাম', publishedAt: new Date('2026-09-11T00:00:00Z'), authorId: 'u1', postAsNewsDesk: false },
-    { slug: 'undated', title: 'No published date', publishedAt: null, authorId: 'u2', postAsNewsDesk: true },
+    { slug: 'বাংলা-শিরোনাম', title: 'বাংলা শিরোনাম', publishedAt: new Date('2026-09-11T00:00:00Z'), authorId: 'u1', postAsNewsDesk: false, revisions: [] },
+    { slug: 'undated', title: 'No published date', publishedAt: null, authorId: 'u2', postAsNewsDesk: true, revisions: [] },
   ]);
   db.category.findMany.mockResolvedValue([{ slug: 'power-generation', createdAt: new Date() }]);
   db.magazineIssue.findFirst.mockResolvedValue({ createdAt: new Date('2026-08-01T00:00:00Z') });
@@ -66,6 +70,13 @@ describe('sitemap', () => {
       expect(entry, study.slug).toBeDefined();
       expect(entry?.lastModified).toBeUndefined();
     }
+  });
+
+  it('dates an article by its newest body revision after publication, else publishedAt', async () => {
+    const byUrl = new Map((await sitemap()).map((e) => [e.url, e]));
+    expect(byUrl.get(`${SITE}/articles/revised-story`)?.lastModified).toEqual(new Date('2026-09-05T12:00:00Z'));
+    expect(byUrl.get(`${SITE}/articles/drafted-story`)?.lastModified).toEqual(new Date('2026-09-08T00:00:00Z'));
+    expect(byUrl.get(`${SITE}/articles/english-story`)?.lastModified).toEqual(new Date('2026-09-10T00:00:00Z'));
   });
 
   it('states lastModified only where a real date exists', async () => {
