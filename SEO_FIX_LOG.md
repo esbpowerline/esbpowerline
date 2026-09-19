@@ -1189,3 +1189,102 @@ day it never fetched — a zero where rule 1 wants a dash. Present in production
 needs its own change in the Overview's empty state.
 
 State: both **fixed in code, verified on a local production build, not yet released**.
+
+---
+
+## Stage 11 — The cost baseline, and four items closed (2026-09-19)
+
+### 11.1 Released and verified
+
+Two releases this evening. `64a1cd88c` (homepage weight, Grid Explorer request
+dedupe, the redirects, the log) built as `dpl_5LfjCo4EgSS78bzhtQuRsZQ1Ajp2`; measured
+on production with the same Puppeteer + Edge harness as §10.2, cold profile:
+
+| Cold load, production | Before (2026-09-19 morning) | After |
+|---|---:|---:|
+| Homepage requests | 74 | 67 |
+| Homepage transfer | 1,825 KB | **1,186 KB** |
+| — images | 23 / 739 KB | 18 / **206 KB** |
+| — RSC / fetch | 11 / 119 KB | 10 / 61 KB |
+| — fonts | 5 / 265 KB | 4 / 216 KB |
+| Grid Explorer `/api/data` requests | 25 (10 distinct, 15 duplicate) | **12 (11 distinct, 1 duplicate)** |
+| Grid Explorer transfer | 579 KB | 503 KB |
+
+Head checks on the live homepage: no Source Serif preload (2 font preloads, was 3),
+`fetchpriority="high"` present on the hero preload, every promotional image carrying
+its `sizes`. `5a86383fa` (the locked-day dash fix) followed.
+
+### 11.2 The cost baseline, finally measured (S9-8 closed)
+
+Hamim signed in to both dashboards in the 9222 window; these are the first real
+figures this work has had. **Vercel, team `teamesb`, Pro plan, period 13 Sep – 13 Oct
+2026** (about 40% elapsed):
+
+| Product | Usage | Charge |
+|---|---|---:|
+| ISR Writes | 282.94K | $1.47 |
+| Fast Origin Transfer | 4 GB | $1.09 |
+| Fluid Active CPU | 3 hours | $0.66 |
+| Function Invocations | 359.82K | $0.22 |
+| Fluid Provisioned Memory | 15.65 GB-hrs | $0.21 |
+| ISR Reads | 131.08K | $0.07 |
+| Edge Requests – additional CPU duration | 8 min | $0.06 |
+| Image Optimization (540 transforms, 3.48K writes, 15.85K reads) | | $0.05 |
+| Edge Requests | 341.16K / 10M included | $0.00 |
+| Fast Data Transfer | 3 GB / 1 TB included | $0.00 |
+| Build CPU | 2 hours | $0.00 |
+
+Infrastructure subtotal **$3.82**, entirely covered by the $20 included credit;
+the bill is the $20 licence. **Supabase, org on Pro, 3 Sep – 3 Oct:** egress 4.15 of
+250 GB (2%), cached egress 1.17 GB, storage 0.10 of 100 GB, 6 MAU, 0 realtime, 0 edge
+functions, no quota exceeded. Micro compute 386 hours ($5.19) against $10 of compute
+credit. The 500 MB free-tier ceiling recorded in CLAUDE.md is obsolete: this project
+is on Pro with a 100 GB allowance, so the database's 172 MB and its ~130 MB/year
+growth are not a near-term constraint. The ISR-writes line is the one worth watching:
+it is the largest single charge and it moves with revalidation windows, not traffic.
+
+**So the honest statement about this stage's performance work is: it bought speed, not
+money.** Nothing measured here is near a paid threshold. The homepage's 639 KB saving
+per cold visit is a reader-experience and Core-Web-Vitals change; at current volumes it
+is worth cents. The Grid Explorer's 13 fewer requests per view remove middleware
+invocations from a 341K/10M edge-request allowance. Neither justified on cost alone,
+and neither is claimed to be.
+
+### 11.3 The locked-day zero (S10-6, closed)
+
+Found by the dedupe agent, fixed here (`5a86383fa`). The Overview destructured
+`activeData ?? { systemStats: { eveningPeakGen: 0, totalEnergyGen: 0, … } }`, so a
+tier-locked day printed **"Evening Peak Gen: 0 MW / Total Energy Gen: 0.00 MKWh"** for
+figures it had never fetched — the exact claim doctrine rule 1 forbids, live in
+production since the lock was written. The pending-day panel already solved this
+correctly (six tiles, every figure a dash, naming who owes it), so that strip is now
+exported as `AbsentFiguresStrip` and both callers share it; the Overview is given
+figures only when `activeDataDate === selectedDate`. Three tests pin it, including one
+asserting the rendered markup contains no digit at all. The component-size ratchet
+caught the first draft at 3,494 lines against a 3,487 budget and was right to: the
+condition already existed in the file as `availabilityKnown`, and reusing it removed
+the duplication.
+
+### 11.4 The Bengali articles (S9-6, closed by decision)
+
+Hamim's call: unpublish. 33 rows moved `PUBLISHED` → `DRAFT`
+(`scratch/unpublish-bengali.ts`, dry-run first, 33 of 33 updated; 208 → 175 published,
+0 Bengali-titled remaining). Nothing is deleted and the flip is reversible. This makes
+the CMS and the site agree: those rows already answered 404 to every reader because
+`getPublishedArticleBySlug` rejects a Bengali title while the server locale is `en`,
+and they were already filtered out of the sitemap and the feed. What changes is that
+the newsroom no longer reports 33 stories as live that no one can read. They return
+the day they carry English titles, or the day a real `/bn` route exists — which
+remains an open product question, not a defect.
+
+### 11.5 Open after this stage
+
+| Item | State |
+|---|---|
+| Mobile LCP | Improved, not solved. Field data still says "needs improvement" and will until CrUX catches up (28 days). What remains is structural: an 87 KB render-blocking stylesheet and a document carrying 24 articles × 10 categories in its RSC payload. A design decision under DESIGN-DIRECTION.md, not a fix to make unilaterally. |
+| Search titles on 47 long headlines | Editorial, optional, per story. |
+| ~14 "crawled, currently not indexed" current pages | Google's judgement; inspect individually if they matter. |
+| Bing Webmaster Tools | Never opened; no sign-in. |
+| Google recrawl | Sitemaps submitted 2026-09-19. Read Page indexing, Sitemaps, Datasets and Core Web Vitals around 26 September and 17 October. |
+
+Nothing else found in this pass is both actionable and unfixed.
