@@ -1066,3 +1066,33 @@ Inspection after release. S9-5 (www 307) — the redirect list holds no www URL.
 — no `/author/*` URL appears in the 404 or redirect exports, so the only evidence for
 the old logins is the importer's e-mail slugs. S10-5 — confirmed in the field: mobile
 LCP is the one CWV issue, on every URL Google has data for.
+
+### 10.7 Released and verified in production (2026-09-19)
+
+`main` fast-forwarded `9852aeeda` → `8eb566114` on Hamim's instruction; Vercel built
+`dpl_4tZQkinq1ih6QCtpKQiHzPJ8knTb` and it was serving within about ten minutes. No
+migration ran (none in the change). Verified against that deployment with a browser
+user-agent (Googlebot UA for the grid sitemap):
+
+| Check | Production result |
+|---|---|
+| `sitemap.xml` | 226 URLs, 3 `/analysis*`, 0 `/magazine`, edge HIT |
+| `grid-sitemap.xml` | 4,578 URLs, 30 `<lastmod>` (all revision timestamps), 0 bare-date lastmods; 2019-06-15 undated |
+| `/analysis` `<title>` | "Event studies — Bangladesh grid and gas events, day by day \| ESB PowerLine" |
+| grid day `Dataset.publisher` | `{"@id": ".../#organization"}` |
+| article `dateModified` / `og:modified_time` | equal to `datePublished` for an unrevised article (true) |
+| `/author/hamim`, `/author/rasel`, `/author/admin` | 308 to the author pages, which answer 200 |
+| `/author/unknown-person` | 404 |
+| `/2026/06/08/`, `/2026/04/` | 308 (slash strip) → 308 → `/articles` 200 |
+| `/categories/grid-transmission-2` | 308 → `/categories/grid-transmission` |
+| `/magazine` | still `noindex, follow` (intentional) |
+| `/grid-explorer/zzz-bad` | still a hard 404 |
+
+Per-issue state after release: S9-1, S9-2, S9-3, S9-4, S10-1, S10-2, S10-3 — **deployed
+and verified in production**; Google's observed status unchanged until recrawl (the
+sitemaps were submitted the same day and show the pre-release counts until Google
+re-reads them). S9-5 (www 307) — still open, dashboard. S10-4, S10-5 — unchanged,
+documented. Editorial items unchanged.
+
+This section is committed to `authenticating` only; `main` carries the code and is one
+docs commit behind, which the next release closes.
