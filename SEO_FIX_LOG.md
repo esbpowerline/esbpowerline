@@ -997,3 +997,72 @@ order: Page indexing (classify each reason; export "Submitted URL marked noindex
 the Vercel usage page (function invocations, edge requests, bandwidth, image
 transformations for the current period) and the Supabase usage page (egress, database
 size), recorded here as the before for whatever comes next.
+
+### 10.6 Search Console, read in Hamim's window (2026-09-19, later the same day)
+
+Hamim opened the 9222 Edge and signed in; every figure below was read from the
+property `https://esbpowerline.com/` through `scratch/gsc*.mjs`, in tabs opened and
+closed in front of him. Report dates are Google's "last update".
+
+**Sitemaps — none was submitted.** The Sitemaps report was empty: robots.txt named the
+three files, but nothing had ever been submitted, so the "Sitemaps" evidence stages 2, 5
+and 8 expected to read did not exist. All three were submitted from the window
+(`scratch/gsc-submit-sitemap.mjs`) and read back: `sitemap.xml` Success, 220 discovered;
+`news-sitemap.xml` Success, 6; `grid-sitemap.xml` showed "Couldn't fetch" for the first
+minute — the origin answered Googlebot 200, well-formed, 714 KB, cached — then Success,
+4,578. Those counts are the *live* files, i.e. before the stage 9/10 changes deploy;
+the first read after release should show 223 for the first and about 30 dated entries
+in the third.
+
+**Page indexing (9/14/26):** 207 indexed, 1,050 not indexed across 11 reasons. Every
+example list was exported in full (`scratch/gsc-table.mjs`) and classified:
+
+| Reason | Pages | What they are | Disposition |
+|---|---:|---|---|
+| Crawled – currently not indexed | 784 | 252 `/_next/static/*` chunks, fonts and CSS with old `?dpl=` ids; 154 WordPress date URLs with Bengali slugs; 85 other Bengali-era paths (`/tag/…`, `/location/…`, `/category/…`); 20 WordPress date URLs with English slugs; 12 current tag/category/article pages | Assets: Google fetching page resources, not a defect, and they must not be blocked (rendering needs them). Bengali-era: obsolete URLs from the old site (S9-6 is the product question). The 12 current pages: **unresolved diagnosis** — three articles and a handful of hubs Google chose not to index; content, not code |
+| Not found (404) | 159 | 94 Bengali-era paths; 16 WordPress date URLs whose slug does not exist here (`…-season-2`); 14 `/tags/<keyword>` (stage 2's dead links); 6 `/category/…`; 4 `/articles/…` (truncated slugs, and the archived Moheshkhali story); 2 slugless date archives; 1 `/categories/grid-transmission-2`; scanner junk (`/W`, `/t`, `/mmbtu`) | The two date archives and the `-2` category now redirect (this stage). The rest are correct 404s: obsolete, awaiting recrawl |
+| Duplicate without user-selected canonical | 31 | 24 `/?NNNNNN.html` spam query strings on the homepage; 5 `/login?callbackUrl=…`; `/categories/environment-efficiency`; `/articles/drilling-for-survival-…-kamta-2` | Obsolete report: the homepage and login pages carry canonicals since stage 2/5 (live check today); the two real pages are **unresolved** — inspect after release |
+| Page with redirect | 23 | WordPress URLs and trailing-slash variants, all redirecting correctly | Intentional |
+| Excluded by 'noindex' | 20 | `/tags/*`, `/tags` | Intentional |
+| Blocked by robots.txt | 14 | `/login?callbackUrl=…`, `/members/login?callbackUrl=…` | Intentional; the callback links left the HTML in stage 2 |
+| Blocked due to other 4xx | 8 | Bengali-era paths, one `/tags/among`, two `/?N.html` | Obsolete |
+| Alternate page with proper canonical | 4 | | Intentional |
+| three further reasons | 2, 1, 1 | validation "Started" | not read individually |
+
+Nothing in the not-indexed set is a page this site wants indexed and cannot get indexed
+for a technical reason that is still live. The number will not go to zero and should
+not: two-thirds of it is the old Bengali site, and a quarter is page resources.
+
+**Core Web Vitals (CrUX, 9/17/26) — the first field evidence this work has had.**
+Mobile: 0 good, **146 need improvement, 0 poor**, one issue: *LCP longer than 2.5 s
+(mobile)*. Desktop: 146 good, 0 issues. This agrees with the lab runs in §10.2 (3):
+mobile LCP is the site's one performance problem in the field, at the "needs
+improvement" band (2.5–4 s at the 75th percentile), not "poor". The homepage's 1.8 MB
+cold weight is the likeliest driver; a fix is design work (the 60-card sections, image
+sizing on the first screen) and is not attempted here.
+
+**Other reports:** HTTPS — 140 HTTPS URLs, 0 non-HTTPS (9/11). Manual actions — none.
+Security issues — none. Breadcrumbs — 0 invalid (9/17). Datasets — 1 valid, 0 invalid,
+"Missing field license" 0 (9/17); only one Dataset item is counted, so the 4,563 day
+pages had not been read as datasets by 9/17. Video indexing — no report exists (the
+site has no video pages). Crawl stats (90 days to 9/17): 6,590 requests, 185 MB, 250 ms
+average response; by response 80% 200, 9% 404, 8% 301, 3% other 4xx, <1% 5xx; by
+purpose 95% refresh, 5% discovery; by file type 45% JavaScript, 16% HTML, 14% other,
+8% image, 5% CSS. Host status: no problems.
+
+**Performance, 12 Jul – 16 Sep 2026:** 184 clicks, 10.7K impressions, 1.7% CTR,
+average position 19.4. The preceding-period comparison and the query/page/device tables
+were not read this session; they change nothing about the fixes and are the first thing
+to read after release.
+
+**Not reached:** the Vercel usage page and the Supabase usage page both asked for a
+sign-in in that window. Cost remains as §10.2 (2) states: measured per request, not in
+money.
+
+**Per-issue "Google's observed status", updated:** S9-1 — `/magazine` does not appear in
+the noindex or sitemap lists yet (the sitemap was only submitted today). S9-2 — the
+`/analysis` pages are not in any not-indexed list; whether they are indexed needs URL
+Inspection after release. S9-5 (www 307) — the redirect list holds no www URL. S10-3
+— no `/author/*` URL appears in the 404 or redirect exports, so the only evidence for
+the old logins is the importer's e-mail slugs. S10-5 — confirmed in the field: mobile
+LCP is the one CWV issue, on every URL Google has data for.
