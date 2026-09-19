@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
+import tempfile
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -77,8 +79,52 @@ def update_available_dates(iso: str) -> None:
     if iso not in dates:
         dates.append(iso)
         dates.sort()
-        AVAILABLE_DATES.parent.mkdir(parents=True, exist_ok=True)
-        AVAILABLE_DATES.write_text(json.dumps(dates, indent=2), encoding="utf-8")
+        write_json_atomic(AVAILABLE_DATES, dates)
+
+
+def write_json_atomic(path: Path, data: Any, *, indent: int = 2, ensure_ascii: bool = False) -> None:
+    """Serialise, then replace the file in one step. Never leave a torn one.
+
+    `Path.write_text` truncates the target and then writes into it, so a power
+    cut, a full disk or a killed process in between leaves a published file that
+    is empty or half a document. That is not hypothetical here:
+    `public/data/petrobangla/daily/2026-09-15.json` was committed at **zero
+    bytes** (33bd6124f) and every `build_reserve_model.py` run since died on it
+    with `json.loads: Expecting value: line 1 column 1` — which marked the 16th
+    and 17th as failed days and froze the gas reserve model, while the site
+    itself stayed correct because the DataRelease row still carried the day.
+
+    Two guarantees, and both matter:
+
+    * **Serialise before touching the target.** If `json.dumps` raises, the file
+      on disk is the previous good one, untouched.
+    * **Refuse to write nothing.** An empty or whitespace-only document is never
+      a day; it is a failure that has not reported itself yet. CLAUDE.md's rule
+      is that a step which wrote nothing must fail rather than claim success, and
+      an empty file is the silent version of exactly that.
+
+    The replace is atomic on POSIX and on Windows (`os.replace`), so a reader —
+    or the next poll's `git status` — sees either the old file or the new one.
+    `fsync` before the swap so the bytes are on the platter, not just in the page
+    cache, which is what a power cut takes away.
+    """
+    text = json.dumps(data, indent=indent, ensure_ascii=ensure_ascii)
+    if not text.strip() or text.strip() in ("{}", "[]", "null"):
+        raise ValueError(f"refusing to write an empty document to {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def update_petrobangla_index(payload: dict, json_name: str, index_path: Path) -> None:
@@ -124,8 +170,7 @@ def update_petrobangla_index(payload: dict, json_name: str, index_path: Path) ->
     index["days"] = days
     index["total_days"] = len(days)
     index["generated_at"] = datetime.now().isoformat(timespec="seconds")
-    index_path.parent.mkdir(parents=True, exist_ok=True)
-    index_path.write_text(json.dumps(index, indent=2, ensure_ascii=False), encoding="utf-8")
+    write_json_atomic(index_path, index)
 
 
 def deploy(
@@ -139,9 +184,8 @@ def deploy(
     iso = energy.isoformat()
     written: dict[str, Path | str] = {}
 
-    GRID_DAILY_OUT.mkdir(parents=True, exist_ok=True)
     grid_path = GRID_DAILY_OUT / f"{iso}.json"
-    grid_path.write_text(json.dumps(grid_data, indent=2), encoding="utf-8")
+    write_json_atomic(grid_path, grid_data)
     written["pipeline_a"] = grid_path
 
     if update_index:
@@ -210,13 +254,11 @@ def deploy_petrobangla(
         print(f"  gas window: document states {iso}, not the requested {energy.isoformat()} — filing under {iso}")
     json_name = f"{iso}.json"
     staging_path = PETROBANGLA_JSON_STAGING / json_name
-    staging_path.parent.mkdir(parents=True, exist_ok=True)
-    staging_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    write_json_atomic(staging_path, petrobangla_data)
     update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_INDEX_STAGING)
 
-    PETROBANGLA_PUBLIC.mkdir(parents=True, exist_ok=True)
     pb_path = PETROBANGLA_PUBLIC / json_name
-    pb_path.write_text(json.dumps(petrobangla_data, indent=2, ensure_ascii=False), encoding="utf-8")
+    write_json_atomic(pb_path, petrobangla_data)
     update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_PUBLIC_ROOT / "_index.json")
     written["pipeline_b"] = pb_path
 
