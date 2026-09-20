@@ -17600,6 +17600,17 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 
 .article-body img.article-img--zoomable { cursor: zoom-in; }
 
+/* ...but not the ad, which is not a picture in the story. It lives inside
+   .article-body, so the proportional sizing above caught it and held a
+   full-column banner at 68% (837px of 1230 — measured 2026-09-20). It spans
+   the column at its own 10.67:1 and carries its own margins. */
+.article-body .article-body-ad-block img {
+  max-width: 100%;
+  width: 100%;
+  max-height: none;
+  margin: 0;
+}
+
 .article-body img.article-img--full { max-width: 100%; width: 100%; float: none; margin: 1.25rem 0; }
 
 .article-body img.article-img--center {
@@ -17649,24 +17660,6 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 /* A float must not escape its story: the ad slot, the related rail and the
    footer all sit below and would otherwise ride up beside a tall picture. */
 .article-body::after { content: ''; display: block; clear: both; }
-
-/* The hero opens too. It is a next/image `fill` inside a fixed 16:9 box, so
-   growing the <img> alone would do nothing — the frame has to give up its
-   aspect ratio and the image its crop. */
-.article-page-root figure img.article-img--zoomable { cursor: zoom-in; }
-
-.article-page-root figure img.article-img--expanded {
-  position: static;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  cursor: zoom-out;
-}
-
-.article-page-root figure:has(img.article-img--expanded) .image-container-with-credit {
-  aspect-ratio: auto;
-  height: auto;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .article-body img { transition: none; }

@@ -168,10 +168,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <ArticleViewTracker articleId={article.id} />
-      {/* Click any picture to enlarge it where it sits — in the story, never
-          over it. Delegated from `.article-page-root`, so it covers the hero
-          and every body image without the body being React elements. */}
-      <ArticleImageZoom />
+      {/* Click a picture in the BODY to enlarge it where it sits. Scoped to
+          `.article-body`: the featured image is the story's own frame, sized
+          and cropped deliberately, and is not something to open. */}
+      <ArticleImageZoom rootSelector=".article-body" />
       {/* Home → News → <category> → this story, visible and as BreadcrumbList. */}
       <Breadcrumbs
         crumbs={[
@@ -303,28 +303,25 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <div dangerouslySetInnerHTML={{ __html: linkPolicyMentions(sanitizeArticleHtml(firstHalf)) }} />
 
         {/* In-article ad slot.
-            The creative declares its own size — 008.png is a 712x140 slot
-            rendered at 3x — and this block used to stretch it to the full
-            column: 1230x242 on a 1366px desktop, 270px with its margins, 30%
-            of the viewport for one placeholder (measured 2026-09-20). The
-            block still spans the column; `object-contain` under a height cap
-            renders the creative at the size it was drawn for instead of
-            upscaling it 1.7x.
 
-            `contain`, never `cover`: a cap with `cover` would crop, and
-            cropping an advertiser's artwork is not a layout decision we get
-            to make. A creative that wants the full column width should be
-            supplied at the column's aspect ratio. */}
+            The creative is 1600x150 — 10.67:1, the shape a full-column banner
+            needs — so it spans the column at its own proportions and needs no
+            height cap or contain-fit. The previous placeholder was a 712x140
+            slot drawn at 3x, which this block stretched to 1230x242: 270px
+            with margins, 30% of the viewport for one placeholder. Width and
+            height are the file's real dimensions so the browser reserves the
+            right box and the ad cannot shift the copy as it loads, and
+            `sizes` lets it scale with the column on any screen. */}
         {adSplit && (
           <div className="article-body-ad-block my-10" suppressHydrationWarning>
             <Link prefetch={false} href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
               <Image
-                src="/images/promotions/008.png"
+                src="/images/promotions/in-news-ad.jpeg"
                 alt="Advertisement"
-                width={2136}
-                height={420}
-                sizes="(max-width: 768px) 100vw, 712px"
-                className="mx-auto h-auto max-h-[140px] w-full object-contain"
+                width={1600}
+                height={150}
+                sizes="(max-width: 767px) 100vw, (max-width: 1279px) 90vw, 1232px"
+                className="h-auto w-full"
                 suppressHydrationWarning
               />
             </Link>
