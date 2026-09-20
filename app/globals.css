@@ -12422,14 +12422,23 @@ html.theme-white .cms-datetime-grid-cell {
     align-items: flex-start !important;
   }
   
+  /* The actions stay in normal flow. They used to be absolutely positioned
+     at right:0 with 2.75rem of padding reserved on the byline — enough for
+     one button, which is what the row held when that was written. It holds
+     two now (Share and Save, 85px) and three for staff, so the buttons sat
+     on top of the author name and the date on any phone under 393px: 9px of
+     overlap at 375, 23px at 360, 60px at 320 (measured 2026-09-20). A flex
+     row measures its own children; a hand-counted reservation cannot, and
+     goes stale the next time a control joins the row. The container query
+     above already sets `align-items: flex-start`, which is the only thing
+     the absolute positioning was buying. */
   .fluid-article-container .article-meta-left-group {
-    padding-right: 2.75rem !important; /* Prevent text from colliding with bookmark button */
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
   }
 
   .fluid-article-container .article-meta-actions {
-    position: absolute !important;
-    top: clamp(0.75rem, 2cqw, 1.25rem) !important; /* Align button top with text row top */
-    right: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   /* Make bookmark button a compact circular icon on mobile */
@@ -17732,6 +17741,32 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
 
 @media (prefers-reduced-motion: reduce) {
   .article-img-hint { animation: none; }
+}
+
+/* The reading-tools row, under the hero image. The control lived in the
+   meta row beside Share and Save until 2026-09-20, which is where a reader
+   looks for story controls — but that row runs out of width on a phone: at
+   393px the pill's box started at x=187 while the byline block ran to x=287
+   and it overlapped the author name and the date outright. Here it has a
+   line of its own at every width, and it sits on the threshold between the
+   hero and the first paragraph, which is where the choice is still useful. */
+.article-reading-tools {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* On a phone it takes the full width rather than hugging the right edge:
+   a lone pill in a corner reads as a stray control, and the touch target
+   wants the room anyway. */
+@media (max-width: 640px) {
+  .article-reading-tools {
+    justify-content: center;
+    margin-top: 0.85rem;
+  }
 }
 
 /* Reader text size, wearing the same pill as Share and Save beside it.

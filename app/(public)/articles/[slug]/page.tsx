@@ -251,9 +251,6 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
           
           <div className="article-meta-actions flex items-center gap-2">
-            {/* Beside share and save, where a reader already looks for the
-                controls that belong to the story rather than the site. */}
-            <ArticleTextSize />
             <QuickEditButton articleId={article.id} variant="inline" />
             <ShareArticleMenu title={article.title} slug={slug} />
             <SaveArticleButton articleId={article.id} articleSlug={slug} />
@@ -292,6 +289,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <figcaption className="mt-2 text-center text-sm text-muted-foreground italic">{article.heroImage.caption}</figcaption>
         )}
       </figure>
+
+      {/* Reading tools, on the threshold between the hero and the story —
+          the point where a reader decides to settle in, and the last moment
+          the choice is worth offering before they are already reading. */}
+      <div className="article-reading-tools">
+        <ArticleTextSize />
+      </div>
 
 
 
