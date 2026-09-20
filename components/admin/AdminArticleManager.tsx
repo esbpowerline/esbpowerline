@@ -22,6 +22,7 @@ import { cn, formatNumber, formatDeskDate } from '@/lib/utils';
 
 import { bulkArticleAction, bulkOwnArticleAction, type BulkArticleAction, type OwnBulkAction } from '@/lib/actions/articles';
 import { DELETE_PHRASE, isLiveStatus } from '@/lib/article-delete';
+import { actionIsUseful } from '@/lib/article-bulk-actions';
 import { requestArticleRevision } from '@/lib/actions/notices';
 import { AdminSecureActionDialog } from '@/components/admin/AdminSecureActionDialog';
 import {
@@ -203,6 +204,8 @@ function ArticleRowMenu({
   allowEdit?: boolean;
 }) {
   const isTrash = article.status === 'TRASH';
+  const rowUseful = (action: Parameters<typeof actionIsUseful>[0]) =>
+    actionIsUseful(action, [article.status]);
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [menuRect, setMenuRect] = useState<{ top: number; left: number } | null>(null);
@@ -276,15 +279,23 @@ function ArticleRowMenu({
             
             {!isTrash && allowEdit && (
               <>
-                <button type="button" className="admin-row-menu-item" onClick={() => { onAction('publish'); setOpen(false); }}>
-                  <Send className="h-3.5 w-3.5" /><span>Publish</span>
-                </button>
-                <button type="button" className="admin-row-menu-item" onClick={() => { onAction('draft'); setOpen(false); }}>
-                  <FileEdit className="h-3.5 w-3.5" /><span>Move to draft</span>
-                </button>
-                <button type="button" className="admin-row-menu-item" onClick={() => { onAction('archive'); setOpen(false); }}>
-                  <Archive className="h-3.5 w-3.5" /><span>Archive</span>
-                </button>
+                {/* Same rule as the bulk bar: a row already in a status does
+                    not offer the action that would put it there. */}
+                {rowUseful('publish') && (
+                  <button type="button" className="admin-row-menu-item" onClick={() => { onAction('publish'); setOpen(false); }}>
+                    <Send className="h-3.5 w-3.5" /><span>Publish</span>
+                  </button>
+                )}
+                {rowUseful('draft') && (
+                  <button type="button" className="admin-row-menu-item" onClick={() => { onAction('draft'); setOpen(false); }}>
+                    <FileEdit className="h-3.5 w-3.5" /><span>Move to draft</span>
+                  </button>
+                )}
+                {rowUseful('archive') && (
+                  <button type="button" className="admin-row-menu-item" onClick={() => { onAction('archive'); setOpen(false); }}>
+                    <Archive className="h-3.5 w-3.5" /><span>Archive</span>
+                  </button>
+                )}
                 <button type="button" className="admin-row-menu-item admin-row-menu-item--danger" onClick={() => { onAction('trash'); setOpen(false); }}>
                   <Trash2 className="h-3.5 w-3.5" /><span>Move to trash</span>
                 </button>
@@ -569,14 +580,20 @@ export function AdminArticleManager({
     description: o.description,
   }));
 
-  const selectedInTrash = Array.from(selected).some((id) => {
-    const a = articles.find((x) => x.id === id);
-    return a?.status === 'TRASH';
-  });
-  const selectedNotTrash = Array.from(selected).some((id) => {
-    const a = articles.find((x) => x.id === id);
-    return a && a.status !== 'TRASH';
-  });
+  const selectedStatuses = useMemo(() => {
+    const byId = new Map(articles.map((a) => [a.id, a.status]));
+    return Array.from(selected)
+      .map((id) => byId.get(id))
+      .filter((s): s is string => Boolean(s));
+  }, [selected, articles]);
+
+  const selectedInTrash = selectedStatuses.includes('TRASH');
+  const selectedNotTrash = selectedStatuses.some((s) => s !== 'TRASH');
+  /* Only offer what would actually change something. A "Draft" button on My
+     Drafts moved drafts to draft, which is how a toolbar stops being read
+     (2026-09-20). */
+  const useful = (action: Parameters<typeof actionIsUseful>[0]) =>
+    actionIsUseful(action, selectedStatuses);
 
   return (
     <div className="admin-article-manager">
@@ -615,20 +632,26 @@ export function AdminArticleManager({
           <div className="admin-bulk-actions">
             {selectedNotTrash && (
               <>
-                <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('publish')}>
-                  <Send className="h-3 w-3" /> Publish
-                </button>
-                {canSchedule && (
+                {useful('publish') && (
+                  <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('publish')}>
+                    <Send className="h-3 w-3" /> Publish
+                  </button>
+                )}
+                {canSchedule && useful('schedule') && (
                   <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('schedule')}>
                     <CalendarClock className="h-3 w-3" /> Schedule
                   </button>
                 )}
-                <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('draft')}>
-                  <FileEdit className="h-3 w-3" /> Draft
-                </button>
-                <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('archive')}>
-                  <Archive className="h-3 w-3" /> Archive
-                </button>
+                {useful('draft') && (
+                  <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('draft')}>
+                    <FileEdit className="h-3 w-3" /> Draft
+                  </button>
+                )}
+                {useful('archive') && (
+                  <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('archive')}>
+                    <Archive className="h-3 w-3" /> Archive
+                  </button>
+                )}
                 <button type="button" className="admin-bulk-btn admin-bulk-btn--danger" disabled={pending} onClick={() => runBulk('trash')}>
                   <Trash2 className="h-3 w-3" /> Trash
                 </button>
