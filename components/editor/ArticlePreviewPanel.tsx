@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Monitor, Tablet, Smartphone, LayoutGrid, Newspaper, Pin, Star, Flame, Facebook, Globe, Bookmark } from 'lucide-react';
+import { Monitor, Tablet, Smartphone, LayoutGrid, Newspaper, Pin, Star, Flame, Facebook, Globe, Bookmark, Wand2 } from 'lucide-react';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
-import { cn, formatExactDate, formatArticleDate, formatArticleHoverDate, formatNumber, extractKeywords, smartRearrangeText } from '@/lib/utils';
+import { cn, formatExactDate, formatArticleDate, formatArticleHoverDate, formatNumber, smartRearrangeText } from '@/lib/utils';
+import { suggestArticleKeywords } from '@/lib/article-keywords';
 import { FeaturedCarousel } from '@/components/news/FeaturedCarousel';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { HomeTrendingSection } from '@/components/home/HomeTrendingSection';
@@ -15,6 +16,7 @@ import { PreviewCategoryPill } from '@/components/editor/PreviewCategoryPill';
 import { getArticlePreviewContext } from '@/lib/actions/preview-context';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import { splitBodyForAd } from '@/lib/article-ad-split';
+import { linkPolicyMentions } from '@/lib/policy-links';
 import {
   mergeDraftIntoCarousel,
   mergeDraftIntoArticles,
@@ -232,6 +234,16 @@ export function ArticlePreviewPanel({
   const [internalDevice, setInternalDevice] = useState<PreviewDevice>('desktop');
   const device = deviceProp ?? internalDevice;
   const setDevice = onDeviceChangeProp ?? setInternalDevice;
+  /**
+   * "Show formatting": outlines each passage a tool touched and names the tool.
+   *
+   * A preview renders the result, which is the point of it — but it cannot
+   * answer "which sentence did I just change, and with what", and an editor
+   * reading their own copy cannot tell a bold from a heading-3 from a font-size
+   * bump by eye. Off by default, because the answer to "what will the reader
+   * see" must stay the reader's view.
+   */
+  const [showFormatting, setShowFormatting] = useState(false);
 
   const [internalTheme, setInternalTheme] = useState<SiteTheme>('midnight');
   const theme = themeProp ?? internalTheme;
@@ -380,7 +392,11 @@ export function ArticlePreviewPanel({
   const cleanContent = useMemo(
     () => {
       if (!active || placement !== 'article') return '';
-      return sanitizeArticleHtml(content);
+      // Sanitise, then link policy mentions — the same two steps the article
+      // page runs, in the same order. The preview did only the first, so the
+      // reader's body carried links to the policy library that the editor
+      // never saw (2026-09-20).
+      return linkPolicyMentions(sanitizeArticleHtml(content));
     },
     [active, placement, content]
   );
@@ -426,7 +442,7 @@ export function ArticlePreviewPanel({
     if (tags && tags.length > 0) {
       return tags;
     }
-    return extractKeywords(title, content);
+    return suggestArticleKeywords(title, content);
   }, [tags, title, content]);
 
   if (!active) return null;
@@ -952,7 +968,8 @@ export function ArticlePreviewPanel({
                   'cms-preview-public-surface w-full rounded-b-[1.25rem]',
                   !focusMode ? 'min-h-full overflow-y-auto' : 'h-auto overflow-y-visible',
                   `theme-${theme}`,
-                  theme === 'white' ? 'light' : 'dark'
+                  theme === 'white' ? 'light' : 'dark',
+                  showFormatting && 'cms-preview--show-tools'
                 )}
               >
                 {renderContent}
@@ -964,7 +981,8 @@ export function ArticlePreviewPanel({
                 'cms-preview-public-surface flex-1 rounded-b-[1.25rem]',
                 !focusMode ? 'overflow-y-auto' : 'h-auto overflow-y-visible',
                 `theme-${theme}`,
-                theme === 'white' ? 'light' : 'dark'
+                theme === 'white' ? 'light' : 'dark',
+                showFormatting && 'cms-preview--show-tools'
               )}
             >
               {renderContent}
@@ -1067,6 +1085,23 @@ export function ArticlePreviewPanel({
               ))}
               <span className="cms-preview-device-label">{deviceLabel}</span>
             </div>
+
+            <ModernTooltip
+              label={showFormatting ? 'Hide formatting' : 'Show formatting'}
+              hint="Outline each passage a tool changed, and name the tool"
+              variant="editor"
+              side="top"
+            >
+              <button
+                type="button"
+                aria-pressed={showFormatting}
+                onClick={() => setShowFormatting((v) => !v)}
+                className={`cms-preview-tools-toggle${showFormatting ? ' cms-preview-tools-toggle--on' : ''}`}
+              >
+                <Wand2 className="h-3.5 w-3.5" />
+                <span>Formatting</span>
+              </button>
+            </ModernTooltip>
 
             <PreviewThemeToggle theme={theme} onChange={setTheme} />
           </div>

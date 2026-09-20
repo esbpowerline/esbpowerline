@@ -32,9 +32,22 @@ const ARTICLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     span: ['class', 'style'],
     div: ['class', 'style'],
     p: ['class', 'style'],
-    h1: ['class'],
-    h2: ['class'],
-    h3: ['class'],
+    // `style` as well as `class`, or alignment on a heading is thrown away.
+    // TextAlign is configured for `['heading', 'paragraph']`
+    // (`TipTapEditor.tsx`) and writes `style="text-align: …"`; paragraphs
+    // allowed style and headings did not, so centring a heading worked in the
+    // editor, vanished from the preview and never reached the page — a tool
+    // that silently did nothing (2026-09-20). StarterKit enables h1–h6, so all
+    // six are listed rather than the three the toolbar exposes; pasted copy
+    // carries the rest. `allowedStyles` below is what actually bounds this: it
+    // permits five presentation properties and nothing else, so this widens
+    // which elements may be aligned, not what may be done to them.
+    h1: ['class', 'style'],
+    h2: ['class', 'style'],
+    h3: ['class', 'style'],
+    h4: ['class', 'style'],
+    h5: ['class', 'style'],
+    h6: ['class', 'style'],
   },
   allowedStyles: {
     // Only allow safe, presentation-only CSS properties — no url(), expressions, or JS

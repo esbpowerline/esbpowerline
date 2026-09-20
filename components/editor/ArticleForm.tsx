@@ -43,7 +43,8 @@ import { submitDraftForAdminReview } from '@/lib/actions/review-workflow';
 import { can, type Role } from '@/lib/constants';
 import { canSubmitArticleForReview } from '@/lib/editorial-review';
 import type { PublicCategory } from '@/lib/category-types';
-import { slugify, cn, extractKeywords, autoCalculateCategory } from '@/lib/utils';
+import { slugify, cn, autoCalculateCategory } from '@/lib/utils';
+import { suggestArticleKeywords } from '@/lib/article-keywords';
 import type { MediaItem } from '@/components/cms/MediaPicker';
 import { FeaturedImageEditor } from '@/components/cms/FeaturedImageEditor';
 import type { HeroImageMeta } from '@/lib/hero-image';
@@ -255,6 +256,22 @@ export function ArticleForm({
   }
   const resolvedPublishedAt = publishedAt || defaultPublishedAtRef.current;
   const authorName = session?.user?.name ?? 'ESB Staff';
+  /**
+   * Words in the body, as a reader would count them.
+   *
+   * The headline, deck and slug all carry a character budget, and the body —
+   * the thing being written — had only a derived read time. Tags are stripped
+   * first so markup is not counted as prose.
+   */
+  const bodyWordCount = useMemo(() => {
+    const text = (content ?? '')
+      .replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&(?:#x?[0-9a-f]+|[a-z][a-z0-9]*);/gi, ' ')
+      .trim();
+    return text ? text.split(/\s+/).length : 0;
+  }, [content]);
+
   const readTime = useMemo(
     () => Math.max(1, Math.ceil(stripArticleHtml(content).length / 1000)),
     [content],
@@ -292,7 +309,7 @@ export function ArticleForm({
       imageCredit: imageCredit || null,
       tags: tagsList.length > 0
         ? tagsList
-        : extractKeywords(title, content),
+        : suggestArticleKeywords(title, content),
       collaboratorIds,
       isFeatured,
       isBreaking,
@@ -429,7 +446,7 @@ export function ArticleForm({
       }
     }
     if (tagsList.length === 0 && (title || content)) {
-      const computedTags = extractKeywords(title, content);
+      const computedTags = suggestArticleKeywords(title, content);
       setTagsList(computedTags);
     }
   }, [title, content, categories, category, tagsList.length]);
@@ -695,7 +712,15 @@ export function ArticleForm({
                   <Layers className="h-4 w-4 text-sky-500 shrink-0" />
                   <div className="min-w-0">
                     <h2 className="cms-editor-panel__title">Story content</h2>
-                    <p className="cms-editor-panel__desc hidden sm:block">Grows automatically as you write and paste</p>
+                    <p className="cms-editor-panel__desc hidden sm:block">
+                      {/* The body is the one field that had no measure of
+                          itself: headline, deck and slug all show a budget.
+                          Words, not characters — a budget would imply a limit
+                          the desk does not set. */}
+                      {bodyWordCount > 0
+                        ? `${bodyWordCount.toLocaleString('en-US')} ${bodyWordCount === 1 ? 'word' : 'words'} · ${readTime} min read`
+                        : 'Grows automatically as you write and paste'}
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -1005,7 +1030,7 @@ export function ArticleForm({
                 <button
                   type="button"
                   onClick={() => {
-                    const picked = extractKeywords(title, content);
+                    const picked = suggestArticleKeywords(title, content);
                     setTagsList(picked);
                   }}
                   className="text-[10px] font-semibold text-sky-400 hover:text-sky-300 hover:underline transition-all"

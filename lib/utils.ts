@@ -242,6 +242,12 @@ export function formatBdtAmount(value: number): string {
   return value.toFixed(2);
 }
 
+/**
+ * @deprecated Superseded by `suggestArticleKeywords` in `lib/article-keywords.ts`,
+ * which recognises the sector's entities and emits phrases with their proper
+ * casing rather than counting single lowercased words. Kept only so an older
+ * import does not break; it has no callers in the app (2026-09-20).
+ */
 export function extractKeywords(title: string, contentHtml: string): string[] {
   // Simple check to avoid import loops if called from validations
   const text = (title + ' ' + (contentHtml ? contentHtml.replace(/<[^>]+>/g, ' ') : ''))

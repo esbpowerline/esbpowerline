@@ -756,7 +756,17 @@ export function TipTapEditor({
         const res = await fetch('/api/upload', { method: 'POST', body: form });
         if (!res.ok) return;
         const { url } = await res.json();
-        editor.chain().focus().setImage({ src: url }).run();
+        // Alt text, asked for once at the point of insert.
+        //
+        // `setImage({ src })` wrote no alt at all, so every inline image ever
+        // added through this toolbar reached the page unlabelled — invisible to
+        // a screen reader and to image search, on a site whose hero images all
+        // carry one (2026-09-20). Empty is accepted and stored as empty, which
+        // is the correct markup for an image that genuinely carries no
+        // information; it is a decision the writer makes, not a field we can
+        // fill for them.
+        const alt = window.prompt('Describe this image for readers who cannot see it (leave blank if decorative):', '') ?? '';
+        editor.chain().focus().setImage({ src: url, alt: alt.trim() }).run();
       } catch (err) {
         console.error('Editor image upload failed:', err);
       }

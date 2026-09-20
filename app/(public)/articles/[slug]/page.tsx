@@ -2,7 +2,8 @@ import { getServerSiteLocale } from '@/lib/locale-server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { formatDate, formatExactDate, formatArticleDate, formatArticleHoverDate, formatNumber, slugify, extractKeywords } from '@/lib/utils';
+import { formatDate, formatExactDate, formatArticleDate, formatArticleHoverDate, formatNumber, slugify } from '@/lib/utils';
+import { suggestArticleKeywords } from '@/lib/article-keywords';
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
 import { heroImageStyle } from '@/lib/hero-image';
 import { ArticleCard } from '@/components/news/ArticleCard';
@@ -122,7 +123,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   const siteUrl = SITE_URL;
   const heroImage = normalizeArticleImageUrl(article.imageUrl);
-  const keywords = article.tags?.length ? article.tags : extractKeywords(article.title, article.content);
+  const keywords = article.tags?.length ? article.tags : suggestArticleKeywords(article.title, article.content);
 
   // Every field here has a real source on the row; the ones that do not
   // (image dimensions, a licence) are left out rather than guessed.
@@ -368,7 +369,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         // near-empty noindex tag pages Google was spending crawl on
         // (SEO_FIX_LOG stage 2).
         const stored = article.tags && article.tags.length > 0;
-        const displayTags = stored ? article.tags : extractKeywords(article.title, article.content);
+        const displayTags = stored ? article.tags : suggestArticleKeywords(article.title, article.content);
         if (displayTags.length === 0) return null;
         return (
           <div className="mt-10 pt-6 border-t border-border/30">

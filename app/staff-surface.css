@@ -10840,3 +10840,125 @@ a.admin-list-row:hover .admin-list-title {
   padding: var(--sp-4) var(--sp-5);
   border-top: 1px solid var(--line-soft);
 }
+
+/* ── Preview: "show formatting" ────────────────────────────────────────────
+   Outlines each passage a tool changed and names the tool.
+
+   A preview renders the result, which is what it is for — but it cannot answer
+   "which sentence did I just change, and with what". An editor reading their
+   own copy cannot tell a bold from a heading, or spot a font-size bump, by
+   eye. Opt-in and off by default, because the preview's first duty is to show
+   what the reader will see (2026-09-20).
+
+   Every label is derived from the element itself, so this adds no attributes
+   to the body and the preview keeps rendering exactly the markup that will be
+   published. Inline labels appear on hover and block labels in the margin, so
+   switching it on never reflows the copy being checked. */
+.cms-preview--show-tools .article-body :is(strong, b, em, i, u, s, sub, sup, code, a, span[style]) {
+  outline: 1px dashed hsl(var(--primary) / 0.5);
+  outline-offset: 1px;
+  border-radius: 2px;
+  position: relative;
+}
+
+.cms-preview--show-tools .article-body :is(strong, b, em, i, u, s, sub, sup, code, a, span[style]):hover::after,
+.cms-preview--show-tools .article-body :is(h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, table, figure)::before {
+  position: absolute;
+  z-index: 20;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.cms-preview--show-tools .article-body :is(strong, b, em, i, u, s, sub, sup, code, a, span[style]):hover::after {
+  bottom: 100%;
+  left: 0;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Inline marks, named on hover. */
+.cms-preview--show-tools .article-body strong:hover::after,
+.cms-preview--show-tools .article-body b:hover::after { content: 'Bold'; }
+.cms-preview--show-tools .article-body em:hover::after,
+.cms-preview--show-tools .article-body i:hover::after { content: 'Italic'; }
+.cms-preview--show-tools .article-body u:hover::after { content: 'Underline'; }
+.cms-preview--show-tools .article-body s:hover::after { content: 'Strikethrough'; }
+.cms-preview--show-tools .article-body sub:hover::after { content: 'Subscript'; }
+.cms-preview--show-tools .article-body sup:hover::after { content: 'Superscript'; }
+.cms-preview--show-tools .article-body code:hover::after { content: 'Code'; }
+.cms-preview--show-tools .article-body a:hover::after { content: 'Link'; }
+/* The four span marks are told apart by the property each one writes. The
+   background-color rule is last so a highlight is not reported as a colour. */
+.cms-preview--show-tools .article-body span[style*="font-size"]:hover::after { content: 'Font size'; }
+.cms-preview--show-tools .article-body span[style*="font-family"]:hover::after { content: 'Font family'; }
+.cms-preview--show-tools .article-body span[style*="color"]:hover::after { content: 'Text colour'; }
+.cms-preview--show-tools .article-body span[style*="background-color"]:hover::after { content: 'Highlight'; }
+
+/* Block tools get a standing label: structure is what an editor is usually
+   checking, and it should not need hunting for with the pointer. */
+.cms-preview--show-tools .article-body :is(h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, table, hr, img, figure) {
+  outline: 1px dashed hsl(var(--primary) / 0.38);
+  outline-offset: 3px;
+  position: relative;
+}
+
+.cms-preview--show-tools .article-body :is(h1, h2, h3, h4, h5, h6, blockquote, pre, ul, ol, table, figure)::before {
+  top: -0.35rem;
+  right: 0;
+  transform: translateY(-100%);
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.cms-preview--show-tools .article-body h1::before { content: 'Heading 1'; }
+.cms-preview--show-tools .article-body h2::before { content: 'Heading 2'; }
+.cms-preview--show-tools .article-body h3::before { content: 'Heading 3'; }
+.cms-preview--show-tools .article-body h4::before { content: 'Heading 4'; }
+.cms-preview--show-tools .article-body h5::before { content: 'Heading 5'; }
+.cms-preview--show-tools .article-body h6::before { content: 'Heading 6'; }
+.cms-preview--show-tools .article-body blockquote::before { content: 'Blockquote'; }
+.cms-preview--show-tools .article-body pre::before { content: 'Code block'; }
+.cms-preview--show-tools .article-body ul::before { content: 'Bullet list'; }
+.cms-preview--show-tools .article-body ol::before { content: 'Numbered list'; }
+.cms-preview--show-tools .article-body table::before { content: 'Table'; }
+.cms-preview--show-tools .article-body figure::before { content: 'Figure'; }
+
+/* Alignment writes no element of its own, so it is called out by the
+   attribute it leaves behind. */
+.cms-preview--show-tools .article-body [style*="text-align"] {
+  outline: 1px dashed hsl(var(--primary) / 0.38);
+  outline-offset: 3px;
+}
+
+.cms-preview-tools-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.cms-preview-tools-toggle:hover {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--primary) / 0.5);
+}
+
+.cms-preview-tools-toggle--on {
+  background: hsl(var(--primary) / 0.12);
+  border-color: hsl(var(--primary) / 0.6);
+  color: hsl(var(--primary));
+}
