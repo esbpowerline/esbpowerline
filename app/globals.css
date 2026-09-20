@@ -12522,24 +12522,31 @@ html.theme-white .cms-datetime-grid-cell {
   margin-bottom: 0.25rem !important;
 }
 
-/* Tables move with the reader's choice too. A table is reference matter —
-   scanned rather than read — so it stays a notch under body copy, but it is
-   part of the story and has to breathe with it. Type, cell padding and the
-   margins above and below all take the multiplier, so the whole block shrinks
-   rather than the numbers rattling around inside a box that never moves.
-   At scale 1 these reproduce the previous rendering exactly: 0.875rem type,
-   0.75rem/0.5rem padding, 1rem margins. */
+/* A table is set in the story's own type, at the story's own size.
+   It was held a notch under body copy — 14px against 19px at 1536 — on the
+   reasoning that a table is reference matter, scanned rather than read. In
+   the page that reads as a different document dropped into the middle of
+   this one, and it was reported twice as not feeling like the same text
+   (2026-09-20). It now takes exactly the paragraph's clamp and the reader's
+   multiplier, so a figure in a table is the same size as the same figure in
+   a sentence.
+   Cell padding is proportional to that type rather than fixed, so the rows
+   stay tight as the text grows instead of the block becoming chunky, and
+   the margins above and below match a paragraph's. */
 .fluid-article-container .article-body table {
-  font-size: calc(0.875rem * var(--article-text-scale, 1)) !important;
-  margin-top: calc(1rem * var(--article-text-scale, 1)) !important;
-  margin-bottom: calc(1rem * var(--article-text-scale, 1)) !important;
+  font-size: calc(clamp(0.9375rem, 2.45cqw, 1.1875rem) * var(--article-text-scale, 1)) !important;
+  line-height: 1.55 !important;
+  margin-top: clamp(0.75rem, 2.2cqw, 1.25rem) !important;
+  margin-bottom: clamp(0.75rem, 2.2cqw, 1.25rem) !important;
 }
 
 .fluid-article-container .article-body th,
 .fluid-article-container .article-body td {
-  padding: calc(0.5rem * var(--article-text-scale, 1))
-           calc(0.75rem * var(--article-text-scale, 1)) !important;
-  line-height: 1.5 !important;
+  font-size: inherit !important;
+  /* `em`, so the padding follows the cell's own type at every step and needs
+     no multiplier of its own. */
+  padding: 0.4em 0.6em !important;
+  line-height: 1.55 !important;
 }
 
 .fluid-article-container figcaption {

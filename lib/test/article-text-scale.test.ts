@@ -59,6 +59,10 @@ describe('reader text scale', () => {
     expect(found.length).toBeGreaterThan(5);
 
     const missing = found
+      // `inherit` and `1em` defer to an ancestor that is already scaled —
+      // table cells take the table's size this way — so they satisfy the
+      // rule without naming the variable. Any other literal does not.
+      .filter((r) => !/^\s*(inherit|1em)\s*(!important)?\s*$/.test(r.value))
       .filter((r) => !r.value.includes('--article-text-scale'))
       .map((r) => `${r.selector} -> font-size:${r.value.trim()}`);
 
