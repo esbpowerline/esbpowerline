@@ -24,6 +24,7 @@ import { gridViewForCategory } from '@/lib/grid-explorer-views';
 import { cleanDescription, ORGANIZATION_ID, shareImageUrl, SITE_URL } from '@/lib/seo';
 import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
+import { splitBodyForAd } from '@/lib/article-ad-split';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
 import { QuickEditButton } from '@/components/editor/QuickEditButton';
 import prisma from '@/lib/prisma';
@@ -114,10 +115,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     getArticleComments(article.id),
   ]);
 
-  const paragraphs = article.content.split('</p>');
-  const middleIndex = Math.floor(paragraphs.length / 2);
-  const firstHalf = paragraphs.slice(0, middleIndex).join('</p>') + (middleIndex > 0 ? '</p>' : '');
-  const secondHalf = paragraphs.slice(middleIndex).join('</p>');
+  // Shared with the CMS preview so the editor sees the slot where it lands.
+  const adSplit = splitBodyForAd(article.content);
+  const firstHalf = adSplit?.first ?? article.content;
+  const secondHalf = adSplit?.second ?? '';
 
   const siteUrl = SITE_URL;
   const heroImage = normalizeArticleImageUrl(article.imageUrl);
@@ -289,11 +290,31 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             page in the policy library (stage 6). */}
         <div dangerouslySetInnerHTML={{ __html: linkPolicyMentions(sanitizeArticleHtml(firstHalf)) }} />
 
-        {/* In-Article Ad Space */}
-        {paragraphs.length > 3 && (
-          <div className="article-body-ad-block my-12" suppressHydrationWarning>
+        {/* In-article ad slot.
+            The creative declares its own size — 008.png is a 712x140 slot
+            rendered at 3x — and this block used to stretch it to the full
+            column: 1230x242 on a 1366px desktop, 270px with its margins, 30%
+            of the viewport for one placeholder (measured 2026-09-20). The
+            block still spans the column; `object-contain` under a height cap
+            renders the creative at the size it was drawn for instead of
+            upscaling it 1.7x.
+
+            `contain`, never `cover`: a cap with `cover` would crop, and
+            cropping an advertiser's artwork is not a layout decision we get
+            to make. A creative that wants the full column width should be
+            supplied at the column's aspect ratio. */}
+        {adSplit && (
+          <div className="article-body-ad-block my-10" suppressHydrationWarning>
             <Link prefetch={false} href="/contact#advertising" className="rounded-2xl overflow-hidden relative group block" suppressHydrationWarning>
-              <Image src="/images/promotions/008.png" alt="Advertisement" width={2136} height={420} className="w-full h-auto object-cover" suppressHydrationWarning />
+              <Image
+                src="/images/promotions/008.png"
+                alt="Advertisement"
+                width={2136}
+                height={420}
+                sizes="(max-width: 768px) 100vw, 712px"
+                className="mx-auto h-auto max-h-[140px] w-full object-contain"
+                suppressHydrationWarning
+              />
             </Link>
           </div>
         )}

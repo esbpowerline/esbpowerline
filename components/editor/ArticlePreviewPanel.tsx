@@ -14,6 +14,7 @@ import { PreviewThemeToggle } from '@/components/editor/PreviewThemeToggle';
 import { PreviewCategoryPill } from '@/components/editor/PreviewCategoryPill';
 import { getArticlePreviewContext } from '@/lib/actions/preview-context';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
+import { splitBodyForAd } from '@/lib/article-ad-split';
 import {
   mergeDraftIntoCarousel,
   mergeDraftIntoArticles,
@@ -383,6 +384,14 @@ export function ArticlePreviewPanel({
     },
     [active, placement, content]
   );
+
+  /**
+   * Where the in-article ad lands. The published page makes this same cut, from
+   * the same function, so the preview cannot drift out of agreement with it —
+   * the preview used to render the body whole, which answered the wrong
+   * question for an editor deciding where their copy breaks.
+   */
+  const adSplit = useMemo(() => splitBodyForAd(cleanContent), [cleanContent]);
 
   const carouselItems = useMemo(
     () => mergeDraftIntoCarousel(context?.carouselItems ?? [], draft),
@@ -819,7 +828,28 @@ export function ArticlePreviewPanel({
             </figure>
           )}
 
-          <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe" dangerouslySetInnerHTML={{ __html: cleanContent }} />
+          {adSplit ? (
+            <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe">
+              <div dangerouslySetInnerHTML={{ __html: adSplit.first }} />
+              {/* The slot itself, at the height the page gives it, so the
+                  editor sees the real break in their copy rather than a hint.
+                  Outlined and labelled rather than showing the creative: this
+                  is a structural marker in an editing tool, and an editor
+                  mistaking a rendered advert for their own content is the
+                  confusion worth avoiding. */}
+              <div
+                className="article-body-ad-block my-10 flex h-[140px] items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20"
+                aria-hidden
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  In-article advertisement
+                </span>
+              </div>
+              <div dangerouslySetInnerHTML={{ __html: adSplit.second }} />
+            </div>
+          ) : (
+            <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe" dangerouslySetInnerHTML={{ __html: cleanContent }} />
+          )}
 
           {draftTags.length > 0 && (
             <div className="mt-8 flex flex-wrap gap-2 pt-4 border-t border-border/30">
