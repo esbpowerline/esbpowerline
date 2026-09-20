@@ -12549,6 +12549,24 @@ html.theme-white .cms-datetime-grid-cell {
   line-height: 1.55 !important;
 }
 
+/* The editor wraps every cell's content in a paragraph, so the body's
+   paragraph margin was being applied INSIDE each cell: a one-line row at
+   1536 measured 68px — 7.6 padding + 29 of text + 20px of stray margin +
+   7.6 padding — where it should be about 45. A third of every row was empty
+   space, which is what made a table read as oversized even once its type
+   matched the story's (measured 2026-09-20).
+   First and last child only, so two paragraphs in one cell still have a gap
+   between them. */
+.fluid-article-container .article-body td > :first-child,
+.fluid-article-container .article-body th > :first-child {
+  margin-top: 0 !important;
+}
+
+.fluid-article-container .article-body td > :last-child,
+.fluid-article-container .article-body th > :last-child {
+  margin-bottom: 0 !important;
+}
+
 .fluid-article-container figcaption {
   font-size: calc(clamp(0.725rem, 1.8cqw, 0.875rem) * var(--article-text-scale, 1)) !important;
   margin-top: clamp(0.4rem, 1.5cqw, 0.65rem) !important;
