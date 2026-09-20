@@ -9,7 +9,7 @@ import {
   Search, ArrowUpDown, Tag, User, Star, Pin,
   Trash2, RotateCcw, Send, FileEdit, Archive, Flame, X, Check,
   MoreHorizontal, Pencil, Eye, MessageSquare,
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown, CalendarClock,
 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AdminTableShell } from '@/components/admin/AdminUI';
@@ -154,7 +154,13 @@ function getPageNumbers(current: number, total: number) {
   return pages;
 }
 
-const SECURE_ACTIONS = new Set<BulkArticleAction>(['trash', 'delete_permanent', 'archive']);
+const SECURE_ACTIONS = new Set<BulkArticleAction>(['trash', 'delete_permanent', 'archive', 'schedule']);
+
+/* Scheduling is in that set because it needs a time typed in before it can
+   run, not because it needs guarding — so it asks for no password and no
+   note. Keeping it in one dialog means a bulk action cannot grow its own
+   half-built confirm step. */
+const NO_PASSWORD_ACTIONS = new Set<BulkArticleAction>(['schedule']);
 
 const SECURE_ACTION_COPY: Record<string, { title: string; description: string; confirm: string }> = {
   trash: {
@@ -171,6 +177,11 @@ const SECURE_ACTION_COPY: Record<string, { title: string; description: string; c
     title: 'Delete permanently?',
     description: 'This cannot be undone. Authors will be notified.',
     confirm: 'Delete forever',
+  },
+  schedule: {
+    title: 'Schedule these stories',
+    description: 'They go live automatically at the time you choose. The publish cron runs every 15 minutes, so a story goes out at or just after its time.',
+    confirm: 'Schedule',
   },
 };
 
@@ -305,6 +316,10 @@ export type ArticleManagerOptions = {
   useOwnBulkActions?: boolean;
   currentUserId?: string;
   canEditAny?: boolean;
+  /** Offer bulk scheduling. Off where the caller cannot publish anyway. */
+  canSchedule?: boolean;
+  /** Off where every row already shares one status, e.g. My Drafts. */
+  showStatusFilter?: boolean;
 };
 
 export function AdminArticleManager({
@@ -324,6 +339,8 @@ export function AdminArticleManager({
     currentUserId,
     canEditAny = false,
     useOwnBulkActions = false,
+    canSchedule = false,
+    showStatusFilter = true,
   } = options;
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -464,13 +481,16 @@ export function AdminArticleManager({
   function executeBulk(
     action: BulkArticleAction,
     targetIds: string[],
-    opts?: { password?: string; authorNote?: string; phrase?: string }
+    opts?: { password?: string; authorNote?: string; phrase?: string; scheduledAt?: string }
   ) {
     startTransition(async () => {
       try {
-        const ownActions: OwnBulkAction[] = ['publish', 'draft', 'trash', 'archive'];
+        const ownActions: OwnBulkAction[] = ['publish', 'schedule', 'draft', 'trash', 'archive'];
         const res = useOwnBulkActions && ownActions.includes(action as OwnBulkAction)
-          ? await bulkOwnArticleAction(targetIds, action as OwnBulkAction, { confirmation: opts?.phrase })
+          ? await bulkOwnArticleAction(targetIds, action as OwnBulkAction, {
+              confirmation: opts?.phrase,
+              scheduledAt: opts?.scheduledAt,
+            })
           : await bulkArticleAction(targetIds, action, opts);
         toast.success(`Updated ${res.affected} article(s)`);
         setSelected((prev) => {
@@ -570,7 +590,9 @@ export function AdminArticleManager({
             className="pl-9 h-8"
           />
         </div>
-        <ArticleStatusFilter value={statusFilter} onChange={setStatusFilter} articles={articles} />
+        {showStatusFilter && (
+          <ArticleStatusFilter value={statusFilter} onChange={setStatusFilter} articles={articles} />
+        )}
         <AdminSelectMenu value={categoryFilter} onChange={setCategoryFilter} options={categoryOptions} icon={Tag} placeholder="Category" minWidth="9.5rem" />
         {showAuthorFilter && (
           <AdminSelectMenu value={authorFilter} onChange={setAuthorFilter} options={authorOptions} icon={User} placeholder="Author" minWidth="9.5rem" />
@@ -596,6 +618,11 @@ export function AdminArticleManager({
                 <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('publish')}>
                   <Send className="h-3 w-3" /> Publish
                 </button>
+                {canSchedule && (
+                  <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('schedule')}>
+                    <CalendarClock className="h-3 w-3" /> Schedule
+                  </button>
+                )}
                 <button type="button" className="admin-bulk-btn" disabled={pending} onClick={() => runBulk('draft')}>
                   <FileEdit className="h-3 w-3" /> Draft
                 </button>
@@ -922,8 +949,10 @@ export function AdminArticleManager({
         }
         confirmLabel={secureAction ? SECURE_ACTION_COPY[secureAction.action]?.confirm ?? 'Confirm' : 'Confirm'}
         requirePhrase={secureAction?.action === 'trash' && secureLiveCount > 0 ? DELETE_PHRASE : undefined}
-        requirePassword
-        showAuthorNote
+        requireDateTime={secureAction?.action === 'schedule'}
+        dateTimeLabel="Go live at"
+        requirePassword={secureAction ? !NO_PASSWORD_ACTIONS.has(secureAction.action) : true}
+        showAuthorNote={secureAction ? !NO_PASSWORD_ACTIONS.has(secureAction.action) : true}
         authorNoteLabel="Note for author (optional)"
         loading={pending}
         onClose={() => setSecureAction(null)}

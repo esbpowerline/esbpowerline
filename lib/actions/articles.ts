@@ -8,6 +8,7 @@ import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
 import { deleteRefusalReason, isLiveStatus } from '@/lib/article-delete';
+import { parseScheduleTime } from '@/lib/bulk-schedule';
 import { slugify } from '@/lib/utils';
 import {
   formatPublishBlockerMessage,
@@ -325,6 +326,7 @@ export type BulkArticleAction =
   | 'trash'
   | 'restore'
   | 'publish'
+  | 'schedule'
   | 'draft'
   | 'archive'
   | 'delete_permanent'
@@ -340,7 +342,7 @@ const PASSWORD_REQUIRED_ACTIONS = new Set<BulkArticleAction>(['trash', 'delete_p
 export async function bulkArticleAction(
   rawIds: string[],
   action: BulkArticleAction,
-  options?: { password?: string; authorNote?: string }
+  options?: { password?: string; authorNote?: string; scheduledAt?: string }
 ) {
   // Article.id is a cuid, not a uuid — .uuid() rejected every real id, which
   // made every bulk action on /admin/articles throw a raw ZodError.
@@ -390,6 +392,15 @@ export async function bulkArticleAction(
         data: { status: 'DRAFT' },
       }));
       break;
+    case 'schedule': {
+      const when = parseScheduleTime(options?.scheduledAt);
+      if (!when.ok) throw new Error(when.reason);
+      ({ count: affected } = await prisma.article.updateMany({
+        where: { id: { in: ids } },
+        data: { status: 'SCHEDULED', publishedAt: when.at },
+      }));
+      break;
+    }
     case 'publish':
       await prisma.$transaction(
         articles.map((a) =>
@@ -850,12 +861,12 @@ export async function restoreArticleRevision(articleId: string, revisionId: stri
   return { ok: true };
 }
 
-export type OwnBulkAction = 'publish' | 'draft' | 'trash' | 'archive';
+export type OwnBulkAction = 'publish' | 'schedule' | 'draft' | 'trash' | 'archive';
 
 export async function bulkOwnArticleAction(
   ids: string[],
   action: OwnBulkAction,
-  options?: { confirmation?: string },
+  options?: { confirmation?: string; scheduledAt?: string },
 ) {
   const user = await requireAuth();
   if (!ids.length) throw new Error('No articles selected');
@@ -866,7 +877,7 @@ export async function bulkOwnArticleAction(
   });
   if (articles.length === 0) throw new Error('No articles found');
 
-  if (action === 'publish' && !can(user.role, 'article.publish')) {
+  if ((action === 'publish' || action === 'schedule') && !can(user.role, 'article.publish')) {
     throw new Error('You do not have permission to publish');
   }
   if (action === 'trash' && !can(user.role, 'article.delete_own')) {
@@ -905,6 +916,15 @@ export async function bulkOwnArticleAction(
       );
       affected = articles.length;
       break;
+    case 'schedule': {
+      const when = parseScheduleTime(options?.scheduledAt);
+      if (!when.ok) throw new Error(when.reason);
+      ({ count: affected } = await prisma.article.updateMany({
+        where: { id: { in: ids }, authorId: user.id },
+        data: { status: 'SCHEDULED', publishedAt: when.at },
+      }));
+      break;
+    }
     case 'draft':
       ({ count: affected } = await prisma.article.updateMany({
         where: { id: { in: ids }, authorId: user.id },

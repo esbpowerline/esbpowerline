@@ -33,7 +33,7 @@ const NAV_GROUPS: StaffNavGroup[] = [
     items: [
       { href: '/cms/articles/new', label: 'New story', icon: Feather },
       { href: '/cms/articles', label: 'All stories', icon: LibraryBig },
-      { href: '/cms/articles/drafts', label: 'My drafts', icon: FileSignature },
+      { href: '/cms/articles/drafts', label: 'My Drafts', icon: FileSignature },
       { href: '/cms/articles/scheduled', label: 'Scheduled', icon: Timer },
       { href: '/cms/trash', label: 'Trash', icon: Trash },
     ],
@@ -60,7 +60,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/cms/analytics': 'Performance',
   '/cms/articles': 'All Articles',
   '/cms/articles/new': 'Story editor',
-  '/cms/articles/drafts': 'Drafts',
+  '/cms/articles/drafts': 'My Drafts',
   '/cms/articles/scheduled': 'Scheduled',
   '/cms/calendar': 'Editorial Calendar',
   '/cms/yoy-sheet': 'Grid Comparison',
