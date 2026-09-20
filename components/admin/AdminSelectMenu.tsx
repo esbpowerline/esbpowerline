@@ -236,7 +236,12 @@ export function AdminSelectMenu({
         <span className="admin-select-trigger-label">
           {selected?.label ?? placeholder}
         </span>
-        {selected?.count !== undefined && (
+        {/* A count on the trigger says how much the filter narrowed things.
+            While nothing is chosen it narrows nothing, so four menus sat in a
+            row each printing the same total, beside a counter already showing
+            it — five copies of 217 (2026-09-20). Open the menu and every
+            option still carries its own number. */}
+        {selected?.count !== undefined && selected.value !== 'ALL' && (
           <span className="admin-select-trigger-count">{selected.count}</span>
         )}
         <ChevronDown className={cn('h-3 w-3 shrink-0 opacity-60 transition-transform duration-150', open && 'rotate-180')} />

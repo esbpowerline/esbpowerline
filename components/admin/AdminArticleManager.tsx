@@ -23,6 +23,14 @@ import { cn, formatNumber, formatDeskDate } from '@/lib/utils';
 import { bulkArticleAction, bulkOwnArticleAction, type BulkArticleAction, type OwnBulkAction } from '@/lib/actions/articles';
 import { DELETE_PHRASE, isLiveStatus } from '@/lib/article-delete';
 import { actionIsUseful } from '@/lib/article-bulk-actions';
+import {
+  applyFilters,
+  countBy,
+  countFlags,
+  rowsForFacet,
+  type ArticleFilterState,
+  type FilterDimension,
+} from '@/lib/article-filters';
 import { requestArticleRevision } from '@/lib/actions/notices';
 import { AdminSecureActionDialog } from '@/components/admin/AdminSecureActionDialog';
 import {
@@ -410,26 +418,44 @@ export function AdminArticleManager({
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
   }, [articles]);
 
-  const filtered = useMemo(() => {
-    let list = articles.filter((a) => {
-      const q = query.toLowerCase();
-      const matchesQ = !q
-        || a.title.toLowerCase().includes(q)
-        || a.slug.toLowerCase().includes(q)
-        || a.category.toLowerCase().includes(q)
-        || authorName(a).toLowerCase().includes(q);
-      const matchesStatus = statusFilter === 'ALL' || a.status === statusFilter;
-      const matchesCategory = categoryFilter === 'ALL' || a.category === categoryFilter;
-      const matchesAuthor = authorFilter === 'ALL' || authorId(a) === authorFilter;
-      const matchesFlag =
-        flagFilter === 'ALL'
-        || (flagFilter === 'featured' && a.isFeatured)
-        || (flagFilter === 'pinned' && a.isPinned)
-        || (flagFilter === 'breaking' && a.isBreaking);
-      return matchesQ && matchesStatus && matchesCategory && matchesAuthor && matchesFlag;
-    });
-    return sortArticles(list, sort);
-  }, [articles, query, statusFilter, categoryFilter, authorFilter, flagFilter, sort]);
+  /* The rows in the shape the filter helpers take, so the predicate that
+     decides what is shown and the one that counts the menu options are
+     literally the same code. They used to be two copies, and the counting
+     copy ignored every filter but its own. */
+  const filterRows = useMemo(
+    () =>
+      articles.map((a) => ({
+        ...a,
+        authorId: authorId(a),
+        authorName: authorName(a),
+      })),
+    [articles],
+  );
+
+  const filterState: ArticleFilterState = useMemo(
+    () => ({
+      query,
+      status: statusFilter,
+      category: categoryFilter,
+      author: authorFilter,
+      flag: flagFilter,
+    }),
+    [query, statusFilter, categoryFilter, authorFilter, flagFilter],
+  );
+
+  /** Rows a menu counts against: everything except that menu's own filter. */
+  const facetRows = useMemo(() => {
+    const cache = {} as Record<FilterDimension, typeof filterRows>;
+    for (const d of ['status', 'category', 'author', 'flag'] as FilterDimension[]) {
+      cache[d] = rowsForFacet(filterRows, filterState, d);
+    }
+    return cache;
+  }, [filterRows, filterState]);
+
+  const filtered = useMemo(
+    () => sortArticles(applyFilters(filterRows, filterState), sort),
+    [filterRows, filterState, sort],
+  );
 
   // Pagination calculations
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -526,53 +552,33 @@ export function AdminArticleManager({
   }
 
   const categoryOptions = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const article of articles) {
-      counts.set(article.category, (counts.get(article.category) ?? 0) + 1);
-    }
+    const rows = facetRows.category;
+    const counts = countBy(rows, (a) => a.category);
     return [
-      { value: 'ALL', label: 'All categories', count: articles.length },
-      ...categories.map((c) => ({
-        value: c,
-        label: c,
-        count: counts.get(c) ?? 0,
-      })),
+      { value: 'ALL', label: 'All categories', count: rows.length },
+      ...categories.map((c) => ({ value: c, label: c, count: counts.get(c) ?? 0 })),
     ];
-  }, [articles, categories]);
+  }, [facetRows, categories]);
 
   const authorOptions = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const article of articles) {
-      const id = authorId(article);
-      if (!id) continue;
-      counts.set(id, (counts.get(id) ?? 0) + 1);
-    }
+    const rows = facetRows.author;
+    const counts = countBy(rows, (a) => a.authorId);
     return [
-      { value: 'ALL', label: 'All authors', count: articles.length },
-      ...authors.map(([id, name]) => ({
-        value: id,
-        label: name,
-        count: counts.get(id) ?? 0,
-      })),
+      { value: 'ALL', label: 'All authors', count: rows.length },
+      ...authors.map(([id, name]) => ({ value: id, label: name, count: counts.get(id) ?? 0 })),
     ];
-  }, [articles, authors]);
+  }, [facetRows, authors]);
 
   const flagOptions = useMemo(() => {
-    let featured = 0;
-    let pinned = 0;
-    let breaking = 0;
-    for (const article of articles) {
-      if (article.isFeatured) featured += 1;
-      if (article.isPinned) pinned += 1;
-      if (article.isBreaking) breaking += 1;
-    }
+    const rows = facetRows.flag;
+    const { featured, pinned, breaking } = countFlags(rows);
     return [
-      { value: 'ALL', label: 'All flags', count: articles.length },
+      { value: 'ALL', label: 'All flags', count: rows.length },
       { value: 'featured', label: 'Featured', count: featured },
       { value: 'pinned', label: 'Pinned', count: pinned },
       { value: 'breaking', label: 'Breaking', count: breaking },
     ];
-  }, [articles]);
+  }, [facetRows]);
 
   const sortOptions = SORT_OPTIONS.map((o) => ({
     value: o.value,
@@ -608,7 +614,7 @@ export function AdminArticleManager({
           />
         </div>
         {showStatusFilter && (
-          <ArticleStatusFilter value={statusFilter} onChange={setStatusFilter} articles={articles} />
+          <ArticleStatusFilter value={statusFilter} onChange={setStatusFilter} articles={facetRows.status} />
         )}
         <AdminSelectMenu value={categoryFilter} onChange={setCategoryFilter} options={categoryOptions} icon={Tag} placeholder="Category" minWidth="9.5rem" />
         {showAuthorFilter && (
