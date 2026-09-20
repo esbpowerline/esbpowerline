@@ -28,6 +28,52 @@ function balanced(html: string, tag: string): boolean {
   return open === close;
 }
 
+const MARKER = '<div class="article-ad-slot"></div>';
+
+describe('splitBodyForAd — the marker the editor placed', () => {
+  it('breaks exactly where the marker sits, and consumes it', () => {
+    const body = `${p(2)}${MARKER}${p(4)}`;
+    const split = splitBodyForAd(body)!;
+    expect(split.placed).toBe(true);
+    expect(split.first).toBe(p(2));
+    expect(split.second).toBe(p(4));
+    // The reader must never see the instruction.
+    expect(split.first + split.second).not.toContain('article-ad-slot');
+  });
+
+  it('honours a marker in a body too short for the automatic rule', () => {
+    const body = `<p>only one</p>${MARKER}<p>and two</p>`;
+    const split = splitBodyForAd(body)!;
+    expect(split.placed).toBe(true);
+    expect(split.second).toContain('and two');
+  });
+
+  it('falls back to the midpoint when the marker is at the very start or end', () => {
+    for (const body of [`${MARKER}${p(6)}`, `${p(6)}${MARKER}`]) {
+      const split = splitBodyForAd(body)!;
+      expect(split.placed).toBe(false);
+      expect(split.first + split.second).not.toContain('article-ad-slot');
+    }
+  });
+
+  it('splits at the first marker and leaves none behind', () => {
+    // A second marker would otherwise reach the page as an empty div.
+    const body = `${p(2)}${MARKER}${p(2)}${MARKER}${p(2)}`;
+    const split = splitBodyForAd(body)!;
+    expect(split.placed).toBe(true);
+    expect(split.first).toBe(p(2));
+    expect(split.first + split.second).not.toContain('article-ad-slot');
+  });
+
+  it('still refuses to cut a table open when no marker is present', () => {
+    const body = p(2) + TABLE + p(2);
+    const split = splitBodyForAd(body)!;
+    expect(split.placed).toBe(false);
+    expect(balanced(split.first, 'table')).toBe(true);
+    expect(balanced(split.second, 'table')).toBe(true);
+  });
+});
+
 describe('splitBodyForAd', () => {
   it('declines to break a body under the minimum', () => {
     for (let n = 0; n < AD_MIN_PARAGRAPHS; n += 1) {

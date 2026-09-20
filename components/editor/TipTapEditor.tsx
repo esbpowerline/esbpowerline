@@ -14,7 +14,10 @@ import { TableHeader } from '@tiptap/extension-table-header';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Editor } from '@tiptap/react';
-import { Mark, mergeAttributes } from '@tiptap/core';
+// Aliased: a bare `Node` import shadows the DOM's Node type, which this file
+// uses for `contains(e.target as Node)` click handling.
+import { Mark, Node as TipTapNode, mergeAttributes } from '@tiptap/core';
+import { AD_SLOT_CLASS } from '@/lib/article-ad-split';
 import { Button } from '@/components/ui/button';
 import { cn, smartRearrangeText } from '@/lib/utils';
 import { optimizeImageToWebP } from '@/lib/image-optimizer';
@@ -27,10 +30,41 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Table as TableIcon, Minus, RemoveFormatting,
   Pilcrow, Code2, CornerDownLeft, IndentIncrease, IndentDecrease, ChevronDown,
   Palette, Highlighter, Subscript, Superscript,
-  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop,
+  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop, Megaphone,
 } from 'lucide-react';
 
 
+
+/**
+ * The in-article ad slot, placed by the desk.
+ *
+ * Without it the page picked the midpoint by itself, which is a guess about
+ * someone else's copy: it lands where the paragraph count says, not where the
+ * story can stand a break. An editor who wants the ad after the standfirst, or
+ * after the table rather than before it, had no way to say so.
+ *
+ * An atom, so it is one thing to select and delete rather than a box you can
+ * type inside, and a block, so it only ever sits between paragraphs — the one
+ * place `splitBodyForAd` is able to cut. It carries no content of its own; it
+ * is an instruction, and the reader never sees it.
+ */
+export const AdSlotNode = TipTapNode.create({
+  name: 'adSlot',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+
+  parseHTML() {
+    return [{ tag: `div.${AD_SLOT_CLASS}` }];
+  },
+
+  renderHTML() {
+    // No attributes beyond the class: the class is what the sanitiser keeps
+    // and what splitBodyForAd matches on.
+    return ['div', { class: AD_SLOT_CLASS }];
+  },
+});
 
 export const FontSizeMark = Mark.create({
   name: 'fontSize',
@@ -179,6 +213,7 @@ const TOOLBAR_ITEMS: Record<string, { label: string; hint: string; shortcut?: st
   link: { label: 'Insert link', hint: 'Add hyperlinks to sources' },
   image: { label: 'Insert image', hint: 'Upload inline visuals' },
   table: { label: 'Insert table', hint: 'Structured figures or comparisons' },
+  adSlot: { label: 'Ad slot', hint: 'Put the in-article ad here instead of the middle' },
   // A table could be inserted at a fixed 3x3 and then never changed: no row,
   // no column, no way to remove it. Published pieces carry five- and nine-row
   // tables, so the desk was building them outside the editor (2026-09-20).
@@ -660,6 +695,7 @@ export function TipTapEditor({
       Image.configure({ inline: false }),
       Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder }),
+      AdSlotNode,
       FontSizeMark,
       TextColorMark,
       HighlightMark,
@@ -786,6 +822,20 @@ export function TipTapEditor({
     }
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
+
+  // Does the body already carry a slot? A plain walk on each render rather
+  // than a memo: the doc changes on every keystroke and a stale memo would
+  // leave the button enabled after a slot was added, or disabled after one was
+  // deleted. The walk stops at the first hit.
+  const hasAdSlot = (() => {
+    if (!editor) return false;
+    let found = false;
+    editor.state.doc.descendants((node) => {
+      if (node.type.name === 'adSlot') found = true;
+      return !found;
+    });
+    return found;
+  })();
 
   const insertTable = useCallback(() => {
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
@@ -927,6 +977,17 @@ export function TipTapEditor({
           </ToolbarButton>
           <ToolbarButton toolKey="hr" onClick={() => editor.chain().focus().setHorizontalRule().run()}>
             <Minus className="h-4 w-4" />
+          </ToolbarButton>
+          {/* One slot per story: a second marker would be ignored by
+              splitBodyForAd, which takes the first, so the button turns off
+              rather than letting the desk place one that does nothing. */}
+          <ToolbarButton
+            toolKey="adSlot"
+            active={editor.isActive('adSlot')}
+            disabled={hasAdSlot}
+            onClick={() => editor.chain().focus().insertContent({ type: 'adSlot' }).run()}
+          >
+            <Megaphone className="h-4 w-4" />
           </ToolbarButton>
         </div>
         {/* Table controls, only while the cursor is in a table.

@@ -979,7 +979,7 @@ export function ArticleForm({
                   variant="ghost"
                   onClick={() => handleSubmit('DRAFT')}
                   disabled={loading}
-                  className="cms-publish-btn w-full text-muted-foreground"
+                  className="cms-publish-btn cms-publish-btn--draft w-full"
                 >
                   <Archive className="h-4 w-4" /> Move to draft
                 </Button>

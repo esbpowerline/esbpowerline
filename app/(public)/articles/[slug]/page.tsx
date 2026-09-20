@@ -25,7 +25,7 @@ import { gridViewForCategory } from '@/lib/grid-explorer-views';
 import { cleanDescription, ORGANIZATION_ID, shareImageUrl, SITE_URL } from '@/lib/seo';
 import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
-import { splitBodyForAd } from '@/lib/article-ad-split';
+import { splitBodyForAd, stripAdSlotMarkers } from '@/lib/article-ad-split';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
 import { QuickEditButton } from '@/components/editor/QuickEditButton';
 import prisma from '@/lib/prisma';
@@ -118,7 +118,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   // Shared with the CMS preview so the editor sees the slot where it lands.
   const adSplit = splitBodyForAd(article.content);
-  const firstHalf = adSplit?.first ?? article.content;
+  // On the fallback path the marker is still in the body and would render as a
+  // stray empty div, so it is stripped whether or not it placed the slot.
+  const firstHalf = adSplit?.first ?? stripAdSlotMarkers(article.content);
   const secondHalf = adSplit?.second ?? '';
 
   const siteUrl = SITE_URL;

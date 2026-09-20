@@ -9526,6 +9526,10 @@ button.grid-explorer-link {
 .article-body blockquote { @apply border-l-4 border-primary/60 pl-5 italic text-foreground my-4; }
 .article-body img { @apply max-w-full rounded-xl my-4 shadow-sm; }
 .article-body a { @apply text-primary underline underline-offset-2; }
+/* ...but not the ad, which is a link only so the slot is clickable. It sat
+   inside .article-body and inherited the body-link underline, drawing a faint
+   rule across the creative — plainest in the white theme (2026-09-20). */
+.article-body .article-body-ad-block a { @apply no-underline; }
 .article-body table { @apply w-full border-collapse my-4 text-sm; }
 .article-body th, .article-body td { @apply border border-border px-3 py-2 align-top; }
 .article-body th { @apply bg-muted/40 font-semibold text-left text-foreground; }
@@ -17522,4 +17526,40 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   :root .sm\:text-\[52px\] { font-size: calc(52 * var(--px)); }
   :root .sm\:w-\[320px\] { width: calc(320 * var(--px)); }
   :root .xs\:text-\[10px\] { font-size: calc(10 * var(--px)); }
+}
+
+/* The ad slot the desk placed.
+   Inside the editor it is a labelled bar, because an empty div is invisible
+   and an instruction you cannot see is one you cannot move or delete. On the
+   published page it never renders at all: splitBodyForAd consumes it and the
+   real slot is drawn between the two halves (2026-09-20). */
+.tiptap-editor .article-ad-slot,
+.ProseMirror .article-ad-slot {
+  position: relative;
+  height: 2.5rem;
+  margin: 1.5rem 0;
+  border: 1px dashed hsl(var(--primary) / 0.5);
+  border-radius: 0.75rem;
+  background: hsl(var(--primary) / 0.06);
+}
+
+.tiptap-editor .article-ad-slot::after,
+.ProseMirror .article-ad-slot::after {
+  content: 'Advertisement slot';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: hsl(var(--primary) / 0.8);
+}
+
+.ProseMirror .article-ad-slot.ProseMirror-selectednode {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.25);
 }

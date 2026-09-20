@@ -15,7 +15,7 @@ import { PreviewThemeToggle } from '@/components/editor/PreviewThemeToggle';
 import { PreviewCategoryPill } from '@/components/editor/PreviewCategoryPill';
 import { getArticlePreviewContext } from '@/lib/actions/preview-context';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
-import { splitBodyForAd } from '@/lib/article-ad-split';
+import { splitBodyForAd, stripAdSlotMarkers } from '@/lib/article-ad-split';
 import { linkPolicyMentions } from '@/lib/policy-links';
 import {
   mergeDraftIntoCarousel,
@@ -858,13 +858,17 @@ export function ArticlePreviewPanel({
                 aria-hidden
               >
                 <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  In-article advertisement
+                  {/* Say which it is. An automatic slot is a guess the desk can
+                      override from the toolbar; a placed one is theirs. */}
+                  {adSplit.placed
+                    ? 'In-article advertisement · placed here'
+                    : 'In-article advertisement · automatic midpoint'}
                 </span>
               </div>
               <div dangerouslySetInnerHTML={{ __html: adSplit.second }} />
             </div>
           ) : (
-            <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe" dangerouslySetInnerHTML={{ __html: cleanContent }} />
+            <div className="article-body mt-8 text-lg md:text-xl leading-relaxed pb-safe" dangerouslySetInnerHTML={{ __html: stripAdSlotMarkers(cleanContent) }} />
           )}
 
           {draftTags.length > 0 && (
