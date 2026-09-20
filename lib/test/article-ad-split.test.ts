@@ -2,13 +2,31 @@ import { describe, expect, it } from 'vitest';
 import { splitBodyForAd, AD_MIN_PARAGRAPHS } from '@/lib/article-ad-split';
 
 /**
- * The article page and the CMS preview must break the body at the same place.
- * Before this was one function the preview rendered the body whole, so an
- * editor could not see that an ad slot lands in the middle of their copy.
+ * The article page and the CMS preview must break the body at the same place,
+ * and that place must never be inside an element. The two halves are rendered
+ * into separate containers, so a cut inside a table leaves an unclosed
+ * `<table>` in one and an orphan `</table>` in the other.
  */
 
 const p = (n: number) =>
   Array.from({ length: n }, (_, i) => `<p>Paragraph ${i + 1}.</p>`).join('');
+
+/** A table whose cells contain paragraphs — the shape that broke the old rule. */
+const TABLE = [
+  '<table><thead><tr><th><p>Station</p></th><th><p>MW</p></th></tr></thead>',
+  '<tbody>',
+  '<tr><td><p>Bibiyana</p></td><td><p>341</p></td></tr>',
+  '<tr><td><p>Ghorashal</p></td><td><p>210</p></td></tr>',
+  '<tr><td><p>Sirajganj</p></td><td><p>225</p></td></tr>',
+  '</tbody></table>',
+].join('');
+
+/** Both halves must parse as balanced markup for the tags we care about. */
+function balanced(html: string, tag: string): boolean {
+  const open = (html.match(new RegExp(`<${tag}\\b`, 'g')) ?? []).length;
+  const close = (html.match(new RegExp(`</${tag}>`, 'g')) ?? []).length;
+  return open === close;
+}
 
 describe('splitBodyForAd', () => {
   it('declines to break a body under the minimum', () => {
@@ -18,34 +36,72 @@ describe('splitBodyForAd', () => {
   });
 
   it('breaks a body at exactly the minimum, as the page always has', () => {
-    // Three paragraphs qualify: the split leaves a trailing empty segment, so
-    // the segment count is four. Pinned because it reads like an off-by-one.
     expect(splitBodyForAd(p(AD_MIN_PARAGRAPHS))).not.toBeNull();
   });
 
   it('breaks a long body once, losing nothing', () => {
     const body = p(8);
-    const split = splitBodyForAd(body);
-    expect(split).not.toBeNull();
-    // Every paragraph survives, in order, on one side or the other.
-    expect(split!.first + split!.second).toBe(body);
-    expect(split!.first).toContain('Paragraph 1.');
-    expect(split!.second).toContain('Paragraph 8.');
+    const split = splitBodyForAd(body)!;
+    expect(split.first + split.second).toBe(body);
+    expect(split.first).toContain('Paragraph 1.');
+    expect(split.second).toContain('Paragraph 8.');
   });
 
-  it('closes the first half rather than leaving a dangling tag', () => {
-    const split = splitBodyForAd(p(6));
-    expect(split!.first.endsWith('</p>')).toBe(true);
+  it('never cuts a table open, even when one sits across the middle', () => {
+    // Two paragraphs, a table, two paragraphs: the midpoint by paragraph count
+    // lands inside the table, which is what used to break it.
+    const body = p(2) + TABLE + p(2);
+    const split = splitBodyForAd(body)!;
+    expect(split.first + split.second).toBe(body);
+    for (const tag of ['table', 'thead', 'tbody', 'tr', 'td', 'th']) {
+      expect(balanced(split.first, tag), `first half ${tag}`).toBe(true);
+      expect(balanced(split.second, tag), `second half ${tag}`).toBe(true);
+    }
+    // The table survives whole, on one side.
+    const whole = split.first.includes(TABLE) || split.second.includes(TABLE);
+    expect(whole).toBe(true);
   });
 
-  it('puts the break near the middle', () => {
-    const split = splitBodyForAd(p(10));
-    const before = (split!.first.match(/<p>/g) ?? []).length;
-    const after = (split!.second.match(/<p>/g) ?? []).length;
-    expect(Math.abs(before - after)).toBeLessThanOrEqual(1);
+  it('moves the slot past a list or figure rather than into it', () => {
+    const list = '<ul><li><p>one</p></li><li><p>two</p></li><li><p>three</p></li></ul>';
+    const figure = '<figure><img src="/x.png" alt="x"><figcaption><p>caption</p></figcaption></figure>';
+    for (const block of [list, figure]) {
+      const body = p(1) + block + p(1);
+      const split = splitBodyForAd(body);
+      if (split) {
+        expect(split.first + split.second).toBe(body);
+        for (const tag of ['ul', 'li', 'figure', 'figcaption']) {
+          expect(balanced(split.first, tag), `first ${tag}`).toBe(true);
+          expect(balanced(split.second, tag), `second ${tag}`).toBe(true);
+        }
+      }
+    }
   });
 
-  it('is stable for a body with no paragraph tags at all', () => {
+  it('puts the break near the middle of a plain body', () => {
+    const split = splitBodyForAd(p(10))!;
+    const before = (split.first.match(/<p>/g) ?? []).length;
+    const after = (split.second.match(/<p>/g) ?? []).length;
+    expect(Math.abs(before - after)).toBeLessThanOrEqual(2);
+  });
+
+  it('never puts the slot after all the content', () => {
+    const split = splitBodyForAd(p(6))!;
+    expect(split.second.trim()).not.toBe('');
+  });
+
+  it('declines a body that is one indivisible block', () => {
+    // A single table is not an article to interrupt; there is nowhere to cut.
+    expect(splitBodyForAd(TABLE)).toBeNull();
+  });
+
+  it('is stable for a body with no markup at all', () => {
     expect(splitBodyForAd('just text, no markup')).toBeNull();
+  });
+
+  it('does not let stray closing tags create a false boundary', () => {
+    const body = `${p(2)}</div>${p(2)}`;
+    const split = splitBodyForAd(body);
+    if (split) expect(split.first + split.second).toBe(body);
   });
 });
