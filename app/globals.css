@@ -17708,6 +17708,12 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
     max-height: none;
     margin: 1rem 0;
   }
+
+  /* ...so nothing here should offer to open one. The zoom cursor and the
+     hint pill were still drawn, promising a picture would get bigger when
+     the rule above had already made that a no-op (2026-09-20). */
+  .article-body img.article-img--zoomable { cursor: default; }
+  .article-img-hint { display: none; }
 }
 
 /* The hint that appears over a picture you can open. Rendered, not a `title`

@@ -49,8 +49,22 @@ import {
  * place `splitBodyForAd` is able to cut. It carries no content of its own; it
  * is an instruction, and the reader never sees it.
  */
-/** The alignment classes the stylesheet owns, and the sanitiser permits. */
+/**
+ * The alignment classes the stylesheet owns, and the sanitiser permits.
+ *
+ * `default` is deliberately the empty string: it carries no class, so the base
+ * `.article-body img` rule applies — the proportional size (68% of the column,
+ * 62vh tall) that a picture in a story should have unless someone asked for
+ * something else. Full-bleed is a choice, not what you get by doing nothing.
+ *
+ * It was the other way round until 2026-09-20 and the effect was not confined
+ * to new images: `parseHTML` read an image with no alignment class as `full`,
+ * so opening any older article and saving it stamped `article-img--full` onto
+ * every picture in it. "Bangladesh's Energy Security Under Pressure" was
+ * found with both of its images full-bleed for exactly that reason.
+ */
 export const IMAGE_ALIGNMENTS = {
+  default: '',
   full: 'article-img--full',
   left: 'article-img--left',
   center: 'article-img--center',
@@ -141,17 +155,21 @@ const AlignableImage = Image.extend({
         parseHTML: () => '',
       },
       align: {
-        default: 'full' as ImageAlignment,
+        default: 'default' as ImageAlignment,
         parseHTML: (element) => {
           for (const cls of element.classList) {
             const found = ALIGNMENT_BY_CLASS.get(cls);
             if (found) return found;
           }
-          return 'full';
+          // No class means no choice was made — not a choice of full-bleed.
+          return 'default';
         },
         renderHTML: (attributes) => {
-          const align = (attributes.align ?? 'full') as ImageAlignment;
-          return { class: IMAGE_ALIGNMENTS[align] ?? IMAGE_ALIGNMENTS.full };
+          const align = (attributes.align ?? 'default') as ImageAlignment;
+          const cls = IMAGE_ALIGNMENTS[align] ?? '';
+          // An empty class attribute would survive sanitising and read as a
+          // deliberate blank; omit it entirely instead.
+          return cls ? { class: cls } : {};
         },
       },
     };
@@ -325,6 +343,7 @@ const TOOLBAR_ITEMS: Record<string, { label: string; hint: string; shortcut?: st
   table: { label: 'Insert table', hint: 'Structured figures or comparisons' },
   adSlot: { label: 'Ad slot', hint: 'Put the in-article ad here instead of the middle' },
   find: { label: 'Find & replace', hint: 'Search the story and replace across it', shortcut: `${MOD}+F` },
+  imgDefault: { label: 'Default size', hint: 'Proportional to the column — the usual choice' },
   imgFull: { label: 'Full width', hint: 'Image spans the column' },
   imgLeft: { label: 'Float left', hint: 'Image sits left, text wraps beside it' },
   imgCenter: { label: 'Centre', hint: 'Image centred at half width' },
@@ -1155,6 +1174,7 @@ export function TipTapEditor({
             <div className="tiptap-toolbar__group" role="group" aria-label="Image">
               {(
                 [
+                  ['imgDefault', 'default', ImageIcon],
                   ['imgFull', 'full', Maximize2],
                   ['imgLeft', 'left', AlignLeft],
                   ['imgCenter', 'center', AlignCenter],
