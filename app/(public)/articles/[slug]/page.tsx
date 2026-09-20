@@ -28,6 +28,7 @@ import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import { splitBodyForAd, stripAdSlotMarkers } from '@/lib/article-ad-split';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
 import { ArticleImageZoom } from '@/components/news/ArticleImageZoom';
+import { ArticleTextSize } from '@/components/news/ArticleTextSize';
 import { QuickEditButton } from '@/components/editor/QuickEditButton';
 import prisma from '@/lib/prisma';
 
@@ -250,6 +251,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           </div>
           
           <div className="article-meta-actions flex items-center gap-2">
+            {/* Beside share and save, where a reader already looks for the
+                controls that belong to the story rather than the site. */}
+            <ArticleTextSize />
             <QuickEditButton articleId={article.id} variant="inline" />
             <ShareArticleMenu title={article.title} slug={slug} />
             <SaveArticleButton articleId={article.id} articleSlug={slug} />

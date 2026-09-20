@@ -45,6 +45,10 @@ const ARTICLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     // carries the rest. `allowedStyles` below is what actually bounds this: it
     // permits five presentation properties and nothing else, so this widens
     // which elements may be aligned, not what may be done to them.
+    // A body image with a caption renders as a figure; both need their class
+    // or the caption arrives as a loose line of text under the picture.
+    figure: ['class'],
+    figcaption: ['class'],
     h1: ['class', 'style'],
     h2: ['class', 'style'],
     h3: ['class', 'style'],

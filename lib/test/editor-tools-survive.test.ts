@@ -56,6 +56,11 @@ const CASES: ToolCase[] = [
   { tool: 'image centre', html: '<img src="https://x.test/a.png" alt="a" class="article-img--center">', survives: ['article-img--center'] },
   { tool: 'image right', html: '<img src="https://x.test/a.png" alt="a" class="article-img--right">', survives: ['article-img--right'] },
   { tool: 'image alt text', html: '<img src="https://x.test/a.png" alt="A gas plant at dusk">', survives: ['alt="A gas plant at dusk"'] },
+  {
+    tool: 'image caption and credit',
+    html: '<figure class="article-figure"><img src="https://x.test/a.png" alt="a"><figcaption class="article-figure__caption">Gas field at dusk<span class="article-figure__credit">Photo: BGFCL</span></figcaption></figure>',
+    survives: ['<figure class="article-figure">', 'article-figure__caption', 'Gas field at dusk', 'article-figure__credit', 'Photo: BGFCL'],
+  },
 
   // Alignment, which TextAlign applies to paragraphs AND headings.
   { tool: 'align paragraph', html: '<p style="text-align: center">mid</p>', survives: ['text-align'] },

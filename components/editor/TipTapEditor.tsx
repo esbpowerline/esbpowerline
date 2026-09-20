@@ -31,7 +31,7 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Table as TableIcon, Minus, RemoveFormatting,
   Pilcrow, Code2, CornerDownLeft, IndentIncrease, IndentDecrease, ChevronDown,
   Palette, Highlighter, Subscript, Superscript,
-  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop, Megaphone, Maximize2, Type, Search,
+  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop, Megaphone, Maximize2, Type, Search, Captions,
 } from 'lucide-react';
 
 
@@ -73,9 +73,73 @@ const ALIGNMENT_BY_CLASS = new Map<string, ImageAlignment>(
  * of what each one means.
  */
 const AlignableImage = Image.extend({
+  /**
+   * A picture in a story usually needs a line saying what it is and who took
+   * it. The node had neither, so a caption could only be typed as a paragraph
+   * underneath — which reads as body copy, is styled as body copy, and comes
+   * apart the moment the image is moved.
+   *
+   * With a caption or a credit the node renders as a `figure` with a
+   * `figcaption`; without, it stays a bare `img`, so nothing already published
+   * changes shape. Both forms parse back, so the round trip through the
+   * sanitiser and the editor is stable.
+   */
+  parseHTML() {
+    return [
+      {
+        tag: 'figure.article-figure',
+        getAttrs: (element) => {
+          const el = element as HTMLElement;
+          const img = el.querySelector('img');
+          if (!img) return false;
+          const cap = el.querySelector('figcaption');
+          const credit = cap?.querySelector('.article-figure__credit');
+          // The credit lives inside the caption, so remove it before reading
+          // the caption's own text or it would be counted twice.
+          const captionText = (() => {
+            if (!cap) return '';
+            const clone = cap.cloneNode(true) as HTMLElement;
+            clone.querySelector('.article-figure__credit')?.remove();
+            return clone.textContent?.trim() ?? '';
+          })();
+          return {
+            src: img.getAttribute('src'),
+            alt: img.getAttribute('alt'),
+            title: img.getAttribute('title'),
+            caption: captionText,
+            credit: credit?.textContent?.replace(/^Photo:\s*/i, '').trim() ?? '',
+          };
+        },
+      },
+      { tag: 'img[src]' },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes, node }) {
+    const caption = String(node.attrs.caption ?? '').trim();
+    const credit = String(node.attrs.credit ?? '').trim();
+    const { caption: _c, credit: _r, ...imgAttrs } = HTMLAttributes as Record<string, unknown>;
+    if (!caption && !credit) return ['img', mergeAttributes(imgAttrs)];
+    const figcaption: unknown[] = ['figcaption', { class: 'article-figure__caption' }];
+    if (caption) figcaption.push(caption);
+    if (credit) figcaption.push(['span', { class: 'article-figure__credit' }, `Photo: ${credit}`]);
+    return ['figure', { class: 'article-figure' }, ['img', mergeAttributes(imgAttrs)], figcaption];
+  },
+
   addAttributes() {
     return {
       ...this.parent?.(),
+      caption: {
+        default: '',
+        // Rendered by renderHTML into the figcaption, never as an attribute.
+        renderHTML: () => ({}),
+        parseHTML: () => '',
+      },
+      credit: {
+        default: '',
+        renderHTML: () => ({}),
+        parseHTML: () => '',
+      },
       align: {
         default: 'full' as ImageAlignment,
         parseHTML: (element) => {
@@ -266,6 +330,7 @@ const TOOLBAR_ITEMS: Record<string, { label: string; hint: string; shortcut?: st
   imgCenter: { label: 'Centre', hint: 'Image centred at half width' },
   imgRight: { label: 'Float right', hint: 'Image sits right, text wraps beside it' },
   imgAlt: { label: 'Alt text', hint: 'Describe the image for readers who cannot see it' },
+  imgCaption: { label: 'Caption & credit', hint: 'The line under the picture, and who took it' },
   // A table could be inserted at a fixed 3x3 and then never changed: no row,
   // no column, no way to remove it. Published pieces carry five- and nine-row
   // tables, so the desk was building them outside the editor (2026-09-20).
@@ -917,6 +982,17 @@ export function TipTapEditor({
     editor.chain().focus().updateAttributes('image', { alt: next.trim() }).run();
   }, [editor]);
 
+  /** The line under the picture, and who took it. Blank clears either. */
+  const editImageCaption = useCallback(() => {
+    if (!editor) return;
+    const attrs = editor.getAttributes('image');
+    const caption = window.prompt('Caption — the line printed under the picture:', String(attrs.caption ?? ''));
+    if (caption === null) return;
+    const credit = window.prompt('Credit — who took or supplied it (leave blank for none):', String(attrs.credit ?? ''));
+    if (credit === null) return;
+    editor.chain().focus().updateAttributes('image', { caption: caption.trim(), credit: credit.trim() }).run();
+  }, [editor]);
+
   const insertTable = useCallback(() => {
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
   }, [editor]);
@@ -1096,6 +1172,13 @@ export function TipTapEditor({
               ))}
               <ToolbarButton toolKey="imgAlt" onClick={editImageAlt}>
                 <Type className="h-4 w-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                toolKey="imgCaption"
+                active={Boolean(editor.getAttributes('image').caption || editor.getAttributes('image').credit)}
+                onClick={editImageCaption}
+              >
+                <Captions className="h-4 w-4" />
               </ToolbarButton>
             </div>
           </>
