@@ -12513,8 +12513,28 @@ html.theme-white .cms-datetime-grid-cell {
   margin-bottom: 0.25rem !important;
 }
 
+/* Tables move with the reader's choice too. A table is reference matter —
+   scanned rather than read — so it stays a notch under body copy, but it is
+   part of the story and has to breathe with it. Type, cell padding and the
+   margins above and below all take the multiplier, so the whole block shrinks
+   rather than the numbers rattling around inside a box that never moves.
+   At scale 1 these reproduce the previous rendering exactly: 0.875rem type,
+   0.75rem/0.5rem padding, 1rem margins. */
+.fluid-article-container .article-body table {
+  font-size: calc(0.875rem * var(--article-text-scale, 1)) !important;
+  margin-top: calc(1rem * var(--article-text-scale, 1)) !important;
+  margin-bottom: calc(1rem * var(--article-text-scale, 1)) !important;
+}
+
+.fluid-article-container .article-body th,
+.fluid-article-container .article-body td {
+  padding: calc(0.5rem * var(--article-text-scale, 1))
+           calc(0.75rem * var(--article-text-scale, 1)) !important;
+  line-height: 1.5 !important;
+}
+
 .fluid-article-container figcaption {
-  font-size: clamp(0.725rem, 1.8cqw, 0.875rem) !important;
+  font-size: calc(clamp(0.725rem, 1.8cqw, 0.875rem) * var(--article-text-scale, 1)) !important;
   margin-top: clamp(0.4rem, 1.5cqw, 0.65rem) !important;
 }
 

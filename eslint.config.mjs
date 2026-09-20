@@ -22,6 +22,10 @@ const config = [
   },
   {
     ignores: [
+      // Agent worktrees are separate checkouts that carry their own build
+      // output; linting them reported 74 errors from `.next` chunks and
+      // drowned the real signal (2026-09-20).
+      '.claude/**/*',
       '.next/**/*',
       '.next-admin/**/*',
       '.next-cms/**/*',
