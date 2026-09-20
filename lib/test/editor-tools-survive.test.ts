@@ -50,6 +50,13 @@ const CASES: ToolCase[] = [
   { tool: 'text colour', html: '<p><span style="color: #dc2626">red</span></p>', survives: ['color'] },
   { tool: 'highlight', html: '<p><span style="background-color: #fef08a">hl</span></p>', survives: ['background-color'] },
 
+  // Image alignment, stored as a class the stylesheet owns.
+  { tool: 'image full width', html: '<img src="https://x.test/a.png" alt="a" class="article-img--full">', survives: ['article-img--full'] },
+  { tool: 'image left', html: '<img src="https://x.test/a.png" alt="a" class="article-img--left">', survives: ['article-img--left'] },
+  { tool: 'image centre', html: '<img src="https://x.test/a.png" alt="a" class="article-img--center">', survives: ['article-img--center'] },
+  { tool: 'image right', html: '<img src="https://x.test/a.png" alt="a" class="article-img--right">', survives: ['article-img--right'] },
+  { tool: 'image alt text', html: '<img src="https://x.test/a.png" alt="A gas plant at dusk">', survives: ['alt="A gas plant at dusk"'] },
+
   // Alignment, which TextAlign applies to paragraphs AND headings.
   { tool: 'align paragraph', html: '<p style="text-align: center">mid</p>', survives: ['text-align'] },
   { tool: 'align heading 1', html: '<h1 style="text-align: center">mid</h1>', survives: ['text-align'] },
@@ -83,6 +90,12 @@ describe('the sanitiser still refuses what it should', () => {
 
   it('drops a data: image', () => {
     expect(sanitizeArticleHtml('<img src="data:image/png;base64,AAA">')).not.toContain('data:');
+  });
+
+  it('still drops a style attribute on an image', () => {
+    // Only a class is allowed there; free-form CSS on an image is not.
+    const out = sanitizeArticleHtml('<img src="https://x.test/a.png" style="position:fixed">');
+    expect(out).not.toContain('style');
   });
 
   it('drops position and url() styles', () => {

@@ -17563,3 +17563,121 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   border-color: hsl(var(--primary));
   box-shadow: 0 0 0 2px hsl(var(--primary) / 0.25);
 }
+
+/* Click a picture in a story to see it whole (ArticleImageLightbox).
+   Body pictures default to the column width rather than their natural size:
+   one published image is 351px wide in a 1230px column and reads as a mistake
+   rather than a choice. An editor who wants it narrower aligns it (below). */
+.article-body img { width: 100%; height: auto; }
+
+.article-image--zoomable { cursor: zoom-in; }
+
+.article-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: hsl(0 0% 0% / 0.88);
+  backdrop-filter: blur(4px);
+  animation: article-lightbox-in 140ms ease-out;
+}
+
+@keyframes article-lightbox-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-lightbox { animation: none; }
+}
+
+.article-lightbox__figure {
+  margin: 0;
+  max-width: min(100%, 1600px);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.article-lightbox__img {
+  max-width: 100%;
+  /* Room for the caption beneath without the picture overflowing the screen. */
+  max-height: calc(100vh - 8rem);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  cursor: zoom-out;
+}
+
+.article-lightbox__caption {
+  max-width: 70ch;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+  color: hsl(0 0% 100% / 0.82);
+}
+
+.article-lightbox__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  border: 1px solid hsl(0 0% 100% / 0.25);
+  background: hsl(0 0% 0% / 0.5);
+  color: hsl(0 0% 100%);
+}
+
+.article-lightbox__close:hover { background: hsl(0 0% 100% / 0.16); }
+.article-lightbox__close:focus-visible { outline: 2px solid hsl(0 0% 100%); outline-offset: 2px; }
+
+/* Body image alignment. Four fixed classes, because the sanitiser allows a
+   class on an image and not free-form CSS — a list of names to check rather
+   than a stylesheet to parse. Full width is the default and what every
+   existing image gets, so nothing already published moves. */
+.article-body img.article-img--full { width: 100%; float: none; margin: 1rem 0; }
+
+.article-body img.article-img--center {
+  display: block;
+  width: min(100%, 60%);
+  margin: 1.25rem auto;
+  float: none;
+}
+
+.article-body img.article-img--left {
+  float: left;
+  width: min(100%, 45%);
+  margin: 0.35rem 1.5rem 1rem 0;
+}
+
+.article-body img.article-img--right {
+  float: right;
+  width: min(100%, 45%);
+  margin: 0.35rem 0 1rem 1.5rem;
+}
+
+/* A float must not escape its story: the ad slot, the related rail and the
+   footer all sit below and would otherwise ride up beside a tall picture. */
+.article-body::after { content: ''; display: block; clear: both; }
+
+/* On a phone a 45% float is a column two words wide. Below the breakpoint
+   every image is full width, which is the only readable answer. */
+@media (max-width: 640px) {
+  .article-body img.article-img--left,
+  .article-body img.article-img--right,
+  .article-body img.article-img--center {
+    float: none;
+    width: 100%;
+    margin: 1rem 0;
+  }
+}

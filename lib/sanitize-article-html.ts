@@ -24,7 +24,10 @@ const ARTICLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: ARTICLE_ALLOWED_TAGS,
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
-    img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
+    // `class` so an aligned image survives. A free-form `style` is NOT allowed
+    // here: alignment is a fixed set of classes the stylesheet owns, which
+    // keeps the attack surface a list of names rather than a CSS parser.
+    img: ['src', 'alt', 'title', 'width', 'height', 'loading', 'class'],
     a: ['href', 'name', 'target', 'rel'],
     td: ['colspan', 'rowspan', 'align'],
     th: ['colspan', 'rowspan', 'align'],

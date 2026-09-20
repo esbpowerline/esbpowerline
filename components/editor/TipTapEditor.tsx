@@ -24,13 +24,14 @@ import { optimizeImageToWebP } from '@/lib/image-optimizer';
 import { useEditorPreferences } from '@/components/cms/EditorPreferencesProvider';
 
 import { ModernTooltip } from '@/components/shared/ModernTooltip';
+import { EditorFindReplace } from '@/components/editor/EditorFindReplace';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Heading1, Heading2, Heading3,
   List, ListOrdered, Quote, Link as LinkIcon, Image as ImageIcon, Undo, Redo, Code,
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Table as TableIcon, Minus, RemoveFormatting,
   Pilcrow, Code2, CornerDownLeft, IndentIncrease, IndentDecrease, ChevronDown,
   Palette, Highlighter, Subscript, Superscript,
-  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop, Megaphone,
+  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop, Megaphone, Maximize2, Type, Search,
 } from 'lucide-react';
 
 
@@ -48,6 +49,51 @@ import {
  * place `splitBodyForAd` is able to cut. It carries no content of its own; it
  * is an instruction, and the reader never sees it.
  */
+/** The alignment classes the stylesheet owns, and the sanitiser permits. */
+export const IMAGE_ALIGNMENTS = {
+  full: 'article-img--full',
+  left: 'article-img--left',
+  center: 'article-img--center',
+  right: 'article-img--right',
+} as const;
+
+export type ImageAlignment = keyof typeof IMAGE_ALIGNMENTS;
+
+const ALIGNMENT_BY_CLASS = new Map<string, ImageAlignment>(
+  Object.entries(IMAGE_ALIGNMENTS).map(([k, v]) => [v, k as ImageAlignment]),
+);
+
+/**
+ * The body image, with somewhere to sit.
+ *
+ * A picture could only ever be full column width, so a portrait shot or a
+ * small chart had to be full width or nothing. Alignment is stored as one of
+ * four fixed classes rather than inline CSS: the sanitiser then has a list of
+ * names to check instead of a stylesheet to parse, and the page keeps control
+ * of what each one means.
+ */
+const AlignableImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      align: {
+        default: 'full' as ImageAlignment,
+        parseHTML: (element) => {
+          for (const cls of element.classList) {
+            const found = ALIGNMENT_BY_CLASS.get(cls);
+            if (found) return found;
+          }
+          return 'full';
+        },
+        renderHTML: (attributes) => {
+          const align = (attributes.align ?? 'full') as ImageAlignment;
+          return { class: IMAGE_ALIGNMENTS[align] ?? IMAGE_ALIGNMENTS.full };
+        },
+      },
+    };
+  },
+});
+
 export const AdSlotNode = TipTapNode.create({
   name: 'adSlot',
   group: 'block',
@@ -214,6 +260,12 @@ const TOOLBAR_ITEMS: Record<string, { label: string; hint: string; shortcut?: st
   image: { label: 'Insert image', hint: 'Upload inline visuals' },
   table: { label: 'Insert table', hint: 'Structured figures or comparisons' },
   adSlot: { label: 'Ad slot', hint: 'Put the in-article ad here instead of the middle' },
+  find: { label: 'Find & replace', hint: 'Search the story and replace across it', shortcut: `${MOD}+F` },
+  imgFull: { label: 'Full width', hint: 'Image spans the column' },
+  imgLeft: { label: 'Float left', hint: 'Image sits left, text wraps beside it' },
+  imgCenter: { label: 'Centre', hint: 'Image centred at half width' },
+  imgRight: { label: 'Float right', hint: 'Image sits right, text wraps beside it' },
+  imgAlt: { label: 'Alt text', hint: 'Describe the image for readers who cannot see it' },
   // A table could be inserted at a fixed 3x3 and then never changed: no row,
   // no column, no way to remove it. Published pieces carry five- and nine-row
   // tables, so the desk was building them outside the editor (2026-09-20).
@@ -681,6 +733,22 @@ export function TipTapEditor({
   const syncBodyHeightRef = useRef<(() => void) | null>(null);
   const { preferences } = useEditorPreferences();
   const isSticky = preferences.stickyTipTapToolbar;
+  const [findOpen, setFindOpen] = useState(false);
+
+  // Ctrl/Cmd-F opens ours rather than the browser's, but only while the story
+  // body has focus: a writer looking for text in the sidebar, or anywhere else
+  // on the page, should still get the browser's find.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.key === 'f' && (e.metaKey || e.ctrlKey))) return;
+      const root = editorRef.current?.view.dom;
+      if (!root || !root.contains(document.activeElement)) return;
+      e.preventDefault();
+      setFindOpen(true);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   const editor = useEditor({
     extensions: [
@@ -692,7 +760,7 @@ export function TipTapEditor({
       TableRow,
       TableHeader,
       TableCell,
-      Image.configure({ inline: false }),
+      AlignableImage.configure({ inline: false }),
       Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder }),
       AdSlotNode,
@@ -836,6 +904,18 @@ export function TipTapEditor({
     });
     return found;
   })();
+
+  /**
+   * Alt text is asked for on insert, but that is one chance and the desk
+   * revises. This edits it on a selected image, seeded with whatever is there.
+   */
+  const editImageAlt = useCallback(() => {
+    if (!editor) return;
+    const current = (editor.getAttributes('image').alt as string | undefined) ?? '';
+    const next = window.prompt('Describe this image for readers who cannot see it (leave blank if decorative):', current);
+    if (next === null) return;
+    editor.chain().focus().updateAttributes('image', { alt: next.trim() }).run();
+  }, [editor]);
 
   const insertTable = useCallback(() => {
     editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
@@ -990,6 +1070,37 @@ export function TipTapEditor({
             <Megaphone className="h-4 w-4" />
           </ToolbarButton>
         </div>
+        {/* Image controls, only with an image selected. Same reasoning as the
+            table group below: these are no-ops otherwise, and a row of dead
+            buttons is how a toolbar stops being read. */}
+        {editor.isActive('image') && (
+          <>
+            <Divider />
+            <div className="tiptap-toolbar__group" role="group" aria-label="Image">
+              {(
+                [
+                  ['imgFull', 'full', Maximize2],
+                  ['imgLeft', 'left', AlignLeft],
+                  ['imgCenter', 'center', AlignCenter],
+                  ['imgRight', 'right', AlignRight],
+                ] as const
+              ).map(([key, align, Icon]) => (
+                <ToolbarButton
+                  key={key}
+                  toolKey={key}
+                  active={editor.getAttributes('image').align === align}
+                  onClick={() => editor.chain().focus().updateAttributes('image', { align }).run()}
+                >
+                  <Icon className="h-4 w-4" />
+                </ToolbarButton>
+              ))}
+              <ToolbarButton toolKey="imgAlt" onClick={editImageAlt}>
+                <Type className="h-4 w-4" />
+              </ToolbarButton>
+            </div>
+          </>
+        )}
+
         {/* Table controls, only while the cursor is in a table.
             Contextual rather than always-on: every one of these is a no-op
             outside a table, and a row of permanently dead buttons is how a
@@ -1059,6 +1170,9 @@ export function TipTapEditor({
         )}
         <Divider />
         <div className="tiptap-toolbar__group tiptap-toolbar__group--end" role="group" aria-label="History">
+          <ToolbarButton toolKey="find" active={findOpen} onClick={() => setFindOpen((v) => !v)}>
+            <Search className="h-4 w-4" />
+          </ToolbarButton>
           <ToolbarButton toolKey="clear" onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}>
             <RemoveFormatting className="h-4 w-4" />
           </ToolbarButton>
@@ -1070,6 +1184,8 @@ export function TipTapEditor({
           </ToolbarButton>
         </div>
       </div>
+
+      {findOpen && <EditorFindReplace editor={editor} onClose={() => setFindOpen(false)} />}
 
       <EditorContent editor={editor} className="tiptap-editor__body" />
     </div>

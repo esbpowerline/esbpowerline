@@ -27,6 +27,7 @@ import { hasArticleImage, normalizeArticleImageUrl } from '@/lib/article-image';
 import { sanitizeArticleHtml } from '@/lib/sanitize-article-html';
 import { splitBodyForAd, stripAdSlotMarkers } from '@/lib/article-ad-split';
 import { ShareArticleMenu } from '@/components/shared/ShareArticleMenu';
+import { ArticleImageLightbox } from '@/components/news/ArticleImageLightbox';
 import { QuickEditButton } from '@/components/editor/QuickEditButton';
 import prisma from '@/lib/prisma';
 
@@ -160,12 +161,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   };
 
   return (
-    <div className="container py-10 max-w-3xl article-page--with-sticky-author fluid-article-container">
+    <div className="article-page-root container py-10 max-w-3xl article-page--with-sticky-author fluid-article-container">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
       <ArticleViewTracker articleId={article.id} />
+      {/* Click any picture in the story to see it whole. Attaches by delegation
+          to `.article-page-root`, so it covers the hero and every body image
+          without the body needing to be React elements. */}
+      <ArticleImageLightbox />
       {/* Home → News → <category> → this story, visible and as BreadcrumbList. */}
       <Breadcrumbs
         crumbs={[
