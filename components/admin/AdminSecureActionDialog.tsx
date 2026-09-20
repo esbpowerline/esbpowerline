@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Lock, MessageSquare } from 'lucide-react';
+import { X, Lock, MessageSquare, Type } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { matchesPhrase } from '@/lib/article-delete';
 
 export function AdminSecureActionDialog({
   open,
@@ -14,6 +15,7 @@ export function AdminSecureActionDialog({
   confirmLabel = 'Confirm',
   variant = 'destructive',
   requirePassword = true,
+  requirePhrase,
   showAuthorNote = false,
   authorNoteRequired = false,
   authorNoteLabel = 'Note for author',
@@ -28,16 +30,19 @@ export function AdminSecureActionDialog({
   confirmLabel?: string;
   variant?: 'destructive' | 'primary' | 'success';
   requirePassword?: boolean;
+  /** Words the user must type out before the action can be confirmed. */
+  requirePhrase?: string;
   showAuthorNote?: boolean;
   authorNoteRequired?: boolean;
   authorNoteLabel?: string;
   authorNotePlaceholder?: string;
   loading?: boolean;
   onClose: () => void;
-  onConfirm: (payload: { password?: string; authorNote?: string }) => void | Promise<void>;
+  onConfirm: (payload: { password?: string; authorNote?: string; phrase?: string }) => void | Promise<void>;
 }) {
   const [password, setPassword] = useState('');
   const [authorNote, setAuthorNote] = useState('');
+  const [phrase, setPhrase] = useState('');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,6 +54,7 @@ export function AdminSecureActionDialog({
     if (!open) {
       setPassword('');
       setAuthorNote('');
+      setPhrase('');
     }
   }, [open]);
 
@@ -57,14 +63,21 @@ export function AdminSecureActionDialog({
   function handleClose() {
     setPassword('');
     setAuthorNote('');
+    setPhrase('');
     onClose();
   }
 
+  const phraseSatisfied = !requirePhrase || matchesPhrase(phrase, requirePhrase);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // Belt and braces: `required` does not stop a submit when the text is
+    // merely wrong rather than empty.
+    if (!phraseSatisfied) return;
     await onConfirm({
       password: requirePassword ? password : undefined,
       authorNote: authorNote.trim() || undefined,
+      phrase: requirePhrase ? phrase : undefined,
     });
   }
 
@@ -105,6 +118,33 @@ export function AdminSecureActionDialog({
             </div>
           )}
 
+          {requirePhrase && (
+            <div>
+              <label className="admin-secure-dialog-label">
+                <Type className="h-3 w-3" />
+                Type <span className="admin-secure-dialog-phrase">{requirePhrase}</span> to confirm
+              </label>
+              <Input
+                type="text"
+                value={phrase}
+                onChange={(e) => setPhrase(e.target.value)}
+                placeholder={requirePhrase}
+                className="h-9"
+                required
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
+                aria-describedby="admin-secure-dialog-phrase-hint"
+              />
+              <p id="admin-secure-dialog-phrase-hint" className="admin-secure-dialog-hint">
+                {phrase.trim() && !phraseSatisfied
+                  ? 'That is not the phrase yet.'
+                  : 'Capitals and extra spaces do not matter.'}
+              </p>
+            </div>
+          )}
+
           {requirePassword && (
             <div>
               <label className="admin-secure-dialog-label">
@@ -137,7 +177,7 @@ export function AdminSecureActionDialog({
             <Button
               type="submit"
               size="sm"
-              disabled={loading}
+              disabled={loading || !phraseSatisfied}
               className={cn(
                 variant === 'destructive' && 'bg-destructive hover:bg-destructive/90',
                 variant === 'success' && 'bg-emerald-600 hover:bg-emerald-500 text-white'

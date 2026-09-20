@@ -4802,6 +4802,27 @@ a.admin-list-row:hover .admin-list-title {
   margin-bottom: 0.35rem;
 }
 
+/* The words to type, set apart from the sentence asking for them — an editor
+   copies them by eye, so they have to read as a literal string rather than as
+   part of the instruction. */
+.admin-secure-dialog-phrase {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.25rem;
+  background: hsl(var(--destructive) / 0.12);
+  color: hsl(var(--destructive));
+}
+
+.admin-secure-dialog-hint {
+  margin-top: 0.3rem;
+  font-size: 11px;
+  line-height: 1.4;
+  color: hsl(var(--muted-foreground));
+}
+
 .admin-secure-dialog-textarea {
   width: 100%;
   min-height: 4.5rem;
@@ -10974,6 +10995,13 @@ a.admin-list-row:hover .admin-list-title {
 .cms-publish-btn--draft:active:not(:disabled) {
   background: hsl(350 80% 52%) !important;
   border-color: hsl(350 76% 44%) !important;
+  color: hsl(0 0% 100%) !important;
+}
+
+.cms-publish-btn--delete:hover:not(:disabled),
+.cms-publish-btn--delete:active:not(:disabled) {
+  background: hsl(0 72% 45%) !important;
+  border-color: hsl(0 70% 38%) !important;
   color: hsl(0 0% 100%) !important;
 }
 

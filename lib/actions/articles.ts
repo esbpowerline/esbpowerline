@@ -7,6 +7,7 @@ import { announceArticles } from '@/lib/notifications/articles';
 import { revalidateArticleContent } from '@/lib/revalidate-tags';
 import { auth } from '@/lib/auth';
 import { can, type Role } from '@/lib/constants';
+import { deleteRefusalReason, isLiveStatus } from '@/lib/article-delete';
 import { slugify } from '@/lib/utils';
 import {
   formatPublishBlockerMessage,
@@ -709,7 +710,21 @@ export async function updateArticle(id: string, data: ArticleInput) {
   return article;
 }
 
-export async function deleteArticle(id: string) {
+/**
+ * Move an article to the trash.
+ *
+ * This is a recoverable delete, not an erasure: the row goes to TRASH and an
+ * editor can restore it from Editorial → Trash until the retention window
+ * purges it. Permanent removal stays where it already was, behind the trash
+ * panel, because a hard `article.delete` orphans rows in six tables that hold
+ * an `articleId` with no foreign key (comments, bookmarks, history, saved
+ * items, notification events) — see prisma/schema.prisma.
+ *
+ * A live article additionally needs the phrase typed out. The status is read
+ * from the database rather than trusted from the caller, so a client that
+ * omits or lies about it cannot skip the gate.
+ */
+export async function deleteArticle(id: string, options?: { confirmation?: string }) {
   const user = await requireAuth();
   const existing = await prisma.article.findUnique({ where: { id } });
   if (!existing) throw new Error('Not found');
@@ -719,12 +734,28 @@ export async function deleteArticle(id: string) {
     : can(user.role, 'article.delete_any');
   if (!canDelete) throw new Error('Forbidden');
 
+  const refusal = deleteRefusalReason(existing.status, options?.confirmation);
+  if (refusal) throw new Error(refusal);
+
   const isOwn = existing.authorId === user.id;
   await prisma.article.update({
     where: { id },
     data: isOwn
       ? { status: 'TRASH', editorTrash: true, trashedAt: new Date() }
       : { status: 'TRASH', editorTrash: false, trashedAt: null },
+  });
+
+  /* Editor-side trashing was unaudited until 2026-09-20, which meant taking a
+     published story off the site left no record of who did it or when. The
+     status it was in when deleted is kept, because that is what distinguishes
+     a discarded draft from an unpublishing. */
+  await prisma.auditLog.create({
+    data: {
+      type: 'article.delete',
+      message: `${user.name ?? user.email ?? 'A user'} moved "${existing.title}" to trash (was ${existing.status})`,
+      userId: user.id,
+      undoPayload: JSON.stringify({ articleId: id, previousStatus: existing.status, wasOwn: isOwn }),
+    },
   });
 
   const { syncAuthorArticleCounts } = await import('@/lib/author-stats');
@@ -821,7 +852,11 @@ export async function restoreArticleRevision(articleId: string, revisionId: stri
 
 export type OwnBulkAction = 'publish' | 'draft' | 'trash' | 'archive';
 
-export async function bulkOwnArticleAction(ids: string[], action: OwnBulkAction) {
+export async function bulkOwnArticleAction(
+  ids: string[],
+  action: OwnBulkAction,
+  options?: { confirmation?: string },
+) {
   const user = await requireAuth();
   if (!ids.length) throw new Error('No articles selected');
 
@@ -836,6 +871,25 @@ export async function bulkOwnArticleAction(ids: string[], action: OwnBulkAction)
   }
   if (action === 'trash' && !can(user.role, 'article.delete_own')) {
     throw new Error('You do not have permission to delete');
+  }
+
+  /* The same gate the edit form applies, because otherwise it is decorative:
+     an editor could select a live story in the list and trash it without
+     typing anything, which is the exact action the phrase exists to slow
+     down (2026-09-20). One phrase covers the batch — it is asked once, for a
+     selection that contains anything live. */
+  if (action === 'trash') {
+    const live = articles.filter((a) => isLiveStatus(a.status));
+    if (live.length > 0) {
+      const refusal = deleteRefusalReason('PUBLISHED', options?.confirmation);
+      if (refusal) {
+        throw new Error(
+          live.length === articles.length
+            ? refusal
+            : `${live.length} of the ${articles.length} selected are live. ${refusal}`,
+        );
+      }
+    }
   }
 
   let affected = 0;

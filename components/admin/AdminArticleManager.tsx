@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { cn, formatNumber, formatDeskDate } from '@/lib/utils';
 
 import { bulkArticleAction, bulkOwnArticleAction, type BulkArticleAction, type OwnBulkAction } from '@/lib/actions/articles';
+import { DELETE_PHRASE, isLiveStatus } from '@/lib/article-delete';
 import { requestArticleRevision } from '@/lib/actions/notices';
 import { AdminSecureActionDialog } from '@/components/admin/AdminSecureActionDialog';
 import {
@@ -337,6 +338,14 @@ export function AdminArticleManager({
   const [sort, setSort] = useState<SortKey>('updated_desc');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [secureAction, setSecureAction] = useState<{ action: BulkArticleAction; ids: string[] } | null>(null);
+  /* How many of the selected rows a reader can currently reach. Drives both
+     the sentence in the dialog and whether the phrase is asked for, so the
+     two cannot disagree about what is at stake. */
+  const secureLiveCount = useMemo(() => {
+    if (!secureAction) return 0;
+    const ids = new Set(secureAction.ids);
+    return articles.filter((a) => ids.has(a.id) && isLiveStatus(a.status)).length;
+  }, [secureAction, articles]);
   const [revisionIds, setRevisionIds] = useState<string[] | null>(null);
 
   // Pagination states
@@ -455,13 +464,13 @@ export function AdminArticleManager({
   function executeBulk(
     action: BulkArticleAction,
     targetIds: string[],
-    opts?: { password?: string; authorNote?: string }
+    opts?: { password?: string; authorNote?: string; phrase?: string }
   ) {
     startTransition(async () => {
       try {
         const ownActions: OwnBulkAction[] = ['publish', 'draft', 'trash', 'archive'];
         const res = useOwnBulkActions && ownActions.includes(action as OwnBulkAction)
-          ? await bulkOwnArticleAction(targetIds, action as OwnBulkAction)
+          ? await bulkOwnArticleAction(targetIds, action as OwnBulkAction, { confirmation: opts?.phrase })
           : await bulkArticleAction(targetIds, action, opts);
         toast.success(`Updated ${res.affected} article(s)`);
         setSelected((prev) => {
@@ -901,8 +910,18 @@ export function AdminArticleManager({
       <AdminSecureActionDialog
         open={!!secureAction}
         title={secureAction ? SECURE_ACTION_COPY[secureAction.action]?.title ?? 'Confirm action' : ''}
-        description={secureAction ? SECURE_ACTION_COPY[secureAction.action]?.description ?? '' : ''}
+        description={
+          secureAction
+            ? [
+                SECURE_ACTION_COPY[secureAction.action]?.description ?? '',
+                secureLiveCount > 0 && secureAction.action === 'trash'
+                  ? `${secureLiveCount} of the ${secureAction.ids.length} selected ${secureLiveCount === 1 ? 'is' : 'are'} live on the site.`
+                  : '',
+              ].filter(Boolean).join(' ')
+            : ''
+        }
         confirmLabel={secureAction ? SECURE_ACTION_COPY[secureAction.action]?.confirm ?? 'Confirm' : 'Confirm'}
+        requirePhrase={secureAction?.action === 'trash' && secureLiveCount > 0 ? DELETE_PHRASE : undefined}
         requirePassword
         showAuthorNote
         authorNoteLabel="Note for author (optional)"

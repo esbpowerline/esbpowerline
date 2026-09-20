@@ -37,10 +37,11 @@ import { CmsPlacementIcon } from '@/components/cms/CmsPlacementIcon';
 import { CmsPlacementSwitch } from '@/components/cms/CmsPlacementSwitch';
 import { PLACEMENT_FLAGS } from '@/lib/article-placement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { createArticle, updateArticle } from '@/lib/actions/articles';
+import { createArticle, updateArticle, deleteArticle } from '@/lib/actions/articles';
 
 import { submitDraftForAdminReview } from '@/lib/actions/review-workflow';
 import { can, type Role } from '@/lib/constants';
+import { DELETE_PHRASE, requiresDeletePhrase } from '@/lib/article-delete';
 import { canSubmitArticleForReview } from '@/lib/editorial-review';
 import type { PublicCategory } from '@/lib/category-types';
 import { slugify, cn, autoCalculateCategory } from '@/lib/utils';
@@ -51,6 +52,7 @@ import type { HeroImageMeta } from '@/lib/hero-image';
 import { ArticlePreviewPanel, type PreviewDevice } from '@/components/editor/ArticlePreviewPanel';
 import { PreviewThemeToggle } from '@/components/editor/PreviewThemeToggle';
 import { RevisionHistory } from '@/components/cms/RevisionHistory';
+import { AdminSecureActionDialog } from '@/components/admin/AdminSecureActionDialog';
 import type { SiteTheme } from '@/lib/site-theme';
 import { CmsFormSelect } from '@/components/cms/CmsFormSelect';
 import { CmsCategorySelect } from '@/components/cms/CmsCategorySelect';
@@ -77,6 +79,7 @@ import {
   FolderOpen, Archive, Link2, PenLine, ShieldCheck, Camera, Focus, X,
   Settings, Pin, LayoutGrid, Star, Flame, Facebook, Newspaper, Monitor,
   Tablet, Smartphone, Info,
+  Trash2,
 } from 'lucide-react';
 
 type ArticleFormPermissions = {
@@ -175,6 +178,7 @@ export function ArticleForm({
   const [previewDevice, setPreviewDevice] = useState<PreviewDevice>('desktop');
   const [previewTheme, setPreviewTheme] = useState<SiteTheme>('midnight');
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [reviewNote, setReviewNote] = useState('');
   const [slugTouched, setSlugTouched] = useState(mode === 'edit');
   const [staff, setStaff] = useState<StaffMember[]>([]);
@@ -286,6 +290,18 @@ export function ArticleForm({
     status,
   });
 
+  /* Mirrors `deleteArticle`: your own article needs `article.delete_own`,
+     someone else's needs `article.delete_any`. The server decides; this only
+     decides whether to offer the button, so the two must agree or an editor
+     is shown an action that throws. */
+  const isOwnArticle = Boolean(session?.user?.id && article?.authorId === session.user.id);
+  const canDelete =
+    mode === 'edit' &&
+    Boolean(article?.id) &&
+    status !== 'TRASH' &&
+    can(role, isOwnArticle ? 'article.delete_own' : 'article.delete_any');
+  const deleteNeedsPhrase = requiresDeletePhrase(status);
+
   const statusSelectOptions = useMemo(() => {
     return STATUS_OPTIONS.filter((opt) => {
       if (opt.value === 'PUBLISHED' || opt.value === 'SCHEDULED') return canPublish;
@@ -326,6 +342,27 @@ export function ArticleForm({
     ],
   );
 
+
+  const handleDelete = useCallback(
+    async (confirmation?: string) => {
+      if (!article?.id) return;
+      setLoading(true);
+      try {
+        await deleteArticle(article.id, { confirmation });
+        setDeleteDialogOpen(false);
+        cmsToast.success('Moved to trash', 'You can restore it from Editorial → Trash.');
+        router.push('/cms/articles');
+        router.refresh();
+      } catch (error) {
+        // The server's message names the reason — a missing phrase, a
+        // permission, a row already gone — and is worth more than 'failed'.
+        cmsToast.error('Could not delete', error instanceof Error ? error.message : 'Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [article?.id, router],
+  );
 
   const handleSubmitForReview = useCallback(async () => {
     if (!article) return;
@@ -984,6 +1021,17 @@ export function ArticleForm({
                   <Archive className="h-4 w-4" /> Move to Draft
                 </Button>
               )}
+              {canDelete && (
+                <Button
+                  variant="ghost"
+                  onClick={() => setDeleteDialogOpen(true)}
+                  disabled={loading}
+                  className="cms-publish-btn cms-publish-btn--delete w-full text-muted-foreground"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  {deleteNeedsPhrase ? 'Delete live article' : 'Delete article'}
+                </Button>
+              )}
               {canSubmitForReview && status !== 'IN_REVIEW' && (
                 <Button
                   variant="outline"
@@ -1115,6 +1163,25 @@ export function ArticleForm({
         </aside>
         )}
       </div>
+
+      {deleteDialogOpen && (
+        <AdminSecureActionDialog
+          open
+          title={deleteNeedsPhrase ? 'Delete a live article' : 'Delete this article'}
+          description={
+            deleteNeedsPhrase
+              ? `"${title || 'This article'}" is live. Deleting it removes it from the site for anyone who has it open, linked or bookmarked. It goes to Editorial → Trash, where it can be restored until the retention window clears it.`
+              : 'It goes to Editorial → Trash, where you can restore it until the retention window clears it.'
+          }
+          confirmLabel="Move to trash"
+          variant="destructive"
+          requirePassword={false}
+          requirePhrase={deleteNeedsPhrase ? DELETE_PHRASE : undefined}
+          loading={loading}
+          onClose={() => !loading && setDeleteDialogOpen(false)}
+          onConfirm={({ phrase }) => handleDelete(phrase)}
+        />
+      )}
 
       {reviewDialogOpen && (
         <div className="cms-review-submit-backdrop" onClick={() => !loading && setReviewDialogOpen(false)}>
