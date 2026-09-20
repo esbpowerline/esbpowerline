@@ -11097,3 +11097,204 @@ a.admin-list-row:hover .admin-list-title {
 .cms-find-replace__action:hover:not(:disabled) { background: hsl(var(--muted) / 0.7); }
 .cms-find-replace__action:disabled,
 .cms-find-replace__btn:disabled { opacity: 0.45; }
+
+/* ── My Drafts ─────────────────────────────────────────────────────────────
+   A writer's desk. This page used the articles-desk table until 2026-09-20
+   and it read as the admin panel with two columns hidden — an author column
+   on a page showing one person's work, a status filter where every row is a
+   draft, view counts on stories nobody can see yet. The list below answers
+   the questions a draft raises instead: how far along is it, and what is
+   still stopping it going out. */
+.my-drafts__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.my-drafts__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 14rem;
+  min-width: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.my-drafts__search-input {
+  height: 2rem;
+  font-size: 12.5px;
+}
+
+.my-drafts__selectall {
+  font-size: 12px;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  white-space: nowrap;
+}
+
+.my-drafts__selectall:disabled { opacity: 0.4; }
+
+.my-drafts__bulk {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0.65rem;
+  margin-bottom: 0.65rem;
+  border-radius: 0.6rem;
+  border: 1px solid hsl(var(--primary) / 0.25);
+  background: hsl(var(--primary) / 0.07);
+}
+
+.my-drafts__bulk-count { font-size: 12.5px; font-weight: 600; }
+.my-drafts__bulk-note { font-weight: 500; color: hsl(var(--muted-foreground)); }
+
+.my-drafts__bulk-actions { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+
+.my-drafts__bulk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 1.85rem;
+  padding: 0 0.6rem;
+  border-radius: 0.45rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.my-drafts__bulk-btn:hover:not(:disabled) {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.my-drafts__bulk-btn--danger:hover:not(:disabled) {
+  background: hsl(0 72% 45%);
+  border-color: hsl(0 70% 38%);
+  color: hsl(0 0% 100%);
+}
+
+.my-drafts__bulk-btn:disabled { opacity: 0.5; }
+
+.my-drafts__bulk-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+
+.my-drafts__list { display: flex; flex-direction: column; }
+
+.my-drafts__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.7rem 0.4rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.my-drafts__row:last-child { border-bottom: 0; }
+.my-drafts__row--selected { background: hsl(var(--primary) / 0.05); }
+
+.my-drafts__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  border-radius: 0.3rem;
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--primary-foreground));
+}
+
+.my-drafts__row--selected .my-drafts__check {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.my-drafts__main { flex: 1 1 auto; min-width: 0; }
+
+.my-drafts__title {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: hsl(var(--foreground));
+}
+
+.my-drafts__title:hover { color: hsl(var(--primary)); }
+
+.my-drafts__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-top: 0.2rem;
+  font-size: 11.5px;
+  color: hsl(var(--muted-foreground));
+}
+
+.my-drafts__cat {
+  padding: 0.05rem 0.35rem;
+  border-radius: 0.25rem;
+  background: hsl(var(--muted));
+  font-weight: 600;
+}
+
+.my-drafts__state { flex-shrink: 0; padding-top: 0.1rem; }
+
+.my-drafts__ready,
+.my-drafts__blocked {
+  display: inline-block;
+  max-width: 14rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-drafts__ready { background: hsl(160 84% 33% / 0.12); color: hsl(160 84% 30%); }
+.dark .my-drafts__ready { color: hsl(160 70% 55%); }
+
+.my-drafts__blocked { background: hsl(38 92% 50% / 0.14); color: hsl(38 92% 32%); }
+.dark .my-drafts__blocked { color: hsl(38 92% 62%); }
+
+.my-drafts__none,
+.my-drafts-empty {
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  font-size: 12.5px;
+  color: hsl(var(--muted-foreground));
+}
+
+.my-drafts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.my-drafts-empty__cta { color: hsl(var(--primary)); font-weight: 600; }
+
+@media (max-width: 640px) {
+  .my-drafts__row { flex-wrap: wrap; }
+  .my-drafts__state { width: 100%; padding-left: 1.7rem; }
+  .my-drafts__ready,
+  .my-drafts__blocked { max-width: 100%; }
+}

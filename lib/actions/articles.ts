@@ -15,6 +15,7 @@ import {
   getPublishBlockers,
   parseArticleInput,
   publishArticleSchema,
+  stripArticleHtml,
   type ArticleInput,
 } from '@/lib/validations/article';
 import { PUBLIC_REVALIDATE_PATHS } from '@/lib/public-paths';
@@ -315,6 +316,60 @@ export async function getArticles(opts?: { authorId?: string; status?: string; l
     take: opts?.limit,
   });
 }
+
+/**
+ * The drafts belonging to the person asking. Nobody else's, ever.
+ *
+ * `getArticles` widens to the whole newsroom for anyone with
+ * `article.review`, which is right for the articles desk and wrong for a page
+ * called My Drafts — an editor opening it was shown every writer's unfinished
+ * work. The author scope here is not an option a caller can pass; it is the
+ * session, and there is no parameter to get it wrong with.
+ *
+ * It also answers the question a drafts list exists to answer: is this one
+ * ready to go out? `getArticles` omits the body deliberately (583 kB of
+ * markup across a list view), so it cannot tell. This reads the body, works
+ * out what is still missing, and returns the verdict rather than the markup —
+ * the content never reaches the client.
+ */
+export async function getMyDrafts() {
+  const user = await requireAuth();
+  const rows = await prisma.article.findMany({
+    where: { authorId: user.id, status: 'DRAFT', editorTrash: false },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      excerpt: true,
+      content: true,
+      category: true,
+      imageUrl: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+
+  return rows.map(({ content, ...rest }) => {
+    const words = stripArticleHtml(content).split(/\s+/).filter(Boolean).length;
+    return {
+      ...rest,
+      words,
+      readTime: Math.max(1, Math.ceil(words / 200)),
+      /* What still stands between this draft and being published, in the
+         words the editor form already uses — so the list and the form do not
+         describe the same gap differently. */
+      blockers: getPublishBlockers({
+        title: rest.title ?? '',
+        excerpt: rest.excerpt ?? '',
+        content,
+      }),
+      hasImage: Boolean(rest.imageUrl),
+    };
+  });
+}
+
+export type MyDraft = Awaited<ReturnType<typeof getMyDrafts>>[number];
 
 export async function getAdminArticles() {
   const user = await requireAuth();
