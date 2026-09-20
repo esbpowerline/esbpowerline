@@ -10963,43 +10963,29 @@ a.admin-list-row:hover .admin-list-title {
   color: hsl(var(--primary));
 }
 
-/* ── Publish actions: one colour each ──────────────────────────────────────
-   Four buttons sit in this column and three of them were grey until hovered:
-   Save was primary, Publish `secondary`, Schedule `outline`, Move to draft
-   `ghost`. The colours existed only as hover states, so the actions read as
-   one block and the destructive one looked like the neutral one. Each now
-   carries its hue at rest — tinted, so the column is still calm — and fills
-   in on hover. The hues are the ones already chosen; only Move to draft is
-   new, and it is rose because taking a story off the live site is the one
-   action here a reader would notice (2026-09-20). */
-.cms-publish-btn--publish:not(:disabled) {
-  background: hsl(160 84% 39% / 0.12);
-  border: 1px solid hsl(160 84% 39% / 0.45);
-  color: hsl(160 84% 30%);
-}
-
-.cms-publish-btn--schedule:not(:disabled) {
-  background: hsl(38 92% 50% / 0.12);
-  border: 1px solid hsl(38 92% 50% / 0.45);
-  color: hsl(30 80% 34%);
-}
-
-.cms-publish-btn--draft:not(:disabled) {
-  background: hsl(350 80% 55% / 0.1);
-  border: 1px solid hsl(350 80% 55% / 0.4);
-  color: hsl(350 70% 42%);
-}
-
-.cms-publish-btn--draft:hover:not(:disabled) {
+/* ── Publish actions ───────────────────────────────────────────────────────
+   Each action has its own colour, but only on hover and while pressed: at
+   rest the column keeps the neutral shapes it always had — Save primary,
+   Publish secondary, Schedule and Draft outlined. Tinting all four at rest
+   was tried on 2026-09-20 and reverted; four coloured pills in a sidebar
+   column is a traffic light, not a toolbar. Move to Draft is rose because
+   taking a story off the live site is the one action here a reader notices. */
+.cms-publish-btn--draft:hover:not(:disabled),
+.cms-publish-btn--draft:active:not(:disabled) {
   background: hsl(350 80% 52%) !important;
   border-color: hsl(350 76% 44%) !important;
   color: hsl(0 0% 100%) !important;
 }
 
-/* Dark themes: the same hues, lifted so they read on a dark card. */
-.dark .cms-publish-btn--publish:not(:disabled) { color: hsl(160 70% 66%); }
-.dark .cms-publish-btn--schedule:not(:disabled) { color: hsl(38 92% 68%); }
-.dark .cms-publish-btn--draft:not(:disabled) { color: hsl(350 85% 72%); }
+.cms-publish-btn--publish:active:not(:disabled) {
+  background: hsl(160 84% 33%) !important;
+  color: hsl(0 0% 100%) !important;
+}
+
+.cms-publish-btn--schedule:active:not(:disabled) {
+  background: hsl(38 88% 44%) !important;
+  color: hsl(222 47% 11%) !important;
+}
 
 /* Find & replace, above the story body. */
 .cms-find-replace {

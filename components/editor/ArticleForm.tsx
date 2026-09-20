@@ -979,9 +979,9 @@ export function ArticleForm({
                   variant="ghost"
                   onClick={() => handleSubmit('DRAFT')}
                   disabled={loading}
-                  className="cms-publish-btn cms-publish-btn--draft w-full"
+                  className="cms-publish-btn cms-publish-btn--draft w-full text-muted-foreground"
                 >
-                  <Archive className="h-4 w-4" /> Move to draft
+                  <Archive className="h-4 w-4" /> Move to Draft
                 </Button>
               )}
               {canSubmitForReview && status !== 'IN_REVIEW' && (

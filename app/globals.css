@@ -17714,50 +17714,54 @@ html.theme-dark .reserve-read__tag--reserves { color: hsl(38 92% 60%); }
   .article-img-hint { animation: none; }
 }
 
+/* Reader text size, wearing the same pill as Share and Save beside it.
+   Those two are `h-9 px-4 rounded-full bg-primary/10 text-primary` (see
+   ShareArticleMenu and SaveArticleButton); this control sat between them in
+   its own grey outline and read as a different kind of thing (2026-09-20). */
 .article-text-size {
   display: inline-flex;
   align-items: center;
   gap: 0.15rem;
-  padding: 0.2rem 0.4rem;
+  height: 2.25rem;
+  padding: 0 0.6rem;
   border-radius: 9999px;
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--card));
+  border: 1px solid transparent;
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  transition: background-color 150ms ease;
 }
 
-.article-text-size__icon { color: hsl(var(--muted-foreground)); margin-right: 0.15rem; }
+.article-text-size:hover { background: hsl(var(--primary) / 0.2); }
+
+.article-text-size__icon { opacity: 0.85; margin-right: 0.15rem; }
 
 .article-text-size__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.65rem;
-  height: 1.65rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 9999px;
-  color: hsl(var(--muted-foreground));
-  transition: background-color 120ms ease, color 120ms ease;
+  color: inherit;
+  transition: background-color 120ms ease, opacity 120ms ease;
 }
 
-.article-text-size__btn:hover:not(:disabled) {
-  background: hsl(var(--muted));
-  color: hsl(var(--foreground));
-}
-
-.article-text-size__btn:disabled { opacity: 0.35; }
+.article-text-size__btn:hover:not(:disabled) { background: hsl(var(--primary) / 0.22); }
+.article-text-size__btn:disabled { opacity: 0.4; }
 
 .article-text-size__level {
-  min-width: 1.6rem;
+  min-width: 1.5rem;
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: hsl(var(--muted-foreground));
+  color: inherit;
 }
 
-/* On a phone the meta row wraps; the control keeps its own line rather than
-   squeezing the share and save buttons off the edge. */
+/* On a phone the meta row wraps; keep the touch targets usable. */
 @media (max-width: 480px) {
-  .article-text-size { padding: 0.15rem 0.3rem; }
-  .article-text-size__btn { width: 1.9rem; height: 1.9rem; }
+  .article-text-size { padding: 0 0.45rem; }
+  .article-text-size__btn { width: 1.75rem; height: 1.75rem; }
 }
 
 /* A body picture with a caption. The figure carries the layout the bare image
