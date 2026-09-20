@@ -27,6 +27,7 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify, Table as TableIcon, Minus, RemoveFormatting,
   Pilcrow, Code2, CornerDownLeft, IndentIncrease, IndentDecrease, ChevronDown,
   Palette, Highlighter, Subscript, Superscript,
+  Rows3, Columns3, Trash2, TableRowsSplit, PanelTop,
 } from 'lucide-react';
 
 
@@ -178,6 +179,16 @@ const TOOLBAR_ITEMS: Record<string, { label: string; hint: string; shortcut?: st
   link: { label: 'Insert link', hint: 'Add hyperlinks to sources' },
   image: { label: 'Insert image', hint: 'Upload inline visuals' },
   table: { label: 'Insert table', hint: 'Structured figures or comparisons' },
+  // A table could be inserted at a fixed 3x3 and then never changed: no row,
+  // no column, no way to remove it. Published pieces carry five- and nine-row
+  // tables, so the desk was building them outside the editor (2026-09-20).
+  addRowAfter: { label: 'Add row', hint: 'Insert a row below the cursor' },
+  deleteRow: { label: 'Delete row', hint: 'Remove the row under the cursor' },
+  addColumnAfter: { label: 'Add column', hint: 'Insert a column to the right' },
+  deleteColumn: { label: 'Delete column', hint: 'Remove the column under the cursor' },
+  toggleHeaderRow: { label: 'Header row', hint: 'Turn the top row into headers' },
+  mergeOrSplit: { label: 'Merge / split cells', hint: 'Merge the selection, or split a merged cell' },
+  deleteTable: { label: 'Delete table', hint: 'Remove the whole table' },
   hr: { label: 'Divider', hint: 'Separate story sections' },
   inlineCode: { label: 'Inline code', hint: 'Mark a short code fragment' },
   hardBreak: { label: 'Line break', hint: 'Insert a line break within a paragraph' },
@@ -908,6 +919,73 @@ export function TipTapEditor({
             <Minus className="h-4 w-4" />
           </ToolbarButton>
         </div>
+        {/* Table controls, only while the cursor is in a table.
+            Contextual rather than always-on: every one of these is a no-op
+            outside a table, and a row of permanently dead buttons is how a
+            toolbar stops being read. `editor.can()` still guards each one, so
+            a control that cannot apply here is disabled rather than silently
+            doing nothing (for example splitting a cell that was never merged). */}
+        {editor.isActive('table') && (
+          <>
+            <Divider />
+            <div className="tiptap-toolbar__group" role="group" aria-label="Table">
+              <ToolbarButton
+                toolKey="addRowAfter"
+                disabled={!editor.can().addRowAfter()}
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+              >
+                <Rows3 className="h-4 w-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                toolKey="deleteRow"
+                disabled={!editor.can().deleteRow()}
+                onClick={() => editor.chain().focus().deleteRow().run()}
+              >
+                <TableRowsSplit className="h-4 w-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                toolKey="addColumnAfter"
+                disabled={!editor.can().addColumnAfter()}
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+              >
+                <Columns3 className="h-4 w-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                toolKey="deleteColumn"
+                disabled={!editor.can().deleteColumn()}
+                onClick={() => editor.chain().focus().deleteColumn().run()}
+              >
+                <Columns3 className="h-4 w-4 rotate-180 opacity-70" />
+              </ToolbarButton>
+              {/* No `active` state: `isActive('tableHeader')` describes the
+                  cell the cursor is in, not whether the table has a header
+                  row, so it would read as "off" from any body cell of a table
+                  that does have one. A lit indicator that is wrong half the
+                  time is worse than none. */}
+              <ToolbarButton
+                toolKey="toggleHeaderRow"
+                disabled={!editor.can().toggleHeaderRow()}
+                onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+              >
+                <PanelTop className="h-4 w-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                toolKey="mergeOrSplit"
+                disabled={!editor.can().mergeOrSplit()}
+                onClick={() => editor.chain().focus().mergeOrSplit().run()}
+              >
+                <TableIcon className="h-4 w-4" />
+              </ToolbarButton>
+              <ToolbarButton
+                toolKey="deleteTable"
+                disabled={!editor.can().deleteTable()}
+                onClick={() => editor.chain().focus().deleteTable().run()}
+              >
+                <Trash2 className="h-4 w-4" />
+              </ToolbarButton>
+            </div>
+          </>
+        )}
         <Divider />
         <div className="tiptap-toolbar__group tiptap-toolbar__group--end" role="group" aria-label="History">
           <ToolbarButton toolKey="clear" onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}>
