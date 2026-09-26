@@ -61,29 +61,13 @@ export const DEFAULT_INTERVIEWS: Interview[] = [
  * Interviews pinned to the front of the rail, newest-first left to right.
  *
  * Every field is copied from the video's own Open Graph data, in the words and
- * spelling it uses (including "জালানী") — nothing here is written by us. Both are
- * the same Express Talk episode: the first is marked LIVE and resolves to a reel,
- * the second is the recorded video, which Facebook canonicalises to News
- * Express's page. Facebook's metadata exposes no duration or publish date, so
- * both are left absent rather than guessed.
+ * spelling it uses (including "জালানী") — nothing here is written by us.
+ * Facebook canonicalises this to News Express's page. Facebook's metadata
+ * exposes no duration or publish date, so both are left absent rather than guessed.
  *
  * Thumbnails are copied into /public because fbcdn URLs are signed and expire.
  */
 export const PINNED_INTERVIEWS: Interview[] = [
-  {
-    id: 'fb-express-talk-energy-crisis-live',
-    title: 'বর্তমান জ্বালানী সংকট ও উত্তরনের উপায়',
-    guest: 'অধ্যাপক আনু মুহাম্মদ',
-    role: 'অর্থনীতি ও জালানী বিশেষজ্ঞ',
-    programme: 'এক্সপ্রেস টক · LIVE',
-    duration: '—',
-    date: '',
-    thumbnail: '/images/interviews/express-talk-energy-crisis-live.jpg',
-    youtubeId: '',
-    excerpt: 'উপস্থাপনা- ফরিদ উদ্দিন আহমেদ · সৌজন্যে- নিউজ এক্সপ্রেস ও ইএসবি পাওয়ার লাইন',
-    provider: 'facebook',
-    videoUrl: 'https://www.facebook.com/esbpowerlineofficial/videos/1550945206292721',
-  },
   {
     id: 'fb-express-talk-energy-crisis',
     title: 'বর্তমান জ্বালানী সংকট ও উত্তরনের উপায়',
@@ -121,14 +105,14 @@ export function encodeInterviewAssetUrl(url: string): string {
   return encodeURI(trimmed);
 }
 
-/** Accept a bare ID or a full YouTube URL from admin settings. */
+/** Accept a bare ID or a full YouTube/Shorts URL from admin settings or imports. */
 export function extractYoutubeId(raw: string | undefined): string | null {
   const value = raw?.trim() ?? '';
   if (!value) return null;
   if (/^[a-zA-Z0-9_-]{11}$/.test(value)) return value;
 
   const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
     /[?&]v=([a-zA-Z0-9_-]{11})/,
   ];
 
@@ -140,18 +124,28 @@ export function extractYoutubeId(raw: string | undefined): string | null {
   return null;
 }
 
+export function getYoutubeThumbnailUrl(youtubeId: string): string {
+  const id = extractYoutubeId(youtubeId);
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
+}
+
 function normalizeInterviewEntry(raw: unknown, index: number): Interview | null {
   if (!raw || typeof raw !== 'object') return null;
 
   const item = raw as Partial<Interview>;
-  const youtubeId = extractYoutubeId(item.youtubeId) ?? '';
   const provider = item.provider === 'facebook' ? 'facebook' : 'youtube';
+  const rawYoutube = (item.youtubeId || (provider === 'youtube' ? item.videoUrl : '')) ?? '';
+  const youtubeId = extractYoutubeId(rawYoutube) ?? '';
   const videoUrl = item.videoUrl?.trim() || '';
   const id = typeof item.id === 'string' && item.id.trim() ? item.id.trim() : `interview-${index + 1}`;
 
   // A Facebook entry has no youtubeId, so it must not be dropped for lacking one.
   const playable = provider === 'facebook' ? !!videoUrl : !!youtubeId;
   if (!playable && !item.title?.trim() && !item.guest?.trim()) return null;
+
+  const thumbnailFallback = youtubeId
+    ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+    : '/images/yt_tm_1.jpg';
 
   return {
     id,
@@ -160,7 +154,7 @@ function normalizeInterviewEntry(raw: unknown, index: number): Interview | null 
     role: item.role?.trim() || 'Energy sector',
     duration: item.duration?.trim() || '—',
     date: item.date?.trim() || '',
-    thumbnail: encodeInterviewAssetUrl(item.thumbnail?.trim() || '/images/yt_tm_1.jpg'),
+    thumbnail: encodeInterviewAssetUrl(item.thumbnail?.trim() || thumbnailFallback),
     youtubeId,
     excerpt: item.excerpt?.trim() || '',
     provider,
@@ -177,6 +171,46 @@ export function normalizeInterviews(source: unknown): Interview[] {
     .filter((row): row is Interview => row !== null);
 
   return normalized.length > 0 ? normalized : DEFAULT_INTERVIEWS;
+}
+
+export function isLegacyDummyInterviews(list: unknown): boolean {
+  if (!Array.isArray(list) || list.length === 0) return false;
+  return list.some(
+    (item) =>
+      item &&
+      typeof item === 'object' &&
+      (item.youtubeId === 'dQw4w9wgxcQ' ||
+        item.guest === 'Dr. Shahana Rahman' ||
+        item.title?.includes('SREDA’s 2030 Renewable Roadmap') ||
+        item.title?.includes("SREDA's 2030 Renewable Roadmap")),
+  );
+}
+
+/**
+ * Resolves interviews for display on the homepage.
+ * If the admin has configured interviews in Site Settings (non-empty list of valid interviews),
+ * those configured interviews take full precedence in real time.
+ * If no configured interviews exist in settings, falls back to pinned interviews + fallback YouTube feed.
+ */
+export function resolveHomepageInterviews(
+  configuredInterviews: unknown,
+  fallbackInterviews: Interview[] = DEFAULT_INTERVIEWS,
+  limit = INTERVIEW_RAIL_LIMIT,
+): Interview[] {
+  if (
+    Array.isArray(configuredInterviews) &&
+    configuredInterviews.length > 0 &&
+    !isLegacyDummyInterviews(configuredInterviews)
+  ) {
+    const normalized = configuredInterviews
+      .map((row, index) => normalizeInterviewEntry(row, index))
+      .filter((row): row is Interview => row !== null);
+    if (normalized.length > 0) {
+      return normalized.slice(0, limit);
+    }
+  }
+
+  return withPinnedInterviews(normalizeInterviews(fallbackInterviews), limit);
 }
 
 /**

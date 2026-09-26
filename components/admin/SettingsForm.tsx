@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { PanelsEditor } from '@/components/admin/PanelsEditor';
+import { InterviewsEditor } from '@/components/admin/InterviewsEditor';
 import { AdminCard, AdminTagCapsule } from '@/components/admin/AdminUI';
 import { resolvePolicies, type Policy } from '@/lib/data/policy/policies';
 import { DEFAULT_IMPORTANT_LINKS, resolveImportantLinks } from '@/lib/data/important-links';
@@ -23,6 +24,7 @@ import {
   Settings, TrendingUp, BarChart3, Play, Globe,
   Database, ArrowUp, ArrowDown, Pin, LayoutGrid, Layers,
 } from 'lucide-react';
+import { DEFAULT_INTERVIEWS, PINNED_INTERVIEWS, extractYoutubeId, isLegacyDummyInterviews } from '@/lib/interview-content';
 
 type ArticlePickerItem = {
   slug: string;
@@ -119,23 +121,18 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
   );
 
   // 4. Featured Interviews
-  const [interviews, setInterviews] = useState<any[]>(
-    (settings.interviews as any[]) ??
-      // Blank slots, not example interviews. These carried four invented
-      // conversations with named office-holders; nothing here now asserts that
-      // anyone said anything.
-      ['i1', 'i2', 'i3', 'i4'].map((id) => ({
-        id,
-        title: '',
-        guest: '',
-        role: '',
-        duration: '',
-        date: '',
-        thumbnail: '',
-        youtubeId: '',
-        excerpt: '',
-      }))
-  );
+  const initialAdminInterviews = useMemo(() => {
+    if (
+      Array.isArray(settings.interviews) &&
+      settings.interviews.length > 0 &&
+      !isLegacyDummyInterviews(settings.interviews)
+    ) {
+      return settings.interviews as any[];
+    }
+    return [...PINNED_INTERVIEWS, ...DEFAULT_INTERVIEWS];
+  }, [settings.interviews]);
+
+  const [interviews, setInterviews] = useState<any[]>(initialAdminInterviews);
 
   // 5. Grid Explorer Data
   const [gridMix, setGridMix] = useState<any[]>(
@@ -327,8 +324,56 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
   // Interview helpers
   const updateInterviewField = (index: number, field: string, val: any) => {
     const next = [...interviews];
-    next[index] = { ...next[index], [field]: val };
+    const current = { ...next[index], [field]: val };
+
+    // Auto-extract YouTube video ID from URL if pasted into youtubeId
+    if (field === 'youtubeId') {
+      const extracted = extractYoutubeId(val);
+      if (extracted) {
+        current.youtubeId = extracted;
+        if (!current.thumbnail || current.thumbnail.includes('img.youtube.com/vi/')) {
+          current.thumbnail = `https://img.youtube.com/vi/${extracted}/hqdefault.jpg`;
+        }
+      }
+    }
+
+    if (field === 'provider' && val === 'youtube' && current.youtubeId) {
+      if (!current.thumbnail) {
+        current.thumbnail = `https://img.youtube.com/vi/${current.youtubeId}/hqdefault.jpg`;
+      }
+    }
+
+    next[index] = current;
     setInterviews(next);
+  };
+
+  const addInterview = () => {
+    const newId = `interview-${Date.now().toString(36)}`;
+    setInterviews([
+      ...interviews,
+      {
+        id: newId,
+        title: '',
+        guest: '',
+        role: '',
+        programme: '',
+        duration: '',
+        date: '',
+        thumbnail: '',
+        youtubeId: '',
+        excerpt: '',
+        provider: 'youtube',
+        videoUrl: '',
+      },
+    ]);
+  };
+
+  const removeInterview = (index: number) => {
+    setInterviews(interviews.filter((_, i) => i !== index));
+  };
+
+  const resetInterviewsToDefaults = () => {
+    setInterviews([...PINNED_INTERVIEWS, ...DEFAULT_INTERVIEWS]);
   };
 
   const moveInterview = (index: number, direction: 'up' | 'down' | 'first') => {
@@ -579,108 +624,15 @@ export function SettingsForm({ settings, articlePickerList = [] }: SettingsFormP
 
         {/* Tab 4: Latest Interviews */}
         {activeTab === 'interviews' && (
-          <div className="admin-settings-stack">
-            {interviews.map((iv, idx) => (
-              <AdminCard
-                key={iv.id}
-                title={`Interview #${idx + 1}: ${iv.guest || 'Untitled'}`}
-                icon={Play}
-                bodyClassName="admin-settings-body"
-                action={
-                  <div className="flex items-center gap-1">
-                    {idx === 0 && <AdminTagCapsule className="mr-1">Pinned first</AdminTagCapsule>}
-                    <button type="button" className="admin-row-btn" title="Pin to first" aria-label="Pin to first" onClick={() => moveInterview(idx, 'first')}>
-                      <Pin className="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" className="admin-row-btn" title="Move up" aria-label="Move up" onClick={() => moveInterview(idx, 'up')} disabled={idx === 0}>
-                      <ArrowUp className="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" className="admin-row-btn" title="Move down" aria-label="Move down" onClick={() => moveInterview(idx, 'down')} disabled={idx === interviews.length - 1}>
-                      <ArrowDown className="h-3.5 w-3.5" />
-                    </button>
-                    <span className="font-mono text-xs text-muted-foreground ml-1">{iv.id}</span>
-                  </div>
-                }
-              >
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Interview Title</Label>
-                    <Input value={iv.title ?? ''} onChange={(e) => updateInterviewField(idx, 'title', e.target.value)} className="mt-1" />
-                  </div>
-                  <div>
-                    <Label>Guest Name</Label>
-                    <Input value={iv.guest ?? ''} onChange={(e) => updateInterviewField(idx, 'guest', e.target.value)} className="mt-1" />
-                  </div>
-                  <div>
-                    <Label>Guest Role / Designation</Label>
-                    <Input value={iv.role ?? ''} onChange={(e) => updateInterviewField(idx, 'role', e.target.value)} className="mt-1" />
-                    <p className="mt-1 text-xs text-muted-foreground">Shown in full in the player modal.</p>
-                  </div>
-                  <div>
-                    <Label>Programme / Series (card chip)</Label>
-                    <Input
-                      value={iv.programme ?? ''}
-                      onChange={(e) => updateInterviewField(idx, 'programme', e.target.value)}
-                      className="mt-1"
-                      placeholder="e.g. Express Talk"
-                    />
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      The card chip is narrow — a full job title truncates there. Falls back to the role if left blank.
-                    </p>
-                  </div>
-                  <div>
-                    <Label>Video Platform</Label>
-                    <select
-                      value={iv.provider ?? 'youtube'}
-                      onChange={(e) => updateInterviewField(idx, 'provider', e.target.value)}
-                      className="admin-native-select mt-1"
-                    >
-                      <option value="youtube">YouTube</option>
-                      <option value="facebook">Facebook</option>
-                    </select>
-                  </div>
-                  {(iv.provider ?? 'youtube') === 'facebook' ? (
-                    <div>
-                      <Label>Facebook Video URL</Label>
-                      <Input
-                        value={iv.videoUrl ?? ''}
-                        onChange={(e) => updateInterviewField(idx, 'videoUrl', e.target.value)}
-                        className="mt-1"
-                        placeholder="https://www.facebook.com/…/videos/…"
-                      />
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Required — Facebook has no short embed id, so the card cannot play without this.
-                      </p>
-                    </div>
-                  ) : (
-                    <div>
-                      <Label>YouTube Video ID (embed)</Label>
-                      <Input value={iv.youtubeId ?? ''} onChange={(e) => updateInterviewField(idx, 'youtubeId', e.target.value)} className="mt-1" />
-                      <p className="mt-1 text-xs text-muted-foreground">Just the id, not the full URL.</p>
-                    </div>
-                  )}
-                  <div>
-                    <Label>Thumbnail Image URL</Label>
-                    <Input value={iv.thumbnail ?? ''} onChange={(e) => updateInterviewField(idx, 'thumbnail', e.target.value)} className="mt-1" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label>Duration (e.g. 24:15)</Label>
-                      <Input value={iv.duration ?? ''} onChange={(e) => updateInterviewField(idx, 'duration', e.target.value)} className="mt-1" />
-                    </div>
-                    <div>
-                      <Label>Date / Display Label</Label>
-                      <Input value={iv.date ?? ''} onChange={(e) => updateInterviewField(idx, 'date', e.target.value)} className="mt-1" />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label>Excerpt Summary</Label>
-                    <Textarea value={iv.excerpt ?? ''} onChange={(e) => updateInterviewField(idx, 'excerpt', e.target.value)} className="mt-1" rows={2} />
-                  </div>
-                </div>
-              </AdminCard>
-            ))}
-          </div>
+          <InterviewsEditor
+            interviews={interviews}
+            setInterviews={setInterviews}
+            updateInterviewField={updateInterviewField}
+            addInterview={addInterview}
+            removeInterview={removeInterview}
+            resetInterviewsToDefaults={resetInterviewsToDefaults}
+            moveInterview={moveInterview}
+          />
         )}
 
         {/* Tab 6: All Coverage mosaic */}
