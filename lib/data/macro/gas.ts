@@ -3,7 +3,7 @@
 // every poll from the daily reports under public/data/petrobangla/daily.
 //
 // Each year is the MEAN of the daily MMCFD Petrobangla stated, over the days it
-// filed (2020-01-12 to 2026-09-25); `days` is that count and `partial`
+// filed (2020-01-12 to 2026-09-26); `days` is that count and `partial`
 // marks a year the archive does not cover end to end. Years before the archive
 // begins are absent rather than estimated.
 
@@ -27,5 +27,5 @@ export const macroGasData: readonly MacroGasYear[] = [
   { year: '2023', domestic: 2121, lng: 655, days: 362, partial: false },
   { year: '2024', domestic: 1983, lng: 705, days: 354, partial: false },
   { year: '2025', domestic: 1809, lng: 899, days: 360, partial: false },
-  { year: '2026', domestic: 1657, lng: 851, days: 265, partial: true },
+  { year: '2026', domestic: 1657, lng: 852, days: 266, partial: true },
 ] as const;
