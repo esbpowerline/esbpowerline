@@ -68,29 +68,5 @@ export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
     prefix: '',
   });
 
-  // Global energy commodities
-  if (macro?.spotLng) {
-    items.push({
-      id: 'spot-lng',
-      name: 'Spot LNG',
-      value: macro.spotLng,
-      decimals: 2,
-      unit: '/MMBtu',
-      change: null,
-      prefix: '$',
-    });
-  }
-  if (macro?.importCoal) {
-    items.push({
-      id: 'import-coal',
-      name: 'Import Coal',
-      value: macro.importCoal,
-      decimals: 0,
-      unit: '/t',
-      change: null,
-      prefix: '$',
-    });
-  }
-
   return items.length > 0 ? items : null;
 }

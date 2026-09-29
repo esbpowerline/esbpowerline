@@ -61,16 +61,16 @@ describe('BERC electricity tariffs on the commodities strip', () => {
     const octane = items.find((i) => i.id === 'octane-bpc');
     const petrol = items.find((i) => i.id === 'petrol-bpc');
     const cng = items.find((i) => i.id === 'cng-berc');
-    const lng = items.find((i) => i.id === 'spot-lng');
-    const coal = items.find((i) => i.id === 'import-coal');
 
     expect(diesel).toMatchObject({ name: 'Diesel', value: 135, unit: 'Tk/L' });
     expect(kerosene).toMatchObject({ name: 'Kerosene', value: 155, unit: 'Tk/L' });
     expect(octane).toMatchObject({ name: 'Octane', value: 165, unit: 'Tk/L' });
     expect(petrol).toMatchObject({ name: 'Petrol', value: 160, unit: 'Tk/L' });
     expect(cng).toMatchObject({ name: 'CNG', value: 43, unit: 'Tk/m³' });
-    expect(lng).toMatchObject({ name: 'Spot LNG', value: 11.8, unit: '/MMBtu', prefix: '$' });
-    expect(coal).toMatchObject({ name: 'Import Coal', value: 105, unit: '/t', prefix: '$' });
+
+    // Confirms estimated commodities are removed
+    expect(items.find((i) => i.id === 'spot-lng')).toBeUndefined();
+    expect(items.find((i) => i.id === 'import-coal')).toBeUndefined();
 
     // Confirms references and memo strings are stripped
     for (const item of items) {
