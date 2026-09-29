@@ -159,12 +159,6 @@ export function LiveMarketTicker({
           )}
           {item.unit && <span className="ml-0.5 text-neutral-500 dark:text-neutral-400 font-normal">{item.unit}</span>}
         </span>
-        {/* The publishing body, named on the figure itself. */}
-        {item.source && (
-          <span className="font-sans text-[9px] md:text-[9.5px] font-semibold uppercase tracking-wide text-neutral-400 dark:text-neutral-500">
-            {item.source}
-          </span>
-        )}
         {/* No delta badge without a delta. A green 0.0% reads as "unchanged
             today", which is a measurement, not a blank. */}
         {change !== null && (
@@ -212,14 +206,6 @@ export function LiveMarketTicker({
         <span className="md:hidden">COMMODITIES</span>
         <span className="hidden md:inline">{t('ticker.commodities')}</span>
       </span>
-      {asOf ? (
-        <span
-          className="font-mono text-[9px] font-semibold tracking-wide text-muted-foreground/70 whitespace-nowrap select-none"
-          title="Figures from the named day's PGCB / Petrobangla daily reports — updated per ingest, not a live market feed"
-        >
-          {asOf}
-        </span>
-      ) : null}
     </div>
   ) : (
     <div
@@ -232,14 +218,6 @@ export function LiveMarketTicker({
       <span className={cn('font-semibold uppercase tracking-[0.1em]', labelSize)}>
         {t('ticker.commodities')}
       </span>
-      {asOf ? (
-        <span
-          className="font-mono text-[9px] font-semibold tracking-wide text-muted-foreground/70 whitespace-nowrap select-none"
-          title="Figures from the named day's PGCB / Petrobangla daily reports — updated per ingest, not a live market feed"
-        >
-          {asOf}
-        </span>
-      ) : null}
     </div>
   );
 

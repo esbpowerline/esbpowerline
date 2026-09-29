@@ -25,6 +25,8 @@ const ENERGY_TICKER_LABELS_BN: Record<string, string> = {
   'octane-bpc': 'অকটেন',
   'petrol-bpc': 'পেট্রোল',
   'cng-berc': 'সিএনজি',
+  'spot-lng': 'স্পট এলএনজি',
+  'import-coal': 'আমদানি কয়লা',
   'gas-power-berc': 'গ্যাস (বিদ্যুৎ কেন্দ্র)',
   fx: 'ডলার/টাকা',
 };
