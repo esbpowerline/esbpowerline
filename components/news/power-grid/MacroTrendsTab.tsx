@@ -2070,8 +2070,8 @@ export function MacroTrendsTab({
                     <thead>
                       <tr>
                         <th>Year</th>
-                        <th className="text-left">Retail Diesel (Tk/L)</th>
-                        <th className="text-left">Retail Octane (Tk/L)</th>
+                        <th className="text-left">Retail Diesel (Tk/L)</th><th className="text-left">Retail Kerosene (Tk/L)</th>
+                        <th className="text-left">Retail Octane (Tk/L)</th><th className="text-left">Retail Petrol (Tk/L)</th>
                         <th className="text-left">Spot LNG (USD/MMBtu)</th>
                         <th className="text-left">Import Coal (USD/Ton)</th>
                         <th className="text-left">Exchange Rate (BDT/USD)</th>
@@ -2082,8 +2082,8 @@ export function MacroTrendsTab({
                       {localMacroEconomicData.map((d, idx) => (
                         <tr key={idx}>
                           <td className="font-semibold">{d.year}</td>
-                          <td className="text-left tabular-nums">{d.retailDiesel.toFixed(2)} Tk</td>
-                          <td className="text-left tabular-nums">{d.retailOctane.toFixed(2)} Tk</td>
+                          <td className="text-left tabular-nums">{d.retailDiesel.toFixed(2)} Tk</td><td className="text-left tabular-nums">{d.retailKerosene.toFixed(2)} Tk</td>
+                          <td className="text-left tabular-nums">{d.retailOctane.toFixed(2)} Tk</td><td className="text-left tabular-nums">{d.retailPetrol.toFixed(2)} Tk</td>
                           <td className="text-left tabular-nums">${d.spotLng.toFixed(2)}</td>
                           <td className="text-left tabular-nums">${d.importCoal.toFixed(2)}</td>
                           <td className="text-left tabular-nums font-semibold text-primary">{d.exchangeRate.toFixed(2)} Tk</td>

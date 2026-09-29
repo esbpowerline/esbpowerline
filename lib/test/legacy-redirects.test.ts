@@ -50,4 +50,14 @@ describe('legacy redirects', () => {
     expect(find(list, '/:year(\\d{4})/:month(\\d{2})')?.destination).toBe('/articles');
     expect(find(list, '/categories/grid-transmission-2')?.destination).toBe('/categories/grid-transmission');
   });
+
+  it('maps legacy WordPress category slugs and index.php to valid canonical destinations', async () => {
+    const list = await redirects();
+    expect(find(list, '/category/:parent/distribution')?.destination).toBe('/categories/distribution-utilities');
+    expect(find(list, '/category/distribution')?.destination).toBe('/categories/distribution-utilities');
+    expect(find(list, '/category/:parent/policy')?.destination).toBe('/categories/energy-policy-regulators');
+    expect(find(list, '/category/policy')?.destination).toBe('/categories/energy-policy-regulators');
+    expect(find(list, '/category/:parent/renewable-energy')?.destination).toBe('/categories/renewables-nuclear');
+    expect(find(list, '/index.php')?.destination).toBe('/');
+  });
 });

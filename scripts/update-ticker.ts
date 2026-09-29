@@ -28,8 +28,10 @@ async function main() {
       { id: 'hfo-cost', name: 'HFO Gen Cost', value: 18.06, unit: 'Tk/kWh', change: 0.0, prefix: '' },
       { id: 'import-cost', name: 'Import Gen Cost', value: 6.34, unit: 'Tk/kWh', change: 0.0, prefix: '' },
       { id: 'solar-cost', name: 'Solar Gen Cost', value: 15.77, unit: 'Tk/kWh', change: 0.0, prefix: '' },
-      { id: 'diesel-bpc', name: 'Diesel (BPC)', value: 106.75, unit: 'Tk/L', change: 0.0, prefix: '' },
-      { id: 'octane-bpc', name: 'Octane (BPC)', value: 126.00, unit: 'Tk/L', change: 0.0, prefix: '' },
+      { id: 'diesel-bpc', name: 'Diesel (BPC)', value: 135.00, unit: 'Tk/L', change: 0.0, prefix: '' },
+      { id: 'kerosene-bpc', name: 'Kerosene (BPC)', value: 155.00, unit: 'Tk/L', change: 0.0, prefix: '' },
+      { id: 'octane-bpc', name: 'Octane (BPC)', value: 165.00, unit: 'Tk/L', change: 0.0, prefix: '' },
+      { id: 'petrol-bpc', name: 'Petrol (BPC)', value: 160.00, unit: 'Tk/L', change: 0.0, prefix: '' },
       { id: 'gas-prod', name: 'Total Gas Prod', value: 2647.5, unit: 'MMcfd', change: 0.0, prefix: '' },
       { id: 'renewables-cap', name: 'Renewables Cap', value: 1804.8, unit: 'MW', change: 0.0, prefix: '' },
     ];

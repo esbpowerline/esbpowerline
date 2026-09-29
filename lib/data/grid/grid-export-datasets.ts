@@ -455,7 +455,9 @@ const STATIC_DATASETS: Record<string, StaticDataset> = {
       { key: 'spot_lng_usd_mmbtu', header: 'spot_lng_usd_mmbtu' },
       { key: 'import_coal_usd_ton', header: 'import_coal_usd_ton' },
       { key: 'retail_diesel_bdt_l', header: 'retail_diesel_bdt_l' },
+      { key: 'retail_kerosene_bdt_l', header: 'retail_kerosene_bdt_l' },
       { key: 'retail_octane_bdt_l', header: 'retail_octane_bdt_l' },
+      { key: 'retail_petrol_bdt_l', header: 'retail_petrol_bdt_l' },
     ],
     rows: () =>
       macroEconomicData.map((d) => ({
@@ -465,7 +467,9 @@ const STATIC_DATASETS: Record<string, StaticDataset> = {
         spot_lng_usd_mmbtu: num(d.spotLng),
         import_coal_usd_ton: num(d.importCoal),
         retail_diesel_bdt_l: num(d.retailDiesel),
+        retail_kerosene_bdt_l: num(d.retailKerosene),
         retail_octane_bdt_l: num(d.retailOctane),
+        retail_petrol_bdt_l: num(d.retailPetrol),
       })),
   },
   fin_petrobangla: {

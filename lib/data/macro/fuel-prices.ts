@@ -33,7 +33,7 @@ const globalVsDomesticRaw = [
   { year: '2020', globalOil: 41.8, bdDiesel: 65.0, globalCoal: 70.0, bdCoal: 82.0, globalGas: 2.1, bdGas: 9.7, globalSolar: 4.8, bdSolar: 12.0 },
   { year: '2022', globalOil: 99.0, bdDiesel: 80.0, globalCoal: 280.0, bdCoal: 220.0, globalGas: 34.0, bdGas: 11.9, globalSolar: 4.3, bdSolar: 15.0 },
   { year: '2024', globalOil: 82.5, bdDiesel: 106.75, globalCoal: 115.0, bdCoal: 110.0, globalGas: 12.5, bdGas: 14.5, globalSolar: 3.6, bdSolar: 15.77 },
-  { year: '2026', globalOil: 78.0, bdDiesel: 105.50, globalCoal: 105.0, bdCoal: 100.0, globalGas: 11.8, bdGas: 16.8, globalSolar: 3.1, bdSolar: 15.77 },
+  { year: '2026', globalOil: 78.0, bdDiesel: 135.00, globalCoal: 105.0, bdCoal: 100.0, globalGas: 11.8, bdGas: 16.8, globalSolar: 3.1, bdSolar: 15.77 },
 ];
 
 /** Global commodity prices vs Bangladesh domestic retail (BDT-adjusted where noted). */

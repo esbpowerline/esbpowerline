@@ -102,4 +102,11 @@ describe('sitemap', () => {
     expect(urls.filter((u) => u === `${SITE}/authors/esb-news-desk`)).toHaveLength(1);
     expect(urls).toContain(`${SITE}/authors/hamim-rahman`);
   });
+
+  it('lists /grid-explorer/archive and yearly archive hubs', async () => {
+    const urls = (await sitemap()).map((e) => e.url);
+    expect(urls).toContain(`${SITE}/grid-explorer/archive`);
+    expect(urls).toContain(`${SITE}/grid-explorer/archive/2026`);
+    expect(urls).toContain(`${SITE}/grid-explorer/archive/2024`);
+  });
 });

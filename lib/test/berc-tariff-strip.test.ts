@@ -55,4 +55,19 @@ describe('BERC electricity tariffs on the commodities strip', () => {
     }
     expect(tariffs.find((t) => t.id === 'berc-bulk-33kv-breb')?.source).toBe('BERC 2026/01 · from Jun 2026 bill');
   });
+
+  it('carries latest government administered retail fuel and gas prices', async () => {
+    const items = (await getLiveTickerItems()) ?? [];
+    const diesel = items.find((i) => i.id === 'diesel-bpc');
+    const kerosene = items.find((i) => i.id === 'kerosene-bpc');
+    const octane = items.find((i) => i.id === 'octane-bpc');
+    const petrol = items.find((i) => i.id === 'petrol-bpc');
+    const cng = items.find((i) => i.id === 'cng-berc');
+
+    expect(diesel).toMatchObject({ name: 'Diesel', value: 135, unit: 'Tk/L', source: 'BPC · 21 Sep 2026' });
+    expect(kerosene).toMatchObject({ name: 'Kerosene', value: 155, unit: 'Tk/L', source: 'BPC · 21 Sep 2026' });
+    expect(octane).toMatchObject({ name: 'Octane', value: 165, unit: 'Tk/L', source: 'BPC · 21 Sep 2026' });
+    expect(petrol).toMatchObject({ name: 'Petrol', value: 160, unit: 'Tk/L', source: 'BPC · 21 Sep 2026' });
+    expect(cng).toMatchObject({ name: 'CNG', value: 43, unit: 'Tk/m³', source: 'BERC · Gazetted' });
+  });
 });

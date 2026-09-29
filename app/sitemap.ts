@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { POLICIES } from '@/lib/data/policy/policies';
 import { EVENT_STUDIES } from '@/lib/data/analysis/event-registry';
 import { IS_DEMO } from '@/lib/magazine-demo-issue';
-import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
+import { getLatestAvailableDate, availableDates } from '@/lib/data/grid/available-dates';
 import { slugify } from '@/lib/utils';
 import { latestContentChange } from '@/lib/category-content';
 
@@ -162,6 +162,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // /grid-explorer changes when a new report day lands, not when the sitemap is
   // built. The catalogue's newest day is the honest answer.
   const latestGridDate = getLatestAvailableDate();
+  const gridArchiveYears = [...new Set(availableDates.map((d) => d.slice(0, 4)))];
+
+  const gridArchiveUrls: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/grid-explorer/archive`,
+      ...(latestGridDate ? { lastModified: new Date(`${latestGridDate}T00:00:00Z`) } : {}),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    ...gridArchiveYears.map((year) => ({
+      url: `${baseUrl}/grid-explorer/archive/${year}`,
+      changeFrequency: 'monthly' as const,
+      priority: 0.5,
+    })),
+  ];
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}`, changeFrequency: 'daily', priority: 1.0 },
@@ -182,6 +197,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...gridArchiveUrls,
     ...articleUrls,
     ...categoryUrls,
     ...authorUrls,

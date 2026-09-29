@@ -71,9 +71,8 @@ export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
     });
   }
 
-  // BPC's administered retail prices. The dataset holds one row per year, so
-  // the year is the only effective date that can honestly be stated for them —
-  // a fuel price set by notification in March should not be dated "today".
+  // BPC's administered retail prices.
+  // Set by Energy and Mineral Resources Division gazette notification (effective 21 September 2026).
   const macro = macroEconomicData[macroEconomicData.length - 1];
   if (macro?.retailDiesel) {
     items.push({
@@ -83,7 +82,18 @@ export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
       unit: 'Tk/L',
       change: null,
       prefix: '',
-      source: `BPC · ${macro.year}`,
+      source: 'BPC · 21 Sep 2026',
+    });
+  }
+  if (macro?.retailKerosene) {
+    items.push({
+      id: 'kerosene-bpc',
+      name: 'Kerosene',
+      value: round(macro.retailKerosene),
+      unit: 'Tk/L',
+      change: null,
+      prefix: '',
+      source: 'BPC · 21 Sep 2026',
     });
   }
   if (macro?.retailOctane) {
@@ -94,9 +104,40 @@ export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
       unit: 'Tk/L',
       change: null,
       prefix: '',
-      source: `BPC · ${macro.year}`,
+      source: 'BPC · 21 Sep 2026',
     });
   }
+  if (macro?.retailPetrol) {
+    items.push({
+      id: 'petrol-bpc',
+      name: 'Petrol',
+      value: round(macro.retailPetrol),
+      unit: 'Tk/L',
+      change: null,
+      prefix: '',
+      source: 'BPC · 21 Sep 2026',
+    });
+  }
+
+  // BERC administered natural gas / CNG tariffs
+  items.push({
+    id: 'cng-berc',
+    name: 'CNG',
+    value: 43.00,
+    unit: 'Tk/m³',
+    change: null,
+    prefix: '',
+    source: 'BERC · Gazetted',
+  });
+  items.push({
+    id: 'gas-power-berc',
+    name: 'Gas (Power)',
+    value: 14.00,
+    unit: 'Tk/m³',
+    change: null,
+    prefix: '',
+    source: 'BERC · Gazetted',
+  });
 
   // An empty strip is the correct output when nothing is quotable: the ticker
   // renders no bar at all rather than a COMMODITIES heading over an empty

@@ -115,6 +115,7 @@ export default async function PowerGridExplorerPage() {
       : getLatestAvailableDate();
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
+  const recentDates = availableDates.slice(-7).reverse();
   // Filled from the catalogue rather than hardcoded, so the coverage a crawler
   // is told about is the coverage that actually shipped.
   const earliest = availableDates[0];
@@ -284,6 +285,19 @@ export default async function PowerGridExplorerPage() {
             <li>
               <Link prefetch={false} href={`/grid-explorer/${latestDate}`}>Latest day ({latestDate})</Link>
               <span> — the headline figures for the newest report.</span>
+            </li>
+          )}
+          {recentDates.length > 0 && (
+            <li>
+              <span>Recent daily reports: </span>
+              {recentDates.map((date, idx) => (
+                <span key={date}>
+                  {idx > 0 && ' · '}
+                  <Link prefetch={false} href={`/grid-explorer/${date}`} className="font-mono text-xs underline hover:text-foreground">
+                    {date}
+                  </Link>
+                </span>
+              ))}
             </li>
           )}
         </ul>

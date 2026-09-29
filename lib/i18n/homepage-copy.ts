@@ -21,7 +21,11 @@ const ENERGY_TICKER_LABELS_BN: Record<string, string> = {
   // Bengali names stay beside the figures they describe.
   ...Object.fromEntries([...RESIDENTIAL_RATES, ...BULK_RATES].map((r) => [r.id, r.labelBn])),
   'diesel-bpc': 'ডিজেল',
+  'kerosene-bpc': 'কেরোসিন',
   'octane-bpc': 'অকটেন',
+  'petrol-bpc': 'পেট্রোল',
+  'cng-berc': 'সিএনজি',
+  'gas-power-berc': 'গ্যাস (বিদ্যুৎ কেন্দ্র)',
   fx: 'ডলার/টাকা',
 };
 
