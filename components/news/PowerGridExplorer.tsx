@@ -10,6 +10,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
+import { formatPeakFlowTotal } from '@/lib/data/grid/border-imports';
 import { EventStudyDateLink } from '@/components/news/power-grid/EventStudyDateLink';
 import { useChartTheme, type ChartTheme } from '@/hooks/useChartTheme';
 import {
@@ -2620,8 +2621,8 @@ export function PowerGridExplorer({
                         <GridProvenanceTag kind={derivedRow ? 'D' : 'P'} className="ml-1" />
                       </td>
                       <td className="text-left tabular-nums">
-                        {formatNumber(Math.round(bi.peakFlow))}
-                        <GridProvenanceTag kind={derivedRow ? 'D' : 'P'} className="ml-1" />
+                        {bi.peakFlow == null ? '—' : formatNumber(Math.round(bi.peakFlow))}
+                        {bi.peakFlow != null && <GridProvenanceTag kind={derivedRow ? 'D' : 'P'} className="ml-1" />}
                       </td>
                       <td className="text-left tabular-nums text-muted-foreground" title="PGCB publishes one import cost covering all interconnectors, not a figure per line">—</td>
                     </tr>
@@ -2631,7 +2632,7 @@ export function PowerGridExplorer({
                     <td>Total Grid Imports</td>
                     <td className="text-muted-foreground">National aggregate</td>
                     <td className="text-left tabular-nums text-primary">{borderImportsData.reduce((sum, i) => sum + i.energy, 0).toFixed(2)}</td>
-                    <td className="text-left tabular-nums">{formatNumber(Math.round(borderImportsData.reduce((sum, i) => sum + i.peakFlow, 0)))}</td>
+                    <td className="text-left tabular-nums">{formatPeakFlowTotal(borderImportsData)}</td>
                     {/* The published import cost itself, not the line sum times
                         the blended rate. Those two disagree, because P1's fuel
                         table and the interconnector block state slightly

@@ -172,7 +172,12 @@ function sumImportPeakMw(data: GridDailyData): Figure {
   // No cross-border table is a report that did not publish one, not a day on
   // which Bheramara, Godda and Tripura all delivered nothing.
   if (!rows?.length) return awaiting('PGCB');
-  return mapFigure(total(rows.map((row) => known(row.peakFlow ?? 0)), 'PGCB'), Math.round);
+  // One line with no stated peak makes the whole sum absent. Adding up the
+  // lines that have one would print a smaller figure under the same label —
+  // a partial total posing as the national one.
+  const peaks = rows.map((row) => row.peakFlow);
+  if (peaks.some((p) => p == null)) return awaiting('PGCB');
+  return mapFigure(total((peaks as number[]).map(known), 'PGCB'), Math.round);
 }
 
 /**

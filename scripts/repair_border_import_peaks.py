@@ -13,9 +13,15 @@ document: the three figures `backfill_daily_extremes.matches_archive` trusts
 must agree, and so must every interconnector's energy, which the defect never
 touched. Only a peak the archive holds as 0 is replaced, only by a figure the
 workbook states, and only `borderImportsData` changes — every other section is
-compared before and after. A day with no workbook, or one that fails either
-check, is listed and left alone: its 0 is wrong, but a number from anywhere
-else would be a guess, and `peakFlow` cannot yet be null.
+compared before and after.
+
+A pre-2025 day that cannot be restored — no workbook, a workbook that fails
+either check, or one that states no peak in either column — gets `null` for
+the zero rows. Its 0 is known to be the defect's output rather than a reading
+(of the 1,209 whose workbook reproduces the day, 1,200 state a real peak), and
+a number from anywhere else would be a guess; `null` prints as a dash. The
+2025+ layout reads a different sheet, so a zero there did not come through this
+defect: it is listed and left exactly as it is.
 
 Not `backfill_border_imports.py`, which takes the day's maximum off the
 half-hourly curve. That is a different quantity from the evening-peak figure
@@ -53,6 +59,9 @@ def zero_peak_rows(doc: dict) -> list[dict]:
     ]
 
 
+NULLABLE_BEFORE = "2025-01-01"
+
+
 def others(doc: dict) -> str:
     return json.dumps({k: v for k, v in doc.items() if k != "borderImportsData"}, sort_keys=True)
 
@@ -86,12 +95,28 @@ def main() -> None:
     left: list[str] = []
     samples: list[str] = []
 
+    def clear(fp: Path, doc: dict) -> None:
+        """The zero rows become null — pre-2025 only; see the module docstring."""
+        if fp.stem >= NULLABLE_BEFORE:
+            stats["left as published (2025+ layout)"] += 1
+            return
+        before = others(doc)
+        for row in zero_peak_rows(doc):
+            row["peakFlow"] = None
+        if others(doc) != before:
+            stats["ABORTED - another section moved"] += 1
+            return
+        stats["zero -> null (no source figure)"] += 1
+        if args.apply:
+            fp.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+
     for fp, doc in targets:
         day = fp.stem
         src = sources.get(day) or by_name.get(((doc.get("sourceFiles") or {}).get("pgcb")) or "")
         if src is None:
             stats["no source workbook"] += 1
             left.append(f"{day}: no source workbook held")
+            clear(fp, doc)
             continue
         try:
             tmp.write_text(read_source(src), encoding="utf-8")
@@ -99,10 +124,12 @@ def main() -> None:
         except Exception as exc:  # noqa: BLE001
             stats["re-parse failed"] += 1
             left.append(f"{day}: re-parse failed ({exc})")
+            clear(fp, doc)
             continue
         if not parsed or not matches_archive(parsed, doc):
             stats["source does not reproduce the day"] += 1
             left.append(f"{day}: {src.name} does not reproduce the archived day")
+            clear(fp, doc)
             continue
 
         fresh = {r["source"]: r for r in parsed.get("borderImportsData") or []}
@@ -118,10 +145,12 @@ def main() -> None:
         if mismatch:
             stats["interconnector energy disagrees"] += 1
             left.append(f"{day}: {src.name} states different import energy")
+            clear(fp, doc)
             continue
         if not changed:
             stats["workbook states no peak either"] += 1
             left.append(f"{day}: {src.name} states no peak for the zero row(s)")
+            clear(fp, doc)
             continue
 
         for row, peak in changed:
@@ -144,7 +173,7 @@ def main() -> None:
     for s in samples:
         print("   ", s)
     if left:
-        print(f"\n{len(left)} day(s) left at zero:")
+        print(f"\n{len(left)} day(s) not restored from a workbook:")
         for line in left:
             print("   ", line)
     print("\nDRY RUN - nothing written. Re-run with --apply." if not args.apply else "\nWritten.")

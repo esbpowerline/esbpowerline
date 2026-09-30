@@ -266,7 +266,7 @@ const DAILY_DATASETS: Record<string, DailyDataset> = {
         date,
         source: b.source,
         energy_mkwh: num(b.energy),
-        peak_flow_mw: num(b.peakFlow),
+        peak_flow_mw: numOrBlank(b.peakFlow),
         interconnector_type: b.type ?? '',
       })),
   },

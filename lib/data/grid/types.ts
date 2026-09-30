@@ -112,7 +112,11 @@ export interface GasDistributionItem {
 export interface BorderImportItem {
   source: string;
   energy: number;
-  peakFlow: number;
+  /** MW at PGCB's stated peak. `null` where no column of the report states
+   *  one — never 0, which asserts the line carried nothing at that instant.
+   *  1,261 days from 2018 to 2024 printed 0 here beside gigawatt-hours of
+   *  energy because a blank cell was read as zero (2026-09-30). */
+  peakFlow: number | null;
   type: string;
 }
 

@@ -61,7 +61,7 @@ export const dailyReportSchema = z.object({
   borderImportsData: z.array(z.object({
     source: z.string(),
     energy: z.number(),
-    peakFlow: z.number(),
+    peakFlow: z.number().nullable(),
     type: z.string(),
   })).optional(),
   regionalDemandData: z.array(z.object({

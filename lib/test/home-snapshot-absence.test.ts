@@ -122,6 +122,21 @@ describe('absent is absent — cross-border imports', () => {
   it('sums the stated peak flows', () => {
     expect(tile(SAMPLE_DAILY_REPORT, SAMPLE_SREDA, 'Grid Import')?.value).toBe(2570);
   });
+
+  it('is null, not a smaller sum, when one line states no peak', () => {
+    // 2018-01-21 published "Grid Import: 0 MW" beside 11.99 GWh of imports —
+    // a blank peak cell read as zero. A line with no stated peak leaves the
+    // national figure unknown; summing the others would understate it.
+    const report = {
+      ...SAMPLE_DAILY_REPORT,
+      borderImportsData: SAMPLE_DAILY_REPORT.borderImportsData.map((row, i) =>
+        i === 0 ? { ...row, peakFlow: null } : row,
+      ),
+    };
+    const t = tile(report, SAMPLE_SREDA, 'Grid Import');
+    expect(t?.value).toBeNull();
+    expect(t?.awaiting).toBe('PGCB');
+  });
 });
 
 describe('SREDA register — off the snapshot, still reported', () => {

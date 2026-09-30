@@ -294,10 +294,13 @@ export function ImportsKpiStrip({
 
   const links = (borderImportsData ?? []).filter((l) => typeof l.energy === 'number');
   const linkSum = links.reduce((s, l) => s + (l.energy || 0), 0);
-  const biggest = links.reduce<(typeof links)[number] | null>(
-    (best, l) => (best == null || (l.peakFlow || 0) > (best.peakFlow || 0) ? l : best),
-    null,
-  );
+  // Unknown when any line's peak is: the unstated one may be the largest.
+  const biggest = links.some((l) => l.peakFlow == null)
+    ? null
+    : links.reduce<(typeof links)[number] | null>(
+        (best, l) => (best == null || (l.peakFlow ?? 0) > (best.peakFlow ?? 0) ? l : best),
+        null,
+      );
   const sharePct =
     importedMkwh != null && systemStats.totalEnergyGen
       ? (importedMkwh / systemStats.totalEnergyGen) * 100
@@ -337,7 +340,7 @@ export function ImportsKpiStrip({
         icon={Plug}
         iconClassName="text-amber-500"
         label={<>Largest Link<DailyBadge /></>}
-        value={biggest == null ? '—' : `${formatNumber(Math.round(biggest.peakFlow || 0))} MW`}
+        value={biggest?.peakFlow == null ? '—' : `${formatNumber(Math.round(biggest.peakFlow))} MW`}
         hint={biggest == null ? null : <span className="text-muted-foreground">{biggest.source}</span>}
         provenance="P"
         active={open === 'link'}
@@ -353,7 +356,7 @@ export function ImportsKpiStrip({
               key={l.source}
               provenance="P"
               label={`${l.source}:`}
-              value={`${formatNumber(Math.round(l.peakFlow || 0))} MW peak · ${(l.energy || 0).toFixed(2)} MKWh`}
+              value={`${l.peakFlow == null ? 'peak not stated' : `${formatNumber(Math.round(l.peakFlow))} MW peak`} · ${(l.energy || 0).toFixed(2)} MKWh`}
             />
           ))}
           <GridKpiTooltipAudit>

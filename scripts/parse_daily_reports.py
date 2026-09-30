@@ -2375,27 +2375,25 @@ def parse_pgcb_file(filepath, op_date):
                     if slot['peak'] is None and p is not None:
                         slot['peak'] = p
 
-                # The row shape still needs a number, so an interconnector with
-                # no stated peak in either column keeps 0.0 as before. When this
-                # was fixed, 9 of the 1,261 affected days' workbooks stated no
-                # peak in either column (repair_border_import_peaks.py lists
-                # them); `peakFlow` becoming nullable is what would let those
-                # print a dash instead.
+                # An interconnector with no stated peak in either column gets
+                # None, which the site prints as a dash. When this was fixed, 9
+                # of the 1,261 affected days' workbooks stated none
+                # (repair_border_import_peaks.py lists them).
                 if 'hvdc' in found:
                     hvdc_gen = found['hvdc']['kwh'] / 1000000.0
-                    hvdc_peak = found['hvdc']['peak'] or 0.0
+                    hvdc_peak = found['hvdc']['peak']
                 if 'tripura' in found:
                     tripura_gen = found['tripura']['kwh'] / 1000000.0
-                    tripura_peak = found['tripura']['peak'] or 0.0
+                    tripura_peak = found['tripura']['peak']
                 if 'adani' in found:
                     adani_gen = found['adani']['kwh'] / 1000000.0
-                    adani_peak = found['adani']['peak'] or 0.0
+                    adani_peak = found['adani']['peak']
 
-    if hvdc_gen > 0.0 or hvdc_peak > 0.0:
+    if hvdc_gen > 0.0 or (hvdc_peak or 0.0) > 0.0:
         border_imports_data.append({'source': 'HVDC Bheramara (India)', 'energy': round(hvdc_gen, 2), 'peakFlow': hvdc_peak, 'type': 'C/B Interconnector (West)'})
-    if adani_gen > 0.0 or adani_peak > 0.0:
+    if adani_gen > 0.0 or (adani_peak or 0.0) > 0.0:
         border_imports_data.append({'source': 'Adani Godda (India)', 'energy': round(adani_gen, 2), 'peakFlow': adani_peak, 'type': 'C/B Interconnector (North)'})
-    if tripura_gen > 0.0 or tripura_peak > 0.0:
+    if tripura_gen > 0.0 or (tripura_peak or 0.0) > 0.0:
         border_imports_data.append({'source': 'Tripura Cumilla (India)', 'energy': round(tripura_gen, 2), 'peakFlow': tripura_peak, 'type': 'C/B Interconnector (East)'})
 
     if total_imports == 0.0:
