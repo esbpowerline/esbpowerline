@@ -1,16 +1,25 @@
-/** Macroeconomic indicators affecting power sector costs. */
+/**
+ * Macroeconomic indicators affecting power sector costs.
+ *
+ * HAND-TYPED AND UNCITED, except the 2026 Diesel and Octane figures, which
+ * match EMRD's gazette of 20 Sep 2026 (see `lib/data/tariff/administered-prices.ts`,
+ * which is what the commodities strip reads). Kerosene and Petrol columns were
+ * removed 2026-09-30: every Kerosene figure equalled that year's Diesel and every
+ * Petrol was Octane minus 3–5, the signature of a column filled in rather than
+ * read. Rebuild any column here from EMRD/BPC notifications before trusting it.
+ */
 export const macroEconomicData = [
-  { year: '2010', exchangeRate: 69.50, inflation: 8.13, spotLng: 0.0, importCoal: 0.0, retailDiesel: 44.0, retailKerosene: 44.0, retailOctane: 77.0, retailPetrol: 74.0 },
-  { year: '2012', exchangeRate: 81.80, inflation: 8.69, spotLng: 0.0, importCoal: 0.0, retailDiesel: 61.0, retailKerosene: 61.0, retailOctane: 94.0, retailPetrol: 91.0 },
-  { year: '2014', exchangeRate: 77.60, inflation: 7.35, spotLng: 0.0, importCoal: 0.0, retailDiesel: 68.0, retailKerosene: 68.0, retailOctane: 99.0, retailPetrol: 96.0 },
-  { year: '2016', exchangeRate: 78.40, inflation: 5.92, spotLng: 0.0, importCoal: 0.0, retailDiesel: 65.0, retailKerosene: 65.0, retailOctane: 89.0, retailPetrol: 86.0 },
-  { year: '2018', exchangeRate: 83.90, inflation: 5.78, spotLng: 8.2, importCoal: 85.0, retailDiesel: 65.0, retailKerosene: 65.0, retailOctane: 89.0, retailPetrol: 86.0 },
-  { year: '2020', exchangeRate: 84.90, inflation: 5.65, spotLng: 6.4, importCoal: 70.0, retailDiesel: 65.0, retailKerosene: 65.0, retailOctane: 89.0, retailPetrol: 86.0 },
-  { year: '2021', exchangeRate: 84.80, inflation: 5.56, spotLng: 10.2, importCoal: 90.0, retailDiesel: 65.0, retailKerosene: 65.0, retailOctane: 89.0, retailPetrol: 86.0 },
-  { year: '2022', exchangeRate: 93.50, inflation: 6.15, spotLng: 35.4, importCoal: 280.0, retailDiesel: 80.0, retailKerosene: 80.0, retailOctane: 130.0, retailPetrol: 125.0 },
-  { year: '2023', exchangeRate: 109.20, inflation: 9.02, spotLng: 14.5, importCoal: 140.0, retailDiesel: 109.0, retailKerosene: 109.0, retailOctane: 130.0, retailPetrol: 125.0 },
-  { year: '2024', exchangeRate: 117.50, inflation: 9.73, spotLng: 12.5, importCoal: 115.0, retailDiesel: 106.75, retailKerosene: 106.75, retailOctane: 131.0, retailPetrol: 127.0 },
-  { year: '2026', exchangeRate: 122.00, inflation: 10.45, spotLng: 11.8, importCoal: 105.0, retailDiesel: 135.00, retailKerosene: 155.00, retailOctane: 165.00, retailPetrol: 160.00 },
+  { year: '2010', exchangeRate: 69.50, inflation: 8.13, spotLng: 0.0, importCoal: 0.0, retailDiesel: 44.0, retailOctane: 77.0 },
+  { year: '2012', exchangeRate: 81.80, inflation: 8.69, spotLng: 0.0, importCoal: 0.0, retailDiesel: 61.0, retailOctane: 94.0 },
+  { year: '2014', exchangeRate: 77.60, inflation: 7.35, spotLng: 0.0, importCoal: 0.0, retailDiesel: 68.0, retailOctane: 99.0 },
+  { year: '2016', exchangeRate: 78.40, inflation: 5.92, spotLng: 0.0, importCoal: 0.0, retailDiesel: 65.0, retailOctane: 89.0 },
+  { year: '2018', exchangeRate: 83.90, inflation: 5.78, spotLng: 8.2, importCoal: 85.0, retailDiesel: 65.0, retailOctane: 89.0 },
+  { year: '2020', exchangeRate: 84.90, inflation: 5.65, spotLng: 6.4, importCoal: 70.0, retailDiesel: 65.0, retailOctane: 89.0 },
+  { year: '2021', exchangeRate: 84.80, inflation: 5.56, spotLng: 10.2, importCoal: 90.0, retailDiesel: 65.0, retailOctane: 89.0 },
+  { year: '2022', exchangeRate: 93.50, inflation: 6.15, spotLng: 35.4, importCoal: 280.0, retailDiesel: 80.0, retailOctane: 130.0 },
+  { year: '2023', exchangeRate: 109.20, inflation: 9.02, spotLng: 14.5, importCoal: 140.0, retailDiesel: 109.0, retailOctane: 130.0 },
+  { year: '2024', exchangeRate: 117.50, inflation: 9.73, spotLng: 12.5, importCoal: 115.0, retailDiesel: 106.75, retailOctane: 131.0 },
+  { year: '2026', exchangeRate: 122.00, inflation: 10.45, spotLng: 11.8, importCoal: 105.0, retailDiesel: 135.00, retailOctane: 165.00 },
 ] as const;
 
 export const petrobanglaAuditedFinancials = [

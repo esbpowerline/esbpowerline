@@ -30,7 +30,7 @@ import {
 } from '@/lib/data/companies/usePgcbMonthly';
 import { PgcbMonthlyDetail } from '@/components/news/power-grid/PgcbMonthlyDetail';
 import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
-import { macroTariffData } from '@/lib/data/macro/tariff';
+import { macroTariffData, LATEST_BPDB_AUDIT, BERC_BULK_RANGE } from '@/lib/data/macro/tariff';
 import { macroGasData } from '@/lib/data/macro/gas';
 import { macroEconomicData, petrobanglaAuditedFinancials } from '@/lib/data/macro/economics';
 import { globalVsDomesticData, historicalExchangeRates } from '@/lib/data/macro/fuel-prices';
@@ -668,7 +668,7 @@ export function MacroTrendsTab({
                   <BarChart3 className="h-5 w-5 text-primary shrink-0" />
                   <div>
                     <h3 className="grid-explorer-chart-card__title">Historical Pricing &amp; Tariff Comparison</h3>
-                    <p className="grid-explorer-chart-card__sub">Analyze the exact BPDB weighted average bulk tariff vs average generation &amp; procurement cost — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                    <p className="grid-explorer-chart-card__sub">BPDB&apos;s audited cost of supply per unit against its average bulk tariff — <span className="text-primary font-semibold text-xs">BPDB annual reports</span></p>
                   </div>
                 </div>
 
@@ -677,39 +677,39 @@ export function MacroTrendsTab({
                     {
                       Icon: Zap,
                       iconColor: "text-primary",
-                      label: "Current Bulk:",
-                      value: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/kWh`,
+                      label: "Bulk since 4 Jun 2026:",
+                      value: `${BERC_BULK_RANGE} Tk/kWh`,
                       valueColor: "text-primary",
-                      tooltipTitle: "BERC Approved",
-                      tooltipDesc: "The latest official wholesale bulk tariff set by the Bangladesh Energy Regulatory Commission (BERC) for utility distribution.",
-                      highlightLabel: "Official Rate",
-                      highlightValue: `${localMacroTariffData[localMacroTariffData.length - 1].tariff.toFixed(2)} Tk/kWh`,
+                      tooltipTitle: "BERC Order 2026/01",
+                      tooltipDesc: "Since 4 June 2026 BERC fixes the bulk rate per distributor and per voltage (Reconsideration Order 2026/01, Appendix-ka), so there is no single national figure. Shown: the lowest to the highest rate in the order.",
+                      highlightLabel: "Per utility & voltage",
+                      highlightValue: `${BERC_BULK_RANGE} Tk/kWh`,
                       highlightStyles: "bg-primary/10 text-primary border-primary/20",
                       roundedClasses: "rounded-t-xl sm:rounded-l-xl sm:rounded-tr-none"
                     },
                     {
                       Icon: History,
                       iconColor: "text-orange-500",
-                      label: "2010 Baseline:",
-                      value: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/kWh`,
+                      label: `Audited, FY ${LATEST_BPDB_AUDIT.fy}:`,
+                      value: `${LATEST_BPDB_AUDIT.cost?.toFixed(2) ?? '—'} Tk/kWh`,
                       valueColor: "text-orange-600 dark:text-orange-400",
-                      tooltipTitle: "Historical Anchor",
-                      tooltipDesc: "The earliest recorded BERC bulk tariff in our dataset, establishing the historical cost baseline from March 2010.",
-                      highlightLabel: "Initial Rate",
-                      highlightValue: `${localMacroTariffData[0].tariff.toFixed(2)} Tk/kWh`,
+                      tooltipTitle: "BPDB Annual Report",
+                      tooltipDesc: `BPDB's printed bulk supply cost per unit — generation plus power bought, per unit sold in bulk — for FY ${LATEST_BPDB_AUDIT.fy}, the latest year it has published. Beside it, the average bulk tariff BPDB printed for the same year.`,
+                      highlightLabel: "Average bulk tariff",
+                      highlightValue: `${LATEST_BPDB_AUDIT.tariff?.toFixed(2) ?? '—'} Tk/kWh`,
                       highlightStyles: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
                       roundedClasses: ""
                     },
                     {
                       Icon: TrendingUp,
                       iconColor: "text-destructive",
-                      label: "True Gen Cost:",
+                      label: "Daily Fuel Cost:",
                       value: `${formatUnitRate(systemStats?.avgProductionCost ?? 0)} Tk/kWh`,
                       valueColor: "text-foreground",
-                      tooltipTitle: "Real Production Cost",
-                      tooltipDesc: "BPDB's current blended per-unit generation and procurement cost, factoring in fuel prices and IPP capacity payments.",
-                      highlightLabel: "Tariff Deficit",
-                      highlightValue: `${((systemStats?.avgProductionCost ?? 0) - localMacroTariffData[localMacroTariffData.length - 1].tariff).toFixed(2)} Tk Gap`,
+                      tooltipTitle: "PGCB, latest day",
+                      tooltipDesc: "PGCB's fuel cost per unit for the day shown — fuel only, with no capacity payments or purchased power, so it is not comparable with the audited cost or with a bulk tariff.",
+                      highlightLabel: "Measure",
+                      highlightValue: "Fuel only, daily",
                       highlightStyles: "bg-destructive/10 text-destructive border-destructive/20",
                       roundedClasses: "rounded-b-xl sm:rounded-r-xl sm:rounded-bl-none"
                     }
@@ -719,7 +719,7 @@ export function MacroTrendsTab({
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors duration-200 leading-none mt-0.5">
                         {stat.label}
                       </span>
-                      <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2010</div>
+                      <div className="text-primary font-semibold text-xs mt-0.5 select-none">As published</div>
                       <span className={`font-bold leading-none mt-0.5 ${stat.valueColor}`}>
                         {stat.value}
                       </span>
@@ -748,8 +748,8 @@ export function MacroTrendsTab({
                 <GridChartFrame
                   className="mt-4"
                   legend={[
-                    { id: 'tariff', label: 'Bulk Tariff (Tk/kWh)', color: chartTheme.primary, variant: 'bar' },
-                    { id: 'cost', label: 'BPDB Gen. Cost (Tk/kWh)', color: chartTheme.destructive, variant: 'line' },
+                    { id: 'tariff', label: 'Avg Bulk Tariff (Tk/kWh)', color: chartTheme.primary, variant: 'bar' },
+                    { id: 'cost', label: 'BPDB Supply Cost (Tk/kWh)', color: chartTheme.destructive, variant: 'line' },
                   ]}
                 >
                   <ComposedChart role="img" aria-label="Historical Pricing and Tariff Comparison, chart" accessibilityLayer={false} data={localMacroTariffData} margin={GRID_CHART_MARGIN.legend} barCategoryGap="20%">
@@ -775,7 +775,7 @@ export function MacroTrendsTab({
                           content={({ active, payload }) => {
                             if (!active || !payload?.length) return null;
                             const d = payload[0].payload;
-                            const deficit = (d.cost - d.tariff).toFixed(2);
+                            const deficit = d.cost == null || d.tariff == null ? null : (d.cost - d.tariff).toFixed(2);
                             return (
                               <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-80 select-none bg-card">
                                 <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
@@ -784,34 +784,34 @@ export function MacroTrendsTab({
                                 </div>
                                 <div className="space-y-2 text-xs">
                                   <div className="flex justify-between flex-col mb-2">
-                                    <span className="text-muted-foreground font-semibold">Approved Bulk Tariff (BPDB to Utilities):</span>
-                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.tariff.toFixed(2)} Tk/kWh</span>
+                                    <span className="text-muted-foreground font-semibold">Average Bulk Tariff (BPDB audit):</span>
+                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.tariff == null ? 'not printed' : `${d.tariff.toFixed(2)} Tk/kWh`}</span>
                                   </div>
                                   <div className="flex justify-between flex-col mb-2">
-                                    <span className="text-muted-foreground font-semibold">Total Generation &amp; Procurement Cost:</span>
-                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.cost.toFixed(2)} Tk/kWh</span>
+                                    <span className="text-muted-foreground font-semibold">Bulk Supply Cost (BPDB audit):</span>
+                                    <span className="font-bold text-foreground mt-0.5 tabular-nums">{d.cost == null ? '—' : `${d.cost.toFixed(2)} Tk/kWh`}</span>
                                   </div>
                                   <div className="flex justify-between border-t border-border/30 pt-2 mt-2">
                                     <span className="text-destructive font-semibold">BPDB Unit Deficit / Subsidy Reqd:</span>
-                                    <span className="font-bold text-destructive tabular-nums">{deficit} Tk/kWh</span>
+                                    <span className="font-bold text-destructive tabular-nums">{deficit == null ? '—' : `${deficit} Tk/kWh`}</span>
                                   </div>
                                 </div>
                               </div>
                             );
                           }}
                         />
-                        <Bar dataKey="tariff" name="Bulk Tariff (Tk/kWh)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={32} />
-                        <Line type="monotone" dataKey="cost" name="BPDB Gen. Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Bar dataKey="tariff" name="Avg Bulk Tariff (Tk/kWh)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={32} />
+                        <Line type="monotone" dataKey="cost" name="BPDB Supply Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
                 <div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
                   <p><strong>What is being shown?</strong></p>
                   <ul className="list-disc pl-4 space-y-1">
-                    <li><strong className="text-destructive">BPDB Generation &amp; Procurement Cost:</strong> The actual per-unit (kWh) cost incurred by BPDB. This includes the cost of fuel (gas, coal, HFO, LNG), cross-border electricity imports, operational/maintenance costs, and <strong>capacity charges</strong> paid to Independent Power Producers (IPPs) and Rental plants.</li>
-                    <li><strong className="text-primary">Weighted Avg Bulk Tariff:</strong> The BERC-approved wholesale rate at which BPDB sells this electricity to distribution companies like DPDC, DESCO, REB, NESCO, and WZPDCL.</li>
+                    <li><strong className="text-destructive">BPDB Supply Cost:</strong> BPDB&apos;s printed cost per unit sold in bulk — its own generation plus power bought from IPPs, rentals and imports, including <strong>capacity charges</strong> — from each year&apos;s annual report.</li>
+                    <li><strong className="text-primary">Average Bulk Tariff:</strong> what BPDB earned per unit sold to the distributors. BPDB prints it for FY 2022-23 only; other years are left blank rather than derived.</li>
                   </ul>
                   <p className="mt-2 pt-2 border-t border-border/30 font-medium">
-                    <strong>Analytical Insight:</strong> The gap between the average generation cost and the bulk wholesale tariff represents a structural deficit. Because BPDB sells power at a wholesale loss, this per-unit deficit must be directly subsidized by the Ministry of Finance to keep retail consumer prices lower. This widening deficit is unsustainable, placing a massive subsidy burden (estimated at 35k-40k Crore BDT annually) on the national treasury, highlighting that wholesale tariffs must either rise or the grid must phase out expensive IPP capacity charges to regain financial viability.
+                    <strong>Analytical Insight:</strong> In FY {LATEST_BPDB_AUDIT.fy} BPDB&apos;s supply cost was {LATEST_BPDB_AUDIT.cost?.toFixed(2) ?? '—'} Tk/kWh against an average bulk tariff of {LATEST_BPDB_AUDIT.tariff?.toFixed(2) ?? '—'}, and its accounts record a government subsidy of Tk {LATEST_BPDB_AUDIT.subsidyCrore == null ? '—' : formatNumber(LATEST_BPDB_AUDIT.subsidyCrore, 2)} crore for that year. Later years are not yet published by BPDB.
                   </p>
                 </div>
 
@@ -819,7 +819,7 @@ export function MacroTrendsTab({
                 <GridCardFooter>
                   <span>Source: <a href="https://www.berc.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BERC Tariff Orders</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Reports</a></span>
                   <span>As published. Not independently audited.</span>
-                  <span className="font-medium">Reporting Period: FY 2010 - FY 2024</span>
+                  <span className="font-medium">Reporting Period: FY 2016-17 – FY 2022-23 (BPDB annual reports)</span>
                 </GridCardFooter>
               </div>
               <ChartDataTable
@@ -827,8 +827,8 @@ export function MacroTrendsTab({
                 categoryHeader="Year"
                 categories={(localMacroTariffData).map((d) => String(d.year))}
                 series={[
-                  { label: "Bulk Tariff (Tk/kWh)", values: columnOf(localMacroTariffData, 'tariff') },
-                  { label: "BPDB Gen. Cost (Tk/kWh)", values: columnOf(localMacroTariffData, 'cost') },
+                  { label: "Avg Bulk Tariff (Tk/kWh)", values: columnOf(localMacroTariffData, 'tariff') },
+                  { label: "BPDB Supply Cost (Tk/kWh)", values: columnOf(localMacroTariffData, 'cost') },
                 ]}
               />
 
@@ -850,7 +850,7 @@ export function MacroTrendsTab({
                       <TakaIcon className="h-5 w-5 shrink-0 text-primary" />
                       <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">Wholesale Tariff vs. Unit Production Cost</h3>
-                        <p className="grid-explorer-chart-card__sub">Audit history showing growing BPDB cost gap (Tk/kWh) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                        <p className="grid-explorer-chart-card__sub">BPDB&apos;s audited supply cost against its bulk tariff (Tk/kWh) — <span className="text-primary font-semibold text-xs">BPDB annual reports</span></p>
                       </div>
                     </div>
                     <span className="grid-explorer-chip">Bulk Tariff Gap</span>
@@ -867,7 +867,7 @@ export function MacroTrendsTab({
                             content={({ active, payload }) => {
                               if (!active || !payload?.length) return null;
                               const d = payload[0].payload;
-                              const deficit = (d.cost - d.tariff).toFixed(2);
+                              const deficit = d.cost == null || d.tariff == null ? null : (d.cost - d.tariff).toFixed(2);
                               return (
                                 <div className="grid-hover-panel p-3.5 md:p-4 text-card-foreground text-xs md:text-sm leading-relaxed w-72 md:w-80 max-w-[calc(100vw-2rem)] select-none bg-card">
                                   <div className="font-bold text-foreground border-b border-border/40 pb-1.5 mb-2 flex items-center justify-between gap-2">
@@ -876,20 +876,20 @@ export function MacroTrendsTab({
                                   </div>
                                   <div className="space-y-2 text-[11px] md:text-xs">
                                     <div className="flex justify-between">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Wholesale Bulk Tariff:</span>
-                                      <span className="font-bold text-foreground tabular-nums">{d.tariff.toFixed(2)} Tk/kWh</span>
+                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Average Bulk Tariff:</span>
+                                      <span className="font-bold text-foreground tabular-nums">{d.tariff == null ? 'not printed' : `${d.tariff.toFixed(2)} Tk/kWh`}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Unit Production Cost:</span>
-                                      <span className="font-bold text-foreground tabular-nums">{d.cost.toFixed(2)} Tk/kWh</span>
+                                      <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Bulk Supply Cost:</span>
+                                      <span className="font-bold text-foreground tabular-nums">{d.cost == null ? '—' : `${d.cost.toFixed(2)} Tk/kWh`}</span>
                                     </div>
                                     <div className="flex justify-between border-t border-border/30 pt-1">
                                       <span className="text-destructive font-semibold inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Unit Deficit:</span>
-                                      <span className="font-bold text-destructive tabular-nums">{deficit} Tk/kWh</span>
+                                      <span className="font-bold text-destructive tabular-nums">{deficit == null ? '—' : `${deficit} Tk/kWh`}</span>
                                     </div>
                                   </div>
                                   <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                                    Calculation: Unit Deficit = Average Production Cost − Bulk Wholesale Tariff
+                                    Calculation: Unit Deficit = Bulk Supply Cost − Average Bulk Tariff, only where BPDB printed both
                                   </div>
                                   <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
                                     <div><strong>Source:</strong> <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPDB Annual Audits</a> &amp; BERC Notifications</div>
@@ -900,8 +900,8 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
-                          <Bar dataKey="tariff" name="Bulk Wholesale Tariff" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={30} />
-                          <Line dataKey="cost" name="Average Generation Cost" stroke={chartTheme.destructive} strokeWidth={3} dot={{ fill: chartTheme.destructive, r: 4 }} activeDot={{ r: 6 }} />
+                          <Bar dataKey="tariff" name="Average Bulk Tariff" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={30} />
+                          <Line dataKey="cost" name="Bulk Supply Cost" stroke={chartTheme.destructive} strokeWidth={3} dot={{ fill: chartTheme.destructive, r: 4 }} activeDot={{ r: 6 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     ) : (
@@ -913,8 +913,8 @@ export function MacroTrendsTab({
                     categoryHeader="Year"
                     categories={(localMacroTariffData).map((d) => String(d.year))}
                     series={[
-                      { label: "Bulk Wholesale Tariff", values: columnOf(localMacroTariffData, 'tariff') },
-                      { label: "Average Generation Cost", values: columnOf(localMacroTariffData, 'cost') },
+                      { label: "Average Bulk Tariff", values: columnOf(localMacroTariffData, 'tariff') },
+                      { label: "Bulk Supply Cost", values: columnOf(localMacroTariffData, 'cost') },
                     ]}
                   />
 
@@ -922,8 +922,8 @@ export function MacroTrendsTab({
                   <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
                     <p><strong>What is being shown?</strong></p>
                     <ul className="list-disc pl-4 space-y-1">
-                      <li><strong className="text-primary">Bulk Wholesale Tariff:</strong> The BERC-approved rate at which BPDB sells power to distribution utilities (DESCO, DPDC, etc.).</li>
-                      <li><strong className="text-destructive">Average Generation Cost:</strong> The total blended per-unit generation and procurement cost, including capacity charges.</li>
+                      <li><strong className="text-primary">Average Bulk Tariff:</strong> what BPDB earned per unit sold to the distributors, as BPDB printed it (FY 2022-23 only).</li>
+                      <li><strong className="text-destructive">Bulk Supply Cost:</strong> BPDB&apos;s printed cost per unit sold in bulk, including power bought and capacity charges.</li>
                     </ul>
                     <p className="mt-2 pt-2 border-t border-border/30">
                       <strong>Analytical Insight:</strong> The widening gap between bulk tariff and actual production cost has resulted in massive structural deficits for BPDB. This trend is highly unsustainable and highlights the critical need to either rationalize power purchase costs (by phasing out liquid fuel plants) or adjust wholesale tariffs to reduce the fiscal subsidy burden on the government.
@@ -1077,11 +1077,11 @@ export function MacroTrendsTab({
                 </div>
 
                 <div className="card p-4 space-y-3">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">State Subsidy Burden<GridProvenanceTag kind="D" /></div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">State Subsidy, FY {LATEST_BPDB_AUDIT.fy}<GridProvenanceTag kind="P" /></div>
                   <div className="space-y-1">
-                    <div className="text-xl font-bold text-foreground">~35k-40k Crore BDT / Year</div>
+                    <div className="text-xl font-bold text-foreground">{LATEST_BPDB_AUDIT.subsidyCrore == null ? '—' : `${formatNumber(LATEST_BPDB_AUDIT.subsidyCrore, 2)} Crore BDT`}</div>
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                      Due to the Tk 4.52 per unit wholesale cost gap (average Tk 12.91 generation cost vs Tk 8.39 bulk tariff), the Ministry of Finance issues massive annual treasury transfers to cover the deficit.
+                      The government subsidy BPDB&apos;s own accounts record for the year, covering the gap between its supply cost ({LATEST_BPDB_AUDIT.cost?.toFixed(2) ?? '—'} Tk/kWh) and its average bulk tariff ({LATEST_BPDB_AUDIT.tariff?.toFixed(2) ?? '—'}).
                     </p>
                   </div>
                 </div>
@@ -1092,8 +1092,8 @@ export function MacroTrendsTab({
                 <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">Petrobangla Hydrocarbon Unit</a> &amp; <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-medium">BPDB Annual Financials</a></span>
                 <span>
                   Reserve and capacity-charge figures are as the audits state them. The
-                  subsidy card is ours: the Tk 4.52 gap is Tk 12.91 generation cost less
-                  Tk 8.39 bulk tariff, and the annual range follows from it. Note that this
+                  subsidy is BPDB&apos;s own figure from its FY {LATEST_BPDB_AUDIT.fy} annual report (it replaced an estimate
+                  of ours built on a superseded 8.39 bulk tariff on 2026-09-30). Note that this
                   cost is BPDB&apos;s <em>bulk purchase</em> rate across the year, not the daily
                   production cost shown on the Overview tab — the two measure different
                   things and should not be compared directly. Not independently audited.
@@ -2070,8 +2070,8 @@ export function MacroTrendsTab({
                     <thead>
                       <tr>
                         <th>Year</th>
-                        <th className="text-left">Retail Diesel (Tk/L)</th><th className="text-left">Retail Kerosene (Tk/L)</th>
-                        <th className="text-left">Retail Octane (Tk/L)</th><th className="text-left">Retail Petrol (Tk/L)</th>
+                        <th className="text-left">Retail Diesel (Tk/L)</th>
+                        <th className="text-left">Retail Octane (Tk/L)</th>
                         <th className="text-left">Spot LNG (USD/MMBtu)</th>
                         <th className="text-left">Import Coal (USD/Ton)</th>
                         <th className="text-left">Exchange Rate (BDT/USD)</th>
@@ -2082,8 +2082,8 @@ export function MacroTrendsTab({
                       {localMacroEconomicData.map((d, idx) => (
                         <tr key={idx}>
                           <td className="font-semibold">{d.year}</td>
-                          <td className="text-left tabular-nums">{d.retailDiesel.toFixed(2)} Tk</td><td className="text-left tabular-nums">{d.retailKerosene.toFixed(2)} Tk</td>
-                          <td className="text-left tabular-nums">{d.retailOctane.toFixed(2)} Tk</td><td className="text-left tabular-nums">{d.retailPetrol.toFixed(2)} Tk</td>
+                          <td className="text-left tabular-nums">{d.retailDiesel.toFixed(2)} Tk</td>
+                          <td className="text-left tabular-nums">{d.retailOctane.toFixed(2)} Tk</td>
                           <td className="text-left tabular-nums">${d.spotLng.toFixed(2)}</td>
                           <td className="text-left tabular-nums">${d.importCoal.toFixed(2)}</td>
                           <td className="text-left tabular-nums font-semibold text-primary">{d.exchangeRate.toFixed(2)} Tk</td>
@@ -2097,7 +2097,7 @@ export function MacroTrendsTab({
                 {/* Card Metadata Footer */}
                 <GridCardFooter>
                   <span>Source: <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPC Retail Gazettes</a> &amp; <a href="https://www.bb.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Bangladesh Bank Databases</a></span>
-                  <span>As published. Not independently audited.</span>
+                  <span>Hand-entered and not yet checked against the gazettes; Kerosene and Petrol were removed on 2026-09-30 as filled-in rather than read.</span>
                   <span className="font-medium">Reporting Period: Historical Macro Pricing Benchmarks (2010 - 2026)</span>
                 </GridCardFooter>
               </div>
