@@ -2343,22 +2343,53 @@ def parse_pgcb_file(filepath, op_date):
                 names = [n.strip() for n in name_row.split('|')]
                 kwhs = [k.strip() for k in kwh_row.split('|')]
                 peaks = [p.strip() for p in peak_row.split('|')]
-                
+
+                # YesterdayGen carries each interconnector TWICE: the plant
+                # column ("Bheramara (HVDC )", "Impoprt (Tripura)") and a summary
+                # column far to the right ("HVDC", "Tripura") repeating the same
+                # hourly flows and KWH but leaving the peak rows blank. This loop
+                # used to let the last match win, so the summary column's blank
+                # peak cell overwrote the plant column's figure through
+                # clean_float('') == 0.0 — and 1,261 days from 2018 to 2024
+                # published "Grid Import: 0 MW" beside gigawatt-hours of imports.
+                # 2018-01-21: PGCB printed 495 MW for HVDC and 124 MW for Tripura
+                # at the evening peak; the archive said 0 and 0 (found
+                # 2026-09-30). A peak is now taken from the first column that
+                # states one, and a blank cell states nothing.
+                found = {}
                 for i in range(len(names)):
-                    name = names[i]
-                    k = clean_float(kwhs[i]) if i < len(kwhs) else 0.0
-                    p = clean_float(peaks[i]) if i < len(peaks) else 0.0
-                    name_lower = name.lower()
-                    
-                    if 'hvdc' in name_lower or 'bheramara (hvdc' in name_lower or 'bheramara hvdc' in name_lower:
-                        hvdc_gen = k / 1000000.0
-                        hvdc_peak = p
-                    elif 'tripura' in name_lower or 'impoprt (tripura)' in name_lower:
-                        tripura_gen = k / 1000000.0
-                        tripura_peak = p
+                    name_lower = names[i].lower()
+                    if 'hvdc' in name_lower:
+                        key = 'hvdc'
+                    elif 'tripura' in name_lower:
+                        key = 'tripura'
                     elif 'adani' in name_lower:
-                        adani_gen = k / 1000000.0
-                        adani_peak = p
+                        key = 'adani'
+                    else:
+                        continue
+                    k = clean_float(kwhs[i]) if i < len(kwhs) else 0.0
+                    p = station_float(peaks[i]) if i < len(peaks) else None
+                    slot = found.setdefault(key, {'kwh': 0.0, 'peak': None})
+                    if not slot['kwh'] and k:
+                        slot['kwh'] = k
+                    if slot['peak'] is None and p is not None:
+                        slot['peak'] = p
+
+                # The row shape still needs a number, so an interconnector with
+                # no stated peak in either column keeps 0.0 as before. When this
+                # was fixed, 9 of the 1,261 affected days' workbooks stated no
+                # peak in either column (repair_border_import_peaks.py lists
+                # them); `peakFlow` becoming nullable is what would let those
+                # print a dash instead.
+                if 'hvdc' in found:
+                    hvdc_gen = found['hvdc']['kwh'] / 1000000.0
+                    hvdc_peak = found['hvdc']['peak'] or 0.0
+                if 'tripura' in found:
+                    tripura_gen = found['tripura']['kwh'] / 1000000.0
+                    tripura_peak = found['tripura']['peak'] or 0.0
+                if 'adani' in found:
+                    adani_gen = found['adani']['kwh'] / 1000000.0
+                    adani_peak = found['adani']['peak'] or 0.0
 
     if hvdc_gen > 0.0 or hvdc_peak > 0.0:
         border_imports_data.append({'source': 'HVDC Bheramara (India)', 'energy': round(hvdc_gen, 2), 'peakFlow': hvdc_peak, 'type': 'C/B Interconnector (West)'})
