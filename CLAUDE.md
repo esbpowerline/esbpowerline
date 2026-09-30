@@ -169,13 +169,13 @@ EMRD's monthly decision under the 2024 automatic formula — look on emrd.gov.bd
 not BERC's page. `/lpg-price` carries BERC's monthly LPG notifications from October 2025
 (`lib/data/tariff/berc-lpg.ts`); each new month is one scan read and one row, and the tests pin
 its arithmetic. Evidence manifests: `evidence/fuel/`, `evidence/lpg/`, `evidence/tariff/`.
-**Still unsourced:** the yearly `macroEconomicData` table in `lib/data/macro/economics.ts`, which
-feeds the Macro Trends fuel table and the macro export. Its Kerosene and Petrol columns for
-2010–2024 look derived rather than read (every Kerosene equals that year's Diesel; every Petrol
-is Octane minus 3–5) — rebuild them from the notifications or remove them, do not trust them.
-Also still carrying the superseded 3 June figures: `lib/data/companies/berc.ts` /
-`macro/tariff.ts` (the Macro Trends bulk-tariff chart's `Jun 2026: 8.39`) and
-`lib/data/policy/policies.ts:689`.
+Macro Trends' tariff-vs-cost chart reads BPDB's audited accounts (`macro/tariff.ts` over
+`bpdb-annual-accounts.ts`, FY 2016-17 to 2022-23; tariff only where BPDB printed it) — the
+hand-typed 2010–2026 series and its 8.39 are gone, as is the policy library's 3 June line.
+**Still unsourced:** the rest of `macroEconomicData` in `lib/data/macro/economics.ts` (Diesel and
+Octane before 2026, exchange rate, inflation, spot LNG, import coal), which feeds the Macro
+fuel table and export. Its Kerosene and Petrol columns were removed as filled-in; rebuild the
+rest from EMRD/BPC notifications and Bangladesh Bank before trusting it.
 
 **6. The audit and security sweeps are partial.** `GRID_EXPLORER_AUDIT.md` and
 `CONTENT_INVENTORY.md` are from 2026-09-03 and predate everything since. Of the security pass,
