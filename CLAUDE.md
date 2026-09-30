@@ -160,18 +160,22 @@ byte, asserted per file. Afterwards: republish the ~90 days holding `DataRelease
 means reparsing the source workbooks (`reingest_from_archive.py`), which is a different and
 much larger job. Do not guess at them; that would be inventing text.
 
-**5. The commodities strip: electricity is sourced, fuels are not.** Since 2026-09-17 the
-strip's electricity tariffs come from `lib/data/tariff/berc-electricity-2026.ts` — lifeline 4.63
-and first step 5.26 (amendment notification memo …26.2569) and the Appendix-ka bulk rates per
-distributor and voltage (Reconsideration Order 2026/01), each read off the archived scan and
-printed to the digits the order uses. The one-day 8.39 national average is gone; there is no
-national bulk figure after 4 June. **Diesel and Octane are still hand-typed yearly rows** from
-`lib/data/macro/economics.ts`, "BPC · 2026", no document cited. BPC moved to a **monthly
-automatic pricing formula in 2024**, and BERC's notices page now also carries monthly LPG, jet
-fuel and furnace-oil price orders — none of which the strip reads yet. Do not answer this from
-memory: add a fuel only with the instrument that sets it. Also still carrying the superseded
-3 June figures: `lib/data/companies/berc.ts` / `macro/tariff.ts` (the Macro Trends bulk-tariff
-chart's `Jun 2026: 8.39`) and `lib/data/policy/policies.ts:689`.
+**5. Prices: the strip and LPG are sourced; the yearly fuel history is not.** Since 2026-09-30
+every figure on the commodities strip comes from `lib/data/tariff/administered-prices.ts`, each
+naming its instrument: Diesel 135, Octane 165, Petrol 160, Kerosene 155 Tk/L from **EMRD's**
+gazette of 20 Sep 2026 (…07.0017.26.215, effective 21 Sep), held for October by EMRD memo
+…24.452; CNG 43 Tk/m³ from BERC's 4 Jun 2022 notification (…22.2523). Petroleum prices are
+EMRD's monthly decision under the 2024 automatic formula — look on emrd.gov.bd/pages/notices,
+not BERC's page. `/lpg-price` carries BERC's monthly LPG notifications from October 2025
+(`lib/data/tariff/berc-lpg.ts`); each new month is one scan read and one row, and the tests pin
+its arithmetic. Evidence manifests: `evidence/fuel/`, `evidence/lpg/`, `evidence/tariff/`.
+**Still unsourced:** the yearly `macroEconomicData` table in `lib/data/macro/economics.ts`, which
+feeds the Macro Trends fuel table and the macro export. Its Kerosene and Petrol columns for
+2010–2024 look derived rather than read (every Kerosene equals that year's Diesel; every Petrol
+is Octane minus 3–5) — rebuild them from the notifications or remove them, do not trust them.
+Also still carrying the superseded 3 June figures: `lib/data/companies/berc.ts` /
+`macro/tariff.ts` (the Macro Trends bulk-tariff chart's `Jun 2026: 8.39`) and
+`lib/data/policy/policies.ts:689`.
 
 **6. The audit and security sweeps are partial.** `GRID_EXPLORER_AUDIT.md` and
 `CONTENT_INVENTORY.md` are from 2026-09-03 and predate everything since. Of the security pass,

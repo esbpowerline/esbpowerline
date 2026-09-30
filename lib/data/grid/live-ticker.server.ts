@@ -1,72 +1,29 @@
 import 'server-only';
 
 import type { TickerItem } from '@/components/news/LiveMarketTicker';
-import { macroEconomicData } from '@/lib/data/macro/economics';
+import { ADMINISTERED_PRICES } from '@/lib/data/tariff/administered-prices';
 
 /**
  * The commodities strip: actual energy commodities and their prices.
  * Only energy commodities (fuels, gas, coal) and pricing — no references,
  * legal instruments or utility voltage tariffs.
+ *
+ * Every figure comes from `administered-prices.ts`, which names the gazette or
+ * notification that set it. Until 2026-09-30 these were read from a hand-typed
+ * yearly table and a literal CNG value, citing nothing.
  */
 
-const round = (v: number, d = 2) => Number(v.toFixed(d));
-
 export async function getLiveTickerItems(): Promise<TickerItem[] | null> {
-  const items: TickerItem[] = [];
-
-  const macro = macroEconomicData[macroEconomicData.length - 1];
-
-  // Government administered petroleum fuel prices
-  if (macro?.retailOctane) {
-    items.push({
-      id: 'octane-bpc',
-      name: 'Octane',
-      value: round(macro.retailOctane),
-      unit: 'Tk/L',
-      change: null,
-      prefix: '',
-    });
-  }
-  if (macro?.retailPetrol) {
-    items.push({
-      id: 'petrol-bpc',
-      name: 'Petrol',
-      value: round(macro.retailPetrol),
-      unit: 'Tk/L',
-      change: null,
-      prefix: '',
-    });
-  }
-  if (macro?.retailDiesel) {
-    items.push({
-      id: 'diesel-bpc',
-      name: 'Diesel',
-      value: round(macro.retailDiesel),
-      unit: 'Tk/L',
-      change: null,
-      prefix: '',
-    });
-  }
-  if (macro?.retailKerosene) {
-    items.push({
-      id: 'kerosene-bpc',
-      name: 'Kerosene',
-      value: round(macro.retailKerosene),
-      unit: 'Tk/L',
-      change: null,
-      prefix: '',
-    });
-  }
-
-  // Administered gas tariff
-  items.push({
-    id: 'cng-berc',
-    name: 'CNG',
-    value: 43.00,
-    unit: 'Tk/m³',
+  const items: TickerItem[] = ADMINISTERED_PRICES.map((p) => ({
+    id: p.id,
+    name: p.name,
+    value: p.value,
+    unit: p.unit,
+    // An administered price has no daily delta; null, never a flat 0.
     change: null,
     prefix: '',
-  });
-
+    // No `source` on the item: the strip carries prices without reference
+    // clutter (29 Sep 2026). The citation lives on the price record.
+  }));
   return items.length > 0 ? items : null;
 }

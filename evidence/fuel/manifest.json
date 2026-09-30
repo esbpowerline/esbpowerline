@@ -1,0 +1,53 @@
+{
+  "_comment": [
+    "Administered fuel and CNG price evidence. PDFs archived under W:/Grid-Explorer/ (not committed); sha256 checks",
+    "the archived copy against the publisher. Figures in lib/data/tariff/administered-prices.ts were read from the page images",
+    "2026-09-30 (the EMRD PDFs carry a text layer in a legacy font encoding that garbles the extract; the BERC 2022 file is a scan).",
+    "CNG: the 2022 notification is the latest BERC instrument found stating the CNG rate. The April 2025 re-fixing covered the",
+    "industrial and captive-power categories only (its own title says so); no later CNG instrument appears in BERC notices to page 70."
+  ],
+  "documents": [
+    {
+      "id": "emrd-gazette-2026-09-20-215",
+      "issuer": "EMRD",
+      "documentType": "GAZETTE_NOTIFICATION",
+      "memoNo": "28.00.0000.000.026.07.0017.26.215",
+      "titleBn": "প্রজ্ঞাপন — জ্বালানি তেলের (ডিজেল, কেরোসিন, অকটেন ও পেট্রোল) মূল্য পুনর্নির্ধারণ",
+      "issuedOn": "2026-09-20",
+      "publishedOn": "2026-09-20",
+      "effectiveFrom": "2026-09-21",
+      "location": "paragraphs 1-2; price structure in Appendix-ka (gazette p. 25340)",
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-emrd/2026/8/b7e030d8-c9ab-416b-8950-7843cfd0b1f2.pdf",
+      "sha256": "2d35b6aa66666441d49b3f02ba72bda39b539c940e3b56835d8db3b114c5fd09",
+      "archivedAs": "EMRD/fuel/emrd-gazette-2026-09-20-215.pdf"
+    },
+    {
+      "id": "emrd-memo-2026-09-30-452",
+      "issuer": "EMRD",
+      "documentType": "OFFICE_MEMO",
+      "memoNo": "28.00.0000.000.026.35.0116.24.452",
+      "titleBn": "অক্টোবর ২০২৬ মাসে জ্বালানি তেল (ডিজেল, অকটেন, পেট্রোল, কেরোসিন)-এর মূল্য নির্ধারণ",
+      "issuedOn": "2026-09-30",
+      "publishedOn": "2026-09-30",
+      "effectiveFrom": "2026-10-01",
+      "location": "paragraph 1: the 20 Sep prices held unchanged for October 2026",
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-emrd/2026/8/4e037165-6558-4be7-8939-acbe5fbb1187.pdf",
+      "sha256": "c6c82bc9ecdd8a55d234486b8f2ef8240e57fe7b3904c1710017d0e6095a089d",
+      "archivedAs": "EMRD/fuel/emrd-memo-2026-09-30-452.pdf"
+    },
+    {
+      "id": "berc-gas-2022-06-04-2523",
+      "issuer": "BERC",
+      "documentType": "BERC_NOTIFICATION",
+      "memoNo": "28.01.0000.012.14.001.22.2523",
+      "titleBn": "ভোক্তাপর্যায়ে প্রাকৃতিক গ্যাসের মূল্যহার, ২০২২ সংক্রান্ত বিজ্ঞপ্তি",
+      "issuedOn": "2022-06-04",
+      "publishedOn": "2022-06-05",
+      "effectiveFrom": "bill month June 2022",
+      "location": "table row 7 (CNG 43.00 Tk/m3) and paragraph 3 (unchanged; feed gas 35.00 + operator margin 8.00)",
+      "sourceUrl": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-berc/2024/12/062f526e55424bfca8ddfebbc0425654.pdf",
+      "sha256": "e09bf8b52f66a8328a1440a797468e09902958a5d729fcf0ac44efb3cc6d5fc7",
+      "archivedAs": "BERC/gas-tariff/berc-gas-2022-06-04-2523.pdf"
+    }
+  ]
+}
