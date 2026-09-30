@@ -1359,8 +1359,8 @@ articles; a redirect would be a guess, so they stay correct 404s.
 
 | Item | State |
 |---|---|
-| Import-peak repair | Dry-run clean: 1,200 restored, 60 cleared to null, 1 (2025-02-26, a different sheet) left as published. **Not applied** — the auto-mode classifier holds a rewrite of the published archive for a human: `python scripts/repair_border_import_peaks.py --apply`, then `npm run verify:data`, commit `public/data/daily`. |
-| Release | Items 1–4 on `authenticating` only. |
+| Import-peak repair | **Applied** by Hamim (the classifier holds archive rewrites for a human): 1,200 restored, 60 cleared to null, 2025-02-26 left as published. Ten further rows keep 0 because PGCB's own cell prints 0 at the evening peak (Adani on trial, late 2022; a line off at the peak hour) — filed, so published. `verify:data`: 0 ERROR. Commit `68af92a68`. |
+| Release | **Released and verified in production** 2026-09-30, `main` `883f6588e` → `68af92a68`, live in ~5 min. `grid-sitemap.xml` 105 URLs (90 days); 2019-06-15 `noindex, follow`, Grid Import 1,075 MW (was 0), "no Petrobangla figure held"; 2018-01-21 Grid Import "—"; 2026-09-29 carries no robots tag. |
 | LPG price page | The largest unmet demand; build only from BERC's monthly orders (CLAUDE.md open work 5). |
 | Month archive pages | Awaiting reference designs. |
 | Next Search Console read | ~17 October: archive not-indexed count should stop growing and start to fall; watch whether the discovered queue clears for the real pages. |
