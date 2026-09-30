@@ -1303,3 +1303,64 @@ answer this):
 
 The unlocked day is unchanged, which is the half of this that could have broken. The
 dash count on the unlocked page is the collapsed tiles' own chrome, not figures.
+
+---
+
+## Stage 12 — The first read after release, and the archive's thin pages (2026-09-30)
+
+### 12.1 Search Console, read in the 9222 window
+
+The property is the URL prefix `https://esbpowerline.com/`; `sc-domain:` answers "no
+access". The profile was still signed in from 2026-09-19. New:
+`scratch/gsc-reasons.mjs` prints example URLs for every not-indexed reason in one run.
+
+| | 2026-09-19 (§10.6) | 2026-09-30 |
+|---|---:|---:|
+| Indexed | 207 | **330** (186 articles, 96 archive days, 17 policy, 10 categories) |
+| Not indexed | 1,050 | **5,490** |
+| Mobile CWV | 146 need improvement (LCP) | **139 good, 0 poor** |
+| Desktop CWV | 146 good | 139 good |
+| Clicks / day | ~2.8 (12 Jul–16 Sep) | ~4.2 (118 in 28 days) |
+| Impressions / day | ~160 | ~295 (8.27K in 28 days) |
+| Average position | 19.4 | 9.3 |
+
+The periods differ in length, so the position figure is indicative only. Sitemaps:
+all three Success — 247, 9 and 4,589 discovered. Mobile LCP, the one field problem
+in §10.6, is closed by the homepage-weight work (§10.9, §11.1).
+
+**The not-indexed jump is the archive.** Reason by reason: 4,184 *discovered —
+currently not indexed* and ~1,000 *crawled — currently not indexed*, both almost
+entirely `/grid-explorer/{date}`; 163 not found (the old site's Bengali paths and dead
+tags, as before); the rest intentional (login callbacks, `/?NNNNNN.html` spam, noindexed
+tags). Of ~4,578 day pages, 96 were indexed. Each is ~207 words: one templated sentence,
+a tile grid and the lock box. Google took a sample of a set it read as near-duplicates,
+while real pages — `/energy-policy/eec-master-plan-2030`, an author page — waited in the
+same discovered queue.
+
+**Queries.** The largest demand the site is not meeting is monthly LPG prices: the LPG
+September article drew 1,810 impressions for 5 clicks, and "bangladesh lpg 12 kg price
+september 2026 berc" and its variants add ~150 more. "what is the industry of sreda.bg"
+(560 impressions, Bulgarian) is noise.
+
+### 12.2 Changed
+
+| # | Change | Commit |
+|---|---|---|
+| 1 | Archive day pages older than 90 days carry `noindex, follow` and leave `grid-sitemap.xml` (≈4,590 → 105 URLs). The year indexes stay indexed and still link every day; nothing a reader can open is removed. One rule, `lib/data/grid/archive-indexing.ts`, read by both. A holding position until a richer archive page exists — month pages are the candidate, and a design change under `docs/DESIGN-DIRECTION.md`. | `f951935e6` |
+| 2 | **A doctrine defect found on the day pages.** 1,261 days (2018–2024) printed "Grid Import: 0 MW" beside gigawatt-hours of imports. The parser's, not PGCB's: YesterdayGen carries each interconnector twice and the blank summary column overwrote the plant column's printed peak (2018-01-21: PGCB 495 MW HVDC, 124 MW Tripura; archive 0 and 0). Parser fixed; `scripts/repair_border_import_peaks.py` restores the printed figure from each day's held workbook, writing only where the re-parse reproduces the day. | `4584e9860` |
+| 3 | `peakFlow` nullable end to end; the tile, the imports table and total, Largest Link and the export print a dash, never a partial sum. Pre-2025 zeros that cannot be restored are cleared to null. | `e96acc355` |
+| 4 | Archive day pages past 14 days say "no Petrobangla figure held" instead of "awaiting Petrobangla" — the 2019 page was promising a filing that cannot come. | `6aa204993` |
+
+Not changed: `/index.php` already redirects (the 404 in the report predates §10.7).
+`/articles/fuel-` and `/articles/national-` are truncated inbound links matching 8 and 2
+articles; a redirect would be a guess, so they stay correct 404s.
+
+### 12.3 Open after this stage
+
+| Item | State |
+|---|---|
+| Import-peak repair | Dry-run clean: 1,200 restored, 60 cleared to null, 1 (2025-02-26, a different sheet) left as published. **Not applied** — the auto-mode classifier holds a rewrite of the published archive for a human: `python scripts/repair_border_import_peaks.py --apply`, then `npm run verify:data`, commit `public/data/daily`. |
+| Release | Items 1–4 on `authenticating` only. |
+| LPG price page | The largest unmet demand; build only from BERC's monthly orders (CLAUDE.md open work 5). |
+| Month archive pages | Awaiting reference designs. |
+| Next Search Console read | ~17 October: archive not-indexed count should stop growing and start to fall; watch whether the discovered queue clears for the real pages. |
