@@ -81,3 +81,13 @@ describe('isIndexedArchiveDay', () => {
     expect(isIndexedArchiveDay('2019-06-15', undefined)).toBe(true);
   });
 });
+
+describe('isSettledArchiveDay', () => {
+  it('stops saying "awaiting" 14 days back, and never guesses without a catalogue', async () => {
+    const { isSettledArchiveDay } = await import('@/lib/data/grid/archive-indexing');
+    expect(isSettledArchiveDay('2026-09-16', '2026-09-29')).toBe(false); // 13 days: still awaited
+    expect(isSettledArchiveDay('2026-09-15', '2026-09-29')).toBe(true); // 14 days
+    expect(isSettledArchiveDay('2019-06-15', '2026-09-29')).toBe(true);
+    expect(isSettledArchiveDay('2019-06-15', undefined)).toBe(false);
+  });
+});

@@ -11,7 +11,7 @@ import {
   type ArchiveDaySummary,
 } from '@/lib/data/grid/archive-day.server';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
-import { isIndexedArchiveDay } from '@/lib/data/grid/archive-indexing';
+import { isIndexedArchiveDay, isSettledArchiveDay } from '@/lib/data/grid/archive-indexing';
 import { ORGANIZATION_ID } from '@/lib/seo';
 
 /**
@@ -91,12 +91,15 @@ function Tile({
   unit,
   isDecimal,
   awaiting,
+  settled,
 }: {
   label: string;
   value: number | null;
   unit: string;
   isDecimal?: boolean;
   awaiting?: string;
+  /** Past the window in which a publisher still files: nothing is coming. */
+  settled?: boolean;
 }) {
   return (
     <div className="rounded-xl border border-border/70 bg-card px-4 py-3">
@@ -110,7 +113,9 @@ function Tile({
               that nobody filed the figure. */}
           <p className="mt-1 text-2xl font-semibold tabular-nums text-muted-foreground">—</p>
           {awaiting && (
-            <p className="text-[11px] text-muted-foreground/80">awaiting {awaiting}</p>
+            <p className="text-[11px] text-muted-foreground/80">
+              {settled ? `no ${awaiting} figure held` : `awaiting ${awaiting}`}
+            </p>
           )}
         </>
       ) : (
@@ -135,6 +140,7 @@ export default async function ArchiveDayPage({
   const readable = formatArchiveDate(summary.date);
   const description = describeDay(summary);
   const year = summary.date.slice(0, 4);
+  const settled = isSettledArchiveDay(summary.date, (await getArchiveCatalogue()).at(-1));
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
 
   // Dataset rather than Article: this page is a day of measurements, and the
@@ -204,7 +210,7 @@ export default async function ArchiveDayPage({
         </h2>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {summary.stats.map((stat) => (
-            <Tile key={stat.label} {...stat} />
+            <Tile key={stat.label} {...stat} settled={settled} />
           ))}
         </div>
       </section>

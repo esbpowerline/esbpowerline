@@ -27,3 +27,19 @@ export function isIndexedArchiveDay(date: string, newest: string | undefined): b
   const age = (Date.parse(`${newest}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`)) / DAY_MS;
   return age < INDEXED_ARCHIVE_DAYS;
 }
+
+/**
+ * Past this age a day page stops saying "awaiting" a publisher.
+ *
+ * "Gas Supply — awaiting Petrobangla" on a 2019 day promised a figure that
+ * will never come: the Petrobangla archive starts in 2020, and PGCB does not
+ * refile a seven-year-old workbook. Fourteen days matches `LOOKBACK_GAS` in
+ * watch_sources.py — the longest the pipeline itself keeps asking — so a
+ * genuinely late filing is still described as awaited.
+ */
+export const AWAITING_WINDOW_DAYS = 14;
+
+export function isSettledArchiveDay(date: string, newest: string | undefined): boolean {
+  if (!newest) return false;
+  return (Date.parse(`${newest}T00:00:00Z`) - Date.parse(`${date}T00:00:00Z`)) / DAY_MS >= AWAITING_WINDOW_DAYS;
+}
