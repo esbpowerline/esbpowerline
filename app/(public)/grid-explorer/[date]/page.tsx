@@ -11,6 +11,7 @@ import {
   type ArchiveDaySummary,
 } from '@/lib/data/grid/archive-day.server';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
+import { isIndexedArchiveDay } from '@/lib/data/grid/archive-indexing';
 import { ORGANIZATION_ID } from '@/lib/seo';
 
 /**
@@ -57,11 +58,17 @@ export async function generateMetadata({
 
   const readable = formatArchiveDate(summary.date);
   const description = describeDay(summary);
+  const catalogue = await getArchiveCatalogue();
 
   return {
     title: `Bangladesh Power Grid on ${readable} — generation, demand & load shedding`,
     description,
     alternates: { canonical: `/grid-explorer/${summary.date}` },
+    // Outside the recent window: reachable, followed, not asked to be indexed.
+    // Why, with the Search Console figures, in archive-indexing.ts.
+    ...(isIndexedArchiveDay(summary.date, catalogue.at(-1))
+      ? {}
+      : { robots: { index: false, follow: true } }),
     openGraph: {
       type: 'article',
       url: `/grid-explorer/${summary.date}`,

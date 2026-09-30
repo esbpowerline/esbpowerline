@@ -1,6 +1,7 @@
 import { SITE_URL } from '@/lib/seo';
 import { getArchiveCatalogue } from '@/lib/data/grid/archive-day.server';
 import { getReleaseRevisionTimes } from '@/lib/data/releases.server';
+import { isIndexedArchiveDay } from '@/lib/data/grid/archive-indexing';
 
 /**
  * The archive's own sitemap: one entry per day, plus the year indexes.
@@ -30,6 +31,7 @@ export async function GET() {
     getReleaseRevisionTimes(['GRID_DAILY', 'GAS_DAILY']).catch(() => ({}) as Record<string, string>),
   ]);
   const years = [...new Set(catalogue.map((d) => d.slice(0, 4)))].sort();
+  const newest = catalogue.at(-1);
 
   const entries: string[] = [
     `<url><loc>${SITE_URL}/grid-explorer/archive</loc><changefreq>daily</changefreq><priority>0.7</priority></url>`,
@@ -37,7 +39,9 @@ export async function GET() {
       (year) =>
         `<url><loc>${SITE_URL}/grid-explorer/archive/${year}</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>`,
     ),
-    ...catalogue.map((date) => {
+    // The recent window only: older days are `noindex` (archive-indexing.ts),
+    // and a sitemap listing a noindexed URL contradicts itself.
+    ...catalogue.filter((date) => isIndexedArchiveDay(date, newest)).map((date) => {
       const lastmod = revised[date] ? `<lastmod>${revised[date]}</lastmod>` : '';
       return `<url><loc>${SITE_URL}/grid-explorer/${date}</loc>${lastmod}<changefreq>yearly</changefreq><priority>0.6</priority></url>`;
     }),
