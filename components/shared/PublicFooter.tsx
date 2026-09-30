@@ -95,6 +95,8 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
     // The policy library ranks on page one for several queries and had no
     // site-wide link at all (stage 6).
     { label: t('footer.energyPolicy'), href: '/energy-policy' },
+    // The largest unmet search demand in Search Console, 2026-09-30.
+    { label: t('footer.lpgPrice'), href: '/lpg-price' },
     { label: t('footer.search'), href: '/search' },
   ];
 

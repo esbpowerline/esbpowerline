@@ -25,6 +25,7 @@ export type MessageKey =
   | 'footer.monthlyMagazine'
   | 'footer.gridExplorer'
   | 'footer.energyPolicy'
+  | 'footer.lpgPrice'
   | 'footer.search'
   | 'footer.copyright'
   | 'footer.tagline'
@@ -199,6 +200,7 @@ const EN: Record<MessageKey, string> = {
   'footer.monthlyMagazine': 'Monthly Magazine',
   'footer.gridExplorer': 'Grid Explorer',
   'footer.energyPolicy': 'Energy Policy Library',
+  'footer.lpgPrice': 'LPG Price (BERC)',
   'footer.search': 'Search',
   'footer.copyright': '© {year} ESB PowerLine. All rights reserved.',
   'footer.tagline':
@@ -389,6 +391,7 @@ const BN: Record<MessageKey, string> = {
   'footer.monthlyMagazine': 'মাসিক ম্যাগাজিন',
   'footer.gridExplorer': 'গ্রিড তথ্য',
   'footer.energyPolicy': 'জ্বালানি নীতি সংগ্রহ',
+  'footer.lpgPrice': 'এলপিজির দাম (বিইআরসি)',
   'footer.search': 'খুঁজুন',
   'footer.copyright': '© {year} ইএসবি পাওয়ারলাইন। সর্বস্বত্ব সংরক্ষিত।',
   'footer.tagline':

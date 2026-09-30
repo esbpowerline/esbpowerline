@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { CURRENT_LPG_NOTICE } from '@/lib/data/tariff/berc-lpg';
 import { prisma } from '@/lib/prisma';
 import { POLICIES } from '@/lib/data/policy/policies';
 import { EVENT_STUDIES } from '@/lib/data/analysis/event-registry';
@@ -190,6 +191,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/categories`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${baseUrl}/energy-policy`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/titas-gas`, changeFrequency: 'monthly', priority: 0.6 },
+    // lastmod is when the newest BERC notice took effect: the page changes then, and only then.
+    { url: `${baseUrl}/lpg-price`, lastModified: new Date(CURRENT_LPG_NOTICE.effectiveFrom), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/annual-reports/financials`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${baseUrl}/about`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.4 },
