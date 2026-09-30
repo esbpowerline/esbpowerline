@@ -715,7 +715,17 @@ export const POLICIES: Policy[] = [
       ],
     },
     dataPoints: [
-      { label: 'Latest retail power tariff', value: '+16.68% — weighted average Tk 9.11 → Tk 10.63/kWh, announced 3 June 2026 (BERC’s first power determination since 2020)', asOf: 'Jun 2026', source: { label: 'Prothom Alo', url: 'https://en.prothomalo.com/business/local/x730jsk72r' } },
+      /**
+       * QUARANTINED 2026-09-30, for the reason the entry below was on 09-05.
+       *
+       * This entry read: "Latest retail power tariff: +16.68% — weighted
+       * average Tk 9.11 → Tk 10.63/kWh, announced 3 June 2026", cited to
+       * Prothom Alo. That is BERC's order of 3 June 2026, which BERC amended
+       * on 4 June (Reconsideration Order 2026/01) — so for four months the
+       * library called a one-day figure the latest tariff. The 09-05 pass
+       * quarantined its neighbour and missed this line. No post-amendment
+       * weighted average is held from a BERC document, so none is printed.
+       */
       /**
        * QUARANTINED 2026-09-05, and replaced by a fact the engine resolves.
        *
