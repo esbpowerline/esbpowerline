@@ -1083,8 +1083,97 @@
       }
     ]
   },
+  "gasProductionData": [
+    {
+      "company": "BGFCL (Titas, Habiganj, Bakhrabad)",
+      "fields": 5,
+      "gas": 477.4,
+      "condensate": 369.0,
+      "share": 18.4
+    },
+    {
+      "company": "SGFL (Sylhet, Rashidpur, Kailashtila)",
+      "fields": 5,
+      "gas": 138.5,
+      "condensate": 609.4,
+      "share": 5.3
+    },
+    {
+      "company": "BAPEX (Shahbazpur, Srikail, Begumganj)",
+      "fields": 9,
+      "gas": 103.9,
+      "condensate": 52.0,
+      "share": 4.0
+    },
+    {
+      "company": "Chevron (Bibiyana, Jalalabad, Moulavibazar)",
+      "fields": 3,
+      "gas": 868.8,
+      "condensate": 4650.8,
+      "share": 33.5
+    },
+    {
+      "company": "Tullow (Bangora)",
+      "fields": 1,
+      "gas": 29.4,
+      "condensate": 85.0,
+      "share": 1.1
+    },
+    {
+      "company": "RPGCL (R-LNG Import / LNG Terminal)",
+      "fields": 0,
+      "gas": 972.4,
+      "condensate": 0.0,
+      "share": 37.5
+    }
+  ],
+  "gasDistributionData": [
+    {
+      "company": "TGTDCL (Dhaka & Mymensingh)",
+      "power": 240.0,
+      "fertilizer": 97.2,
+      "others": 1105.2,
+      "total": 1442.4
+    },
+    {
+      "company": "BGDCL (Cumilla & Sylhet)",
+      "power": 185.6,
+      "fertilizer": 0.0,
+      "others": 85.5,
+      "total": 271.1
+    },
+    {
+      "company": "KGDCL (Chattogram)",
+      "power": 37.9,
+      "fertilizer": 47.3,
+      "others": 176.5,
+      "total": 261.8
+    },
+    {
+      "company": "JGTDSL (Sylhet region)",
+      "power": 271.5,
+      "fertilizer": 28.2,
+      "others": 116.5,
+      "total": 416.2
+    },
+    {
+      "company": "PGCL (Rajshahi & Rangpur)",
+      "power": 56.0,
+      "fertilizer": 0.0,
+      "others": 30.9,
+      "total": 86.9
+    },
+    {
+      "company": "SGCL (Barishal & Khulna)",
+      "power": 65.9,
+      "fertilizer": 0.0,
+      "others": 7.3,
+      "total": 73.2
+    }
+  ],
   "sourceFiles": {
-    "pgcb": "Daily Report 02-10-2026.xlsx"
+    "pgcb": "Daily Report 02-10-2026.xlsx",
+    "petrobangla": "Daily-Gas-Intake-Offtake-Report (03.10.26).pdf"
   },
   "observationWindows": {
     "timezone": "+06:00",
@@ -1094,6 +1183,15 @@
       "end": "2026-10-02T00:00:00+06:00",
       "filedAs": "2026-10-02",
       "sourceFile": "Daily Report 02-10-2026.xlsx"
+    },
+    "petrobangla": {
+      "unit": "gas day",
+      "start": "2026-10-01T08:00:00+06:00",
+      "end": "2026-10-02T08:00:00+06:00",
+      "filedAs": "2026-10-02",
+      "publishedLabel": "01-02 Oct, 2026",
+      "period": "8.00 to 8.00",
+      "sourceFile": "Daily-Gas-Intake-Offtake-Report (03.10.26).pdf"
     }
   },
   "forecast": {
