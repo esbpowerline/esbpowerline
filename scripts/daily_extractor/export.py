@@ -253,6 +253,24 @@ def deploy_petrobangla(
     if iso != energy.isoformat():
         print(f"  gas window: document states {iso}, not the requested {energy.isoformat()} — filing under {iso}")
     json_name = f"{iso}.json"
+
+    # A window taken from the request never replaces one the document stated.
+    # On 2026-10-02 a report whose header the parser could not read was filed
+    # as 2026-09-29 by request, over the genuine 29 -> 30 report already held
+    # — the archive swapped a confirmed day for an assumed one, and the two
+    # days became byte-identical. Refused and said so; the day keeps the copy
+    # its own document vouches for.
+    held = PETROBANGLA_PUBLIC / json_name
+    new_source = petrobangla_data.get("meta", {}).get("window_source")
+    if new_source == "request" and held.exists():
+        try:
+            held_source = json.loads(held.read_text(encoding="utf-8")).get("meta", {}).get("window_source")
+        except (OSError, ValueError):
+            held_source = None
+        if held_source == "document":
+            print(f"  gas window: refusing to replace {iso}, whose window its document states, "
+                  "with a report dated only by the request")
+            return written
     staging_path = PETROBANGLA_JSON_STAGING / json_name
     write_json_atomic(staging_path, petrobangla_data)
     update_petrobangla_index(petrobangla_data, json_name, PETROBANGLA_INDEX_STAGING)

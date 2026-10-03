@@ -382,7 +382,29 @@ def document_window(page_text):
     page, so both are searched independently and the day pair is the anchor.
     Returns the START date — the calendar day containing the window's opening
     instant, which is the anchor rule in observation-window.ts.
+
+    A window that crosses a month boundary can also print both months in full:
+    the report served under 01.10.26 reads `Date : 30 Sep- 1 Oct 2026`. The
+    day-pair pattern below does not match that, so it returned None, the
+    caller fell back to the day it had asked for, and on 2026-10-02 the Pi
+    filed this 30 Sep -> 1 Oct document as energy day 2026-09-29 too —
+    overwriting the genuine 29 -> 30 report already held. That form is read
+    first, and its year belongs to the END month, as "31-01 Sep" does below.
     """
+    full = re.search(
+        r'Date\s*:\s*(\d{1,2})\s*([A-Z][a-z]{2})[a-z]*\.?\s*[-–]\s*'
+        r'(\d{1,2})\s*([A-Z][a-z]{2})[a-z]*\.?,?\s*(20\d\d)', page_text)
+    if full:
+        start_month, end_month = _MONTHS.get(full.group(2)), _MONTHS.get(full.group(4))
+        if not start_month or not end_month:
+            return None
+        year = int(full.group(5))
+        if start_month > end_month:     # 31 Dec - 1 Jan 2027
+            year -= 1
+        try:
+            return datetime.date(year, start_month, int(full.group(1)))
+        except ValueError:
+            return None
     m = re.search(r'Date\s*:\s*(\d{1,2})\s*[-–]\s*(\d{1,2})', page_text)
     if not m:
         return None

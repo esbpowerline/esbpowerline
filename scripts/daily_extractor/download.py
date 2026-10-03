@@ -356,6 +356,13 @@ def download_petrobangla(energy: date, dest_dir: Path | None = None) -> tuple[Pa
                 if stated > energy:
                     break
                 continue
+            if stated is None and key != listing_key:
+                # Cannot confirm, from a slot that is not the day's own: a
+                # neighbour is only ever a hint. Accepting it here is how the
+                # 30 Sep -> 1 Oct report under 01.10.26, whose header this
+                # reader could not yet parse, was filed as energy day
+                # 2026-09-29 on 2026-10-02, over the real 29 -> 30 report.
+                continue
             (dest_dir / "petrobangla_latest.txt").write_text(text, encoding="utf-8")
             return dest, url
         except Exception:
