@@ -21,7 +21,7 @@ import { mediaStorageBucket } from '@/lib/media-storage-url';
  * The comment this replaces said a library of a few hundred items was "several
  * hundred megabytes per browse", and at the time it was right — uploads were
  * stored byte-for-byte as they arrived. They are not any more: `media-storage.ts`
- * caps the longest edge at 2560px, strips metadata and stores WebP q80 on the
+ * caps the longest edge at 2560px, strips metadata and stores WebP q100 on the
  * way in. Measured against the live table, the 168 Supabase-hosted objects come
  * to **16 MB in total — 100 kB average, 342 kB largest**. A full browse of the
  * entire library is now smaller than a single unoptimised phone photo used to be.

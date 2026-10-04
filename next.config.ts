@@ -216,9 +216,21 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.esbpowerline.com' },
     ],
     formats: ['image/avif', 'image/webp'],
-    // Only 80 is allowed, so the built-in default (75) snaps to it — every
-    // <Image> is served at q80, matching the upload/import/Supabase pipeline.
-    qualities: [80],
+    // Only one value is allowed, so the built-in default (75) snaps to it and
+    // every <Image> is served at it, matching the upload/import pipeline.
+    //
+    // Raised 80 -> 100 on 2026-10-04 by Hamim's call. This is the setting that
+    // costs READERS, not storage: it governs what /_next/image hands back on
+    // every request. Measured on this repo's own images (INNER005, banner,
+    // INNER003, re-encoded with the same encoder settings), q100 is ~2.5x the
+    // bytes of q80 — 318 KB becomes 800 KB across those three. Pro allows
+    // 250 GB of egress a month and 4.2 GB was in use on 2026-09-19, so there is
+    // headroom; the constraint that bites first is a reader on a Bangladeshi
+    // mobile connection paying for the difference. If page weight becomes the
+    // complaint, this line is the one to move, and `formats` below already
+    // prefers AVIF, which at q80 is about the same size as WebP q80 and well
+    // under half of WebP q100.
+    qualities: [100],
     // 2560 exists for retina desktops: the masthead banner (1480 CSS px) and the
     // article hero (1224 CSS px) both need >1920 at DPR 2, and without a larger
     // candidate they were being upscaled from 1920. Only those two request it —

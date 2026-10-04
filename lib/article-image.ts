@@ -17,7 +17,7 @@ export function normalizeArticleImageUrl(url?: string | null): string | null {
   // — but 42 `Media` rows do, and they render in the CMS through here.
   //
   // The object URL is served as stored: uploads are already normalised to WebP
-  // q80 at a 2560px longest edge by media-storage.ts, so the transform was
+  // q100 at a 2560px longest edge by media-storage.ts, so the transform was
   // buying very little even when it worked.
   if (trimmed.startsWith('/uploads/')) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();

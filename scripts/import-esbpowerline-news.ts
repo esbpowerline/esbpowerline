@@ -519,9 +519,11 @@ async function downloadAndProcessImage(url: string, fallbackTitle: string, dryRu
     const arrayBuffer = await res.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Convert image buffer to WebP via sharp
+    // Convert image buffer to WebP via sharp. q100 since 2026-10-04 to match
+    // the upload path in lib/media-storage.ts — an imported image is a stored
+    // master like any other and is never re-encoded from.
     const webpBuffer = await sharp(buffer)
-      .webp({ quality: 80 })
+      .webp({ quality: 100 })
       .toBuffer();
 
     let fileName = path.basename(new URL(targetUrl).pathname);

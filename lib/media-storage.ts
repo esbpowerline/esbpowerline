@@ -55,7 +55,7 @@ const NORMALIZED_RASTER_MIMES = new Set(['image/jpeg', 'image/png', 'image/webp'
 const MAX_IMAGE_DIMENSION = 2560;
 
 /**
- * Cap dimensions, strip metadata, store WebP q80.
+ * Cap dimensions, strip metadata, store WebP q100 (q80 before 2026-10-04).
  *
  * Uploads used to be stored byte-for-byte as they arrived — a 12 MP phone photo
  * became a 5-8 MB original served to every reader, which is the root cause of
@@ -92,7 +92,13 @@ export async function normalizeRasterImage(input: {
         fit: 'inside',
         withoutEnlargement: true,
       })
-      .webp({ quality: 80 })
+      // q100 since 2026-10-04, by Hamim's call. Stored originals are the master
+      // copy and are never re-encoded from, so a lossy master cannot be undone;
+      // the figure that reaches a reader is set by `images.qualities` in
+      // next.config.ts, not here. Measured on this repo's own images, q100 is
+      // about 2.5x the bytes of q80 — that cost lands on storage, not on egress,
+      // because nothing serves this file directly.
+      .webp({ quality: 100 })
       .toBuffer();
   } catch (error) {
     throw new Error(

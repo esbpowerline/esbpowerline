@@ -20,8 +20,10 @@ describe('mediaThumbnailUrl', () => {
     // This assertion is the inverse of what it used to be, and deliberately so.
     // The endpoint it used to require now answers 403 FeatureNotEnabled, which
     // made every thumbnail in every CMS grid a broken image. Serving the object
-    // is safe: uploads are normalised to WebP q80 at 2560px on the way in, so
-    // the library is 16 MB across 168 objects.
+    // is safe: uploads are normalised to WebP at 2560px on the way in, so the
+    // library was 16 MB across 168 objects at q80. The encoder moved to q100 on
+    // 2026-10-04, so objects stored after that date are roughly 2.5x heavier and
+    // this grid pulls the full object — worth rechecking if a CMS list gets slow.
     const url = mediaThumbnailUrl(ORIGINAL, MEDIA_THUMB_WIDTH)!;
     expect(url).not.toContain('/render/image/');
     expect(url).toContain('/object/public/');
