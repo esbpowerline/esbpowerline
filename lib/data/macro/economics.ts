@@ -22,17 +22,40 @@ export const macroEconomicData = [
   { year: '2026', exchangeRate: 122.00, inflation: 10.45, spotLng: 11.8, importCoal: 105.0, retailDiesel: 135.00, retailOctane: 165.00 },
 ] as const;
 
+/**
+ * Petrobangla's accounts. Cut back to two years on 2026-10-04.
+ *
+ * This was twelve rows running FY 10 to FY 26, and all but two of them were
+ * filled in rather than read. The tell was in the series itself: FY 16 revenue
+ * of 16,400 crore sits beside FY 17 of 4,593, a fourfold step no real accounts
+ * produce, and every row before FY 17 carried `lngCost: 0` as a placeholder.
+ * FY 24 and FY 26 are years Petrobangla has not published at all — the same
+ * defect found in `bpdbAuditedFinancials` the same day, and the reason this
+ * one was looked at.
+ *
+ * FY 17 and FY 18 survive because they are corroborated: they agree to the
+ * lakh with the figures the Sector Financials page carried independently,
+ * which are now in `lib/data/companies/petrobangla-financials.ts`. That makes
+ * them very likely genuine readings of Petrobangla's annual accounts. It does
+ * NOT make them sourced — **no source document is recorded for either year**,
+ * so doctrine rule 5 is unsatisfied and the explorer labels them unverified.
+ *
+ * `revenue` here agrees with that module's `revenueCrore`. `lngCost` and
+ * `netProfit` have no counterpart there and are kept as they were found:
+ * `netProfit` is not `revenue - lngCost`, and is not the operating result the
+ * other module carries, so the three are different quantities and must not be
+ * reconciled against each other.
+ *
+ * To restore the long series, get Petrobangla's annual reports and read them.
+ * Do not re-add a row without the file name that backs it.
+ */
 export const petrobanglaAuditedFinancials = [
-  { year: 'FY 10', revenue: 6200, lngCost: 0, netProfit: 350 },
-  { year: 'FY 12', revenue: 8400, lngCost: 0, netProfit: 450 },
-  { year: 'FY 14', revenue: 12500, lngCost: 0, netProfit: 600 },
-  { year: 'FY 16', revenue: 16400, lngCost: 0, netProfit: 800 },
   { year: 'FY 17', revenue: 4593, lngCost: 6602, netProfit: -1874 },
   { year: 'FY 18', revenue: 4825, lngCost: 6857, netProfit: -1825 },
-  { year: 'FY 20', revenue: 23400, lngCost: 14800, netProfit: 850 },
-  { year: 'FY 21', revenue: 25600, lngCost: 17200, netProfit: 600 },
-  { year: 'FY 22', revenue: 28100, lngCost: 32800, netProfit: -1900 },
-  { year: 'FY 23', revenue: 34500, lngCost: 41200, netProfit: -3400 },
-  { year: 'FY 24', revenue: 38900, lngCost: 45500, netProfit: -2800 },
-  { year: 'FY 26', revenue: 44200, lngCost: 48900, netProfit: -1200 },
 ] as const;
+
+/** What was removed, and why, named rather than left as a shorter chart. */
+export const PETROBANGLA_SERIES_COVERAGE_NOTE =
+  'Only FY 2016-17 and FY 2017-18 are held. The ten other years this series ' +
+  'once showed were hand-typed without a source, two of them for fiscal years ' +
+  'Petrobangla has never published, and were removed rather than corrected.';

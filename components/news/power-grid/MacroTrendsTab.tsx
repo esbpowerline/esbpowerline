@@ -29,10 +29,10 @@ import {
   usePgcbMonthlySeries,
 } from '@/lib/data/companies/usePgcbMonthly';
 import { PgcbMonthlyDetail } from '@/components/news/power-grid/PgcbMonthlyDetail';
-import { bpdbAuditedFinancials } from '@/lib/data/companies/bpdb';
+import { bpdbAuditedFinancials, BPDB_FINANCIALS_COVERAGE_NOTE } from '@/lib/data/companies/bpdb';
 import { macroTariffData, LATEST_BPDB_AUDIT, BERC_BULK_RANGE } from '@/lib/data/macro/tariff';
 import { macroGasData } from '@/lib/data/macro/gas';
-import { macroEconomicData, petrobanglaAuditedFinancials } from '@/lib/data/macro/economics';
+import { macroEconomicData, petrobanglaAuditedFinancials, PETROBANGLA_SERIES_COVERAGE_NOTE } from '@/lib/data/macro/economics';
 import { globalVsDomesticData, historicalExchangeRates } from '@/lib/data/macro/fuel-prices';
 import { macroInfrastructureData } from '@/lib/data/macro/infrastructure';
 import { nationalBudgetData } from '@/lib/data/macro/budget';
@@ -939,7 +939,7 @@ export function MacroTrendsTab({
                       so the gap can be read directly rather than eyeballed off the
                       two lines. Not independently audited.
                     </span>
-                    <span className="font-medium">Reporting Period: FY 2020 - FY 2026 Financial Audits</span>
+                    <span className="font-medium">Reporting Period: FY 2016-17 – FY 2022-23</span>
                   </GridCardFooter>
                 </div>
 
@@ -2108,24 +2108,24 @@ export function MacroTrendsTab({
           {macroSubTab === 'reports' && (
             <div className="space-y-6 grid-explorer-subpanel">
               {/*
-                A published figure stays P even when it does not add up — that is a
-                defect in the source, disclosed, not a reason to restate its
-                provenance. Same treatment as PGCB's 1 MVA total error and its
-                prose-vs-table contradiction elsewhere in this explorer.
+                This banner used to say BPDB's accounts did not reconcile, and named
+                FY24 and FY26 as the worst offenders. Both years were invented, and
+                the series they sat in was replaced on 2026-10-04 by one derived from
+                the audited reports — whose balance is computed here rather than read,
+                so it reconciles by construction. Petrobangla's half is still the old
+                shape: hand-typed, citing nothing, and not reconciling. Only it warns.
               */}
-              <div className="p-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] text-[11px] leading-relaxed flex items-start gap-2.5">
-                <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                <span className="text-muted-foreground">
-                  <strong className="text-foreground">These accounts do not reconcile against themselves.</strong>{' '}
-                  For BPDB, revenue plus subsidy minus cost should equal the stated profit or
-                  loss; it does on 4 of 11 years. FY24 is out by 8,100 crore and FY26 by
-                  9,700 crore. The figures are shown exactly as published rather than adjusted
-                  to balance, which is why they still carry{' '}
-                  <GridProvenanceTag kind="P" /> — a published figure stays published even when
-                  it is wrong. Read the profit or loss line as stated, not as the other three
-                  columns imply.
-                </span>
-              </div>
+              {reportsCompany === 'petrobangla' ? (
+                <div className="p-3 rounded-2xl border border-amber-500/30 bg-amber-500/[0.07] text-[11px] leading-relaxed flex items-start gap-2.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                  <span className="text-muted-foreground">
+                    <strong className="text-foreground">These Petrobangla figures are hand-typed and name no document.</strong>{' '}
+                    Revenue less LNG cost does not equal the stated net profit in any year shown,
+                    and the series runs to FY 26 — years Petrobangla has not published. Read it as
+                    unverified until its annual reports are attached, as BPDB&apos;s now are.
+                  </span>
+                </div>
+              ) : null}
 
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex gap-2">
@@ -2165,7 +2165,7 @@ export function MacroTrendsTab({
                       <Landmark className="h-5 w-5 shrink-0 text-emerald-500" />
                       <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">BPDB Annual Cost, Revenue &amp; Subsidy Profile (Crore BDT)</h3>
-                        <p className="grid-explorer-chart-card__sub">Historical audited gap showing rising purchase costs vs treasury transfers — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                        <p className="grid-explorer-chart-card__sub">The gap between what BPDB sells power for and what it costs to supply, against the treasury transfer that covers it — <span className="text-primary font-semibold text-xs">FY 2016-17 to FY 2022-23, as BPDB printed it</span></p>
                       </div>
                     </div>
 
@@ -2188,27 +2188,27 @@ export function MacroTrendsTab({
                                     </div>
                                     <div className="space-y-2 text-[11px] md:text-xs">
                                       <div className="flex justify-between">
-                                        <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Operating Revenue:</span>
-                                        <span className="font-bold text-foreground tabular-nums">{formatNumber(d.revenue)} Crore BDT</span>
+                                        <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Energy Sales:</span>
+                                        <span className="font-bold text-foreground tabular-nums">{d.revenue == null ? '—' : `${formatNumber(d.revenue, 2)} Crore BDT`}</span>
                                       </div>
                                       <div className="flex justify-between">
-                                        <span className="text-destructive inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Gen &amp; Purchase Cost:</span>
-                                        <span className="font-bold text-destructive tabular-nums">{formatNumber(d.cost)} Crore BDT</span>
+                                        <span className="text-destructive inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Total Operating Expenses:</span>
+                                        <span className="font-bold text-destructive tabular-nums">{formatNumber(d.cost, 2)} Crore BDT</span>
                                       </div>
                                       <div className="flex justify-between">
                                         <span className="text-emerald-500 inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Government Subsidy:</span>
-                                        <span className="font-bold text-emerald-500 tabular-nums">{formatNumber(d.subsidy)} Crore BDT</span>
+                                        <span className="font-bold text-emerald-500 tabular-nums">{d.subsidy == null ? 'Not printed this year' : `${formatNumber(d.subsidy, 2)} Crore BDT`}</span>
                                       </div>
                                       <div className="flex justify-between border-t border-border/30 pt-1">
-                                        <span className="text-destructive font-bold inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Net Profit/Loss:</span>
-                                        <span className="font-bold text-destructive tabular-nums">{formatNumber(d.loss)} Crore BDT</span>
+                                        <span className="font-bold inline-flex items-center gap-1"><GridProvenanceTag kind="D" />Operating balance after subsidy:</span>
+                                        <span className={cn("font-bold tabular-nums", d.loss == null ? "text-muted-foreground" : d.loss < 0 ? "text-destructive" : "text-emerald-500")}>{d.loss == null ? '—' : `${formatNumber(d.loss, 2)} Crore BDT`}</span>
                                       </div>
                                     </div>
                                     <div className="mt-2 pt-2 border-t border-border/30 text-[9px] md:text-[10px] text-muted-foreground leading-normal italic font-medium">
-                                      Formula: Net Profit/Loss = (Revenue + Subsidy) - Generation &amp; Purchase Cost
+                                      ESB PowerLine&apos;s arithmetic: (Energy Sales + Subsidy) − Total Operating Expenses. BPDB does not print it, and it is an operating balance — no interest, no other income. Blank where BPDB printed no subsidy.
                                     </div>
                                     <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                                      <div><strong>Source:</strong> <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPDB Annual Financial Report</a></div>
+                                      <div><strong>Source:</strong> {d.sourceFile}, Comparative Statement of Budget and Achievement — <a href="https://www.bpdb.gov.bd/site/page/annual-report" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">BPDB annual reports</a></div>
                                       <div>As published. Not independently audited.</div>
                                     </div>
                                   </div>
@@ -2216,10 +2216,10 @@ export function MacroTrendsTab({
                               }}
                             />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                            <Bar dataKey="revenue" name="Operating Revenue" fill={SERIES_COLORS.domesticGas} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar dataKey="revenue" name="Energy Sales" fill={SERIES_COLORS.domesticGas} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
                             <Bar dataKey="subsidy" name="Govt Subsidy" fill={SERIES_COLORS.retailDiesel} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="cost" name="Gen &amp; Purchase Cost" fill={SERIES_COLORS.peakGeneration} radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Line type="monotone" dataKey="loss" name="Net Loss (after subsidy)" stroke={SERIES_COLORS.powerBudget} strokeWidth={3} dot={{ fill: SERIES_COLORS.powerBudget, r: 4 }} />
+                            <Bar dataKey="cost" name="Total Operating Expenses" fill={SERIES_COLORS.peakGeneration} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Line type="monotone" dataKey="loss" name="Operating balance after subsidy" stroke={SERIES_COLORS.powerBudget} strokeWidth={3} dot={{ fill: SERIES_COLORS.powerBudget, r: 4 }} connectNulls={false} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       ) : (
@@ -2231,10 +2231,10 @@ export function MacroTrendsTab({
         categoryHeader='Year'
         categories={localBpdbAuditedFinancials.map((d) => d.year)}
         series={[
-          { label: "Operating Revenue", values: columnOf(localBpdbAuditedFinancials, 'revenue') },
+          { label: "Energy Sales", values: columnOf(localBpdbAuditedFinancials, 'revenue') },
           { label: "Govt Subsidy", values: columnOf(localBpdbAuditedFinancials, 'subsidy') },
-          { label: "Gen & Purchase Cost", values: columnOf(localBpdbAuditedFinancials, 'cost') },
-          { label: "Net Loss (after subsidy)", values: columnOf(localBpdbAuditedFinancials, 'loss') },
+          { label: "Total Operating Expenses", values: columnOf(localBpdbAuditedFinancials, 'cost') },
+          { label: "Operating balance after subsidy (derived)", values: columnOf(localBpdbAuditedFinancials, 'loss') },
         ]}
       />
 
@@ -2242,7 +2242,7 @@ export function MacroTrendsTab({
                     <GridCardFooter>
                       <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financial Reports</a></span>
                       <span>As published. Not independently audited.</span>
-                      <span className="font-medium">Reporting Period: Audited Accounts (FY 2010 - FY 2026)</span>
+                      <span className="font-medium">Reporting Period: FY 2016-17 – FY 2022-23. {BPDB_FINANCIALS_COVERAGE_NOTE}</span>
                     </GridCardFooter>
                   </div>
 
@@ -2254,16 +2254,16 @@ export function MacroTrendsTab({
                           <tr>
                             <th>Fiscal Year</th>
                             <th className="text-left">
-                              <span className="inline-flex items-center gap-1">Operating Revenue (Crore BDT)<GridProvenanceTag kind="P" /></span>
+                              <span className="inline-flex items-center gap-1">Energy Sales (Crore BDT)<GridProvenanceTag kind="P" /></span>
                             </th>
                             <th className="text-left">
-                              <span className="inline-flex items-center gap-1">Generation &amp; Purchase Cost (Crore BDT)<GridProvenanceTag kind="P" /></span>
+                              <span className="inline-flex items-center gap-1">Total Operating Expenses (Crore BDT)<GridProvenanceTag kind="P" /></span>
                             </th>
                             <th className="text-left">
                               <span className="inline-flex items-center gap-1">Govt Subsidy Received (Crore BDT)<GridProvenanceTag kind="P" /></span>
                             </th>
                             <th className="text-left">
-                              <span className="inline-flex items-center gap-1">Net Profit / Loss (Crore BDT)<GridProvenanceTag kind="P" /></span>
+                              <span className="inline-flex items-center gap-1">Operating balance after subsidy (Crore BDT)<GridProvenanceTag kind="D" /></span>
                             </th>
                           </tr>
                         </thead>
@@ -2271,10 +2271,10 @@ export function MacroTrendsTab({
                           {localBpdbAuditedFinancials.map((d, idx) => (
                             <tr key={idx}>
                               <td className="font-semibold">{d.year}</td>
-                              <td className="text-left tabular-nums">{formatNumber(d.revenue)}</td>
-                              <td className="text-left tabular-nums text-destructive">{formatNumber(d.cost)}</td>
-                              <td className="text-left tabular-nums text-emerald-500 font-semibold">{formatNumber(d.subsidy)}</td>
-                              <td className="text-left tabular-nums font-bold text-destructive">{formatNumber(d.loss)}</td>
+                              <td className="text-left tabular-nums">{d.revenue == null ? '—' : formatNumber(d.revenue, 2)}</td>
+                              <td className="text-left tabular-nums text-destructive">{formatNumber(d.cost, 2)}</td>
+                              <td className="text-left tabular-nums text-emerald-500 font-semibold">{d.subsidy == null ? '—' : formatNumber(d.subsidy, 2)}</td>
+                              <td className={cn("text-left tabular-nums font-bold", d.loss == null ? "" : d.loss < 0 ? "text-destructive" : "text-emerald-500")}>{d.loss == null ? '—' : formatNumber(d.loss, 2)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -2285,7 +2285,7 @@ export function MacroTrendsTab({
                     <GridCardFooter>
                       <span>Source: <a href="https://www.bpdb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">BPDB Annual Financial Reports</a></span>
                       <span>As published. Not independently audited.</span>
-                      <span className="font-medium">Reporting Period: Audited Financial Statements (FY 2010 - FY 2026)</span>
+                      <span className="font-medium">Reporting Period: FY 2016-17 – FY 2022-23. {BPDB_FINANCIALS_COVERAGE_NOTE}</span>
                     </GridCardFooter>
                   </div>
                 </div>
@@ -2297,7 +2297,7 @@ export function MacroTrendsTab({
                       <Landmark className="h-5 w-5 shrink-0 text-violet-500" />
                       <div className="min-w-0">
                         <h3 className="grid-explorer-chart-card__title">Petrobangla Annual Revenue &amp; LNG Import Costs</h3>
-                        <p className="grid-explorer-chart-card__sub">Audited historical financials illustrating LNG import cost burden (Crore BDT) — <span className="text-primary font-semibold text-xs">Tracked since 2010</span></p>
+                        <p className="grid-explorer-chart-card__sub">Gas sales against the LNG import bill (Crore BDT) — <span className="text-primary font-semibold text-xs">FY 2016-17 and FY 2017-18 only, unverified</span></p>
                       </div>
                     </div>
 
@@ -2370,7 +2370,7 @@ export function MacroTrendsTab({
                     <GridCardFooter>
                       <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Financial Accounts</a></span>
                       <span>As published. Not independently audited.</span>
-                      <span className="font-medium">Reporting Period: Audited Balance Sheets (FY 2010 - FY 2026)</span>
+                      <span className="font-medium">Reporting Period: FY 2016-17 – FY 2017-18. {PETROBANGLA_SERIES_COVERAGE_NOTE}</span>
                     </GridCardFooter>
                   </div>
 
@@ -2422,7 +2422,7 @@ export function MacroTrendsTab({
                     <GridCardFooter>
                       <span>Source: <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Petrobangla Audited Financial Accounts</a></span>
                       <span>As published. Not independently audited.</span>
-                      <span className="font-medium">Reporting Period: Audited Accounts Summary (FY 2010 - FY 2026)</span>
+                      <span className="font-medium">Reporting Period: FY 2016-17 – FY 2017-18. {PETROBANGLA_SERIES_COVERAGE_NOTE}</span>
                     </GridCardFooter>
                   </div>
                 </div>
