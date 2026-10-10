@@ -51,7 +51,7 @@ export const revalidate = 3600;
 export const metadata = {
   title: 'The R-LNG Shortfall, July–August 2026 — Bangladesh gas crisis event study',
   description:
-    'How Bangladesh’s grid moved when R-LNG supply fell from ~1,040 to ~500, then ~300 MMCFD: gas supply, gas-fired generation, substitution, cost and load shedding, day by day and hour by hour — every figure from the official PGCB, Petrobangla and NLDC records.',
+    'How Bangladesh’s grid moved when R-LNG supply fell from ~1,040 to ~500, then ~300 MMCFD — generation, cost and load shedding, day by day, from official records.',
   alternates: { canonical: '/analysis/gas-crisis-2026' },
   keywords: [
     'Bangladesh gas crisis 2026',

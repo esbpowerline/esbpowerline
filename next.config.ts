@@ -345,6 +345,26 @@ const nextConfig: NextConfig = {
       // WordPress front-controller (/index.php, /index.php?...)
       { source: '/index.php', destination: '/', permanent: true },
 
+      // Search Console "Not found (404)", read 2026-10-10 — each of these still
+      // answered 404 live. WordPress minted `-2` for a second post under a slug
+      // already taken; the story is the one without it. The truncated
+      // `standards-non-` matches exactly one article (the other truncated
+      // prefixes in that list match several and stay 404 rather than guess).
+      // Category feeds and the old power-grid data page have one obvious home.
+      {
+        source: '/articles/severe-power-shortage-feared-in-the-upcoming-summer-season-2',
+        destination: '/articles/severe-power-shortage-feared-in-the-upcoming-summer-season',
+        permanent: true,
+      },
+      {
+        source: '/articles/standards-non-',
+        destination: '/articles/standards-non-compliance-petrobangla-rejects-and-sends-back-aramco-lng-cargo',
+        permanent: true,
+      },
+      { source: '/category/:path*/feed', destination: '/feed.xml', permanent: true },
+      { source: '/videogallery/feed', destination: '/feed.xml', permanent: true },
+      { source: '/data-reports/power-grid', destination: '/grid-explorer', permanent: true },
+
       // Legacy WordPress category mappings to canonical Next.js categories.
       // Explicit mappings MUST precede generic /category/:slug and /category/:parent/:slug
       // fallbacks, or requests like /category/news/distribution/ redirect to

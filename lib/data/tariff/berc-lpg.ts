@@ -55,6 +55,20 @@ export interface LpgPriceNotice {
 /** Newest first. */
 export const LPG_PRICE_HISTORY: readonly LpgPriceNotice[] = [
   {
+    // Read 2026-10-10 from the scan. Every cylinder size agrees with 153.06/kg
+    // (5.5 kg 842, 45 kg 6,888); the full order is BERC order 2026/36.
+    memoNo: '28.01.0000.012.17.002.26.3309',
+    issuedOn: '2026-10-04',
+    effectiveFrom: '2026-10-04T18:00+06:00',
+    kind: 'monthly',
+    saudiCpUsdPerTonne: { propane: 680, butane: 730, average: 712.5 },
+    perKgTk: 153.06,
+    cylinder12KgTk: 1837,
+    autogasPerLitreTk: 84.62,
+    evidenceId: 'berc-lpg-2026-10-04-3309',
+    sourceUrl: 'https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-berc/2026/9/9ae44ba8-583b-4012-bad0-4171813add29.pdf',
+  },
+  {
     memoNo: '28.01.0000.012.17.002.26.3176',
     issuedOn: '2026-09-02',
     effectiveFrom: '2026-09-02T18:00+06:00',
@@ -220,23 +234,23 @@ export const LPG_PRICE_HISTORY: readonly LpgPriceNotice[] = [
  * figures, from which no other size is derived here.
  */
 export const CURRENT_CYLINDER_PRICES: readonly { kg: number; tk: number }[] = [
-  { kg: 5.5, tk: 727 },
-  { kg: 12, tk: 1585 },
-  { kg: 12.5, tk: 1652 },
-  { kg: 15, tk: 1982 },
-  { kg: 16, tk: 2114 },
-  { kg: 18, tk: 2378 },
-  { kg: 20, tk: 2642 },
-  { kg: 22, tk: 2907 },
-  { kg: 25, tk: 3303 },
-  { kg: 30, tk: 3964 },
-  { kg: 33, tk: 4360 },
-  { kg: 35, tk: 4624 },
-  { kg: 45, tk: 5945 },
+  { kg: 5.5, tk: 842 },
+  { kg: 12, tk: 1837 },
+  { kg: 12.5, tk: 1913 },
+  { kg: 15, tk: 2296 },
+  { kg: 16, tk: 2449 },
+  { kg: 18, tk: 2755 },
+  { kg: 20, tk: 3061 },
+  { kg: 22, tk: 3367 },
+  { kg: 25, tk: 3827 },
+  { kg: 30, tk: 4592 },
+  { kg: 33, tk: 5051 },
+  { kg: 35, tk: 5357 },
+  { kg: 45, tk: 6888 },
 ];
 
 /** Piped (reticulated) private LPG in the newest notification. */
-export const CURRENT_RETICULATED = { liquidPerKgTk: 128.37, gasPerCubicMetreTk: 285.3 } as const;
+export const CURRENT_RETICULATED = { liquidPerKgTk: 149.31, gasPerCubicMetreTk: 331.9 } as const;
 
 /**
  * Government LPG (LP Gas Ltd), 12.5 kg at the dealer/retailer point. Not set

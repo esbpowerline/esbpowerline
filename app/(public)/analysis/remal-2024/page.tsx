@@ -53,7 +53,7 @@ const PATH = `/analysis/${def.slug}`;
 export const metadata = {
   title: 'The R-LNG Line After Cyclone Remal, May–October 2024 — Bangladesh event study',
   description:
-    'How Bangladesh’s imported-gas supply fell over Cyclone Remal and held near 600 MMCFD for four months in 2024: gas supply, gas-fired generation, substitution, cost and the evening-peak shortfall, day by day — every figure from the official PGCB and Petrobangla records.',
+    'How Bangladesh’s imported gas fell over Cyclone Remal and held near 600 MMCFD for four months in 2024 — generation, cost and the evening-peak shortfall.',
   alternates: { canonical: PATH },
   keywords: [
     'Cyclone Remal LNG',

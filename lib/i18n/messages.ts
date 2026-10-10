@@ -26,6 +26,9 @@ export type MessageKey =
   | 'footer.gridExplorer'
   | 'footer.energyPolicy'
   | 'footer.lpgPrice'
+  | 'footer.gridArchive'
+  | 'footer.analysis'
+  | 'footer.titasGas'
   | 'footer.search'
   | 'footer.copyright'
   | 'footer.tagline'
@@ -201,6 +204,9 @@ const EN: Record<MessageKey, string> = {
   'footer.gridExplorer': 'Grid Explorer',
   'footer.energyPolicy': 'Energy Policy Library',
   'footer.lpgPrice': 'LPG Price (BERC)',
+  'footer.gridArchive': 'Grid Archive since 2013',
+  'footer.analysis': 'Event Studies',
+  'footer.titasGas': 'Titas Gas Record',
   'footer.search': 'Search',
   'footer.copyright': '© {year} ESB PowerLine. All rights reserved.',
   'footer.tagline':
@@ -392,6 +398,9 @@ const BN: Record<MessageKey, string> = {
   'footer.gridExplorer': 'গ্রিড তথ্য',
   'footer.energyPolicy': 'জ্বালানি নীতি সংগ্রহ',
   'footer.lpgPrice': 'এলপিজির দাম (বিইআরসি)',
+  'footer.gridArchive': 'গ্রিড আর্কাইভ (২০১৩ থেকে)',
+  'footer.analysis': 'ঘটনা বিশ্লেষণ',
+  'footer.titasGas': 'তিতাস গ্যাসের হিসাব',
   'footer.search': 'খুঁজুন',
   'footer.copyright': '© {year} ইএসবি পাওয়ারলাইন। সর্বস্বত্ব সংরক্ষিত।',
   'footer.tagline':

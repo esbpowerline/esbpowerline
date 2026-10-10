@@ -13,7 +13,7 @@ export function generateMetadata() {
   return {
     title: 'Energy Policy & Regulatory Framework',
     description:
-      "The acts, policies, master plans and regulations that officially govern Bangladesh's power & energy sector — curated summaries with links to the official source documents.",
+      "The acts, policies, master plans and regulations governing Bangladesh's power and energy sector — summaries linked to the official source documents.",
     alternates: {
       canonical: '/energy-policy',
     },

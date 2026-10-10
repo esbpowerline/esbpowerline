@@ -34,7 +34,7 @@ export const metadata = {
   // the title, the H1 strap and the first paragraph of this page (2026-09-02).
   title: 'Bangladesh Power Sector Data — Grid Explorer: daily generation, demand & gas',
   description:
-    'Daily generation, demand, load shedding, fuel mix, gas supply and cross-border imports for Bangladesh’s national grid — 4,500+ days from the official PGCB and Petrobangla daily reports, with every figure traced to its source.',
+    'Bangladesh’s national grid day by day: generation, demand, load shedding, fuel mix, gas and imports — 4,500+ days from official PGCB and Petrobangla reports.',
   // Broad but honest: every term below names something this page actually
   // publishes figures for. Nothing here is a query we cannot answer.
   keywords: [

@@ -97,6 +97,12 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
     { label: t('footer.energyPolicy'), href: '/energy-policy' },
     // The largest unmet search demand in Search Console, 2026-09-30.
     { label: t('footer.lpgPrice'), href: '/lpg-price' },
+    // Search Console "Discovered — currently not indexed", 2026-10-10: /analysis
+    // and the archive's own front door sat in the queue with no site-wide link,
+    // and /titas-gas was reachable only from the homepage rail.
+    { label: t('footer.gridArchive'), href: '/grid-explorer/archive' },
+    { label: t('footer.analysis'), href: '/analysis' },
+    { label: t('footer.titasGas'), href: '/titas-gas' },
     { label: t('footer.search'), href: '/search' },
   ];
 

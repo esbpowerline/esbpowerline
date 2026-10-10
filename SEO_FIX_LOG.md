@@ -1374,3 +1374,30 @@ articles; a redirect would be a guess, so they stay correct 404s.
 | LPG price page | The largest unmet demand; build only from BERC's monthly orders (CLAUDE.md open work 5). |
 | Month archive pages | Awaiting reference designs. |
 | Next Search Console read | ~17 October: archive not-indexed count should stop growing and start to fall; watch whether the discovered queue clears for the real pages. |
+
+---
+
+## 12. Search Console pass, 2026-10-10
+
+Every "why pages aren't indexed" list was read and every non-Bengali URL in "Not found"
+was requested live. Most already redirect correctly (the report predates the 19 September
+fixes). What was still wrong, and what changed:
+
+| Finding | Fix |
+|---|---|
+| **Multi-word tag pages answered 404.** Next passes `/tags/Natural%20gas` still encoded; the page looked up `Natural%20gas`. 192 of 818 published tags, 208 links from 59 articles. | `decodeRouteParam` (`lib/route-param.ts`) in the tag page and its metadata. |
+| `/lpg-price` still showed September — the page behind the largest unmet search demand. | BERC's October notice (memo …26.3309, 4 Oct 2026, effective 6 pm) read from the scan and added: Tk 153.06/kg, 12 kg Tk 1,837, autogas Tk 84.62/L, every size and piped LPG. Every size agrees with the per-kg rate; evidence in `evidence/lpg/manifest.json`. |
+| LPG and Titas stories never linked to `/lpg-price` or `/titas-gas`. | "Data behind this story" cards from `lib/data-page-links.ts`. |
+| `/analysis`, `/grid-explorer/archive`, the author pages and 7 policy entries sat in "Discovered — currently not indexed"; the first two had no site-wide link, `/titas-gas` only the homepage rail. | Footer: Grid Archive, Event Studies, Titas Gas Record. |
+| 3 of 4 author pages had an empty or one-word description (`??` let `""` and "Contributor" through). | Bio used only when it reads as a description; otherwise a plain one. |
+| 110 descriptions over 160 characters (91 grid days, 15 archive years, Titas at 671, Analysis, the explorer, the policy index). | Day pages through `cleanDescription`; the rest rewritten under 160 with the same claims. |
+| Spam `/?459430.html` query strings (20+ "Duplicate without user-selected canonical"). | 301 to `/` in middleware. Next hands them over as `?459430.html=`. |
+| WordPress leftovers `/wp-content/*`, `/p=NNN`, `/NNNNN.html`. | 410 with the Bengali-era paths (`lib/retired-paths.ts`). |
+| `…-summer-season-2` (WordPress duplicate slug), truncated `/articles/standards-non-` (one match), `/category/…/feed`, `/data-reports/power-grid`. | Permanent redirects in `next.config.ts`. Other truncated prefixes match several articles and stay 404. |
+
+Left as they are, deliberately: dead `/tags/<keyword>` URLs from before stage 2 and scanner
+junk (`/W`, `/t`, `/*`) — correct 404s; the archived Moheshkhali story; `?date=` on Grid
+Explorer, which is a live deep link with a canonical. Two articles and
+`/energy-policy/national-energy-policy` are "crawled — not indexed": Google's judgement of the
+content, not something code fixes. Article titles over 65 characters (159) are headlines;
+they already drop the brand suffix.

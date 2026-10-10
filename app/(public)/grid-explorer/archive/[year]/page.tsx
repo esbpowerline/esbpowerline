@@ -36,7 +36,7 @@ export async function generateMetadata({
   const days = await daysInYear(year);
   if (!days.length) return { title: 'Year not found — ESB PowerLine' };
 
-  const description = `Bangladesh power sector daily reports for ${year}: peak generation, demand, load shedding, fuel mix and gas supply for each of the ${days.length} days PGCB and Petrobangla published that year.`;
+  const description = `Bangladesh grid daily reports for ${year}: peak generation, demand, load shedding, fuel mix and gas supply — ${days.length} days as PGCB and Petrobangla published them.`;
 
   return {
     title: `Bangladesh Power Grid ${year} — daily generation, demand & load shedding`,

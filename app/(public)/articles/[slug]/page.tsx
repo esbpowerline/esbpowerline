@@ -20,6 +20,7 @@ import { NoImage } from '@/components/shared/NoImage';
 import { safeJsonLd } from '@/lib/json-ld';
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import { linkPolicyMentions, policiesMentioned } from '@/lib/policy-links';
+import { dataPagesForArticle } from '@/lib/data-page-links';
 import { POLICIES } from '@/lib/data/policy/policies';
 import { gridViewForCategory } from '@/lib/grid-explorer-views';
 import { cleanDescription, ORGANIZATION_ID, shareImageUrl, SITE_URL } from '@/lib/seo';
@@ -345,7 +346,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           .map((s) => POLICIES.find((p) => p.slug === s))
           .filter((p): p is (typeof POLICIES)[number] => Boolean(p))
           .slice(0, 4);
-        if (!view && mentioned.length === 0) return null;
+        const dataPages = dataPagesForArticle(article.title, article.content);
+        if (!view && mentioned.length === 0 && dataPages.length === 0) return null;
         return (
           <aside className="article-context mt-10 grid gap-4 sm:grid-cols-2" aria-label="Related data and policy">
             {view && (
@@ -355,6 +357,13 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
                 <span className="mt-1 block text-sm text-muted-foreground">{view.blurb}, from the official PGCB and Petrobangla daily reports.</span>
               </Link>
             )}
+            {dataPages.map((d) => (
+              <Link key={d.href} prefetch={false} href={d.href} className="article-context__card block rounded-2xl border border-border/60 bg-muted/20 p-4 hover:border-primary/40 transition-colors">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">Data behind this story</span>
+                <span className="mt-1 block font-semibold text-foreground">{d.label}</span>
+                <span className="mt-1 block text-sm text-muted-foreground">{d.blurb}</span>
+              </Link>
+            ))}
             {mentioned.length > 0 && (
               <div className="article-context__card rounded-2xl border border-border/60 bg-muted/20 p-4">
                 <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-primary">Policy referenced</span>

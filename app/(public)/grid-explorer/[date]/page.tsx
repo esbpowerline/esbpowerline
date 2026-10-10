@@ -12,7 +12,7 @@ import {
 } from '@/lib/data/grid/archive-day.server';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
 import { isIndexedArchiveDay, isSettledArchiveDay } from '@/lib/data/grid/archive-indexing';
-import { ORGANIZATION_ID } from '@/lib/seo';
+import { ORGANIZATION_ID, cleanDescription } from '@/lib/seo';
 
 /**
  * One indexable page per archive day.
@@ -57,7 +57,9 @@ export async function generateMetadata({
   if (!summary) return { title: 'Day not found — ESB PowerLine' };
 
   const readable = formatArchiveDate(summary.date);
-  const description = describeDay(summary);
+  // The on-page summary below keeps every clause; the snippet is cut at a
+  // sentence or word boundary to what Google shows.
+  const description = cleanDescription(describeDay(summary));
   const catalogue = await getArchiveCatalogue();
 
   return {

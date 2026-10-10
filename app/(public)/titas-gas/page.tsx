@@ -8,7 +8,9 @@ export const revalidate = 3600;
 export function generateMetadata() {
   return {
     title: `${TITAS_RECORD.short} — the accountability record`,
-    description: TITAS_RECORD.overview,
+    // The overview runs ~670 characters; Google shows ~160. Same claims, from the same record.
+    description:
+      'Titas Gas from its own audited accounts and auditors: a company that loses close to a tenth of the gas it buys and has lost money three years running.',
     alternates: {
       canonical: '/titas-gas',
     },

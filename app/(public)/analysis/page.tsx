@@ -29,7 +29,7 @@ export const metadata = {
   // "Bangladesh" is what a reader searching for these would type.
   title: 'Event studies — Bangladesh grid and gas events, day by day',
   description:
-    'Day-by-day accounts of what happened on Bangladesh’s grid and gas network during specific events, built from the official PGCB and Petrobangla records.',
+    'Day-by-day accounts of Bangladesh’s grid and gas network during specific events, built from the official PGCB and Petrobangla records.',
   alternates: { canonical: '/analysis' },
   openGraph: {
     type: 'website',

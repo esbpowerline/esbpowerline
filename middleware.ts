@@ -27,7 +27,7 @@ import {
   resolveGridAccessTier,
 } from '@/lib/data/grid/grid-tier-access';
 import { isPublicSampleDate } from '@/lib/data/grid/public-sample-dates';
-import { isRetiredPath } from '@/lib/retired-paths';
+import { isRetiredPath, isSpamHomepageQuery } from '@/lib/retired-paths';
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
@@ -150,6 +150,10 @@ export async function middleware(request: NextRequest) {
   // Gate on the path the file system will resolve, not the path as typed:
   // see normalizeRequestPath for the percent-encoding bypass this closes.
   const pathname = normalizeRequestPath(request.nextUrl.pathname);
+
+  if (isSpamHomepageQuery(pathname, request.nextUrl.search)) {
+    return NextResponse.redirect(new URL('/', request.url), 301);
+  }
 
   // Bengali-era URLs from the old site: gone on purpose, see retired-paths.ts.
   // A WordPress date URL reaches here after next.config's 301 to /articles/<slug>.

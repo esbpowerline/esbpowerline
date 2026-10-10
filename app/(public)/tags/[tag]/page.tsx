@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/shared/Breadcrumbs';
 import { notFound } from 'next/navigation';
+import { decodeRouteParam } from '@/lib/route-param';
 import Link from 'next/link';
 import { ArticleCard } from '@/components/news/ArticleCard';
 import { getPublishedArticlesByTag, getPublicTagCounts } from '@/lib/category-content';
@@ -36,7 +37,7 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { tag } = await params;
+  const tag = decodeRouteParam((await params).tag);
   return {
     title: `#${tag}`,
     description: `Articles tagged with #${tag} in Bangladesh power & energy news.`,
@@ -51,7 +52,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function TagPage({ params }: Props) {
-  const { tag } = await params;
+  const tag = decodeRouteParam((await params).tag);
   const articles = await getPublishedArticlesByTag(tag);
 
   if (articles.length === 0) notFound();

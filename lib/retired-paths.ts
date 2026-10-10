@@ -15,6 +15,24 @@
  */
 const BENGALI_SCRIPT = /[ঀ-৿]/;
 
+/**
+ * WordPress internals and its numeric post forms, from the same Search Console
+ * lists (2026-10-10): /wp-content/*, /p=63212, /53773.html. None maps to a page
+ * here — WordPress post ids were not carried over — so they are gone, not moved.
+ */
+const WORDPRESS_LEFTOVER = /^\/(wp-(content|admin|includes|json)(\/|$)|p=\d+$|\d+\.html$)/;
+
 export function isRetiredPath(pathname: string): boolean {
-  return BENGALI_SCRIPT.test(pathname);
+  return BENGALI_SCRIPT.test(pathname) || WORDPRESS_LEFTOVER.test(pathname);
+}
+
+/**
+ * `/?459430.html`, `/index.php?1183480.html`: spam query strings someone
+ * pointed at the homepage. Search Console listed 20+ as "Duplicate without
+ * user-selected canonical"; they are all the homepage. Next normalises a bare
+ * key to `?459430.html=` before middleware sees it (logged in dev, 2026-10-10),
+ * so the trailing `=` is optional.
+ */
+export function isSpamHomepageQuery(pathname: string, search: string): boolean {
+  return pathname === '/' && /^\?\d+\.html=?$/.test(search);
 }

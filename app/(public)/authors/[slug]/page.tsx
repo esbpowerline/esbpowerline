@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { cleanDescription } from '@/lib/seo';
 import {
   AuthorProfileFrame,
   allAuthorSlugs,
@@ -40,7 +41,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: `${user.name}`,
-    description: user.bio ?? `Articles written by ${user.name}`,
+    // `??` let an empty bio through as an empty description, and a one-word
+    // bio ("Contributor") as the whole snippet — 3 of 4 author pages, live
+    // check 2026-10-10. A bio is used only when it reads as a description.
+    description:
+      user.bio && user.bio.trim().length >= 70
+        ? cleanDescription(user.bio)
+        : `Every article by ${user.name} for ESB PowerLine, covering Bangladesh's power and energy sector.`,
     alternates: { canonical: `/authors/${slug}` },
   };
 }

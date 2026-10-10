@@ -16,7 +16,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: 'Bangladesh Power Grid Archive — every daily report since 2013',
   description:
-    'Browse twelve years of Bangladesh power sector daily reports: generation, demand, load shedding, fuel mix and gas supply for every day PGCB and Petrobangla published, from 2013 to today.',
+    'Every Bangladesh power sector daily report since 2013: generation, demand, load shedding, fuel mix and gas supply, one page per day, from PGCB and Petrobangla.',
   alternates: { canonical: '/grid-explorer/archive' },
   openGraph: {
     type: 'website',
