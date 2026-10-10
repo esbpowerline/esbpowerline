@@ -15,9 +15,9 @@ import { safeJsonLd } from '@/lib/json-ld';
 import { GRID_EXPLORER_VIEWS } from '@/lib/grid-explorer-views';
 
 // Dynamic grid data is client-fetched; settings mutations call revalidatePath('/grid-explorer'),
-// so this time window is only a safety net. 300s keeps ISR churn low (new report dates ship via
-// redeploy of the static catalog, not ISR).
-export const revalidate = 300;
+// so this time window is only a safety net. Data publishes (publish-local, publish, refresh-all)
+// revalidate this path too. 900s: each regeneration stores ~312 KB (216 KB HTML + 96 KB RSC).
+export const revalidate = 900;
 
 /**
  * One canonical URL, deliberately.

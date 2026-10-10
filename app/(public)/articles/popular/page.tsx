@@ -1,6 +1,8 @@
 import { ArticlesIndexFrame } from '@/components/news/ArticlesIndexFrame';
 
-export const revalidate = 300;
+// Publishing revalidates /articles directly; the window is a safety net for
+// pagination and view-ordered lists. 900s cuts ISR writes 3x versus 300s.
+export const revalidate = 900;
 
 /**
  * The "most read" order as its own page, replacing the `?sort=views` query

@@ -48,7 +48,13 @@ import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
 
-export const revalidate = 180;
+// A safety net, not the freshness mechanism. Every way new content reaches this
+// page already calls revalidatePath('/'): publishing and scheduled publishing
+// (PUBLIC_REVALIDATE_PATHS), and the Pi's data publishes (publish-local). The live
+// tiles poll /api/data/live-grid from the browser and ignore this window. At 180s
+// each regeneration stored ~1.06 MB (788 KB HTML + 273 KB RSC) up to 480 times a
+// day, which is what ISR Writes billed from 2026-09-03 (~$0.20/day, 4x August).
+export const revalidate = 900;
 
 export const metadata = {
   // `absolute` opts out of the root '%s | ESB PowerLine' template, which was
@@ -92,10 +98,13 @@ export default async function Home() {
 
   const categoriesWithArticles = await Promise.all(
     categories.map(async (cat) => {
-      let articles = await getPublishedArticlesByCategory(cat.name, locale, 24);
+      const articles = await getPublishedArticlesByCategory(cat.name, locale, 24);
       return {
         ...cat,
-        articles,
+        // These rows cross into a client component, so every field is serialised
+        // into the RSC payload of each regeneration. CategoryCarousel never reads
+        // heroMeta, isPinned or isTrending; leave them on the server.
+        articles: articles.map(({ heroMeta: _h, isPinned: _p, isTrending: _t, ...card }) => card),
       };
     })
   );

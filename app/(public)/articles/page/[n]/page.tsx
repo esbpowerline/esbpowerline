@@ -3,7 +3,9 @@ import { getPublishedArticlesForPublic } from '@/lib/category-content';
 import { ARTICLES_PER_PAGE } from '@/components/news/ArticlesIndex';
 import { ArticlesIndexFrame, ARTICLES_INDEX_LIMIT } from '@/components/news/ArticlesIndexFrame';
 
-export const revalidate = 300;
+// Publishing revalidates /articles directly; the window is a safety net for
+// pagination and view-ordered lists. 900s cuts ISR writes 3x versus 300s.
+export const revalidate = 900;
 
 /**
  * Page N of the news index, a real URL with its own canonical. Replaces the
