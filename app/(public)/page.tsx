@@ -48,10 +48,12 @@ import { getLatestHomeSnapshot } from '@/lib/data/grid/home-snapshot.server';
 import { getLiveTickerItems } from '@/lib/data/grid/live-ticker.server';
 import { formatSnapshotHeaderDate } from '@/lib/i18n/homepage-copy';
 
-// A safety net, not the freshness mechanism. Every way new content reaches this
-// page already calls revalidatePath('/'): publishing and scheduled publishing
-// (PUBLIC_REVALIDATE_PATHS), and the Pi's data publishes (publish-local). The live
-// tiles poll /api/data/live-grid from the browser and ignore this window. At 180s
+// Articles do not wait on this window: publishing and scheduled publishing call
+// revalidatePath('/') (PUBLIC_REVALIDATE_PATHS). Grid data does: the Pi publishes
+// through scripts/publish-local.ts over SQL, which cannot revalidate a path, so a
+// new day reaches the snapshot within this window plus RELEASE_CACHE_SECONDS
+// (600s) — ~25 minutes worst case, against data its publishers file hours late.
+// The live tiles poll /api/data/live-grid from the browser and ignore it. At 180s
 // each regeneration stored ~1.06 MB (788 KB HTML + 273 KB RSC) up to 480 times a
 // day, which is what ISR Writes billed from 2026-09-03 (~$0.20/day, 4x August).
 export const revalidate = 900;
