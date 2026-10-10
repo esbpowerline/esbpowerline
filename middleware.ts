@@ -27,6 +27,7 @@ import {
   resolveGridAccessTier,
 } from '@/lib/data/grid/grid-tier-access';
 import { isPublicSampleDate } from '@/lib/data/grid/public-sample-dates';
+import { isRetiredPath } from '@/lib/retired-paths';
 
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
@@ -149,6 +150,19 @@ export async function middleware(request: NextRequest) {
   // Gate on the path the file system will resolve, not the path as typed:
   // see normalizeRequestPath for the percent-encoding bypass this closes.
   const pathname = normalizeRequestPath(request.nextUrl.pathname);
+
+  // Bengali-era URLs from the old site: gone on purpose, see retired-paths.ts.
+  // A WordPress date URL reaches here after next.config's 301 to /articles/<slug>.
+  if (isRetiredPath(pathname)) {
+    return new NextResponse('410 Gone — this page was removed.', {
+      status: 410,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+        'X-Robots-Tag': 'noindex',
+      },
+    });
+  }
 
   // The news index no longer takes query strings: `?category=`, `?sort=` and
   // `?page=` each became a real page in Stage 4 of the SEO fix. Google holds

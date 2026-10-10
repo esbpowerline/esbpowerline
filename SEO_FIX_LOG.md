@@ -1277,6 +1277,16 @@ the newsroom no longer reports 33 stories as live that no one can read. They ret
 the day they carry English titles, or the day a real `/bn` route exists — which
 remains an open product question, not a defect.
 
+**Closed for good, 2026-10-10.** Hamim's call: English only, no Bengali URL space. The
+33 rows (by then all in TRASH, 0 views, nothing linking to them) were deleted with
+their revisions, and ten Bengali keyword tags were cleared from the one English
+article that carried them. Rows, the tag change and all 33 image files are backed up
+off-repo in `C:\Users\User\esbpowerline-backups\2026-10-10-bengali-removal\`. The 33
+image files are still in the `media` bucket pending removal from the Media library
+(`storage-files-to-delete.txt` lists them). Every Bengali-script path now answers
+**410 Gone** from the middleware (`lib/retired-paths.ts`) instead of 404, so Google
+drops the old WordPress-era Bengali URLs rather than re-checking them.
+
 ### 11.5 Open after this stage
 
 | Item | State |
