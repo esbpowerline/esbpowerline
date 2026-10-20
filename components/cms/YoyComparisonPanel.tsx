@@ -51,6 +51,7 @@ import { GridDatePicker } from '@/components/cms/yoy/GridDatePicker';
 import { GridMonthPicker } from '@/components/cms/yoy/GridMonthPicker';
 import { MetricPicker, SectionChips } from '@/components/cms/yoy/MetricPicker';
 import { useYoyUrl, type YoyUrl } from '@/components/cms/yoy/useYoyUrl';
+import { YoyCardDownload } from '@/components/cms/yoy/YoyCardDownload';
 import {
   metricLabel,
   sectionLabel,
@@ -816,6 +817,15 @@ function SheetMode({ bootstrap, archive, url, lang }: { bootstrap: YoyBootstrap;
           lang={lang}
           disabled={!result?.ok || pending || !date}
           run={(format) => exportSheetDocument(date, format, lang)}
+        />
+        {/* The same nine figures as the designed social card. Always the
+            English sheet — the card's design is English — whatever the
+            Output language above is set to. */}
+        <YoyCardDownload
+          date={date}
+          disabled={!result?.ok || pending || !date}
+          className={btnGhost}
+          save={saveBlob}
         />
         <SaveToArchive
           filename={result?.ok ? result.filename : ''}
