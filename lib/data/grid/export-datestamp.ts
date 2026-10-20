@@ -48,8 +48,16 @@ const isGregorianLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400
 /**
  * Month lengths under the 2019 revision.
  *
- * The first five months are 31 days and the remaining seven are 30, which comes
- * to 365. In a leap year the extra day goes on Falgun, the eleventh month.
+ * Boishakh to Ashwin are 31 days, Kartik to Magh and Choitro are 30, and Falgun
+ * is 29 — 30 in a year that contains a leap February. That comes to 365/366.
+ * The lengths were chosen so the national days fall on fixed Bangla dates:
+ * 21 February is 8 Falgun and 16 December is 1 Poush, every year.
+ *
+ * This used to encode the 1987 revision instead (five months of 31, Falgun
+ * taking the leap day), which put every date from Kartik to Falgun one day
+ * late: 20 Oct 2026 printed as ৫ কার্তিক where Bangladesh's calendar says ৪,
+ * and 21 February as 9 Falgun. The two schemes agree from Boishakh to the end
+ * of Bhadro, which is why the August fixtures below never saw it.
  *
  * A Bangla year opens on 14 April of Gregorian year Y and closes on 13 April of
  * Y+1, so the February it contains is February of Y+1 — that is the February
@@ -58,7 +66,7 @@ const isGregorianLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400
  */
 function banglaMonthLengths(startYear: number): number[] {
   const leap = isGregorianLeap(startYear + 1);
-  return [31, 31, 31, 31, 31, 30, 30, 30, 30, 30, leap ? 31 : 30, 30];
+  return [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, leap ? 30 : 29, 30];
 }
 
 const MS_DAY = 86_400_000;

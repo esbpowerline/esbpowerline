@@ -44,25 +44,35 @@ describe('Bangla calendar', () => {
 
   it('gives Falgun its extra day only when the year contains a leap February', () => {
     // 1430 opened 14 Apr 2023 and contains February 2024 — a leap February — so
-    // Falgun runs to 31 and the year is 366 days.
+    // Falgun runs to 30 and the year is 366 days.
     const leapEnd = toBanglaDate(utc(2024, 3, 14)); // 14 March 2024
-    expect(leapEnd).toMatchObject({ year: 1430, monthName: 'ফাল্গুন', day: 31 });
-    // The 31st is the last of Falgun; the next day opens Choitro.
+    expect(leapEnd).toMatchObject({ year: 1430, monthName: 'ফাল্গুন', day: 30 });
     expect(toBanglaDate(utc(2024, 3, 15))).toMatchObject({ day: 1, monthName: 'চৈত্র' });
 
-    // 1431 contains February 2025, an ordinary February, so Falgun stops at 30
-    // and Choitro opens a day earlier in the Gregorian year.
+    // 1431 contains February 2025, an ordinary February, so Falgun stops at 29.
     const ordinaryEnd = toBanglaDate(utc(2025, 3, 14));
-    expect(ordinaryEnd).toMatchObject({ year: 1431, monthName: 'ফাল্গুন', day: 30 });
+    expect(ordinaryEnd).toMatchObject({ year: 1431, monthName: 'ফাল্গুন', day: 29 });
     expect(toBanglaDate(utc(2025, 3, 15))).toMatchObject({ day: 1, monthName: 'চৈত্র' });
 
-    // Which is the whole point: there is no 31 Falgun in an ordinary year.
-    let sawThirtyFirst = false;
+    // There is no 30 Falgun in an ordinary year.
+    let sawThirtieth = false;
     for (let d = 1; d <= 31; d += 1) {
       const b = toBanglaDate(utc(2025, 3, d));
-      if (b.monthName === 'ফাল্গুন' && b.day === 31) sawThirtyFirst = true;
+      if (b.monthName === 'ফাল্গুন' && b.day === 30) sawThirtieth = true;
     }
-    expect(sawThirtyFirst).toBe(false);
+    expect(sawThirtieth).toBe(false);
+  });
+
+  it('keeps the national days on the dates the 2019 revision fixed for them', () => {
+    // The revision's whole purpose. The 1987 month lengths this file used to
+    // carry put both a day late, and the August fixtures could not see it.
+    for (const y of [2025, 2026, 2027, 2028]) {
+      expect(toBanglaDate(utc(y, 2, 21)), `21 Feb ${y}`).toMatchObject({ day: 8, monthName: 'ফাল্গুন' });
+      expect(toBanglaDate(utc(y, 12, 16)), `16 Dec ${y}`).toMatchObject({ day: 1, monthName: 'পৌষ' });
+    }
+    // Ashwin is 31 days, so Kartik opens on 17 October.
+    expect(toBanglaDate(utc(2026, 10, 16))).toMatchObject({ day: 31, monthName: 'আশ্বিন' });
+    expect(formatBangla(utc(2026, 10, 20))).toBe('৪ কার্তিক ১৪৩৩, মঙ্গলবার');
   });
 
   it('spans exactly one Gregorian year, leap or not', () => {
