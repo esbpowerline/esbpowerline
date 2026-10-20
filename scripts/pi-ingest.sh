@@ -239,6 +239,67 @@ else
     fi
 fi
 
+# Tell the site, the moment a day is published, to drop its cached pages — then
+# check the day's page really loads.
+#
+# The rows above went straight into the database, and nothing on Vercel hears
+# about that, so the site used to wait on its own timers: 15 minutes for the
+# homepage and /grid-explorer, a day for /grid-explorer/[date]. On 2026-10-20
+# the 2026-10-19 page was requested a minute before the 12:35 poll published it,
+# and that 404 was cached for the day. /api/cron/revalidate-grid expires the
+# release cache and those pages; its secret lives in $ROOT/revalidate.env,
+# outside the checkout, because every poll resets the tree.
+#
+# The check after it is the backup: a day page still answering 404 gets one more
+# revalidation, and an alert if it does not recover. Days are read from this
+# run's own result table, so a late gas window republished on an old day counts.
+pub_days=$(grep -E '^\| 20[0-9]{2}-[0-9]{2}-[0-9]{2} \|.*\| published' "$LOG" | awk -F'|' '{gsub(/ /, "", $2); print $2}' | sort -u | tr '\n' ' ')
+if [[ -n "$pub_days" ]]; then
+    if [[ -f "$ROOT/revalidate.env" ]]; then
+        # shellcheck disable=SC1091
+        REVALIDATE_SECRET=$(. "$ROOT/revalidate.env" && echo "${REVALIDATE_SECRET:-}") \
+        "$ROOT/venv/bin/python" - "$SITE" $pub_days <<'PY' || notify warn "ingest: site not refreshed" "$(tail -1 "$LOG")"
+import json, os, sys, time, urllib.error, urllib.request
+site, days = sys.argv[1], sys.argv[2:]
+secret = os.environ.get("REVALIDATE_SECRET", "").strip()
+UA = "Mozilla/5.0 (esb-pi-revalidate)"
+def revalidate():
+    req = urllib.request.Request(f"{site}/api/cron/revalidate-grid", data=json.dumps({"dates": days}).encode(), method="POST",
+        headers={"Authorization": f"Bearer {secret}", "Content-Type": "application/json", "User-Agent": UA})
+    return json.load(urllib.request.urlopen(req, timeout=30))
+def status(day):
+    try:
+        return urllib.request.urlopen(urllib.request.Request(f"{site}/grid-explorer/{day}", headers={"User-Agent": UA}), timeout=30).status
+    except urllib.error.HTTPError as e:
+        return e.code
+    except Exception:
+        return None
+try:
+    print(f"site refresh: {len(revalidate().get('revalidated', []))} pages expired for {' '.join(days)}")
+except Exception as e:
+    print(f"site refresh: the call failed ({e}); pages wait on their own timers"); sys.exit(1)
+# The first request after an expiry may still get the old page while the new one
+# renders, so look twice before calling it stuck.
+bad = []
+for day in days:
+    for attempt in range(3):
+        time.sleep(10)
+        code = status(day)
+        if code == 200: break
+        if attempt == 1:
+            try: revalidate()
+            except Exception: pass
+    else:
+        bad.append(f"{day}:{code}")
+if bad:
+    print(f"site refresh: day page still not loading — {' '.join(bad)}"); sys.exit(1)
+print(f"site refresh: day pages load — {' '.join(days)}")
+PY
+    else
+        echo "  note: $ROOT/revalidate.env missing — the site will pick up ${pub_days}on its own timers"
+    fi
+fi
+
 # How far behind is the archive? Two days back is PGCB being slow; three is us.
 "$ROOT/venv/bin/python" - <<'PY' || notify warn "ingest: archive falling behind" "$(tail -1 "$LOG")"
 import json, datetime, sys

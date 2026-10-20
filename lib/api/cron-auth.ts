@@ -8,12 +8,15 @@ function timingSafeEqualString(a: string, b: string): boolean {
   return mismatch === 0;
 }
 
+/** Bearer check against a named secret; false when the secret is unset, so a missing env var never opens a route. */
+export function isBearerAuthorized(request: Request, secret: string | undefined): boolean {
+  const s = secret?.trim();
+  if (!s) return false;
+  const auth = request.headers.get('authorization') ?? '';
+  return timingSafeEqualString(auth, `Bearer ${s}`);
+}
+
 /** Shared CRON bearer check for health routes and proxy API bypass. */
 export function isCronAuthorized(request: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET?.trim();
-  if (!cronSecret) return false;
-
-  const auth = request.headers.get('authorization') ?? '';
-  const expected = `Bearer ${cronSecret}`;
-  return timingSafeEqualString(auth, expected);
+  return isBearerAuthorized(request, process.env.CRON_SECRET);
 }
