@@ -276,6 +276,10 @@ def status(day):
         return None
 try:
     print(f"site refresh: {len(revalidate().get('revalidated', []))} pages expired for {' '.join(days)}")
+except urllib.error.HTTPError as e:
+    if e.code == 404:   # the endpoint is not deployed yet: main has not been released since it was added
+        print("site refresh: /api/cron/revalidate-grid is not on the live site yet; pages wait on their own timers"); sys.exit(0)
+    print(f"site refresh: the call failed ({e}); pages wait on their own timers"); sys.exit(1)
 except Exception as e:
     print(f"site refresh: the call failed ({e}); pages wait on their own timers"); sys.exit(1)
 # The first request after an expiry may still get the old page while the new one
