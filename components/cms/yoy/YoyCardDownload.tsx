@@ -10,14 +10,13 @@ import { YoyCard } from '@/components/cms/yoy/YoyCard';
 /**
  * "Download .png" — the day's sheet as the designed social card.
  *
- * Drawn in the editor's browser rather than on the server: nothing new runs on
- * Vercel, and the browser shapes the masthead's Bengali calendar line where
- * the server-side renderers mangle its conjuncts (see the .pdf caveat beside
- * this button). The card is always built from the English sheet, whatever the
+ * Drawn in the editor's browser rather than on the server, so nothing new runs
+ * on Vercel. The card is always built from the English sheet, whatever the
  * panel's output language, because the design is English.
  *
  * The card is mounted off-screen only for the moment it is being captured, at
- * its real 1080 px size, and rasterised at 2× so it stays sharp on a phone.
+ * its real 1080×1350 (4:5) size, and rasterised at 2× so it stays sharp on a
+ * phone.
  */
 export function YoyCardDownload({
   date,
@@ -59,15 +58,12 @@ export function YoyCardDownload({
         if (!node) throw new Error('The card did not mount.');
         await document.fonts.ready;
         // A face that has not been asked for yet is not loading yet: request
-        // both explicitly so the capture can never fall back to a system font.
-        await Promise.all([
-          document.fonts.load("900 46px 'YoyCardInter'"),
-          document.fonts.load("600 16px 'YoyCardBengali'", 'কার্তিক'),
-        ]);
+        // it explicitly so the capture can never fall back to a system font.
+        await document.fonts.load("900 46px 'YoyCardInter'");
         await Promise.all(
           Array.from(node.querySelectorAll('img')).map((img) => img.decode().catch(() => undefined)),
         );
-        const blob = await toBlob(node, { width: 1080, height: 1080, pixelRatio: 2, cacheBust: true });
+        const blob = await toBlob(node, { width: 1080, height: 1350, pixelRatio: 2, cacheBust: true });
         if (!blob) throw new Error('The browser could not draw the card.');
         if (!cancelled) save(model.filename, blob);
       } catch (e) {
@@ -97,7 +93,7 @@ export function YoyCardDownload({
         <div
           ref={host}
           aria-hidden
-          style={{ position: 'fixed', left: -20000, top: 0, width: 1080, height: 1080, pointerEvents: 'none' }}
+          style={{ position: 'fixed', left: -20000, top: 0, width: 1080, height: 1350, pointerEvents: 'none' }}
         >
           <YoyCard model={model} />
         </div>
