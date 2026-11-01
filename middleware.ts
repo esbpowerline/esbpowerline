@@ -419,6 +419,14 @@ export async function middleware(request: NextRequest) {
  *   BY PREFIX — build output and asset directories that can never carry a
  *     session, a role or a gated date. `__nextjs_font` is new here; it was
  *     costing one invocation on every page that pulled a face.
+ *     `api/o/` and `r/` are the outreach open pixel and click redirect
+ *     (app/api/o/[key], app/r/[key]). They are public by design, must set no
+ *     cookie — a signed-in staff member opening their own test letter would
+ *     otherwise get a session refresh written onto a tracking GIF — and must
+ *     not meet the bot user-agent guard, which refuses an empty UA and so
+ *     some mail image proxies. Both keep their own per-IP limit on recorded
+ *     events. The trailing slash is load-bearing: `r/` excludes `/r/{key}`
+ *     only, never `/reports` or `/r`.
  *
  *   BY EXTENSION — the same idea, generalised. Fonts, icons, stylesheets,
  *     source maps, the manifest, the RSS feed, the two extra sitemaps
@@ -439,6 +447,6 @@ export async function middleware(request: NextRequest) {
  */
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|__nextjs_font|images|api/cron|.*\.(?:ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2|ttf|otf|eot|css|js|mjs|map|txt|xml|webmanifest|pdf)$).*)',
+    '/((?!_next/static|_next/image|__nextjs_font|images|api/cron|api/o/|r/|.*\.(?:ico|png|jpg|jpeg|gif|svg|webp|avif|woff|woff2|ttf|otf|eot|css|js|mjs|map|txt|xml|webmanifest|pdf)$).*)',
   ],
 };

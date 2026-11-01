@@ -57,6 +57,13 @@ describe('middleware still runs where a decision is made', () => {
     '/categories/energy-policy-regulators',
     '/grid-explorer',
     '/grid-explorer/2026-07-08',
+    // The outreach exclusions are prefix-exact: neighbours keep matching.
+    '/r',
+    '/reports',
+    '/research/some-slug',
+    '/api/other',
+    '/api/o',
+    '/api/organizations',
   ];
 
   for (const p of MUST_MATCH) {
@@ -86,6 +93,11 @@ describe('middleware does not run on things that carry no decision', () => {
     '/macro-charts/generation.svg',
     '/pdf/annual-report.pdf',
     '/googlef7ae5454de989a56.html'.replace('.html', '.txt'),
+    // Outreach open pixel and click redirect: public, cookie-free, and out of
+    // reach of the bot guard (see the matcher comment in middleware.ts).
+    '/api/o/AbCdEfGhIjKlMnOpQrSt_-',
+    '/api/o/AbCdEfGhIjKlMnOpQrSt_-.gif',
+    '/r/AbCdEfGhIjKlMnOpQrSt_-',
   ];
 
   for (const p of MUST_NOT_MATCH) {
