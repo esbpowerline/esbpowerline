@@ -3,6 +3,7 @@ import {
   buildWorldRows,
   candidateContracts,
   contractSymbol,
+  currentContract,
   isSettled,
   matchFront,
   minusMonth,
@@ -66,6 +67,24 @@ describe('world oil futures', () => {
     expect(isSettled(fri, Date.parse('2026-10-30T21:00:00Z'))).toBe(true); // 17:00 New York
     expect(isSettled(fri, Date.parse('2026-11-01T02:00:00Z'))).toBe(true);
     expect(nyDay(Date.parse('2026-11-01T02:00:00Z'))).toBe('2026-10-31');
+  });
+
+  it('never counts a weekend bar as a settlement', () => {
+    // Yahoo files the session that opens Sunday evening under Sunday's date.
+    expect(isSettled('2026-11-01', Date.parse('2026-11-01T21:30:00Z'))).toBe(false);
+    expect(isSettled('2026-10-31', Date.parse('2026-11-02T12:00:00Z'))).toBe(false);
+  });
+
+  it('takes the contract still quoted, not an expiry-day bar', () => {
+    // 1 Nov 2026: BZ=F's daily bar for 30 Oct had been revised to December's
+    // final settlement (117.64), but its live quote was January's.
+    const live = { symbol: 'BZ=F', regularMarketPrice: 113.43, regularMarketVolume: 37539 };
+    expect(
+      currentContract(live, {
+        'BZZ26.NYM': { symbol: 'BZZ26.NYM', regularMarketPrice: 117.64, regularMarketVolume: 2223 },
+        'BZF27.NYM': { symbol: 'BZF27.NYM', regularMarketPrice: 113.43, regularMarketVolume: 37539 },
+      }),
+    ).toBe('BZF27.NYM');
   });
 
   it('finds the front contract by matching the continuous series, never by guessing', () => {

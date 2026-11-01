@@ -25,22 +25,25 @@ import { createScriptPrismaClient } from '../prisma/client';
 import {
   SERIES,
   candidateContracts,
+  currentContract,
   isSettled,
   matchFront,
   nyDay,
   parseChart,
+  round4,
+  type ChartMeta,
   type DailyBar,
 } from '../lib/data/oil/futures';
 
 const DRY = process.argv.includes('--dry-run');
 const UA = 'Mozilla/5.0 (X11; Linux aarch64) esbpowerline-ingest';
 
-async function chart(symbol: string): Promise<DailyBar[]> {
+async function chart(symbol: string): Promise<{ bars: DailyBar[]; meta: ChartMeta | null }> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=3mo&interval=1d`;
   const res = await fetch(url, { headers: { 'user-agent': UA } });
-  if (res.status === 404) return []; // a contract Yahoo does not list yet
+  if (res.status === 404) return { bars: [], meta: null }; // a contract Yahoo does not list yet
   if (!res.ok) throw new Error(`${symbol}: HTTP ${res.status}`);
-  return parseChart(await res.json()).bars;
+  return parseChart(await res.json());
 }
 
 async function main() {
@@ -52,15 +55,25 @@ async function main() {
   try {
     for (const s of SERIES) {
       const settled = (bars: DailyBar[]) => bars.filter((b) => isSettled(b.day, now));
-      const continuous = settled(await chart(s.continuous));
+      const cont = await chart(s.continuous);
+      const continuous = settled(cont.bars);
       const contracts: Record<string, DailyBar[]> = {};
+      const metas: Record<string, ChartMeta> = {};
       for (const sym of candidateContracts(s.root, today)) {
-        const bars = settled(await chart(sym));
+        const c = await chart(sym);
+        const bars = settled(c.bars);
         if (bars.length) contracts[sym] = bars;
+        if (c.meta) metas[sym] = c.meta;
       }
       const front = matchFront(continuous, contracts);
+      // The latest settled day is the one a card prints. Its front is the
+      // contract still being quoted, not whatever Yahoo's daily bar says on an
+      // expiry day (see currentContract).
+      const now_ = cont.meta && currentContract(cont.meta, metas);
+      const lastDay = Object.values(contracts).flat().map((b) => b.day).sort().at(-1);
+      if (now_ && lastDay && contracts[now_]?.some((b) => b.day === lastDay)) front[lastDay] = now_;
       const rows = Object.entries(contracts).flatMap(([contract, bars]) =>
-        bars.map((b) => ({ contract, day: b.day, settle: b.close, front: front[b.day] === contract })),
+        bars.map((b) => ({ contract, day: b.day, settle: round4(b.close), front: front[b.day] === contract })),
       );
       const latest = Object.keys(front).sort().at(-1);
       console.log(
@@ -73,15 +86,41 @@ async function main() {
         continue;
       }
       if (!prisma) continue;
+      // Write only what is new or has changed. The first capture on the Pi
+      // upserted 1,152 rows one round-trip at a time and the runner's
+      // ten-minute timeout cut it off part-way through heating oil; a normal
+      // day adds four rows and moves one front flag.
       const fetchedAt = new Date(now);
-      for (const r of rows) {
-        const tradeDate = new Date(`${r.day}T00:00:00Z`); // @db.Date goes in as UTC midnight
-        await prisma.oilFuturesSettlement.upsert({
-          where: { contract_tradeDate_source: { contract: r.contract, tradeDate, source: 'yahoo-chart' } },
-          create: { series: s.id, contract: r.contract, tradeDate, settle: r.settle, front: r.front, fetchedAt },
-          update: { settle: r.settle, front: r.front, fetchedAt },
+      const held = await prisma.oilFuturesSettlement.findMany({
+        where: { contract: { in: Object.keys(contracts) }, source: 'yahoo-chart' },
+        select: { id: true, contract: true, tradeDate: true, settle: true, front: true },
+      });
+      const byKey = new Map(held.map((h) => [`${h.contract}|${h.tradeDate.toISOString().slice(0, 10)}`, h]));
+      const fresh = rows.filter((r) => !byKey.has(`${r.contract}|${r.day}`));
+      const moved = rows.filter((r) => {
+        const h = byKey.get(`${r.contract}|${r.day}`);
+        return h && (Number(h.settle) !== r.settle || h.front !== r.front);
+      });
+      if (fresh.length) {
+        await prisma.oilFuturesSettlement.createMany({
+          data: fresh.map((r) => ({
+            series: s.id,
+            contract: r.contract,
+            tradeDate: new Date(`${r.day}T00:00:00Z`), // @db.Date goes in as UTC midnight
+            settle: r.settle,
+            front: r.front,
+            fetchedAt,
+          })),
+          skipDuplicates: true,
         });
       }
+      for (const r of moved) {
+        await prisma.oilFuturesSettlement.update({
+          where: { id: byKey.get(`${r.contract}|${r.day}`)!.id },
+          data: { settle: r.settle, front: r.front, fetchedAt },
+        });
+      }
+      console.log(`  ${s.id}: ${fresh.length} new, ${moved.length} changed, ${rows.length - fresh.length - moved.length} unchanged`);
     }
   } finally {
     await prisma?.$disconnect();

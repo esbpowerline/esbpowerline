@@ -98,6 +98,8 @@ export function parseChart(json: unknown): { bars: DailyBar[]; meta: ChartMeta }
 export interface ChartMeta {
   symbol: string;
   regularMarketTime?: number;
+  regularMarketPrice?: number;
+  regularMarketVolume?: number;
   currentTradingPeriod?: { regular?: { start: number; end: number } };
 }
 
@@ -122,6 +124,12 @@ export function nyDay(ms: number): string {
  * without a holiday table: a day before today has always settled.
  */
 export function isSettled(day: string, nowMs: number): boolean {
+  // Futures settle Monday to Friday. Yahoo opens a bar for the session that
+  // starts on Sunday evening in New York (Monday's trading) under Sunday's
+  // date; without this a 03:30 Dhaka run on Monday would store it as a
+  // Sunday "settlement".
+  const dow = new Date(`${day}T12:00:00Z`).getUTCDay();
+  if (dow === 0 || dow === 6) return false;
   const today = nyDay(nowMs);
   if (day < today) return true;
   if (day > today) return false;
@@ -157,6 +165,33 @@ export function matchFront(
     if (hits.length === 1) front[bar.day] = hits[0];
   }
   return front;
+}
+
+/**
+ * The contract the continuous symbol is quoting *now*: the one whose live
+ * price and volume equal the continuous symbol's.
+ *
+ * Needed because the daily bars alone get expiry day wrong. Brent December
+ * expired on Fri 30 Oct 2026. Yahoo first served BZ=F's 30 Oct bar as the
+ * January contract (113.43), then revised it to December's final settlement
+ * (117.64), while BZ=F's live quote stayed on January (113.43, 37,539 lots).
+ * A card published after that day must show the contract still trading.
+ */
+export function currentContract(continuous: ChartMeta, contracts: Record<string, ChartMeta>): string | null {
+  const p = continuous.regularMarketPrice;
+  if (p == null) return null;
+  const hits = Object.entries(contracts).filter(
+    ([, m]) =>
+      m.regularMarketPrice != null &&
+      Math.abs(m.regularMarketPrice - p) < 1e-6 &&
+      (continuous.regularMarketVolume == null || m.regularMarketVolume === continuous.regularMarketVolume),
+  );
+  return hits.length === 1 ? hits[0][0] : null;
+}
+
+/** Settlements are stored to four decimals; compare and store at that precision. */
+export function round4(v: number): number {
+  return Math.round(v * 1e4) / 1e4;
 }
 
 export interface Settlement {
