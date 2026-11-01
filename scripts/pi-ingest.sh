@@ -323,7 +323,7 @@ if ! cmp -s "$REPO/scripts/pi-ingest.sh" "$ROOT/pi-ingest.sh"; then
     chmod +x "$ROOT/pi-ingest.sh"
     echo "runner updated from the repo — effective next poll"
 fi
-for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh pi-monthly.sh pi-boot.sh pi-sreda.sh; do
+for helper in pi-notify.sh pi-nightly.sh pi-weekly.sh pi-watch.sh pi-hourly.sh pi-monthly.sh pi-boot.sh pi-sreda.sh pi-oil.sh; do
     if [[ -f "$REPO/scripts/$helper" ]] && ! cmp -s "$REPO/scripts/$helper" "$ROOT/$helper"; then
         cp "$REPO/scripts/$helper" "$ROOT/$helper"; chmod +x "$ROOT/$helper"
         echo "$helper updated from the repo"
@@ -361,6 +361,9 @@ declare -a SCHEDULE=(
     # before the 09:30 poll. Not hourly — it is a stock as of a date, and SREDA
     # republishes on no timetable of ours.
     "pi-sreda.sh|30 6 * * *"
+    # World oil futures settlements for the CMS fuel-price card, once a day.
+    # 03:30 is after both New York settlements, before the 05:30 monthly run.
+    "pi-oil.sh|30 3 * * *"
     # Once per boot, because cron has no memory: a slot inside a power cut is
     # never run, and on this supply that is a matter of when, not if. On
     # 2026-09-16 the Pi lost power around 10:20 and returned at 10:28, between

@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import {
   LayoutGrid, LibraryBig, CalendarDays, Images, Feather, Tag, Shapes, MessageCircleReply,
-  Activity, Timer, FileSignature, Layers, Megaphone, Trash, GitCompare,
+  Activity, Timer, FileSignature, Layers, Megaphone, Trash, GitCompare, Fuel,
 } from 'lucide-react';
 import { StaffShell, type StaffNavGroup } from '@/components/staff/StaffShell';
 import { CmsArticleEditorProvider } from '@/components/cms/CmsArticleEditorContext';
@@ -26,6 +26,7 @@ const NAV_GROUPS: StaffNavGroup[] = [
       { href: '/cms/analytics', label: 'Performance', icon: Activity },
       { href: '/cms/calendar', label: 'Editorial Calendar', icon: CalendarDays },
       { href: '/cms/yoy-sheet', label: 'Grid Comparison', icon: GitCompare },
+      { href: '/cms/fuel-card', label: 'Fuel Prices', icon: Fuel },
     ],
   },
   {
@@ -64,6 +65,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/cms/articles/scheduled': 'Scheduled',
   '/cms/calendar': 'Editorial Calendar',
   '/cms/yoy-sheet': 'Grid Comparison',
+  '/cms/fuel-card': 'Fuel Prices',
   '/cms/media': 'Media Library',
   '/cms/categories': 'Categories',
   '/cms/tags': 'Tags',

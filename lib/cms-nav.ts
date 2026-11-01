@@ -10,6 +10,7 @@ export const CMS_NAV_PERMISSIONS: Record<string, string> = {
   '/cms/articles/scheduled': 'article.create',
   '/cms/calendar': 'article.create',
   '/cms/yoy-sheet': 'article.create',
+  '/cms/fuel-card': 'article.create',
   '/cms/media': 'media.upload',
   '/cms/tags': 'article.create',
   '/cms/categories': 'article.create',

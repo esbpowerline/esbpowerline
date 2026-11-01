@@ -1187,3 +1187,35 @@ model NotificationSetting {
   value     Json
   updatedAt DateTime @updatedAt
 }
+
+/// Daily settlements of world oil futures, for the fuel-price card.
+///
+/// One row per named contract per trading day — never the continuous
+/// front-month symbol, which jumps contracts on expiry day and turns a
+/// comparison across the jump into a fiction (Brent, 30 Oct 2026: −2.8% on the
+/// continuous series, +1.5% on the contract). `front` records which contract
+/// the continuous series was on that day, as observed from Yahoo rather than
+/// computed from expiry rules. Written once a day by the Pi
+/// (scripts/ingest-oil-settlements.ts); the card reads it and never Yahoo.
+model OilFuturesSettlement {
+  id String @id @default(cuid())
+
+  /// brent | wti | rbob | ulsd — lib/data/oil/futures.ts SERIES.
+  series   String
+  /// Yahoo's name for the single contract, e.g. CLZ26.NYM.
+  contract String
+  /// The exchange trading day the settlement belongs to (New York calendar),
+  /// stored as UTC midnight like every other @db.Date here.
+  tradeDate DateTime @db.Date
+  settle    Decimal  @db.Decimal(12, 4)
+  /// Whether the continuous front-month symbol equalled this contract that day.
+  front     Boolean  @default(false)
+
+  /// When ESB read it, kept apart from tradeDate so lateness stays visible.
+  fetchedAt DateTime
+  /// The feed, so a later licensed source can sit beside this one.
+  source    String   @default("yahoo-chart")
+
+  @@unique([contract, tradeDate, source])
+  @@index([series, tradeDate])
+}
