@@ -56,8 +56,8 @@ const CSS = `
 .yoyc .yc-then small{color:rgba(20,40,74,.7)} .yoyc .yc-then b{color:#14284a}
 .yoyc .yc-now small{color:rgba(232,89,12,.7)} .yoyc .yc-now b{color:#e8590c}
 .yoyc .yc-vs{flex:none;position:relative;width:46px;height:46px}
-.yoyc .yc-vs .yc-dia{position:absolute;left:3.9px;top:3.9px;width:38.184px;height:38.184px;transform:rotate(-45deg);background:#fff;border:4px dashed #b4182f;border-radius:4px;
-  box-shadow:0 1px 1.5px rgba(77,51,0,.12),0 4px 8px rgba(77,51,0,.2)}
+.yoyc .yc-vs .yc-dia{position:absolute;left:0;top:0;width:46px;height:46px;overflow:visible;
+  filter:drop-shadow(0 1px 1.5px rgba(77,51,0,.12)) drop-shadow(0 4px 8px rgba(77,51,0,.2))}
 .yoyc .yc-vs span{position:absolute;left:23.4px;top:23px;transform:translate(-50%,-50%);font-size:16px;font-weight:900;letter-spacing:.8px;color:#b4182f;line-height:normal}
 
 .yoyc .yc-thead{left:14px;top:163px;width:948px;height:43.25px;background:#8a1a1e;border-radius:12px;font-size:15px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#fff;line-height:1.15}
@@ -167,7 +167,21 @@ export function YoyCard({ model }: { model: YoyCardModel }) {
               <b>{model.thenLabel}</b>
             </div>
             <div className="yc-vs" aria-hidden>
-              <div className="yc-dia" />
+              {/*
+                Figma's 4 px dashed border on this diamond lands as four corner
+                chevrons; CSS `dashed` chops it into many short dashes instead.
+                So the stroke is drawn here with the master's own rhythm: each
+                side (normalised to 25 units) keeps an 8-unit arm at either
+                corner and leaves a 9-unit gap in the middle.
+              */}
+              <svg className="yc-dia" viewBox="0 0 46 46">
+                <rect
+                  x="4.9" y="4.9" width="36.2" height="36.2" rx="3"
+                  transform="rotate(45 23 23)"
+                  fill="#fff" stroke="#b4182f" strokeWidth="4"
+                  pathLength="100" strokeDasharray="16 9" strokeDashoffset="8"
+                />
+              </svg>
               <span>VS</span>
             </div>
             <div className="yc-side yc-now">
