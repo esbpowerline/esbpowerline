@@ -429,7 +429,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
             More in {article.category} →
           </Link>
         </div>
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
           {related.map((r) => (
             <ArticleCard
               key={r.id}

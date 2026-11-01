@@ -280,9 +280,105 @@ html[data-site-theme='white'],
   border-color: hsl(var(--primary) / 0.45);
 }
 
+/*
+ * BANNER FRAME: every news-card picture is the shape of the news banners
+ * (1920x1080). Until 2026-11-01 the card image was a fixed h-48 while its width
+ * followed the grid, so the box was 1.12:1 on a phone's 2-up row and 3.36:1 in
+ * the article page's related row, and object-fit:cover cut the banners down to
+ * 53-78%: the logo/date/category strip, the footer strip and, on narrow cards,
+ * the banner's own headline panel (UI audit, ~/esbpowerline-ui-audit). The
+ * hero carousel and the article hero were already 16:9; now every slot is.
+ */
+:root {
+  --banner-ratio: 16 / 9;
+}
+
+.article-card__image-wrapper {
+  aspect-ratio: var(--banner-ratio);
+  overflow: hidden;
+  flex: 0 0 auto;
+  background: hsl(var(--muted));
+}
+
 .article-card__image {
-  @apply w-full h-48 object-cover bg-muted;
+  @apply w-full h-full object-cover bg-muted;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Headline block reads top-down: kicker, headline, excerpt; the date row is
+   pinned to the card's foot so equal-height grid rows still line up there. */
+.article-card__body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.article-card__kicker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  margin-bottom: 0.5rem;
+  min-width: 0;
+}
+
+/* Category as a coloured kicker. The accent is mixed toward the foreground so
+   amber/lime stay legible on white and still read as their colour in dark. */
+.article-card__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: var(--text-ui-2xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--kicker, hsl(var(--primary))) 78%, hsl(var(--foreground)));
+}
+
+.article-card__category::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 2px;
+  background: var(--kicker, hsl(var(--primary)));
+}
+
+.article-card__meta {
+  margin-top: auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.article-card__date {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.article-card__date-short {
+  display: none;
+}
+
+/* Size container so the date can switch to its short form on narrow cards. */
+.article-card__body {
+  container-type: inline-size;
+}
+
+@container (max-width: 18rem) {
+  .article-card__date-long {
+    display: none;
+  }
+  .article-card__date-short {
+    display: inline;
+  }
 }
 
 /*
@@ -293,9 +389,13 @@ html[data-site-theme='white'],
  *
  *   0.25rem  track container's pt-1
  * + 0.5rem   inner track's py-2
- * + 12rem    the h-48 image
+ * + card width x 9/16   the 16:9 image (a fixed 12rem h-48 until 2026-11-01)
  * + 1px      the card's own top border (.article-card is `border`)
- * = calc(12.75rem + 1px)
+ *
+ * The image height now follows the card width, so the carousel wrapper is a
+ * size container (.category-carousel) and the card width is written in cqw
+ * with the same steps as the track's w-full / md:w-[calc(50%-0.75rem)] /
+ * lg:w-[calc(33.333%-1rem)] classes. The :root value is the old fallback.
  *
  * In rem, not px, because this site scales its root font size with the
  * viewport — html is clamp(10.67px, 1.0417vw, 16px) above 1024px, and similar
@@ -310,6 +410,24 @@ html[data-site-theme='white'],
  */
 :root {
   --category-nav-seam: calc(12.75rem + 1px);
+}
+
+.category-carousel {
+  container-type: inline-size;
+  --category-card-w: 100cqw;
+  --category-nav-seam: calc(0.75rem + 1px + var(--category-card-w) * 9 / 16);
+}
+
+@media (min-width: 768px) {
+  .category-carousel {
+    --category-card-w: calc(50cqw - 0.75rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .category-carousel {
+    --category-card-w: calc(33.333cqw - 1rem);
+  }
 }
 
 /*
@@ -1588,12 +1706,6 @@ html.theme-midnight .featured-hero__timestamp {
     max-height: none;
     flex-basis: auto;
   }
-
-  .home-page .home-trending-wave__image {
-    height: 7.125rem;
-    min-height: 7.125rem;
-    max-height: 7.125rem;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -1611,11 +1723,22 @@ html.theme-midnight .featured-hero__timestamp {
     min-height: 100%;
   }
 
+  /* The rail is locked to the hero band height, so a full 16:9 banner costs
+     the excerpt here; title and meta still show. Past ~1800px the band grows
+     slower than the rail's width, so the image may give up a few pixels of
+     height (flex-shrink) rather than push the byline into the queue. */
+  .home-page .home-trending-wave__excerpt {
+    display: none;
+  }
+
+  .home-page .home-trending-wave__featured {
+    height: 100%;
+    min-height: 0;
+  }
+
   .home-page .home-trending-wave__image {
-    flex: 1 1 auto;
-    height: auto;
-    min-height: 5rem;
-    max-height: 6.75rem;
+    flex: 0 1 auto;
+    min-height: 0;
   }
 
   .home-page .home-trending-wave__queue {
@@ -1671,12 +1794,43 @@ html.theme-midnight .featured-hero__timestamp {
   flex: 1;
 }
 
+/* Tablet (640-1023px): the rail spans the full content width there, so a
+   stacked 16:9 banner would be ~350px tall. Put it beside the copy instead. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .home-page .home-trending-wave__featured {
+    display: grid;
+    grid-template-columns: minmax(0, 46%) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 1rem;
+    row-gap: 0.375rem;
+    align-content: start;
+  }
+  .home-page .home-trending-wave__image {
+    grid-column: 1;
+    grid-row: 1 / span 4;
+    align-self: start;
+    margin-bottom: 0;
+  }
+  .home-page .home-trending-wave__kicker,
+  .home-page .home-trending-wave__title,
+  .home-page .home-trending-wave__excerpt,
+  .home-page .home-trending-wave__meta {
+    grid-column: 2;
+  }
+  .home-page .home-trending-wave__meta {
+    align-self: end;
+  }
+  .home-page .home-trending-wave__stage {
+    min-height: 0;
+  }
+}
+
+/* 16:9 like the banners it shows; it was a 6.5-7.125rem strip (about 2.8:1). */
 .home-trending-wave__image {
   position: relative;
   width: 100%;
-  height: 7rem;
-  min-height: 7rem;
-  max-height: 7rem;
+  aspect-ratio: var(--banner-ratio);
+  height: auto;
   flex-shrink: 0;
   border-radius: 0.5rem;
   overflow: hidden;
@@ -1684,19 +1838,6 @@ html.theme-midnight .featured-hero__timestamp {
   margin-bottom: 0.25rem;
 }
 
-.home-page .home-trending-wave__image {
-  height: 6.5rem;
-  min-height: 6.5rem;
-  max-height: 6.5rem;
-}
-
-@media (min-width: 768px) {
-  .home-page .home-trending-wave__image {
-    height: 7.125rem;
-    min-height: 7.125rem;
-    max-height: 7.125rem;
-  }
-}
 
 .home-trending-wave__image-zoom {
   animation: home-trending-zoom-slow 6s ease-in-out infinite;
@@ -1748,10 +1889,11 @@ html.theme-midnight .featured-hero__timestamp {
   color: hsl(var(--muted-foreground));
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   overflow: hidden;
-  min-height: calc(var(--text-ui-sm) * 1.35 * 2);
-  max-height: calc(var(--text-ui-sm) * 1.35 * 2);
+  min-height: calc(var(--text-ui-sm) * 1.35 * 3);
+  max-height: calc(var(--text-ui-sm) * 1.35 * 3);
 }
 
 .home-trending-wave__meta {
@@ -2338,18 +2480,23 @@ html.locale-bn .search-page__header h1 {
   text-overflow: ellipsis;
 }
 
+/* Three lines, clamped, and no reserved fourth: the old four-line min-height
+   left a dead gap under every two-line headline, and on featured cards (16px
+   type in a box sized for 18px) a fifth line peeked out under the ellipsis.
+   max-height is in em so it follows whichever font-size applies. */
 .article-card h3 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   overflow: hidden;
   font-family: var(--font-sans), sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: normal !important;
   font-size: 1.0625rem !important; /* 17px on mobile */
   line-height: 1.3 !important;
-  min-height: 5.525rem !important;
-  max-height: 5.525rem !important;
+  min-height: 0 !important;
+  max-height: 3.9em !important;
 }
 
 .article-card.is-featured h3 {
@@ -2359,8 +2506,6 @@ html.locale-bn .search-page__header h1 {
 @media (min-width: 768px) {
   .article-card h3 {
     font-size: 1.125rem !important; /* 18px on tablet & desktop */
-    min-height: 5.85rem !important;
-    max-height: 5.85rem !important;
   }
   .article-card.is-featured h3 {
     font-size: 1rem !important; /* 16px */

@@ -237,17 +237,9 @@ function TrendingHeroRailWave({ trending }: { trending: PublicArticleCard[] }) {
               <h3 className="home-trending-wave__title group-hover:text-primary transition-colors">
                 {resolveDisplayTitle(article.title, article.shortTitle)}
               </h3>
-              <p
-                className="home-trending-wave__excerpt"
-                style={{
-                  WebkitLineClamp: 3,
-                  display: '-webkit-box',
-                  WebkitBoxOrient: 'vertical',
-                  minHeight: 'calc(var(--text-ui-sm) * 1.35 * 3)',
-                  maxHeight: 'calc(var(--text-ui-sm) * 1.35 * 3)',
-                  overflow: 'hidden',
-                }}
-              >
+              {/* Clamp lives in CSS (.home-trending-wave__excerpt) so the
+                  desktop rail can drop the excerpt for a full 16:9 banner. */}
+              <p className="home-trending-wave__excerpt">
                 {article.excerpt ?? '\u00A0'}
               </p>
               <p className="home-trending-wave__meta flex items-center gap-1">
@@ -512,14 +504,14 @@ export function HomeTrendingSection({
             <div className="absolute -top-[20%] -right-[20%] w-[12rem] h-[12rem] rounded-full bg-amber-500/5 blur-[40px]" />
             <div className="absolute -bottom-[20%] -left-[20%] w-[12rem] h-[12rem] rounded-full bg-primary/4 blur-[40px]" />
           </div>
-          <div className="relative w-24 sm:w-28 md:w-32 shrink-0 aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+          <div className="relative w-28 sm:w-32 md:w-36 shrink-0 aspect-video self-start rounded-lg overflow-hidden bg-muted">
             {hasArticleImage(lead.imageUrl) ? (
               <Image
                 src={lead.imageUrl}
                 alt={lead.heroMeta?.alt || resolveDisplayTitle(lead.title, lead.shortTitle)}
                 fill
                 style={heroImageStyle(lead.heroMeta || undefined)}
-                sizes="(max-width: 768px) 96px, 128px"
+                sizes="(max-width: 768px) 128px, 144px"
               />
             ) : (
               <NoImage className="h-full w-full" label={lead.category} />

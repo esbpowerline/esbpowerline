@@ -256,7 +256,7 @@ function CategoryCarousel({ articles }: { articles: PublicArticleCard[] }) {
 
   return (
     <div 
-      className="relative group/carousel w-full"
+      className="category-carousel relative group/carousel w-full"
       onMouseEnter={handleInteraction}
       onTouchStart={handleInteraction}
       onFocus={handleInteraction}
