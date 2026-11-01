@@ -1,7 +1,7 @@
 /**
  * The "What changed in a year" social card, as data.
  *
- * The card is the published year-on-year sheet drawn as a 1080×1080 image for
+ * The card is the published year-on-year sheet drawn as a 1080×1350 (4:5) image for
  * the desk's Facebook post. It is a picture of the sheet, not a second
  * calculation of it: every figure, change and percentage below is the string
  * `buildYoyComparison` already formatted for the .txt the desk publishes, so the
@@ -16,12 +16,11 @@
  * up-arrow is the honest picture of shedding going up.
  *
  * Client-safe on purpose (no `server-only` import): the panel builds the model
- * in the browser and the browser draws the PNG, because the browser shapes the
- * header's Bengali calendar line correctly and the server-side renderers do not.
+ * in the browser and the browser draws the PNG.
  */
 import type { YoyResult, YoyRow } from '@/lib/data/grid/yoy-comparison';
 import { verdictOf } from '@/lib/data/grid/comparison-i18n';
-import { downloadStamp, formatBangla } from '@/lib/data/grid/export-datestamp';
+import { downloadStamp } from '@/lib/data/grid/export-datestamp';
 
 export type CardTone = 'good' | 'bad' | 'neutral';
 
@@ -39,7 +38,7 @@ export type CardRow = {
   tone: CardTone;
 };
 
-export type CardGroup = { key: 'power' | 'gas' | 'energy'; label: string; rows: CardRow[] };
+export type CardGroup = { key: 'power' | 'gas' | 'cost'; label: string; rows: CardRow[] };
 
 export type YoyCardModel = {
   /** ISO energy day being compared (the "NOW" day). */
@@ -48,8 +47,12 @@ export type YoyCardModel = {
   nowLabel: string;
   thenYear: string;
   nowYear: string;
-  /** The day the card was made, in the three calendars the desk prints. */
-  published: { gregorian: string; bangla: string; hijri: string | null };
+  /**
+   * The day the card was made, Dhaka's civil day: `Tuesday` and
+   * `20 October 2026`. The 4:5 design (Figma "YoY Card - 4:5 V2") prints the
+   * Gregorian date alone; the Bangla and Hijri lines of the 1:1 card are gone.
+   */
+  published: { weekday: string; date: string };
   groups: CardGroup[];
   filename: string;
 };
@@ -73,14 +76,16 @@ const GROUP_OF: Record<string, CardGroup['key']> = {
   'gas.domestic': 'gas',
   'gas.lng': 'gas',
   'gas.total': 'gas',
-  'system.totalEnergyGen': 'energy',
-  'system.totalDailyCost': 'energy',
+  // Energy is electricity: the 4:5 design moved it out of the old
+  // "Energy & cost" group and left cost standing on its own.
+  'system.totalEnergyGen': 'power',
+  'system.totalDailyCost': 'cost',
 };
 
 const GROUP_LABEL: Record<CardGroup['key'], string> = {
-  power: 'Power',
+  power: 'Electricity',
   gas: 'Gas',
-  energy: 'Energy & cost',
+  cost: 'Cost',
 };
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -108,31 +113,6 @@ function dirOf(r: YoyRow): CardRow['dir'] {
   return r.delta > 0 ? 'up' : r.delta < 0 ? 'down' : 'flat';
 }
 
-/**
- * The Hijri line in Bengali, as the masthead prints it: `৯ জমাদিউল আউয়াল,
- * ১৪৪৮ হিজরি`. Umm al-Qura, the same calendar `downloadStamp` uses, so every
- * export from this desk agrees on the Hijri date. Null where the runtime's ICU
- * has no Islamic calendar — a decorative line must not fail the download.
- */
-function hijriBn(civil: Date): string | null {
-  try {
-    const parts = new Intl.DateTimeFormat('bn-u-ca-islamic-umalqura', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      timeZone: 'UTC',
-    }).formatToParts(civil);
-    const get = (t: string) => parts.find((p) => p.type === t)?.value;
-    const day = get('day');
-    const month = get('month');
-    const year = get('year');
-    if (!day || !month || !year) return null;
-    return `${day} ${month}, ${year} হিজরি`;
-  } catch {
-    return null;
-  }
-}
-
 export function buildYoyCardModel(
   sheet: Extract<YoyResult, { ok: true }>,
   now: Date = new Date(),
@@ -140,7 +120,7 @@ export function buildYoyCardModel(
   if (sheet.lang !== 'en') {
     throw new Error('The social card is drawn from the English sheet.');
   }
-  const groups: CardGroup[] = (['power', 'gas', 'energy'] as const).map((key) => ({
+  const groups: CardGroup[] = (['power', 'gas', 'cost'] as const).map((key) => ({
     key,
     label: GROUP_LABEL[key],
     rows: [],
@@ -166,8 +146,10 @@ export function buildYoyCardModel(
 
   // Dhaka's civil day, the same instant `downloadStamp` reads, so the card's
   // "Published" line and the .docx/.pdf "Downloaded" stamp name the same day.
+  // Its Gregorian line is `20 October 2026, Tuesday`; the card sets the
+  // weekday beside "Published" and the date on its own.
   const stamp = downloadStamp(now);
-  const civil = new Date(`${stamp.iso}T00:00:00Z`);
+  const [date, weekday = ''] = stamp.gregorian.split(', ');
 
   return {
     date: sheet.date,
@@ -175,7 +157,7 @@ export function buildYoyCardModel(
     nowLabel: shortDate(sheet.date),
     thenYear: sheet.aLabel,
     nowYear: sheet.bLabel,
-    published: { gregorian: stamp.gregorian, bangla: formatBangla(civil), hijri: hijriBn(civil) },
+    published: { weekday, date },
     groups,
     filename: `ESB_YoY_Card_${sheet.date}.png`,
   };

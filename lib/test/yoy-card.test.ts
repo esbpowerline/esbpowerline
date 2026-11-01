@@ -58,9 +58,16 @@ describe('the year-on-year social card', () => {
 
   it('groups the nine rows the way the card draws them', () => {
     expect(m.groups.map((g) => [g.key, g.rows.length])).toEqual([
-      ['power', 3],
+      ['power', 4],
       ['gas', 4],
-      ['energy', 2],
+      ['cost', 1],
+    ]);
+    expect(m.groups.map((g) => g.label)).toEqual(['Electricity', 'Gas', 'Cost']);
+    expect(m.groups[0].rows.map((r) => r.id)).toEqual([
+      'system.eveningPeakDemand',
+      'system.eveningPeakGen',
+      'shedding.total',
+      'system.totalEnergyGen',
     ]);
   });
 
@@ -85,9 +92,7 @@ describe('the year-on-year social card', () => {
 
   it('names both compared days and the day it was published', () => {
     expect(m).toMatchObject({ thenLabel: '14 Oct 2025', nowLabel: '14 Oct 2026', thenYear: '2025', nowYear: '2026' });
-    expect(m.published.gregorian).toBe('20 October 2026, Tuesday');
-    expect(m.published.bangla).toBe('৪ কার্তিক ১৪৩৩, মঙ্গলবার');
-    if (m.published.hijri) expect(m.published.hijri).toMatch(/হিজরি$/);
+    expect(m.published).toEqual({ weekday: 'Tuesday', date: '20 October 2026' });
     expect(m.filename).toBe('ESB_YoY_Card_2026-10-14.png');
   });
 
