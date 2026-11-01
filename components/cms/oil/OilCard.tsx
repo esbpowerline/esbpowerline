@@ -57,7 +57,8 @@ const CSS = `
 .oilc .o-state{align-self:flex-start;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:16px;background:#fff;font-size:22px;font-weight:800;line-height:27px;color:#14284a}
 .oilc .o-last{font-size:17px;font-weight:600;color:#5f6a82;line-height:23px}
 
-.oilc .o-cols{display:flex;gap:12px;margin-right:16px}
+.oilc .o-title{min-width:0;overflow:hidden}
+.oilc .o-cols{flex:none;width:422px;display:flex;gap:12px;margin-right:16px}
 .oilc .o-col{font-size:17px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;color:#555b6b;line-height:21px}
 .oilc .o-rows{display:flex;flex-direction:column;gap:8px;margin-top:14px}
 .oilc .o-row{height:49px;border-radius:16px;background:#f6f2e8;padding:5px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -245,7 +246,7 @@ export function OilCard({ model }: { model: OilCardModel }) {
           <div className="o-title" style={{ alignItems: 'flex-end' }}>
             <span className="o-h o-serif">World oil prices</span>
             <span className="o-sub" style={{ lineHeight: '24px' }}>
-              {model.world ? `Settlement · ${model.world.settlement}` : 'Settlement · awaiting first capture'}
+              {model.world ? `Settlement · ${model.world.settlement}` : 'Settlement · pending'}
             </span>
           </div>
           <div className="o-cols">
