@@ -3,6 +3,10 @@
  *
  *   npx tsx scripts/ingest-oil-settlements.ts            # last 3 months, upsert
  *   npx tsx scripts/ingest-oil-settlements.ts --dry-run  # fetch and print only
+ *   npx tsx scripts/ingest-oil-settlements.ts --range 1y --back 3
+ *       # backfill: a year of each contract's settlements, and contracts back to
+ *       # three months before this one (Yahoo answers 404 once a contract has
+ *       # rolled off its list, so this reaches only the recently expired)
  *
  * For each series (lib/data/oil/futures.ts SERIES) it asks Yahoo's chart API
  * for the continuous front-month symbol and the next five named contracts,
@@ -36,10 +40,17 @@ import {
 } from '../lib/data/oil/futures';
 
 const DRY = process.argv.includes('--dry-run');
+const arg = (name: string) => {
+  const i = process.argv.indexOf(name);
+  return i > 0 ? process.argv[i + 1] : undefined;
+};
+const RANGE = arg('--range') ?? '3mo';
+if (!/^(1mo|3mo|6mo|1y|2y)$/.test(RANGE)) throw new Error(`--range ${RANGE}: use 1mo, 3mo, 6mo, 1y or 2y`);
+const BACK = Number(arg('--back') ?? 0);
 const UA = 'Mozilla/5.0 (X11; Linux aarch64) esbpowerline-ingest';
 
 async function chart(symbol: string): Promise<{ bars: DailyBar[]; meta: ChartMeta | null }> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=3mo&interval=1d`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${RANGE}&interval=1d`;
   const res = await fetch(url, { headers: { 'user-agent': UA } });
   if (res.status === 404) return { bars: [], meta: null }; // a contract Yahoo does not list yet
   if (!res.ok) throw new Error(`${symbol}: HTTP ${res.status}`);
@@ -59,7 +70,9 @@ async function main() {
       const continuous = settled(cont.bars);
       const contracts: Record<string, DailyBar[]> = {};
       const metas: Record<string, ChartMeta> = {};
-      for (const sym of candidateContracts(s.root, today)) {
+      const start = new Date(`${today.slice(0, 7)}-01T00:00:00Z`);
+      start.setUTCMonth(start.getUTCMonth() - BACK);
+      for (const sym of candidateContracts(s.root, start.toISOString().slice(0, 10), 5 + BACK)) {
         const c = await chart(sym);
         const bars = settled(c.bars);
         if (bars.length) contracts[sym] = bars;

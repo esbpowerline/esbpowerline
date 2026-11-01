@@ -231,8 +231,8 @@ export function OilCard({ model }: { model: OilCardModel }) {
                 {t.name}
               </div>
               <div className="o-price">
-                <Taka />
-                <b>{t.value}</b>
+                {t.value != null && <Taka />}
+                <b>{t.value ?? '—'}</b>
               </div>
               <TileState t={t} />
               <TileLine t={t} />

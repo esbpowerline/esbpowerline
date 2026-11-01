@@ -230,41 +230,66 @@ export interface WorldRow {
   /** Percent change against the same contract, null where it has no settlement that far back. */
   week: number | null;
   month: number | null;
+  /** The settlement days the two baselines were read from. */
+  weekDay: string | null;
+  monthDay: string | null;
+}
+
+/** The latest day on or before `limit` on which every series has a front contract. */
+export function latestCompleteDay(rows: Settlement[], limit: string): string | null {
+  const fronts = rows.filter((r) => r.front && r.day <= limit);
+  const days = [...new Set(fronts.map((r) => r.day))].sort().reverse();
+  return days.find((d) => SERIES.every((s) => fronts.some((r) => r.series === s.id && r.day === d))) ?? null;
 }
 
 /**
  * The world table for a card, from stored settlements.
  *
- * The settlement day is the latest day on which *every* series has a front
- * contract — one date heads the column, so the four rows must share it. The
- * baselines are the same contract's last settlement on or before 7 days and
- * one calendar month earlier.
+ * The settlement day is the latest day on or before `limit` on which *every*
+ * series has a front contract: one date heads the column, so the four rows
+ * must share it. Each row quotes that day's front contract — or, when the
+ * day was the contract's last (it never settled again), the contract that
+ * took over, which a reader could still trade — and compares it with the same contract's last
+ * settlement on or before 7 days and one calendar month earlier.
  */
-export function buildWorldRows(
-  rows: Settlement[],
-  onOrBefore: string,
-): { day: string; rows: WorldRow[] } | null {
-  const fronts = rows.filter((r) => r.front && r.day <= onOrBefore);
-  const days = [...new Set(fronts.map((r) => r.day))].sort().reverse();
-  const day = days.find((d) => SERIES.every((s) => fronts.some((r) => r.series === s.id && r.day === d)));
+export function buildWorldRows(rows: Settlement[], limit: string): { day: string; rows: WorldRow[] } | null {
+  const day = latestCompleteDay(rows, limit);
   if (!day) return null;
 
   const pct = (now: number, then: number | undefined) =>
-    then == null || then === 0 ? null : Math.round(((now / then - 1) * 100) * 10) / 10;
+    then == null || then === 0 ? null : Math.round((now / then - 1) * 1000) / 10;
 
-  const out: WorldRow[] = SERIES.map((s) => {
-    const cur = fronts.find((r) => r.series === s.id && r.day === day)!;
-    const same = rows.filter((r) => r.contract === cur.contract).sort((a, b) => (a.day < b.day ? 1 : -1));
-    const at = (limit: string) => same.find((r) => r.day <= limit)?.settle;
-    return {
+  const out: WorldRow[] = [];
+  for (const s of SERIES) {
+    const todayFront = rows.find((r) => r.series === s.id && r.front && r.day === day)!;
+    // Switch only when the day's front never traded again — it expired that
+    // day — and a later front is stored. Switching whenever tomorrow's front
+    // differed (the first version) moved the 30 Oct card to January Brent a
+    // day early: December still settled on 30 Oct (114.88 on the 29th, not
+    // January's 110.80). Verified against BZ=F, RB=F and HO=F.
+    const tradedAfter = rows.some((r) => r.contract === todayFront.contract && r.day > day);
+    const nextFront = tradedAfter
+      ? undefined
+      : rows.filter((r) => r.series === s.id && r.front && r.day > day).sort((a, b) => (a.day < b.day ? -1 : 1))[0];
+    const continuing =
+      nextFront && rows.some((r) => r.contract === nextFront.contract && r.day === day) ? nextFront.contract : null;
+    const contract = continuing ?? todayFront.contract;
+    const same = rows.filter((r) => r.contract === contract).sort((a, b) => (a.day < b.day ? 1 : -1));
+    const cur = same.find((r) => r.day === day)!;
+    const at = (lim: string) => same.find((r) => r.day <= lim);
+    const w = at(minusDays(day, 7));
+    const m = at(minusMonth(day));
+    out.push({
       series: s.id,
       label: s.label,
       unit: s.unit,
-      contract: cur.contract,
+      contract,
       settle: cur.settle,
-      week: pct(cur.settle, at(minusDays(day, 7))),
-      month: pct(cur.settle, at(minusMonth(day))),
-    };
-  });
+      week: pct(cur.settle, w?.settle),
+      month: pct(cur.settle, m?.settle),
+      weekDay: w?.day ?? null,
+      monthDay: m?.day ?? null,
+    });
+  }
   return { day, rows: out };
 }

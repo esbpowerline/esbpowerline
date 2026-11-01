@@ -11,7 +11,7 @@ import {
   parseChart,
   type Settlement,
 } from '@/lib/data/oil/futures';
-import { buildOilCardModel } from '@/lib/data/oil/oil-card';
+import { buildOilCardModel, cardableDays, oilCaption, oilCardCsv } from '@/lib/data/oil/oil-card';
 import { EMRD_FUEL_MONTHS, LAST_FUEL_CHANGE } from '@/lib/data/tariff/administered-prices';
 
 /**
@@ -119,12 +119,12 @@ describe('world oil futures', () => {
 });
 
 describe('the fuel-price card', () => {
-  const m = buildOilCardModel(ROWS, new Date('2026-11-01T08:00:00Z'));
+  const m = buildOilCardModel(ROWS, { now: new Date('2026-11-01T08:00:00Z') });
 
   it('dates itself by Dhaka and the settlement by New York', () => {
     expect(m.published).toEqual({ weekday: 'Sunday', date: '1 November 2026' });
     expect(m.world?.settlement).toBe('30 Oct 2026');
-    expect(m.filename).toBe('ESB_Fuel_Prices_2026-11-01.png');
+    expect(m.filename).toBe('ESB_Fuel_Prices_2026-11-01');
   });
 
   it("names the month's instrument and calls an unmoved price unchanged", () => {
@@ -147,11 +147,96 @@ describe('the fuel-price card', () => {
     const last = EMRD_FUEL_MONTHS.at(-1)!.month; // 2026-11
     const [y, mo] = last.split('-').map(Number);
     const next = new Date(Date.UTC(mo === 12 ? y + 1 : y, mo === 12 ? 0 : mo, 2, 6));
-    expect(buildOilCardModel(ROWS, next).pump.chip).toBe('EMRD · November rate · awaiting December notice');
+    expect(buildOilCardModel(ROWS, { now: next }).pump.chip).toBe('EMRD · November rate · awaiting December notice');
   });
 
   it('carries the triangle by sign and keeps the figure unsigned', () => {
     const ulsd = m.world!.rows.find((r) => r.id === 'ulsd')!;
     expect(ulsd).toMatchObject({ price: '4.68', week: { dir: 'down', pct: '2.3' }, month: { dir: 'up', pct: '3.8' } });
+  });
+});
+
+describe('cards for a missed day', () => {
+  // A full trading week for each series' front contract, 26–30 Oct 2026, plus
+  // Brent's expiring December on its last day (30 Oct) and the baselines.
+  const week = ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29', '2026-10-30'];
+  const rows: Settlement[] = [...ROWS];
+  for (const [series, contract, base] of [
+    ['wti', 'CLZ26.NYM', 100],
+    ['rbob', 'RBZ26.NYM', 3],
+    ['ulsd', 'HOZ26.NYM', 4.5],
+  ] as const) {
+    week.slice(0, 4).forEach((d, i) => rows.push(S(series, contract, d, base + i, true)));
+  }
+  week.slice(0, 4).forEach((d, i) => {
+    rows.push(S('brent', 'BZZ26.NYM', d, 115 + i, true));
+    rows.push(S('brent', 'BZF27.NYM', d, 110 + i));
+  });
+  // On its expiry day the bar matched the expiring contract.
+  rows.push(S('brent', 'BZZ26.NYM', '2026-10-30', 117.64, false));
+
+  it('reads the last session settled before the day began', () => {
+    // A card for Thu 29 Oct reads Wed 28 Oct, not the Thursday session.
+    const m = buildOilCardModel(rows, { day: '2026-10-29' });
+    expect(m.world?.settlement).toBe('28 Oct 2026');
+    expect(m.published).toEqual({ weekday: 'Thursday', date: '29 October 2026' });
+    expect(m.filename).toBe('ESB_Fuel_Prices_2026-10-29');
+  });
+
+  it('quotes the contract still trading after an expiry day', () => {
+    // 30 Oct was Brent December's last day; a card for 31 Oct must not
+    // print the expired contract's 117.64.
+    const m = buildOilCardModel(
+      rows.map((r) => (r.series === 'brent' && r.day === '2026-10-30' && r.contract === 'BZZ26.NYM' ? { ...r, front: true } : r.series === 'brent' && r.day === '2026-10-30' ? { ...r, front: false } : r)).concat([S('brent', 'BZF27.NYM', '2026-11-02', 114, true), S('wti', 'CLZ26.NYM', '2026-11-02', 105, true), S('rbob', 'RBZ26.NYM', '2026-11-02', 3.2, true), S('ulsd', 'HOZ26.NYM', '2026-11-02', 4.7, true)]),
+      { day: '2026-10-31' },
+    );
+    expect(m.world?.rows.find((r) => r.id === 'brent')).toMatchObject({ price: '113.43', contract: 'BZF27.NYM' });
+  });
+
+  it('keeps a contract that settled again the next day, even if the front then moved', () => {
+    // The card for 30 Oct reads 29 Oct. December Brent still settled on the
+    // 30th, so it is 29 Oct's contract, though January was front by the 30th.
+    const live = rows
+      .filter((r) => !(r.series === 'brent' && r.day === '2026-10-30'))
+      .concat([S('brent', 'BZF27.NYM', '2026-10-30', 113.43, true), S('brent', 'BZZ26.NYM', '2026-10-30', 117.64, false)]);
+    const m = buildOilCardModel(live, { day: '2026-10-30' });
+    expect(m.world?.rows.find((r) => r.id === 'brent')).toMatchObject({ price: '118.00', contract: 'BZZ26.NYM' });
+  });
+
+  it('refuses a world settlement more than five days old', () => {
+    // Friday's settlement is good through Wednesday — the Tuesday after a
+    // Monday holiday with a day to spare — and refused from Thursday.
+    expect(buildOilCardModel(rows, { day: '2026-11-04' }).world?.settlement).toBe('30 Oct 2026');
+    expect(buildOilCardModel(rows, { day: '2026-11-05' }).world).toBeNull();
+  });
+
+  it('offers only days the archive can answer', () => {
+    const days = cardableDays(rows, '2026-11-01');
+    expect(days[0]).toBe('2026-10-27');
+    expect(days.at(-1)).toBe('2026-11-01');
+    expect(days).not.toContain('2026-10-26'); // nothing settled on or before the 25th
+  });
+
+  it('reads the EMRD instrument in force on the day, not today', () => {
+    const oct = buildOilCardModel(rows, { day: '2026-10-29' });
+    expect(oct.pump.chip).toBe('EMRD · October rate');
+    expect(oct.pump.instrument?.memoNo).toBe('28.00.0000.000.026.35.0116.24.452');
+    const sep = buildOilCardModel([], { day: '2026-09-25' });
+    expect(sep.pump.chip).toBe('EMRD · September rate');
+    expect(sep.pump.tiles.every((t) => t.state === 'changed' && t.value != null)).toBe(true);
+    const before = buildOilCardModel([], { day: '2026-09-10' });
+    expect(before.pump.tiles.every((t) => t.value === null)).toBe(true);
+  });
+
+  it('writes the caption and the data file from the same figures', () => {
+    const m = buildOilCardModel(ROWS, { day: '2026-11-01' });
+    const cap = oilCaption(m);
+    expect(cap).toContain('Sunday, 1 November 2026');
+    expect(cap).toContain('Diesel: Tk 135 (unchanged since 21 Sep)');
+    expect(cap).toContain('Brent Crude: $113.43 per barrel (▲1.5% / ▲19.3%)');
+    expect(cap).toContain('memo 28.00.0000.000.026.35.0116.24.499');
+    const csv = oilCardCsv(m).trim().split(/\n/);
+    expect(csv).toHaveLength(1 + 4 + 4);
+    expect(csv).toContain('2026-11-01,world,Heating Oil (ULSD),4.68,USD/gallon,-2.3,3.8,HOZ26.NYM,2026-10-30,2026-10-23,2026-09-30,Yahoo Finance chart API');
   });
 });

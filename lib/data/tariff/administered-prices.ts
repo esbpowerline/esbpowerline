@@ -120,20 +120,41 @@ export const ADMINISTERED_PRICES: readonly AdministeredPrice[] = [
  * 20 Sep gazette re-fixed the prices mid-September; the October and November
  * memos hold them "unchanged".
  */
+export type FuelId = 'diesel-bpc' | 'octane-bpc' | 'petrol-bpc' | 'kerosene-bpc';
+
 export interface FuelMonthRate {
   /** `YYYY-MM`. */
   month: string;
   instrument: PriceInstrument;
   changed: boolean;
+  /** The four prices, Tk/L, as this instrument states them (memos restate them). */
+  prices: Record<FuelId, number>;
 }
 
+const SEP_20_PRICES: Record<FuelId, number> = {
+  'diesel-bpc': 135,
+  'octane-bpc': 165,
+  'petrol-bpc': 160,
+  'kerosene-bpc': 155,
+};
+
+/**
+ * In date order. A card for a past day reads the instrument in force on that
+ * day — never today's price — so a missed day can be made later and still say
+ * what was true then.
+ */
 export const EMRD_FUEL_MONTHS: readonly FuelMonthRate[] = [
-  { month: '2026-09', instrument: EMRD_GAZETTE_2026_09_20, changed: true },
-  { month: '2026-10', instrument: EMRD_MEMO_2026_09_30, changed: false },
-  { month: '2026-11', instrument: EMRD_MEMO_2026_10_29, changed: false },
+  { month: '2026-09', instrument: EMRD_GAZETTE_2026_09_20, changed: true, prices: SEP_20_PRICES },
+  { month: '2026-10', instrument: EMRD_MEMO_2026_09_30, changed: false, prices: SEP_20_PRICES },
+  { month: '2026-11', instrument: EMRD_MEMO_2026_10_29, changed: false, prices: SEP_20_PRICES },
 ];
 
-export type FuelId = 'diesel-bpc' | 'octane-bpc' | 'petrol-bpc' | 'kerosene-bpc';
+/**
+ * The first day a card can be made for: the earliest day an archived
+ * instrument fixes the pump prices. Before 21 Sep 2026 the prices in force
+ * came from EMRD's memo of 31 Aug, which is not archived.
+ */
+export const FIRST_FUEL_CARD_DAY = EMRD_GAZETTE_2026_09_20.effectiveFrom;
 
 /**
  * The instrument that last *changed* the four fuel prices, and the prices it
