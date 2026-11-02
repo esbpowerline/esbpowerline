@@ -198,6 +198,13 @@ export const LOAD_CURVE_COLORS = {
   demand: { light: '#eda100', dark: '#c98500' },
 } as const satisfies Record<string, ModalColor>;
 
+/**
+ * The gold of the 19:30 half-hour sample marked in the Overview chart's prose. It is a
+ * label colour, not a series fill, and was a raw literal inside the Overview block
+ * until that block moved under power-grid/ (2026-11-02).
+ */
+export const SAMPLE_1930_COLOR = '#c98a1a';
+
 /** Pick the right step of a modal colour without threading `mode` everywhere. */
 export function pick(color: ModalColor, mode: ChartMode = 'light'): string {
   return color[mode];
