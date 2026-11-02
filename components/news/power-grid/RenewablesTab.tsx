@@ -84,6 +84,8 @@ import {
   WARN_CLASS,
   fmt,
 } from '@/components/news/power-grid/renewables/shared';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
+import { useBelowDesktop } from '@/components/news/power-grid/useTapToRead';
 import { ProjectRegisterCard } from '@/components/news/power-grid/renewables/ProjectRegisterCard';
 import { YearAttributionNote } from '@/components/news/power-grid/renewables/YearAttributionNote';
 import { YearWiseTable } from '@/components/news/power-grid/renewables/YearWiseTable';
@@ -440,6 +442,9 @@ export function RenewablesTab({
     });
 
   const [timelineCardRef, isNarrowTimeline] = useNarrowChartCard();
+  // Phone/tablet: station table -> cards, sparser axis ticks. False on the server and first hydration (desktop markup unchanged).
+  const small = useBelowDesktop();
+  const [showAllStations, setShowAllStations] = useState(false);
 
   /**
    * One tooltip for the monthly timeline, shared by the combined chart and by
@@ -506,7 +511,8 @@ export function RenewablesTab({
       {...gridChartXAxisProps(chartTheme, {
         dataKey: 'month',
         tickFormatter: (v: string) => v.slice(0, 4),
-        interval: Math.max(0, Math.floor(monthlySeries.length / 14)),
+        // 11px labels at ~15 ticks overlapped on a 360px plot ("201201201…"); ~6 years is readable.
+        interval: Math.max(0, Math.floor(monthlySeries.length / (small ? 6 : 14))),
       })}
     />
   );
@@ -689,7 +695,7 @@ export function RenewablesTab({
           {daily.rows.length ? (
             <>
               <div className="grid-explorer-table-wrap">
-                <table className="grid-explorer-table">
+                <table className="grid-explorer-table ge-compact-table ge-rn-fuel">
                   <thead>
                     <tr>
                       <th>Fuel</th>
@@ -736,12 +742,14 @@ export function RenewablesTab({
                   </tbody>
                 </table>
               </div>
-              <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
-                Hydro and Wind carry a <strong>flat</strong>{' '}
-                mark because PGCB applies a fixed rate to
-                them — 0.1000 and 14.7100 Tk/kWh on essentially every day of 2026 — rather than
-                reporting a measured cost. A rate no agency prints is derived either way.
-              </div>
+              <MobileFold title="What does the flat mark mean?">
+                <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                  Hydro and Wind carry a <strong>flat</strong>{' '}
+                  mark because PGCB applies a fixed rate to
+                  them — 0.1000 and 14.7100 Tk/kWh on essentially every day of 2026 — rather than
+                  reporting a measured cost. A rate no agency prints is derived either way.
+                </div>
+              </MobileFold>
             </>
           ) : (
             <CardNotice>PGCB published no fuel-wise generation for this date.</CardNotice>
@@ -1069,11 +1077,13 @@ export function RenewablesTab({
                 ) : null,
               )}
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
-              Left axis is monthly energy in MKWh, stacked; right axis is renewables as a share of all
-              generation that month. Gaps in the line are months PGCB has not published — nothing is
-              interpolated across them.
-            </p>
+            <MobileFold title="How to read this chart">
+              <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                Left axis is monthly energy in MKWh, stacked; right axis is renewables as a share of all
+                generation that month. Gaps in the line are months PGCB has not published — nothing is
+                interpolated across them.
+              </p>
+            </MobileFold>
           </div>
         ) : (
           <CardNotice>PGCB monthly reports could not be loaded, so no timeline is shown.</CardNotice>
@@ -1111,6 +1121,27 @@ export function RenewablesTab({
 
         {plants === null ? (
           <CardNotice>Loading station detail…</CardNotice>
+        ) : renewablePlants.length && small ? (
+          <div>
+            <ul className="ge-plant-list">
+              {(showAllStations ? renewablePlants : renewablePlants.slice(0, 8)).map((p) => (
+                <RenewableStationCard key={p.name} p={p} />
+              ))}
+            </ul>
+            {renewablePlants.length > 8 && (
+              <button type="button" className="ge-gas-show-all" onClick={() => setShowAllStations((v) => !v)}>
+                {showAllStations ? 'Show first 8' : `Show all ${renewablePlants.length} stations`}
+              </button>
+            )}
+            <div className="ge-plant-total">
+              <strong>{renewablePlants.length} stations <GridProvenanceTag kind="D" /></strong>
+              <span>Installed MW <b>{formatNumber(Math.round(plantTotals.installed))}</b></span>
+              <span>Available MW <b>{formatNumber(Math.round(plantTotals.present))}</b></span>
+              <span>Day peak MW <b>{formatNumber(Math.round(plantTotals.dayPeak))}</b></span>
+              <span>Evening peak MW <b>{formatNumber(Math.round(plantTotals.evePeak))}</b></span>
+              <span>Energy MKWh <b className="text-primary">{fmt(plantTotals.energyKwh / 1_000_000, 3)}</b></span>
+            </div>
+          </div>
         ) : renewablePlants.length ? (
           <div className="grid-explorer-table-wrap">
             <table className="grid-explorer-table">
@@ -1207,11 +1238,13 @@ export function RenewablesTab({
                 </div>
               ))}
             </div>
-            <p className="mt-1.5 text-[10px] text-muted-foreground leading-relaxed">
-              The station table and the fuel table are different pages of the same PGCB report, so
-              each fuel&rsquo;s stations should sum to its published energy. Band is half of the last
-              digit PGCB prints, once per figure summed.
-            </p>
+            <MobileFold title="How the stations are checked">
+              <p className="mt-1.5 text-[10px] text-muted-foreground leading-relaxed">
+                The station table and the fuel table are different pages of the same PGCB report, so
+                each fuel&rsquo;s stations should sum to its published energy. Band is half of the last
+                digit PGCB prints, once per figure summed.
+              </p>
+            </MobileFold>
           </div>
         )}
 
@@ -1257,7 +1290,7 @@ export function RenewablesTab({
 
             {sreda.technologyBreakdown?.length ? (
               <div className="grid-explorer-table-wrap">
-                <table className="grid-explorer-table">
+                <table className="grid-explorer-table ge-compact-table ge-rn-tech">
                   <thead>
                     <tr>
                       <th>Technology</th>
@@ -1289,7 +1322,7 @@ export function RenewablesTab({
                             onClick={() => toggleTech(source)}
                           >
                             <td className="font-bold text-xs uppercase tracking-wide">
-                              <span className="flex items-center gap-2">
+                              <span className="flex items-center gap-2 ge-rn-tech__name">
                                 {open ? (
                                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                 ) : (
@@ -1344,15 +1377,17 @@ export function RenewablesTab({
               </CardNotice>
             )}
 
-            <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
-              <strong>Installations</strong>{' '}
-              is a count, not a capacity: 6,037,583 solar home systems
-              sit beside 14 solar parks, so the columns cannot be ranked against each other.
-              <strong> MWp</strong>{' '}
-              is peak DC capacity as SREDA reports it — not the MW used above
-              for grid capacity and output. Each source row sums the SREDA-published
-              technology rows beneath it — click a source to expand or collapse them.
-            </div>
+            <MobileFold title="Installations vs MWp: how to read this">
+              <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                <strong>Installations</strong>{' '}
+                is a count, not a capacity: 6,037,583 solar home systems
+                sit beside 14 solar parks, so the columns cannot be ranked against each other.
+                <strong> MWp</strong>{' '}
+                is peak DC capacity as SREDA reports it — not the MW used above
+                for grid capacity and output. Each source row sums the SREDA-published
+                technology rows beneath it — {small ? 'tap' : 'click'} a source to expand or collapse them.
+              </div>
+            </MobileFold>
 
             <GridCardFooter>
               <span>
@@ -1380,7 +1415,7 @@ export function RenewablesTab({
 
               {sreda.generationMix?.length ? (
                 <div className="grid-explorer-table-wrap">
-                  <table className="grid-explorer-table">
+                  <table className="grid-explorer-table ge-compact-table">
                     <thead>
                       <tr>
                         <th>Fuel / Resource</th>
@@ -1425,11 +1460,13 @@ export function RenewablesTab({
                 </CardNotice>
               )}
 
-              <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
-                This page states renewable capacity in <strong>MW</strong>; the technology page states
-                the same quantity in <strong>MWp</strong>. SREDA uses both labels for it, and the two
-                figures differ slightly — the reconciliation below reports that rather than picking one.
-              </div>
+              <MobileFold title="MW vs MWp on this page">
+                <div className="pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                  This page states renewable capacity in <strong>MW</strong>; the technology page states
+                  the same quantity in <strong>MWp</strong>. SREDA uses both labels for it, and the two
+                  figures differ slightly — the reconciliation below reports that rather than picking one.
+                </div>
+              </MobileFold>
 
               <GridCardFooter>
                 <span>
@@ -1458,7 +1495,9 @@ export function RenewablesTab({
                   {sreda.yearWiseTables.map((table) => (
                     <YearWiseTable key={table.category} table={table} />
                   ))}
-                  <YearAttributionNote tables={sreda.yearWiseTables} />
+                  <MobileFold title="What the year column means">
+                    <YearAttributionNote tables={sreda.yearWiseTables} />
+                  </MobileFold>
                 </div>
               ) : (
                 <CardNotice>
@@ -1508,7 +1547,7 @@ export function RenewablesTab({
                     </div>
                   </div>
                   <div className="grid-explorer-table-wrap">
-                    <table className="grid-explorer-table">
+                    <table className="grid-explorer-table ge-compact-table">
                       <thead>
                         <tr>
                           <th>Organisation</th>
@@ -1620,7 +1659,7 @@ export function RenewablesTab({
                   </button>
                 </div>
 
-                <div className="grid-explorer-table-wrap mt-2">
+                <div className="grid-explorer-table-wrap mt-2 ge-rn-scroll">
                 <table className="grid-explorer-table">
                   <thead>
                     <tr>
@@ -1675,6 +1714,7 @@ export function RenewablesTab({
               <CardNotice>No reconciliation available for this snapshot.</CardNotice>
             )}
 
+            <MobileFold title="How the band is set">
             <div className="pb-4 text-[11px] text-muted-foreground leading-relaxed">
               The band is half of the last digit SREDA prints, once per figure summed — derived from
               how the source states its numbers, not chosen.
@@ -1690,6 +1730,7 @@ export function RenewablesTab({
                 </>
               )}
             </div>
+            </MobileFold>
 
             <GridCardFooter>
               <span>
@@ -1715,6 +1756,7 @@ export function RenewablesTab({
                 </div>
               </div>
 
+              <MobileFold title="These are estimates: read before using">
               <div className="mt-3 p-3 rounded-lg border border-amber-500/30 bg-amber-500/5 text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
                 <strong>These are estimates, including the &ldquo;so far&rdquo; column.</strong>{' '}
                 SREDA heads both of its column groups &ldquo;Expected Energy Generation&rdquo; — the figures
@@ -1723,6 +1765,7 @@ export function RenewablesTab({
                 cannot be checked, and they are reproduced verbatim rather than recalculated. The
                 metered renewable output is in the PGCB cards above.
               </div>
+              </MobileFold>
 
               {/*
                 Same cell treatment as every other table in this tab: the label
@@ -1731,7 +1774,7 @@ export function RenewablesTab({
                 projection columns were muted here and nowhere else, which made
                 this card read as a different component.
               */}
-              <div className="grid-explorer-table-wrap mt-3">
+              <div className="grid-explorer-table-wrap mt-3 ge-rn-scroll">
                 <table className="grid-explorer-table">
                   <thead>
                     <tr>
@@ -1780,6 +1823,53 @@ export function RenewablesTab({
 
       <UnitsGlossary />
     </div>
+  );
+}
+
+/**
+ * Phone/tablet card for one renewable station: name + fuel, three key figures
+ * (installed, day peak, energy), the rest behind a tap. Same styles as the
+ * Power Stations tab's cards; all eight table columns remain reachable.
+ */
+function RenewableStationCard({ p }: { p: PlantRow }) {
+  const [open, setOpen] = useState(false);
+  const Icon = FUEL_ICON[p.fuel] ?? Sun;
+  return (
+    <li className="ge-plant-card">
+      <button type="button" className="ge-plant-card__btn" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <span className="ge-plant-card__top">
+          <span className="ge-plant-card__name">{p.name}</span>
+          {p.fuel ? (
+            <span className="ge-plant-card__chip inline-flex items-center gap-1">
+              <Icon className="h-3 w-3 shrink-0" style={{ color: FUEL_COLOR[p.fuel] }} aria-hidden />
+              {p.fuel}
+            </span>
+          ) : null}
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} aria-hidden />
+        </span>
+        <span className="ge-plant-card__figs">
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Installed MW <GridProvenanceTag kind="P" /></span>
+            <span className="ge-plant-card__val">{p.installedMw ?? '—'}</span>
+          </span>
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Day peak MW <GridProvenanceTag kind="P" /></span>
+            <span className="ge-plant-card__val font-semibold">{p.dayPeakMw ?? '—'}</span>
+          </span>
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Energy MKWh <GridProvenanceTag kind="P" /></span>
+            <span className="ge-plant-card__val">{p.energyKwh == null ? '—' : fmt(p.energyKwh / 1_000_000, 3)}</span>
+          </span>
+        </span>
+      </button>
+      {open && (
+        <dl className="ge-plant-card__more">
+          <div><dt>Producer <GridProvenanceTag kind="P" /></dt><dd>{p.producer || '—'}</dd></div>
+          <div><dt>Available MW <GridProvenanceTag kind="P" /></dt><dd>{p.presentCapacityMw ?? '—'}</dd></div>
+          <div><dt>Evening peak MW <GridProvenanceTag kind="P" /></dt><dd>{p.eveningPeakMw ?? '—'}</dd></div>
+        </dl>
+      )}
+    </li>
   );
 }
 
@@ -1888,6 +1978,7 @@ function UnitsGlossary() {
           </p>
         </div>
       </div>
+      <MobileFold title="Definitions: power, energy, carbon, other terms">
       <div className="grid gap-6 sm:grid-cols-2">
         {groups.map((g) => (
           <div key={g.heading}>
@@ -1917,6 +2008,7 @@ function UnitsGlossary() {
         describes — and is left unmarked, because it identifies the row rather than asserting a
         figure about it. Chart series carry the mark in the legend.
       </div>
+      </MobileFold>
 
       <GridCardFooter>
         <span>

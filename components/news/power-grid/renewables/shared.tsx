@@ -4,6 +4,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useBelowDesktop } from '@/components/news/power-grid/useTapToRead';
 
 /** Fixed-decimal grouping, so columns of figures line up. */
 export const fmt = (v: number, dp = 3) =>
@@ -15,6 +16,9 @@ export const WARN_CLASS = 'text-amber-600 dark:text-amber-400 font-bold ml-2';
 /** Rows shown before a long list asks to be expanded. */
 export const REGISTER_INITIAL_ROWS = 15;
 export const YEAR_INITIAL_ROWS = 8;
+/** Below 1024px: the recent years and the first projects only, then "Show all N". */
+export const REGISTER_INITIAL_ROWS_SMALL = 8;
+export const YEAR_INITIAL_ROWS_SMALL = 6;
 
 /** Only this status is installed capacity; the rest are pipeline or retired. */
 export const STATUS_RUNNING = 'Completed & Running';
@@ -57,8 +61,13 @@ export function CountChip({ children }: { children: ReactNode }) {
  * full count is always stated on the control, so a collapsed list never reads as
  * a complete one.
  */
-export function useExpandable<T>(rows: T[], initial: number) {
+export function useExpandable<T>(rows: T[], initialDesktop: number, initialSmall?: number) {
   const [expanded, setExpanded] = useState(false);
+  // Phones/tablets open on fewer rows (register 8, years 6): a 15-row register
+  // was ~1,100px of the 16,000px page. useBelowDesktop is false on the server
+  // and first hydration, so desktop output is byte-identical.
+  const small = useBelowDesktop();
+  const initial = small && initialSmall != null ? initialSmall : initialDesktop;
   return {
     shown: expanded ? rows : rows.slice(0, initial),
     expanded,
@@ -89,7 +98,7 @@ export function ShowMoreRow({
         <button
           type="button"
           onClick={onToggle}
-          className="w-full py-2 text-[11px] font-semibold text-primary hover:bg-muted/30 transition-colors flex items-center justify-center gap-1.5"
+          className="ge-rn-more w-full py-2 text-[11px] font-semibold text-primary hover:bg-muted/30 transition-colors flex items-center justify-center gap-1.5"
         >
           {expanded ? (
             <>

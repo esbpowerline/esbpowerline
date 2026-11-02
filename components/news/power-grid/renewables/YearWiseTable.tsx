@@ -12,13 +12,14 @@ import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import {
   ShowMoreRow,
   YEAR_INITIAL_ROWS,
+  YEAR_INITIAL_ROWS_SMALL,
   fmt,
   useExpandable,
 } from '@/components/news/power-grid/renewables/shared';
 import type { SredaYearTable } from '@/lib/data/sreda/types';
 
 export function YearWiseTable({ table }: { table: SredaYearTable }) {
-  const { shown, expanded, toggle, hidden } = useExpandable(table.rows, YEAR_INITIAL_ROWS);
+  const { shown, expanded, toggle, hidden } = useExpandable(table.rows, YEAR_INITIAL_ROWS, YEAR_INITIAL_ROWS_SMALL);
   const hasQuantity = table.rows.some((r) => r.quantity !== null);
   const malformed = table.rows.filter((r) => r.yearMalformed);
   const cols = hasQuantity ? 3 : 2;
@@ -32,7 +33,7 @@ export function YearWiseTable({ table }: { table: SredaYearTable }) {
         </span>
       </h4>
       <div className="grid-explorer-table-wrap">
-        <table className="grid-explorer-table">
+        <table className="grid-explorer-table ge-compact-table ge-rn-year">
           <thead>
             <tr>
               <th>Year</th>

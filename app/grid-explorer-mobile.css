@@ -531,3 +531,65 @@
   /* The imports table no longer scrolls sideways, so its swipe hint goes. */
   .ge-root .ge-imp-hint { display: none; }
 }
+
+/* ── RENEWABLES tab (phone/tablet) ───────────────────────────────────────────
+   SREDA register / year / station cards, compact roll-up tables, chip rows.
+   Simple 2-5 column tables reuse .ge-compact-table (<768px, defined above). */
+@media (max-width: 1023px) {
+  /* Tech/status/filter chips: one swipeable row each instead of 4-5 wrapped
+     rows (the register's filters were ~330px tall before the first project). */
+  .ge-root .ge-rn-chips { flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 4px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .ge-root .ge-rn-chips::-webkit-scrollbar { display: none; }
+  .ge-root .ge-rn-chips > button { flex: none; white-space: nowrap; min-height: 44px; }
+  .ge-root .ge-rn-chips--status { display: flex !important; width: 100%; }
+  .ge-root .ge-rn-filters { row-gap: 8px; }
+  .ge-root .ge-rn-search { width: 100%; margin-left: 0; }
+  .ge-root .ge-rn-search input { min-height: 44px; font-size: 14px; }
+
+  /* Register card: status badge sits on its own line under the name. */
+  .ge-root .ge-rn-card__sub { display: block; margin-top: 3px; }
+  .ge-root .ge-rn-card__status { display: inline-block; padding: 1px 8px; font-size: 11px; line-height: 1.4; }
+
+  /* "Show all N" inside a table cell: the global td-button reset removes the
+     44px floor; restore it for this one control. */
+  .ge-root td button.ge-rn-more { min-height: 44px; font-size: 12px; }
+
+  /* Wide, text-heavy tables (reconciliation, carbon) scroll inside their own
+     box with the first column pinned. */
+  .ge-root .ge-rn-scroll { overflow-x: auto; }
+  .ge-root .ge-rn-scroll th:first-child, .ge-root .ge-rn-scroll td:first-child {
+    position: sticky; left: 0; z-index: 1; background: hsl(var(--card));
+    box-shadow: 1px 0 0 hsl(var(--border) / 0.4); max-width: 9.5rem; white-space: normal;
+  }
+  .ge-root .ge-rn-scroll thead th:first-child { z-index: 2; }
+  .ge-root .ge-rn-scroll th, .ge-root .ge-rn-scroll td { font-size: 12px; }
+  .ge-root .ge-rn-scroll th { white-space: normal; min-width: 5.5rem; }
+
+  /* Year tables: the tag and "as printed" badge keep the 11px floor. */
+  .ge-root .ge-rn-year td { font-size: 13px; }
+  .ge-root .ge-rn-year .text-\[10px\] { font-size: 11px; }
+  /* Technology roll-up rows toggle on tap: give the whole row a 44px target. */
+  .ge-root .ge-rn-tech tr[aria-expanded] td { height: 44px; }
+  .ge-root .ge-rn-tech tr[aria-expanded] { cursor: pointer; }
+  /* Chart captions render at ~10px on phones; lift to the 11px floor. */
+  .ge-root .grid-explorer-chart-caption { font-size: 11px; }
+  /* Inline source links in prose: 14px-tall lines are too small to tap. Pad
+     the hit area and cancel the layout effect with equal negative margin. */
+  .ge-root a.text-primary.hover\:underline { display: inline-block; padding-block: 15px; margin-block: -15px; }
+}
+@media (max-width: 767px) {
+  /* Technology name cell: icon + name + tag + "N technologies" wrap instead of
+     pushing the four figure columns off-screen. */
+  .ge-root .ge-rn-tech__name { flex-wrap: wrap; gap: 2px 6px; }
+  /* Fixed layout so the 5 columns share the card width exactly: the auto
+     layout let the figure columns push "Total (MWp)" 8px past the card edge. */
+  .ge-root .ge-rn-tech { table-layout: fixed; width: 100%; }
+  .ge-root .ge-rn-tech th:first-child, .ge-root .ge-rn-tech td:first-child { width: 25%; }
+  .ge-root .ge-rn-tech th { overflow-wrap: anywhere; letter-spacing: 0; }
+  .ge-root .ge-rn-tech td:not(:first-child) { white-space: nowrap; font-size: 11px; padding-inline: 2px; }
+  .ge-root .ge-rn-tech th:first-child, .ge-root .ge-rn-tech td:first-child { width: 22%; }
+  .ge-root .ge-rn-tech td { font-size: 11.5px; padding-inline: 3px; }
+  .ge-root .ge-rn-tech th { font-size: 11px; padding-inline: 3px; }
+  .ge-root .ge-rn-tech td.pl-6 { padding-left: 14px; }
+  .ge-root .ge-rn-fuel td:nth-child(3) { font-size: 11.5px; }
+}

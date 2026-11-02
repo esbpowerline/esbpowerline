@@ -14,12 +14,16 @@
  */
 
 import { useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Factory, Search } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ChevronDown, Factory, Search } from 'lucide-react';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
+import { useBelowDesktop } from '@/components/news/power-grid/useTapToRead';
+import { cn } from '@/lib/utils';
 import { GridCardFooter, GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import {
   CountChip,
   OK_CLASS,
   REGISTER_INITIAL_ROWS,
+  REGISTER_INITIAL_ROWS_SMALL,
   STATUS_RUNNING,
   ShowMoreRow,
   WARN_CLASS,
@@ -33,6 +37,59 @@ import type {
   SredaReconciliation,
   SredaTechnologyRow,
 } from '@/lib/data/sreda/types';
+
+/**
+ * Phone/tablet card for one register row: name + status, three key figures
+ * (capacity, completion, agency), the rest (location, financing, SREDA id)
+ * behind a tap. The 7-column table needed ~900px of width and a sideways swipe
+ * to read a single project. Reuses the Power Stations card styles.
+ */
+function ProjectCard({ r }: { r: SredaProjectRegister['rows'][number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li className="ge-plant-card">
+      <button type="button" className="ge-plant-card__btn" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <span className="ge-plant-card__top">
+          <span className="ge-plant-card__name">{r.projectName}</span>
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} aria-hidden />
+        </span>
+        <span className="ge-rn-card__sub">
+          <span className={`ge-rn-card__status rounded border font-bold ${statusClass(r.status)}`}>{r.status}</span>
+        </span>
+        <span className="ge-plant-card__figs">
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Capacity <GridProvenanceTag kind="P" /></span>
+            <span className="ge-plant-card__val font-semibold">{r.capacityPublished}</span>
+          </span>
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Completion <GridProvenanceTag kind="P" /></span>
+            <span className="ge-plant-card__val">{r.completionDate || '—'}</span>
+          </span>
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Agency <GridProvenanceTag kind="P" /></span>
+            <span className="ge-plant-card__val">{r.agency || '—'}</span>
+          </span>
+        </span>
+      </button>
+      {open && (
+        <dl className="ge-plant-card__more">
+          <div><dt>Location <GridProvenanceTag kind="P" /></dt><dd>{r.location || '—'}</dd></div>
+          <div>
+            <dt>Financing <GridProvenanceTag kind="P" /></dt>
+            <dd>
+              {r.finance || '—'}
+              {r.financeFullName && r.financeFullName !== r.finance ? ` — ${r.financeFullName}` : ''}
+            </dd>
+          </div>
+          {r.agencyFullName && r.agencyFullName !== r.agency && (
+            <div><dt>Agency (full name)</dt><dd>{r.agencyFullName}</dd></div>
+          )}
+          <div><dt>SREDA ID</dt><dd>{`${r.sid} · ${r.technology}`}</dd></div>
+        </dl>
+      )}
+    </li>
+  );
+}
 
 export function ProjectRegisterCard({
   registers,
@@ -48,6 +105,7 @@ export function ProjectRegisterCard({
   const [tech, setTech] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('all');
+  const small = useBelowDesktop();
 
   const active = registers.find((r) => r.technology === tech) ?? registers[0];
 
@@ -69,7 +127,7 @@ export function ProjectRegisterCard({
     );
   }, [active, query, status]);
 
-  const { shown, expanded, toggle, hidden } = useExpandable(visible, REGISTER_INITIAL_ROWS);
+  const { shown, expanded, toggle, hidden } = useExpandable(visible, REGISTER_INITIAL_ROWS, REGISTER_INITIAL_ROWS_SMALL);
 
   const running = active.rows.filter((r) => r.status === STATUS_RUNNING);
   const runningMwp = running.reduce((s, r) => s + r.capacityMwp, 0);
@@ -105,7 +163,7 @@ export function ProjectRegisterCard({
         </div>
       </div>
 
-      <div className="pt-3 flex flex-wrap gap-1.5">
+      <div className="pt-3 flex flex-wrap gap-1.5 ge-rn-chips">
         {registers.map((r) => (
           <button
             key={r.technology}
@@ -127,7 +185,8 @@ export function ProjectRegisterCard({
 
       {/* Status chips double as filters: the counts are the point, and clicking
           one is the obvious way to act on them. */}
-      <div className="pt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+      <div className="pt-3 flex flex-wrap items-center gap-x-3 gap-y-2 ge-rn-filters">
+        <div className="contents ge-rn-chips ge-rn-chips--status">
         <button
           type="button"
           onClick={() => setStatus('all')}
@@ -159,7 +218,8 @@ export function ProjectRegisterCard({
             <span className="text-muted-foreground">{name}</span>
           </button>
         ))}
-        <div className="relative ml-auto w-full sm:w-60">
+        </div>
+        <div className="relative ml-auto w-full sm:w-60 ge-rn-search">
           <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 shrink-0 text-muted-foreground" />
           <input
             value={query}
@@ -187,6 +247,21 @@ export function ProjectRegisterCard({
         </p>
       )}
 
+      {small ? (
+        <div>
+          <ul className="ge-plant-list">
+            {shown.map((r) => (
+              <ProjectCard key={`${r.sid}-${r.projectName}`} r={r} />
+            ))}
+          </ul>
+          {visible.length === 0 && <p className="ge-plant-empty">No projects match this filter.</p>}
+          {hidden > 0 && (
+            <button type="button" className="ge-gas-show-all" onClick={toggle}>
+              {expanded ? 'Show fewer' : `Show all ${visible.length} projects (${hidden} more)`}
+            </button>
+          )}
+        </div>
+      ) : (
       <div className="grid-explorer-table-wrap mt-3">
         <table className="grid-explorer-table">
           <thead>
@@ -275,6 +350,7 @@ export function ProjectRegisterCard({
           </tbody>
         </table>
       </div>
+      )}
 
       {(countCheck || capCheck || (techRow && runCheck)) && (
         <div className="mt-3 p-3 rounded-lg border border-border/50 bg-muted/15 space-y-1">
@@ -337,6 +413,7 @@ export function ProjectRegisterCard({
         </div>
       )}
 
+      <MobileFold title="How to read this register">
       <div className="py-3 text-[11px] text-muted-foreground leading-relaxed space-y-1.5">
         <p>
           <strong>{`Only “${STATUS_RUNNING}” projects are installed capacity.`}</strong>{' '}
@@ -354,6 +431,7 @@ export function ProjectRegisterCard({
           }, and the count above is checked against SREDA’s own headline.`}
         </p>
       </div>
+      </MobileFold>
 
       <GridCardFooter>
         <span>
