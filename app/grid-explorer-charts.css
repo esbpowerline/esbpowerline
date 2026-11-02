@@ -22,7 +22,7 @@
     .rtraj__tick, .rtraj__unit, .rtraj__note, .rtraj__wedge, .rtraj__anchor, .rtraj__pin,
     .rtraj__readout-foot, .rtraj__readout-list
   ):not(#ge) {
-    font-size: 11px;
+    font-size: var(--ge-text-min);
   }
 
   /* Recharts charts (every other tab): axis ticks, legends and tooltips. */
@@ -30,10 +30,10 @@
   .grid-explorer .recharts-polar-angle-axis-tick-value,
   .grid-explorer .recharts-label,
   .grid-explorer .recharts-text.recharts-cartesian-axis-tick-value tspan {
-    font-size: 11px;
+    font-size: var(--ge-text-min);
   }
   .grid-chart-external-legend__item.grid-chart-external-legend__item {
-    font-size: 11px;
+    font-size: var(--ge-text-min);
   }
   .grid-chart-tooltip__label, .grid-chart-tooltip__value, .grid-chart-tooltip__title,
   .grid-chart-tooltip__foot {
@@ -55,7 +55,7 @@
   .grid-provenance-tag:not(#ge) {
     width: 16px;
     height: 16px;
-    font-size: 11px;
+    font-size: 11px;   /* allow-listed: P/D mark is a badge */
     vertical-align: 0.25em;
   }
 }

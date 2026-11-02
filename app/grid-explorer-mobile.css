@@ -4,6 +4,25 @@
    the explorer routes. Note: postcss-root-relative-px rewrites px to
    calc(N * var(--px)); below 1024px --px is exactly 1px. */
 
+/* ── Design tokens (Phase 3, Round 2B) ───────────────────────────────────────
+   Defined once; every phone/tablet rule below reads them. They are only consumed
+   inside max-width:1023px rules, so defining them globally changes nothing on
+   desktop. Phone-S (<360px) tightens gutter and card padding to 12px. */
+:root {
+  --ge-gutter: 16px;
+  --ge-card-pad: 16px;
+  --ge-radius: 12px;
+  --ge-section-gap: 24px;
+  --ge-gap: 12px;
+  --ge-gap-sm: 8px;
+  --ge-tap: 44px;
+  --ge-text-min: 12px;   /* body / supporting / caption / table / legend text */
+  --ge-pill-min: 11px;   /* ONLY pills, badges, P/D marks, sup marks */
+}
+@media (max-width: 359px) {
+  :root { --ge-gutter: 12px; --ge-card-pad: 12px; }
+}
+
 /* ── Sticky context bar ─────────────────────────────────────────────────── */
 .ge-shell-bar {
   position: sticky;
@@ -15,8 +34,8 @@
   min-height: 56px;
   padding: 6px 0;
   /* Bleed to the container edge so the bar's background spans the screen. */
-  margin-inline: -1rem;
-  padding-inline: 1rem;
+  margin-inline: calc(-1 * var(--ge-gutter));
+  padding-inline: var(--ge-gutter);
   background: hsl(var(--background));
   border-bottom: 1px solid hsl(var(--border) / 0.6);
 }
@@ -24,9 +43,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 44px;
+  min-height: var(--ge-tap);
   padding: 0 12px;
-  border-radius: 16px;
+  border-radius: var(--ge-radius);
   border: 1px solid hsl(var(--border) / 0.7);
   background: hsl(var(--card));
   color: hsl(var(--foreground));
@@ -56,12 +75,25 @@
 .ge-shell-tag {
   border-radius: 999px;
   padding: 2px 8px;
-  font-size: 11px;
+  font-size: var(--ge-pill-min);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   background: hsl(var(--primary) / 0.12);
   color: hsl(var(--primary));
+}
+
+/* Intro "More" toggle: phone only (see the Page header block below). The row
+   around the H1 is transparent from 768px up, so desktop/tablet markup flows as before. */
+.ge-intro__row { display: contents; }
+.ge-intro__toggle { display: none; }
+@media (max-width: 767px) {
+  .ge-intro__row { display: flex; align-items: center; justify-content: space-between; gap: var(--ge-gap-sm); min-height: var(--ge-tap); }
+  .ge-intro:not(.is-open) { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .ge-intro__toggle {
+    display: inline-flex; align-items: center; justify-content: flex-end; min-height: var(--ge-tap); min-width: var(--ge-tap);
+    padding: 0; font-size: var(--ge-text-min); font-weight: 600; color: hsl(var(--primary)); cursor: pointer;
+  }
 }
 
 /* Desktop never sees the bar. `lg:hidden` alone loses to the display:flex above
@@ -141,9 +173,31 @@
   html.ge-active .public-market-strip { display: none !important; }
   html.ge-active body:has(.public-market-strip) { padding-bottom: 0 !important; }
 
-  /* Header block above the date row: it was ~130px of chrome between the bar
-     and the first figure. */
-  .ge-root #grid-status-overview-header { margin-bottom: 0.75rem; gap: 0.5rem; }
+  /* Page gutter: one value for every tab (container--shell is 1rem, and rem is
+     viewport-scaled on phones). Scoped to the explorer via html.ge-active. */
+  html.ge-active #power-grid-page-container { padding-inline: var(--ge-gutter); }
+
+  /* Page header (page.tsx): eyebrow row carries the CSV button at its right edge,
+     intro is clamped to two lines (full text stays in the DOM) with a 44px
+     More toggle. Goal: sticky bar + first content inside ~420px at 390. */
+  .ge-page-head { position: relative; margin-bottom: var(--ge-gap-sm); padding-bottom: var(--ge-gap-sm); gap: 0; }
+  .ge-page-head__eyebrow { margin-bottom: 0; padding-right: 0; }
+  /* CSV button: own right-aligned row. (It used to be absolutely positioned beside the
+     eyebrow, but the site-wide phone rule that makes `.flex.flex-row.gap-2` 100% wide
+     inside #power-grid-page-container stretched its wrapper over the eyebrow text.) */
+  #power-grid-page-container .ge-page-head .ge-page-head__actions.flex { width: 100% !important; justify-content: flex-end; margin-top: var(--ge-gap-sm); }
+  #power-grid-page-container .ge-page-head .ge-page-head__actions > div { display: flex; justify-content: flex-end; }
+  #power-grid-page-container .ge-page-head .ge-page-head__actions > div:empty { display: none; }
+  .ge-page-head .ge-page-head__actions a, .ge-page-head .ge-page-head__actions button { min-height: var(--ge-tap); padding-inline: 12px; width: auto; white-space: nowrap; }
+  .ge-intro { font-size: var(--ge-text-min); }
+
+  /* "Grid Status Overview" row: heading left, LATEST pill right, date under it. */
+  .ge-root #grid-status-overview-header { margin-bottom: var(--ge-gap); gap: 0; }
+  .ge-root #grid-status-overview-header > div:first-child { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--ge-gap-sm); }
+  .ge-root #grid-status-overview-header h2 { order: 1; flex: 1 1 auto; font-size: 18px; line-height: 1.3; }
+  .ge-root #grid-status-overview-header > div:first-child > p { display: contents; }
+  .ge-root #grid-status-overview-header .ge-hdr-pill { order: 2; margin-left: auto; font-size: var(--ge-pill-min); }
+  .ge-root #grid-status-overview-header .ge-hdr-date { order: 3; flex: 0 0 100%; margin-top: 2px; font-size: var(--ge-text-min); color: hsl(var(--muted-foreground)); }
 
   /* Overview KPIs: every tile visible, hero full width, rest two-up. The
      fold is a phone-only CSS hide (globals.css, max-width:40rem); undo it. */
@@ -153,27 +207,49 @@
   .ge-root .grid-explorer-kpi-more { display: none !important; }
   .ge-root .grid-explorer-kpi__value { overflow-wrap: normal; }
 
-  /* ── Type floor: Tailwind's literal sub-11px sizes -> 11px ──────────────── */
+  /* ── Type floor: Tailwind's literal sub-12px sizes -> 12px ───────────────── */
   .ge-root .text-\[7px\], .ge-root .text-\[8px\], .ge-root .text-\[8\.5px\],
   .ge-root .text-\[9px\], .ge-root .text-\[9\.5px\], .ge-root .text-\[10px\],
-  .ge-root .text-\[10\.5px\], .ge-root .md\:text-\[9px\], .ge-root .md\:text-\[10px\],
+  .ge-root .text-\[10\.5px\], .ge-root .text-\[11px\], .ge-root .md\:text-\[9px\], .ge-root .md\:text-\[10px\],
   #power-grid-page-container .text-\[9px\], #power-grid-page-container .text-\[10px\],
   #power-grid-page-container .text-\[8px\], #power-grid-page-container .text-\[10\.5px\],
+  #power-grid-page-container .text-\[11px\],
   /* Class-based micro type in the KPI strips (globals.css sets 7-10px). */
-  .ge-root .grid-provenance-tag, .ge-root .grid-kpi-cite__key, .ge-root .grid-kpi-cite__doc,
+  .ge-root .grid-kpi-cite__key, .ge-root .grid-kpi-cite__doc,
   .ge-root .grid-kpi-cite__part, .ge-root .grid-kpi-cite__date, .ge-root .grid-kpi-cite__host,
   .ge-root .grid-kpi-source-file, .ge-root .grid-source-files__lead,
   .ge-root .grid-source-files__agency, .ge-root .grid-source-files__name,
   .ge-root .grid-kpi-tip__title, .ge-root .grid-explorer-kpi__label,
-  .ge-root .grid-explorer-chart-card__sub, .ge-root .grid-explorer-kpi__label sup,
-  .ge-root .grid-explorer-kpi__label *, .ge-root .grid-explorer-chip,
+  .ge-root .grid-explorer-chart-card__sub, .ge-root .grid-explorer-kpi__label *,
   /* rem-based text-xs resolves to ~9.75px on phones (root font scales with vw). */
   .ge-root .text-xs, #power-grid-page-container .text-xs,
   #power-grid-page-container .grid-explorer-views a,
   #power-grid-page-container .grid-explorer-views span {
-    font-size: 11px;
+    font-size: var(--ge-text-min);
     line-height: 1.35;
   }
+  /* Pills and badges (rounded + horizontal padding utilities), the P/D mark, chips
+     and sup marks are the ONLY text allowed below 12px: 11px. Listed here so the
+     12px rule above never grows them. */
+  .ge-root span[class*='rounded'][class*='px-'], .ge-root .grid-provenance-tag, .ge-root .grid-explorer-chip,
+  .ge-root .grid-explorer-kpi__label sup, #power-grid-page-container span[class*='rounded'][class*='px-'] {
+    font-size: var(--ge-pill-min);
+    line-height: 1.35;
+  }
+
+  /* Catch-all for text that gets its size from rem (root is viewport-scaled, so
+     text-sm is ~11.4px on a phone) or from a parent: never below the floor. */
+  .ge-root .text-sm, #power-grid-page-container .text-sm,
+  #power-grid-page-container .btn > span { font-size: 13px; }
+  /* globals.css sizes .btn with !important in its phone/tablet blocks. */
+  #power-grid-page-container .btn { font-size: 13px !important; }
+  .ge-root table td, .ge-root table th { font-size: max(1em, var(--ge-text-min)); }
+  .ge-root .ge-zone-compact td:first-child, .ge-root .ge-zone-compact tr.is-total td { font-size: 14px; }
+  .ge-root .ge-outage-toggle { font-size: 13px; }
+  .ge-root .grid-load-glossary dt, .ge-root .grid-load-glossary dd,
+  .ge-root .grid-source-files__sep,
+  .grid-explorer-date-dock__head span, .grid-explorer-date-dock__close,
+  .forecast-curve text { font-size: var(--ge-text-min); }
 
   /* ── Tap floor: standalone controls only (not inline icons/badges) ──────── */
   .ge-root button:not(.ge-no-tap-floor):not([class*="rounded-full"][class*="h-"]),
@@ -231,11 +307,17 @@
   .ge-root .grid-explorer-chart-card__title sup,
   .ge-root .grid-explorer-kpi__label sup,
   .ge-root sup.text-\[10px\],
-  .ge-root sup.text-\[9px\] { font-size: 11px !important; }
+  .ge-root sup.text-\[9px\] { font-size: var(--ge-pill-min) !important; }
 
   /* Card inside card was ~16px + 16px of padding either side. 12px keeps the
      chart nearly full width while the card edge still reads as a card. */
-  .ge-root .grid-explorer-chart-card { padding: 14px 12px; }
+  .ge-root .grid-explorer-chart-card, .ge-root .card {
+    padding: var(--ge-card-pad) !important;   /* globals.css clamps .card padding with !important */
+    border-radius: var(--ge-radius);
+    gap: var(--ge-gap-sm);
+  }
+  /* Related blocks and cards share one rhythm. */
+  .ge-root .grid-explorer-panel > :not([hidden]) ~ :not([hidden]) { margin-top: var(--ge-section-gap); }
   /* Title + badge on one row, subtitle beneath: let the head wrap so the
      SCADA/FUEL TYPE chip never squeezes the title into 5 lines. */
   .ge-root .grid-explorer-chart-card__head { flex-wrap: wrap; row-gap: 4px; }
@@ -252,12 +334,12 @@
   .ge-root .grid-chart-legend__key,
   .ge-root .grid-explorer-table th,
   .ge-root .grid-explorer-table td > div > span.block,
-  .ge-root .grid-explorer-table--stack td > div { font-size: 11px; }
+  .ge-root .grid-explorer-table--stack td > div { font-size: var(--ge-text-min); }
   /* Legend rows are tap/hover targets (they highlight a slice): give them room. */
   .ge-root .grid-chart-legend__item { min-height: 36px; }
   /* Donut centre label is an inline-styled SVG <text> (10px in a 200 viewBox
      drawn at 1:1). */
-  .ge-root text.ge-donut-label { font-size: 11px !important; }
+  .ge-root text.ge-donut-label { font-size: var(--ge-text-min) !important; }
 
   /* Footer source link: 24px tall hit box -> 44px, without moving the line. */
   .ge-root .grid-explorer-card-footer a { min-height: 44px; margin-block: -12px; }
@@ -274,7 +356,7 @@
   .ge-root .ge-outage-item { font-size: 13px; line-height: 1.4; }
   .ge-root .ge-outage-item__head { flex-wrap: wrap; align-items: baseline; }
   .ge-root .ge-outage-item__head > span:first-child { flex: 1 1 12rem; min-width: 0; overflow-wrap: anywhere; }
-  .ge-root .ge-outage-item__head > .font-mono { font-size: 11px; white-space: nowrap; }
+  .ge-root .ge-outage-item__head > .font-mono { font-size: var(--ge-text-min); white-space: nowrap; }
   .ge-root .ge-outage-item > div:last-child { flex-wrap: wrap; }
   .ge-root .ge-outage-toggle { min-height: 44px; background: hsl(var(--muted) / 0.2); }
 
@@ -284,7 +366,7 @@
   .ge-root .ge-circuit-row > span:first-child { width: 100%; white-space: normal; }
   .ge-root .ge-circuit-row > span:nth-child(2) { flex: 1 1 0; min-width: 80px; }
 
-  .ge-root .ge-zone-compact td[data-label]::before { font-size: 11px; line-height: 1.3; }
+  .ge-root .ge-zone-compact td[data-label]::before { font-size: var(--ge-text-min); line-height: 1.3; }
   .ge-root .ge-zone-compact td.grid-explorer-table__zeros { font-size: 12px; }
 }
 
@@ -345,7 +427,7 @@
   .ge-root .gas-disclosure__row > :nth-child(5),
   .ge-root .gas-disclosure__total > :nth-child(5) { grid-column: 1 / -1; }
   /* Label above value, 11px floor (globals.css uses 9px for this label). */
-  .ge-root .gas-disclosure__label { font-size: 11px; line-height: 1.3; letter-spacing: 0.03em; }
+  .ge-root .gas-disclosure__label { font-size: var(--ge-text-min); line-height: 1.3; letter-spacing: 0.03em; }
   .ge-root .gas-disclosure__share { flex-wrap: wrap; gap: 2px 6px; }
   .ge-root .gas-disclosure__share > .gas-disclosure__track { width: 2.25rem; flex: 0 1 2.25rem; }
   .ge-root .gas-disclosure__row > :nth-child(5) .gas-disclosure__track { width: 5rem; flex-basis: 5rem; }
@@ -371,7 +453,7 @@
     color: hsl(var(--primary)); font-size: 13px; font-weight: 600;
   }
   /* Detail stat chips sit in a wrapping row; keep their 11px floor. */
-  .ge-root .gas-disclosure__panel .text-\[10px\] { font-size: 11px; }
+  .ge-root .gas-disclosure__panel .text-\[10px\] { font-size: var(--ge-text-min); }
 }
 
 /* ── GENERATION & COST tab (phone/tablet) ────────────────────────────────────
@@ -411,8 +493,8 @@
   .ge-root .ge-cost-heads tr > td:empty { display: none; }
 
   /* Generation mix scale toggle + "show unserved load" checkbox: 10px / ~24px. */
-  .ge-root .genmix__mode { font-size: 11px; min-height: 44px; padding: 0.25rem 0.9rem; }
-  .ge-root .genmix__toggle { font-size: 11px; min-height: 44px; }
+  .ge-root .genmix__mode { font-size: var(--ge-text-min); min-height: 44px; padding: 0.25rem 0.9rem; }
+  .ge-root .genmix__toggle { font-size: var(--ge-text-min); min-height: 44px; }
   .ge-root .genmix__toggle input { width: 20px; height: 20px; }
 
   /* Prose and key/value rows: 13px body floor. */
@@ -438,20 +520,20 @@
   .ge-root .ge-plant-card__top { display: flex; align-items: center; gap: 8px; }
   .ge-root .ge-plant-card__name { flex: 1 1 auto; min-width: 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
   .ge-root .ge-plant-card__chip {
-    flex: none; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600;
+    flex: none; border-radius: 999px; padding: 1px 8px; font-size: var(--ge-pill-min); font-weight: 600;
     background: hsl(var(--muted) / 0.5); color: hsl(var(--muted-foreground));
   }
   .ge-root .ge-plant-card__figs {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 12px; margin-top: 6px;
   }
   .ge-root .ge-plant-card__fig { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .ge-root .ge-plant-card__lab { font-size: 11px; line-height: 1.3; color: hsl(var(--muted-foreground)); }
+  .ge-root .ge-plant-card__lab { font-size: var(--ge-text-min); line-height: 1.3; color: hsl(var(--muted-foreground)); }
   .ge-root .ge-plant-card__val { font-size: 14px; font-variant-numeric: tabular-nums; }
   .ge-root .ge-plant-card__more {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px 12px;
     margin: 0 0 10px; padding: 8px 10px; border-radius: 10px; background: hsl(var(--muted) / 0.2);
   }
-  .ge-root .ge-plant-card__more dt { font-size: 11px; color: hsl(var(--muted-foreground)); }
+  .ge-root .ge-plant-card__more dt { font-size: var(--ge-text-min); color: hsl(var(--muted-foreground)); }
   .ge-root .ge-plant-card__more dd { margin: 0; font-size: 13px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
   .ge-root .ge-plant-card__remark { grid-column: 1 / -1; }
   .ge-root .ge-plant-empty { padding: 16px 4px; font-size: 13px; color: hsl(var(--muted-foreground)); }
@@ -464,7 +546,7 @@
 
   /* Hourly log: 11px floor (the table sets text-[11px] already), sticky station
      column stays; the table scrolls inside its own box. */
-  .ge-root .ge-plant-log th, .ge-root .ge-plant-log td { font-size: 11px; }
+  .ge-root .ge-plant-log th, .ge-root .ge-plant-log td { font-size: var(--ge-text-min); }
   /* Derating reason is free text: let it wrap instead of truncating on a tap-less title. */
   .ge-root .ge-plant-reason .grid-explorer-table__truncate { white-space: normal; overflow: visible; text-overflow: clip; }
 }
@@ -475,7 +557,7 @@
 @media (max-width: 767px) {
   .ge-root .ge-compact-table { width: 100%; table-layout: auto; }
   .ge-root .ge-compact-table th {
-    font-size: 11px; line-height: 1.2; padding: 6px 4px; white-space: normal; vertical-align: bottom;
+    font-size: var(--ge-text-min); line-height: 1.2; padding: 6px 4px; white-space: normal; vertical-align: bottom;
   }
   .ge-root .ge-compact-table td {
     font-size: 12px; padding: 7px 4px; font-variant-numeric: tabular-nums; vertical-align: top;
@@ -484,10 +566,10 @@
   .ge-root .ge-compact-table td:first-child { max-width: 7rem; overflow-wrap: anywhere; font-weight: 600; }
   .ge-root .ge-compact-table .grid-provenance-tag { margin-left: 2px; }
   .ge-root .ge-compact-table tbody tr.is-total td { font-weight: 700; }
-  .ge-root .ge-compact-note { font-size: 11px; line-height: 1.4; color: hsl(var(--muted-foreground)); margin: 6px 0; }
+  .ge-root .ge-compact-note { font-size: var(--ge-text-min); line-height: 1.4; color: hsl(var(--muted-foreground)); margin: 6px 0; }
   .ge-root .ge-derate-station { max-width: 9rem; }
   .ge-root .ge-derate-sub {
-    display: block; margin-top: 2px; font-size: 11px; font-weight: 400; line-height: 1.3;
+    display: block; margin-top: 2px; font-size: var(--ge-text-min); font-weight: 400; line-height: 1.3;
     color: hsl(var(--muted-foreground)); overflow-wrap: anywhere;
   }
 }
@@ -529,7 +611,7 @@
   .ge-root .ge-imports-table .ge-imp-long, .ge-root .ge-imports-table .ge-imp-type-col { display: none; }
   .ge-root .ge-imports-table .ge-imp-short { display: inline; }
   .ge-root .ge-imports-table .ge-imp-type-sub {
-    display: block; margin-top: 1px; font-size: 11px; font-weight: 400; line-height: 1.3;
+    display: block; margin-top: 1px; font-size: var(--ge-text-min); font-weight: 400; line-height: 1.3;
     color: hsl(var(--muted-foreground));
   }
   .ge-root .ge-imports-table th, .ge-root .ge-imports-table td { text-transform: none; letter-spacing: 0; }
@@ -556,7 +638,7 @@
 
   /* Register card: status badge sits on its own line under the name. */
   .ge-root .ge-rn-card__sub { display: block; margin-top: 3px; }
-  .ge-root .ge-rn-card__status { display: inline-block; padding: 1px 8px; font-size: 11px; line-height: 1.4; }
+  .ge-root .ge-rn-card__status { display: inline-block; padding: 1px 8px; font-size: var(--ge-pill-min); line-height: 1.4; }
 
   /* "Show all N" inside a table cell: the global td-button reset removes the
      44px floor; restore it for this one control. */
@@ -575,12 +657,12 @@
 
   /* Year tables: the tag and "as printed" badge keep the 11px floor. */
   .ge-root .ge-rn-year td { font-size: 13px; }
-  .ge-root .ge-rn-year .text-\[10px\] { font-size: 11px; }
+  .ge-root .ge-rn-year .text-\[10px\] { font-size: var(--ge-text-min); }
   /* Technology roll-up rows toggle on tap: give the whole row a 44px target. */
   .ge-root .ge-rn-tech tr[aria-expanded] td { height: 44px; }
   .ge-root .ge-rn-tech tr[aria-expanded] { cursor: pointer; }
   /* Chart captions render at ~10px on phones; lift to the 11px floor. */
-  .ge-root .grid-explorer-chart-caption { font-size: 11px; }
+  .ge-root .grid-explorer-chart-caption { font-size: var(--ge-text-min); }
   /* Inline source links in prose: 14px-tall lines are too small to tap. Pad
      the hit area and cancel the layout effect with equal negative margin. */
   .ge-root a.text-primary.hover\:underline { display: inline-block; padding-block: 15px; margin-block: -15px; }
@@ -594,12 +676,12 @@
   .ge-root .ge-rn-tech { table-layout: fixed; width: 100%; }
   .ge-root .ge-rn-tech th:first-child, .ge-root .ge-rn-tech td:first-child { width: 25%; }
   .ge-root .ge-rn-tech th { overflow-wrap: anywhere; letter-spacing: 0; }
-  .ge-root .ge-rn-tech td:not(:first-child) { white-space: nowrap; font-size: 11px; padding-inline: 2px; }
+  .ge-root .ge-rn-tech td:not(:first-child) { white-space: nowrap; font-size: var(--ge-text-min); padding-inline: 2px; }
   .ge-root .ge-rn-tech th:first-child, .ge-root .ge-rn-tech td:first-child { width: 22%; }
-  .ge-root .ge-rn-tech td { font-size: 11.5px; padding-inline: 3px; }
-  .ge-root .ge-rn-tech th { font-size: 11px; padding-inline: 3px; }
+  .ge-root .ge-rn-tech td { font-size: 12px; padding-inline: 3px; }
+  .ge-root .ge-rn-tech th { font-size: var(--ge-text-min); padding-inline: 3px; }
   .ge-root .ge-rn-tech td.pl-6 { padding-left: 14px; }
-  .ge-root .ge-rn-fuel td:nth-child(3) { font-size: 11.5px; }
+  .ge-root .ge-rn-fuel td:nth-child(3) { font-size: 12px; }
 }
 
 /* ── MACRO TRENDS tab (phone/tablet) ─────────────────────────────────────────
@@ -619,7 +701,7 @@
 }
 @media (max-width: 1023px) {
   /* Split-unit Y ticks (value over unit) are SVG presentation attributes 10/9. */
-  .ge-root .ge-split-tick { font-size: 11px; }
+  .ge-root .ge-split-tick { font-size: var(--ge-text-min); }
 }
 @media (max-width: 1023px) {
   /* Pager (substation / outage lists): rem sizes resolve to ~8.9px on a vw-scaled
@@ -642,7 +724,7 @@
   .ge-root .gas-reserve-evidence__mode-label, .ge-root .gas-reserve-segmented__btn,
   .ge-root .gas-reserve-archive-range__btn, .ge-root .grid-explorer-macro-gas-stat__label,
   .ge-root .grid-explorer-macro-gas-stat__hint, .ge-root .gas-reserve-archive-context__stat-label,
-  .ge-root .gas-reserve-archive-context__stat-date { font-size: 11px; line-height: 1.35; }
+  .ge-root .gas-reserve-archive-context__stat-date { font-size: var(--ge-text-min); line-height: 1.35; }
   .ge-root .reserve-ladder__body { font-size: 12px; }
   .ge-root .gas-reserve-archive-range__btn { min-width: 44px; }
   /* Verification sub-view: 01..12 month / All chips are w-9 (36px) boxes. */
@@ -685,7 +767,7 @@
 @media (max-width: 1023px) {
   /* The section <select> was 36px; the hint line used rem, which collapses to ~9px here. */
   .ge-root select { min-height: 44px; }
-  .ge-root .grid-explorer-table-scroll-hint { font-size: 11px; min-height: 28px; }
+  .ge-root .grid-explorer-table-scroll-hint { font-size: var(--ge-text-min); min-height: 28px; }
   .ge-root .grid-explorer-subpanel input[type="text"],
   .ge-root .grid-explorer-subpanel input[type="search"],
   .ge-root .grid-explorer-subpanel input:not([type]) { min-height: 44px; }
@@ -701,7 +783,7 @@
   .ge-root .ge-tm-dates { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 10px; font-size: 13px; }
   /* Chart: a bit shorter than 320px keeps the reading + legend on the first screen. */
   .ge-root .ge-tm-chart { height: 280px; touch-action: pan-y; }
-  .ge-root .ge-tm-legend { gap: 6px 14px; font-size: 11px; }
+  .ge-root .ge-tm-legend { gap: 6px 14px; font-size: var(--ge-text-min); }
   .ge-root .ge-tm-legend > span { min-height: 28px; }
   .ge-root .ge-tm-defs { margin: 0; display: grid; gap: 10px; font-size: 13px; line-height: 1.45; }
   .ge-root .ge-tm-defs dt { font-weight: 700; font-size: 13px; }
@@ -753,7 +835,7 @@
 @media (max-width: 1023px) {
   /* "Every view in the explorer" / "Browse the archive" were 11px at a 16px
      root but the root shrinks with the viewport (~8.9px on a phone). */
-  .grid-explorer-views h2 { font-size: 11px; }
+  .grid-explorer-views h2 { font-size: var(--ge-text-min); }
   /* Links in those lists become 44px rows; the date links flow inline. */
   .grid-explorer-views a {
     display: inline-flex;
@@ -767,7 +849,7 @@
      (negative margin cancels the padding so the look is unchanged). */
   .grid-kpi-cite__host { display: inline-block; padding: 15px 6px; margin: -15px -6px; }
   /* Tooltip body: md:text-xs resolves to ~9.6px on tablets. */
-  .ge-root .md\:text-xs, .ge-root .grid-kpi-tip__title { font-size: 11px; }
+  .ge-root .md\:text-xs, .ge-root .grid-kpi-tip__title { font-size: var(--ge-text-min); }
   .ge-root .grid-hover-panel { max-width: calc(100vw - 24px); }
 
   /* Grey "What is being shown?" block -> same 44px tinted row as MobileFold. */

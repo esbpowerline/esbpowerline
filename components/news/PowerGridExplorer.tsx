@@ -1374,7 +1374,7 @@ export function PowerGridExplorer({
       <GridAccessBanner
         access={gridAccess}
         totalArchiveDays={availableDatesList.length}
-        compactOnPhone={activeTab !== 'overview'}
+        compactOnPhone
         className="mb-4 relative z-50"
       />
 
@@ -1416,11 +1416,11 @@ export function PowerGridExplorer({
             {/* A pending day has no payload, so systemStats.date is undefined
                 and the header read "Active reporting date:" followed by
                 nothing. Fall back to the selection itself. */}
-            Active reporting date: <span className="font-semibold text-primary">{systemStats.date || isoDateToLegacy(selectedDate) || selectedDate}</span>
+            <span className="ge-hdr-date">Active reporting date: <span className="font-semibold text-primary">{systemStats.date || isoDateToLegacy(selectedDate) || selectedDate}</span></span>
             {(() => {
               const badge = getBacklogBadgeStyles(selectedDate, latestDate);
               return (
-                <span className={cn("text-[10px] px-1.5 py-0.5 rounded font-bold ml-1 uppercase tracking-wider transition-all duration-300 inline-block align-middle", badge.className, tierLockRequired && 'opacity-50')}>
+                <span className={cn("ge-hdr-pill text-[10px] px-1.5 py-0.5 rounded font-bold ml-1 uppercase tracking-wider transition-all duration-300 inline-block align-middle", badge.className, tierLockRequired && 'opacity-50')}>
                   {badge.text}
                 </span>
               );

@@ -12,6 +12,7 @@ import { Activity } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { safeJsonLd } from '@/lib/json-ld';
+import { HeaderIntro } from '@/components/news/power-grid/HeaderIntro';
 import { GRID_EXPLORER_VIEWS } from '@/lib/grid-explorer-views';
 
 // Dynamic grid data is client-fetched; settings mutations call revalidatePath('/grid-explorer'),
@@ -203,28 +204,30 @@ export default async function PowerGridExplorerPage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       {/* Sleek, Compact Premium Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-4 border-b border-border/40 pb-3 mb-3 lg:pb-5 lg:mb-6 group">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-4 border-b border-border/40 pb-3 mb-3 lg:pb-5 lg:mb-6 group ge-page-head">
         <div>
-          <div className="flex items-center gap-1.5 mb-1.5 opacity-90 transition-opacity group-hover:opacity-100">
+          <div className="ge-page-head__eyebrow flex items-center gap-1.5 mb-1.5 opacity-90 transition-opacity group-hover:opacity-100">
             {/* No animate-pulse: a perpetual heartbeat beside the kicker reads
                 as a live-system indicator on a daily-ingest page (audit 2026-09-01). */}
             <Activity className="w-3 h-3 text-primary" />
             <div className="uppercase tracking-[2.5px] text-[9px] text-primary font-bold">Interactive Data • Power Sector</div>
           </div>
-          <h1 className="h1 font-display font-bold text-2xl md:text-3xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
+
+          <HeaderIntro heading={
+            <h1 className="h1 font-display font-bold text-2xl md:text-3xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
             Power Grid Explorer
           </h1>
-          <p className="text-muted-foreground mt-1 text-xs md:text-sm leading-snug lg:leading-relaxed max-w-2xl">
+          } className="text-muted-foreground mt-1 text-xs md:text-sm leading-snug lg:leading-relaxed max-w-2xl">
             {/* Not "planning and indicative": every daily figure below is an
                 operational number PGCB or Petrobangla filed for that day, and
                 the strap-line is the first sentence a reader (and a crawler)
                 sees. It says what the page is — and names the sector. */}
             Bangladesh’s power sector, one day at a time — generation, demand, load shedding, gas supply
             and cross-border imports as filed by PGCB and Petrobangla, back to 2013.
-          </p>
+          </HeaderIntro>
         </div>
         
-        <div className="flex flex-row items-center gap-2 shrink-0 self-start lg:self-center no-print w-full lg:w-auto">
+        <div className="ge-page-head__actions flex flex-row items-center gap-2 shrink-0 self-start lg:self-center no-print w-full lg:w-auto">
           <div className="flex-1 lg:flex-none transition-transform duration-200 hover:-translate-y-0.5">
             <RefreshGridDataButton />
           </div>
