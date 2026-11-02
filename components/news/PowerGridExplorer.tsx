@@ -86,6 +86,8 @@ import { GridDayWindows } from '@/components/news/power-grid/GridDayWindows';
 import { ForecastSection } from '@/components/news/power-grid/ForecastSection';
 import { petrobanglaGasDay, formatWindow } from '@/lib/data/grid/observation-window';
 import { tabAvailability, type GridTabId } from '@/lib/data/grid/tab-availability';
+import '@/app/grid-explorer-mobile.css';
+import { GridExplorerMobileShell } from '@/components/news/power-grid/GridExplorerMobileShell';
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
@@ -210,6 +212,20 @@ function ShedActiveBar({ x = 0, y = 0, width = 0, height = 0, fill }: {
     </g>
   );
 }
+
+/** Short right-hand hints in the phone "Jump to section" sheet. */
+const SECTION_HINTS: Record<string, string> = {
+  overview: 'KPIs · 24-h curve',
+  regional: 'zones · outages',
+  gen: 'fuel mix · cost',
+  gas: 'fields · LNG',
+  plants: 'per station',
+  imports: 'interconnectors',
+  renewables: 'solar · wind · hydro',
+  macro: 'long-run trends',
+  transmission: 'lines · substations',
+};
+
 
 
 export function PowerGridExplorer({
@@ -726,7 +742,11 @@ export function PowerGridExplorer({
       const navbar = document.querySelector('.public-nav-bar');
       const navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
       const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      const targetY = elementPosition - navbarHeight - 24;
+      // Phone/tablet: the sticky context bar sits under the navbar, so the
+      // target must clear it too (0 on desktop, where the bar is display:none).
+      const shellBar = document.querySelector('[data-ge-shell-bar]');
+      const shellBarHeight = shellBar ? shellBar.getBoundingClientRect().height : 0;
+      const targetY = elementPosition - navbarHeight - shellBarHeight - 24;
       
       const startY = window.scrollY;
       const difference = targetY - startY;
@@ -759,6 +779,14 @@ export function PowerGridExplorer({
       activeScrollIdRef.current = requestAnimationFrame(step);
     }
   };
+
+  // While the explorer is mounted, mark <html> so grid-explorer-mobile.css can
+  // hide the fixed commodities ticker below 1024px (it sits over the bottom of
+  // the screen where the thumb works). CSS-only otherwise.
+  useEffect(() => {
+    document.documentElement.classList.add('ge-active');
+    return () => document.documentElement.classList.remove('ge-active');
+  }, []);
 
   const handleTabClick = (tabId: typeof activeTab) => {
     const foldsCategoryRibbon = (tabId !== 'overview') !== (activeTab !== 'overview');
@@ -1256,7 +1284,29 @@ export function PowerGridExplorer({
         macroSubTab={macroSubTab}
         latestDate={latestDate}
       />
-      <div className="grid-explorer relative print:hidden">
+      <div className="grid-explorer ge-root relative print:hidden">
+      {/* Phone/tablet context bar: day + section, sticky for the whole page.
+          Reuses the existing date sheet; desktop keeps the tab row below. */}
+      <GridExplorerMobileShell
+        dateLabel={systemStats.date || isoDateToLegacy(selectedDate) || selectedDate}
+        isLatest={selectedDate === latestDate}
+        dateSheetOpen={isDateSheetOpen}
+        onOpenDate={() => setIsDateSheetOpen(true)}
+        sections={tabs.map((t) => {
+          const a = availability?.[t.id as GridTabId];
+          return {
+            id: t.id,
+            label: t.label,
+            icon: t.icon,
+            hint: SECTION_HINTS[t.id] ?? '',
+            empty: a ? !a.hasData : false,
+            reason: a?.reason,
+          };
+        })}
+        activeId={activeTab}
+        onSelect={(id) => handleTabClick(id as typeof activeTab)}
+      />
+
       {/* Dynamic Animated Ambient Background */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none rounded-3xl" aria-hidden="true">
         {/* Glow Blobs */}

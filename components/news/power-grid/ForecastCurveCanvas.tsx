@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { ChartReadout, useBelowDesktop, useTapToRead } from '@/components/news/power-grid/useTapToRead';
 import { formatNumber } from '@/lib/utils';
 import { minutesOf, monotonePath, type Pt } from '@/components/news/power-grid/svgChart';
 
@@ -122,7 +123,11 @@ export function ForecastCurveCanvas({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const hostRef = useRef<HTMLElement | null>(null);
   const [width, setWidth] = useState(VIEW_W_FALLBACK);
-  const [activeMins, setActiveMins] = useState<number | null>(null);
+  const { cursor: activeMins, handlers, clear } = useTapToRead<number>({ hostRef, clearOnMiss: true });
+  // SVG text is drawn 1:1 here (viewBox == pixel width), so on phone/tablet the
+  // 8.5-9.5px attributes are bumped to the 11px floor; desktop keeps its sizes.
+  const small = useBelowDesktop();
+  const fs = (n: number) => (small ? Math.max(n, 11) : n);
 
   useEffect(() => {
     const el = hostRef.current;
@@ -257,12 +262,12 @@ export function ForecastCurveCanvas({
     };
   }, [points, issuedClock, eveningPeakTime, VIEW_W]);
 
-  const onMove = useCallback(
-    (ev: React.PointerEvent<SVGSVGElement>) => {
+  const pointAt = useCallback(
+    (clientX: number): number | null => {
       const svg = svgRef.current;
-      if (!svg || !model) return;
+      if (!svg || !model) return null;
       const box = svg.getBoundingClientRect();
-      const px = ((ev.clientX - box.left) / box.width) * VIEW_W;
+      const px = ((clientX - box.left) / box.width) * VIEW_W;
       const mins = ((px - PAD.left) / model.plotW) * 1440;
       let best: number | null = null;
       let bestD = Infinity;
@@ -273,7 +278,7 @@ export function ForecastCurveCanvas({
           best = r.mins;
         }
       }
-      setActiveMins(bestD <= 60 ? best : null);
+      return bestD <= 60 ? best : null;
     },
     [model, VIEW_W],
   );
@@ -298,9 +303,8 @@ export function ForecastCurveCanvas({
         aria-label="PGCB's forecast load curve drawn against the measured curve, megawatts by hour"
         width={VIEW_W}
         height={VIEW_H}
-        className="block w-full touch-none"
-        onPointerMove={onMove}
-        onPointerLeave={() => setActiveMins(null)}
+        className="block w-full touch-pan-y"
+        {...handlers(pointAt)}
       >
         <defs>
           <linearGradient id={`fc-short-${uid}`} x1="0" y1="0" x2="0" y2="1">
@@ -353,7 +357,7 @@ export function ForecastCurveCanvas({
               strokeWidth={0.7}
               strokeDasharray="3 6"
             />
-            <text x={PAD.left - 7} y={model.y(t) + 3.5} textAnchor="end" fontSize={9.5} fill={axisColor}>
+            <text x={PAD.left - 7} y={model.y(t) + 3.5} textAnchor="end" fontSize={fs(9.5)} fill={axisColor}>
               {formatMw(t)}
             </text>
           </g>
@@ -385,10 +389,10 @@ export function ForecastCurveCanvas({
               strokeDasharray="4 3"
               opacity={0.6}
             />
-            <text x={model.x(model.issuedMins) - 6} y={PAD.top + 10} textAnchor="end" fontSize={9} fill={axisColor} opacity={0.85}>
+            <text x={model.x(model.issuedMins) - 6} y={PAD.top + 10} textAnchor="end" fontSize={fs(9)} fill={axisColor} opacity={0.85}>
               already happened
             </text>
-            <text x={model.x(model.issuedMins) + 6} y={PAD.top + 10} fontSize={9} fill={axisColor} opacity={0.85}>
+            <text x={model.x(model.issuedMins) + 6} y={PAD.top + 10} fontSize={fs(9)} fill={axisColor} opacity={0.85}>
               forecast from {issuedClock}
             </text>
           </g>
@@ -443,7 +447,7 @@ export function ForecastCurveCanvas({
               x={model.x(nowMinutes) - 6}
               y={PAD.top - 10}
               textAnchor="end"
-              fontSize={9.5}
+              fontSize={fs(9.5)}
               fontWeight={700}
               fill={axisColor}
             >
@@ -473,7 +477,7 @@ export function ForecastCurveCanvas({
               x={model.x(model.peak.mins)}
               y={model.y(model.peak.actualMw) - 10}
               textAnchor="middle"
-              fontSize={9}
+              fontSize={fs(9)}
               fontWeight={700}
               fill={actualColor}
             >
@@ -483,7 +487,7 @@ export function ForecastCurveCanvas({
         )}
 
         {/* ── signed error strip ── */}
-        <text x={PAD.left - 7} y={model.stripMid + 3} textAnchor="end" fontSize={8.5} fill={axisColor} opacity={0.9}>
+        <text x={PAD.left - 7} y={model.stripMid + 3} textAnchor="end" fontSize={fs(8.5)} fill={axisColor} opacity={0.9}>
           miss
         </text>
         <line
@@ -533,7 +537,7 @@ export function ForecastCurveCanvas({
             x={model.x(m)}
             y={model.stripTop + STRIP_H + 13}
             textAnchor={m === 0 ? 'start' : m === 1440 ? 'end' : 'middle'}
-            fontSize={9.5}
+            fontSize={fs(9.5)}
             fill={axisColor}
           >
             {String(Math.floor(m / 60)).padStart(2, '0')}:00
@@ -565,8 +569,9 @@ export function ForecastCurveCanvas({
       {/* HTML over the SVG: crisp type and the card's own styles, rather than
           re-implementing a panel in SVG text. */}
       {active && (
-        <div
+        <ChartReadout
           className="pointer-events-none absolute top-2 z-10 rounded-lg border border-border/60 bg-popover/95 px-2.5 py-1.5 text-[10px] shadow-lg backdrop-blur-sm"
+          onClose={clear}
           style={{
             left: `${Math.min(Math.max((model.x(active.mins) / VIEW_W) * 100, 6), 78)}%`,
           }}
@@ -603,10 +608,10 @@ export function ForecastCurveCanvas({
               </div>
             )}
           </div>
-        </div>
+        </ChartReadout>
       )}
 
-      <figcaption className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
+      <figcaption className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] max-lg:text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded" style={{ background: forecastColor }} />
           Forecast

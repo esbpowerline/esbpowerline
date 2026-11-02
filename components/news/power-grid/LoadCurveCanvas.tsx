@@ -39,6 +39,7 @@ import { formatNumber } from '@/lib/utils';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { minutesOf, monotonePath, type Pt } from '@/components/news/power-grid/svgChart';
 import { LOAD_CURVE_COLORS } from '@/lib/data/grid/chart-palette';
+import { ChartReadout, useTapToRead } from '@/components/news/power-grid/useTapToRead';
 
 export type LoadCurveRow = {
   time: string;
@@ -227,8 +228,6 @@ export function LoadCurveCanvas({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(360);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [pinned, setPinned] = useState(false);
 
   useEffect(() => {
     const el = hostRef.current;
@@ -346,8 +345,6 @@ export function LoadCurveCanvas({
     };
   }, [data, width, height]);
 
-  const active = cursor != null ? data[cursor] : null;
-
   const pointAt = useCallback(
     (clientX: number) => {
       const el = hostRef.current;
@@ -365,11 +362,9 @@ export function LoadCurveCanvas({
     [data, model],
   );
 
-  const onMove = (e: React.PointerEvent) => {
-    if (pinned) return;
-    const i = pointAt(e.clientX);
-    if (i != null) setCursor(i);
-  };
+  // Pointer handling (mouse hover + pin, touch tap/scrub/outside-tap) lives in the shared hook.
+  const { cursor, setCursor, pinned, setPinned, clear, handlers } = useTapToRead<number>({ hostRef });
+  const active = cursor != null ? data[cursor] : null;
 
   const onKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -465,9 +460,7 @@ export function LoadCurveCanvas({
         tabIndex={0}
         role="application"
         aria-label="Load curve. Use left and right arrow keys to step through the hours."
-        onPointerMove={onMove}
-        onPointerLeave={() => { if (!pinned) setCursor(null); }}
-        onPointerDown={(e) => { const i = pointAt(e.clientX); if (i != null) { setCursor(i); setPinned(true); } }}
+        {...handlers(pointAt)}
         onKeyDown={onKey}
       >
         {model && (
@@ -683,8 +676,9 @@ export function LoadCurveCanvas({
         {/* The readout is HTML over the SVG: crisp type, real wrapping, and it
             can use the card's own styles instead of re-implementing them. */}
         {active && model && (
-          <div
+          <ChartReadout
             className="load-curve__readout"
+            onClose={clear}
             style={{
               left: `${Math.min(Math.max(model.x(active.mins), PAD.left + 4), PAD.left + model.plotW - 4)}px`,
               // Flip to the other side near the right edge so the panel never
@@ -772,7 +766,7 @@ export function LoadCurveCanvas({
                 </div>
               )}
             </dl>
-          </div>
+          </ChartReadout>
         )}
       </div>
 
@@ -859,7 +853,8 @@ export function LoadCurveCanvas({
         </span>
 
         <span className="load-curve__hint">
-          Hover or use arrow keys to read an hour · click to pin
+          <span className="max-md:hidden">Hover or use arrow keys to read an hour · click to pin</span>
+          <span className="md:hidden">Tap or drag to read an hour · tap outside to close</span>
         </span>
       </figcaption>
 

@@ -32,6 +32,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { formatNumber } from '@/lib/utils';
+import { ChartReadout, useTapToRead } from '@/components/news/power-grid/useTapToRead';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { useSvgTextWidth } from '@/components/news/power-grid/useSvgTextWidth';
 import type { EnergyCurvePoint, ENERGY_CURVE_GROUPS } from '@/lib/data/grid/energy-curve';
@@ -116,8 +117,7 @@ export function GenerationMixCanvas({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(380);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [pinned, setPinned] = useState(false);
+  const { cursor, setCursor, pinned, setPinned, clear, handlers } = useTapToRead<number>({ hostRef });
   const [mode, setMode] = useState<'mw' | 'share'>('mw');
   const [showShortage, setShowShortage] = useState(true);
 
@@ -332,9 +332,7 @@ export function GenerationMixCanvas({
         tabIndex={0}
         role="application"
         aria-label="Generation mix. Use left and right arrow keys to step through the half hours."
-        onPointerMove={(e) => { if (!pinned) { const i = pointAt(e.clientX); if (i != null) setCursor(i); } }}
-        onPointerLeave={() => { if (!pinned) setCursor(null); }}
-        onPointerDown={(e) => { const i = pointAt(e.clientX); if (i != null) { setCursor(i); setPinned(true); } }}
+        {...handlers(pointAt)}
         onKeyDown={onKey}
       >
         {model && (
@@ -405,8 +403,9 @@ export function GenerationMixCanvas({
         )}
 
         {readout && activeRow && model && (
-          <div
+          <ChartReadout
             className="genmix__readout"
+            onClose={clear}
             style={{
               left: `${Math.min(Math.max(model.x(activeRow.mins), PAD.left), PAD.left + model.plotW)}px`,
               transform: model.x(activeRow.mins) > PAD.left + model.plotW * 0.6
@@ -462,14 +461,15 @@ export function GenerationMixCanvas({
               Shares are each fuel against the half-hour total
               <GridProvenanceTag kind="D" className="ml-1" />
             </p>
-          </div>
+          </ChartReadout>
         )}
       </div>
 
       <figcaption className="genmix__caption">
         <span className="genmix__note">
           Stacked in dispatch order <GridProvenanceTag kind="D" /> — always-on plant at the
-          foot, last-resort plant at the top. Hover or use arrow keys · click to pin.
+          foot, last-resort plant at the top. <span className="max-md:hidden">Hover or use arrow keys · click to pin.</span>
+          <span className="md:hidden">Tap or drag to read an hour.</span>
         </span>
       </figcaption>
     </figure>

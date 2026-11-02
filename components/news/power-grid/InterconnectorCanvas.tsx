@@ -22,6 +22,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { formatNumber } from '@/lib/utils';
+import { ChartReadout, useTapToRead } from '@/components/news/power-grid/useTapToRead';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { useSvgTextWidth } from '@/components/news/power-grid/useSvgTextWidth';
 import { SvgProvMark, formatK, inkOn, minutesOf, niceTicks } from '@/components/news/power-grid/svgChart';
@@ -115,8 +116,7 @@ export function InterconnectorCanvas({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(320);
-  const [cursor, setCursor] = useState<number | null>(null);
-  const [pinned, setPinned] = useState(false);
+  const { cursor, setCursor, pinned, setPinned, clear, handlers } = useTapToRead<number>({ hostRef });
 
   const [play, setPlay] = useState(false);
 
@@ -283,9 +283,7 @@ export function InterconnectorCanvas({
         tabIndex={0}
         role="application"
         aria-label="Interconnector transfer. Use left and right arrow keys to step through the hours."
-        onPointerMove={(e) => { if (!pinned) { const i = pointAt(e.clientX); if (i != null) setCursor(i); } }}
-        onPointerLeave={() => { if (!pinned) setCursor(null); }}
-        onPointerDown={(e) => { const i = pointAt(e.clientX); if (i != null) { setCursor(i); setPinned(true); } }}
+        {...handlers(pointAt)}
         onKeyDown={onKey}
       >
         {model && (
@@ -463,8 +461,9 @@ export function InterconnectorCanvas({
         )}
 
         {activeRow && model && (
-          <div
+          <ChartReadout
             className="xgrid__readout"
+            onClose={clear}
             style={{
               top: `${model.plotTop + 4}px`,
               left: `${Math.min(Math.max(model.x(activeRow.mins), PAD.left), PAD.left + model.plotW)}px`,
@@ -501,7 +500,7 @@ export function InterconnectorCanvas({
                 );
               })}
             </ul>
-          </div>
+          </ChartReadout>
         )}
       </div>
 
@@ -510,7 +509,8 @@ export function InterconnectorCanvas({
         own column <GridProvenanceTag kind="P" />; adding them is ours <GridProvenanceTag kind="D" />.
         The travelling dots mark the direction of the crossing, west to east — a
         cue, not a figure: their speed is the same on every corridor and every day.
-        Hover or use arrow keys · click to pin.
+        <span className="max-md:hidden">Hover or use arrow keys · click to pin.</span>
+        <span className="md:hidden">Tap or drag to read an hour.</span>
       </figcaption>
     </figure>
   );

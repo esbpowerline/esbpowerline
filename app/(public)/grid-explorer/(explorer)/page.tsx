@@ -193,7 +193,7 @@ export default async function PowerGridExplorerPage() {
   return (
     // <main>, not <div>: the page had no main landmark at all, which assistive
     // tech uses to skip the chrome — and Lighthouse fails without one.
-    <main id="power-grid-page-container" className="container container--shell py-8 md:py-10">
+    <main id="power-grid-page-container" className="container container--shell py-4 md:py-10">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
@@ -203,7 +203,7 @@ export default async function PowerGridExplorerPage() {
         dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }}
       />
       {/* Sleek, Compact Premium Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-border/40 pb-5 mb-6 group">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-4 border-b border-border/40 pb-3 mb-3 lg:pb-5 lg:mb-6 group">
         <div>
           <div className="flex items-center gap-1.5 mb-1.5 opacity-90 transition-opacity group-hover:opacity-100">
             {/* No animate-pulse: a perpetual heartbeat beside the kicker reads
@@ -214,7 +214,7 @@ export default async function PowerGridExplorerPage() {
           <h1 className="h1 font-display font-bold text-2xl md:text-3xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/80">
             Power Grid Explorer
           </h1>
-          <p className="text-muted-foreground mt-1 text-xs md:text-sm leading-relaxed max-w-2xl">
+          <p className="text-muted-foreground mt-1 text-xs md:text-sm leading-snug lg:leading-relaxed max-w-2xl">
             {/* Not "planning and indicative": every daily figure below is an
                 operational number PGCB or Petrobangla filed for that day, and
                 the strap-line is the first sentence a reader (and a crawler)

@@ -6049,7 +6049,9 @@ html.theme-dark .locale-toggle__btn--active:hover {
   display: none;
 }
 
-@media (max-width: 40rem) {
+/* Widened from 40rem to 1023px (2026-11, mobile shell): the sticky context bar
+   opens this same sheet on tablets too, so the dock must be a sheet there. */
+@media (max-width: 1023px) {
   .grid-explorer-date-chip {
     @apply flex w-full items-center gap-2 min-h-11 px-3.5 py-2;
     @apply rounded-2xl border border-border/55 bg-card/70 text-xs text-foreground;

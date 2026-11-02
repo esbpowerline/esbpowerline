@@ -27,6 +27,7 @@
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { formatNumber } from '@/lib/utils';
+import { ChartReadout, useTapToRead } from '@/components/news/power-grid/useTapToRead';
 import { GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { useSvgTextWidth } from '@/components/news/power-grid/useSvgTextWidth';
 import {
@@ -111,8 +112,7 @@ export function ReserveTrajectoryCanvas({
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(460);
-  const [cursorYear, setCursorYear] = useState<number | null>(null);
-  const [pinned, setPinned] = useState(false);
+  const { cursor: cursorYear, setCursor: setCursorYear, pinned, setPinned, clear, handlers } = useTapToRead<number>({ hostRef });
   const [play, setPlay] = useState(false);
 
   useEffect(() => {
@@ -354,9 +354,7 @@ export function ReserveTrajectoryCanvas({
         tabIndex={0}
         role="application"
         aria-label="Reserve depletion. Use left and right arrow keys to move through the years."
-        onPointerMove={(e) => { if (!pinned) { const y = pointAt(e.clientX); if (y != null) setCursorYear(y); } }}
-        onPointerLeave={() => { if (!pinned) setCursorYear(null); }}
-        onPointerDown={(e) => { const y = pointAt(e.clientX); if (y != null) { setCursorYear(y); setPinned(true); } }}
+        {...handlers(pointAt)}
         onKeyDown={(e) => {
           if (!geom) return;
           if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
@@ -570,8 +568,9 @@ export function ReserveTrajectoryCanvas({
         )}
 
         {geom && reading && cursorYear != null && (
-          <div
+          <ChartReadout
             className="rtraj__readout"
+            onClose={clear}
             style={{
               top: `${geom.rateTop - 6}px`,
               left: `${Math.min(Math.max(geom.x(cursorYear), PAD.left), PAD.left + geom.plotW)}px`,
@@ -615,7 +614,7 @@ export function ReserveTrajectoryCanvas({
                 </li>
               )}
             </ul>
-          </div>
+          </ChartReadout>
         )}
       </div>
     </figure>

@@ -1,5 +1,7 @@
 'use client';
 
+import '@/app/grid-explorer-charts.css';
+
 /**
  * The plotted figures as a table, for readers the graphic cannot serve.
  *
@@ -33,17 +35,24 @@ export function ChartDataTable({
   categories,
   series,
   decimals = 1,
+  visible = false,
 }: {
   caption: string;
   categoryHeader: string;
   categories: readonly (string | number)[];
   series: readonly ChartTableSeries[];
   decimals?: number;
+  /**
+   * Show the table on screen (the "Table" view of a chart card). Default stays
+   * screen-reader-only. Visible, it scrolls sideways inside its own container
+   * with the first column pinned, so a wide table never widens the page.
+   */
+  visible?: boolean;
 }) {
   if (!categories.length || !series.length) return null;
 
-  return (
-    <table className="sr-only">
+  const table = (
+    <table className={visible ? 'ge-chart-table' : 'sr-only'}>
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -76,6 +85,7 @@ export function ChartDataTable({
       </tbody>
     </table>
   );
+  return visible ? <div className="ge-chart-table-wrap">{table}</div> : table;
 }
 
 /** Pull one key out of a Recharts `data` array, preserving gaps as null. */

@@ -2,6 +2,7 @@
 
 import { ShieldCheck, ShieldAlert, ShieldQuestion } from 'lucide-react';
 import type { DayProvenance } from '@/lib/data/grid/verification-ledger';
+import '@/app/grid-explorer-charts.css';
 
 /**
  * What re-reading this day's source document found — told to the reader.
@@ -51,15 +52,33 @@ export function SourceProvenanceNote({ provenance }: { provenance: DayProvenance
           : 'Verified against the source document';
 
   return (
-    <aside
-      className={`mb-4 flex items-start gap-2.5 rounded-xl border px-3 py-2.5 ${tone}`}
-      aria-label={`Source verification for ${provenance.day}`}
-    >
-      <Icon className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden />
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold leading-tight">{heading}</p>
-        <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">{provenance.summary}</p>
-      </div>
-    </aside>
+    <>
+      {/* Phone (<768px): one line, "<heading>   Source ›", with the long detail
+          behind the tap. A native <details> closed by default, so there is no
+          hydration state to get wrong; the desktop block below is hidden by CSS
+          at that width and nothing is removed from the page. */}
+      <details
+        className={`ge-prov-phone ${tone}`}
+        aria-label={`Source verification for ${provenance.day}`}
+      >
+        <summary>
+          <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span className="ge-prov-phone__text">{heading}</span>
+          <span className="ge-prov-phone__more">Source ›</span>
+        </summary>
+        <p className="ge-prov-phone__detail">{provenance.summary}</p>
+      </details>
+
+      <aside
+        className={`ge-prov-desktop mb-4 flex items-start gap-2.5 rounded-xl border px-3 py-2.5 ${tone}`}
+        aria-label={`Source verification for ${provenance.day}`}
+      >
+        <Icon className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden />
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold leading-tight">{heading}</p>
+          <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">{provenance.summary}</p>
+        </div>
+      </aside>
+    </>
   );
 }

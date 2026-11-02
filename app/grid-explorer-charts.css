@@ -1,0 +1,209 @@
+/* Grid Explorer — shared chart pieces on phone / tablet (step 0b).
+   Everything here sits behind max-width media queries; >= 1024px is untouched.
+   Imported from components/news/power-grid/useTapToRead.tsx and MobileFold.tsx.
+
+   Note: below 1024px `--px` is exactly 1px, so px values here are real px.
+   Rules use :is(...):is(...) (specificity 0,2,0) because globals.css defines the
+   base type for these classes and the load order between the two sheets is not
+   something to depend on. */
+
+/* ── 1. Text floors (>= 11px) for the hand-drawn canvases ─────────────────── */
+@media (max-width: 1023px) {
+  /* :not(#ge) only raises specificity so these beat globals.css whatever the load order. */
+  :is(
+    .load-curve__tick, .load-curve__unit, .load-curve__flag-label, .load-curve__strip-label,
+    .load-curve__strip-max, .load-curve__key, .load-curve__key-value, .load-curve__hint,
+    .load-curve__tag, .load-curve__pin, .load-curve__sub, .load-curve__meter-caption,
+    .load-curve__readout-list dt, .load-curve__readout-list dd,
+    .genmix__tick, .genmix__unit, .genmix__band-label, .genmix__note, .genmix__pin,
+    .genmix__readout-foot, .genmix__readout-list,
+    .xgrid__tick, .xgrid__unit, .xgrid__band-label, .xgrid__caption, .xgrid__peak, .xgrid__pin,
+    .xgrid__readout-list,
+    .rtraj__tick, .rtraj__unit, .rtraj__note, .rtraj__wedge, .rtraj__anchor, .rtraj__pin,
+    .rtraj__readout-foot, .rtraj__readout-list
+  ):not(#ge) {
+    font-size: 11px;
+  }
+
+  /* Recharts charts (every other tab): axis ticks, legends and tooltips. */
+  .grid-explorer .recharts-cartesian-axis-tick-value,
+  .grid-explorer .recharts-polar-angle-axis-tick-value,
+  .grid-explorer .recharts-label,
+  .grid-explorer .recharts-text.recharts-cartesian-axis-tick-value tspan {
+    font-size: 11px;
+  }
+  .grid-chart-external-legend__item.grid-chart-external-legend__item {
+    font-size: 11px;
+  }
+  .grid-chart-tooltip__label, .grid-chart-tooltip__value, .grid-chart-tooltip__title,
+  .grid-chart-tooltip__foot {
+    font-size: 12px;
+  }
+
+  /* Finger scrubbing: let the browser keep vertical page scroll, give the chart
+     the horizontal axis. Forecast curve used `touch-none`, which trapped scroll. */
+  .genmix__canvas, .xgrid__canvas, .rtraj__canvas, .load-curve__canvas, .forecast-curve svg {
+    touch-action: pan-y;
+  }
+  .forecast-curve > svg { touch-action: pan-y !important; }
+}
+
+/* The P/D provenance mark is sized in rem (0.56rem glyph = 6px on a phone, where
+   the root is ~10.7px). Badge text floor is 11px, so below 1024px the box grows to
+   16px with an 11px letter; same mark, same meaning, same colours. */
+@media (max-width: 1023px) {
+  .grid-provenance-tag:not(#ge) {
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+    vertical-align: 0.25em;
+  }
+}
+
+/* Canvases fill the card edge to edge on a phone. */
+@media (max-width: 767px) {
+  .load-curve__canvas, .genmix__canvas, .xgrid__canvas, .rtraj__canvas { width: 100%; }
+}
+
+/* ── 2. Tap-to-read readout: dark card docked to the bottom of the viewport ── */
+@media (max-width: 767px) {
+  .ge-readout-sheet {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    top: auto !important;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding: 14px 16px 12px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    background: #0f172a !important;
+    box-shadow: 0 18px 44px -10px rgb(0 0 0 / 0.55) !important;
+    backdrop-filter: none !important;
+    z-index: 70 !important;
+    pointer-events: auto !important;
+    animation: none;
+    font-size: 13px !important;
+  }
+  .ge-readout-sheet,
+  .ge-readout-sheet *:not(.grid-provenance-tag):not(.grid-provenance-tag *) {
+    color: #f1f5f9 !important;
+    border-color: rgb(255 255 255 / 0.16) !important;
+  }
+  .ge-readout-sheet *:not(.grid-provenance-tag):not(.grid-provenance-tag *) {
+    font-size: 13px !important;
+    line-height: 1.4;
+  }
+  .ge-readout-sheet [class*='readout-head'],
+  .ge-readout-sheet [class*='readout-time'] {
+    font-size: 15px !important;
+    font-weight: 700;
+  }
+  .ge-readout-sheet [class*='readout-head'] *:not(.grid-provenance-tag),
+  .ge-readout-sheet [class*='readout-time'] *:not(.grid-provenance-tag) {
+    font-size: inherit !important;
+  }
+  .ge-readout-sheet :is([class*='__tag'], [class*='__pin'], [class*='__sub'], [class*='__muted'], [class*='readout-foot'], [class*='meter-caption']) {
+    font-size: 12px !important;
+    color: #cbd5e1 !important;
+  }
+  /* nowrap rows from the desktop popover must wrap inside a 366px card */
+  .ge-readout-sheet [class*='__sub'] { white-space: normal !important; }
+  .ge-readout-sheet [class*='readout-time'],
+  .ge-readout-sheet [class*='readout-head'] { padding-right: 44px; }
+
+  .ge-readout-sheet [class*='__pin'] { display: none !important; }
+  .ge-readout-sheet .grid-provenance-tag { color: #93c5fd !important; background: rgb(147 197 253 / 0.12) !important; }
+  .ge-readout-sheet .grid-provenance-tag--d { color: #cbd5e1 !important; background: rgb(203 213 225 / 0.1) !important; }
+
+  .ge-readout-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: #f1f5f9 !important;
+    font-size: 26px !important;
+    line-height: 1;
+    cursor: pointer;
+  }
+}
+
+/* ── 3. MobileFold ("How to read this chart") ─────────────────────────────── */
+@media (min-width: 1024px) {
+  /* Desktop: no chrome at all — the children render in place. */
+  .ge-fold, .ge-fold__body { display: contents; }
+  .ge-fold > .ge-fold__summary { display: none; }
+}
+@media (max-width: 1023px) {
+  .ge-fold { margin: 8px 0; }
+  .ge-fold__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: hsl(var(--primary) / 0.08);
+    color: hsl(var(--primary));
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ge-fold__summary::-webkit-details-marker { display: none; }
+  .ge-fold__chev { font-size: 20px; line-height: 1; transition: transform 0.15s; }
+  .ge-fold[data-ge-ready][open] > .ge-fold__summary .ge-fold__chev { transform: rotate(90deg); }
+  .ge-fold__body { padding: 10px 4px 2px; font-size: 13px; line-height: 1.55; }
+  /* First paint, before the effect has folded it: don't flash the long prose. */
+  .ge-fold:not([data-ge-ready]) > .ge-fold__body { display: none; }
+}
+
+/* ── 4. Source provenance: one line on phone, detail behind the tap ───────── */
+.ge-prov-phone { display: none; }
+@media (max-width: 767px) {
+  .ge-prov-desktop { display: none !important; }
+  .ge-prov-phone { display: block; margin-bottom: 12px; border-radius: 12px; border: 1px solid; }
+  .ge-prov-phone > summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 12px;
+    list-style: none;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .ge-prov-phone > summary::-webkit-details-marker { display: none; }
+  .ge-prov-phone__text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+  .ge-prov-phone__more { flex: none; font-weight: 600; color: hsl(var(--primary)); }
+  .ge-prov-phone[open] .ge-prov-phone__more { opacity: 0.7; }
+  .ge-prov-phone__detail { padding: 0 12px 12px 34px; font-size: 12px; line-height: 1.5; color: hsl(var(--muted-foreground)); }
+}
+
+/* ── 5. ChartDataTable (visible variant) ──────────────────────────────────── */
+.ge-chart-table-wrap { width: 100%; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.ge-chart-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ge-chart-table caption { text-align: left; padding: 0 0 8px; font-weight: 600; font-size: 13px; }
+.ge-chart-table th, .ge-chart-table td { padding: 8px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid hsl(var(--border) / 0.5); }
+.ge-chart-table thead th { font-weight: 700; background: hsl(var(--card)); }
+.ge-chart-table tbody th { text-align: left; font-weight: 600; }
+.ge-chart-table th:first-child, .ge-chart-table td:first-child {
+  text-align: left;
+  position: sticky;
+  left: 0;
+  background: hsl(var(--card));
+  z-index: 1;
+}
+@media (min-width: 768px) { .ge-chart-table { font-size: 13px; } }
