@@ -6091,7 +6091,11 @@ html.theme-dark .locale-toggle__btn--active:hover {
        and cannot grow, so it lets its menus escape instead. */
     overflow: visible;
     transform: translateY(101%);
-    transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1);
+    /* Closed = unreachable, not just offscreen: hidden from full-page captures,
+       the tab order and screen readers. visibility flips after the slide-out. */
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 220ms;
   }
 
   /* Anchored to the bottom of the screen, a menu that drops down has nowhere
@@ -6104,6 +6108,9 @@ html.theme-dark .locale-toggle__btn--active:hover {
 
   .grid-explorer-date-dock.is-open {
     transform: translateY(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1), visibility 0s;
   }
 
   /* Stacked, not wrapped: in a sheet there is no reason for a control to sit

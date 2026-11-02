@@ -91,6 +91,7 @@ import { tabAvailability, type GridTabId } from '@/lib/data/grid/tab-availabilit
 import '@/app/grid-explorer-mobile.css';
 import { GridExplorerMobileShell } from '@/components/news/power-grid/GridExplorerMobileShell';
 import { GridAccessBanner } from '@/components/news/power-grid/GridAccessBanner';
+import { GridTopFold } from '@/components/news/power-grid/GridTopFold';
 import { GridArchiveTeaser } from '@/components/news/power-grid/GridArchiveTeaser';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
 const GridTopologyMap = dynamic(
@@ -1378,6 +1379,7 @@ export function PowerGridExplorer({
       <GridAccessBanner
         access={gridAccess}
         totalArchiveDays={availableDatesList.length}
+        compactOnPhone={activeTab !== 'overview'}
         className="mb-4 relative z-50"
       />
 
@@ -1581,6 +1583,10 @@ export function PowerGridExplorer({
         onTryDemo={() => setSelectedDate(DEMO_DATE)}
         variant="micro"
       >
+      <GridTopFold
+        collapse={activeTab !== 'overview'}
+        summary={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW evening peak · ${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW deficit`}
+      >
       <OverviewKpiStrip
         systemStats={systemStats}
         sourceFiles={sourceFiles}
@@ -1603,6 +1609,7 @@ export function PowerGridExplorer({
         isoDate={selectedDate}
         forecast={forecast}
       />
+      </GridTopFold>
 </GridLockedContent>
       )}
 

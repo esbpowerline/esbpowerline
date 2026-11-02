@@ -599,7 +599,7 @@ export function PowerStationsTab({
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Filter station, fuel, producer"
+                placeholder={phone ? 'Filter stations' : 'Filter station, fuel, producer'}
                 aria-label="Filter stations by name, fuel or producer"
                 className="pl-8 pr-3 py-1.5 w-56 text-xs font-medium rounded-xl border border-border/40 bg-transparent text-foreground placeholder:text-muted-foreground/70 transition-colors hover:border-border/70 focus:outline-none focus:ring-2 focus:ring-primary/45 focus:border-transparent"
               />

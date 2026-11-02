@@ -76,13 +76,13 @@ export function GridReportingStandards({
         <div className="space-y-1.5">
           <div className="font-semibold text-foreground text-[10.5px]">Source Directories</div>
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-muted-foreground/90 font-semibold">
-            <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">PGCB/NLDC Operations</a>
+            <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="ge-tap-link text-primary hover:underline flex items-center gap-1">PGCB/NLDC Operations</a>
             <span>·</span>
-            <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">Petrobangla Reports</a>
+            <a href="https://www.petrobangla.org.bd/" target="_blank" rel="noopener noreferrer" className="ge-tap-link text-primary hover:underline flex items-center gap-1">Petrobangla Reports</a>
             <span>·</span>
-            <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">SREDA Database</a>
+            <a href="http://www.renewableenergy.gov.bd/" target="_blank" rel="noopener noreferrer" className="ge-tap-link text-primary hover:underline flex items-center gap-1">SREDA Database</a>
             <span>·</span>
-            <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">BPC Pricing</a>
+            <a href="https://bpc.gov.bd/" target="_blank" rel="noopener noreferrer" className="ge-tap-link text-primary hover:underline flex items-center gap-1">BPC Pricing</a>
           </div>
           <div className="text-[9.5px] text-muted-foreground/60 border-t border-border/10 pt-1.5">
             {/* "Indicative and editor-managed" contradicted every P mark on

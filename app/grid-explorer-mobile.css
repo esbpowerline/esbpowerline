@@ -39,6 +39,14 @@
   border-color: hsl(var(--primary) / 0.35);
   background: hsl(var(--primary) / 0.08);
 }
+/* Section name wraps to two lines instead of truncating ("Generation & Gas"). */
+.ge-shell-label {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
 .ge-shell-chip:focus-visible,
 .ge-sheet__row:focus-visible,
 .ge-sheet__close:focus-visible {
@@ -698,4 +706,118 @@
   .ge-root .ge-tm-defs { margin: 0; display: grid; gap: 10px; font-size: 13px; line-height: 1.45; }
   .ge-root .ge-tm-defs dt { font-weight: 700; font-size: 13px; }
   .ge-root .ge-tm-defs dd { margin: 2px 0 0; color: hsl(var(--muted-foreground)); }
+}
+
+/* ── Top-block fold (non-Overview tabs, phone only) ─────────────────────── */
+/* GridTopFold: the KPI strip collapses behind a one-line summary below 768px.
+   From 768px up the row is hidden and the body is always shown, so tablets and
+   desktop render the strip exactly as before. */
+.ge-topfold__row { display: none; }
+@media (max-width: 767px) {
+  .ge-topfold__row {
+    display: flex;
+    width: 100%;
+    min-height: 44px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 6px 14px;
+    border-radius: 14px;
+    border: 1px solid hsl(var(--primary) / 0.3);
+    background: hsl(var(--primary) / 0.08);
+    color: hsl(var(--foreground));
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+  }
+  .ge-topfold__text { min-width: 0; flex: 1 1 auto; line-height: 1.25; }
+  .ge-topfold__cta {
+    display: inline-flex; align-items: center; gap: 2px; flex: 0 0 auto;
+    font-size: 12px; color: hsl(var(--primary));
+  }
+  .ge-topfold__row:focus-visible { outline: none; box-shadow: 0 0 0 2px hsl(var(--primary) / 0.5); }
+  .ge-topfold[data-open='false'] > .ge-topfold__body { display: none; }
+}
+
+/* ── Page chrome, tap links, tooltips, unified folds (polish pass) ───────── */
+@media (max-width: 1023px) {
+  /* "Every view in the explorer" / "Browse the archive" were 11px at a 16px
+     root but the root shrinks with the viewport (~8.9px on a phone). */
+  .grid-explorer-views h2 { font-size: 11px; }
+  /* Links in those lists become 44px rows; the date links flow inline. */
+  .grid-explorer-views a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 2px;
+  }
+  /* Footer standards block + KPI source links: same 44px hit area. */
+  .ge-tap-link { display: inline-flex; align-items: center; min-height: 44px; }
+  /* The cite host is 15px tall inside a tooltip; grow only the hit area
+     (negative margin cancels the padding so the look is unchanged). */
+  .grid-kpi-cite__host { display: inline-block; padding: 15px 6px; margin: -15px -6px; }
+  /* Tooltip body: md:text-xs resolves to ~9.6px on tablets. */
+  .ge-root .md\:text-xs, .ge-root .grid-kpi-tip__title { font-size: 11px; }
+  .ge-root .grid-hover-panel { max-width: calc(100vw - 24px); }
+
+  /* Grey "What is being shown?" block -> same 44px tinted row as MobileFold. */
+  .grid-explorer-explain.bg-muted\/10 { background: transparent; border-top: 0; padding: 0; margin: 8px 0; }
+  .grid-explorer-explain__heading { display: none; }
+  .grid-explorer-explain__toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 12px;
+    background: hsl(var(--primary) / 0.08);
+    color: hsl(var(--primary));
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+  }
+  .grid-explorer-explain__toggle strong { font-weight: 600; }
+  .grid-explorer-explain__chevron { width: 20px; height: 20px; transition: transform 200ms ease; }
+  .grid-explorer-explain.is-open .grid-explorer-explain__chevron { transform: rotate(180deg); }
+  .grid-explorer-explain:not(.is-open) .grid-explorer-explain__body { display: none; }
+  .grid-explorer-explain__body { padding: 10px 4px 2px; font-size: 13px; line-height: 1.55; }
+}
+
+/* Date sheet header ("Choose a reporting date" + Done): globals.css declares the
+   desktop `display:none` AFTER the phone media block, so it won at equal
+   specificity and the sheet had no visible close control. */
+@media (max-width: 1023px) {
+  .grid-explorer-date-dock > .grid-explorer-date-dock__head { display: flex; }
+}
+
+/* ── KPI tooltips on a phone: a bottom card, not a popover ──────────────── */
+/* The popover hangs off its tile at a fixed 18rem width, so a right-hand tile
+   on a 390px screen ran 39px off the left edge. Phones get a fixed card inside
+   the viewport instead (tap the tile to open, tap anywhere else to close). */
+@media (max-width: 767px) {
+  .ge-root .grid-explorer-kpi .grid-hover-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    top: auto;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+    max-height: 62vh;
+    overflow-y: auto;
+    transform: none !important;
+    z-index: 300;
+  }
+}
+@media (max-width: 1023px) {
+  /* Event Study sits in the date row with the other controls: 44px like them. */
+  .grid-explorer-control { min-height: 44px; }
+  .grid-kpi-cite__host { padding: 16px 6px; margin: -16px -6px; }
+}
+@media (max-width: 767px) {
+  /* A tap leaves :hover stuck on the tile, and its translateY makes the tile the
+     containing block of the fixed tooltip card above (it then sized to the tile). */
+  .ge-root .grid-explorer-kpi:hover { transform: none !important; }
 }

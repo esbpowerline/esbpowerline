@@ -47,7 +47,8 @@ function useBriefing<T extends string>() {
     }
     setOpen((prev) => {
       const next = prev === id ? null : id;
-      if (next) {
+      /* Touch (<1024px): tap toggles and a tap elsewhere closes; the 2s auto-hide is for hover/mouse only, it would close the panel before a phone reader finishes it or reaches its source link. */
+      if (next && !(typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches)) {
         timer.current = setTimeout(() => {
           setOpen(null);
           timer.current = null;

@@ -10,6 +10,8 @@ type GridAccessBannerProps = {
   access: GridTierAccessState;
   totalArchiveDays?: number;
   className?: string;
+  /** Phone, non-Overview tabs: render one compact line instead of the full card. */
+  compactOnPhone?: boolean;
 };
 
 const TIER_STYLES = {
@@ -19,7 +21,7 @@ const TIER_STYLES = {
   plan_999: 'border-emerald-500/25 bg-emerald-500/5',
 } as const;
 
-export function GridAccessBanner({ access, totalArchiveDays, className }: GridAccessBannerProps) {
+export function GridAccessBanner({ access, totalArchiveDays, className, compactOnPhone }: GridAccessBannerProps) {
   if (access.loading) {
     return (
       <div className={cn('h-16 animate-pulse rounded-2xl bg-muted/30', className)} />
@@ -35,10 +37,35 @@ export function GridAccessBanner({ access, totalArchiveDays, className }: GridAc
     : `Full archive · through ${latestDate}`;
 
   return (
+    <>
+    {compactOnPhone && (
+      <div
+        className={cn(
+          'flex min-h-11 items-center justify-between gap-2 rounded-xl border px-3 text-xs md:hidden',
+          TIER_STYLES[tier],
+          className,
+        )}
+      >
+        <span className="min-w-0 flex-1 font-semibold text-foreground">
+          {status.statusLabel} · {status.accessWindow}
+        </span>
+        {status.upgradeLine && status.upgradeHref && (
+          <Link
+            prefetch={false}
+            href={status.upgradeHref}
+            className="inline-flex min-h-11 shrink-0 items-center gap-0.5 px-1 font-bold text-primary"
+          >
+            {tier === 'visitor' ? 'Sign up free' : 'Upgrade'}
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        )}
+      </div>
+    )}
     <div
       className={cn(
         'rounded-2xl border px-4 py-3.5 md:px-5',
         TIER_STYLES[tier],
+        compactOnPhone && 'max-md:hidden',
         className,
       )}
     >
@@ -91,5 +118,6 @@ export function GridAccessBanner({ access, totalArchiveDays, className }: GridAc
         )}
       </div>
     </div>
+    </>
   );
 }

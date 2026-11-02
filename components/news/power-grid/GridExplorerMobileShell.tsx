@@ -111,6 +111,9 @@ export function GridExplorerMobileShell({
     };
   }, [open, close]);
 
+  // Phone: the year is dropped from the chip (full date stays in the aria-label
+  // and the date sheet) so the section name gets the width it needs.
+  const shortDate = dateLabel.replace(/[ ,/-]*(19|20)[0-9]{2} *$/, '').trim() || dateLabel;
   const current = sections.find((s) => s.id === activeId) ?? sections[0];
 
   return (
@@ -129,7 +132,7 @@ export function GridExplorerMobileShell({
           className="ge-shell-chip ge-shell-chip--date"
         >
           <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-          <span className="font-bold whitespace-nowrap">{dateLabel}</span>
+          <span className="font-bold whitespace-nowrap">{shortDate}</span>
           {isLatest && <span className="ge-shell-tag">Latest</span>}
         </button>
         <button
@@ -141,7 +144,7 @@ export function GridExplorerMobileShell({
           className="ge-shell-chip ge-shell-chip--section"
         >
           <span className="min-w-0 flex-1 text-left">
-            <span className="block truncate text-[13px] font-bold leading-tight text-primary">{current?.label}</span>
+            <span className="ge-shell-label block text-[13px] font-bold leading-tight text-primary">{current?.label}</span>
             <span className="block text-[11px] leading-tight text-muted-foreground">{sections.length} sections</span>
           </span>
           <ChevronDown className={cn('h-4 w-4 shrink-0 text-primary transition-transform', open && 'rotate-180')} aria-hidden />
