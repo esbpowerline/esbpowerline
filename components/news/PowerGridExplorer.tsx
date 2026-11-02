@@ -2609,24 +2609,27 @@ export function PowerGridExplorer({
               </div>
             </div>
 
-            <p className="grid-explorer-table-scroll-hint sm:hidden mx-4" role="note">
+            {/* Phone: five short rows become a compact table that fits 390px, so the
+                text keeps its place on tablets only (see "IMPORTS tab" in
+                grid-explorer-mobile.css). */}
+            <p className="grid-explorer-table-scroll-hint ge-imp-hint sm:hidden mx-4" role="note">
               Swipe horizontally to see all columns
             </p>
             <div className="grid-explorer-table-wrap grid-explorer-table-wrap--sticky-col">
-              <table className="grid-explorer-table">
+              <table className="grid-explorer-table ge-compact-table ge-imports-table">
                 <thead>
                   <tr>
                     <th>Import Source / Line</th>
                     {/* "C/B Interconnector (West)" and the rest are our own
                         labels for the lines, not a classification PGCB prints. */}
-                    <th>Type<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="ge-imp-type-col">Type<GridProvenanceTag kind="D" className="ml-1" /></th>
                     {/* Energy and peak are published per line in P1 — except
                         Nepal, whose row is derived from the half-hourly curve
                         and is marked on the row itself. */}
-                    <th className="text-left">Daily Energy Imported (MKWh)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                    <th className="text-left"><span className="ge-imp-long">Daily Energy Imported (MKWh)</span><span className="ge-imp-short" aria-hidden="true">Energy MKWh</span><GridProvenanceTag kind="P" className="ml-1" /></th>
                     {/* P1 prints "Peak Hr Flow … MW at 21:00 hrs." — an instantaneous
                         flow at one hour. "Capacity Served" read as a capacity. */}
-                    <th className="text-left">Peak Hour Flow (MW)<GridProvenanceTag kind="P" className="ml-1" /></th>
+                    <th className="text-left"><span className="ge-imp-long">Peak Hour Flow (MW)</span><span className="ge-imp-short" aria-hidden="true">Peak MW</span><GridProvenanceTag kind="P" className="ml-1" /></th>
                     {/*
                       The blended-rate column is deliberately not here. PGCB
                       prices imports as one line covering Bheramara, Adani and
@@ -2638,7 +2641,7 @@ export function PowerGridExplorer({
                       cost PGCB does publish stays; the average it implies does
                       not.
                     */}
-                    <th className="text-left">Cost (Cr Tk)<GridProvenanceTag kind="P" className="ml-1" /><span className="font-normal text-muted-foreground"> — all lines</span></th>
+                    <th className="text-left"><span className="ge-imp-long">Cost (Cr Tk)</span><span className="ge-imp-short" aria-hidden="true">Cost Cr Tk</span><GridProvenanceTag kind="P" className="ml-1" /><span className="font-normal text-muted-foreground"> — all lines</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2667,6 +2670,8 @@ export function PowerGridExplorer({
                     <tr key={idx}>
                       <td className="font-semibold">
                         {bi.source}
+                        {/* Phone: the Type column is folded into a sub-line here. */}
+                        <span className="ge-imp-type-sub" aria-hidden="true">{bi.type}</span>
                         {derivedRow && (
                           <span
                             className="ml-1.5 inline-block px-1.5 py-px rounded border text-[9px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
@@ -2676,7 +2681,7 @@ export function PowerGridExplorer({
                           </span>
                         )}
                       </td>
-                      <td className="text-muted-foreground">{bi.type}</td>
+                      <td className="ge-imp-type-col text-muted-foreground">{bi.type}</td>
                       <td className="text-left tabular-nums font-semibold">
                         {bi.energy.toFixed(2)}
                         <GridProvenanceTag kind={derivedRow ? 'D' : 'P'} className="ml-1" />
@@ -2690,8 +2695,8 @@ export function PowerGridExplorer({
                     );
                   })}
                   <tr className="border-t border-border/80 font-bold bg-muted/20">
-                    <td>Total Grid Imports</td>
-                    <td className="text-muted-foreground">National aggregate</td>
+                    <td>Total Grid Imports<span className="ge-imp-type-sub" aria-hidden="true">National aggregate</span></td>
+                    <td className="ge-imp-type-col text-muted-foreground">National aggregate</td>
                     <td className="text-left tabular-nums text-primary">{borderImportsData.reduce((sum, i) => sum + i.energy, 0).toFixed(2)}</td>
                     <td className="text-left tabular-nums">{formatPeakFlowTotal(borderImportsData)}</td>
                     {/* The published import cost itself, not the line sum times
@@ -2711,7 +2716,7 @@ export function PowerGridExplorer({
               </table>
             </div>
 
-            <div className="p-4 bg-muted/20 border border-border/40 rounded-xl mt-4 text-xs text-muted-foreground leading-relaxed space-y-2">
+            <MobileFold title="Why cost is shown once, and the lines"><div className="p-4 bg-muted/20 border border-border/40 rounded-xl mt-4 text-xs text-muted-foreground leading-relaxed space-y-2">
               <p>
                 <strong>Why cost is shown once, and no rate at all:</strong> PGCB reports energy and peak
                 flow for each interconnector, but prices imports as a single line in its production-cost
@@ -2735,7 +2740,7 @@ export function PowerGridExplorer({
                 base-load supply directly to the northern grid interface. HVDC Bheramara is the main synchronous
                 link with the Indian National Grid (NTPC/PowerGrid).
               </p>
-            </div>
+            </div></MobileFold>
 
             {/* Card Metadata Footer */}
             <GridCardFooter>

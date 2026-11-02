@@ -511,3 +511,23 @@
   .ge-root .ge-plant-log th, .ge-root .ge-plant-log td { padding-block: 4px; }
   .ge-root .ge-plant-log td { line-height: 1.3; }
 }
+
+/* ── IMPORTS tab ─────────────────────────────────────────────────────────────
+   Five-row interconnector table. On phones the Type column folds into a sub-line
+   under the line name and the headers shorten, so the table fits 390px with no
+   sideways swipe. Desktop/tablet show the original columns and headers. */
+.ge-root .ge-imp-short, .ge-root .ge-imp-type-sub { display: none; }
+@media (max-width: 767px) {
+  .ge-root .ge-imports-table .ge-imp-long, .ge-root .ge-imports-table .ge-imp-type-col { display: none; }
+  .ge-root .ge-imports-table .ge-imp-short { display: inline; }
+  .ge-root .ge-imports-table .ge-imp-type-sub {
+    display: block; margin-top: 1px; font-size: 11px; font-weight: 400; line-height: 1.3;
+    color: hsl(var(--muted-foreground));
+  }
+  .ge-root .ge-imports-table th, .ge-root .ge-imports-table td { text-transform: none; letter-spacing: 0; }
+  .ge-root .ge-imports-table td:first-child { max-width: none; width: 40%; }
+}
+@media (max-width: 767px) {
+  /* The imports table no longer scrolls sideways, so its swipe hint goes. */
+  .ge-root .ge-imp-hint { display: none; }
+}
