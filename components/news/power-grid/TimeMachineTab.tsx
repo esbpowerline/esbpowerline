@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { GridCardFooter, GridProvenanceTag } from '@/components/news/power-grid/GridExplorerUI';
 import { categoricalSlot, isKnownFuel, resolveFuelColor } from '@/lib/data/grid/chart-palette';
 
@@ -179,7 +180,7 @@ export default function TimeMachineTab() {
                 published; days and months are derived from them.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="ge-tm-selects flex flex-wrap gap-2">
               <select
                 aria-label="Metric"
                 value={metric}
@@ -203,7 +204,7 @@ export default function TimeMachineTab() {
           {/* The scrubber. Two native date inputs rather than a custom slider:
               they are keyboard-accessible, they work with a thumb, and they
               cannot be dragged outside the archive's own bounds. */}
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+          <div className="ge-tm-dates flex flex-wrap items-center gap-2 text-xs">
             <label className="text-muted-foreground" htmlFor="tm-from">From</label>
             <input
               id="tm-from" type="date" value={range.from}
@@ -237,7 +238,7 @@ export default function TimeMachineTab() {
             </div>
           )}
 
-          <div className="h-[320px] w-full">
+          <div className="ge-tm-chart h-[320px] w-full">
             {data && data.points.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data.points} margin={{ top: 8, right: 8, bottom: 4, left: 4 }}>
@@ -249,7 +250,7 @@ export default function TimeMachineTab() {
                       if (!active || !payload?.length) return null;
                       const p = payload[0].payload as Point;
                       return (
-                        <div className="grid-hover-panel p-3 text-xs bg-card text-card-foreground w-64">
+                        <div className="grid-hover-panel p-3 text-xs bg-card text-card-foreground w-64 max-w-[calc(100vw-48px)]">
                           <div className="font-bold border-b border-border/40 pb-1.5 mb-2">{p.t}</div>
                           {p.state === 'RESTRICTED' ? (
                             <div className="text-sky-700 dark:text-sky-400">
@@ -328,7 +329,7 @@ export default function TimeMachineTab() {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-3 text-[10px]">
+          <div className="ge-tm-legend flex flex-wrap gap-3 text-[10px]">
             {STATE_LEGEND.map((s) => (
               <span key={s.state} className="inline-flex items-center gap-1.5" title={s.detail}>
                 <span
@@ -346,6 +347,21 @@ export default function TimeMachineTab() {
                 <span className="uppercase tracking-wider font-semibold text-muted-foreground">{s.title}</span>
               </span>
             ))}
+          </div>
+
+          {/* The legend's explanations live in `title` tooltips, which a phone can
+              never show. Same text, folded, phones/tablets only. */}
+          <div className="lg:hidden">
+            <MobileFold title="What the line styles mean">
+              <dl className="ge-tm-defs">
+                {STATE_LEGEND.map((s) => (
+                  <div key={s.state}>
+                    <dt>{s.title}</dt>
+                    <dd>{s.detail.replace('on hover', 'when you tap a point')}</dd>
+                  </div>
+                ))}
+              </dl>
+            </MobileFold>
           </div>
         </div>
 

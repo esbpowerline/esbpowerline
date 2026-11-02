@@ -21,6 +21,7 @@ import { ongoingProjectsData } from '@/lib/data/infrastructure/projects-ongoing'
 import { upcomingProjectsData } from '@/lib/data/infrastructure/projects-upcoming';
 import { completedProjectsData } from '@/lib/data/infrastructure/projects-completed';
 import { CustomDropdown, TakaIcon, getUpcomingProjectStatusInfo, renderProjectCost } from '@/components/news/power-grid/shared';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { GridDataTable, type GridTableDensity } from '@/components/news/power-grid/GridDataTable';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
@@ -629,7 +630,7 @@ export function TechnicalInfoTab({
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Then vs Now</h3>
                 </div>
                 <div className="grid-explorer-table-wrap">
-                  <table className="grid-explorer-table text-xs">
+                  <table className="grid-explorer-table ge-compact-table text-xs">
                     <thead>
                       <tr className="border-b border-border/60">
                         <th className="py-2.5 text-left text-foreground font-bold">Infrastructure Class</th>
@@ -704,6 +705,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Jargon, translated">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
@@ -731,6 +733,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
             </div>
           )}
 
@@ -752,7 +755,7 @@ export function TechnicalInfoTab({
                       </div>
 
                       <div className="grid-explorer-table-wrap">
-                        <table className="grid-explorer-table text-xs">
+                        <table className="grid-explorer-table ge-compact-table text-xs">
                           <thead>
                             <tr className="border-b border-border/40">
                               <th className="py-2 text-left">Voltage Class</th>
@@ -813,7 +816,7 @@ export function TechnicalInfoTab({
                       </div>
 
                       <div className="grid-explorer-table-wrap">
-                        <table className="grid-explorer-table text-xs">
+                        <table className="grid-explorer-table ge-compact-table text-xs">
                           <thead>
                             <tr className="border-b border-border/40">
                               <th className="py-2 text-left">Infrastructure Item</th>
@@ -872,7 +875,7 @@ export function TechnicalInfoTab({
                     </div>
 
                     <div className="grid-explorer-table-wrap">
-                      <table className="grid-explorer-table text-xs">
+                      <table className="grid-explorer-table ge-compact-table text-xs">
                         <thead>
                           <tr className="border-b border-border/40">
                             <th className="py-2 text-left">Substation / Station Class</th>
@@ -941,6 +944,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Jargon, translated">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
@@ -968,6 +972,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
             </div>
           )}
 
@@ -1064,7 +1069,7 @@ export function TechnicalInfoTab({
                 </div>
 
                 <div className="grid-explorer-table-wrap">
-                  <table className="grid-explorer-table">
+                  <table className="grid-explorer-table ge-compact-table">
                     <thead>
                       <tr>
                         <th>Rating / Type</th>
@@ -1299,6 +1304,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Jargon, translated">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
@@ -1322,6 +1328,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
             </div>
           )}
 
@@ -1984,6 +1991,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Diagram key & technical footnote">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Diagram Key &amp; Technical Footnote
@@ -2007,6 +2015,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
             </div>
           )}
 
@@ -2054,6 +2063,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Diagram key & technical footnote">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-teal-400" /> Mapping &amp; Geography Footnote
@@ -2077,6 +2087,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
             </div>
           )}
 
@@ -2124,6 +2135,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Diagram key & technical footnote">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-purple-400" /> OPGW &amp; Telecom Footnote
@@ -2147,6 +2159,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
             </div>
           )}
 
@@ -2288,6 +2301,7 @@ export function TechnicalInfoTab({
               </div>
 
               {/* Technical Glossary Footnote */}
+              <MobileFold title="Jargon, translated">
               <div className="mt-6 p-4 rounded-2xl bg-muted/5 border border-border/30 space-y-2.5">
                 <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Info className="h-3.5 w-3.5 shrink-0 text-primary" /> Jargon, translated
@@ -2315,6 +2329,7 @@ export function TechnicalInfoTab({
                   </div>
                 </div>
               </div>
+              </MobileFold>
 
               <GridCardFooter>
                 <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">Power Grid Bangladesh PLC</a> — Optical Fiber Commercial Leasing</span>

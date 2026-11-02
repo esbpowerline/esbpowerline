@@ -226,6 +226,7 @@ const SECTION_HINTS: Record<string, string> = {
   renewables: 'solar · wind · hydro',
   macro: 'long-run trends',
   transmission: 'lines · substations',
+  timemachine: '11 years, hour by hour',
 };
 
 
@@ -1297,17 +1298,23 @@ export function PowerGridExplorer({
         isLatest={selectedDate === latestDate}
         dateSheetOpen={isDateSheetOpen}
         onOpenDate={() => setIsDateSheetOpen(true)}
-        sections={tabs.map((t) => {
-          const a = availability?.[t.id as GridTabId];
-          return {
-            id: t.id,
-            label: t.label,
-            icon: t.icon,
-            hint: SECTION_HINTS[t.id] ?? '',
-            empty: a ? !a.hasData : false,
-            reason: a?.reason,
-          };
-        })}
+        sections={[
+          ...tabs.map((t) => {
+            const a = availability?.[t.id as GridTabId];
+            return {
+              id: t.id,
+              label: t.label,
+              icon: t.icon,
+              hint: SECTION_HINTS[t.id] ?? '',
+              empty: a ? !a.hasData : false,
+              reason: a?.reason,
+            };
+          }),
+          // The Time Machine has no desktop tab (it is reached by URL/links), so a
+          // phone reader had no way in. It is a tenth row of the section sheet only;
+          // the desktop tab bar above is unchanged.
+          { id: 'timemachine', label: 'Time Machine', icon: History, hint: SECTION_HINTS.timemachine },
+        ]}
         activeId={activeTab}
         onSelect={(id) => handleTabClick(id as typeof activeTab)}
       />

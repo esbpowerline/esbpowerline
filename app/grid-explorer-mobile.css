@@ -668,3 +668,34 @@
      ~60px-high plot. Same width, more height. */
   .ge-root .ge-macro .grid-explorer-chart-area--lg { height: 280px; min-height: 280px; }
 }
+
+/* ── TECHNICAL INFORMATION + TIME MACHINE tabs ──────────────────────────────
+   Phone/tablet only. The summary tables on Technical Information carry
+   `ge-compact-table` (wrap instead of clipping their 2nd/3rd column behind a
+   swipe nobody was told about). The 260-row substation registry keeps its own
+   sticky-header scroll box. */
+@media (max-width: 1023px) {
+  /* The section <select> was 36px; the hint line used rem, which collapses to ~9px here. */
+  .ge-root select { min-height: 44px; }
+  .ge-root .grid-explorer-table-scroll-hint { font-size: 11px; min-height: 28px; }
+  .ge-root .grid-explorer-subpanel input[type="text"],
+  .ge-root .grid-explorer-subpanel input[type="search"],
+  .ge-root .grid-explorer-subpanel input:not([type]) { min-height: 44px; }
+  /* Icon-only pager / previous-next buttons were 25px wide. */
+  .ge-root .grid-explorer-subpanel button:has(> svg:only-child) { min-width: 44px; }
+  /* Density toggle (Comfortable / Compact) and table pager size chips. */
+  .ge-root .grid-explorer-subpanel button.capitalize { min-width: 44px; }
+
+  /* Time Machine: both selects and the two date inputs share a row each, full
+     width, 44px; the From/to labels stay on their own tiny line so the dates get room. */
+  .ge-root .ge-tm-selects { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .ge-root .ge-tm-selects select, .ge-root .ge-tm-dates input { min-height: 44px; font-size: 14px; width: 100%; }
+  .ge-root .ge-tm-dates { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 10px; font-size: 13px; }
+  /* Chart: a bit shorter than 320px keeps the reading + legend on the first screen. */
+  .ge-root .ge-tm-chart { height: 280px; touch-action: pan-y; }
+  .ge-root .ge-tm-legend { gap: 6px 14px; font-size: 11px; }
+  .ge-root .ge-tm-legend > span { min-height: 28px; }
+  .ge-root .ge-tm-defs { margin: 0; display: grid; gap: 10px; font-size: 13px; line-height: 1.45; }
+  .ge-root .ge-tm-defs dt { font-weight: 700; font-size: 13px; }
+  .ge-root .ge-tm-defs dd { margin: 2px 0 0; color: hsl(var(--muted-foreground)); }
+}
