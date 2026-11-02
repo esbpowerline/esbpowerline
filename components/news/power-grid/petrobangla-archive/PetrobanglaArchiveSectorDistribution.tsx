@@ -1,5 +1,6 @@
 'use client';
 
+import { useChartAnimation } from '../useChartAnimation';
 import { useMemo , type ReactNode} from 'react';
 import { PieChart } from 'lucide-react';
 import {
@@ -169,6 +170,7 @@ export function PetrobanglaArchiveSectorDistribution({
   rangeToolbar?: ReactNode;
   onClose?: () => void;
 }) {
+  const animate = useChartAnimation();
   const chartTheme = useChartTheme();
 
   const chartData = useMemo(() => {
@@ -224,10 +226,10 @@ export function PetrobanglaArchiveSectorDistribution({
                 <XAxis {...gridChartXAxisProps(chartTheme, { dataKey: 'date', tickFormatter: (v: string) => v.slice(0, 7), interval: Math.floor(chartData.length / 10) })} />
                 <YAxis {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
                 <GridRechartsTooltip content={<SectorTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
-                <Area type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} legendType="none" />
-                <Area type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} legendType="none" />
-                <Area type="monotone" dataKey="powerSupply" name="Power supply" stackId="s" fill={SECTOR_COLORS.powerSupply} stroke={SECTOR_COLORS.powerSupply} fillOpacity={0.2} legendType="none" />
-                <Line type="monotone" dataKey="powerDemand" name="Power demand" stroke={SECTOR_COLORS.powerDemand} strokeWidth={2} dot={false} strokeDasharray="4 4" legendType="none" />
+                <Area isAnimationActive={animate} type="monotone" dataKey="others" name="Others/Industry" stackId="s" fill={SECTOR_COLORS.others} stroke={SECTOR_COLORS.others} fillOpacity={0.2} legendType="none" />
+                <Area isAnimationActive={animate} type="monotone" dataKey="fertSupply" name="Fertilizer supply" stackId="s" fill={SECTOR_COLORS.fertSupply} stroke={SECTOR_COLORS.fertSupply} fillOpacity={0.25} legendType="none" />
+                <Area isAnimationActive={animate} type="monotone" dataKey="powerSupply" name="Power supply" stackId="s" fill={SECTOR_COLORS.powerSupply} stroke={SECTOR_COLORS.powerSupply} fillOpacity={0.2} legendType="none" />
+                <Line isAnimationActive={animate} type="monotone" dataKey="powerDemand" name="Power demand" stroke={SECTOR_COLORS.powerDemand} strokeWidth={2} dot={false} strokeDasharray="4 4" legendType="none" />
               </ComposedChart>
             </ResponsiveContainer>
           ) : (

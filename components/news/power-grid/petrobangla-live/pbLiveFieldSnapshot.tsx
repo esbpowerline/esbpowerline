@@ -1,5 +1,6 @@
 'use client';
 
+import { useChartAnimation } from '../useChartAnimation';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
 import { cn, formatNumber } from '@/lib/utils';
 import { fieldSparklines } from '@/lib/data/petrobangla/computeLiveWeek';
@@ -20,6 +21,7 @@ export function PbLiveFieldSnapshot({
   latest: PetrobanglaDaily;
   showSparklines: boolean;
 }) {
+  const animate = useChartAnimation();
   const sparks = fieldSparklines(bundle);
   const fields = [...latest.production.fields].sort((a, b) => b.gas_mmcfd - a.gas_mmcfd);
 
@@ -57,7 +59,7 @@ export function PbLiveFieldSnapshot({
                       <div className="h-6 w-20">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart role="img" aria-label={`${f.field} gas production, 7-day sparkline, chart`} accessibilityLayer={false} data={series}>
-                            <Line
+                            <Line isAnimationActive={animate}
                               type="monotone"
                               dataKey="v"
                               stroke={f.company_code === 'RPGCL' ? PB_ARCHIVE_COLORS.lng : PB_ARCHIVE_COLORS.domestic}

@@ -1,5 +1,6 @@
 'use client';
 
+import { useChartAnimation } from '../useChartAnimation';
 import { useMemo, useState , type ReactNode} from 'react';
 import { Info, LineChart as LineChartIcon } from 'lucide-react';
 import { Line, LineChart, ResponsiveContainer } from 'recharts';
@@ -52,6 +53,7 @@ export function PetrobanglaArchiveFieldCards({
   rangeToolbar?: ReactNode;
   onClose?: () => void;
 }) {
+  const animate = useChartAnimation();
   const [sort, setSort] = useState<SortKey>('largest');
   const [modalField, setModalField] = useState<string | null>(null);
   const [hoverField, setHoverField] = useState<string | null>(null);
@@ -217,7 +219,7 @@ export function PetrobanglaArchiveFieldCards({
                       accessibilityLayer={false}
                       data={c.series}
                     >
-                      <Line
+                      <Line isAnimationActive={animate}
                         type="monotone"
                         dataKey="gas"
                         stroke={c.isRpgcl ? PB_ARCHIVE_COLORS.lng : PB_ARCHIVE_COLORS.domestic}

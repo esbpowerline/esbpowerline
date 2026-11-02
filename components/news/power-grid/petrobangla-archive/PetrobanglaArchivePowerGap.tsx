@@ -1,5 +1,6 @@
 'use client';
 
+import { useChartAnimation } from '../useChartAnimation';
 import { useMemo , type ReactNode} from 'react';
 import { CalendarX2, Factory, Flame } from 'lucide-react';
 import {
@@ -129,6 +130,7 @@ export function PetrobanglaArchivePowerGap({
   rangeToolbar?: ReactNode;
   onClose?: () => void;
 }) {
+  const animate = useChartAnimation();
   const chartTheme = useChartTheme();
 
   const chartData = useMemo(() => {
@@ -187,7 +189,7 @@ export function PetrobanglaArchivePowerGap({
                 <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => formatNumber(v, 0) })} />
                 <YAxis yAxisId="right" orientation="right" {...gridChartYAxisProps(chartTheme, { tickFormatter: (v) => `${v}%`, domain: [0, 100] })} />
                 <GridRechartsTooltip content={<PowerGapTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
-                <Area
+                <Area isAnimationActive={animate}
                   yAxisId="left"
                   type="monotone"
                   dataKey="gap"
@@ -197,7 +199,7 @@ export function PetrobanglaArchivePowerGap({
                   fillOpacity={0.15}
                   legendType="none"
                 />
-                <Line
+                <Line isAnimationActive={animate}
                   yAxisId="left"
                   type="monotone"
                   dataKey="demand"
@@ -207,7 +209,7 @@ export function PetrobanglaArchivePowerGap({
                   dot={false}
                   legendType="none"
                 />
-                <Line
+                <Line isAnimationActive={animate}
                   yAxisId="left"
                   type="monotone"
                   dataKey="supply"
@@ -217,7 +219,7 @@ export function PetrobanglaArchivePowerGap({
                   dot={false}
                   legendType="none"
                 />
-                <Line
+                <Line isAnimationActive={animate}
                   yAxisId="right"
                   type="monotone"
                   dataKey="fulfillment"

@@ -1,5 +1,6 @@
 'use client';
 
+import { useChartAnimation } from '../useChartAnimation';
 import { useMemo } from 'react';
 import {
   Area,
@@ -105,6 +106,7 @@ export function PbLiveTimeline({
   compact?: boolean;
   fillHeight?: boolean;
 }) {
+  const animate = useChartAnimation();
   const chartTheme = useChartTheme();
   const dayCount = timelineDays ? timelineDays.length : bundle ? bundle.days.length : 0;
 
@@ -161,7 +163,7 @@ export function PbLiveTimeline({
               <YAxis yAxisId="left" {...gridChartYAxisProps(chartTheme, { domain: [0, 'auto'] })} />
               <GridRechartsTooltip content={<LiveWeekTooltip />} cursor={{ stroke: chartTheme.gridStroke, strokeWidth: 1 }} />
 
-              <Area
+              <Area isAnimationActive={animate}
                 yAxisId="left"
                 type="monotone"
                 dataKey="powerSupply"
@@ -170,7 +172,7 @@ export function PbLiveTimeline({
                 fillOpacity={0.22}
                 legendType="none"
               />
-              <Line
+              <Line isAnimationActive={animate}
                 yAxisId="left"
                 type="monotone"
                 dataKey="totalGas"
@@ -179,7 +181,7 @@ export function PbLiveTimeline({
                 dot={{ r: 4, fill: nationalColor }}
                 legendType="none"
               />
-              <Line
+              <Line isAnimationActive={animate}
                 yAxisId="left"
                 type="monotone"
                 dataKey="powerDemand"

@@ -207,3 +207,22 @@
   z-index: 1;
 }
 @media (min-width: 768px) { .ge-chart-table { font-size: 13px; } }
+
+/* ── 6. No chart entrance animation on phones / tablets (perf O2) ─────────────
+   Wipes and fade-ins on the hand-drawn charts are decoration over data that is
+   already legible; on a throttled phone they cost frames on every tab switch.
+   Desktop (>= 1024px) is untouched. The base state of each is visible, so
+   `animation: none` lands on the finished drawing.
+   NOT touched on purpose: .xgrid__flow (the travelling dots state the direction
+   of flow and are exempt by design, see globals.css). */
+@media (max-width: 1023px) {
+  .rtraj__svg.is-playing .rtraj__wipe,
+  .rtraj__svg.is-playing .rtraj__late,
+  .xgrid__svg.is-playing .xgrid__wipe,
+  .xgrid__svg.is-playing .xgrid__late,
+  .xgrid__svg.is-playing .xgrid__peak-ring,
+  .forecast-curve__ink,
+  .grid-bar-fill {
+    animation: none !important;
+  }
+}

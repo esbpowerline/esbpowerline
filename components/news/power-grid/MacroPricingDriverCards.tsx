@@ -7,6 +7,7 @@
  * ready flag arrive as props exactly as the JSX read them from scope.
  */
 
+import { useChartAnimation } from './useChartAnimation';
 import { Globe, TrendingUp } from 'lucide-react';
 import {
   Area, Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -32,6 +33,7 @@ interface CardProps {
 }
 
 export function MacroPressureCard({ chartTheme, data, chartsReady }: CardProps) {
+  const animate = useChartAnimation();
   return (
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
@@ -85,8 +87,8 @@ export function MacroPressureCard({ chartTheme, data, chartsReady }: CardProps) 
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Bar yAxisId="left" dataKey="exchangeRate" name="USD Exchange Rate (BDT)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={25} />
-                          <Line yAxisId="right" type="monotone" dataKey="inflation" name="Inflation Rate (%)" stroke={SERIES_COLORS.peakGeneration} strokeWidth={3} dot={{ fill: SERIES_COLORS.peakGeneration, r: 4 }} />
+                          <Bar isAnimationActive={animate} yAxisId="left" dataKey="exchangeRate" name="USD Exchange Rate (BDT)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={25} />
+                          <Line isAnimationActive={animate} yAxisId="right" type="monotone" dataKey="inflation" name="Inflation Rate (%)" stroke={SERIES_COLORS.peakGeneration} strokeWidth={3} dot={{ fill: SERIES_COLORS.peakGeneration, r: 4 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     ) : (
@@ -122,6 +124,7 @@ export function MacroPressureCard({ chartTheme, data, chartsReady }: CardProps) 
 }
 
 export function FuelImportCostCard({ chartTheme, data, chartsReady }: CardProps) {
+  const animate = useChartAnimation();
   return (
                 <div className="grid-explorer-chart-card card">
                   <div className="grid-explorer-chart-card__head">
@@ -175,8 +178,8 @@ export function FuelImportCostCard({ chartTheme, data, chartsReady }: CardProps)
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Area yAxisId="left" type="monotone" dataKey="spotLng" name="Spot LNG (USD/MMBtu)" stroke={SERIES_COLORS.powerBudget} fill="rgba(168, 85, 247, 0.15)" strokeWidth={2} />
-                          <Line yAxisId="right" type="monotone" dataKey="importCoal" name="Import Coal (USD/Ton)" stroke={SERIES_UNMAPPED.light} strokeWidth={2.5} dot={{ fill: SERIES_UNMAPPED.light, r: 3 }} />
+                          <Area isAnimationActive={animate} yAxisId="left" type="monotone" dataKey="spotLng" name="Spot LNG (USD/MMBtu)" stroke={SERIES_COLORS.powerBudget} fill="rgba(168, 85, 247, 0.15)" strokeWidth={2} />
+                          <Line isAnimationActive={animate} yAxisId="right" type="monotone" dataKey="importCoal" name="Import Coal (USD/Ton)" stroke={SERIES_UNMAPPED.light} strokeWidth={2.5} dot={{ fill: SERIES_UNMAPPED.light, r: 3 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     ) : (

@@ -1,5 +1,6 @@
 'use client';
 
+import { useChartAnimation } from '../useChartAnimation';
 import { useMemo , type ReactNode} from 'react';
 import { History } from 'lucide-react';
 import { MacroGasInnerSection } from '../MacroGasSectionChrome';
@@ -54,6 +55,7 @@ export function PetrobanglaArchiveNationalTimeline({
   rangeToolbar?: ReactNode;
   onClose?: () => void;
 }) {
+  const animate = useChartAnimation();
   const chartTheme = useChartTheme();
   // Phones: short weekday names on the 1W axis (see formatDynamicXAxisDate).
   const narrowAxis = useBelowDesktop();
@@ -159,7 +161,7 @@ export function PetrobanglaArchiveNationalTimeline({
                     );
                   }}
                 />
-                <Area
+                <Area isAnimationActive={animate}
                   type="monotone"
                   dataKey="domestic"
                   stackId="1"
@@ -169,7 +171,7 @@ export function PetrobanglaArchiveNationalTimeline({
                   strokeWidth={2}
                   legendType="none"
                 />
-                <Area
+                <Area isAnimationActive={animate}
                   type="monotone"
                   dataKey="lng"
                   stackId="1"
@@ -179,7 +181,7 @@ export function PetrobanglaArchiveNationalTimeline({
                   strokeWidth={2}
                   legendType="none"
                 />
-                <Line
+                <Line isAnimationActive={animate}
                   type="monotone"
                   dataKey="total"
                   stroke={PB_ARCHIVE_COLORS.totalLine}
@@ -190,7 +192,7 @@ export function PetrobanglaArchiveNationalTimeline({
                   legendType="none"
                 />
                 {showMa && (
-                  <Line
+                  <Line isAnimationActive={animate}
                     type="monotone"
                     dataKey="totalMa"
                     stroke={PB_ARCHIVE_COLORS.ma}

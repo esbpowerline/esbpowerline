@@ -14,6 +14,7 @@
  * with the parent's state and needs a real refactor rather than a move.
  */
 
+import { useChartAnimation } from './useChartAnimation';
 import { Droplet, DollarSign } from 'lucide-react';
 import {
   Area,
@@ -120,6 +121,7 @@ export function GridBrentDieselCard({
   chartTheme: ChartTheme;
   ready: boolean;
 }) {
+  const animate = useChartAnimation();
   const [cardRef, isNarrow] = useNarrowChartCard();
 
   const tooltip = (
@@ -169,7 +171,7 @@ export function GridBrentDieselCard({
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
                   {tooltip}
-                  <Line type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke={SERIES_COLORS.brent} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.brent, r: 3 }} />
+                  <Line isAnimationActive={animate} type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke={SERIES_COLORS.brent} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.brent, r: 3 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -186,7 +188,7 @@ export function GridBrentDieselCard({
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
                   {tooltip}
-                  <Area type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill={SERIES_COLORS.retailDiesel} fillOpacity={0.05} stroke={SERIES_COLORS.retailDiesel} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.retailDiesel, r: 3 }} />
+                  <Area isAnimationActive={animate} type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill={SERIES_COLORS.retailDiesel} fillOpacity={0.05} stroke={SERIES_COLORS.retailDiesel} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.retailDiesel, r: 3 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -202,8 +204,8 @@ export function GridBrentDieselCard({
               <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'Retail Diesel (Tk/L)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
               {tooltip}
               <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-              <Line yAxisId="left" type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke={SERIES_COLORS.brent} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.brent, r: 3 }} />
-              <Area yAxisId="right" type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill={SERIES_COLORS.retailDiesel} fillOpacity={0.05} stroke={SERIES_COLORS.retailDiesel} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.retailDiesel, r: 3 }} />
+              <Line isAnimationActive={animate} yAxisId="left" type="monotone" dataKey="globalOil" name="Brent Crude ($/bbl)" stroke={SERIES_COLORS.brent} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.brent, r: 3 }} />
+              <Area isAnimationActive={animate} yAxisId="right" type="monotone" dataKey="bdDiesel" name="BD Retail Diesel (Tk/L)" fill={SERIES_COLORS.retailDiesel} fillOpacity={0.05} stroke={SERIES_COLORS.retailDiesel} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.retailDiesel, r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
       <ChartDataTable
@@ -313,6 +315,7 @@ export function GridLngTariffCard({
   chartTheme: ChartTheme;
   ready: boolean;
 }) {
+  const animate = useChartAnimation();
   const [cardRef, isNarrow] = useNarrowChartCard();
 
   const tooltip = (
@@ -362,7 +365,7 @@ export function GridLngTariffCard({
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `$${v}`} />
                   {tooltip}
-                  <Line type="monotone" dataKey="globalGas" name="Global LNG ($/MMBtu)" stroke={SERIES_COLORS.globalLng} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.globalLng, r: 3 }} />
+                  <Line isAnimationActive={animate} type="monotone" dataKey="globalGas" name="Global LNG ($/MMBtu)" stroke={SERIES_COLORS.globalLng} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.globalLng, r: 3 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -379,7 +382,7 @@ export function GridLngTariffCard({
                   {xAxis}
                   <YAxis width={GRID_Y_AXIS_WIDTH.single} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} />
                   {tooltip}
-                  <Area type="monotone" dataKey="bdGas" name="BD Avg Gas Tariff (Tk/CM)" fill={SERIES_COLORS.bdGasTariff} fillOpacity={0.05} stroke={SERIES_COLORS.bdGasTariff} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.bdGasTariff, r: 3 }} />
+                  <Area isAnimationActive={animate} type="monotone" dataKey="bdGas" name="BD Avg Gas Tariff (Tk/CM)" fill={SERIES_COLORS.bdGasTariff} fillOpacity={0.05} stroke={SERIES_COLORS.bdGasTariff} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.bdGasTariff, r: 3 }} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -395,8 +398,8 @@ export function GridLngTariffCard({
               <YAxis yAxisId="right" orientation="right" width={GRID_Y_AXIS_WIDTH.wide} tick={{ fontSize: 10, fill: chartTheme.axisTick }} axisLine={false} tickLine={false} tickMargin={4} tickFormatter={(v) => `${v} Tk`} label={{ value: 'BD Avg Gas Tariff (Tk/CM)', angle: 90, position: 'insideRight', offset: 10, style: { fontSize: '9px', fill: chartTheme.axisTick } }} />
               {tooltip}
               <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-              <Line yAxisId="left" type="monotone" dataKey="globalGas" name="Global LNG ($/MMBtu)" stroke={SERIES_COLORS.globalLng} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.globalLng, r: 3 }} />
-              <Area yAxisId="right" type="monotone" dataKey="bdGas" name="BD Avg Gas Tariff (Tk/CM)" fill={SERIES_COLORS.bdGasTariff} fillOpacity={0.05} stroke={SERIES_COLORS.bdGasTariff} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.bdGasTariff, r: 3 }} />
+              <Line isAnimationActive={animate} yAxisId="left" type="monotone" dataKey="globalGas" name="Global LNG ($/MMBtu)" stroke={SERIES_COLORS.globalLng} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.globalLng, r: 3 }} />
+              <Area isAnimationActive={animate} yAxisId="right" type="monotone" dataKey="bdGas" name="BD Avg Gas Tariff (Tk/CM)" fill={SERIES_COLORS.bdGasTariff} fillOpacity={0.05} stroke={SERIES_COLORS.bdGasTariff} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.bdGasTariff, r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
       <ChartDataTable

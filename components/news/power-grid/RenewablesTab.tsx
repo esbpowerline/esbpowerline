@@ -31,6 +31,7 @@
  * into one another — they sit in separate cards and say which they are.
  */
 
+import { useChartAnimation } from './useChartAnimation';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import {
   Area,
@@ -228,6 +229,7 @@ export function RenewablesTab({
   /** Named on each KPI so a reader can request the same workbook. */
   sourceFiles?: GridDailyData['sourceFiles'];
 }) {
+  const animate = useChartAnimation();
   const [sreda, setSreda] = useState<SredaDailyData | null>(null);
   const [sredaState, setSredaState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [plants, setPlants] = useState<PlantRow[] | null>(null);
@@ -889,7 +891,7 @@ export function RenewablesTab({
                         />
                         {monthlyTimelineTooltip}
                         {(['Hydro', 'Wind', 'Solar'] as const).map((k) => (
-                          <Area
+                          <Area isAnimationActive={animate}
                             key={k}
                             type="monotone"
                             dataKey={k}
@@ -944,7 +946,7 @@ export function RenewablesTab({
                           tooltipType="none"
                           isAnimationActive={false}
                         />
-                        <Line
+                        <Line isAnimationActive={animate}
                           type="monotone"
                           dataKey="sharePct"
                           stroke={SERIES_COLORS.renewableShare}
@@ -993,7 +995,7 @@ export function RenewablesTab({
                       so stacking it at the base keeps the other bands readable
                       once they appear rather than shunting them up and down. */}
                   {(['Hydro', 'Wind', 'Solar'] as const).map((k) => (
-                    <Area
+                    <Area isAnimationActive={animate}
                       key={k}
                       yAxisId="mkwh"
                       type="monotone"
@@ -1034,7 +1036,7 @@ export function RenewablesTab({
                     tooltipType="none"
                     isAnimationActive={false}
                   />
-                  <Line
+                  <Line isAnimationActive={animate}
                     yAxisId="share"
                     type="monotone"
                     dataKey="sharePct"

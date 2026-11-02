@@ -8,6 +8,7 @@
  * in place.
  */
 
+import { useChartAnimation } from './useChartAnimation';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Cell,
 } from 'recharts';
@@ -72,6 +73,7 @@ export function DailyCostCard({
   sourceFiles: GridDailyData['sourceFiles'];
   systemStats: GridSystemStats;
 }) {
+  const animate = useChartAnimation();
   return (
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
@@ -147,7 +149,7 @@ export function DailyCostCard({
                       }}
                       cursor={{ fill: chartTheme.hoverFill, radius: 8 }}
                     />
-                    <Bar
+                    <Bar isAnimationActive={animate}
                       dataKey="costCrore"
                       name="Daily Cost (Cr Tk)"
                       radius={[6, 6, 0, 0]}

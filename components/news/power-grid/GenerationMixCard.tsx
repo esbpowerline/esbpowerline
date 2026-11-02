@@ -8,6 +8,7 @@
  * arrives through props exactly as the JSX read it in place.
  */
 
+import { useChartAnimation } from './useChartAnimation';
 import { PieChart, Pie, Cell } from 'recharts';
 import { Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -43,6 +44,7 @@ export function GenerationMixCard({
   sourceFiles: GridDailyData['sourceFiles'];
   systemStats: GridSystemStats;
 }) {
+  const animate = useChartAnimation();
   return (
           <div className="grid-explorer-chart-card card">
             <div className="grid-explorer-chart-card__head">
@@ -92,7 +94,7 @@ export function GenerationMixCard({
                 </div>
               ) : (
                 <PieChart role="img" aria-label="Daily Generation Mix Snapshot, chart" accessibilityLayer={false} width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                  <Pie
+                  <Pie isAnimationActive={animate}
                     data={pieGenerationData}
                     dataKey="gen"
                     nameKey="name"

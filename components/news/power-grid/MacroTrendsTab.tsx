@@ -7,6 +7,7 @@
  * because the URL syncer reads it; everything else macro-owned lives here.
  */
 
+import { useChartAnimation } from './useChartAnimation';
 import dynamic from 'next/dynamic';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import {
@@ -149,6 +150,7 @@ export function MacroTrendsTab({
   chartsReady: boolean;
   gridAccess: GridAccessLike;
 }) {
+  const animate = useChartAnimation();
   const macroChartsReady = true;
   // Phone/tablet: the sub-tab bar is one swipeable row (CSS .ge-macro-subtabs);
   // bring the active chip into view so a deep link (?macro=system_loss) or a tap
@@ -636,9 +638,9 @@ export function MacroTrendsTab({
                             );
                           }}
                         />
-                        <Bar yAxisId="left" dataKey="power_energy_allocation_crore_tk" name="Power Budget (Cr Tk)" fill="url(#budget-grad)" radius={[4, 4, 0, 0]} maxBarSize={36} />
-                        <Line yAxisId="right" type="monotone" dataKey="installed_capacity_mw" name="Installed Cap. (MW)" stroke={SERIES_COLORS.installedCapacity} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.installedCapacity, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} />
-                        <Line yAxisId="right" type="monotone" dataKey="peak_generation_mw" name="Peak Gen. (MW)" stroke={SERIES_COLORS.peakGeneration} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.peakGeneration, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Bar isAnimationActive={animate} yAxisId="left" dataKey="power_energy_allocation_crore_tk" name="Power Budget (Cr Tk)" fill="url(#budget-grad)" radius={[4, 4, 0, 0]} maxBarSize={36} />
+                        <Line isAnimationActive={animate} yAxisId="right" type="monotone" dataKey="installed_capacity_mw" name="Installed Cap. (MW)" stroke={SERIES_COLORS.installedCapacity} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.installedCapacity, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Line isAnimationActive={animate} yAxisId="right" type="monotone" dataKey="peak_generation_mw" name="Peak Gen. (MW)" stroke={SERIES_COLORS.peakGeneration} strokeWidth={2.5} dot={{ stroke: SERIES_COLORS.peakGeneration, strokeWidth: 2, fill: CHART_INK.surface.light, r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
                 
@@ -815,8 +817,8 @@ export function MacroTrendsTab({
                             );
                           }}
                         />
-                        <Bar dataKey="tariff" name="Avg Bulk Tariff (Tk/kWh)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={32} />
-                        <Line type="monotone" dataKey="cost" name="BPDB Supply Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} />
+                        <Bar isAnimationActive={animate} dataKey="tariff" name="Avg Bulk Tariff (Tk/kWh)" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={32} />
+                        <Line isAnimationActive={animate} type="monotone" dataKey="cost" name="BPDB Supply Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
                 <MobileFold title="What is being shown?"><div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
@@ -915,8 +917,8 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend wrapperStyle={{ fontSize: '11px' }} />
-                          <Bar dataKey="tariff" name="Average Bulk Tariff" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={30} />
-                          <Line dataKey="cost" name="Bulk Supply Cost" stroke={chartTheme.destructive} strokeWidth={3} dot={{ fill: chartTheme.destructive, r: 4 }} activeDot={{ r: 6 }} />
+                          <Bar isAnimationActive={animate} dataKey="tariff" name="Average Bulk Tariff" fill={chartTheme.primary} radius={[4, 4, 0, 0]} maxBarSize={30} />
+                          <Line isAnimationActive={animate} dataKey="cost" name="Bulk Supply Cost" stroke={chartTheme.destructive} strokeWidth={3} dot={{ fill: chartTheme.destructive, r: 4 }} activeDot={{ r: 6 }} />
                         </ComposedChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1027,8 +1029,8 @@ export function MacroTrendsTab({
                               );
                             }}
                           />
-                          <Area type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke={SERIES_COLORS.domesticGas} fill={SERIES_COLORS.domesticGas} fillOpacity={0.22} strokeWidth={2} legendType="none" />
-                          <Area type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke={SERIES_COLORS.powerBudget} fill={SERIES_COLORS.powerBudget} fillOpacity={0.28} strokeWidth={2} legendType="none" />
+                          <Area isAnimationActive={animate} type="monotone" dataKey="domestic" name="Domestic Gas (MMCFD)" stackId="1" stroke={SERIES_COLORS.domesticGas} fill={SERIES_COLORS.domesticGas} fillOpacity={0.22} strokeWidth={2} legendType="none" />
+                          <Area isAnimationActive={animate} type="monotone" dataKey="lng" name="Imported LNG (MMCFD)" stackId="1" stroke={SERIES_COLORS.powerBudget} fill={SERIES_COLORS.powerBudget} fillOpacity={0.28} strokeWidth={2} legendType="none" />
                         </ComposedChart>
                   </GridChartFrame>
                   ) : (
@@ -1358,7 +1360,7 @@ export function MacroTrendsTab({
                             <div className="grid-explorer-donut-wrap grid-explorer-donut-wrap--centered !mb-0 w-full">
                               {macroChartsReady ? (
                                 <PieChart role="img" aria-label="Energy Fuel Mix, chart" width={200} height={200} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-                                  <Pie
+                                  <Pie isAnimationActive={animate}
                                     data={
                                       currentMonthlyData
                                         ? Object.entries(currentMonthlyData.generation_by_fuel)
@@ -1520,7 +1522,7 @@ export function MacroTrendsTab({
                                       domain={[0, 'auto']}
                                       allowDecimals={false}
                                     />
-                                    <Bar
+                                    <Bar isAnimationActive={animate}
                                       dataKey="value"
                                       radius={[6, 6, 0, 0]}
                                       maxBarSize={32}
@@ -1789,8 +1791,8 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Area type="monotone" dataKey="max_evening_peak_demand" name="Estimated Peak Demand" stroke={SERIES_COLORS.peakGeneration} fill="rgba(249, 115, 22, 0.05)" strokeWidth={1.5} />
-                          <Line type="monotone" dataKey="max_evening_peak_gen" name="Maximum Peak Generation" stroke={chartTheme.primary} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
+                          <Area isAnimationActive={animate} type="monotone" dataKey="max_evening_peak_demand" name="Estimated Peak Demand" stroke={SERIES_COLORS.peakGeneration} fill="rgba(249, 115, 22, 0.05)" strokeWidth={1.5} />
+                          <Line isAnimationActive={animate} type="monotone" dataKey="max_evening_peak_gen" name="Maximum Peak Generation" stroke={chartTheme.primary} strokeWidth={2.5} dot={false} activeDot={{ r: 5 }} />
                         </ComposedChart>
                       ) : monthlyTrendMetric === 'energy' ? (
                         <ComposedChart role="img" aria-label="PGCB monthly energy generation, chart" accessibilityLayer={false} data={localPgcbMonthlyData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -1870,7 +1872,7 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Area type="monotone" dataKey="total_net_generation" name="Total Monthly Energy Generation (MKWh)" stroke={SERIES_COLORS.bdGasTariff} fill="rgba(245, 158, 11, 0.1)" strokeWidth={2.5} />
+                          <Area isAnimationActive={animate} type="monotone" dataKey="total_net_generation" name="Total Monthly Energy Generation (MKWh)" stroke={SERIES_COLORS.bdGasTariff} fill="rgba(245, 158, 11, 0.1)" strokeWidth={2.5} />
                         </ComposedChart>
                       ) : (
                         <ComposedChart role="img" aria-label="PGCB monthly generation by fuel, chart" accessibilityLayer={false} data={pgcbFuelTrendData} margin={GRID_EXPLORER_CHART_MARGIN.topLegend}>
@@ -1949,7 +1951,7 @@ export function MacroTrendsTab({
                             }}
                           />
                           <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                          <Line
+                          <Line isAnimationActive={animate}
                             type="monotone"
                             dataKey="fuelTrendMkwh"
                             name={`${getFuelLabel(selectedFuelTrend)} Generation Trend (MKWh)`}
@@ -2233,10 +2235,10 @@ export function MacroTrendsTab({
                               }}
                             />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                            <Bar dataKey="revenue" name="Energy Sales" fill={SERIES_COLORS.domesticGas} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="subsidy" name="Govt Subsidy" fill={SERIES_COLORS.retailDiesel} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="cost" name="Total Operating Expenses" fill={SERIES_COLORS.peakGeneration} radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Line type="monotone" dataKey="loss" name="Operating balance after subsidy" stroke={SERIES_COLORS.powerBudget} strokeWidth={3} dot={{ fill: SERIES_COLORS.powerBudget, r: 4 }} connectNulls={false} />
+                            <Bar isAnimationActive={animate} dataKey="revenue" name="Energy Sales" fill={SERIES_COLORS.domesticGas} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar isAnimationActive={animate} dataKey="subsidy" name="Govt Subsidy" fill={SERIES_COLORS.retailDiesel} stackId="a" radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar isAnimationActive={animate} dataKey="cost" name="Total Operating Expenses" fill={SERIES_COLORS.peakGeneration} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Line isAnimationActive={animate} type="monotone" dataKey="loss" name="Operating balance after subsidy" stroke={SERIES_COLORS.powerBudget} strokeWidth={3} dot={{ fill: SERIES_COLORS.powerBudget, r: 4 }} connectNulls={false} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       ) : (
@@ -2363,9 +2365,9 @@ export function MacroTrendsTab({
                               }}
                             />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                            <Bar dataKey="revenue" name="Gas Sales Revenue" fill={SERIES_COLORS.domesticGas} radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Bar dataKey="lngCost" name="LNG Import Cost" fill={SERIES_COLORS.powerBudget} radius={[2, 2, 0, 0]} maxBarSize={20} />
-                            <Line type="monotone" dataKey="netProfit" name="Net Income / Loss" stroke={STATUS_COLORS.warning} strokeWidth={3} dot={{ fill: STATUS_COLORS.warning, r: 4 }} />
+                            <Bar isAnimationActive={animate} dataKey="revenue" name="Gas Sales Revenue" fill={SERIES_COLORS.domesticGas} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Bar isAnimationActive={animate} dataKey="lngCost" name="LNG Import Cost" fill={SERIES_COLORS.powerBudget} radius={[2, 2, 0, 0]} maxBarSize={20} />
+                            <Line isAnimationActive={animate} type="monotone" dataKey="netProfit" name="Net Income / Loss" stroke={STATUS_COLORS.warning} strokeWidth={3} dot={{ fill: STATUS_COLORS.warning, r: 4 }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       ) : (
@@ -2547,8 +2549,8 @@ export function MacroTrendsTab({
                           }}
                         />
                             <GridRechartsLegend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                        <Line type="monotone" dataKey="globalSolarBdt" name="Global Solar LCOE (Tk/kWh)" stroke={SERIES_COLORS.transmissionIndex} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.transmissionIndex, r: 3 }} />
-                        <Line type="monotone" dataKey="bdSolar" name="BD Solar Tariff (Tk/kWh)" stroke={STATUS_COLORS.critical} strokeWidth={2.5} dot={{ fill: STATUS_COLORS.critical, r: 3 }} />
+                        <Line isAnimationActive={animate} type="monotone" dataKey="globalSolarBdt" name="Global Solar LCOE (Tk/kWh)" stroke={SERIES_COLORS.transmissionIndex} strokeWidth={2.5} dot={{ fill: SERIES_COLORS.transmissionIndex, r: 3 }} />
+                        <Line isAnimationActive={animate} type="monotone" dataKey="bdSolar" name="BD Solar Tariff (Tk/kWh)" stroke={STATUS_COLORS.critical} strokeWidth={2.5} dot={{ fill: STATUS_COLORS.critical, r: 3 }} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   ) : (
@@ -2781,9 +2783,9 @@ export function MacroTrendsTab({
                           iconSize={8}
                           wrapperStyle={{ fontSize: '11px' }}
                         />
-                        <Area type="monotone" dataKey="total_td" name="Total T&amp;D Loss" stroke={chartTheme.destructive} fill={chartTheme.destructive} fillOpacity={0.06} strokeWidth={2.5} />
-                        <Line type="monotone" dataKey="distribution" name="Distribution Loss" stroke={SERIES_COLORS.powerBudget} strokeWidth={2} dot={{ r: 2 }} />
-                        <Line type="monotone" dataKey="transmission" name="Transmission Loss" stroke={SERIES_COLORS.retailDiesel} strokeWidth={2} dot={{ r: 2 }} />
+                        <Area isAnimationActive={animate} type="monotone" dataKey="total_td" name="Total T&amp;D Loss" stroke={chartTheme.destructive} fill={chartTheme.destructive} fillOpacity={0.06} strokeWidth={2.5} />
+                        <Line isAnimationActive={animate} type="monotone" dataKey="distribution" name="Distribution Loss" stroke={SERIES_COLORS.powerBudget} strokeWidth={2} dot={{ r: 2 }} />
+                        <Line isAnimationActive={animate} type="monotone" dataKey="transmission" name="Transmission Loss" stroke={SERIES_COLORS.retailDiesel} strokeWidth={2} dot={{ r: 2 }} />
                       </ComposedChart>
                     </ResponsiveContainer>
                   ) : (
