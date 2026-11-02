@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { fetchPlantDetail, plantCapacityTotals } from '@/lib/data/grid/plant-detail.client';
 import { subtractDaysFromIso } from '@/lib/data/grid/grid-tier-access';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
+import { getDateGuardVersion, subscribeDateGuard } from '@/lib/data/grid/client-date-window';
 
 /** Days of history the Overview compares the selected day against. */
 export const TREND_WINDOW_DAYS = 7;
@@ -65,6 +66,9 @@ export function useGridOverviewContext(
   const [capacity, setCapacity] = useState<OverviewCapacity | null>(null);
   const [baseline, setBaseline] = useState<OverviewBaseline | null>(null);
   const [loading, setLoading] = useState(true);
+  // Re-walk when the tier window changes (session resolved): days skipped while
+  // it was unknown are asked for once they are allowed.
+  const windowVersion = useSyncExternalStore(subscribeDateGuard, getDateGuardVersion, () => 0);
 
   useEffect(() => {
     let live = true;
@@ -159,7 +163,7 @@ export function useGridOverviewContext(
     return () => {
       live = false;
     };
-  }, [isoDate, systemStats]);
+  }, [isoDate, systemStats, windowVersion]);
 
   return { capacity, baseline, loading };
 }

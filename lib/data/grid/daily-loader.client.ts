@@ -10,6 +10,7 @@ import { getCachedDailyReport, setCachedDailyReport } from '@/lib/data/grid/dail
 import { warnIfInvalidDailyReport } from '@/lib/data/grid/validate-daily-report';
 import { fetchJsonDeduped } from '@/lib/data/json-request-dedupe';
 import { isPathPublished } from '@/lib/data/runtime-data.client';
+import { isDateRequestable } from '@/lib/data/grid/client-date-window';
 
 export type { DailyLoadResult, DailyLoadSource } from '@/lib/data/grid/daily-loader-core';
 
@@ -52,6 +53,12 @@ export async function fetchDailyReport(
     if (cached) {
       return { ok: true, data: cached, source: 'network' };
     }
+  }
+
+  // A day outside this reader's tier window: the server would answer 403, so
+  // do not ask (client-date-window.ts). Not cached - the window can widen.
+  if (!isDateRequestable(parsed)) {
+    return { ok: false, error: 'tier_locked', status: 403 };
   }
 
   // A day the manifest lists as released has no static file in this build —

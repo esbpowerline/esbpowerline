@@ -2,6 +2,7 @@ import type { DailyPlantDetail } from '@/lib/data/grid/types';
 import { parseIsoDate } from '@/lib/data/grid/date-utils';
 import { fetchDataJson } from '@/lib/data/runtime-data.client';
 import { staticDataUrl } from '@/lib/data/feed-paths';
+import { isDateRequestable } from '@/lib/data/grid/client-date-window';
 
 /**
  * Per-station detail for a day, fetched only when the Plants tab is opened.
@@ -31,12 +32,24 @@ export function plantDetailPath(isoDate: string): string {
 }
 
 const cache = new Map<string, DailyPlantDetail | null>();
+// One request per day while it is open, so the Overview strip and a tab asking
+// for the same station file a moment apart share it (seen twice on production).
+const inflight = new Map<string, Promise<DailyPlantDetail | null>>();
 
-export async function fetchPlantDetail(isoDate: string): Promise<DailyPlantDetail | null> {
+export function fetchPlantDetail(isoDate: string): Promise<DailyPlantDetail | null> {
   const parsed = parseIsoDate(isoDate);
-  if (!parsed) return null;
-  if (cache.has(parsed)) return cache.get(parsed) ?? null;
+  if (!parsed) return Promise.resolve(null);
+  if (cache.has(parsed)) return Promise.resolve(cache.get(parsed) ?? null);
+  // Outside the reader's tier window: the server would 403. Not cached.
+  if (!isDateRequestable(parsed)) return Promise.resolve(null);
+  const held = inflight.get(parsed);
+  if (held) return held;
+  const job = loadPlantDetail(parsed).finally(() => inflight.delete(parsed));
+  inflight.set(parsed, job);
+  return job;
+}
 
+async function loadPlantDetail(parsed: string): Promise<DailyPlantDetail | null> {
   let detail: DailyPlantDetail | null = null;
   try {
     // Manifest-aware, like every other client reader: this file only ever read

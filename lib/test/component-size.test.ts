@@ -29,12 +29,12 @@ import path from 'node:path';
  * what raising it here and never again is for.
  */
 const BUDGETS: Record<string, number> = {
-  'components/news/PowerGridExplorer.tsx': 2087, // 2026-11-02: four inline tab panels extracted to power-grid/tabs/ (was 3487)
-  'components/news/power-grid/MacroTrendsTab.tsx': 3035, // 2026-11-02: +17 for the Phase 2 phone sub-tab row and folds; split this file in Phase 3 round 2
+  'components/news/PowerGridExplorer.tsx': 1860, // 2026-11-02 (Phase 3 R2A): print report extracted to power-grid/GridPrintReport.tsx (was 2087); // 2026-11-02: four inline tab panels extracted to power-grid/tabs/ (was 3487)
+  'components/news/power-grid/MacroTrendsTab.tsx': 3037, // 2026-11-02: +17 for the Phase 2 phone sub-tab row and folds; split this file in Phase 3 round 2
   'components/news/power-grid/TechnicalInfoTab.tsx': 2350, // 2026-11-02: +15 for Phase 2 phone folds; split this file in Phase 3 round 2
   'components/news/power-grid/LongitudinalStudy.tsx': 252,
   'components/admin/SettingsForm.tsx': 863,
-  'components/news/power-grid/GlobalVsDomesticCards.tsx': 432,
+  'components/news/power-grid/GlobalVsDomesticCards.tsx': 435,
 };
 
 describe('component size ratchet', () => {

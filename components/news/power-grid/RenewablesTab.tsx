@@ -94,6 +94,7 @@ import { sredaAvailableDates } from '@/lib/data/sreda/available-dates';
 // Reads go through the publish manifest so a day or a correction published
 // after the last deploy shows here without one.
 import { fetchDataJson } from '@/lib/data/runtime-data.client';
+import { fetchPlantDetail } from '@/lib/data/grid/plant-detail.client';
 import { cn, formatNumber } from '@/lib/utils';
 import type { SredaDailyData } from '@/lib/data/sreda/types';
 import type { GridDailyData, GridSystemStats } from '@/lib/data/grid/types';
@@ -266,8 +267,9 @@ export function RenewablesTab({
     let alive = true;
     setPlants(null);
     if (!isoDate) return;
-    fetchDataJson<{ plants?: PlantRow[] }>(`plants/${isoDate}.json`)
-      .then((res) => alive && setPlants(res.ok ? (res.data?.plants ?? []) : []))
+    // Shared with the Overview strip's capacity read (cache + one in-flight request).
+    fetchPlantDetail(isoDate)
+      .then((d) => alive && setPlants((d?.plants as unknown as PlantRow[] | undefined) ?? []))
       .catch(() => alive && setPlants([]));
     return () => {
       alive = false;

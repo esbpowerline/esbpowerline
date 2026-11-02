@@ -19,10 +19,18 @@ import { cn } from '@/lib/utils';
 export function GridTopFold({
   collapse,
   summary,
+  pending = false,
   children,
 }: {
   collapse: boolean;
   summary: string;
+  /**
+   * The figures are still loading. The row keeps its final 44px height but
+   * shows a neutral bar instead of the summary, so when the data lands the
+   * collapsed row does not replace a 380px strip of placeholder tiles (that
+   * swap was a 0.15 layout shift on a throttled phone). No numbers are drawn.
+   */
+  pending?: boolean;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -35,9 +43,17 @@ export function GridTopFold({
         className="ge-topfold__row"
         aria-expanded={open}
         aria-controls={id}
+        aria-busy={pending || undefined}
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="ge-topfold__text">{summary}</span>
+        {pending ? (
+          <span className="ge-topfold__text">
+            <span className="ge-topfold__skel" aria-hidden />
+            <span className="sr-only">Loading headline figures</span>
+          </span>
+        ) : (
+          <span className="ge-topfold__text">{summary}</span>
+        )}
         <span className="ge-topfold__cta">
           KPIs
           <ChevronDown className={cn('h-4 w-4 transition-transform', open && 'rotate-180')} aria-hidden />
