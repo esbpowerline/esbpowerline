@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useBelowDesktop } from './useTapToRead';
 import type {
   DistributionCompany,
   PetrobanglaDaily,
@@ -286,7 +287,14 @@ export function ProductionCompanyDetail({
   onToggle?: () => void;
   inline?: boolean;
 }) {
+  // Phones: a producer such as BGFCL carries 20+ field rows; show the first few
+  // and let the reader open the rest. Totals below always use every field.
+  const small = useBelowDesktop();
+  const [showAll, setShowAll] = useState(false);
   if (!fields.length) return null;
+  const PHONE_ROWS = 6;
+  const foldRows = small && !showAll && fields.length > PHONE_ROWS + 2;
+  const visibleFields = foldRows ? fields.slice(0, PHONE_ROWS) : fields;
   const colors = (producerKey && PRODUCER_COLORS[producerKey]) || null;
   const hasOperator = fields.some((f) => f.operator);
   const sum = (pick: (f: ProductionField) => number | null | undefined) =>
@@ -330,7 +338,7 @@ export function ProductionCompanyDetail({
         {utilization != null && <StatChip label="Utilization" value={`${utilization.toFixed(0)}%`} provenance="D" />}
       </DetailHeader>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="ge-gas-detail-table w-full">
           <thead className="bg-muted/20">
             <tr>
               <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40`}>Gas Field</th>
@@ -351,7 +359,7 @@ export function ProductionCompanyDetail({
             </tr>
           </thead>
           <tbody>
-            {fields.map((f, idx) => {
+            {visibleFields.map((f, idx) => {
               const fieldUtil =
                 typeof f.gas_mmcfd === 'number' &&
                 typeof f.capacity_mmcfd === 'number' &&
@@ -395,6 +403,16 @@ export function ProductionCompanyDetail({
           </tbody>
         </table>
       </div>
+      {small && fields.length > PHONE_ROWS + 2 && (
+        <button
+          type="button"
+          className="ge-gas-show-all"
+          aria-expanded={showAll}
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll ? 'Show fewer fields' : `Show all ${fields.length} fields`}
+        </button>
+      )}
     </div>
   );
 }
@@ -417,6 +435,12 @@ export function DistributionCompanyDetail({
   inline?: boolean;
 }) {
   const plants = company.power_plants || [];
+  // Phones: first plants only until "Show all N" (stats and subtotals use all).
+  const small = useBelowDesktop();
+  const [showAll, setShowAll] = useState(false);
+  const PHONE_ROWS = 6;
+  const foldRows = small && !showAll && plants.length > PHONE_ROWS + 2;
+  const visiblePlants = foldRows ? plants.slice(0, PHONE_ROWS) : plants;
   const fert = company.fertilizer;
   const colors = (distributorKey && DISTRIBUTOR_COLORS[distributorKey]) || null;
   const onlinePlants = plants.filter(
@@ -446,7 +470,7 @@ export function DistributionCompanyDetail({
         <StatChip label="Total" value={`${num(company.total_mmcfd)} MMCFD`} provenance="P" />
       </DetailHeader>
       <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="ge-gas-detail-table w-full">
         <thead className="bg-muted/20">
           <tr>
             <th rowSpan={2} className={`${TH} align-bottom border-b border-border/40`}>Power Plant</th>
@@ -459,7 +483,7 @@ export function DistributionCompanyDetail({
           </tr>
         </thead>
         <tbody>
-          {plants.map((p, idx) => {
+          {visiblePlants.map((p, idx) => {
             const shutdown = p.supply_mmcfd === 0;
             const met =
               typeof p.supply_mmcfd === 'number' &&
@@ -542,6 +566,16 @@ export function DistributionCompanyDetail({
         </tbody>
       </table>
       </div>
+      {small && plants.length > PHONE_ROWS + 2 && (
+        <button
+          type="button"
+          className="ge-gas-show-all"
+          aria-expanded={showAll}
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll ? 'Show fewer plants' : `Show all ${plants.length} plants`}
+        </button>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { formatNumber } from '@/lib/utils';
 import { fetchDailyReport } from '@/lib/data/grid/daily-loader.client';
 import { coverageLabel } from '@/lib/data/grid/coverage';
 import { GridLockedContent } from './GridLockedContent';
+import { MobileFold } from './MobileFold';
 import {
   GridCardFooter,
   GridDataBadge,
@@ -176,7 +177,7 @@ export function GasTab({
   if (selectedDate < '2020-01-12') {
     return (
       <div className="grid-explorer-panel space-y-6">
-        <div className="grid-explorer-chart-card card flex min-h-[400px] flex-col items-center justify-center gap-3 p-6 text-center">
+        <div className="grid-explorer-chart-card card flex min-h-[400px] max-lg:min-h-0 max-lg:py-10 flex-col items-center justify-center gap-3 p-6 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
             <Info className="h-8 w-8 shrink-0 text-primary" />
           </span>
@@ -193,7 +194,7 @@ export function GasTab({
   if (!gasProductionData.length) {
     return (
       <div className="grid-explorer-panel space-y-6">
-        <div className="grid-explorer-chart-card card flex min-h-[400px] flex-col items-center justify-center gap-3 p-6 text-center">
+        <div className="grid-explorer-chart-card card flex min-h-[400px] max-lg:min-h-0 max-lg:py-10 flex-col items-center justify-center gap-3 p-6 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/20">
             <Droplet className="h-8 w-8 shrink-0 text-sky-500" />
           </span>
@@ -235,7 +236,8 @@ export function GasTab({
             <p className="grid-explorer-chart-card__sub">
               Petrobangla Production &amp; Marketing Division Report •{' '}
               <span className="text-sky-500 font-semibold">{coverageLabel('gasProduction')}</span> •{' '}
-              Click a company for per-field detail
+              <span className="max-lg:hidden">Click</span>
+              <span className="lg:hidden">Tap</span> a company for per-field detail
             </p>
             {reportCaption}
           </div>
@@ -502,7 +504,8 @@ export function GasTab({
             <p className="grid-explorer-chart-card__sub">
               Allocated supply (MMCFD) across regional gas distributors •{' '}
               <span className="text-sky-500 font-semibold">{coverageLabel('gasProduction')}</span> •{' '}
-              Click a distributor for per-plant detail
+              <span className="max-lg:hidden">Click</span>
+              <span className="lg:hidden">Tap</span> a distributor for per-plant detail
             </p>
             {reportCaption}
           </div>
@@ -652,6 +655,9 @@ export function GasTab({
           }
         />
 
+        {/* Phones: the acronym glossary is reference material, so it sits behind
+            a fold (MobileFold is a no-op wrapper at >=1024px). */}
+        <MobileFold title="Gas sector acronyms & units">
         <div className="mt-4 space-y-3 rounded-2xl border border-border/30 bg-muted/5 p-4">
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
             <Info className="h-4 w-4 shrink-0 text-sky-500" /> Gas Sector Acronyms &amp; Units Footnote
@@ -683,6 +689,7 @@ export function GasTab({
             </div>
           </div>
         </div>
+        </MobileFold>
 
         <GridCardFooter>
           <span>
