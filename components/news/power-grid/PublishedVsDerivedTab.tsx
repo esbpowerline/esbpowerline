@@ -385,7 +385,7 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
               {monthData.totals.failures} beyond rounding · {monthData.totals.defects} defects
             </p>
           </div>
-          <div className="p-3 flex flex-wrap gap-1">
+          <div className="ge-macro-verify-chips p-3 flex flex-wrap gap-1">
             {Object.keys(monthData.days)
               .sort()
               .map((d) => {
@@ -497,7 +497,7 @@ export function PublishedVsDerivedTab({ latestGridDay }: { latestGridDay?: strin
           )}
 
           {/* filters */}
-          <div className="px-4 py-2 border-b border-border/40 flex flex-wrap items-center gap-2">
+          <div className="ge-macro-filter-chips px-4 py-2 border-b border-border/40 flex flex-wrap items-center gap-2">
             {['all', ...Object.keys(detail.agencies)].map((a) => (
               <button
                 key={a}

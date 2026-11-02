@@ -64,6 +64,7 @@ import {
   useNarrowChartCard,
 } from '@/components/news/PowerGridChartUI';
 import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, MonthlyBadge } from '@/components/news/power-grid/GridExplorerUI';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 import { FuelImportCostCard, MacroPressureCard } from '@/components/news/power-grid/MacroPricingDriverCards';
 import {
@@ -149,6 +150,17 @@ export function MacroTrendsTab({
   gridAccess: GridAccessLike;
 }) {
   const macroChartsReady = true;
+  // Phone/tablet: the sub-tab bar is one swipeable row (CSS .ge-macro-subtabs);
+  // bring the active chip into view so a deep link (?macro=system_loss) or a tap
+  // near the edge never leaves the selected chip off-screen. Only scrolls the
+  // bar horizontally, never the page.
+  const subNavRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const nav = subNavRef.current;
+    const chip = nav?.querySelector<HTMLElement>('[data-active="true"]');
+    if (!nav || !chip || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollTo({ left: chip.offsetLeft - (nav.clientWidth - chip.offsetWidth) / 2, behavior: 'smooth' });
+  }, [macroSubTab]);
   const [reportsCompany, setReportsCompany] = useState<'bpdb' | 'petrobangla'>('bpdb');
   const nationalBudgetMergedData = useMemo(() => {
     const infraByYear = Object.fromEntries(
@@ -425,7 +437,7 @@ export function MacroTrendsTab({
         const activeHiddenPercentage = Math.max(0, Math.round((1 - (visibleItemsCount / Math.max(totalItemsCount, visibleItemsCount))) * 100));
 
         return (
-        <div className="grid-explorer-panel space-y-6">
+        <div className="grid-explorer-panel ge-macro space-y-6">
           {isTruncated && (
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
               <div className="flex items-start gap-3">
@@ -440,7 +452,7 @@ export function MacroTrendsTab({
             </div>
           )}
           {/* Sub-tab Navigation */}
-          <div id="macro-subtabs-nav" className="flex flex-wrap gap-1.5 border-b border-border/40 pb-3">
+          <div id="macro-subtabs-nav" ref={subNavRef} className="ge-macro-subtabs flex flex-wrap gap-1.5 border-b border-border/40 pb-3">
             {/* Sub-tab order mirrors the questions a reader brings to the
                 long-run story, in sequence: what is the trend (Overview) →
                 show me the measured history (Monthly Archives) → will the gas
@@ -469,6 +481,7 @@ export function MacroTrendsTab({
                 <button
                   key={t.id}
                   type="button"
+                  data-active={active ? 'true' : undefined}
                   onClick={() => handleSubTabClick(t.id as any)}
                   className={cn(
                     "flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl border transition-all duration-150",
@@ -491,6 +504,7 @@ export function MacroTrendsTab({
             we worked out from theirs.
           */}
           {macroSubTab !== 'verification' && (
+            <MobileFold title="What P and D mean here" className="ge-macro-pd-fold">
             <div className="p-3 rounded-2xl bg-muted/10 border border-border/30 text-[11px] text-muted-foreground leading-relaxed flex items-start gap-2.5">
               <Info className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
               <span>
@@ -514,6 +528,7 @@ export function MacroTrendsTab({
                 source covers and do not move with the date selected above.
               </span>
             </div>
+            </MobileFold>
           )}
 
           {/* Sub-tab: National Budget */}
@@ -627,7 +642,7 @@ export function MacroTrendsTab({
                   </ComposedChart>
                 </GridChartFrame>
                 
-                <div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
+                <MobileFold title="What is being shown?"><div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
                   <p><strong>What is being shown?</strong></p>
                   <ul className="list-disc pl-4 space-y-1">
                     <li><strong style={{ color: SERIES_COLORS.powerBudget }}>Power Sector Budget (Crore BDT):</strong> The total fiscal allocation dedicated specifically to the Ministry of Power, Energy and Mineral Resources each fiscal year.</li>
@@ -636,7 +651,7 @@ export function MacroTrendsTab({
                   <p className="mt-2 pt-2 border-t border-border/30">
                     <strong>Analytical Insight:</strong> While fiscal allocation to the power sector has historically risen, the proposed FY2026-27 budget allocation dropped sharply to 17,345 Crore BDT (~1.85% of total national budget). This contraction signals a major policy pivot: the government is shifting focus away from massive capacity expansions to reviewing existing power purchase agreements (PPAs), reducing subsidies, and eliminating high capacity payments for underutilized plants.
                   </p>
-                </div>
+                </div></MobileFold>
 
                 {/* Card Metadata Footer */}
                 <GridCardFooter>
@@ -804,7 +819,7 @@ export function MacroTrendsTab({
                         <Line type="monotone" dataKey="cost" name="BPDB Supply Cost (Tk/kWh)" stroke={chartTheme.destructive} strokeWidth={2.5} dot={{ fill: chartTheme.destructive, r: 3.5 }} activeDot={{ r: 5 }} />
                   </ComposedChart>
                 </GridChartFrame>
-                <div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
+                <MobileFold title="What is being shown?"><div className="grid-explorer-chart-note bg-muted/10 p-4 text-xs text-muted-foreground space-y-2">
                   <p><strong>What is being shown?</strong></p>
                   <ul className="list-disc pl-4 space-y-1">
                     <li><strong className="text-destructive">BPDB Supply Cost:</strong> BPDB&apos;s printed cost per unit sold in bulk — its own generation plus power bought from IPPs, rentals and imports, including <strong>capacity charges</strong> — from each year&apos;s annual report.</li>
@@ -813,7 +828,7 @@ export function MacroTrendsTab({
                   <p className="mt-2 pt-2 border-t border-border/30 font-medium">
                     <strong>Analytical Insight:</strong> In FY {LATEST_BPDB_AUDIT.fy} BPDB&apos;s supply cost was {LATEST_BPDB_AUDIT.cost?.toFixed(2) ?? '—'} Tk/kWh against an average bulk tariff of {LATEST_BPDB_AUDIT.tariff?.toFixed(2) ?? '—'}, and its accounts record a government subsidy of Tk {LATEST_BPDB_AUDIT.subsidyCrore == null ? '—' : formatNumber(LATEST_BPDB_AUDIT.subsidyCrore, 2)} crore for that year. Later years are not yet published by BPDB.
                   </p>
-                </div>
+                </div></MobileFold>
 
                 {/* Card Metadata Footer */}
                 <GridCardFooter>
@@ -919,7 +934,7 @@ export function MacroTrendsTab({
                   />
 
                   {/* Card Explanation Block */}
-                  <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
+                  <MobileFold title="What is being shown?"><div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
                     <p><strong>What is being shown?</strong></p>
                     <ul className="list-disc pl-4 space-y-1">
                       <li><strong className="text-primary">Average Bulk Tariff:</strong> what BPDB earned per unit sold to the distributors, as BPDB printed it (FY 2022-23 only).</li>
@@ -928,7 +943,7 @@ export function MacroTrendsTab({
                     <p className="mt-2 pt-2 border-t border-border/30">
                       <strong>Analytical Insight:</strong> The widening gap between bulk tariff and actual production cost has resulted in massive structural deficits for BPDB. This trend is highly unsustainable and highlights the critical need to either rationalize power purchase costs (by phasing out liquid fuel plants) or adjust wholesale tariffs to reduce the fiscal subsidy burden on the government.
                     </p>
-                  </div>
+                  </div></MobileFold>
 
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
@@ -1023,11 +1038,11 @@ export function MacroTrendsTab({
                   )}
 
                   {/* Card Explanation Block */}
-                  <div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
+                  <MobileFold title="What is being shown?"><div className="bg-muted/10 p-4 border-t border-border/40 text-xs text-muted-foreground space-y-2">
                     <p><strong>What is being shown?</strong></p>
                     <p className="leading-relaxed">This chart shows the volume (MMCFD) of natural gas supplied from local fields versus imported Liquefied Natural Gas (LNG). Each year is the mean of the daily figures Petrobangla published that year, from 12 January 2020, when this archive begins; the current year runs to the newest report held.</p>
                     <p className="leading-relaxed"><strong>Analytical Insight:</strong> The visual depicts a major structural dependency shift: domestic gas production is stagnant or declining, while imported LNG share is rising to meet energy demand. Because imported LNG is purchased at volatile global spot prices (linked to Brent oil and Platts JKM), this shift directly exposes Bangladesh's power generation costs to global commodity shocks and foreign exchange reserves pressure.</p>
-                  </div>
+                  </div></MobileFold>
 
                   {/* Card Metadata Footer */}
                   <GridCardFooter>
@@ -1126,6 +1141,7 @@ export function MacroTrendsTab({
                 because the interesting result is not the pass — it is the nine
                 rows PGCB dated to an earlier month.
               */}
+<MobileFold title="How these months were checked">
               <div className="p-3 rounded-2xl border border-border/40 bg-muted/[0.06] text-[11px] leading-relaxed text-muted-foreground flex items-start gap-2.5">
                 <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
@@ -1143,6 +1159,7 @@ export function MacroTrendsTab({
                   have not been re-read this way.
                 </span>
               </div>
+              </MobileFold>
               {/* Month/Year Selection Control Panel */}
               {(() => {
                 const currentMonthlyData = localPgcbMonthlyData.find(d => d.date_key === selectedMonthlyKey) || localPgcbMonthlyData[localPgcbMonthlyData.length - 1];
@@ -1416,7 +1433,7 @@ export function MacroTrendsTab({
                                       y={114}
                                       textAnchor="middle"
                                       dominantBaseline="central"
-                                      className="fill-muted-foreground font-sans font-semibold uppercase"
+                                      className="ge-donut-label fill-muted-foreground font-sans font-semibold uppercase"
                                       style={{ fontSize: '9.5px', letterSpacing: '0.1em' }}
                                     >
                                       MKWh Net

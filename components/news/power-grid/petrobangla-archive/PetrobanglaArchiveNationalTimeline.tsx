@@ -31,6 +31,7 @@ import type { PetrobanglaTimelineDay, PetrobanglaTimelineSummary } from '@/lib/d
 import { ArchiveBadge, ArchiveChartFooter, ArchiveInsightCallout, ArchiveRangeLockedOverlay } from './PetrobanglaArchiveShared';
 import { chartGridProps } from '@/lib/data/grid/chart-axis';
 import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
+import { useBelowDesktop } from '@/components/news/power-grid/useTapToRead';
 
 export function PetrobanglaArchiveNationalTimeline({
   timeline,
@@ -54,6 +55,8 @@ export function PetrobanglaArchiveNationalTimeline({
   onClose?: () => void;
 }) {
   const chartTheme = useChartTheme();
+  // Phones: short weekday names on the 1W axis (see formatDynamicXAxisDate).
+  const narrowAxis = useBelowDesktop();
 
   const chartData = useMemo(() => {
     const totals = rangeDays.map((r) => r.total_gas);
@@ -98,7 +101,7 @@ export function PetrobanglaArchiveNationalTimeline({
                 <XAxis
                   {...gridChartXAxisProps(chartTheme, {
                     dataKey: 'date',
-                    tickFormatter: (v: string) => formatDynamicXAxisDate(v, chartData.length),
+                    tickFormatter: (v: string) => formatDynamicXAxisDate(v, chartData.length, narrowAxis),
                     interval: Math.max(0, Math.floor(chartData.length / 12)),
                   })}
                 />

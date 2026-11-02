@@ -34,6 +34,7 @@ import { GridTablePager, useTablePager } from '@/components/news/power-grid/Grid
 
 import { cn } from '@/lib/utils';
 import { GridProvenanceTag } from './GridExplorerUI';
+import { MobileFold } from './MobileFold';
 import type {
   PgcbCircleRow,
   PgcbDailyShedRow,
@@ -196,23 +197,28 @@ function useChartTooltip() {
  * already knows.
  */
 function Explainer({ children }: { children: React.ReactNode }) {
+  // MobileFold: identical output at >=1024px; a 44px "How to read this" row below.
   return (
-    <div className="mt-4 pt-3 border-t border-border/40">
-      <p className="text-[10px] text-muted-foreground leading-relaxed">{children}</p>
-    </div>
+    <MobileFold title="How to read this">
+      <div className="mt-4 pt-3 border-t border-border/40">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">{children}</p>
+      </div>
+    </MobileFold>
   );
 }
 
 /** A term and its definition, for panels that need several at once. */
 function Glossary({ items }: { items: Array<[string, React.ReactNode]> }) {
   return (
-    <div className="mt-4 pt-3 border-t border-border/40 grid sm:grid-cols-2 gap-x-6 gap-y-1.5">
-      {items.map(([term, def]) => (
-        <p key={term} className="text-[10px] text-muted-foreground leading-relaxed">
-          <span className="font-bold text-foreground">{term}</span> — {def}
-        </p>
-      ))}
-    </div>
+    <MobileFold title="Terms used here">
+      <div className="mt-4 pt-3 border-t border-border/40 grid sm:grid-cols-2 gap-x-6 gap-y-1.5">
+        {items.map(([term, def]) => (
+          <p key={term} className="text-[10px] text-muted-foreground leading-relaxed">
+            <span className="font-bold text-foreground">{term}</span> — {def}
+          </p>
+        ))}
+      </div>
+    </MobileFold>
   );
 }
 

@@ -56,12 +56,13 @@ export interface ReserveTrajectoryColors {
 
 /** A caption on the plot, kept inside it by its own measured width. */
 function PlotNote({
-  x, y, text, color, anchorLeft = true, minX, maxX,
+  x, y, text, color, anchorLeft = true, minX, maxX, hide = false,
 }: {
   x: number; y: number; text: string; color: string;
-  anchorLeft?: boolean; minX: number; maxX: number;
+  anchorLeft?: boolean; minX: number; maxX: number; hide?: boolean;
 }) {
   const { ref, width } = useSvgTextWidth(text, 5.2);
+  if (hide) return null;
   const left = anchorLeft ? x : x - width;
   const clamped = Math.min(Math.max(left, minX), Math.max(minX, maxX - width));
   return (
@@ -114,6 +115,10 @@ export function ReserveTrajectoryCanvas({
   const [height, setHeight] = useState(460);
   const { cursor: cursorYear, setCursor: setCursorYear, pinned, setPinned, clear, handlers } = useTapToRead<number>({ hostRef });
   const [play, setPlay] = useState(false);
+  // Narrow plots (phones): the in-plot captions and the three reserve-statement
+  // labels collide at 11px in a ~340px box, so they are listed beneath the chart
+  // instead (same words, same figures; see the notes list at the end).
+  const compact = width > 0 && width < 560;
 
   useEffect(() => {
     const el = hostRef.current;
@@ -264,7 +269,10 @@ export function ReserveTrajectoryCanvas({
       rateTicks: niceTicks(rateMax, 3),
       yearTicks: (() => {
         const span = x1 - x0;
-        const step = span > 26 ? 5 : span > 13 ? 2 : 1;
+        let step = span > 26 ? 5 : span > 13 ? 2 : 1;
+        // Narrow plot: 4-digit years at 11px need ~40px each, or they print as
+        // "2022024". Only widens the step; wide plots keep theirs.
+        if (plotW < 480) while ((step * plotW) / span < 40) step = step === 1 ? 2 : step === 2 ? 5 : step + 5;
         const out: number[] = [];
         for (let y = Math.ceil(x0 / step) * step; y <= x1; y += step) out.push(y);
         return out;
@@ -482,11 +490,13 @@ export function ReserveTrajectoryCanvas({
                 <g key={a.as_of}>
                   <circle cx={a.px} cy={a.py} r={4} fill="hsl(var(--card))"
                     stroke={colors.measured} strokeWidth={2} />
-                  <text x={a.px} y={a.py - 9} textAnchor="middle" className="rtraj__anchor" fill={colors.axis}>
-                    {(a.producing_remaining_bcf / 1000).toFixed(2)}
-                  </text>
+                  {!compact && (
+                    <text x={a.px} y={a.py - 9} textAnchor="middle" className="rtraj__anchor" fill={colors.axis}>
+                      {(a.producing_remaining_bcf / 1000).toFixed(2)}
+                    </text>
+                  )}
                   {/* The only figures on this chart nobody derived. */}
-                  <SvgProvMark x={a.px + 12} y={a.py - 12} kind="P" />
+                  {!compact && <SvgProvMark x={a.px + 12} y={a.py - 12} kind="P" />}
                 </g>
               ))}
               {/* Why this plot starts later than the one below it.
@@ -499,7 +509,7 @@ export function ReserveTrajectoryCanvas({
                   live together in the top plot, which made the second one look
                   like a footnote about the first. */}
               {geom.anchors.length > 0 && (
-                <PlotNote x={PAD.left + 4} y={geom.stockTop + geom.stockH - 6}
+                <PlotNote hide={compact} x={PAD.left + 4} y={geom.stockTop + geom.stockH - 6}
                   text="Petrobangla states this once a year — the archive holds it from 2023"
                   color={colors.axis} minX={PAD.left + 4} maxX={geom.anchors[0].px - 6} />
               )}
@@ -508,7 +518,7 @@ export function ReserveTrajectoryCanvas({
                 <g>
                   <circle cx={geom.x(geom.declineCrossesZeroYear)} cy={geom.yStock(0)} r={3.2}
                     fill="hsl(var(--card))" stroke={colors.decline} strokeWidth={1.6} />
-                  <PlotNote x={geom.x(geom.declineCrossesZeroYear) - 6} y={geom.yStock(0) + 13}
+                  <PlotNote hide={compact} x={geom.x(geom.declineCrossesZeroYear) - 6} y={geom.yStock(0) + 13}
                     text={`every booked BCF produced · ${Math.round(geom.declineCrossesZeroYear)}`}
                     color={colors.decline} anchorLeft={false}
                     minX={PAD.left + 2} maxX={PAD.left + geom.plotW - 2} />
@@ -516,7 +526,7 @@ export function ReserveTrajectoryCanvas({
               )}
 
               {geom.gapLabelAt && (
-                <PlotNote x={geom.gapLabelAt.x - 6} y={geom.gapLabelAt.y + 4}
+                <PlotNote hide={compact} x={geom.gapLabelAt.x - 6} y={geom.gapLabelAt.y + 4}
                   text={`${Math.round(geom.gapLabelAt.gap).toLocaleString()} MMCFD to replace by ${geom.gapLabelAt.year}`}
                   color={colors.decline} anchorLeft={false}
                   minX={geom.x(geom.asOf) + 4} maxX={PAD.left + geom.plotW - 2} />
@@ -531,7 +541,7 @@ export function ReserveTrajectoryCanvas({
                     stroke={colors.axis} strokeWidth={1.4} />
                   <line x1={a.px} x2={a.px} y1={a.py} y2={geom.rateTop + 16}
                     stroke={colors.axis} strokeOpacity={0.35} strokeWidth={1} strokeDasharray="2 3" />
-                  <PlotNote x={a.px + 5} y={geom.rateTop + 12}
+                  <PlotNote hide={compact} x={a.px + 5} y={geom.rateTop + 12}
                     text={`${formatIsoMonth(a.month)}: −${Math.round(a.drop_pct)}% for one month, back by ${formatIsoMonth(a.recovered_by)}`}
                     color={colors.axis}
                     minX={PAD.left + 2} maxX={geom.x(geom.asOf) - 2} />
@@ -543,7 +553,7 @@ export function ReserveTrajectoryCanvas({
                   <line x1={geom.x(geom.halfRateYear)} x2={geom.x(geom.halfRateYear)}
                     y1={geom.rateTop} y2={geom.rateTop + geom.rateH}
                     stroke={colors.axis} strokeOpacity={0.55} strokeWidth={1} strokeDasharray="3 3" />
-                  <PlotNote x={geom.x(geom.halfRateYear) + 5} y={geom.rateTop + 12}
+                  <PlotNote hide={compact} x={geom.x(geom.halfRateYear) + 5} y={geom.rateTop + 12}
                     text={`output halved · ${Math.round(geom.halfRateYear)}`}
                     color={colors.axis} minX={PAD.left + 2} maxX={PAD.left + geom.plotW - 2} />
                 </g>
@@ -617,6 +627,36 @@ export function ReserveTrajectoryCanvas({
           </ChartReadout>
         )}
       </div>
+      {geom && compact && (
+        <ul className="rtraj__notes">
+          {geom.anchors.length > 0 && (
+            <li>
+              <GridProvenanceTag kind="P" className="mr-1" />
+              Published reserve statements (Tcf left):{' '}
+              {geom.anchors.map((a) => `${(a.producing_remaining_bcf / 1000).toFixed(2)}`).join(' · ')}.
+              Petrobangla states this once a year — the archive holds it from 2023.
+            </li>
+          )}
+          {geom.declineCrossesZeroYear != null && geom.declineCrossesZeroYear <= geom.x1 && (
+            <li style={{ color: colors.decline }}>
+              Every booked BCF produced · {Math.round(geom.declineCrossesZeroYear)}
+            </li>
+          )}
+          {geom.gapLabelAt && (
+            <li style={{ color: colors.decline }}>
+              {Math.round(geom.gapLabelAt.gap).toLocaleString()} MMCFD to replace by {geom.gapLabelAt.year}
+            </li>
+          )}
+          {geom.anomalies.map((a) => (
+            <li key={a.month}>
+              {formatIsoMonth(a.month)}: −{Math.round(a.drop_pct)}% for one month, back by {formatIsoMonth(a.recovered_by)}
+            </li>
+          ))}
+          {geom.halfRateYear != null && geom.halfRateYear <= geom.x1 && (
+            <li>Output halved · {Math.round(geom.halfRateYear)}</li>
+          )}
+        </ul>
+      )}
     </figure>
   );
 }

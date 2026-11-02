@@ -593,3 +593,78 @@
   .ge-root .ge-rn-tech td.pl-6 { padding-left: 14px; }
   .ge-root .ge-rn-fuel td:nth-child(3) { font-size: 11.5px; }
 }
+
+/* ── MACRO TRENDS tab (phone/tablet) ─────────────────────────────────────────
+   Ten sub-views: the wrapped 4-row chip block becomes one swipeable row. */
+@media (max-width: 1023px) {
+  .ge-root .ge-macro-subtabs {
+    flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 8px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    /* Sticky under the shell bar would hide content; keep it in flow. */
+  }
+  .ge-root .ge-macro-subtabs::-webkit-scrollbar { display: none; }
+  .ge-root .ge-macro-subtabs > button {
+    flex: none; white-space: nowrap; min-height: 44px; font-size: 13px;
+    border-color: hsl(var(--border) / 0.5);
+  }
+  .ge-root .ge-macro-subtabs > button[data-active='true'] { border-color: hsl(var(--primary) / 0.3); }
+}
+@media (max-width: 1023px) {
+  /* Split-unit Y ticks (value over unit) are SVG presentation attributes 10/9. */
+  .ge-root .ge-split-tick { font-size: 11px; }
+}
+@media (max-width: 1023px) {
+  /* Pager (substation / outage lists): rem sizes resolve to ~8.9px on a vw-scaled
+     root, and 1.85rem buttons are ~20px tall. */
+  .ge-root .grid-pager__count, .ge-root .grid-pager__count strong, .ge-root .grid-pager__size,
+  .ge-root .grid-pager__size-btn, .ge-root .grid-pager__step, .ge-root .grid-pager__num,
+  .ge-root .grid-pager__gap { font-size: 12px; }
+  .ge-root .grid-pager__size-btn, .ge-root .grid-pager__step, .ge-root .grid-pager__num { min-width: 44px; min-height: 44px; }
+  .ge-root .grid-pager__size { flex-wrap: wrap; }
+}
+
+/* Gas Reserve Depletion sub-view (Macro Trends): class-based micro type that is
+   sized in rem/px in globals.css (7-10px on a phone). Labels/hints only; the big
+   figures (__value) are untouched. */
+@media (max-width: 1023px) {
+  .ge-root .gas-reserve-zone-eyebrow, .ge-root .gas-reserve-metric__label,
+  .ge-root .gas-reserve-metric__unit, .ge-root .gas-reserve-metric__hint,
+  .ge-root .reserve-ladder__num, .ge-root .reserve-ladder__title, .ge-root .reserve-ladder__body,
+  .ge-root .reserve-read__tag, .ge-root .reserve-evidence__intro, .ge-root .reserve-drawer__label,
+  .ge-root .gas-reserve-evidence__mode-label, .ge-root .gas-reserve-segmented__btn,
+  .ge-root .gas-reserve-archive-range__btn, .ge-root .grid-explorer-macro-gas-stat__label,
+  .ge-root .grid-explorer-macro-gas-stat__hint, .ge-root .gas-reserve-archive-context__stat-label,
+  .ge-root .gas-reserve-archive-context__stat-date { font-size: 11px; line-height: 1.35; }
+  .ge-root .reserve-ladder__body { font-size: 12px; }
+  .ge-root .gas-reserve-archive-range__btn { min-width: 44px; }
+  /* Verification sub-view: 01..12 month / All chips are w-9 (36px) boxes. */
+  .ge-root .ge-macro-verify-chips > button { min-width: 44px; width: 44px; height: 44px; }
+}
+@media (max-width: 1023px) {
+  .ge-root .ge-macro-filter-chips > button { min-width: 44px; }
+  .ge-root .ge-macro-filter-chips label { min-height: 44px; }
+}
+@media (max-width: 1023px) {
+  /* Hero head: icon + "Structural risk" chip share row one; the explanation takes
+     the full width beneath instead of a 120px column between them. */
+  .ge-root .gas-reserve-hero__head > .min-w-0 { order: 3; flex: 1 1 100%; }
+  .ge-root .gas-reserve-hero__head > .grid-explorer-chip { margin-left: auto; }
+}
+@media (max-width: 1023px) {
+  /* Reserve trajectory: captions moved out of the plot (ReserveTrajectoryCanvas
+     `compact`), listed under it. */
+  .ge-root .rtraj__notes { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 4px; font-size: 12px; line-height: 1.4; color: hsl(var(--muted-foreground)); }
+}
+@media (max-width: 1023px) {
+  /* Archive view tabs (Timeline / Fields / Power / Sectors / Compare): one
+     swipeable row of 44px tabs instead of a 4+1 wrap. */
+  .ge-root .gas-reserve-archive-tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .ge-root .gas-reserve-archive-tabs::-webkit-scrollbar { display: none; }
+  .ge-root .gas-reserve-archive-tabs__btn { flex: none; font-size: 12px; padding-inline: 14px; white-space: nowrap; }
+}
+@media (max-width: 767px) {
+  /* Macro charts: --lg plots are ~195px tall on a phone (15rem on a vw-scaled
+     root), which left dual-axis charts (unit-suffixed ticks on both sides) with a
+     ~60px-high plot. Same width, more height. */
+  .ge-root .ge-macro .grid-explorer-chart-area--lg { height: 280px; min-height: 280px; }
+}

@@ -48,6 +48,7 @@ import { PetrobanglaBootstrapProvider } from './PetrobanglaBootstrap';
 import { GridCardFooter, GridProvenanceTag, GridSourceFiles } from './GridExplorerUI';
 import { PetrobanglaMacroGasSection } from './PetrobanglaMacroGasSection';
 import { ReserveTrajectoryCanvas } from './ReserveTrajectoryCanvas';
+import { MobileFold } from './MobileFold';
 import { SERIES_COLORS } from '@/lib/data/grid/chart-palette';
 
 interface Props {
@@ -367,6 +368,7 @@ function HeroMetrics({ model }: { model: ReserveModel }) {
 function ViewLadder({ model }: { model: ReserveModel }) {
   const first = model.history.monthly_rate[0]?.month.slice(0, 4) ?? '2020';
   return (
+    <MobileFold title="Which view answers which question">
     <div className="reserve-ladder">
       <div className="reserve-ladder__item">
         <span className="reserve-ladder__num">1</span>
@@ -399,6 +401,7 @@ function ViewLadder({ model }: { model: ReserveModel }) {
         </span>
       </div>
     </div>
+    </MobileFold>
   );
 }
 

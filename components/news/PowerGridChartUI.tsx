@@ -217,14 +217,17 @@ export function GridChartSplitUnitTick({ x = 0, y = 0, payload, unit, chartTheme
   const ty = typeof y === 'number' ? y : Number(y);
   return (
     <g transform={`translate(${tx},${ty})`}>
+      {/* ge-split-tick: below 1024px grid-explorer-mobile.css lifts both lines to the
+          11px floor (the 10/9 here are presentation attributes, which CSS overrides). */}
       <text
+        className="ge-split-tick"
         textAnchor="end"
         fill={chartTheme.axisTick}
         fontSize={10}
         fontWeight={500}
       >
-        <tspan x={0} dy={-5}>{num}</tspan>
-        <tspan x={0} dy={12} fontSize={9} fill={chartTheme.axisTick} opacity={0.82}>
+        <tspan x={0} dy={-5} className="ge-split-tick">{num}</tspan>
+        <tspan x={0} dy={12} fontSize={9} fill={chartTheme.axisTick} opacity={0.82} className="ge-split-tick">
           {unit}
         </tspan>
       </text>

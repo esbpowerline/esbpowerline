@@ -49,14 +49,15 @@ export function formatTooltipDate(dateStr: string): string {
 }
 
 /** Formats dates for X-Axis dynamically based on the total time range being viewed */
-export function formatDynamicXAxisDate(dateStr: string, totalDays: number): string {
+export function formatDynamicXAxisDate(dateStr: string, totalDays: number, narrow = false): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   
   if (totalDays <= 14) {
     // Week preset: e.g. "Friday"
-    return d.toLocaleDateString('en-US', { weekday: 'long' });
+    // `narrow` (phones): 7 long weekday names ran into one another at 11px.
+    return d.toLocaleDateString('en-US', { weekday: narrow ? 'short' : 'long' });
   } else if (totalDays <= 45) {
     // Month preset: e.g. "06 Jul"
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
