@@ -8,7 +8,9 @@
  * administered tariff, or nothing but the one publisher.
  */
 
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useBelowDesktop } from '@/components/news/power-grid/useTapToRead';
 import type { UnitCostFact, UnitCostStatus } from '@/components/news/power-grid/useUnitCostAuthentication';
 
 const STYLE: Record<UnitCostStatus, { label: string; cls: string; title: string }> = {
@@ -63,10 +65,15 @@ const STYLE: Record<UnitCostStatus, { label: string; cls: string; title: string 
 export function UnitCostBadge({
   fact,
   className,
+  static: isStatic = false,
 }: {
   fact: UnitCostFact | undefined;
   className?: string;
+  /** The key beside the legend prose: the text is already printed next to it. */
+  static?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const belowDesktop = useBelowDesktop();
   if (!fact) return null;
   const s = STYLE[fact.status];
   const detail =
@@ -76,6 +83,33 @@ export function UnitCostBadge({
       : fact.status === 'awaiting-witness' && fact.witnessThrough
         ? ` Cross-checks currently run through ${fact.witnessThrough}.`
         : '';
+  // Phone/tablet: the explanation lived only in a hover `title`, which touch
+  // never shows. Below 1024px the badge is a button that opens the same text
+  // in place; desktop keeps the original hover span untouched.
+  if (belowDesktop && !isStatic) {
+    return (
+      <>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={`Evidence for this rate: ${s.label}. Tap for explanation`}
+          onClick={() => setOpen((v) => !v)}
+          className={cn(
+            'ge-uc-badge ge-no-tap-floor ml-1.5 inline-flex items-center justify-center px-1.5 py-px rounded border text-[11px] font-bold align-middle',
+            s.cls,
+            className,
+          )}
+        >
+          {s.label}
+        </button>
+        {open ? (
+          <span role="note" className="ge-uc-note block basis-full w-full text-[12px] font-normal leading-snug text-muted-foreground text-left normal-case tracking-normal">
+            {s.title + detail}
+          </span>
+        ) : null}
+      </>
+    );
+  }
   return (
     <span
       className={cn(

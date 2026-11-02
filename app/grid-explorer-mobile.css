@@ -365,3 +365,49 @@
   /* Detail stat chips sit in a wrapping row; keep their 11px floor. */
   .ge-root .gas-disclosure__panel .text-\[10px\] { font-size: 11px; }
 }
+
+/* ── GENERATION & COST tab (phone/tablet) ────────────────────────────────────
+   Fuel/cost table (reuses .ge-zone-compact: name line over label-above-value
+   cells), BPDB cost heads, unit-cost badges, genmix controls, prose sizes. */
+@media (max-width: 1023px) {
+  /* The "swipe horizontally" hint is wrong once the table has stacked. */
+  @container gridcard (max-width: 40rem) {
+    .ge-root .ge-fuel-swipe-hint { display: none; }
+  }
+  /* Fuel name: dot + name on the heading line; total row keeps its tint. */
+  .ge-root .ge-fuel-table td:first-child, .ge-root .ge-cost-heads td:first-child { font-size: 14px; }
+  .ge-root .ge-zone-compact td[data-label]::before { text-transform: uppercase; }
+
+  /* Unit-cost evidence badge: tap target 44px without growing the row, and the
+     opened explanation spans the cell. (Hover `title` never shows on touch.) */
+  .ge-root button.ge-uc-badge.ge-uc-badge { position: relative; min-height: 0; margin-left: 0; }
+  /* An opened explanation needs the whole row, not one third of it. */
+  .ge-root .ge-zone-compact td:has(.ge-uc-note) { grid-column: 1 / -1; }
+  .ge-root .ge-uc-note { flex: 0 0 100%; white-space: normal; font-family: inherit; text-transform: none; }
+  .ge-root .ge-uc-badge::after { content: ''; position: absolute; inset: -14px -10px; }
+  /* In a stacked (column-flex) cell the badge would stretch to the cell width. */
+  .ge-root .ge-zone-compact td .ge-uc-badge { align-self: flex-start; margin: 4px 0 0; }
+  .ge-root .ge-zone-compact td .ge-uc-note { margin-top: 4px; }
+  /* Unit-cost cell: value and its evidence badge share one line under the label. */
+  .ge-root .grid-explorer-table--stack.ge-zone-compact tbody td[data-label^='Tk/kWh'] {
+    flex-direction: row; flex-wrap: wrap; align-items: baseline; justify-content: flex-start; column-gap: 6px;
+  }
+  .ge-root .ge-zone-compact td[data-label^='Tk/kWh']::before { flex: 0 0 100%; }
+  .ge-root .ge-zone-compact td[data-label^='Tk/kWh'] .ge-uc-badge { margin: 0; align-self: center; }
+  .ge-root .ge-zone-compact tr { align-items: start; }
+  /* BPDB cost heads: the group label is long text, give it its own line. */
+  .ge-root .ge-cost-heads td[data-label='Group'] { grid-column: 1 / -1; padding-top: 0; }
+  /* The swatch + group name read as a sub-line of the head; a "GROUP" label on
+     top of it cost a whole extra line per row. */
+  .ge-root .ge-cost-heads td[data-label='Group']::before { display: none; }
+  .ge-root .ge-cost-heads tr > td:empty { display: none; }
+
+  /* Generation mix scale toggle + "show unserved load" checkbox: 10px / ~24px. */
+  .ge-root .genmix__mode { font-size: 11px; min-height: 44px; padding: 0.25rem 0.9rem; }
+  .ge-root .genmix__toggle { font-size: 11px; min-height: 44px; }
+  .ge-root .genmix__toggle input { width: 20px; height: 20px; }
+
+  /* Prose and key/value rows: 13px body floor. */
+  .ge-root .ge-kv, .ge-root .ge-kv span { font-size: 13px; line-height: 1.45; }
+  .ge-root .ge-unitcost-notes { font-size: 13px; }
+}

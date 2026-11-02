@@ -2082,11 +2082,11 @@ export function PowerGridExplorer({
               </div>
             </div>
 
-            <p className="grid-explorer-table-scroll-hint sm:hidden mx-4" role="note">
+            <p className="grid-explorer-table-scroll-hint sm:hidden mx-4 ge-fuel-swipe-hint" role="note">
               Swipe horizontally to see all columns
             </p>
             <div className="grid-explorer-table-wrap grid-explorer-table-wrap--sticky-col">
-              <table className="grid-explorer-table">
+              <table className="grid-explorer-table grid-explorer-table--stack ge-zone-compact ge-fuel-table">
                 <thead>
                   <tr>
                     <th>Fuel / Source</th>
@@ -2113,10 +2113,10 @@ export function PowerGridExplorer({
                           <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: g.color }} />
                           {g.name}
                         </td>
-                        <td className="text-left tabular-nums">{g.gen.toFixed(2)}</td>
-                        <td className="text-left tabular-nums text-muted-foreground">{genShare}%</td>
-                        <td className="text-left tabular-nums">{g.cost == null ? '—' : formatBdtAmount(g.cost / 10000000)}</td>
-                        <td className="text-left tabular-nums text-muted-foreground">{costShare == null ? '—' : `${costShare}%`}</td>
+                        <td data-label="Gen MKWh · P" className="text-left tabular-nums">{g.gen.toFixed(2)}</td>
+                        <td data-label="Gen share · D" className="text-left tabular-nums text-muted-foreground">{genShare}%</td>
+                        <td data-label="Cost Cr BDT · P" className="text-left tabular-nums">{g.cost == null ? '—' : formatBdtAmount(g.cost / 10000000)}</td>
+                        <td data-label="Cost share · D" className="text-left tabular-nums text-muted-foreground">{costShare == null ? '—' : `${costShare}%`}</td>
                         {/*
                           Cost share divided by generation share. Above 1.0 the fuel
                           is taking more of the bill than of the electricity and is
@@ -2124,7 +2124,7 @@ export function PowerGridExplorer({
                           down. Unlike the rate beside it this compares fuels fairly,
                           because both halves are shares of the same two totals.
                         */}
-                        <td className="text-left tabular-nums">
+                        <td data-label="Intensity · D" className="text-left tabular-nums">
                           {(() => {
                             const gs = totalGenMkwhr > 0 ? g.gen / totalGenMkwhr : 0;
                             const cs = g.cost == null || totalCostBdt <= 0 ? null : g.cost / totalCostBdt;
@@ -2145,7 +2145,7 @@ export function PowerGridExplorer({
                             );
                           })()}
                         </td>
-                        <td className="text-left tabular-nums font-mono text-sm">
+                        <td data-label="Tk/kWh · D" className="text-left tabular-nums font-mono text-sm">
                           {g.unitCost == null ? '—' : g.unitCost.toFixed(2)}
                           <UnitCostBadge fact={unitCostAuth.factFor(g.name, g.unitCost)} />
                         </td>
@@ -2160,14 +2160,14 @@ export function PowerGridExplorer({
                     invited a reader to take our sum for theirs. The note below
                     the table reports how the two compare.
                   */}
-                  <tr className="border-t border-border/80 font-bold bg-muted/20">
+                  <tr className="is-total border-t border-border/80 font-bold bg-muted/20">
                     <td>Total System / Average<GridProvenanceTag kind="D" className="ml-1" /></td>
-                    <td className="text-left tabular-nums">{totalGenMkwhr.toFixed(2)}</td>
-                    <td className="text-left tabular-nums">100.00%</td>
-                    <td className="text-left tabular-nums">{hasPublishedFuelCost ? (totalCostBdt / 10000000).toFixed(2) : '—'}</td>
-                    <td className="text-left tabular-nums">{hasPublishedFuelCost ? '100.00%' : '—'}</td>
-                    <td className="text-left tabular-nums">{hasPublishedFuelCost ? '1.00×' : '—'}</td>
-                    <td className="text-left tabular-nums font-mono text-sm text-primary">{hasPublishedFuelCost ? formatUnitRate(avgCostPerKwh) : '—'}</td>
+                    <td data-label="Gen MKWh · D" className="text-left tabular-nums">{totalGenMkwhr.toFixed(2)}</td>
+                    <td data-label="Gen share · D" className="text-left tabular-nums">100.00%</td>
+                    <td data-label="Cost Cr BDT · D" className="text-left tabular-nums">{hasPublishedFuelCost ? (totalCostBdt / 10000000).toFixed(2) : '—'}</td>
+                    <td data-label="Cost share · D" className="text-left tabular-nums">{hasPublishedFuelCost ? '100.00%' : '—'}</td>
+                    <td data-label="Intensity · D" className="text-left tabular-nums">{hasPublishedFuelCost ? '1.00×' : '—'}</td>
+                    <td data-label="Tk/kWh · D" className="text-left tabular-nums font-mono text-sm text-primary">{hasPublishedFuelCost ? formatUnitRate(avgCostPerKwh) : '—'}</td>
                   </tr>
                 </tbody>
               </table>
@@ -2216,7 +2216,7 @@ export function PowerGridExplorer({
             */}
 
             {unitCostAuth.loaded && (
-              <div className="mx-4 mb-4 text-[11px] leading-relaxed text-muted-foreground">
+              <div className="ge-unitcost-notes mx-4 mb-4 text-[11px] leading-relaxed text-muted-foreground">
                 {/*
                   The daily table is fuel-only because that is all PGCB publishes
                   daily. BPDB's own all-in cost — fuel plus capacity payments,
@@ -2294,6 +2294,7 @@ export function PowerGridExplorer({
                   reasons are structural rather than arithmetic, so they are
                   stated beside the number rather than left to be inferred.
                 */}
+                <MobileFold title="Why these rates cannot be ranked" className="mb-3">
                 <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] p-3">
                   <p className="mb-1.5">
                     <strong className="text-foreground">
@@ -2334,6 +2335,8 @@ export function PowerGridExplorer({
                     asked, and cannot answer.
                   </p>
                 </div>
+                </MobileFold>
+                <MobileFold title="How the unit cost is derived, and what the 2× / flat markers mean">
                 <p className="mb-1.5">
                   <strong className="text-foreground">How the unit cost is arrived at.</strong>{' '}
                   No agency publishes a Tk/kWh rate. PGCB publishes a production cost in Taka
@@ -2360,7 +2363,7 @@ export function PowerGridExplorer({
                 </p>
                 <ul className="space-y-0.5 ml-1">
                   <li>
-                    <UnitCostBadge fact={{ status: 'corroborated' } as UnitCostFact} className="ml-0" />{' '}
+                    <UnitCostBadge static fact={{ status: 'corroborated' } as UnitCostFact} className="ml-0" />{' '}
                     BPDB publishes the same cost and the same energy in a separate report with
                     its own control totals, and the rate derived from those agrees. Re-measured
                     across every witnessed day from 2025-01-01 to 2026-06-24: gas agrees on
@@ -2379,30 +2382,31 @@ export function PowerGridExplorer({
                     here and the counts left to the table itself.
                   */}
                   <li>
-                    <UnitCostBadge fact={{ status: 'administered' } as UnitCostFact} className="ml-0" />{' '}
+                    <UnitCostBadge static fact={{ status: 'administered' } as UnitCostFact} className="ml-0" />{' '}
                     a flat rate the publisher applies rather than measures. Through 2026 PGCB
                     prints Wind at 14.7100 Tk/kWh unchanged, and Hydro at 0.1000 except for
                     2026-06-30 to 07-15, when it stepped to 3.8100 and back. Rates that hold to
                     four decimals for weeks and then jump are tariffs in force, not daily costs.
                   </li>
                   <li>
-                    <UnitCostBadge fact={{ status: 'disagreement' } as UnitCostFact} className="ml-0" />{' '}
+                    <UnitCostBadge static fact={{ status: 'disagreement' } as UnitCostFact} className="ml-0" />{' '}
                     both agencies state the inputs and they disagree by more than their printing
                     precision allows. Neither figure is altered.
                   </li>
                   <li>
-                    <UnitCostBadge fact={{ status: 'published-only' } as UnitCostFact} className="ml-0" />{' '}
+                    <UnitCostBadge static fact={{ status: 'published-only' } as UnitCostFact} className="ml-0" />{' '}
                     correctly derived, but only one agency publishes the inputs, so there is no
                     second witness.
                   </li>
                   <li>
-                    <UnitCostBadge fact={{ status: 'awaiting-witness' } as UnitCostFact} className="ml-0" />{' '}
+                    <UnitCostBadge static fact={{ status: 'awaiting-witness' } as UnitCostFact} className="ml-0" />{' '}
                     correctly derived, and the cross-check has not been run for this day yet. The
                     BPDB comparison is a periodic export
                     {unitCostAuth.witnessThrough ? ` covering days through ${unitCostAuth.witnessThrough}` : ''};
                     a day past that is unchecked, which is not the same as unconfirmed.
                   </li>
                 </ul>
+                </MobileFold>
               </div>
             )}
 
@@ -2458,7 +2462,7 @@ export function PowerGridExplorer({
                   Load-Shedding &amp; Demand
                 </div>
                 {/* All three are printed by PGCB's P1 sheet. */}
-                <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
+                <div className="ge-kv grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Peak Demand:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left tabular-nums">{systemStats.eveningPeakDemand.toFixed(1)} MW</span>
                   <span>Peak Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
@@ -2482,7 +2486,7 @@ export function PowerGridExplorer({
                   trough — and the temperature comes from the reported-day block,
                   never the "probable" forecast beside it.
                 */}
-                <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
+                <div className="ge-kv grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Max Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left tabular-nums">
                     {systemStats.maxGen == null ? '—' : `${systemStats.maxGen.toFixed(1)} MW`}
@@ -2510,7 +2514,7 @@ export function PowerGridExplorer({
                   thing. The unit rate is the quotient of the two, which no
                   agency prints.
                 */}
-                <div className="grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
+                <div className="ge-kv grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Gas Supplied:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left tabular-nums">{systemStats.totalGasSuppliedPower.toFixed(1)} MMCFD</span>
                   <span>Gas Cost:<GridProvenanceTag kind="P" className="ml-1" /></span>

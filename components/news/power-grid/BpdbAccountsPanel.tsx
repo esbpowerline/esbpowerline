@@ -43,6 +43,7 @@ import {
   GridProvenanceTag,
 } from './GridExplorerUI';
 import { CustomDropdown } from './shared';
+import { useBelowDesktop } from './useTapToRead';
 
 const GROUP_LABEL: Record<BpdbCostGroup, string> = {
   purchase: 'Electricity BPDB bought',
@@ -109,6 +110,9 @@ export function BpdbAccountsPanel({
   // click handled by the page's single listener; this card owns its own,
   // because it is mounted independently of that component's ref list.
   const [fyOpen, setFyOpen] = useState(false);
+  // Phone/tablet: the itemised heads run to ~15 rows; show the largest few first.
+  const [showAllHeads, setShowAllHeads] = useState(false);
+  const belowDesktop = useBelowDesktop();
   const fyRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!fyOpen) return;
@@ -357,7 +361,7 @@ export function BpdbAccountsPanel({
         </div>
 
         <div className="grid-explorer-table-wrap grid-explorer-table-wrap--compact">
-          <table className="grid-explorer-table grid-explorer-table--stack">
+          <table className="grid-explorer-table grid-explorer-table--stack ge-zone-compact ge-cost-heads">
             <thead>
               <tr>
                 <th>Cost head</th>
@@ -375,7 +379,7 @@ export function BpdbAccountsPanel({
               </tr>
             </thead>
             <tbody>
-              {heads.map((h) => (
+              {(belowDesktop && !showAllHeads ? heads.slice(0, 6) : heads).map((h) => (
                 <tr key={h.key}>
                   <td className="font-semibold text-foreground">{h.label}</td>
                   <td data-label="Group" className="text-left">
@@ -418,6 +422,16 @@ export function BpdbAccountsPanel({
             </tbody>
           </table>
         </div>
+        {belowDesktop && heads.length > 6 ? (
+          <button
+            type="button"
+            onClick={() => setShowAllHeads((v) => !v)}
+            aria-expanded={showAllHeads}
+            className="ge-gas-show-all"
+          >
+            {showAllHeads ? 'Show fewer heads' : `Show all ${heads.length} heads`}
+          </button>
+        ) : null}
       </div>
 
       {/* Who generated the power BPDB paid for. An ownership split, not a fuel
