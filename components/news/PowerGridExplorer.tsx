@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
 import { formatPeakFlowTotal } from '@/lib/data/grid/border-imports';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { EventStudyDateLink } from '@/components/news/power-grid/EventStudyDateLink';
 import { useChartTheme, type ChartTheme } from '@/hooks/useChartTheme';
 import {
@@ -1832,6 +1833,7 @@ export function PowerGridExplorer({
                 : 0;
 
             return (
+              <MobileFold title="What is being shown?">
               <div className="bg-muted/10 p-4 border border-border/40 rounded-xl text-xs text-muted-foreground space-y-2 mt-4">
                 <p><strong>What is being shown?</strong></p>
                 {/* The series names here are painted from LOAD_CURVE_COLORS rather
@@ -1961,6 +1963,7 @@ export function PowerGridExplorer({
                   )}
                 </p>
               </div>
+              </MobileFold>
             );
           })()}
 

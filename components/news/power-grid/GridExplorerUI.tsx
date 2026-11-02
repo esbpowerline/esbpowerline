@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { Children, useEffect, useState } from 'react';
+import { Children, createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { ComponentType, ReactNode } from 'react';
 
@@ -67,8 +67,55 @@ export function GridSinceBadge({ year = '2020' }: { year?: string }) {
 
 /* ── Chart card chrome ── */
 
+/* Phone-only fold shared by the footer and the source-files receipt.
+   >= 768px the <details> is `display: contents` (see app/grid-explorer-mobile.css,
+   "Source folds") so the markup flattens into the original flex row and desktop
+   and tablet are unchanged. Below 768px it starts closed behind a 44px "Details"
+   row. The server renders `open` (no-JS readers and desktop get everything); this
+   effect closes it once on a phone and re-opens it when the viewport widens. */
+function usePhoneFold() {
+  const ref = useRef<HTMLDetailsElement | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const mq = window.matchMedia('(max-width: 767px)');
+    const sync = (initial: boolean) => {
+      if (!mq.matches) el.open = true;
+      else if (initial) el.open = false;
+    };
+    sync(true);
+    el.setAttribute('data-ge-ready', '');
+    const onChange = () => sync(false);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return ref;
+}
+
+/* Lets GridSourceFiles know it already sits inside a folded footer, so it does
+   not add a second fold of its own. */
+const InsideFooterFold = createContext(false);
+
 export function GridCardFooter({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('grid-explorer-card-footer', className)}>{children}</div>;
+  const ref = usePhoneFold();
+  const kids = Children.toArray(children);
+  // First child is the "Source: <agency> — sheet" line by convention. It stays
+  // visible on a phone; everything after it (file names, caveats, period) folds.
+  const [lead, ...rest] = kids;
+  if (!rest.length) return <div className={cn('grid-explorer-card-footer', className)}>{children}</div>;
+  return (
+    <div className={cn('grid-explorer-card-footer', className)}>
+      <details ref={ref} className="ge-footer-fold" open>
+        <summary className="ge-footer-fold__summary">
+          <span className="ge-footer-fold__lead">{lead}</span>
+          <span className="ge-footer-fold__toggle" aria-hidden>Details <ChevronDown className="h-3.5 w-3.5" /></span>
+        </summary>
+        <div className="ge-footer-fold__body">
+          <InsideFooterFold.Provider value>{rest}</InsideFooterFold.Provider>
+        </div>
+      </details>
+    </div>
+  );
 }
 
 /**
@@ -965,8 +1012,10 @@ export function GridSourceFiles({
   className?: string;
 }) {
   const named = (files ?? []).filter((f): f is { label: string; name: string } => Boolean(f.name));
+  const insideFooter = useContext(InsideFooterFold);
+  const foldRef = usePhoneFold();
   if (!named.length) return null;
-  return (
+  const list = (
     <span className={cn('grid-source-files', className)}>
       <span className="grid-source-files__lead">Read from:</span>
       {named.map((f, i) => (
@@ -977,5 +1026,13 @@ export function GridSourceFiles({
         </span>
       ))}
     </span>
+  );
+  // Standalone (not in a card footer): fold the file names behind one tap on phones.
+  if (insideFooter) return list;
+  return (
+    <details ref={foldRef} className="ge-source-fold" open>
+      <summary className="ge-source-fold__summary">Source files <ChevronDown className="h-3.5 w-3.5" aria-hidden /></summary>
+      {list}
+    </details>
   );
 }

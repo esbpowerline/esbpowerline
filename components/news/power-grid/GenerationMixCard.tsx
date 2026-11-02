@@ -170,7 +170,7 @@ export function GenerationMixCard({
                       y={114}
                       textAnchor="middle"
                       dominantBaseline="central"
-                      className="fill-muted-foreground font-sans font-semibold uppercase"
+                      className="ge-donut-label fill-muted-foreground font-sans font-semibold uppercase"
                       style={{ fontSize: '10px', letterSpacing: '0.1em' }}
                     >
                       MKWh Gen

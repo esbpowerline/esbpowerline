@@ -10,6 +10,7 @@ import {
   GridProvenanceTag,
   GridSourceFiles,
 } from '@/components/news/power-grid/GridExplorerUI';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { ForecastCurveCanvas } from '@/components/news/power-grid/ForecastCurveCanvas';
 
 /**
@@ -522,6 +523,7 @@ export function ForecastVsActualPanel({
       {/* The two-workbook mechanic, drawn. Prose alone did not survive contact
           with real readers: the operator who ingests these files daily asked
           why a finished day carries a forecast at all. */}
+      <MobileFold title="Where each column comes from">
       <div className="mt-5 rounded-xl border border-border/30 bg-muted/10 p-4 space-y-2.5">
         <p className="text-xs font-bold text-foreground">
           Where each column comes from — one workbook carries two days
@@ -547,6 +549,7 @@ export function ForecastVsActualPanel({
           feeds="the Actual column above"
         />
       </div>
+      </MobileFold>
 
       <GridExplanationBlock
         what={

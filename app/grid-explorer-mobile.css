@@ -179,3 +179,79 @@
     min-height: 0;
   }
 }
+
+/* ── Source folds (GridCardFooter / GridSourceFiles) ─────────────────────────
+   >= 768px: the <details> wrappers are transparent (display: contents) so the
+   footer's children flow in the original flex row; desktop and tablet are the
+   same as before. < 768px: lead line + "Details" toggle, rest folded. */
+@media (min-width: 768px) {
+  .ge-footer-fold, .ge-footer-fold__body, .ge-footer-fold__lead,
+  .ge-footer-fold > summary, .ge-source-fold { display: contents; }
+  .ge-footer-fold__toggle, .ge-source-fold__summary { display: none; }
+  /* <details> wraps its non-summary children in an anonymous content slot box;
+     without this the footer's flex gap/justify would apply to that box, not to
+     the children. */
+  .ge-footer-fold::details-content, .ge-source-fold::details-content { display: contents; }
+}
+@media (max-width: 767px) {
+  .ge-footer-fold { display: block; width: 100%; }
+  .ge-footer-fold__summary, .ge-source-fold__summary {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    min-height: 44px; list-style: none; cursor: pointer;
+  }
+  .ge-footer-fold__summary::-webkit-details-marker,
+  .ge-source-fold__summary::-webkit-details-marker { display: none; }
+  .ge-footer-fold__lead { flex: 1 1 auto; min-width: 0; font-size: 12px; line-height: 1.4; }
+  .ge-footer-fold__toggle, .ge-source-fold__summary {
+    flex: none; display: inline-flex; align-items: center; gap: 2px;
+    color: hsl(var(--primary)); font-size: 12px; font-weight: 600;
+  }
+  .ge-footer-fold[open] svg, .ge-source-fold[open] svg { transform: rotate(180deg); }
+  .ge-footer-fold__body { display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px; }
+  /* Footer card has -mb-4 so the 44px row must not pull the next block up. */
+  .ge-root .grid-explorer-card-footer { margin-bottom: 0; }
+  /* First paint, before the effect has folded it. */
+  .ge-footer-fold:not([data-ge-ready]) > .ge-footer-fold__body,
+  .ge-source-fold:not([data-ge-ready]) > .grid-source-files { display: none; }
+}
+
+/* ── OVERVIEW tab (phone/tablet) ─────────────────────────────────────────────
+   Shared card chrome + the sub-11px stragglers that only appear on Overview. */
+@media (max-width: 1023px) {
+  /* Cadence badge ("Daily"): globals.css pins every <sup> in a card title to
+     10px with !important, so the plain type floor cannot reach it. */
+  .ge-root .grid-explorer-chart-card__title sup,
+  .ge-root .grid-explorer-kpi__label sup,
+  .ge-root sup.text-\[10px\],
+  .ge-root sup.text-\[9px\] { font-size: 11px !important; }
+
+  /* Card inside card was ~16px + 16px of padding either side. 12px keeps the
+     chart nearly full width while the card edge still reads as a card. */
+  .ge-root .grid-explorer-chart-card { padding: 14px 12px; }
+  /* Title + badge on one row, subtitle beneath: let the head wrap so the
+     SCADA/FUEL TYPE chip never squeezes the title into 5 lines. */
+  .ge-root .grid-explorer-chart-card__head { flex-wrap: wrap; row-gap: 4px; }
+  .ge-root .grid-explorer-chart-card__head > .grid-explorer-chip { order: 0; margin-left: auto; }
+  .ge-root .grid-explorer-chart-card__title { overflow-wrap: normal; word-break: normal; hyphens: none; }
+
+  /* Footer text was 10px; legend rows 8.9px (0.6875rem on a vw-scaled root). */
+  .ge-root .grid-explorer-card-footer,
+  .ge-root .grid-explorer-card-footer span,
+  .ge-root .grid-chart-legend__item,
+  .ge-root .grid-chart-legend__name,
+  .ge-root .grid-chart-legend__meta,
+  .ge-root .grid-chart-legend__val,
+  .ge-root .grid-chart-legend__key,
+  .ge-root .grid-explorer-table th,
+  .ge-root .grid-explorer-table td > div > span.block,
+  .ge-root .grid-explorer-table--stack td > div { font-size: 11px; }
+  /* Legend rows are tap/hover targets (they highlight a slice): give them room. */
+  .ge-root .grid-chart-legend__item { min-height: 36px; }
+  /* Donut centre label is an inline-styled SVG <text> (10px in a 200 viewBox
+     drawn at 1:1). */
+  .ge-root text.ge-donut-label { font-size: 11px !important; }
+
+  /* Footer source link: 24px tall hit box -> 44px, without moving the line. */
+  .ge-root .grid-explorer-card-footer a { min-height: 44px; margin-block: -12px; }
+  .ge-root .grid-explorer-explain__toggle, .ge-root .grid-explorer-explain__toggle strong { font-size: 12px; }
+}
