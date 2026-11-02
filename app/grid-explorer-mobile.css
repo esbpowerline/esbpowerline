@@ -411,3 +411,103 @@
   .ge-root .ge-kv, .ge-root .ge-kv span { font-size: 13px; line-height: 1.45; }
   .ge-root .ge-unitcost-notes { font-size: 13px; }
 }
+
+/* ── POWER STATIONS tab (phone/tablet) ───────────────────────────────────────
+   The 8-column station table becomes a card list (PowerStationsTab.tsx renders
+   it only below 1024px). Fuel / producer / derating tables reuse the stacked
+   .ge-zone-compact cells above. */
+@media (max-width: 1023px) {
+  /* Search + sort + direction share one row; search takes the slack. */
+  .ge-root .ge-plant-controls { width: 100%; margin-left: 0; flex-wrap: nowrap; }
+  .ge-root .ge-plant-search { flex: 1 1 0; min-width: 0; }
+  .ge-root .ge-plant-search input { width: 100%; min-height: 44px; font-size: 14px; }
+  .ge-root .ge-plant-controls > .relative:not(.ge-plant-search) > button { min-height: 44px; }
+  .ge-root .ge-plant-dir { width: 44px; min-height: 44px; flex: none; }
+
+  .ge-root .ge-plant-list { list-style: none; margin: 8px 0 0; padding: 0; }
+  .ge-root .ge-plant-card { border-top: 1px solid hsl(var(--border) / 0.5); }
+  .ge-root .ge-plant-card__btn { display: block; width: 100%; text-align: left; padding: 10px 2px; }
+  .ge-root .ge-plant-card__top { display: flex; align-items: center; gap: 8px; }
+  .ge-root .ge-plant-card__name { flex: 1 1 auto; min-width: 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+  .ge-root .ge-plant-card__chip {
+    flex: none; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 600;
+    background: hsl(var(--muted) / 0.5); color: hsl(var(--muted-foreground));
+  }
+  .ge-root .ge-plant-card__figs {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px 12px; margin-top: 6px;
+  }
+  .ge-root .ge-plant-card__fig { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ge-root .ge-plant-card__lab { font-size: 11px; line-height: 1.3; color: hsl(var(--muted-foreground)); }
+  .ge-root .ge-plant-card__val { font-size: 14px; font-variant-numeric: tabular-nums; }
+  .ge-root .ge-plant-card__more {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px 12px;
+    margin: 0 0 10px; padding: 8px 10px; border-radius: 10px; background: hsl(var(--muted) / 0.2);
+  }
+  .ge-root .ge-plant-card__more dt { font-size: 11px; color: hsl(var(--muted-foreground)); }
+  .ge-root .ge-plant-card__more dd { margin: 0; font-size: 13px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .ge-root .ge-plant-card__remark { grid-column: 1 / -1; }
+  .ge-root .ge-plant-empty { padding: 16px 4px; font-size: 13px; color: hsl(var(--muted-foreground)); }
+  .ge-root .ge-plant-total {
+    display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; margin-top: 8px;
+    padding: 10px 12px; border-radius: 10px; background: hsl(var(--muted) / 0.25); font-size: 13px;
+  }
+  .ge-root .ge-plant-total strong { flex: 1 1 100%; }
+  .ge-root .ge-plant-total b { font-variant-numeric: tabular-nums; }
+
+  /* Hourly log: 11px floor (the table sets text-[11px] already), sticky station
+     column stays; the table scrolls inside its own box. */
+  .ge-root .ge-plant-log th, .ge-root .ge-plant-log td { font-size: 11px; }
+  /* Derating reason is free text: let it wrap instead of truncating on a tap-less title. */
+  .ge-root .ge-plant-reason .grid-explorer-table__truncate { white-space: normal; overflow: visible; text-overflow: clip; }
+}
+
+/* Fuel / producer / derating roll-ups on phones (<768px): a real compact table,
+   header once, one line per item. (Label-above-value stacking repeated the
+   column names in every row and added ~4,000px to the page.) */
+@media (max-width: 767px) {
+  .ge-root .ge-compact-table { width: 100%; table-layout: auto; }
+  .ge-root .ge-compact-table th {
+    font-size: 11px; line-height: 1.2; padding: 6px 4px; white-space: normal; vertical-align: bottom;
+  }
+  .ge-root .ge-compact-table td {
+    font-size: 12px; padding: 7px 4px; font-variant-numeric: tabular-nums; vertical-align: top;
+  }
+  .ge-root .ge-compact-table th:first-child, .ge-root .ge-compact-table td:first-child { padding-left: 2px; }
+  .ge-root .ge-compact-table td:first-child { max-width: 7rem; overflow-wrap: anywhere; font-weight: 600; }
+  .ge-root .ge-compact-table .grid-provenance-tag { margin-left: 2px; }
+  .ge-root .ge-compact-table tbody tr.is-total td { font-weight: 700; }
+  .ge-root .ge-compact-note { font-size: 11px; line-height: 1.4; color: hsl(var(--muted-foreground)); margin: 6px 0; }
+  .ge-root .ge-derate-station { max-width: 9rem; }
+  .ge-root .ge-derate-sub {
+    display: block; margin-top: 2px; font-size: 11px; font-weight: 400; line-height: 1.3;
+    color: hsl(var(--muted-foreground)); overflow-wrap: anywhere;
+  }
+}
+
+/* The base table cell is nowrap, which let long station names run under the
+   Fuel column in the compact derating table. */
+@media (max-width: 767px) {
+  .ge-root .ge-compact-table td { white-space: normal; }
+  .ge-root .ge-compact-table td.ge-derate-station { width: 42%; max-width: none; }
+  .ge-root .ge-compact-table td.ge-derate-station > span { display: block; white-space: normal; overflow-wrap: anywhere; }
+  .ge-root .ge-derate-table td:nth-child(n+3), .ge-root .ge-derate-table th:nth-child(n+3) { white-space: nowrap; }
+}
+
+/* Derating table: fixed layout so the station column keeps ~46% and names wrap
+   at word breaks instead of mid-word; figures get equal narrow columns. */
+@media (max-width: 767px) {
+  .ge-root .ge-derate-table { table-layout: fixed; }
+  .ge-root .ge-derate-table th:nth-child(1), .ge-root .ge-derate-table td:nth-child(1) { width: 46%; }
+  .ge-root .ge-derate-table th:nth-child(2), .ge-root .ge-derate-table td:nth-child(2) { width: 15%; }
+  .ge-root .ge-derate-table td.ge-derate-station > span { overflow-wrap: break-word; }
+  .ge-root .ge-derate-table td.ge-derate-station { width: 46%; }
+  .ge-root .ge-derate-table th:nth-child(n+3), .ge-root .ge-derate-table td:nth-child(n+3) { width: 13%; white-space: normal; }
+  /* Total rows: let the label take its own width instead of stacking to 3 lines. */
+  .ge-root .ge-compact-table td:first-child { max-width: none; }
+}
+
+/* Hourly log rows were ~40px each on phones; 26px keeps the 11px text readable. */
+@media (max-width: 1023px) {
+  .ge-root .ge-plant-log th, .ge-root .ge-plant-log td { padding-block: 4px; }
+  .ge-root .ge-plant-log td { line-height: 1.3; }
+}

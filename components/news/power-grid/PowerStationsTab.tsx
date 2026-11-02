@@ -13,6 +13,8 @@ import {
 import { CountChip } from '@/components/news/power-grid/renewables/shared';
 import { fetchPlantDetail, plantTotals } from '@/lib/data/grid/plant-detail.client';
 import { cn } from '@/lib/utils';
+import { MobileFold } from '@/components/news/power-grid/MobileFold';
+import { useBelowDesktop, useMediaQuery } from '@/components/news/power-grid/useTapToRead';
 import type { DailyPlantDetail, GridSystemStats, PlantActual } from '@/lib/data/grid/types';
 
 const PGCB = 'https://pgcb.gov.bd';
@@ -298,6 +300,60 @@ function MiniBar({ pct, className = 'bg-primary/70' }: { pct: number | null; cla
   );
 }
 
+/**
+ * One station as a phone card (below 1024px, in place of the 8-column table).
+ * Name + fuel on top; the three figures a reader compares (evening peak,
+ * installed, evening utilisation) label-above-value; the remaining columns and
+ * PGCB's remark open on tap. Every figure the table shows is still reachable.
+ * Utilisation is evening peak / installed - ours, so it carries the D mark -
+ * and, as in the fuel roll-up, it is withheld for Solar (its evening zero is a
+ * real after-sunset reading, not idle capacity).
+ */
+function PlantCard({ p }: { p: PlantActual }) {
+  const [open, setOpen] = useState(false);
+  const util =
+    p.fuel === 'Solar' || p.installedMw == null || p.installedMw <= 0 || p.eveningPeakMw == null
+      ? null
+      : (p.eveningPeakMw / p.installedMw) * 100;
+  const idle = p.eveningPeakMw === 0 && !p.dayPeakMw && !p.energyKwh;
+  return (
+    <li className={cn('ge-plant-card', idle && 'opacity-60')}>
+      <button type="button" className="ge-plant-card__btn" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <span className="ge-plant-card__top">
+          <span className="ge-plant-card__name">{p.name}</span>
+          {p.fuel ? <span className="ge-plant-card__chip">{p.fuel}</span> : null}
+          <ChevronDown className={cn('h-4 w-4 shrink-0 text-muted-foreground transition-transform', open && 'rotate-180')} aria-hidden />
+        </span>
+        <span className="ge-plant-card__figs">
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Evening peak MW</span>
+            <span className="ge-plant-card__val font-semibold">{formatMw(p.eveningPeakMw)}</span>
+          </span>
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Installed MW</span>
+            <span className="ge-plant-card__val">{formatMw(p.installedMw)}</span>
+          </span>
+          <span className="ge-plant-card__fig">
+            <span className="ge-plant-card__lab">Utilisation <GridProvenanceTag kind="D" /></span>
+            <span className="ge-plant-card__val">{util == null ? '—' : formatPct(util)}</span>
+            {util != null && <MiniBar pct={util} className="bg-amber-500/70" />}
+          </span>
+        </span>
+      </button>
+      {open && (
+        <dl className="ge-plant-card__more">
+          <div><dt>Producer</dt><dd>{p.producer || '—'}</dd></div>
+          <div><dt>Present MW</dt><dd>{formatMw(p.presentCapacityMw)}</dd></div>
+          {/* Null, not zero, on P2-sourced days: no day peak is published. */}
+          <div><dt>Day peak MW</dt><dd>{formatMw(p.dayPeakMw)}</dd></div>
+          <div><dt>Day&rsquo;s energy MWh</dt><dd>{p.energyKwh == null ? '—' : formatMw(p.energyKwh / 1000)}</dd></div>
+          {p.remarks ? <div className="ge-plant-card__remark"><dt>PGCB remark</dt><dd>{p.remarks}</dd></div> : null}
+        </dl>
+      )}
+    </li>
+  );
+}
+
 function StationSourceFooter({
   label,
   isoDate,
@@ -356,6 +412,14 @@ export function PowerStationsTab({
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortKey>('eveningPeakMw');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
+  // Below 1024px the station table becomes a card list that shows 10 until asked
+  // (149 stations x 8 columns is thousands of nodes on a phone).
+  const small = useBelowDesktop();
+  // Phone only (<768px): the roll-up and derating tables become compact one-line-per-item tables.
+  const phone = useMediaQuery('(max-width: 767px)');
+  const [showAllDerated, setShowAllDerated] = useState(false);
+  const [showAllRows, setShowAllRows] = useState(false);
+  const [showAllLog, setShowAllLog] = useState(false);
 
   // A header click on the current column reverses it; any other column, and
   // any pick from the Sort menu, starts in that column's natural direction.
@@ -508,6 +572,11 @@ export function PowerStationsTab({
   }
 
   const genlog = detail?.genlog;
+  // 149 stations x 24 hours is ~3,600 cells; a phone renders the first 10 until asked.
+  const logAll = (genlog?.stations ?? []).filter((s) =>
+    query.trim() ? s.name.toLowerCase().includes(query.trim().toLowerCase()) : true,
+  );
+  const logRows = small && !showAllLog ? logAll.slice(0, 10) : logAll;
 
   return (
     <div className="grid-explorer-panel space-y-6">
@@ -524,20 +593,57 @@ export function PowerStationsTab({
               Capacity and actual output at both peaks, as published for {systemStats.date}
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 ml-auto">
-            <div className="relative">
+          <div className="flex flex-wrap items-center gap-2 ml-auto ge-plant-controls">
+            <div className="relative ge-plant-search">
               <Search className="h-3.5 w-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Filter station, fuel, producer"
+                aria-label="Filter stations by name, fuel or producer"
                 className="pl-8 pr-3 py-1.5 w-56 text-xs font-medium rounded-xl border border-border/40 bg-transparent text-foreground placeholder:text-muted-foreground/70 transition-colors hover:border-border/70 focus:outline-none focus:ring-2 focus:ring-primary/45 focus:border-transparent"
               />
             </div>
             <SortMenu value={sort} onChange={pickSort} options={SORT_OPTIONS} />
+            {small && (
+              // The column headers that reverse the sort are gone on phones.
+              <button
+                type="button"
+                onClick={() => sortBy(sort)}
+                aria-label={sortDir === 'asc' ? 'Ascending, tap to reverse' : 'Descending, tap to reverse'}
+                className="ge-plant-dir inline-flex items-center justify-center rounded-xl border border-border/40 text-foreground"
+              >
+                {sortDir === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
+              </button>
+            )}
           </div>
         </div>
 
+        {small ? (
+          <div>
+            <ul className="ge-plant-list">
+              {(showAllRows ? rows : rows.slice(0, 10)).map((p) => (
+                <PlantCard key={p.name} p={p} />
+              ))}
+            </ul>
+            {rows.length === 0 && (
+              <p className="ge-plant-empty">No station matches &ldquo;{query}&rdquo;.</p>
+            )}
+            {rows.length > 10 && (
+              <button type="button" className="ge-gas-show-all" onClick={() => setShowAllRows((v) => !v)}>
+                {showAllRows ? 'Show first 10' : `Show all ${rows.length}`}
+              </button>
+            )}
+            {totals && !query && (
+              <div className="ge-plant-total">
+                <strong>All stations <GridProvenanceTag kind="D" /></strong>
+                <span>Day peak <b>{totals.day == null ? '—' : formatMw(totals.day)}</b></span>
+                <span>Evening peak <b className="text-primary">{formatMw(totals.evening)}</b></span>
+                <span>Energy MWh <b>{totals.energyKwh == null ? '—' : formatMw(totals.energyKwh / 1000)}</b></span>
+              </div>
+            )}
+          </div>
+        ) : (
         <div className="grid-explorer-table-wrap">
           <table className="grid-explorer-table">
             <thead>
@@ -615,10 +721,12 @@ export function PowerStationsTab({
             noun="stations"
           />
         </div>
+        )}
 
         {totals && (
           // The station sums are what the headline peaks are made of, so showing
           // both is a check the reader can make rather than take on trust.
+          <MobileFold title="How the station totals reconcile">
           <div className="mt-1 p-3 rounded-lg border border-border/50 bg-muted/15 text-[11px] text-muted-foreground leading-relaxed">
             Station totals reconcile with the system figures for this day:{' '}
             {totals.day != null && (
@@ -641,6 +749,7 @@ export function PowerStationsTab({
               evening peak and the day&apos;s energy but no day peak.</>
             )}
           </div>
+          </MobileFold>
         )}
 
         <StationSourceFooter label="P2 sheet, per-station and per-unit table" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
@@ -665,17 +774,17 @@ export function PowerStationsTab({
             </div>
 
             <div className="grid-explorer-table-wrap">
-              <table className="grid-explorer-table">
+              <table className={cn('grid-explorer-table', phone && 'ge-compact-table')}>
                 <thead>
                   <tr>
                     <th>
                       Fuel
                       <GridProvenanceTag kind="P" className="ml-1" />
                     </th>
-                    <th className="text-right">Stations<GridProvenanceTag kind="D" className="ml-1" /></th>
-                    <th className="text-right">Installed (MW)<GridProvenanceTag kind="D" className="ml-1" /></th>
-                    <th className="text-right">Evening peak (MW)<GridProvenanceTag kind="D" className="ml-1" /></th>
-                    <th className="text-right w-36">Utilisation<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right">{phone ? 'Stns' : 'Stations'}<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right">{phone ? 'Inst MW' : 'Installed (MW)'}<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right">{phone ? 'Peak MW' : 'Evening peak (MW)'}<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right w-36">{phone ? 'Util' : 'Utilisation'}<GridProvenanceTag kind="D" className="ml-1" /></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -689,7 +798,7 @@ export function PowerStationsTab({
                         {g.utilisation == null ? (
                           <span className="text-muted-foreground">
                             —
-                            {g.key === 'Solar' && (
+                            {g.key === 'Solar' && !phone && (
                               <HoverTip
                                 align="right"
                                 text="The evening peak is measured after sunset, so a solar station's zero is a real reading — not idle capacity. No evening-peak utilisation is shown for Solar."
@@ -701,7 +810,7 @@ export function PowerStationsTab({
                             )}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-2 w-32">
+                          <span className={cn('inline-flex items-center gap-2', phone ? 'w-20' : 'w-32')}>
                             <MiniBar pct={g.utilisation} className="bg-amber-500/70" />
                             <span className="tabular-nums font-medium shrink-0">{formatPct(g.utilisation)}</span>
                           </span>
@@ -710,7 +819,7 @@ export function PowerStationsTab({
                     </tr>
                   ))}
                   {fleet && (
-                    <tr className="border-t border-border/80 font-bold bg-muted/20">
+                    <tr className="is-total border-t border-border/80 font-bold bg-muted/20">
                       <td>
                         All fuels
                         <GridProvenanceTag kind="D" className="ml-1" />
@@ -725,12 +834,17 @@ export function PowerStationsTab({
               </table>
             </div>
 
+            {phone && (
+              <p className="ge-compact-note">— Solar: the evening peak is measured after sunset, so its zero is a real reading and no utilisation is shown.</p>
+            )}
+            <MobileFold title="How these figures are derived">
             <div className="text-[11px] text-muted-foreground leading-relaxed">
               PGCB publishes each station&rsquo;s capacity and output but no fuel-wise roll-up — every
               figure here is our sum or quotient of the rows above. Solar stations report a day peak
               and no evening peak, because the evening peak is measured after sunset. A zero there is
               a real reading, not a gap, so Solar carries no evening-peak utilisation.
             </div>
+            </MobileFold>
 
             <StationSourceFooter label="P2 sheet, per-station and per-unit table" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
           </div>
@@ -751,17 +865,17 @@ export function PowerStationsTab({
             </div>
 
             <div className="grid-explorer-table-wrap">
-              <table className="grid-explorer-table">
+              <table className={cn('grid-explorer-table', phone && 'ge-compact-table')}>
                 <thead>
                   <tr>
                     <th>
                       Producer
                       <GridProvenanceTag kind="P" className="ml-1" />
                     </th>
-                    <th className="text-right">Stations<GridProvenanceTag kind="D" className="ml-1" /></th>
-                    <th className="text-right">Installed (MW)<GridProvenanceTag kind="D" className="ml-1" /></th>
-                    <th className="text-right">Evening peak (MW)<GridProvenanceTag kind="D" className="ml-1" /></th>
-                    <th className="text-right w-36">Share of output<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right">{phone ? 'Stns' : 'Stations'}<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right">{phone ? 'Inst MW' : 'Installed (MW)'}<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right">{phone ? 'Peak MW' : 'Evening peak (MW)'}<GridProvenanceTag kind="D" className="ml-1" /></th>
+                    <th className="text-right w-36">{phone ? 'Share' : 'Share of output'}<GridProvenanceTag kind="D" className="ml-1" /></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -783,7 +897,7 @@ export function PowerStationsTab({
                           {share == null ? (
                             <span className="text-muted-foreground">—</span>
                           ) : (
-                            <span className="inline-flex items-center gap-2 w-32">
+                            <span className={cn('inline-flex items-center gap-2', phone ? 'w-20' : 'w-32')}>
                               <MiniBar pct={share} className="bg-sky-500/70" />
                               <span className="tabular-nums font-medium shrink-0">{formatPct(share)}</span>
                             </span>
@@ -793,7 +907,7 @@ export function PowerStationsTab({
                     );
                   })}
                   {fleet && (
-                    <tr className="border-t border-border/80 font-bold bg-muted/20">
+                    <tr className="is-total border-t border-border/80 font-bold bg-muted/20">
                       <td>
                         All producers
                         <GridProvenanceTag kind="D" className="ml-1" />
@@ -810,11 +924,13 @@ export function PowerStationsTab({
               </table>
             </div>
 
+            <MobileFold title="How these figures are derived">
             <div className="text-[11px] text-muted-foreground leading-relaxed">
               Producer labels are exactly as PGCB prints them on each station row; the sums and shares
               are ours, computed over the fleet&rsquo;s summed evening-peak output. PGCB publishes no
               producer-wise total.
             </div>
+            </MobileFold>
 
             <StationSourceFooter label="P2 sheet, per-station and per-unit table" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
           </div>
@@ -840,7 +956,7 @@ export function PowerStationsTab({
           {/* Not `.grid-explorer-table-wrap`: that wrapper bleeds 4px either
               side, which would show under this card's own border and behind the
               sticky station column. Same overflow behaviour, kept local. */}
-          <div className="max-h-[28rem] overflow-auto rounded-lg border border-border/40">
+          <div className="max-h-[28rem] overflow-auto rounded-lg border border-border/40 ge-plant-log">
             <table className="grid-explorer-table w-full text-[11px]">
               <thead className="sticky top-0 bg-card z-10">
                 <tr>
@@ -853,11 +969,7 @@ export function PowerStationsTab({
                 </tr>
               </thead>
               <tbody>
-                {genlog.stations
-                  .filter((s) =>
-                    query.trim() ? s.name.toLowerCase().includes(query.trim().toLowerCase()) : true,
-                  )
-                  .map((s) => (
+                {logRows.map((s) => (
                     <tr key={s.name}>
                       <td className="font-medium whitespace-nowrap sticky left-0 bg-card pl-3">{s.name}</td>
                       {s.hourlyMw.map((v, i) => (
@@ -885,6 +997,11 @@ export function PowerStationsTab({
               </tbody>
             </table>
           </div>
+          {small && logAll.length > 10 && (
+            <button type="button" className="ge-gas-show-all" onClick={() => setShowAllLog((v) => !v)}>
+              {showAllLog ? 'Show first 10' : `Show all ${logAll.length}`}
+            </button>
+          )}
           <StationSourceFooter label="GenLog sheet, per-station generation log" isoDate={isoDate} sourceFile={sourceFiles?.pgcb} />
         </div>
       )}
@@ -937,16 +1054,25 @@ export function PowerStationsTab({
           </div>
 
           <div className="grid-explorer-table-wrap">
-            <table className="grid-explorer-table table-fixed">
-              <colgroup>
+            <table className={cn('grid-explorer-table', !phone && 'table-fixed', phone && 'ge-compact-table ge-derate-table')}>
+              {!phone && <colgroup>
                 <col className="w-[32%]" />
                 <col className="w-[10%]" />
                 <col className="w-[15%]" />
                 <col className="w-[15%]" />
                 <col className="w-[13%]" />
                 <col className="w-[15%]" />
-              </colgroup>
+              </colgroup>}
               <thead>
+                {phone ? (
+                <tr>
+                  <th>Station</th>
+                  <th className="text-left">Fuel</th>
+                  <th className="text-right">Avail MW<GridProvenanceTag kind="P" className="ml-1" /></th>
+                  <th className="text-right">Eff. MW<GridProvenanceTag kind="P" className="ml-1" /></th>
+                  <th className="text-right">Held</th>
+                </tr>
+                ) : (
                 <tr>
                   <th>Station</th>
                   <th className="text-left">Fuel</th>
@@ -963,9 +1089,30 @@ export function PowerStationsTab({
                     PGCB&apos;s reason <GridProvenanceTag kind="P" />
                   </th>
                 </tr>
+                )}
               </thead>
               <tbody>
-                {deratedPager.rows.map((st) => (
+                {phone ? (showAllDerated ? derated : derated.slice(0, 5)).map((st) => (
+                  <tr key={st.name}>
+                    <td className="ge-derate-station">
+                      <span className="font-semibold">{st.name}</span>
+                      <span className="ge-derate-sub">
+                        Actual {st.actualEveningMw == null ? '—' : Math.round(st.actualEveningMw).toLocaleString('en-US')} MW
+                        {st.remarks && st.remarks !== '-' ? ` · ${st.remarks}` : ''}
+                      </span>
+                    </td>
+                    <td className="text-muted-foreground">{st.fuel ?? '—'}</td>
+                    <td className="text-right tabular-nums">
+                      {st.forecastEveningPeakMw == null ? '—' : Math.round(st.forecastEveningPeakMw).toLocaleString('en-US')}
+                    </td>
+                    <td className="text-right tabular-nums">
+                      {st.effectiveEveningPeakMw == null ? '—' : Math.round(st.effectiveEveningPeakMw).toLocaleString('en-US')}
+                    </td>
+                    <td className="text-right tabular-nums text-amber-600 dark:text-amber-400 font-semibold">
+                      −{Math.round(st.held ?? 0).toLocaleString('en-US')}
+                    </td>
+                  </tr>
+                )) : deratedPager.rows.map((st) => (
                   <tr key={st.name}>
                     <td className="font-semibold">
                       <span className="grid-explorer-table__truncate" title={st.name}>
@@ -991,7 +1138,7 @@ export function PowerStationsTab({
                         ? '—'
                         : Math.round(st.actualEveningMw).toLocaleString('en-US')}
                     </td>
-                    <td className="text-muted-foreground">
+                    <td className="text-muted-foreground ge-plant-reason">
                       <span className="grid-explorer-table__truncate" title={st.remarks ?? ''}>
                         {st.remarks && st.remarks !== '-' ? st.remarks : '—'}
                       </span>
@@ -1001,7 +1148,12 @@ export function PowerStationsTab({
               </tbody>
             </table>
           </div>
-          <GridTablePager
+          {phone && derated.length > 5 && (
+            <button type="button" className="ge-gas-show-all" onClick={() => setShowAllDerated((v) => !v)}>
+              {showAllDerated ? 'Show first 5' : `Show all ${derated.length}`}
+            </button>
+          )}
+          {!phone && <GridTablePager
             page={deratedPager.page}
             totalPages={deratedPager.totalPages}
             pageSize={deratedPager.pageSize}
@@ -1011,7 +1163,7 @@ export function PowerStationsTab({
             onPage={deratedPager.setPage}
             onPageSize={deratedPager.setPageSize}
             noun="stations"
-          />
+          />}
 
           <GridExplanationBlock
             what={
