@@ -12,6 +12,7 @@ import {
 import { cn, formatNumber, formatUnitRate, formatBdtAmount } from '@/lib/utils';
 import { formatPeakFlowTotal } from '@/lib/data/grid/border-imports';
 import { MobileFold } from '@/components/news/power-grid/MobileFold';
+import { useBelowDesktop } from '@/components/news/power-grid/useTapToRead';
 import { EventStudyDateLink } from '@/components/news/power-grid/EventStudyDateLink';
 import { useChartTheme, type ChartTheme } from '@/hooks/useChartTheme';
 import {
@@ -332,6 +333,9 @@ export function PowerGridExplorer({
   // Phones get one chip that opens the four date controls as a sheet; the row
   // itself is untouched and simply docks somewhere else below 40rem.
   const [isDateSheetOpen, setIsDateSheetOpen] = useState(false);
+  // Regional tab: below 1024px the NLDC outage log shows its first 5 events until expanded.
+  const [showAllOutages, setShowAllOutages] = useState(false);
+  const belowDesktop = useBelowDesktop();
 
   // Age badge for the active date. Extracted to lib/data/grid/backlog-badge.ts
   // when this file hit its size budget; the logic is unchanged.
@@ -2823,7 +2827,7 @@ export function PowerGridExplorer({
                   each zone becomes a labelled block instead of something to be
                   dragged sideways. */}
               <div className="grid-explorer-table-wrap">
-                <table className="grid-explorer-table grid-explorer-table--stack">
+                <table className="grid-explorer-table grid-explorer-table--stack ge-zone-compact">
                   <thead>
                     <tr>
                       <th>Grid Zone</th>
@@ -2876,7 +2880,7 @@ export function PowerGridExplorer({
                 </table>
               </div>
 
-              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+              <MobileFold title="About this table"><div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
                 {regionalDemandSource === 'bpdb-published' ? (
                   <>
                     <strong className="text-foreground">This day is BPDB&rsquo;s table, not PGCB&rsquo;s.</strong>{' '}
@@ -2899,12 +2903,12 @@ export function PowerGridExplorer({
                     are computed here.
                   </>
                 )}
-              </div>
+              </div></MobileFold>
 
               {/* Card Metadata Footer */}
               {/* The method behind the only computed column on this card,
                   stated rather than left to be inferred from the D tag. */}
-              <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+              <MobileFold title="How severity is calculated"><div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
                 <span className="font-semibold text-foreground">How severity is calculated</span>
                 <GridProvenanceTag kind="D" className="ml-1.5" />
                 <span className="mx-1.5 text-muted-foreground/50">·</span>
@@ -2915,7 +2919,7 @@ export function PowerGridExplorer({
                 same as averaging the nine zone percentages and will read lower when shedding
                 falls on the smaller zones. Both inputs are published; neither publisher states a
                 severity figure.
-              </div>
+              </div></MobileFold>
 
               <GridCardFooter>
                 {regionalDemandSource === 'bpdb-published' ? (
@@ -2959,10 +2963,10 @@ export function PowerGridExplorer({
                   when the card stands alone (one column on small screens), and
                   min-h-0 lets the scroll container shrink instead of forcing the
                   full list height. */}
-              <div className="space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
-                {dailyOutages.map((o, idx) => (
-                  <div key={idx} className="p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
-                    <div className="flex justify-between font-bold text-foreground">
+              <div className="ge-outage-list space-y-4 flex-[1_1_31.5rem] min-h-0 overflow-y-auto pr-1">
+                {(belowDesktop && !showAllOutages ? dailyOutages.slice(0, 5) : dailyOutages).map((o, idx) => (
+                  <div key={idx} className="ge-outage-item p-3 bg-muted/15 border border-border/30 rounded-lg text-xs space-y-1">
+                    <div className="ge-outage-item__head flex justify-between gap-3 font-bold text-foreground">
                       <span>{o.plant}</span>
                       <span className="text-muted-foreground font-mono font-normal">{o.time}</span>
                     </div>
@@ -2985,6 +2989,16 @@ export function PowerGridExplorer({
                     </div>
                   </div>
                 ))}
+                {/* Phone/tablet only: the full list is one tap away, nothing is dropped. */}
+                {belowDesktop && dailyOutages.length > 5 ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllOutages((v) => !v)}
+                    className="ge-outage-toggle w-full rounded-lg border border-border/50 text-sm font-semibold text-primary"
+                  >
+                    {showAllOutages ? 'Show fewer' : `Show all ${dailyOutages.length}`}
+                  </button>
+                ) : null}
               </div>
 
               {/* Card Metadata Footer */}
@@ -3022,7 +3036,7 @@ export function PowerGridExplorer({
                     zeros drop out of the list and are named together on the
                     "No output" line below each zone — moved, not discarded. */}
                 <div className="grid-explorer-table-wrap">
-                  <table className="grid-explorer-table grid-explorer-table--stack-wide">
+                  <table className="grid-explorer-table grid-explorer-table--stack-wide ge-zone-compact">
                     <thead>
                       <tr>
                         <th>Grid Zone</th>
@@ -3095,7 +3109,7 @@ export function PowerGridExplorer({
                   </table>
                 </div>
 
-                <div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
+                <MobileFold title="Every figure on this card is published"><div className="px-4 pb-3 text-[11px] text-muted-foreground leading-relaxed">
                   <span className="font-semibold text-foreground">Every figure on this card is published</span>
                   <GridProvenanceTag kind="P" className="ml-1.5" />
                   <span className="mx-1.5 text-muted-foreground/50">·</span>
@@ -3105,7 +3119,7 @@ export function PowerGridExplorer({
                   from the other. A dash means the fuel has no column on this day&rsquo;s sheet; a
                   zero means the zone generated none. Figures under 0.01 MKWh are shown as
                   &lsquo;&lt;0.01&rsquo; rather than rounded to nothing.
-                </div>
+                </div></MobileFold>
 
                 <GridCardFooter>
                   <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet, zone-wise generation summary</span>
@@ -3178,7 +3192,7 @@ export function PowerGridExplorer({
                   </h4>
                   <div className="space-y-1.5">
                     {ewicCircuitBars.map((c) => (
-                      <div key={c.circuit} className="flex items-center gap-3 text-[11px]">
+                      <div key={c.circuit} className="ge-circuit-row flex items-center gap-3 text-[11px]">
                         <span className="w-44 shrink-0 text-muted-foreground truncate">{c.circuit}</span>
                         <span className="flex-1 h-3 rounded-sm bg-muted/30 overflow-hidden">
                           <span className="block h-full rounded-sm grid-bar-fill" style={{ width: `${c.pct}%`, background: chartTheme.categorical(c.corridorIndex) }} />
