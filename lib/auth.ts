@@ -1,5 +1,8 @@
 import { cache } from 'react';
+import { headers } from 'next/headers';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/server';
+import { parseBearerHeader, verifyBearerUser } from '@/lib/supabase/bearer';
 import prisma from '@/lib/prisma';
 import type { Role } from '@/lib/constants';
 import {
@@ -29,8 +32,8 @@ export type AuthSession = {
   };
 } | null;
 
-async function resolveAppUser(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+export async function resolveAppUser(
+  supabase: SupabaseClient,
   supabaseUser: {
     id: string;
     email?: string | null;
@@ -121,8 +124,25 @@ async function resolveAppUser(
  * Memoised per request: layout, page and a server action in one render each
  * called this, and each call is a Supabase Auth round trip plus a profiles
  * read plus a Prisma lookup. `cache()` collapses them to one.
+ *
+ * A request with an `Authorization` header (the ESB Studio phone app, which signs in
+ * against Supabase directly and holds no cookie for this site) is judged by that header
+ * ALONE: the token is verified with Supabase and then goes through the same profile /
+ * status / role checks as a cookie session. A malformed, expired or refused token is "not
+ * signed in" — it never falls back to a cookie, so a stale header cannot borrow another
+ * session. Requests without the header behave exactly as before.
  */
 export const auth = cache(async function auth(): Promise<AuthSession> {
+  const authorization = (await headers()).get('authorization');
+  if (authorization !== null) {
+    const token = parseBearerHeader(authorization);
+    if (!token) return null;
+    const verified = await verifyBearerUser(token);
+    if (!verified) return null;
+    const bearerUser = await resolveAppUser(verified.supabase, verified.user);
+    return bearerUser ? { user: bearerUser } : null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

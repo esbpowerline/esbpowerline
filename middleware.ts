@@ -11,6 +11,7 @@ import { isCronAuthorized } from '@/lib/api/cron-auth';
 import { TELEGRAM_WEBHOOK_PATH } from '@/lib/notifications/paths';
 import { isProxyProtectedApi } from '@/lib/api/protected-routes';
 import { resolveEdgeSession } from '@/lib/supabase/edge-session-gate';
+import { parseBearerHeader, verifyBearerUser } from '@/lib/supabase/bearer';
 import { can, type Role } from '@/lib/constants';
 import { checkRateLimit, clientIpFromForwarded, edgeRateLimitKey } from '@/lib/rate-limit';
 import {
@@ -382,6 +383,20 @@ export async function middleware(request: NextRequest) {
 
   if (isProxyProtectedApi(pathname)) {
     if (isCronAuthorized(request)) return response;
+
+    // The phone app sends `Authorization: Bearer <Supabase access token>`. A request that carries
+    // the header is judged by it alone (no cookie fallback): verify the token with Supabase, then
+    // the same session gate and role check as a cookie session. Anything else is 401.
+    const authorization = request.headers.get('authorization');
+    if (authorization !== null) {
+      const token = parseBearerHeader(authorization);
+      const verified = token ? await verifyBearerUser(token) : null;
+      const bearer = await resolveEdgeSession(verified?.user ?? null, verified?.supabase ?? null);
+      if (!bearer.active || !bearer.role || !apiRoleAllowed(pathname, bearer.role)) {
+        return unauthorizedApi(response);
+      }
+      return response;
+    }
 
     const { active, role } = await resolveEdgeSession(user, supabase);
     if (!active || !role || !apiRoleAllowed(pathname, role)) {
