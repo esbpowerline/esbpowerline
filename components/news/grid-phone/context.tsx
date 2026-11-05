@@ -17,6 +17,7 @@ import type { DailyPlantDetail, EnergyCurve, GridDailyData } from '@/lib/data/gr
 import type { PetrobanglaDaily } from '@/lib/data/petrobangla/types';
 import type { GridTierAccessState } from '@/hooks/useGridTierAccess';
 import type { MonthlyRow } from './useGridPhoneData';
+import type { DayProvenance } from '@/lib/data/grid/verification-ledger';
 
 export type PhoneData = {
   /** The open energy day, ISO. */
@@ -41,6 +42,8 @@ export type PhoneData = {
   access: GridTierAccessState;
   /** Jump the whole app to another day. */
   setDate: (iso: string) => void;
+  /** What verify:source says about this day (verification-ledger.ts). */
+  provenance: DayProvenance | null;
 };
 
 export const PhoneDataContext = createContext<PhoneData | null>(null);

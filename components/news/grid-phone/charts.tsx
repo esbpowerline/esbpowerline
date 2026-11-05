@@ -227,7 +227,8 @@ export function LineChart({
         {marker && marker.index >= 0 && marker.index < n && (
           <g aria-hidden>
             <line x1={x(marker.index)} x2={x(marker.index)} y1={f.t - 6} y2={h - f.b} className="gp-marker" />
-            <text x={x(marker.index) + 4} y={f.t - 6} className="gp-tick gp-tick--strong">{marker.label}</text>
+            {/* Near the right edge the label sits left of its rule so it never overruns the plot. */}
+            <text x={x(marker.index) + (x(marker.index) > w - 90 ? -4 : 4)} y={f.t - 6} textAnchor={x(marker.index) > w - 90 ? 'end' : 'start'} className="gp-tick gp-tick--strong">{marker.label}</text>
           </g>
         )}
         {bandPath && <path d={bandPath} fill={band!.color} opacity={0.45} />}

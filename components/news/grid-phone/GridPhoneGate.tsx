@@ -14,13 +14,14 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { TAB_FROM_DESKTOP, type PhoneTab } from './GridPhoneApp';
+import type { LedgerDay } from '@/lib/data/grid/verification-ledger';
 
 const GridPhoneApp = dynamic(() => import('./GridPhoneApp').then((m) => m.GridPhoneApp), { ssr: false });
 
 const CLASSIC_KEY = 'esb-grid-classic-view';
 const PHONE = '(max-width: 767px)';
 
-export function GridPhoneGate({ latestDate, runtimeDates }: { latestDate?: string; runtimeDates?: string[] }) {
+export function GridPhoneGate({ latestDate, runtimeDates, verificationLedger }: { latestDate?: string; runtimeDates?: string[]; verificationLedger?: Record<string, LedgerDay> }) {
   const [phone, setPhone] = useState(false);
   const [classic, setClassic] = useState(false);
   const [boot, setBoot] = useState<{ tab: PhoneTab; date?: string; history?: 'trends' | 'macro' | 'machine' }>({ tab: 'today' });
@@ -70,7 +71,7 @@ export function GridPhoneGate({ latestDate, runtimeDates }: { latestDate?: strin
   // Portalled to <body>: inside <main> the layer sat in the page's stacking
   // context, and the site header and the explorer's sticky date bar drew over it.
   return createPortal(
-    <GridPhoneApp latestDate={latestDate} runtimeDates={runtimeDates} initialTab={boot.tab} initialDate={boot.date} initialHistory={boot.history} onClassic={() => setClassicView(true)} />,
+    <GridPhoneApp latestDate={latestDate} runtimeDates={runtimeDates} verificationLedger={verificationLedger} initialTab={boot.tab} initialDate={boot.date} initialHistory={boot.history} onClassic={() => setClassicView(true)} />,
     document.body,
   );
 }

@@ -19,6 +19,7 @@ import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/availabl
 import { dateRequestable, setDateGuard } from '@/lib/data/grid/client-date-window';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
 import { backlogBadge } from '@/lib/data/grid/backlog-badge';
+import { describeDayProvenance, type LedgerDay } from '@/lib/data/grid/verification-ledger';
 import { isBeyondToday, pendingDayFor, pendingDays } from '@/lib/data/grid/pending-days';
 import { tabAvailability } from '@/lib/data/grid/tab-availability';
 import { findEventStudyForDate } from '@/lib/data/analysis/event-registry';
@@ -76,6 +77,7 @@ export function GridPhoneApp({
   initialTab = 'today',
   initialDate,
   initialHistory = 'trends',
+  verificationLedger,
   onClassic,
 }: {
   latestDate?: string;
@@ -83,6 +85,8 @@ export function GridPhoneApp({
   initialTab?: PhoneTab;
   initialDate?: string;
   initialHistory?: 'trends' | 'macro' | 'machine';
+  /** verify:source summaries, server-read (verification-ledger.server.ts), as the desktop gets them. */
+  verificationLedger?: Record<string, LedgerDay>;
   onClassic: () => void;
 }) {
   const access = useGridTierAccess(latestDate);
@@ -303,6 +307,7 @@ export function GridPhoneApp({
       monthly: monthly.data,
       access,
       setDate,
+      provenance: describeDayProvenance(current, verificationLedger?.[current]),
     };
     const screen =
       tab === 'today' ? <TodayScreen /> :

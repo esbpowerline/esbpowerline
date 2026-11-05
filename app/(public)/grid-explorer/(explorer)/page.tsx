@@ -253,7 +253,7 @@ export default async function PowerGridExplorerPage() {
 
       {/* Below 768px the explorer opens as a full-screen phone app over this
           page; the page itself is unchanged and stays what crawlers read. */}
-      <GridPhoneGate latestDate={latestDate ?? undefined} runtimeDates={runtimeDates} />
+      <GridPhoneGate latestDate={latestDate ?? undefined} runtimeDates={runtimeDates} verificationLedger={verificationLedger} />
 
       <MemberToolsPanel latestDate={latestDate ?? undefined} earliestDate={availableDates[0]} />
 

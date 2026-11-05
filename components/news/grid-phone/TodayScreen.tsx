@@ -1,13 +1,19 @@
 'use client';
 
+import '@/app/grid-phone-today.css';
 import { useState, type ReactNode } from 'react';
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { Bars, fmt, Legend, LineChart, StackArea } from './charts';
 import { Delta, fuelPalette, isNum, maxShed, Row, Section, Stat, useSheet, wd, wholeHours } from './shared';
 import { groupCurve } from './SupplyScreen';
 import { usePhone } from './context';
+import { TodayKpiStrip } from './today-kpi';
+import { TodayLoadNotes } from './today-load';
+import { TodayMixCard, TodayCostCard } from './today-mix';
+import { TodayForecast } from './today-forecast';
+import { TodayStatus } from './today-status';
 
-type Metric = 'gen' | 'mix' | 'shed' | 'flow';
+type Metric = 'gen' | 'mix' | 'flow';
 
 export function TodayScreen() {
   const { date, day, prev, prevDate, week, weekDates, curve, plants } = usePhone();
@@ -40,9 +46,8 @@ export function TodayScreen() {
   const fcByHour = new Map((day.forecast?.hourly ?? []).map((h) => [h.time, h.generationMw]));
 
   const M: Record<Metric, { tab: string; unit: string; value: number | null; prev: number | null; kicker: string; goodUp: boolean; show: boolean }> = {
-    gen: { tab: 'Generation', unit: 'MW', value: s.eveningPeakGen ?? null, prev: prev?.systemStats.eveningPeakGen ?? null, kicker: `Evening peak${s.peakTimes?.eveningPeakGen ? ` · ${s.peakTimes.eveningPeakGen}` : ''}`, goodUp: true, show: true },
+    gen: { tab: '24 hours', unit: 'MW', value: s.eveningPeakGen ?? null, prev: prev?.systemStats.eveningPeakGen ?? null, kicker: `Evening peak${s.peakTimes?.eveningPeakGen ? ` · ${s.peakTimes.eveningPeakGen}` : ''}`, goodUp: true, show: true },
     mix: { tab: 'Fuel mix', unit: 'MW', value: s.eveningPeakGen ?? null, prev: prev?.systemStats.eveningPeakGen ?? null, kicker: 'Generation by fuel', goodUp: true, show: !!grouped },
-    shed: { tab: 'Load shed', unit: 'MW', value: shed, prev: maxShed(prev), kicker: 'Worst hour of load shedding', goodUp: false, show: true },
     flow: { tab: 'East–West', unit: 'MW', value: ewicPeakOf(day), prev: ewicPeakOf(prev), kicker: 'Across the Jamuna, busiest hour', goodUp: true, show: !!ewic },
   };
   const m = M[metric];
@@ -59,40 +64,78 @@ export function TodayScreen() {
       { key: 'fc', values: hours.map((h) => fcByHour.get(h.time) ?? null), color: 'var(--gp-fc)', dash: true, width: 1.5 },
     ];
     const vis = series.map((x) => (hidden.has(x.key) ? { ...x, values: x.values.map(() => null) } : x));
-    chart = (
-      <LineChart
-        ariaLabel="Generation, demand and PGCB forecast by hour"
-        labels={labels}
-        series={vis}
-        band={hasDemand && !hidden.has('gen') && !hidden.has('dem') ? { upper: 1, lower: 0, color: 'var(--gp-bad)' } : undefined}
-        onScrub={(i) => {
-          if (i == null) return setScrub(null);
-          const h = hours[i];
-          const f = fcByHour.get(h.time);
-          setScrub({
-            kicker: `${h.time} · generation`,
-            big: h.generation,
-            sub: (
-              <>
-                {isNum(h.demand) ? <>Demand <b>{fmt(h.demand)}</b></> : 'Demand not published'}
-                {isNum(f) ? <> · forecast <b>{fmt(f)}</b></> : null}
-                {isNum(h.loadShed) && h.loadShed > 0 ? <> · <b style={{ color: 'var(--gp-bad)' }}>{fmt(h.loadShed)} shed</b></> : null}
-              </>
-            ),
-          });
-        }}
-      />
+    const peakT = s.peakTimes?.eveningPeakGen;
+    const peakIdx = peakT ? Math.max(hours.findIndex((h) => h.time === peakT), hours.findIndex((h) => h.time === `${peakT.slice(0, 2)}:00`)) : -1;
+    const shedVals = hours.map((h) => (isNum(h.loadShed) ? h.loadShed : null));
+    const anyShed = shedVals.some(isNum);
+    chart = hours.length === 0 ? (
+      <div className="gp-plot">
+        <div className="gp-empty" style={{ minHeight: 160 }}>
+          <div>
+            <b style={{ color: 'var(--gp-on)' }}>No load curve published for this day</b>
+            <br />
+            PGCB’s report does not include the NLDC load-curve sheet. Daily totals and peaks are unaffected.
+          </div>
+        </div>
+      </div>
+    ) : (
+      <>
+        <LineChart
+          ariaLabel="Generation, demand and PGCB forecast by hour"
+          labels={labels}
+          series={vis}
+          marker={peakIdx >= 0 ? { index: peakIdx, label: 'evening peak' } : undefined}
+          band={hasDemand && !hidden.has('gen') && !hidden.has('dem') ? { upper: 1, lower: 0, color: 'var(--gp-bad)' } : undefined}
+          onScrub={(i) => {
+            if (i == null) return setScrub(null);
+            const h = hours[i];
+            const f = fcByHour.get(h.time);
+            const unmet = isNum(h.demand) && isNum(h.generation) ? h.demand - h.generation : null;
+            const met = isNum(h.demand) && h.demand > 0 && isNum(h.generation) ? (h.generation / h.demand) * 100 : null;
+            const dayMax = s.maxGen ?? null;
+            setScrub({
+              kicker: `${h.time} · generation`,
+              big: h.generation,
+              sub: (
+                <>
+                  {isNum(h.demand) ? <>Demand <b>{fmt(h.demand)}</b></> : 'Demand not published'}
+                  {isNum(f) ? <> · forecast <b>{fmt(f)}</b></> : null}
+                  <br />
+                  {isNum(h.loadShed) ? (h.loadShed > 0 ? <b style={{ color: 'var(--gp-bad)' }}>{fmt(h.loadShed)} shed</b> : 'no shedding') : 'shed not published'}
+                  {unmet != null ? <> · unmet <b>{fmt(Math.max(0, Math.round(unmet)))}</b></> : null}
+                  {met != null ? <> · {met.toFixed(1)}% met</> : null}
+                  {isNum(dayMax) && dayMax > 0 && isNum(h.generation) ? <> · {((h.generation / dayMax) * 100).toFixed(0)}% of day peak</> : null}
+                </>
+              ),
+            });
+          }}
+        />
+        {anyShed && (
+          <div className="gp-tstrip" aria-label="Load shed by hour">
+            <span className="gp-tstrip__l">shed</span>
+            <Bars ariaLabel="Load shedding by hour, sized against the worst hour" values={shedVals} colors={shedVals.map((v) => ((v ?? 0) > 0 ? 'var(--gp-bad)' : 'var(--gp-faint)'))} height={40} />
+          </div>
+        )}
+      </>
     );
     legend = (
-      <Legend
-        hidden={hidden}
-        onToggle={toggle}
-        items={[
-          { key: 'gen', label: 'Generation', color: 'var(--gp-primary)', line: true },
-          ...(hasDemand ? [{ key: 'dem', label: 'Demand', color: 'var(--gp-demand)', line: true }] : []),
-          ...(fcByHour.size ? [{ key: 'fc', label: 'PGCB forecast', color: 'var(--gp-fc)', dash: true }] : []),
-        ]}
-      />
+      <>
+        <Legend
+          hidden={hidden}
+          onToggle={toggle}
+          items={[
+            { key: 'gen', label: 'Generation', color: 'var(--gp-primary)', line: true },
+            ...(hasDemand ? [{ key: 'dem', label: 'Demand', color: 'var(--gp-demand)', line: true }] : []),
+            ...(fcByHour.size ? [{ key: 'fc', label: 'PGCB forecast', color: 'var(--gp-fc)', dash: true }] : []),
+          ]}
+        />
+        {shed != null && (
+          <div className="gp-subline" style={{ marginTop: 8 }}>
+            Cuts in <b>{hours.filter((h) => isNum(h.loadShed) && h.loadShed > 0).length}</b> of {hours.filter((h) => isNum(h.loadShed)).length} published hours
+            {isNum(s.totalEnergyUnserved) ? <> · <b>{fmt(s.totalEnergyUnserved, 2)}</b> MKWh not supplied</> : null}
+          </div>
+        )}
+      </>
     );
   } else if (metric === 'mix' && grouped) {
     const groups = grouped.groups.filter((g) => !hidden.has(g));
@@ -118,21 +161,6 @@ export function TodayScreen() {
       />
     );
     legend = <Legend hidden={hidden} onToggle={toggle} items={grouped.groups.map((g) => ({ key: g, label: g, color: palG[g] }))} />;
-  } else if (metric === 'shed') {
-    const published = hours.filter((h) => isNum(h.loadShed)).length;
-    chart = published ? (
-      <div className="gp-plot">
-        <Bars ariaLabel="Load shedding by hour" values={hours.map((h) => (isNum(h.loadShed) ? h.loadShed : null))} labels={hours.map((h) => (/^(00|06|12|18):00$/.test(h.time) ? h.time : ''))} color="var(--gp-bad)" height={220} />
-      </div>
-    ) : (
-      <div className="gp-plot"><div className="gp-empty" style={{ height: 160 }}>This report publishes load shedding for the evening peak only.</div></div>
-    );
-    legend = published ? (
-      <div className="gp-subline" style={{ marginTop: 12 }}>
-        Cuts in <b>{hours.filter((h) => isNum(h.loadShed) && h.loadShed > 0).length}</b> of {published} published hours
-        {isNum(s.totalEnergyUnserved) ? <> · <b>{fmt(s.totalEnergyUnserved, 2)}</b> MKWh not supplied</> : null}
-      </div>
-    ) : null;
   } else if (metric === 'flow' && ewic) {
     const cols = ['var(--gp-primary)', '#a855f7', 'var(--gp-demand)'];
     const keys = ewic.corridors.map((c) => `ewic:${c}`);
@@ -158,6 +186,7 @@ export function TodayScreen() {
     legend = <Legend hidden={hidden} onToggle={toggle} items={ewic.corridors.map((c, k) => ({ key: keys[k], label: c.replace('-', ' → '), color: cols[k % 3], line: true }))} />;
   }
 
+
   const ps = (plants?.plants ?? []).filter((p) => isNum(p.installedMw) && p.installedMw > 0);
   const ran = ps.filter((p) => isNum(p.eveningPeakMw) && p.eveningPeakMw > 0).length;
   const outages = day.dailyOutages ?? [];
@@ -166,12 +195,10 @@ export function TodayScreen() {
   const week7 = (t: W) => () => open(<WeekSheet title={t.l} unit={t.u} dp={t.dp} prefix={t.prefix} dates={weekDates} values={week.map((d) => t.v(d))} current={weekDates.indexOf(date)} />);
   const at = (t?: string | null) => (t ? ` at ${t}` : '');
 
-  const fc = day.forecast;
-  const fcHours = (fc?.hourly ?? []).filter((h) => h.time.endsWith(':00'));
-  const issuedHour = fc?.issuedAt ? Number(/T(\d{2})/.exec(fc.issuedAt)?.[1] ?? NaN) : NaN;
-
   return (
     <div className="gp-screen">
+      <TodayStatus />
+
       <section className="gp-sec" aria-label="Headline">
         <div className="gp-tabs" role="tablist">
           {(Object.keys(M) as Metric[]).filter((k) => M[k].show).map((k) => (
@@ -185,24 +212,32 @@ export function TodayScreen() {
           {!scrub && shed != null && (shed > 0 ? <span className="gp-status bad">{fmt(shed)} MW short</span> : <span className="gp-status good">Demand met</span>)}
         </div>
         <div className="gp-hero"><b>{fmt(head.big)}</b><small>{m.unit}</small></div>
-        <div className="gp-subline">{head.sub}</div>
+        <div className="gp-subline" style={metric === 'gen' ? { minHeight: 38 } : undefined}>{head.sub}</div>
         {chart}
         {legend}
         <div className="gp-sec__foot">PGCB daily report · NLDC hourly sheet{metric === 'mix' ? ' · fuel groups are our sums' : ''}</div>
       </section>
 
-      <Section title="The day in numbers" meta={day.systemStats.date}>
+      <TodayKpiStrip />
+
+      <TodayLoadNotes />
+
+      <TodayMixCard />
+
+      <TodayCostCard />
+
+      <TodayForecast />
+
+      <Section title="More from the day" meta={s.date}>
         <div className="gp-stats gp-stats--first">
-          <Stat label="Evening peak demand" value={s.eveningPeakDemand} unit="MW" prov="P" detail={<Delta cur={s.eveningPeakDemand ?? null} prev={prev?.systemStats.eveningPeakDemand ?? null} goodUp={false} vs={vs} />} onClick={week7({ l: 'Evening peak demand', v: (d) => d?.systemStats.eveningPeakDemand ?? null, u: 'MW', dp: 0 })} />
           <Stat label="Day peak generation" value={s.dayPeakGen} unit="MW" prov="P" detail={`highest before evening${at(s.peakTimes?.dayPeakGen)}`} onClick={week7({ l: 'Day peak generation', v: (d) => d?.systemStats.dayPeakGen ?? null, u: 'MW', dp: 0 })} />
+          <Stat label="Day peak demand" value={s.dayPeakDemand} unit="MW" prov="P" detail={s.peakTimes?.dayPeakDemand ? `at ${s.peakTimes.dayPeakDemand}` : undefined} onClick={week7({ l: 'Day peak demand', v: (d) => d?.systemStats.dayPeakDemand ?? null, u: 'MW', dp: 0 })} />
           <Stat label="Energy generated" value={s.totalEnergyGen} unit="MKWh" dp={1} prov="P" detail={<Delta cur={s.totalEnergyGen ?? null} prev={prev?.systemStats.totalEnergyGen ?? null} goodUp dp={1} vs={vs} />} onClick={week7({ l: 'Energy generated', v: (d) => d?.systemStats.totalEnergyGen ?? null, u: 'MKWh', dp: 1 })} />
           <Stat label="Energy not supplied" value={s.totalEnergyUnserved} unit="MKWh" dp={2} prov="P" detail={<Delta cur={s.totalEnergyUnserved ?? null} prev={prev?.systemStats.totalEnergyUnserved ?? null} goodUp={false} dp={2} vs={vs} />} onClick={week7({ l: 'Energy not supplied', v: (d) => d?.systemStats.totalEnergyUnserved ?? null, u: 'MKWh', dp: 2 })} />
           <Stat label="Lowest generation" value={s.minGen} unit="MW" prov="P" detail={`overnight trough${at(s.peakTimes?.minGen)}`} onClick={week7({ l: 'Lowest generation', v: (d) => d?.systemStats.minGen ?? null, u: 'MW', dp: 0 })} />
           <Stat label="Hottest in Dhaka" value={s.maxTemp} unit="°C" dp={1} prov="P" onClick={week7({ l: 'Hottest in Dhaka', v: (d) => d?.systemStats.maxTemp ?? null, u: '°C', dp: 1 })} />
-          <Stat label="Cost per unit" value={s.avgProductionCost} unit="Tk/kWh" dp={2} prov="P" detail={<Delta cur={s.avgProductionCost ?? null} prev={prev?.systemStats.avgProductionCost ?? null} goodUp={false} dp={2} vs={vs} />} onClick={week7({ l: 'Cost per unit', v: (d) => d?.systemStats.avgProductionCost ?? null, u: 'Tk/kWh', dp: 2 })} />
-          <Stat label="Fuel cost of the day" value={isNum(s.totalDailyCost) ? s.totalDailyCost / 1e7 : null} unit="crore" prefix="৳" prov="D" note="PGCB prints the day’s fuel cost in taka; shown here in crore (÷ 10 million)." onClick={week7({ l: 'Fuel cost of the day', v: (d) => (isNum(d?.systemStats.totalDailyCost) ? d!.systemStats.totalDailyCost! / 1e7 : null), u: 'crore', dp: 0, prefix: '৳' })} />
-          <Stat label="Gas burned for power" value={s.totalGasSuppliedPower} unit="MMCFD" prov="P" detail="the power sector’s share, not national supply" />
-          <Stat label="Stations at the peak" value={ps.length ? ran : null} unit={ps.length ? `of ${ps.length}` : undefined} prov="D" note="Stations whose evening-peak output PGCB printed as more than zero, out of every station with installed capacity." />
+          <Stat label="Cost per unit" value={s.avgProductionCost > 0 ? s.avgProductionCost : null} unit="Tk/kWh" dp={2} prov="D" note="PGCB’s fuel bill divided by the day’s energy. PGCB prints the bill, not this rate." detail={<Delta cur={s.avgProductionCost ?? null} prev={prev?.systemStats.avgProductionCost ?? null} goodUp={false} dp={2} vs={vs} />} onClick={week7({ l: 'Cost per unit', v: (d) => d?.systemStats.avgProductionCost ?? null, u: 'Tk/kWh', dp: 2 })} />
+          <Stat label="Stations at the peak" value={ps.length ? ran : null} unit={ps.length ? `of ${ps.length}` : undefined} prov="D" note="Stations whose evening-peak output PGCB printed as more than zero, out of every station with installed capacity." detail={ps.length ? undefined : 'no station sheet for this day'} />
         </div>
         <div className="gp-hint">Tap a figure for the last {weekDates.length} days</div>
       </Section>
@@ -210,9 +245,9 @@ export function TodayScreen() {
       {outages.length > 0 && (
         <Section title="Outages" meta={`${outages.length} in PGCB’s log`}>
           <div className="gp-rows">
-            {outages.slice(0, 5).map((o, i) => <OutageRow key={i} o={o} />)}
+            {outages.slice(0, 3).map((o, i) => <OutageRow key={i} o={o} />)}
           </div>
-          {outages.length > 5 && (
+          {outages.length > 3 && (
             <button
               className="gp-more"
               onClick={() =>
@@ -227,37 +262,6 @@ export function TodayScreen() {
             >
               All {outages.length} outages
             </button>
-          )}
-        </Section>
-      )}
-
-      {fc && (
-        <Section
-          title="Against PGCB’s forecast"
-          desc={`Issued ${fc.issuedOn}${fc.issuedAt ? ` at ${fc.issuedAt.slice(11, 16)}` : ''} · differences, not a score`}
-          source={`PGCB daily report · forecast block · ${fc.issuedIn}`}
-        >
-          <div className="gp-stats gp-stats--first">
-            <Stat label="Evening peak" value={isNum(fc.maxGenEveningMw) && isNum(s.eveningPeakGen) ? s.eveningPeakGen - fc.maxGenEveningMw : null} unit="MW" prov="D" note="Actual evening-peak generation minus PGCB’s forecast of it." detail={isNum(fc.maxGenEveningMw) ? `${fmt(s.eveningPeakGen)} actual · ${fmt(fc.maxGenEveningMw)} forecast` : 'not forecast'} />
-            <Stat label="Energy" value={isNum(fc.totalEnergyGenMkwh) && isNum(s.totalEnergyGen) ? s.totalEnergyGen - fc.totalEnergyGenMkwh : null} unit="MKWh" dp={1} prov="D" note="Energy generated minus PGCB’s forecast of it." detail={isNum(fc.totalEnergyGenMkwh) ? `${fmt(s.totalEnergyGen, 1)} actual · ${fmt(fc.totalEnergyGenMkwh, 1)} forecast` : 'not forecast'} />
-            {isNum(fc.maxDemandEveningMw) && <Stat label="Evening peak demand" value={isNum(s.eveningPeakDemand) ? s.eveningPeakDemand - fc.maxDemandEveningMw : null} unit="MW" prov="D" detail={`${fmt(s.eveningPeakDemand)} actual · ${fmt(fc.maxDemandEveningMw)} forecast`} />}
-            {isNum(fc.maxTempC) && <Stat label="Hottest in Dhaka" value={isNum(s.maxTemp) ? s.maxTemp - fc.maxTempC : null} unit="°C" dp={1} prov="D" detail={`${fmt(s.maxTemp, 1)} actual · ${fmt(fc.maxTempC, 1)} forecast`} />}
-          </div>
-          {fcHours.length > 2 && (
-            <>
-              <LineChart
-                ariaLabel="Forecast and measured generation by hour"
-                labels={fcHours.map((h) => h.time)}
-                aspect={0.5}
-                minH={190}
-                series={[
-                  { values: fcHours.map((h) => hours.find((x) => x.time === h.time)?.generation ?? null), color: 'var(--gp-primary)', width: 2.25 },
-                  { values: fcHours.map((h) => h.generationMw), color: 'var(--gp-fc)', dash: true, width: 1.5 },
-                ]}
-                marker={isNum(issuedHour) ? { index: fcHours.findIndex((h) => Number(h.time.slice(0, 2)) >= issuedHour), label: 'issued' } : undefined}
-              />
-              <Legend items={[{ label: 'Measured', color: 'var(--gp-primary)', line: true }, { label: 'Forecast', color: 'var(--gp-fc)', dash: true }]} />
-            </>
           )}
         </Section>
       )}
