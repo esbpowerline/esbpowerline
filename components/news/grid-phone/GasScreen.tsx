@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { PetrobanglaDaily } from '@/lib/data/petrobangla/types';
+import { usePhone } from './context';
 import { fmt, LineChart, Meter, StackBar } from './charts';
 import { dm, Empty, isNum, Prov, Row, Section, Stat, wd } from './shared';
 
@@ -11,7 +11,8 @@ import { dm, Empty, isNum, Prov, Row, Section, Stat, wd } from './shared';
  * Petrobangla's printed total, never the sum of the field rows (rule 4: the two
  * routinely disagree and both stay as filed).
  */
-export function GasScreen({ gas, week, weekDates }: { gas: PetrobanglaDaily | null; week: (PetrobanglaDaily | null)[]; weekDates: string[] }) {
+export function GasScreen() {
+  const { gas, gasWeek: week, weekDates } = usePhone();
   const [scrub, setScrub] = useState<number | null>(null);
   const [allFields, setAllFields] = useState(false);
   const [allPlants, setAllPlants] = useState(false);

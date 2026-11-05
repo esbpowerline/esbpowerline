@@ -1,32 +1,16 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import type { DailyPlantDetail, EnergyCurve, GridDailyData } from '@/lib/data/grid/types';
+import type { GridDailyData } from '@/lib/data/grid/types';
 import { Bars, fmt, Legend, LineChart, StackArea } from './charts';
 import { Delta, fuelPalette, isNum, maxShed, Row, Section, Stat, useSheet, wd, wholeHours } from './shared';
 import { groupCurve } from './SupplyScreen';
+import { usePhone } from './context';
 
 type Metric = 'gen' | 'mix' | 'shed' | 'flow';
 
-export function TodayScreen({
-  date,
-  day,
-  prev,
-  prevDate,
-  week,
-  weekDates,
-  curve,
-  plants,
-}: {
-  date: string;
-  day: GridDailyData;
-  prev: GridDailyData | null;
-  prevDate: string | null;
-  week: (GridDailyData | null)[];
-  weekDates: string[];
-  curve: EnergyCurve | null;
-  plants: DailyPlantDetail | null;
-}) {
+export function TodayScreen() {
+  const { date, day, prev, prevDate, week, weekDates, curve, plants } = usePhone();
   const open = useSheet();
   const s = day.systemStats;
   const vs = prevDate ? wd(prevDate) : undefined;

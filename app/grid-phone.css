@@ -241,3 +241,18 @@ button.gp-row:active { background: var(--gp-surface2); }
 .gp-funnel__row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; font-size: 14px; color: var(--gp-muted); }
 .gp-funnel__row b { color: var(--gp-on); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .gp-funnel__bar { grid-column: 1 / -1; height: 14px; border-radius: 4px; margin-top: 6px; }
+.gp-row .gp-tag { white-space: normal; }
+.gp-stats--3 .gp-stat__l { overflow-wrap: anywhere; }
+.gp-stats--3 .gp-stat__l > span { white-space: normal !important; }
+.gp-prov span { font-size: 10px; }
+/* Four tabs must fit a 360px phone without scrolling: share the row. */
+.gp-tabs { gap: 0; }
+.gp-tabs button { flex: 1 0 auto; padding: 0 6px; text-align: center; }
+.gp-tabs button:first-child { text-align: left; padding-left: 0; }
+.gp-tabs button:last-child { text-align: right; padding-right: 0; }
+
+.gp-icon.is-on { background: var(--gp-primaryC); color: var(--gp-primary); }
+.gp-seg--sticky { position: sticky; top: 0; z-index: 2; box-shadow: 0 0 0 6px var(--gp-bg); }
+/* Hosted desktop panels (Macro, Time Machine, Technical) keep their own cards. */
+.gp-host { min-width: 0; }
+.gp-host.grid-explorer { padding: 0; margin: 0; background: none; }

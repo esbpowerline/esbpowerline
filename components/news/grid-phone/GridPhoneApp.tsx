@@ -24,22 +24,34 @@ import { TodayScreen } from './TodayScreen';
 import { SupplyScreen } from './SupplyScreen';
 import { PlantsScreen } from './PlantsScreen';
 import { GasScreen } from './GasScreen';
-import { TrendsScreen } from './TrendsScreen';
+import { GridScreen } from './GridScreen';
+import { HistoryScreen } from './HistoryScreen';
+import { PhoneDataContext, type PhoneData } from './context';
 
-export type PhoneTab = 'today' | 'supply' | 'plants' | 'gas' | 'trends';
+export type PhoneTab = 'today' | 'supply' | 'grid' | 'plants' | 'gas' | 'history';
+
+/** Which lazily-loaded feeds each screen reads from the context. */
+const NEEDS: Record<PhoneTab, { curve?: boolean; plants?: boolean; gas?: boolean; monthly?: boolean }> = {
+  today: { curve: true, plants: true },
+  supply: { curve: true, plants: true },
+  grid: {},
+  plants: { plants: true },
+  gas: { gas: true },
+  history: { monthly: true },
+};
 
 const TABS: { id: PhoneTab; label: string; icon: ReactNode }[] = [
   { id: 'today', label: 'Today', icon: <path d="M3 17l5-6 4 3 6-8 3 4" /> },
   { id: 'supply', label: 'Supply', icon: <path d="M13 2L4 14h7l-1 8 9-12h-7z" /> },
+  { id: 'grid', label: 'Grid', icon: <><circle cx="6" cy="6" r="2.2" /><circle cx="18" cy="6" r="2.2" /><circle cx="12" cy="18" r="2.2" /><path d="M8 6h8M7 8l4 8M17 8l-4 8" /></> },
   { id: 'plants', label: 'Plants', icon: <path d="M3 21V10l5 3V10l5 3V6l8-3v18z" /> },
   { id: 'gas', label: 'Gas', icon: <path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z" /> },
-  { id: 'trends', label: 'Trends', icon: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /> },
 ];
 
 /** Desktop ?tab= values, so a shared desktop link opens the right phone screen. */
 export const TAB_FROM_DESKTOP: Record<string, PhoneTab> = {
-  overview: 'today', gen: 'supply', regional: 'supply', imports: 'supply', renewables: 'supply',
-  plants: 'plants', gas: 'gas', macro: 'trends', timemachine: 'trends', transmission: 'today',
+  overview: 'today', gen: 'supply', regional: 'grid', imports: 'supply', renewables: 'supply',
+  plants: 'plants', gas: 'gas', macro: 'history', timemachine: 'history', transmission: 'grid',
 };
 
 const Icon = ({ children, size = 22 }: { children: ReactNode; size?: number }) => (
@@ -53,12 +65,14 @@ export function GridPhoneApp({
   runtimeDates = [],
   initialTab = 'today',
   initialDate,
+  initialHistory = 'trends',
   onClassic,
 }: {
   latestDate?: string;
   runtimeDates?: string[];
   initialTab?: PhoneTab;
   initialDate?: string;
+  initialHistory?: 'trends' | 'macro' | 'machine';
   onClassic: () => void;
 }) {
   const access = useGridTierAccess(latestDate);
@@ -80,11 +94,12 @@ export function GridPhoneApp({
   const prevDate = week.length > 1 ? week[week.length - 2] : null;
   const day = useDay(locked ? null : current);
   const weekDays = useDays(week, !locked);
-  const curve = useCurve(locked ? null : current, tab === 'today' || tab === 'supply');
-  const plants = usePlants(locked ? null : current, tab === 'today' || tab === 'plants');
-  const gas = useGasDay(locked ? null : current, tab === 'gas');
-  const gasWeek = useGasDays(week, tab === 'gas' && !locked);
-  const monthly = useMonthly(tab === 'trends');
+  const need = NEEDS[tab];
+  const curve = useCurve(locked ? null : current, !!need.curve);
+  const plants = usePlants(locked ? null : current, !!need.plants);
+  const gas = useGasDay(locked ? null : current, !!need.gas);
+  const gasWeek = useGasDays(week, !!need.gas && !locked);
+  const monthly = useMonthly(!!need.monthly);
 
   const [sheet, setSheet] = useState<ReactNode | null>(null);
   const openSheet = useCallback((c: ReactNode | null) => setSheet(c), []);
@@ -181,19 +196,32 @@ export function GridPhoneApp({
       </div>
     );
   } else {
-    const d = day.data;
-    body =
-      tab === 'today' ? (
-        <TodayScreen date={current} day={d} prev={prevDay} prevDate={prevDate} week={weekData} weekDates={week} curve={curve.data} plants={plants.data} />
-      ) : tab === 'supply' ? (
-        <SupplyScreen day={d} curve={curve.data} />
-      ) : tab === 'plants' ? (
-        plants.status === 'loading' && !plants.data ? <Skeleton /> : <PlantsScreen day={d} plants={plants.data} />
-      ) : tab === 'gas' ? (
-        gas.status === 'loading' && !gas.data ? <Skeleton /> : <GasScreen gas={gas.data} week={gasWeek.data ?? []} weekDates={week} />
-      ) : (
-        <TrendsScreen monthly={monthly.data} week={weekData} weekDates={week} date={current} />
-      );
+    const ctx: PhoneData = {
+      date: current,
+      latestDate: newest ?? current,
+      day: day.data,
+      prevDate,
+      prev: prevDay,
+      weekDates: week,
+      week: weekData,
+      curve: curve.data,
+      plants: plants.data,
+      plantsLoading: plants.status === 'loading',
+      gas: gas.data,
+      gasLoading: gas.status === 'loading',
+      gasWeek: gasWeek.data ?? [],
+      monthly: monthly.data,
+      access,
+      setDate,
+    };
+    const screen =
+      tab === 'today' ? <TodayScreen /> :
+      tab === 'supply' ? <SupplyScreen /> :
+      tab === 'grid' ? <GridScreen /> :
+      tab === 'plants' ? (plants.status === 'loading' && !plants.data ? <Skeleton /> : <PlantsScreen />) :
+      tab === 'gas' ? (gas.status === 'loading' && !gas.data ? <Skeleton /> : <GasScreen />) :
+      <HistoryScreen initialView={initialHistory} />;
+    body = <PhoneDataContext.Provider value={ctx}>{screen}</PhoneDataContext.Provider>;
   }
 
   return (
@@ -208,8 +236,8 @@ export function GridPhoneApp({
               <strong>Grid Explorer</strong>
               <span>{current ? longDate(current) : 'ESB Power Line'}</span>
             </div>
-            <button type="button" className="gp-icon" aria-label="Pick a date" onClick={openCalendar}>
-              <Icon><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
+            <button type="button" className={`gp-icon${tab === 'history' ? ' is-on' : ''}`} aria-label="History: trends, macro and the time machine" aria-pressed={tab === 'history'} onClick={() => setTab(tab === 'history' ? 'today' : 'history')}>
+              <Icon><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" /><path d="M3 3v5h5M12 7v5l4 2" /></Icon>
             </button>
           </div>
           <div className="gp-chips" ref={chipsRef} role="tablist" aria-label="Day">

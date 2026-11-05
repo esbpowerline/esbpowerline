@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import type { EnergyCurve, GridDailyData } from '@/lib/data/grid/types';
+import type { EnergyCurve } from '@/lib/data/grid/types';
 import { fmt, Legend, Meter, StackArea, StackBar } from './charts';
 import { fuelPalette, isNum, Prov, Row, Section } from './shared';
+import { usePhone } from './context';
 
 const GROUP_OF = (fuel: string): string | null => {
   if (/^shortage/i.test(fuel)) return null;
@@ -44,7 +45,8 @@ export function groupCurve(curve: EnergyCurve, hourly = true) {
 
 const U = ({ children }: { children: React.ReactNode }) => <span className="gp-u">{children}</span>;
 
-export function SupplyScreen({ day, curve }: { day: GridDailyData; curve: EnergyCurve | null }) {
+export function SupplyScreen() {
+  const { day, curve } = usePhone();
   const base = fuelPalette(day);
   const pal: Record<string, string> = { ...base, Oil: base.HFO, Renewables: base.Wind };
   const g = curve ? groupCurve(curve) : null;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import type { GridDailyData } from '@/lib/data/grid/types';
+import { usePhone } from './context';
 import { Bars, fmt, Legend, LineChart, StackArea } from './charts';
 import type { MonthlyRow } from './useGridPhoneData';
 import { isNum, monthLabel, Prov, Section, wd } from './shared';
@@ -23,7 +23,8 @@ const FUELS: [string, string, string][] = [
   ['wind', 'Wind', '#22c55e'],
 ];
 
-export function TrendsScreen({ monthly, week, weekDates, date }: { monthly: MonthlyRow[] | null; week: (GridDailyData | null)[]; weekDates: string[]; date: string }) {
+export function TrendsScreen() {
+  const { monthly, week, weekDates, date } = usePhone();
   const [k, setK] = useState<K>('peak');
   const [range, setRange] = useState<number>(24);
   const [i, setI] = useState<number | null>(null);

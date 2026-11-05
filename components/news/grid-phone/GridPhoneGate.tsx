@@ -23,7 +23,7 @@ const PHONE = '(max-width: 767px)';
 export function GridPhoneGate({ latestDate, runtimeDates }: { latestDate?: string; runtimeDates?: string[] }) {
   const [phone, setPhone] = useState(false);
   const [classic, setClassic] = useState(false);
-  const [boot, setBoot] = useState<{ tab: PhoneTab; date?: string }>({ tab: 'today' });
+  const [boot, setBoot] = useState<{ tab: PhoneTab; date?: string; history?: 'trends' | 'macro' | 'machine' }>({ tab: 'today' });
 
   useEffect(() => {
     const mq = window.matchMedia(PHONE);
@@ -36,7 +36,7 @@ export function GridPhoneGate({ latestDate, runtimeDates }: { latestDate?: strin
     const q = new URLSearchParams(window.location.search);
     const t = q.get('tab');
     const d = q.get('date');
-    setBoot({ tab: (t && TAB_FROM_DESKTOP[t]) || 'today', date: d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : undefined });
+    setBoot({ tab: (t && TAB_FROM_DESKTOP[t]) || 'today', date: d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : undefined, history: t === 'macro' ? 'macro' : t === 'timemachine' ? 'machine' : 'trends' });
     return () => mq.removeEventListener('change', sync);
   }, []);
 
@@ -70,7 +70,7 @@ export function GridPhoneGate({ latestDate, runtimeDates }: { latestDate?: strin
   // Portalled to <body>: inside <main> the layer sat in the page's stacking
   // context, and the site header and the explorer's sticky date bar drew over it.
   return createPortal(
-    <GridPhoneApp latestDate={latestDate} runtimeDates={runtimeDates} initialTab={boot.tab} initialDate={boot.date} onClassic={() => setClassicView(true)} />,
+    <GridPhoneApp latestDate={latestDate} runtimeDates={runtimeDates} initialTab={boot.tab} initialDate={boot.date} initialHistory={boot.history} onClassic={() => setClassicView(true)} />,
     document.body,
   );
 }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { DailyPlantDetail, GridDailyData, PlantActual } from '@/lib/data/grid/types';
+import type { PlantActual } from '@/lib/data/grid/types';
+import { usePhone } from './context';
 import { fmt, Meter } from './charts';
 import { Empty, fuelOf, fuelPalette, isNum, Prov, Row, Section, Stat, useSheet } from './shared';
 
@@ -28,7 +29,8 @@ const REASON_COLOR: Record<string, string> = {
 const idleOf = (p: PlantActual) => (isNum(p.presentCapacityMw) && isNum(p.eveningPeakMw) ? p.presentCapacityMw - p.eveningPeakMw : null);
 const short = (s: string) => s.replace(/\s+/g, ' ').trim();
 
-export function PlantsScreen({ day, plants }: { day: GridDailyData; plants: DailyPlantDetail | null }) {
+export function PlantsScreen() {
+  const { day, plants } = usePhone();
   const open = useSheet();
   const pal = fuelPalette(day);
   const list = useMemo(() => (plants?.plants ?? []).filter((p) => isNum(p.installedMw) && p.installedMw > 0), [plants]);
