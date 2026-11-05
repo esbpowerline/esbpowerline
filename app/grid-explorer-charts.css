@@ -226,3 +226,32 @@
     animation: none !important;
   }
 }
+
+/* ── Overview, summary-first (phone + tablet) ─────────────────────────────
+   The mix and cost cards share one slot below 1024px behind a switch
+   (OverviewPanel), the mix donut gives way on phones to the stacked bar and
+   legend that carry the same figures, and the forecast card leads with a
+   verdict while its full measures table folds. Desktop is untouched. */
+.ge-ov-switch { display: none; }
+.ge-fc-verdict { display: none; }
+@media (max-width: 1023px) {
+  .ge-ov-switch { display: block; margin-bottom: -8px; }
+  .ge-ov-switch .forecast-switch__opt { min-height: 44px; justify-content: center; }
+  .ge-ov-switch__sub { font-size: 10px; letter-spacing: 0.04em; }
+  .ge-ov-pair[data-show="mix"] > .ge-ov-cost,
+  .ge-ov-pair[data-show="cost"] > .ge-ov-mix { display: none; }
+
+  .ge-fc-verdict {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;
+  }
+  .ge-fc-verdict__tile {
+    border: 1px solid hsl(var(--border) / 0.5); border-radius: 12px;
+    background: hsl(var(--muted) / 0.15); padding: 10px 12px; min-width: 0;
+  }
+  .ge-fc-verdict__label { font-size: 12px; font-weight: 600; color: hsl(var(--muted-foreground)); line-height: 1.3; }
+  .ge-fc-verdict__value { font-size: 18px; font-weight: 800; line-height: 1.2; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .ge-fc-verdict__sub { font-size: 12px; color: hsl(var(--muted-foreground)); line-height: 1.35; margin-top: 2px; font-variant-numeric: tabular-nums; }
+}
+@media (max-width: 767px) {
+  .ge-ov-pair .grid-explorer-donut-wrap { display: none; }
+}

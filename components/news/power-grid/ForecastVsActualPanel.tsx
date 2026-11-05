@@ -324,6 +324,53 @@ export function ForecastVsActualPanel({
         {toggle ?? <span className="grid-explorer-chip">Forecast</span>}
       </div>
 
+      {/* Phone and tablet lead with the verdict — how far the evening peak and
+          the hourly curve landed from the forecast — and fold the full measures
+          table below it. Desktop hides these tiles and shows the table open
+          (MobileFold is display: contents there). */}
+      {(() => {
+        const peak = rows.find((r) => r.label === 'Peak generation, evening' && r.forecast != null && r.actual != null);
+        const energy = rows.find((r) => r.label === 'Total energy generated' && r.forecast != null && r.actual != null);
+        const signed = (n: number, dp: number) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${fmt(Math.abs(n), dp)}`;
+        const tiles: { label: string; value: string; sub: string }[] = [];
+        if (peak) {
+          const gap = peak.actual! - peak.forecast!;
+          const pct = peak.forecast ? (gap / Math.abs(peak.forecast)) * 100 : null;
+          tiles.push({
+            label: 'Evening peak vs forecast',
+            value: `${signed(gap, 0)} MW`,
+            sub: `${fmt(peak.actual, 0)} actual · ${fmt(peak.forecast, 0)} forecast${pct != null ? ` (${signed(pct, 1)}%)` : ''}`,
+          });
+        }
+        if (meanAbsGap != null) {
+          tiles.push({
+            label: 'Average hourly miss',
+            value: `${fmt(Math.round(meanAbsGap), 0)} MW`,
+            sub: worst ? `widest at ${worst.time} (${signed(Math.round(worst.gap!), 0)} MW)` : `${scored.length} forecast hours`,
+          });
+        } else if (energy) {
+          const gap = energy.actual! - energy.forecast!;
+          tiles.push({
+            label: 'Energy vs forecast',
+            value: `${signed(gap, 2)} MKWh`,
+            sub: `${fmt(energy.actual, 2)} actual · ${fmt(energy.forecast, 2)} forecast`,
+          });
+        }
+        if (!tiles.length) return null;
+        return (
+          <div className="ge-fc-verdict">
+            {tiles.map((t) => (
+              <div key={t.label} className="ge-fc-verdict__tile">
+                <div className="ge-fc-verdict__label">{t.label}</div>
+                <div className="ge-fc-verdict__value">{t.value}</div>
+                <div className="ge-fc-verdict__sub">{t.sub}</div>
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
+      <MobileFold title="All forecast measures">
       <div className="grid-explorer-table-wrap">
         {/* Fixed layout with explicit widths. `grid-explorer-table` uses auto
             layout, which is right for the seven-column fuel table but leaves a
@@ -464,6 +511,8 @@ export function ForecastVsActualPanel({
           </div>
         </div>
       )}
+
+      </MobileFold>
 
       {hourly.length > 0 && (
         <div className="mt-5">

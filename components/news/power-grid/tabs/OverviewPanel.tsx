@@ -1,6 +1,7 @@
 'use client';
 
 import { SAMPLE_1930_COLOR } from '@/lib/data/grid/chart-palette';
+import { useState } from 'react';
 import type * as React from 'react';
 import { Info, Activity } from 'lucide-react';
 import { GridLockedContent } from '@/components/news/power-grid/GridLockedContent';
@@ -68,6 +69,11 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
   const { chartsReady, LOAD_CURVE_COLORS, chartTheme, hoveredIndex, hoveredCostIndex } = ui;
   const { setSelectedDate, setHoveredIndex, setHoveredCostIndex } = actions;
   const { dayWindowStrip, provenanceNote, methodologyBanner } = slots;
+  // Below 1024px the mix and cost cards no longer stack (about 1,350px of
+  // phone); a switch shows one at a time. Desktop ignores it: the switch is
+  // hidden and both cards sit side by side as before (rules in
+  // app/grid-explorer-charts.css, .ge-ov-*).
+  const [pairView, setPairView] = useState<'mix' | 'cost'>('mix');
   return (
     selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
@@ -347,10 +353,32 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
             <span className="font-medium">Reporting Period: 24-Hour SCADA Log (Date: {systemStats.date})</span>
           </GridCardFooter>
         </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="ge-ov-switch" role="group" aria-label="Show the fuel mix or the fuel cost">
+            <div className="forecast-switch w-full">
+              <span
+                className="forecast-switch__thumb"
+                style={{ transform: `translateX(${pairView === 'mix' ? 0 : 100}%)` }}
+                aria-hidden
+              />
+              {([['mix', 'Fuel mix', 'MKWh by fuel'], ['cost', 'Fuel cost', 'Crore BDT']] as const).map(([id, label, sub]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setPairView(id)}
+                  aria-pressed={pairView === id}
+                  className={`forecast-switch__opt${pairView === id ? ' is-active' : ''}`}
+                >
+                  <span className="forecast-switch__day">{label}</span>
+                  <span className="forecast-switch__kind ge-ov-switch__sub">{sub}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="ge-ov-pair grid grid-cols-1 lg:grid-cols-2 gap-6" data-show={pairView}>
           {/* Generation Pie Chart — the card's JSX lives in GenerationMixCard,
               moved verbatim; hover state stays here because the mix stack,
               donut and legend all read it. */}
+          <div className="ge-ov-mix contents">
           <GenerationMixCard
             generationData={generationData}
             pieGenerationData={pieGenerationData}
@@ -363,8 +391,10 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
             sourceFiles={sourceFiles}
             systemStats={systemStats}
           />
+          </div>
 
           {/* Cost Bar Chart — likewise DailyCostCard, moved verbatim. */}
+          <div className="ge-ov-cost contents">
           <DailyCostCard
             dailyCostChartData={dailyCostChartData}
             hasPublishedFuelCost={hasPublishedFuelCost}
@@ -376,6 +406,7 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
             sourceFiles={sourceFiles}
             systemStats={systemStats}
           />
+          </div>
         </div>
 
 
