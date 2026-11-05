@@ -2,6 +2,7 @@ import { getGridSettingsMap } from '@/lib/homepage-content';
 import { normalizeGridSettings } from '@/lib/grid-data';
 import { PowerGridExportControls } from '@/components/members/PowerGridExportControls';
 import { PowerGridExplorerClient } from '@/components/news/PowerGridExplorerClient';
+import { GridPhoneGate } from '@/components/news/grid-phone/GridPhoneGate';
 import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButton';
 import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
 import { prefetchGridExplorerDailyReports } from '@/lib/data/grid/grid-explorer-prefetch.server';
@@ -249,6 +250,10 @@ export default async function PowerGridExplorerPage() {
           verificationLedger={verificationLedger}
         />
       </Suspense>
+
+      {/* Below 768px the explorer opens as a full-screen phone app over this
+          page; the page itself is unchanged and stays what crawlers read. */}
+      <GridPhoneGate latestDate={latestDate ?? undefined} runtimeDates={runtimeDates} />
 
       <MemberToolsPanel latestDate={latestDate ?? undefined} earliestDate={availableDates[0]} />
 
