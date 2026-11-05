@@ -29,3 +29,7 @@
 .gz-sheet-h { font-size: 11px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--gp-muted); margin: var(--s5) 0 var(--s1); }
 .gz-tile { cursor: pointer; }
 .gz-tile .gp-stat__v b { overflow-wrap: anywhere; }
+
+/* Severity lives in the row's sub-line; the bar is scaled to the worst zone (≥ 10%) so small cuts stay visible. */
+.gz-sevtxt { color: var(--gp-warn); font-weight: 600; }
+.gz-sevtxt.good { color: var(--gp-good); }

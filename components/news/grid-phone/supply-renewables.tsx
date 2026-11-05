@@ -138,10 +138,26 @@ export function RenewablesView() {
   };
 
   const [allSt, setAllSt] = useState(false);
+  // The SREDA register is a standing stock, not the day's output, and it is
+  // long: on its own tab it no longer buries the day under nine reference cards.
+  const [part, setPart] = useState<'day' | 'sreda'>('day');
   const shownSt = allSt ? stations : stations.slice(0, 8);
 
   return (
     <>
+      <div className="gp-seg" role="tablist" aria-label="Renewables view">
+        {([['day', 'Output'], ['sreda', 'SREDA register']] as const).map(([id, l]) => (
+          <button key={id} role="tab" aria-selected={part === id} className={part === id ? 'is-on' : ''} onClick={() => setPart(id)}>{l}</button>
+        ))}
+      </div>
+      {part === 'sreda' ? (
+        <>
+          <div className="gp-group-label">Standing capacity, not a day’s output · as of {sreda?.date ?? '—'}</div>
+          <SredaCards sreda={sreda} state={state} />
+          <UnitsGlossary />
+        </>
+      ) : (
+      <>
       <Section title="Renewables today" desc="Tap a figure for its briefing" source="PGCB daily report · SREDA register">
         <div className="gp-stats gp-stats--first">
           <Tile label="Renewable Generation" prov="D" note="Our sum of PGCB’s solar, hydro and wind rows." value={dRows.length ? fmt(energy, 2) : '—'} unit={dRows.length ? 'MKWh' : undefined} detail={`PGCB daily report · ${date}`} onClick={bEnergy} />
@@ -332,9 +348,8 @@ export function RenewablesView() {
         )}
       </Section>
 
-      <div className="gp-group-label">SREDA register · standing capacity, not a day’s output</div>
-      <SredaCards sreda={sreda} state={state} />
-      <UnitsGlossary />
+      </>
+      )}
     </>
   );
 }

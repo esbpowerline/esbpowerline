@@ -216,19 +216,12 @@ export function ZoneDemand({ day }: { day: GridDailyData }) {
             <Row
               key={z.zone}
               name={z.zone}
+              sub={z.loadShed > 0 ? <span className="gz-sevtxt">{fmt(p, 1)}% severity</span> : <span className="gz-sevtxt good">Clean (0%)</span>}
               chevron
               value={<>{fmt(z.demand)} <U>MW</U></>}
               small={z.loadShed > 0 ? <span style={{ color: 'var(--gp-bad)', fontWeight: 600 }}>{fmt(z.loadShed)} MW shed</span> : '0 MW shed'}
               onClick={() => open(<ZoneSheet day={day} z={z} s={s} />)}
-              meter={
-                <>
-                  <div className="gz-sev">
-                    <span>Severity</span>
-                    {z.loadShed > 0 ? <b className="bad">{fmt(p, 1)}%</b> : <b className="good">Clean (0%)</b>}
-                  </div>
-                  <div className="gz-sevbar"><Meter value={z.loadShed > 0 ? Math.min(p, 100) : 0} max={100} color="var(--gp-warn)" /></div>
-                </>
-              }
+              meter={z.loadShed > 0 ? <Meter value={Math.min(p, 100)} max={Math.max(10, ...all.map(sev))} color="var(--gp-warn)" /> : undefined}
             />
           );
         })}
