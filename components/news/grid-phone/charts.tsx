@@ -278,7 +278,12 @@ export function StackArea({
 }: {
   labels: string[];
   groups: { name: string; color: string }[];
-  rows: number[][];
+  /**
+   * rows[i][g]. A null anywhere in a row makes that whole point a gap: with
+   * one layer unpublished the stack's height is unknown, so nothing is drawn
+   * there rather than a total that silently counts the gap as zero.
+   */
+  rows: (number | null)[][];
   aspect?: number;
   minH?: number;
   maxH?: number;
@@ -294,18 +299,34 @@ export function StackArea({
   if (n < 2) return <div className="gp-empty" style={{ height: 160 }}>Not published for this day</div>;
   let body: ReactNode = null;
   if (w > 0) {
-    const tot = rows.map((r) => r.reduce((a, v) => a + v, 0));
+    const ok = rows.map((r) => r.every((v) => v != null && Number.isFinite(v)));
+    const tot = rows.map((r, i) => (ok[i] ? r.reduce<number>((a, v) => a + (v as number), 0) : 0));
     const nt = niceTicks(0, Math.max(...tot, 1), h > 280 ? 5 : 4);
     const step = nt.ticks[1] - nt.ticks[0];
     const x = (i: number) => f.l + (i / (n - 1)) * (w - f.l);
     const y = (v: number) => f.t + (1 - v / nt.hi) * (h - f.t - f.b);
+    // Contiguous runs of complete points; each run is drawn as its own band.
+    const runs: [number, number][] = [];
+    for (let i = 0; i < n; i++) {
+      if (!ok[i]) continue;
+      if (runs.length && runs[runs.length - 1][1] === i - 1) runs[runs.length - 1][1] = i;
+      else runs.push([i, i]);
+    }
     const base = rows.map(() => 0);
     const paths = groups.map((g, gi) => {
-      const top = rows.map((r, i) => base[i] + (r[gi] ?? 0));
-      let d = top.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
-      for (let i = n - 1; i >= 0; i--) d += `L${x(i).toFixed(1)},${y(base[i]).toFixed(1)}`;
+      const top = rows.map((r, i) => base[i] + (ok[i] ? (r[gi] as number) : 0));
+      let d = '';
+      for (const [a0, a1] of runs) {
+        const lo = a0 === a1 ? Math.max(0, a0 - 0.25) : a0;
+        const hi = a0 === a1 ? Math.min(n - 1, a1 + 0.25) : a1;
+        const xs = a0 === a1 ? [lo, hi] : Array.from({ length: a1 - a0 + 1 }, (_, k) => a0 + k);
+        const at = (i: number) => Math.round(Math.min(Math.max(i, a0), a1));
+        d += xs.map((i, k) => `${k ? 'L' : 'M'}${x(i).toFixed(1)},${y(top[at(i)]).toFixed(1)}`).join('');
+        for (let k = xs.length - 1; k >= 0; k--) d += `L${x(xs[k]).toFixed(1)},${y(base[at(xs[k])]).toFixed(1)}`;
+        d += 'Z';
+      }
       top.forEach((v, i) => (base[i] = v));
-      return <path key={g.name} d={`${d}Z`} fill={g.color} stroke="var(--gp-surface)" strokeWidth={0.6} />;
+      return d ? <path key={g.name} d={d} fill={g.color} stroke="var(--gp-surface)" strokeWidth={0.6} /> : null;
     });
     body = (
       <>

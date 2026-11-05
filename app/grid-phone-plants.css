@@ -1,0 +1,18 @@
+/* Plants screen extras: ruled stat lines, hour matrix with sticky first column. */
+.gp-mx { overflow: auto; max-height: 62vh; margin: 0 calc(var(--s4) * -1); border-top: 1px solid var(--gp-line); border-bottom: 1px solid var(--gp-line); }
+.gp-mx table { border-collapse: separate; border-spacing: 0; font-size: 12px; font-variant-numeric: tabular-nums; min-width: 100%; }
+.gp-mx th, .gp-mx td { padding: 8px 8px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--gp-line); background: var(--gp-surface); }
+.gp-mx thead th { position: sticky; top: 0; z-index: 2; color: var(--gp-muted); font-weight: 600; }
+.gp-mx th:first-child, .gp-mx td:first-child { position: sticky; left: 0; z-index: 1; text-align: left; max-width: 150px; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid var(--gp-line); }
+.gp-mx thead th:first-child { z-index: 3; }
+.gp-mx td.is-nil { color: var(--gp-faint); }
+.gp-mx tr.is-total td { font-weight: 650; }
+.gp-cells { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--gp-line); border-left: 1px solid var(--gp-line); margin-top: var(--s3); }
+.gp-cells div { padding: 8px 10px; border-right: 1px solid var(--gp-line); border-bottom: 1px solid var(--gp-line); font-size: 12px; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp-cells b { display: block; font-size: 15px; font-weight: 600; color: var(--gp-on); }
+.gp-cells div.is-cur { background: var(--gp-primaryC); }
+.gp-dim { opacity: .5; }
+.gp-note { font-size: 13px; color: var(--gp-muted); line-height: 1.5; margin: var(--s3) 0 0; }
+.gp-split { display: flex; gap: var(--s2); align-items: center; margin-top: var(--s3); }
+.gp-split .gp-search { flex: 1; }
+.gp-split button { flex: none; height: 46px; padding: 0 var(--s3); border-radius: 12px; border: 1px solid var(--gp-line); background: none; color: var(--gp-on); font-size: 13px; font-weight: 550; }
