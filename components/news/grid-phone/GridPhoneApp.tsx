@@ -165,7 +165,7 @@ export function GridPhoneApp({
   if (!current) body = <Skeleton />;
   else if (locked) {
     body = (
-      <div className="gp-card gp-lock">
+      <div className="gp-sec gp-lock">
         <Icon size={32}><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></Icon>
         <h3>{longDate(current)} is in the archive</h3>
         <p>Your access covers the most recent days. Sign up free to open more of the archive.</p>
@@ -175,7 +175,7 @@ export function GridPhoneApp({
   } else if (day.status === 'loading' && !day.data) body = <Skeleton />;
   else if (!day.data) {
     body = (
-      <div className="gp-card gp-lock">
+      <div className="gp-sec gp-lock">
         <h3>No report for {dm(current)}</h3>
         <p>PGCB’s report for this day is not in the archive yet.</p>
       </div>
@@ -204,20 +204,27 @@ export function GridPhoneApp({
             <button type="button" className="gp-icon" aria-label="Menu" onClick={openMenu}>
               <Icon><path d="M4 6h16M4 12h16M4 18h16" /></Icon>
             </button>
-            <div className="gp-bar__title"><b>ESB</b> Grid Explorer</div>
+            <div className="gp-bar__title">
+              <strong>Grid Explorer</strong>
+              <span>{current ? longDate(current) : 'ESB Power Line'}</span>
+            </div>
             <button type="button" className="gp-icon" aria-label="Pick a date" onClick={openCalendar}>
               <Icon><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
             </button>
           </div>
           <div className="gp-chips" ref={chipsRef} role="tablist" aria-label="Day">
             {chipDates.map((d) => (
-              <button key={d} role="tab" aria-selected={d === current} className={`gp-chip${d === current ? ' is-on' : ''}`} onClick={() => setDate(d)}>
-                {wd(d)} <small>{dm(d)}</small>
+              <button key={d} role="tab" aria-selected={d === current} aria-label={longDate(d)} className={`gp-chip${d === current ? ' is-on' : ''}`} onClick={() => setDate(d)}>
+                <small>{wd(d)}</small>
+                <b>{+d.slice(8)}</b>
               </button>
             ))}
             {current && !chipDates.includes(current) && (
-              <button className="gp-chip is-on">{wd(current)} <small>{dm(current)}</small></button>
+              <button className="gp-chip is-on" aria-label={longDate(current)}><small>{wd(current)}</small><b>{+current.slice(8)}</b></button>
             )}
+            <button className="gp-chip gp-chip--cal" aria-label="Older days" onClick={openCalendar}>
+              <Icon size={20}><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
+            </button>
           </div>
         </header>
 
@@ -260,27 +267,37 @@ function CalendarSheet({ all, allowed, current, signedIn, onPick }: { all: strin
   const [m, setM] = useState((current ?? all[all.length - 1] ?? '').slice(0, 7));
   const mi = months.indexOf(m);
   const allowedSet = useMemo(() => new Set(allowed), [allowed]);
-  const days = all.filter((d) => d.startsWith(m));
-  const label = m ? new Date(`${m}-01T00:00:00Z`).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
-  const anyLocked = days.some((d) => !allowedSet.has(d));
+  const held = useMemo(() => new Set(all), [all]);
+  const [y, mo] = m.split('-').map(Number);
+  const first = new Date(Date.UTC(y, mo - 1, 1)).getUTCDay();
+  const lead = (first + 6) % 7; // weeks start on Monday
+  const daysIn = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+  const label = m ? new Date(Date.UTC(y, mo - 1, 1)).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : '';
+  const cells = Array.from({ length: daysIn }, (_, k) => `${m}-${String(k + 1).padStart(2, '0')}`);
+  const anyLocked = cells.some((d) => held.has(d) && !allowedSet.has(d));
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 12 }}>
-        <button className="gp-icon" aria-label="Previous month" disabled={mi <= 0} onClick={() => setM(months[mi - 1])}>‹</button>
-        <h3 style={{ flex: 1, textAlign: 'center', margin: 0 }}>{label}</h3>
-        <button className="gp-icon" aria-label="Next month" disabled={mi >= months.length - 1} onClick={() => setM(months[mi + 1])}>›</button>
+        <button className="gp-icon" aria-label="Previous month" disabled={mi <= 0} onClick={() => setM(months[mi - 1])}><Icon><path d="M15 6l-6 6 6 6" /></Icon></button>
+        <h3 style={{ flex: 1, textAlign: 'center' }}>{label}</h3>
+        <button className="gp-icon" aria-label="Next month" disabled={mi >= months.length - 1} onClick={() => setM(months[mi + 1])}><Icon><path d="M9 6l6 6-6 6" /></Icon></button>
       </div>
-      <div className="gp-datelist">
-        {days.map((d) => (
-          <button key={d} disabled={!allowedSet.has(d)} className={d === current ? 'is-on' : ''} onClick={() => onPick(d)}>
-            {+d.slice(8)}
-            <small>{allowedSet.has(d) ? wd(d) : '🔒'}</small>
-          </button>
-        ))}
+      <div className="gp-cal">
+        {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => <div key={d} className="gp-cal__dow">{d}</div>)}
+        {Array.from({ length: lead }, (_, k) => <div key={`l${k}`} />)}
+        {cells.map((d) => {
+          const has = held.has(d);
+          const ok = allowedSet.has(d);
+          return (
+            <button key={d} disabled={!ok} aria-label={`${d}${has && !ok ? ', locked' : !has ? ', no report' : ''}`} className={`${d === current ? 'is-on' : ok ? 'has' : has ? 'locked' : ''}`} onClick={() => onPick(d)}>
+              {+d.slice(8)}
+            </button>
+          );
+        })}
       </div>
       {anyLocked && (
-        <p className="gp-sheet__sub" style={{ marginTop: 14, textAlign: 'center' }}>
-          Locked days are in the archive. <Link href={signedIn ? '/members/subscription' : '/sign-up'}>{signedIn ? 'See plans' : 'Sign up free'}</Link> to open them.
+        <p className="gp-sheet__sub" style={{ marginTop: 16, textAlign: 'center' }}>
+          Hatched days are in the archive. <Link href={signedIn ? '/members/subscription' : '/sign-up'}>{signedIn ? 'See plans' : 'Sign up free'}</Link> to open them.
         </p>
       )}
     </>

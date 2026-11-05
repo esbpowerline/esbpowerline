@@ -80,13 +80,81 @@ export function Prov({ kind, note }: { kind: 'P' | 'D'; note?: string }) {
         );
       }}
     >
-      {kind}
+      <span>{kind}</span>
     </button>
   );
 }
 
 export function Source({ children }: { children: ReactNode }) {
-  return <div className="gp-src">{children}</div>;
+  return <div className="gp-sec__foot">{children}</div>;
+}
+
+/** A surface on the page. Title row, optional one-line description, body, source footer. */
+export function Section({ title, desc, meta, source, children, id }: { title?: ReactNode; desc?: ReactNode; meta?: ReactNode; source?: ReactNode; children: ReactNode; id?: string }) {
+  return (
+    <section className="gp-sec" id={id} aria-label={typeof title === 'string' ? title : undefined}>
+      {(title || meta) && (
+        <div className="gp-sec__head">
+          <div>
+            {title && <h2 className="gp-sec__title">{title}</h2>}
+            {desc && <div className="gp-sec__desc">{desc}</div>}
+          </div>
+          {meta && <div className="gp-sec__meta">{meta}</div>}
+        </div>
+      )}
+      {children}
+      {source && <Source>{source}</Source>}
+    </section>
+  );
+}
+
+/** Keeps a P/D mark on the same line as the label's last word, so it never wraps alone. */
+function withMark(label: ReactNode, mark: ReactNode) {
+  if (!mark) return label;
+  if (typeof label !== 'string') return <>{label}{mark}</>;
+  const k = label.lastIndexOf(' ');
+  return (
+    <>
+      {k > 0 ? label.slice(0, k + 1) : ''}
+      <span style={{ whiteSpace: 'nowrap' }}>{k > 0 ? label.slice(k + 1) : label}{mark}</span>
+    </>
+  );
+}
+
+/** One cell of a hairline stat grid. */
+export function Stat({ label, value, unit, prefix, dp = 0, detail, prov, note, onClick }: { label: ReactNode; value: number | null | undefined; unit?: string; prefix?: string; dp?: number; detail?: ReactNode; prov?: 'P' | 'D'; note?: string; onClick?: () => void }) {
+  const inner = (
+    <>
+      <div className="gp-stat__l">{withMark(label, prov && <Prov kind={prov} note={note} />)}</div>
+      <div className="gp-stat__v"><b>{isNum(value) && prefix ? prefix : ''}{fmt(value, dp)}</b>{unit && <small>{unit}</small>}</div>
+      {detail != null && detail !== false && <div className="gp-stat__d">{detail}</div>}
+    </>
+  );
+  return onClick ? (
+    <div className="gp-stat" role="button" tabIndex={0} onClick={onClick} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()} style={{ cursor: 'pointer' }}>{inner}</div>
+  ) : (
+    <div className="gp-stat">{inner}</div>
+  );
+}
+
+/** A ruled list row: swatch · name + sub · value + small. */
+export function Row({ sw, name, sub, value, small, meter, wrap, top, onClick, chevron }: { sw?: string; name: ReactNode; sub?: ReactNode; value?: ReactNode; small?: ReactNode; meter?: ReactNode; wrap?: boolean; top?: boolean; onClick?: () => void; chevron?: boolean }) {
+  const cls = `gp-row${sw ? '' : ' gp-row--nosw'}${top ? ' gp-row--top' : ''}`;
+  const body = (
+    <>
+      {sw && <span className="gp-sw" style={{ background: sw }} />}
+      <div className="gp-row__main">
+        <div className={`gp-row__name${wrap ? ' gp-row__name--wrap' : ''}`}>{name}</div>
+        {sub && <div className="gp-row__sub">{sub}</div>}
+      </div>
+      <div className="gp-row__val">
+        {value != null && <b>{value}{chevron && <span className="gp-chev"> ›</span>}</b>}
+        {small != null && <small>{small}</small>}
+      </div>
+      {meter}
+    </>
+  );
+  return onClick ? <button type="button" className={cls} onClick={onClick}>{body}</button> : <div className={cls}>{body}</div>;
 }
 
 /** Fuel colours — the day's own palette where it carries one. */
@@ -108,21 +176,20 @@ export function fuelOf(label: string): string {
   return label;
 }
 
-export function Skeleton({ heights = [300, 120, 200] }: { heights?: number[] }) {
+export function Skeleton({ heights = [420, 180, 260] }: { heights?: number[] }) {
   return (
-    <>
+    <div className="gp-screen">
       {heights.map((h, i) => (
         <div key={i} className="gp-skel" style={{ height: h }} />
       ))}
-    </>
+    </div>
   );
 }
 
-export function Unavailable({ what, why }: { what: string; why: string }) {
+export function Empty({ title, why }: { title?: string; why: ReactNode }) {
   return (
-    <div className="gp-card">
-      <div className="gp-h">{what}</div>
-      <div className="gp-empty" style={{ minHeight: 80 }}>{why}</div>
-    </div>
+    <Section title={title}>
+      <div className="gp-empty" style={{ minHeight: 96 }}>{why}</div>
+    </Section>
   );
 }
