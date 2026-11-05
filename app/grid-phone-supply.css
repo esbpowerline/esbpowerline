@@ -1,0 +1,77 @@
+/* Supply screen extras (components/news/grid-phone/supply-*.tsx). Uses the gp- tokens only. */
+
+.gps-how { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; margin-top: var(--s2); padding: 0; border: 0; background: none; color: var(--gp-primary); font-size: 14px; font-weight: 600; text-align: left; }
+.gps-how svg { flex: none; }
+.gps-how:active { opacity: .6; }
+
+.gps-link { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); width: 100%; min-height: 52px; padding: var(--s3) 0; border: 0; border-top: 1px solid var(--gp-line); background: none; text-align: left; font-size: 15px; font-weight: 500; color: var(--gp-on); }
+.gps-link:first-child { border-top: 0; }
+.gps-link small { display: block; font-size: 13px; font-weight: 400; color: var(--gp-muted); margin-top: 1px; }
+
+/* briefing / check lines (label · mark on the left, value on the right) */
+.gps-kv { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s3); padding: var(--s3) 0; border-top: 1px solid var(--gp-line); font-size: 14px; font-variant-numeric: tabular-nums; align-items: baseline; }
+.gps-kv:first-of-type { border-top: 0; }
+.gps-kv > span:first-child { color: var(--gp-muted); display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
+.gps-kv > b { font-weight: 600; text-align: right; }
+.gps-kv > small { grid-column: 1 / -1; font-size: 12.5px; color: var(--gp-muted); }
+.gps-note { font-size: 13px; line-height: 1.5; color: var(--gp-muted); margin: var(--s3) 0 0; }
+.gps-note b, .gps-note strong { color: var(--gp-on); font-weight: 600; }
+.gps-ref { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--gp-line); font-size: 12.5px; color: var(--gp-muted); line-height: 1.5; }
+.gps-ref code { font-size: 12px; word-break: break-all; }
+
+.gps-check { margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: 12px; background: var(--gp-surface2); }
+.gps-check__t { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.gps-check .gps-kv { padding: var(--s2) 0; border-top: 0; font-size: 13px; }
+.gps-ok { color: var(--gp-good); font-weight: 650; }
+.gps-warn { color: var(--gp-warn); font-weight: 650; }
+.gps-bad { color: var(--gp-bad); font-weight: 650; }
+
+/* sub-controls inside a section */
+.gps-ctl { display: flex; gap: var(--s2); align-items: center; flex-wrap: wrap; margin-bottom: var(--s3); }
+.gps-switch { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; border: 0; background: none; padding: 0; font-size: 14px; color: var(--gp-on); text-align: left; }
+.gps-switch i { position: relative; width: 38px; height: 22px; border-radius: 11px; background: var(--gp-surface2); box-shadow: inset 0 0 0 1px var(--gp-line); flex: none; transition: background .15s; }
+.gps-switch i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 8px; background: var(--gp-surface); box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+.gps-switch[aria-pressed='true'] i { background: var(--gp-primary); }
+.gps-switch[aria-pressed='true'] i::after { transform: translateX(16px); }
+
+/* matrix tables: sticky first column, own scroller */
+.gps-tbl { margin: var(--s3) calc(var(--s4) * -1) 0; overflow: auto; max-height: 440px; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--gp-line); }
+.gps-tbl--free { max-height: none; }
+.gps-tbl table { border-collapse: separate; border-spacing: 0; font-size: 13px; font-variant-numeric: tabular-nums; width: max-content; min-width: 100%; }
+.gps-tbl th, .gps-tbl td { padding: 9px 12px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--gp-line); background: var(--gp-surface); }
+.gps-tbl th { position: sticky; top: 0; z-index: 2; font-size: 12px; font-weight: 600; color: var(--gp-muted); }
+.gps-tbl th:first-child, .gps-tbl td:first-child { position: sticky; left: 0; z-index: 1; text-align: left; border-right: 1px solid var(--gp-line); }
+.gps-tbl th:first-child { z-index: 3; }
+.gps-tbl tr.is-total td { font-weight: 650; background: var(--gp-surface2); }
+.gps-tbl tr.is-dim td { opacity: .45; }
+.gps-tbl td.gps-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+
+.gps-pill { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap; background: var(--gp-surface2); color: var(--gp-muted); border: 0; }
+.gps-pill--good { background: var(--gp-goodC); color: var(--gp-good); }
+.gps-pill--warn { background: var(--gp-warnC); color: var(--gp-warn); }
+.gps-pill--bad { background: var(--gp-badC); color: var(--gp-bad); }
+.gps-pill--info { background: rgba(14, 165, 233, .13); color: #0369a1; }
+.gps-pill--viol { background: rgba(124, 58, 237, .12); color: #7c3aed; }
+html.theme-dark .gps-pill--info, html.theme-midnight .gps-pill--info { color: #7dd3fc; }
+html.theme-dark .gps-pill--viol, html.theme-midnight .gps-pill--viol { color: #c4b5fd; }
+button.gps-pill { min-height: 28px; cursor: pointer; }
+
+.gps-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.gps-box { margin-top: var(--s4); padding: var(--s3) var(--s4); border-radius: 12px; background: var(--gp-warnC); font-size: 13px; line-height: 1.5; color: var(--gp-on); }
+.gps-box--soft { background: var(--gp-surface2); }
+
+.gps-grp { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: var(--s3); width: 100%; min-height: 56px; padding: var(--s3) var(--s4); border: 0; border-top: 1px solid var(--gp-line); background: none; text-align: left; }
+.gps-grp:first-child { border-top: 0; }
+.gps-grp:active { background: var(--gp-surface2); }
+.gps-grp__c { width: 16px; color: var(--gp-faint); transition: transform .15s; }
+.gps-grp[aria-expanded='true'] .gps-grp__c { transform: rotate(90deg); }
+.gps-kid { padding-left: calc(var(--s4) + 28px); }
+.gps-hatch { fill: url(#gps-hatch); }
+
+/* provenance marks inside legends: the legend's own span/button rules must not stretch them */
+.gp-legend button.gp-prov { min-height: 24px; display: inline-grid; gap: 0; }
+.gp-legend .gp-prov span { display: grid; min-height: 15px; gap: 0; }
+
+/* inside a reconciliation box the label and value stack, so a long value never squeezes the label */
+.gps-check .gps-kv { grid-template-columns: 1fr; }
+.gps-check .gps-kv > b { text-align: left; font-weight: 550; }
