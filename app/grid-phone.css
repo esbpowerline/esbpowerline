@@ -256,3 +256,26 @@ button.gp-row:active { background: var(--gp-surface2); }
 /* Hosted desktop panels (Macro, Time Machine, Technical) keep their own cards. */
 .gp-host { min-width: 0; }
 .gp-host.grid-explorer { padding: 0; margin: 0; background: none; }
+
+/* ── shell parity: badge, latest, study, access, menu extras ─────────── */
+.gp-badge { font-style: normal; font-weight: 600; color: var(--gp-primary); }
+.gp-chip--latest { min-width: 64px; border-style: dashed; }
+.gp-study { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2px var(--s2); margin-bottom: var(--s3); padding: var(--s3) var(--s4); border-radius: 16px; background: rgba(124, 58, 237, .1); color: var(--gp-on) !important; text-decoration: none; }
+.gp-study__k { grid-column: 1; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #7c3aed; }
+.gp-study__t { grid-column: 1; font-size: 14px; font-weight: 550; }
+.gp-study .gp-chev { grid-row: 1 / span 2; grid-column: 2; }
+.gp-access { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); margin-top: var(--s5); padding: var(--s3) var(--s4); border: 1px dashed var(--gp-line); border-radius: 16px; font-size: 13px; color: var(--gp-muted); }
+.gp-access > div { flex: 1 1 100%; }
+.gp-access b { color: var(--gp-on); }
+.gp-access span { display: block; font-size: 12px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.gp-access a, .gp-access button { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--s3); border-radius: 10px; border: 1px solid var(--gp-line); background: var(--gp-surface); font-size: 13px; font-weight: 600; color: var(--gp-on) !important; text-decoration: none; }
+.gp-nav button.is-empty .gp-nav__ind { position: relative; }
+.gp-nav button.is-empty .gp-nav__ind::after { content: ''; position: absolute; top: 3px; right: 12px; width: 7px; height: 7px; border-radius: 4px; background: var(--gp-warn); box-shadow: 0 0 0 2px var(--gp-surface); }
+.gp-menu__export { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: var(--s4); padding: var(--s3) 0; border-top: 1px solid var(--gp-line); font-size: 15px; font-weight: 500; }
+.gp-menu__export small { display: block; font-size: 13px; font-weight: 400; color: var(--gp-muted); margin-top: 1px; }
+.gp-menu__export > :last-child { grid-column: 2; margin-top: var(--s2); }
+.gp-menu__refresh:empty { display: none; }
+.gp-menu__refresh { padding: var(--s3) 0; border-top: 1px solid var(--gp-line); }
+/* The site's dialogs (export, date pickers) must open above the app layer. */
+html.gp-on [role='dialog']:not(.gp-sheet), html.gp-on [data-radix-popper-content-wrapper], html.gp-on [data-state][data-radix-dialog-overlay], html.gp-on .fixed.inset-0[data-state] { z-index: 2147483600 !important; }
+html.gp-on [data-sonner-toaster] { z-index: 2147483640 !important; }

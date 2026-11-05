@@ -18,6 +18,16 @@ import Link from 'next/link';
 import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import { dateRequestable, setDateGuard } from '@/lib/data/grid/client-date-window';
 import { useGridTierAccess } from '@/hooks/useGridTierAccess';
+import { backlogBadge } from '@/lib/data/grid/backlog-badge';
+import { isBeyondToday, pendingDayFor, pendingDays } from '@/lib/data/grid/pending-days';
+import { tabAvailability } from '@/lib/data/grid/tab-availability';
+import { findEventStudyForDate } from '@/lib/data/analysis/event-registry';
+import { getTierStatusMessage } from '@/lib/membership/grid-access-messaging';
+import { GridExportDialog } from '@/components/members/GridExportDialog';
+import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
+import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButton';
+import { GridReportingStandards } from '@/components/news/power-grid/GridReportingStandards';
+import { PowerGridExplorerErrorBoundary } from '@/components/news/PowerGridExplorerErrorBoundary';
 import { SheetContext, dm, longDate, Skeleton, wd } from './shared';
 import { useCurve, useDay, useDays, useGasDay, useGasDays, useMonthly, usePlants, useWeekWindow } from './useGridPhoneData';
 import { TodayScreen } from './TodayScreen';
@@ -81,24 +91,34 @@ export function GridPhoneApp({
     return () => setDateGuard(null);
   }, [access.loading, access.tier, latestDate]);
 
-  const allDates = useMemo(() => Array.from(new Set([...availableDates, ...runtimeDates])).sort(), [runtimeDates]);
-  const allowed = useMemo(() => access.filterDates(allDates), [access, allDates]);
-  const newest = allowed[allowed.length - 1] ?? latestDate ?? allDates[allDates.length - 1] ?? null;
+  const heldDates = useMemo(() => Array.from(new Set([...availableDates, ...runtimeDates])).sort(), [runtimeDates]);
+  const pending = useMemo(() => pendingDays(heldDates[heldDates.length - 1] ?? null), [heldDates]);
+  const allDates = useMemo(() => Array.from(new Set([...heldDates, ...pending.map((d) => d.date)])).sort(), [heldDates, pending]);
+  const allowed = useMemo(() => {
+    const ok = access.filterDates(heldDates);
+    return Array.from(new Set([...ok, ...pending.map((d) => d.date)])).sort();
+  }, [access, heldDates, pending]);
+  const allowedHeld = useMemo(() => allowed.filter((d) => heldDates.includes(d)), [allowed, heldDates]);
+  const newest = allowedHeld[allowedHeld.length - 1] ?? latestDate ?? heldDates[heldDates.length - 1] ?? null;
 
-  const [date, setDate] = useState<string | null>(initialDate && allDates.includes(initialDate) ? initialDate : null);
+  const [date, setDate] = useState<string | null>(initialDate ?? null);
   const current = date ?? newest;
-  const locked = current ? !access.loading && !access.canAccessDate(current) : false;
+  const pendingDay = current ? pendingDayFor(current, heldDates[heldDates.length - 1] ?? null) : null;
+  const future = current ? isBeyondToday(current) : false;
+  const notHeld = !!current && !heldDates.includes(current);
+  const locked = current && !pendingDay && !future ? !access.loading && !access.canAccessDate(current) : false;
+  const skipFetch = locked || !!pendingDay || future;
   const [tab, setTab] = useState<PhoneTab>(initialTab);
 
-  const week = useWeekWindow(allowed, current, 7);
+  const week = useWeekWindow(allowedHeld, current, 7);
   const prevDate = week.length > 1 ? week[week.length - 2] : null;
-  const day = useDay(locked ? null : current);
-  const weekDays = useDays(week, !locked);
+  const day = useDay(skipFetch ? null : current);
+  const weekDays = useDays(week, !skipFetch);
   const need = NEEDS[tab];
-  const curve = useCurve(locked ? null : current, !!need.curve);
-  const plants = usePlants(locked ? null : current, !!need.plants);
-  const gas = useGasDay(locked ? null : current, !!need.gas);
-  const gasWeek = useGasDays(week, !!need.gas && !locked);
+  const curve = useCurve(skipFetch ? null : current, !!need.curve);
+  const plants = usePlants(skipFetch ? null : current, !!need.plants);
+  const gas = useGasDay(skipFetch ? null : current, !!need.gas);
+  const gasWeek = useGasDays(week, !!need.gas && !skipFetch);
   const monthly = useMonthly(!!need.monthly);
 
   const [sheet, setSheet] = useState<ReactNode | null>(null);
@@ -131,6 +151,17 @@ export function GridPhoneApp({
   };
 
   const chipDates = allowed.slice(-14);
+  const study = current ? findEventStudyForDate(current) : undefined;
+  const tierMsg = getTierStatusMessage(access.tier, heldDates.length);
+  // The newest day just outside the reader's window (desktop previewLockedArchiveDate).
+  const lockedPreview = useMemo(() => {
+    const first = allowedHeld[0];
+    if (!first) return null;
+    const older = heldDates.filter((d) => d < first);
+    return older[older.length - 1] ?? null;
+  }, [allowedHeld, heldDates]);
+  const avail = useMemo(() => (day.data ? tabAvailability(day.data) : null), [day.data]);
+  const NAV_TAB: Partial<Record<PhoneTab, string>> = { today: 'overview', supply: 'gen', grid: 'regional', plants: 'plants', gas: 'gas' };
   const weekData = weekDays.data ?? [];
   const prevDay = weekData.length > 1 ? weekData[weekData.length - 2] : null;
 
@@ -162,10 +193,46 @@ export function GridPhoneApp({
             <Icon><rect x="3" y="4" width="18" height="14" rx="2" /><path d="M8 21h8" /></Icon>
             <span>Full desktop view<small>Every table, the time machine, exports and methodology</small></span>
           </button>
+          {access.signedIn && newest && (
+            <div className="gp-menu__export">
+              <Icon><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3" /></Icon>
+              <span>Download grid data<small>Excel, CSV or a branded PDF report, for any range your plan covers</small></span>
+              <GridExportDialog latestDate={newest} earliestDate={heldDates[0]} className="gp-menu__export-btn" />
+            </div>
+          )}
+          {access.signedIn && (
+            <button type="button" onClick={() => openSheet(<><h3>Your exports</h3><p className="gp-sheet__sub">The last five downloads on your account</p><div className="grid-explorer gp-host"><MemberToolsPanel latestDate={newest ?? undefined} earliestDate={heldDates[0]} /></div></>)}>
+              <Icon><path d="M4 5h16v14H4zM4 9h16M9 13h6" /></Icon>
+              <span>Your recent exports<small>Fetch a file again or open your library</small></span>
+            </button>
+          )}
+          {!access.signedIn && (
+            <Link href="/members/login?callbackUrl=/grid-explorer">
+              <Icon><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3" /></Icon>
+              <span>Log in to download data<small>Member access is needed for CSV, Excel and PDF exports</small></span>
+            </Link>
+          )}
           <Link href="/grid-explorer/archive">
             <Icon><path d="M4 7h16M4 12h16M4 17h10" /></Icon>
-            <span>Daily archive<small>Every day since 2013, one page each</small></span>
+            <span>Daily archive<small>Every day since {heldDates[0] ?? '2013'}, one page each</small></span>
           </Link>
+          {newest && (
+            <Link href={`/grid-explorer/${newest}`}>
+              <Icon><path d="M5 4h14v16H5zM9 8h6M9 12h6M9 16h3" /></Icon>
+              <span>Latest day page<small>The headline figures for {newest}, as a page you can share</small></span>
+            </Link>
+          )}
+          <Link href="/analysis">
+            <Icon><path d="M4 19h16M7 16V9M12 16V5M17 16v-4" /></Icon>
+            <span>Event studies<small>Breaks in the record, read day by day</small></span>
+          </Link>
+          {current && day.data && (
+            <button type="button" onClick={() => openSheet(<><h3>Sources and standards</h3><p className="gp-sheet__sub">Where every figure on these screens comes from</p><div className="grid-explorer gp-host"><GridReportingStandards date={day.data!.systemStats.date} sourceFiles={day.data!.sourceFiles} /></div></>)}>
+              <Icon><path d="M12 8h.01M11 12h1v4h1M12 21a9 9 0 110-18 9 9 0 010 18z" /></Icon>
+              <span>Sources and standards<small>Report period, source files, how often each figure changes</small></span>
+            </button>
+          )}
+          <div className="gp-menu__refresh"><RefreshGridDataButton /></div>
           {!access.signedIn && (
             <Link href="/sign-up">
               <Icon><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0" /></Icon>
@@ -178,7 +245,25 @@ export function GridPhoneApp({
 
   let body: ReactNode;
   if (!current) body = <Skeleton />;
-  else if (locked) {
+  else if (future) {
+    body = (
+      <div className="gp-sec gp-lock">
+        <h3>{longDate(current)} has not happened yet</h3>
+        <p>This archive holds days the grid has already run. Pick a day up to today.</p>
+        {newest && <button className="gp-btn" onClick={() => setDate(newest)}>Go to the latest day</button>}
+      </div>
+    );
+  } else if (pendingDay) {
+    body = (
+      <div className="gp-sec gp-lock">
+        <Icon size={32}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Icon>
+        <h3>{pendingDay.status === 'in-progress' ? 'This energy day is still being measured' : 'Awaiting PGCB’s report for this day'}</h3>
+        <p>{pendingDay.note}</p>
+        <p style={{ fontSize: 13 }}>Energy day {current} runs midnight to midnight. PGCB files its report on the morning of {pendingDay.dueDate}. This archive collects it four times a day and publishes it the moment it appears.</p>
+        {newest && <button className="gp-btn" onClick={() => setDate(newest)}>Open the latest report</button>}
+      </div>
+    );
+  } else if (locked) {
     body = (
       <div className="gp-sec gp-lock">
         <Icon size={32}><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></Icon>
@@ -191,8 +276,13 @@ export function GridPhoneApp({
   else if (!day.data) {
     body = (
       <div className="gp-sec gp-lock">
-        <h3>No report for {dm(current)}</h3>
-        <p>PGCB’s report for this day is not in the archive yet.</p>
+        <h3>{notHeld ? 'Report has not been released for this day yet' : 'Report file not loaded yet'}</h3>
+        <p>
+          {notHeld
+            ? `The daily grid status report for ${current} has not been finalized or published by PGCB/NLDC.`
+            : `The ${current} PGCB daily report is in our catalog but could not be fetched — it may still be syncing to the site mirror.`}
+        </p>
+        {newest && current !== newest && <button className="gp-btn" onClick={() => setDate(newest)}>View latest report ({dm(newest)})</button>}
       </div>
     );
   } else {
@@ -221,7 +311,11 @@ export function GridPhoneApp({
       tab === 'plants' ? (plants.status === 'loading' && !plants.data ? <Skeleton /> : <PlantsScreen />) :
       tab === 'gas' ? (gas.status === 'loading' && !gas.data ? <Skeleton /> : <GasScreen />) :
       <HistoryScreen initialView={initialHistory} />;
-    body = <PhoneDataContext.Provider value={ctx}>{screen}</PhoneDataContext.Provider>;
+    body = (
+      <PhoneDataContext.Provider value={ctx}>
+        <PowerGridExplorerErrorBoundary>{screen}</PowerGridExplorerErrorBoundary>
+      </PhoneDataContext.Provider>
+    );
   }
 
   return (
@@ -234,7 +328,10 @@ export function GridPhoneApp({
             </button>
             <div className="gp-bar__title">
               <strong>Grid Explorer</strong>
-              <span>{current ? longDate(current) : 'ESB Power Line'}</span>
+              <span>
+                {current ? longDate(current) : 'ESB Power Line'}
+                {current && newest ? <> · <em className="gp-badge">{backlogBadge(current, newest, pendingDay?.status ?? null).text}</em></> : null}
+              </span>
             </div>
             <button type="button" className={`gp-icon${tab === 'history' ? ' is-on' : ''}`} aria-label="History: trends, macro and the time machine" aria-pressed={tab === 'history'} onClick={() => setTab(tab === 'history' ? 'today' : 'history')}>
               <Icon><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" /><path d="M3 3v5h5M12 7v5l4 2" /></Icon>
@@ -250,6 +347,12 @@ export function GridPhoneApp({
             {current && !chipDates.includes(current) && (
               <button className="gp-chip is-on" aria-label={longDate(current)}><small>{wd(current)}</small><b>{+current.slice(8)}</b></button>
             )}
+            {current && newest && current !== newest && (
+              <button className="gp-chip gp-chip--latest" onClick={() => setDate(newest)} aria-label="Go to the latest day">
+                <small>Go to</small>
+                <b>Latest</b>
+              </button>
+            )}
             <button className="gp-chip gp-chip--cal" aria-label="Older days" onClick={openCalendar}>
               <Icon size={20}><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
             </button>
@@ -257,12 +360,40 @@ export function GridPhoneApp({
         </header>
 
         <main ref={mainRef} className="gp-main" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}>
+          {study && (
+            <Link className="gp-study" href={`/analysis/${study.slug}#day-${current}`}>
+              <span className="gp-study__k">Event study</span>
+              <span className="gp-study__t">This day falls inside “{study.title}”</span>
+              <span className="gp-chev">›</span>
+            </Link>
+          )}
           {body}
+          {!access.loading && (
+            <div className="gp-access">
+              <div>
+                <b>{tierMsg.statusLabel}</b> · {tierMsg.accessWindow}
+                <span>{access.earliestAllowedDate ? `${access.earliestAllowedDate} → ${access.latestDate}` : `Full archive · through ${access.latestDate}`}</span>
+              </div>
+              {tierMsg.upgradeHref && (
+                <Link href={tierMsg.upgradeHref}>{access.tier === 'visitor' ? 'Sign up free' : 'Upgrade'}</Link>
+              )}
+              {access.tier !== 'plan_999' && lockedPreview && (
+                <button type="button" onClick={() => setDate(lockedPreview)}>Preview a locked day</button>
+              )}
+            </div>
+          )}
         </main>
 
         <nav className="gp-nav" aria-label="Sections">
           {TABS.map((t) => (
-            <button key={t.id} type="button" className={t.id === tab ? 'is-on' : ''} aria-current={t.id === tab ? 'page' : undefined} onClick={() => setTab(t.id)}>
+            <button
+              key={t.id}
+              type="button"
+              className={`${t.id === tab ? 'is-on' : ''}${avail && NAV_TAB[t.id] && avail[NAV_TAB[t.id] as keyof typeof avail]?.hasData === false ? ' is-empty' : ''}`}
+              aria-current={t.id === tab ? 'page' : undefined}
+              title={avail && NAV_TAB[t.id] ? avail[NAV_TAB[t.id] as keyof typeof avail]?.reason : undefined}
+              onClick={() => setTab(t.id)}
+            >
               <span className="gp-nav__ind"><Icon>{t.icon}</Icon></span>
               {t.label}
             </button>
