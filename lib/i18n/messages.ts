@@ -34,6 +34,7 @@ export type MessageKey =
   | 'footer.tagline'
   | 'footer.about'
   | 'footer.contact'
+  | 'footer.privacy'
   | 'footer.backToTop'
   | 'brand.kicker'
   | 'brand.lede'
@@ -213,6 +214,7 @@ const EN: Record<MessageKey, string> = {
     'Authoritative coverage for utilities, regulators, IPPs, investors and policymakers.',
   'footer.about': 'About Us',
   'footer.contact': 'Contact ESB',
+  'footer.privacy': 'Privacy',
   'footer.backToTop': 'Back to Top',
   'brand.kicker': 'News portal & magazine',
   'brand.lede':
@@ -407,6 +409,7 @@ const BN: Record<MessageKey, string> = {
     'বিদ্যুৎ কোম্পানি, নিয়ন্ত্রক সংস্থা, আইপিপি, বিনিয়োগকারী ও নীতিনির্ধারকদের জন্য নির্ভরযোগ্য সংবাদ ও বিশ্লেষণ।',
   'footer.about': 'আমাদের সম্পর্কে',
   'footer.contact': 'যোগাযোগ',
+  'footer.privacy': 'গোপনীয়তা',
   'footer.backToTop': 'উপরে যান',
   'brand.kicker': 'সংবাদ পোর্টাল ও ম্যাগাজিন',
   'brand.lede':
