@@ -50,7 +50,7 @@ export default function PrivacyPage() {
         <p className="text-sm text-muted-foreground">Last updated {UPDATED}</p>
         <p className="text-[15px] leading-relaxed text-foreground/80">
           ESB Power Line (esbpowerline.com, the ESB Power Line monthly magazine and our social media pages) is published by
-          Express Broadcast and Communication Ltd., House-381, Road-28, Mohakhali DOHS, Dhaka 1212, Bangladesh. This page
+          Express Broadcast and Communication Ltd., House #36/1, Avenue #01, Block-A, Section-10, Mirpur, Pallabi, Dhaka-1216, Bangladesh. This page
           explains what we collect, why, who handles it for us, and how to have it deleted. We do not sell personal data
           and we do not use it for advertising.
         </p>
