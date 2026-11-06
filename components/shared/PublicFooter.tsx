@@ -193,6 +193,13 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
               >
                 {t('footer.contact')}
               </Link>
+              <Link
+                prefetch={false}
+                href="/privacy"
+                className="inline-flex items-center justify-center px-4 py-2 text-xs font-medium text-muted-foreground hover:text-primary bg-secondary/30 hover:bg-secondary/75 border border-border/40 hover:border-primary/30 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                {t('footer.privacy')}
+              </Link>
               <a
                 href="#top"
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-medium text-muted-foreground hover:text-primary bg-secondary/30 hover:bg-secondary/75 border border-border/40 hover:border-primary/30 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
