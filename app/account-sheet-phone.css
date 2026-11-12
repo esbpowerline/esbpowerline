@@ -79,3 +79,21 @@
 @keyframes acct-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes acct-sheet-fade { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .account-menu__panel, .account-menu__scrim { animation: none !important; } }
+
+/* Owner, 2026-11-12: the account menu "should remain on top right", not a
+   bottom sheet. Same modern contents (header, grouped rows, sign-out), now a
+   dropdown card anchored under the avatar at the top-right corner, dropping
+   down from it. The scrim stays as an invisible tap-catcher with a faint dim. */
+@media (max-width: 767px) {
+  .account-menu__scrim { background: rgba(6, 10, 22, .16); }
+  html body .account-menu__panel {
+    top: calc(env(safe-area-inset-top) + 102px) !important; bottom: auto !important; left: auto !important; right: 8px !important;
+    width: min(320px, calc(100vw - 16px)) !important; max-height: calc(100dvh - 140px);
+    padding: 16px 12px 12px !important; border-radius: 20px !important;
+    border: 1px solid color-mix(in srgb, var(--gp-line) 70%, transparent) !important;
+    box-shadow: 0 18px 48px -12px rgba(10, 14, 22, .35), 0 2px 6px rgba(10, 14, 22, .08) !important;
+    transform-origin: top right; animation: acct-drop .18s cubic-bezier(.23, 1, .32, 1) !important;
+  }
+  .account-menu__panel .account-menu__grab { display: none !important; }
+  @keyframes acct-drop { from { opacity: 0; transform: translateY(-6px) scale(.97); } to { opacity: 1; transform: none; } }
+}
