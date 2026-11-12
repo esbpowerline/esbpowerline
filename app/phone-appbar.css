@@ -110,3 +110,35 @@
   .public-nav-bar__search-pill svg, .hp-appbar__theme svg, .public-nav-bar__account-pill .public-nav-bar__account-glyph { width: 20px !important; height: 20px !important; stroke-width: 1.9; }
   .public-nav-bar__account-pill .public-nav-bar__account-icon-slot { background: none !important; width: 20px !important; height: 20px !important; }
 }
+
+/* Signed-in fix (seen on the S25, 2026-11-12): signed in, the account button
+   carries extra trigger classes whose desktop rules out-ranked the bar's, so
+   it drew 44x38 with a ~44px avatar sitting low, and the right group kept a
+   153px box for two buttons - a 60px hole at the right edge while search was
+   squeezed to 38px. Higher specificity, a content-sized group, and the avatar
+   held to the same 36px disc as the other two controls. */
+@media (max-width: 767px) {
+  html body .public-nav-bar__end .public-nav-bar__utilities { width: auto !important; min-width: 0 !important; flex: none !important; gap: 2px !important; padding: 0 !important; }
+  html body .public-nav-bar__main { gap: 2px !important; }
+  html body .public-nav-bar__start { flex: 1 1 auto !important; }
+  html body .public-nav-bar__start-cluster, html body .public-nav-bar__start-cluster .public-nav-bar__utilities { flex: none !important; }
+  html body .public-nav-bar :is(.public-nav-bar__search-pill, .hp-appbar__theme, .account-menu__trigger) {
+    flex: none !important; width: 44px !important; min-width: 44px !important; height: 44px !important; min-height: 44px !important;
+    padding: 0 !important; margin: 0 !important; display: inline-grid !important; place-items: center !important;
+    border: 0 !important; box-shadow: none !important; transform: none !important;
+    background: radial-gradient(circle, hsl(var(--muted)) 0 18px, transparent 18.5px) !important;
+  }
+  html body .public-nav-bar .account-menu__trigger .public-nav-bar__account-icon-slot {
+    width: 36px !important; height: 36px !important; margin: 0 !important; display: grid !important; place-items: center !important;
+    background: none !important; overflow: hidden; border-radius: 999px;
+  }
+  html body .public-nav-bar .account-menu__trigger.account-menu__trigger--signed-in { background: none !important; }
+  html body .public-nav-bar .account-menu__trigger .public-nav-bar__account-icon-slot > * { width: 36px !important; height: 36px !important; min-width: 0 !important; font-size: 15px !important; line-height: 36px !important; margin: 0 !important; }
+  html body .public-nav-bar .account-menu__trigger .public-nav-bar__account-icon-slot > * * { line-height: inherit; }
+  html body .public-nav-bar .account-menu__trigger .public-nav-bar__account-glyph { width: 20px !important; height: 20px !important; }
+}
+@media (max-width: 767px) {
+  /* globals.css caps every paired pill at --nav-paired-pill-h (38px) with max-width/max-height. */
+  html body .public-nav-bar { --nav-paired-pill-h: 44px; }
+  html body .public-nav-bar :is(.public-nav-bar__search-pill, .hp-appbar__theme, .account-menu__trigger) { max-width: 44px !important; max-height: 44px !important; }
+}
