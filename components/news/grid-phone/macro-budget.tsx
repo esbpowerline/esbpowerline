@@ -4,7 +4,7 @@
  * National Budget & Infra. The desktop's bar-plus-two-lines chart on two axes
  * becomes two short plots under one tapped fiscal year: the allocation (crore
  * Tk) and the megawatts it bought. The tariff chart is the Overview's with
- * this tab's wording; the longitudinal study below is still hosted.
+ * this tab's wording; the longitudinal study below is drawn natively.
  */
 
 import { useMemo } from 'react';
@@ -13,10 +13,10 @@ import { nationalBudgetData } from '@/lib/data/macro/budget';
 import { macroInfrastructureData } from '@/lib/data/macro/infrastructure';
 import { LATEST_BPDB_AUDIT, BERC_BULK_RANGE } from '@/lib/data/macro/tariff';
 import { usePhone } from './context';
-import { Row, Section, useSheet } from './shared';
+import { Prov, Row, Section, useSheet } from './shared';
 import { A, Cap, Foot, InfoPill, Key, KV, Plot, Readout, TablePill, useSel, useSeriesColor, type MacroWindow } from './macro-kit';
 import { TariffCard } from './macro-overview';
-import { HostedLongitudinal } from './macro-hosted';
+import { MacroLongitudinal } from './macro-longitudinal';
 
 const H = 116;
 type Merged = (typeof nationalBudgetData)[number] & Partial<(typeof macroInfrastructureData)[number]>;
@@ -37,7 +37,7 @@ function BudgetCard({ win }: { win: MacroWindow }) {
   const cB = sc('powerBudget'), cC = sc('installedCapacity'), cP = sc('peakGeneration');
   return (
     <Section title="National Budget vs Capacity & Peak Generation" desc="Power sector fiscal allocation (Crore BDT) plotted against installed capacity and peak generation (MW) — Tracked since 2011" meta="FY 2011 - 2027">
-      <Readout kicker={`${d.fiscal_year} Financials`} value={`${d.percentage}%`} unit="of Budget" sub="Power & energy share of the national budget (P)" />
+      <Readout kicker={`${d.fiscal_year} Financials`} value={`${d.percentage}%`} unit="of Budget" sub={<>Power &amp; energy share of the national budget<Prov kind="P" /></>} />
       <Cap color={cB} label="Power Budget (Cr Tk)" prov="P" value={`${d.power_energy_allocation_crore_tk} Cr Tk`} />
       <Plot ariaLabel="Power budget by fiscal year, chart" height={H} labels={labels} sel={i} onSel={setI} series={[{ kind: 'bar', values: data.map((x) => x.power_energy_allocation_crore_tk), color: cB }]} />
       <div className="gpm-cap"><Key items={[{ label: 'Installed Cap. (MW)', color: cC, line: true }, { label: 'Peak Gen. (MW)', color: cP, line: true }]} /></div>
@@ -61,7 +61,8 @@ function BudgetCard({ win }: { win: MacroWindow }) {
           </ul>
           <p><strong>Analytical Insight:</strong> While fiscal allocation to the power sector has historically risen, the proposed FY2026-27 budget allocation dropped sharply to 17,345 Crore BDT (~1.85% of total national budget). This contraction signals a major policy pivot: the government is shifting focus away from massive capacity expansions to reviewing existing power purchase agreements (PPAs), reducing subsidies, and eliminating high capacity payments for underutilized plants.</p>
         </InfoPill>
-        <TablePill title="National Budget vs Capacity and Peak Generation" head={['Fiscal year', 'Power Budget (Cr Tk)', 'Installed Cap. (MW)', 'Peak Gen. (MW)']} rows={data.map((x) => [x.fiscal_year, x.power_energy_allocation_crore_tk, x.installed_capacity_mw ?? '—', x.peak_generation_mw ?? '—'])} />
+        <TablePill title="National Budget vs Capacity and Peak Generation" head={['Fiscal year', { label: 'Power Budget', unit: 'Cr Tk' }, { label: 'Share', unit: '% of budget' }, { label: 'Installed Cap.', unit: 'MW' }, { label: 'Peak Gen.', unit: 'MW' }]}
+          rows={data.map((x) => [x.fiscal_year, x.power_energy_allocation_crore_tk, x.percentage, x.installed_capacity_mw ?? '—', x.peak_generation_mw ?? '—'])} />
       </div>
       <Foot>
         <span>Source: <A href="https://www.mof.gov.bd/">Ministry of Finance</A> &amp; <A href="https://www.bpdb.gov.bd/">BPDB Annual Reports</A></span>
@@ -114,7 +115,7 @@ export function MacroBudget({ win }: { win: MacroWindow }) {
           <span>As published. Not independently audited.</span>
           <span>Reporting Period: FY 2016-17 – FY 2022-23 (BPDB annual reports)</span>
         </>} />
-      <HostedLongitudinal isTruncated={win.isTruncated} allowedYears={win.allowedYears} />
+      <MacroLongitudinal isTruncated={win.isTruncated} allowedYears={win.allowedYears} />
     </>
   );
 }

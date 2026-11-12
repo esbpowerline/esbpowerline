@@ -7,12 +7,13 @@
  */
 
 import { useState } from 'react';
+import { PETROBANGLA_STATEMENTS, PETROBANGLA_BALANCE_SHEET, PETROBANGLA_FINANCIALS_PROVENANCE } from '@/lib/data/companies/petrobangla-financials';
 import { formatNumber } from '@/lib/utils';
 import { bpdbAuditedFinancials, BPDB_FINANCIALS_COVERAGE_NOTE } from '@/lib/data/companies/bpdb';
 import { petrobanglaAuditedFinancials, PETROBANGLA_SERIES_COVERAGE_NOTE } from '@/lib/data/macro/economics';
 import { STATUS_COLORS } from '@/lib/data/grid/chart-palette';
-import { Section } from './shared';
-import { A, Foot, Key, KV, Plot, Readout, TablePill, useSel, useSeriesColor, type MacroWindow } from './macro-kit';
+import { Prov, Section, useSheet } from './shared';
+import { A, DataTable, Foot, Key, KV, Plot, Readout, TablePill, useSel, useSeriesColor, type MacroWindow } from './macro-kit';
 
 const cr = (v: number | null, dp = 2, none = '—') => (v == null ? none : `${formatNumber(v, dp)} Crore BDT`);
 const short = (y: string) => y.replace(/^FY 20/, '').replace(/^FY /, '’');
@@ -27,7 +28,7 @@ function Bpdb({ win }: { win: MacroWindow }) {
   const tone = d.loss == null ? undefined : d.loss < 0 ? 'bad' as const : 'good' as const;
   return (
     <Section title="BPDB Annual Cost, Revenue & Subsidy Profile (Crore BDT)" desc="The gap between what BPDB sells power for and what it costs to supply, against the treasury transfer that covers it — FY 2016-17 to FY 2022-23, as BPDB printed it" meta="Audited Ledger">
-      <Readout kicker={`BPDB ${d.year} Financials`} tone={tone} value={d.loss == null ? '—' : formatNumber(d.loss, 2)} unit="Crore BDT" sub="Operating balance after subsidy (D)" />
+      <Readout kicker={`BPDB ${d.year} Financials`} tone={tone} value={d.loss == null ? '—' : formatNumber(d.loss, 2)} unit="Crore BDT" sub={<>Operating balance after subsidy<Prov kind="D" /></>} />
       <Plot ariaLabel="BPDB Annual Cost, Revenue and Subsidy Profile (Crore BDT), chart" labels={data.map((x) => short(x.year))} sel={i} onSel={setI}
         series={[
           { kind: 'bar', stack: 'a', values: data.map((x) => x.revenue), color: cS },
@@ -44,8 +45,8 @@ function Bpdb({ win }: { win: MacroWindow }) {
           note="ESB PowerLine's arithmetic: (Energy Sales + Subsidy) − Total Operating Expenses. BPDB does not print it, and it is an operating balance — no interest, no other income. Blank where BPDB printed no subsidy." />
       </div>
       <div className="gpm-pills">
-        <TablePill title="BPDB by fiscal year" sub="Crore BDT. Operating balance after subsidy is derived (D); the rest is as printed (P)."
-          head={['Fiscal Year', 'Energy Sales', 'Total Operating Expenses', 'Govt Subsidy Received', 'Operating balance after subsidy']}
+        <TablePill title="BPDB by fiscal year" sub={<>Operating balance after subsidy is derived<Prov kind="D" />; the rest is as printed<Prov kind="P" />.</>}
+          head={['Fiscal Year', { label: 'Energy Sales', unit: 'Crore BDT' }, { label: 'Total Operating Expenses', unit: 'Crore BDT' }, { label: 'Govt Subsidy Received', unit: 'Crore BDT' }, { label: 'Balance after subsidy', unit: 'Crore BDT' }]}
           rows={data.map((x) => [x.year, x.revenue == null ? '—' : formatNumber(x.revenue, 2), formatNumber(x.cost, 2), x.subsidy == null ? '—' : formatNumber(x.subsidy, 2), x.loss == null ? '—' : formatNumber(x.loss, 2)])} />
       </div>
       <Foot>
@@ -55,6 +56,43 @@ function Bpdb({ win }: { win: MacroWindow }) {
       </Foot>
     </Section>
   );
+}
+
+/**
+ * The desktop's "View Full Report" opened /annual-reports/financials in a new
+ * tab. Its Petrobangla figures are a module we hold, so the phone sets them out
+ * in the sheet; the page itself is one same-tab link below, never a new tab.
+ */
+function FullReport() {
+  return (
+    <>
+      <h3>Petrobangla statements, FY 2016-17 and FY 2017-18</h3>
+      <p className="gp-sheet__sub">As held on the Annual Reports page<Prov kind="P" note={PETROBANGLA_FINANCIALS_PROVENANCE} /></p>
+      <div className="gpm-notice gpm-notice--in" style={{ marginTop: 12 }}><b>Unverified</b>{PETROBANGLA_FINANCIALS_PROVENANCE}</div>
+      <p className="gpm-sub">Income statement</p>
+      <DataTable head={['Line', ...PETROBANGLA_STATEMENTS.map((y) => ({ label: y.fy, unit: 'Crore BDT' }))]}
+        rows={[
+          ['Revenue', ...PETROBANGLA_STATEMENTS.map((y) => formatNumber(y.revenueCrore))],
+          ['Cost of sales', ...PETROBANGLA_STATEMENTS.map((y) => formatNumber(y.costOfSalesCrore))],
+          ['Operating result', ...PETROBANGLA_STATEMENTS.map((y) => formatNumber(y.operatingResultCrore))],
+          ['GDES fund receipts', ...PETROBANGLA_STATEMENTS.map((y) => formatNumber(y.gdesFundCrore))],
+        ]} />
+      <p className="gpm-sub">Balance sheet</p>
+      <DataTable head={['Line', ...PETROBANGLA_STATEMENTS.map((y) => ({ label: y.fy, unit: 'Crore BDT' }))]}
+        rows={PETROBANGLA_BALANCE_SHEET.map((r) => [r.label, ...PETROBANGLA_STATEMENTS.map((y) => (r.byYear[y.shortLabel] == null ? '—' : formatNumber(r.byYear[y.shortLabel])))])} />
+      <div className="gpm-foot"><span>Full page, with BPDB beside it: <a href="/annual-reports/financials">Annual Reports · Financials</a></span></div>
+    </>
+  );
+}
+
+function FullReportLink() {
+  const open = useSheet();
+  return <a href="/annual-reports/financials" onClick={(e) => { e.preventDefault(); open(<FullReport />); }}>View</a>;
+}
+
+function FullReportPill() {
+  const open = useSheet();
+  return <button type="button" className="gpm-info" onClick={() => open(<FullReport />)}><span aria-hidden>≡</span>View Full Report (FY 18)</button>;
 }
 
 function Petrobangla({ win }: { win: MacroWindow }) {
@@ -81,9 +119,9 @@ function Petrobangla({ win }: { win: MacroWindow }) {
           <KV label={d.netProfit >= 0 ? 'Net Profit' : 'Net Loss'} prov="P" value={cr(d.netProfit, 0)} sw={cN} tone={d.netProfit >= 0 ? 'good' : 'bad'} sub="Formula: Net Income/Loss = Operating Revenue - Operational & LNG Import Costs" />
         </div>
         <div className="gpm-pills">
-          <TablePill title="Petrobangla by fiscal year" sub="Crore BDT, as published (P)" head={['Fiscal Year', 'Gas Sales Revenue', 'LNG Import Costs', 'Net Profit / Loss', 'Action']}
-            rows={data.map((x) => [x.year, formatNumber(x.revenue), formatNumber(x.lngCost), formatNumber(x.netProfit), x.year === 'FY 18' ? <a key="a" href="/annual-reports/financials" target="_blank">View Full Report</a> : 'N/A'])} />
-          <a className="gpm-info" href="/annual-reports/financials" target="_blank"><span aria-hidden>↗</span>View Full Report (FY 18)</a>
+          <TablePill title="Petrobangla by fiscal year" sub="Crore BDT, as published (P)" head={['Fiscal Year', { label: 'Gas Sales Revenue', unit: 'Crore BDT' }, { label: 'LNG Import Costs', unit: 'Crore BDT' }, { label: 'Net Profit / Loss', unit: 'Crore BDT' }, { label: 'Full report', text: true }]}
+            rows={data.map((x) => [x.year, formatNumber(x.revenue), formatNumber(x.lngCost), formatNumber(x.netProfit), x.year === 'FY 18' ? <FullReportLink key="a" /> : 'N/A'])} />
+          <FullReportPill />
         </div>
         <Foot>
           <span>Source: <A href="https://www.petrobangla.org.bd/">Petrobangla Audited Financial Accounts</A> (Petrobangla Audited Balance Sheets). As published. Not independently audited.</span>

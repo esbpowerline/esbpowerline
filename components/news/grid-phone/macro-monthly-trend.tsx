@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { formatNumber } from '@/lib/utils';
 import type { PgcbMonthlySeriesRecord } from '@/lib/data/companies/pgcb';
 import { LineChart } from './charts';
-import { monthLabel, Section } from './shared';
+import { monthLabel, Prov, Section } from './shared';
 import { A, Foot, Key, KV, Readout, TablePill, useFuelColor, useSeriesColor } from './macro-kit';
 
 type Metric = 'peaks' | 'energy' | 'fuels';
@@ -67,7 +67,7 @@ export function MonthlyTrend({ local, series, selectedKey }: { local: PgcbMonthl
         <KV label="Deficit Gap" value={`${formatNumber(deficit)} MW`} tone="bad" sub={deficit > 0 && <>Deficit Share: {deficitPct.toFixed(1)}%</>} />
       </>
     );
-    table = <TablePill label="All months" title="Monthly peaks" sub="MW, as PGCB printed them" head={['Month', 'Estimated Peak Demand', 'Maximum Peak Generation']} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.max_evening_peak_demand), formatNumber(m.max_evening_peak_gen)])} />;
+    table = <TablePill label="All months" title="Monthly peaks" sub="MW, as PGCB printed them" head={['Month', { label: 'Est. Peak Demand', unit: 'MW' }, { label: 'Max Peak Generation', unit: 'MW' }]} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.max_evening_peak_demand), formatNumber(m.max_evening_peak_gen)])} />;
   } else if (metric === 'energy') {
     const eYoY = yoy(d.total_net_generation, prev?.total_net_generation);
     const days = daysInMonth(d.month, d.year);
@@ -82,7 +82,7 @@ export function MonthlyTrend({ local, series, selectedKey }: { local: PgcbMonthl
         <KV label="Avg continuous dispatch" prov="D" note="The month’s net generation spread evenly over every hour of the month." value={`${formatNumber(Math.round(avgMW))} MW`} sub={<>Calculated across {days} operational days</>} />
       </>
     );
-    table = <TablePill label="All months" title="Monthly energy generation" sub="MKWh, as PGCB printed it" head={['Month', 'Total Monthly Energy Generation']} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.total_net_generation, 1)])} />;
+    table = <TablePill label="All months" title="Monthly energy generation" sub="MKWh, as PGCB printed it" head={['Month', { label: 'Total Monthly Energy Generation', unit: 'MKWh' }]} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.total_net_generation, 1)])} />;
   } else {
     const val = d.generation_by_fuel[fuel] ?? 0;
     const prevVal = prev ? prev.generation_by_fuel[fuel] || 0 : 0;
@@ -98,11 +98,11 @@ export function MonthlyTrend({ local, series, selectedKey }: { local: PgcbMonthl
         <KV label="Total Month Net" prov="P" value={`${formatNumber(d.total_net_generation, 1)} MKWh`} />
       </>
     );
-    table = <TablePill label="All months" title={`Monthly generation from ${fuel}`} sub="MKWh, as PGCB printed it" head={['Month', `${fuel} generation`]} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.generation_by_fuel[fuel] ?? 0, 1)])} />;
+    table = <TablePill label="All months" title={`Monthly generation from ${fuel}`} sub="MKWh, as PGCB printed it" head={['Month', { label: `${fuel} generation`, unit: 'MKWh' }]} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.generation_by_fuel[fuel] ?? 0, 1)])} />;
   }
 
   return (
-    <Section title="PGCB 13-Year Historical Growth Trends" desc={<>Grid operational metrics charted monthly from 2013 to 2026 — the plotted values are PGCB&apos;s own (P), the year-on-year changes below are ours (D) • Tracked since January 2013</>} meta="Monthly">
+    <Section title="PGCB 13-Year Historical Growth Trends" desc={<>Grid operational metrics charted monthly from 2013 to 2026 — the plotted values are PGCB&apos;s own<Prov kind="P" />, the year-on-year changes below are ours<Prov kind="D" /> • Tracked since January 2013</>} meta="Monthly">
       <div className="gp-tabs" role="tablist">
         {([['peaks', 'Grid Peaks'], ['energy', 'Energy'], ['fuels', 'Fuel Trends']] as const).map(([id, l]) => (
           <button key={id} role="tab" aria-selected={metric === id} className={metric === id ? 'is-on' : ''} onClick={() => setMetric(id)}>{l}</button>

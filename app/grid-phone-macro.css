@@ -131,12 +131,28 @@
 .gp .gpm-prose strong { color: var(--gp-on); font-weight: 600; }
 .gp .gpm-hl { display: flex; justify-content: space-between; gap: 12px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gp-line); font-size: 12px; color: var(--gp-muted); }
 .gp .gpm-hl b { color: var(--gp-on); font-weight: 700; text-align: right; }
-.gp .gpm-tablewrap { overflow-x: auto; margin: 0 -16px; padding: 0 16px; }
-.gp .gpm-table { border-collapse: collapse; min-width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
-.gp .gpm-table th { padding: 6px 12px 6px 0; text-align: right; font-size: 10px; font-weight: 700; letter-spacing: .04em; color: var(--gp-faint); border-bottom: 1px solid var(--gp-line); vertical-align: bottom; white-space: normal; min-width: 62px; line-height: 1.3; }
-.gp .gpm-table td { padding: 8px 12px 8px 0; text-align: right; border-bottom: 1px solid var(--gp-line); white-space: nowrap; }
-.gp .gpm-table th:first-child, .gp .gpm-table td:first-child { text-align: left; font-weight: 700; position: sticky; left: -16px; background: var(--gp-surface); padding-left: 16px; margin-left: -16px; }
-.gp .gpm-table th:last-child, .gp .gpm-table td:last-child { padding-right: 0; }
+/* The shared sheet table (macro-kit DataTable). Edge to edge in the sheet; the
+   name column sticks while the figures scroll; every figure column is right
+   aligned on tabular digits; units sit under the header, never in a cell. */
+.gp .gpm-tablewrap { --gpm-gut: 20px; overflow-x: auto; margin: 16px calc(-1 * var(--gpm-gut)) 0; scrollbar-width: none; }
+.gp:not([data-look='cards']) .gpm-tablewrap { --gpm-gut: var(--s4, 16px); }
+.gp .gpm-tablewrap::-webkit-scrollbar { display: none; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table { display: table; width: 100%; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; line-height: 1.35; font-variant-numeric: tabular-nums; margin: 0; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table :is(th, td) { padding: 10px 0 10px 16px; border: 0; border-top: 1px solid var(--gp-line); text-align: right; vertical-align: baseline; white-space: nowrap; background: var(--gp-surface); }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table thead th { padding-top: 0; padding-bottom: 8px; border-top: 0; vertical-align: bottom; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--gp-faint); white-space: normal; min-width: 64px; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table thead th > span { display: block; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table thead th > small { display: block; margin-top: 2px; font-size: 10px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--gp-faint); }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table td { color: var(--gp-on); font-weight: 500; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table .gpm-td0 { position: sticky; left: 0; z-index: 1; text-align: left; padding-left: var(--gpm-gut); padding-right: 4px; min-width: 0; font-weight: 600; color: var(--gp-on); }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table thead .gpm-td0 { color: var(--gp-faint); font-weight: 700; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table tbody .gpm-td0 { font-size: 12px; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table .gpm-tdt { text-align: left; white-space: normal; min-width: 96px; }
+.gp .gp-sheet table.gpm-table :is(th, td):last-child, .gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table :is(th, td):last-child { padding-right: var(--gpm-gut); }
+.gp .gpm-tablewrap.gpm-tablewrap table.gpm-table.gpm-table a { color: var(--gp-primary); font-weight: 600; text-decoration: none; }
+.gp .gpm-tablewrap + * { margin-top: 12px; }
+
+/* Plot y values sit inside the plot over their gridline, haloed so a bar never hides them. */
+.gp .gpm-ytick { font-size: 10px; fill: var(--gp-faint); paint-order: stroke; stroke: var(--gp-surface); stroke-width: 3px; stroke-linejoin: round; }
 
 /* Hosted desktop parts (fallbacks) get a quiet label so the seam is honest. */
 .gp .gpm-hosted { min-width: 0; }

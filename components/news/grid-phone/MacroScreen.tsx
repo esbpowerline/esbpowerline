@@ -7,8 +7,8 @@
  * composites and desktop cards in 390px. This screen reads the SAME modules
  * the desktop reads (lib/data/macro/**, the PGCB monthly hooks, the BPDB
  * accounts) and applies the same tier window, and redraws each sub-tab for a
- * phone. Sub-tab order is the desktop's. Parts not yet redrawn stay hosted
- * (macro-hosted.tsx) so no figure is lost in the meantime.
+ * phone. Sub-tab order is the desktop's. The one part not yet redrawn (the
+ * monthly archive's sheet detail) stays hosted (macro-hosted.tsx).
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -26,7 +26,8 @@ import { MacroGlobal } from './macro-global';
 import { MacroBudget } from './macro-budget';
 import { MacroReports } from './macro-reports';
 import { MacroInsights } from './macro-insights';
-import { HostedReserves, HostedVerification } from './macro-hosted';
+import { MacroReserves } from './macro-reserves';
+import { MacroVerify } from './macro-verify';
 
 export type MacroId = 'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'system_loss' | 'insights' | 'verification';
 
@@ -100,14 +101,14 @@ export function MacroScreen({ initial = 'overview' }: { initial?: MacroId }) {
 
       {tab === 'overview' && <MacroOverview win={win} />}
       {tab === 'monthly' && <MacroMonthly win={win} />}
-      {tab === 'reserves' && <HostedReserves selectedDate={p.date} systemStatsDate={p.day.systemStats?.date || 'Jun 2026'} pgcbGasTotal={totalGasSupply} />}
+      {tab === 'reserves' && <MacroReserves selectedDate={p.date} systemStatsDate={p.day.systemStats?.date || 'Jun 2026'} pgcbGasTotal={totalGasSupply} />}
       {tab === 'pricing' && <MacroPricing win={win} />}
       {tab === 'global' && <MacroGlobal win={win} />}
       {tab === 'budget' && <MacroBudget win={win} />}
       {tab === 'reports' && <MacroReports win={win} />}
       {tab === 'system_loss' && <MacroLoss win={win} />}
       {tab === 'insights' && <MacroInsights />}
-      {tab === 'verification' && <HostedVerification latestGridDay={p.latestDate} />}
+      {tab === 'verification' && <MacroVerify latestGridDay={p.latestDate} />}
     </>
   );
 }

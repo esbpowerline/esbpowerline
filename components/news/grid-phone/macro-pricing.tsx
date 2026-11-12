@@ -44,7 +44,7 @@ export function MacroPricing({ win }: { win: MacroWindow }) {
             <p><strong>Analytical Insight:</strong> The rapid rise in the exchange rate (from ~85 Tk in 2021 to 122 Tk in 2026) shows a severe depreciation (~43%) of the BDT. This currency devaluation acts as a direct multiplier on imported fuel costs, triggering high domestic inflation. It signals that energy security in Bangladesh is heavily coupled with foreign exchange reserve stability.</p>
             <p>Source Data: Weighted Average Interbank Exchange Rate &amp; Consumer Price Index. Source: Bangladesh Bank &amp; BBS Databases. As published. Not independently audited.</p>
           </InfoPill>
-          <TablePill title="Macro Pressure Variables" head={['Year', 'USD Exchange Rate (BDT)', 'Inflation Rate (%)']} rows={data.map((x) => [x.year, x.exchangeRate.toFixed(2), x.inflation.toFixed(2)])} />
+          <TablePill title="Macro Pressure Variables" head={['Year', { label: 'USD Exchange Rate', unit: 'BDT/USD' }, { label: 'Inflation Rate (CPI)', unit: '%' }]} rows={data.map((x) => [x.year, x.exchangeRate.toFixed(2), x.inflation.toFixed(2)])} />
         </div>
         <Foot>
           <span>Source: <A href="https://www.bb.org.bd/">Bangladesh Bank Interbank Weighted Average Statistics</A> &amp; <A href="http://bbs.gov.bd/">BBS Inflation Database</A></span>
@@ -65,7 +65,7 @@ export function MacroPricing({ win }: { win: MacroWindow }) {
             <p><strong>Analytical Insight:</strong> The charts capture the extreme volatility of spot LNG compared to imported coal. The massive price spike in 2022 highlights the vulnerability of relying on global energy spot markets, whereas coal offers relatively more stable pricing, though still high. This shows the necessity of transitioning towards longer-term contracts rather than relying on spot imports.</p>
             <p>Indices: Platts JKM Spot Gas LNG &amp; Newcastle Thermal Coal Price Index. Source: Petrobangla LNG Division / BPDB Coal Purchase audits. As published. Not independently audited.</p>
           </InfoPill>
-          <TablePill title="Global Fuel Commodity Import Costs" head={['Year', 'Spot LNG (USD/MMBtu)', 'Import Coal (USD/Ton)']} rows={data.map((x) => [x.year, x.spotLng.toFixed(2), x.importCoal.toFixed(2)])} />
+          <TablePill title="Global Fuel Commodity Import Costs" head={['Year', { label: 'Spot LNG', unit: 'USD/MMBtu' }, { label: 'Import Coal', unit: 'USD/Ton' }]} rows={data.map((x) => [x.year, x.spotLng.toFixed(2), x.importCoal.toFixed(2)])} />
         </div>
         <Foot>
           <span>Source: <A href="https://www.opec.org/">OPEC Bulletin Daily Spot Prices</A> &amp; <A href="https://www.spglobal.com/commodityinsights/en">Platts JKM LNG Assessments</A> / BPC Accounts</span>
@@ -86,8 +86,8 @@ export function MacroPricing({ win }: { win: MacroWindow }) {
         </div>
         <div className="gpm-pills">
           <TablePill title="Retail Fuel & Macro Pricing Benchmarks" sub="Every year held"
-            head={['Year', 'Retail Diesel (Tk/L)', 'Retail Octane (Tk/L)', 'Spot LNG (USD/MMBtu)', 'Import Coal (USD/Ton)', 'Exchange Rate (BDT/USD)', 'Inflation Rate (CPI %)']}
-            rows={data.map((x) => [x.year, `${x.retailDiesel.toFixed(2)} Tk`, `${x.retailOctane.toFixed(2)} Tk`, `$${x.spotLng.toFixed(2)}`, `$${x.importCoal.toFixed(2)}`, `${x.exchangeRate.toFixed(2)} Tk`, `${x.inflation.toFixed(2)}%`])} />
+            head={['Year', { label: 'Retail Diesel', unit: 'Tk/L' }, { label: 'Retail Octane', unit: 'Tk/L' }, { label: 'Spot LNG', unit: 'USD/MMBtu' }, { label: 'Import Coal', unit: 'USD/Ton' }, { label: 'Exchange Rate', unit: 'BDT/USD' }, { label: 'Inflation Rate (CPI)', unit: '%' }]}
+            rows={data.map((x) => [x.year, x.retailDiesel.toFixed(2), x.retailOctane.toFixed(2), x.spotLng.toFixed(2), x.importCoal.toFixed(2), x.exchangeRate.toFixed(2), x.inflation.toFixed(2)])} />
         </div>
         <Foot>
           <span>Source: <A href="https://bpc.gov.bd/">BPC Retail Gazettes</A> &amp; <A href="https://www.bb.org.bd/">Bangladesh Bank Databases</A></span>

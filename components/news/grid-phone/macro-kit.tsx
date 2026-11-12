@@ -67,7 +67,9 @@ export function Plot({ labels, series, sel, onSel, height = CHART_H, ariaLabel, 
 }) {
   const { ref, w } = useWidth<HTMLDivElement>();
   const n = labels.length;
-  const L = 32, T = 10, B = 20;
+  // No y gutter: tick values sit inside the plot, over their gridline, so the
+  // plot runs edge to edge in the card. T leaves room for the top tick's label.
+  const L = 0, T = 16, B = 20;
   const pw = Math.max(0, w - L);
   const bw = n ? pw / n : 0;
   const cx = (i: number) => L + bw * (i + 0.5);
@@ -84,7 +86,7 @@ export function Plot({ labels, series, sel, onSel, height = CHART_H, ariaLabel, 
     const stackOf = (s: PlotSeries) => s.stack ?? `_${bars.indexOf(s)}`;
     const tops = keys.map((key) => labels.map((_, i) => bars.filter((s) => stackOf(s) === key).reduce((a, s) => a + Math.max(0, s.values[i] ?? 0), 0)));
     const all = [...tops.flat(), ...series.flatMap((s) => s.values.filter(isN))];
-    const nt = niceTicks(Math.min(0, ...all), maxIn ?? Math.max(...all, 0), height > 150 ? 4 : 3);
+    const nt = niceTicks(Math.min(0, ...all), maxIn ?? Math.max(...all, 0), height > 150 ? 4 : 2);
     const hi = maxIn ?? nt.hi;
     const lo = nt.lo;
     const step = nt.ticks.length > 1 ? nt.ticks[1] - nt.ticks[0] : 1;
@@ -109,7 +111,7 @@ export function Plot({ labels, series, sel, onSel, height = CHART_H, ariaLabel, 
         {nt.ticks.filter((v) => v <= hi).map((v) => (
           <g key={v} aria-hidden>
             <line x1={L} x2={w} y1={y(v)} y2={y(v)} className={v === 0 ? 'gp-base' : 'gp-grid'} />
-            <text x={L - 6} y={y(v) + 4} textAnchor="end" className="gp-tick gp-tick--out">{tick ? tick(v) : compact(v, step)}</text>
+            <text x={0} y={y(v) - 4} textAnchor="start" className="gp-tick gpm-ytick">{tick ? tick(v) : compact(v, step)}</text>
           </g>
         ))}
         {bars.map((s, k) => {
@@ -159,7 +161,7 @@ export function Plot({ labels, series, sel, onSel, height = CHART_H, ariaLabel, 
 export function Cell({ label, prov, note, value, unit, detail, tone, onClick }: { label: ReactNode; prov?: 'P' | 'D'; note?: string; value: ReactNode; unit?: ReactNode; detail?: ReactNode; tone?: 'bad' | 'good' | 'warn' | 'primary'; onClick?: () => void }) {
   return (
     <div className={`gp-stat${tone ? ` gpm-is-${tone}` : ''}`} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined} onClick={onClick}>
-      <div className="gp-stat__l">{label}{prov && <Prov kind={prov} note={note} />}</div>
+      <div className="gp-stat__l">{marked(label, prov && <Prov kind={prov} note={note} />)}</div>
       <div className="gp-stat__v"><b>{value}</b>{unit && <small>{unit}</small>}</div>
       <div className="gp-stat__d">{detail}</div>
     </div>
@@ -194,22 +196,48 @@ export function InfoPill({ label, title, sub, children }: { label: string; title
   );
 }
 
+/** A table column: a plain string is a numeric column; `unit` sits under the header, never in the cells. */
+export type Col = string | { label: ReactNode; unit?: string; text?: boolean };
+
+/**
+ * The one table every macro sheet uses. First column is the row name, sticky
+ * while the figures scroll sideways; every other column is right-aligned with
+ * tabular figures so digits line up down the column; units live in the header.
+ */
+export function DataTable({ head, rows }: { head: Col[]; rows: ReactNode[][] }) {
+  const cols = head.map((h) => (typeof h === 'object' && h !== null && 'label' in h ? h : { label: h as ReactNode }));
+  const cls = (j: number) => (j === 0 ? 'gpm-td0' : cols[j]?.text ? 'gpm-tdt' : undefined);
+  return (
+    <div className="gpm-tablewrap">
+      <table className="gpm-table">
+        <thead>
+          <tr>{cols.map((c, j) => <th key={j} scope="col" className={cls(j)}><span>{c.label}</span>{c.unit && <small>{c.unit}</small>}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => <tr key={i}>{r.map((c, j) => (j === 0 ? <th key={j} scope="row" className="gpm-td0">{c}</th> : <td key={j} className={cls(j)}>{c ?? '—'}</td>))}</tr>)}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** Title + subtitle + table, the content of a table sheet. */
+export function TableSheet({ title, sub, head, rows, after }: { title: ReactNode; sub?: ReactNode; head: Col[]; rows: ReactNode[][]; after?: ReactNode }) {
+  return (
+    <>
+      <h3>{title}</h3>
+      {sub ? <p className="gp-sheet__sub">{sub}</p> : null}
+      <DataTable head={head} rows={rows} />
+      {after}
+    </>
+  );
+}
+
 /** Every row of a series, in the sheet: the desktop's data table. */
-export function TablePill({ label = 'All years', title, sub, head, rows }: { label?: string; title: string; sub?: string; head: ReactNode[]; rows: ReactNode[][] }) {
+export function TablePill({ label = 'All years', title, sub, head, rows, after }: { label?: string; title: string; sub?: ReactNode; head: Col[]; rows: ReactNode[][]; after?: ReactNode }) {
   const open = useSheet();
   return (
-    <button type="button" className="gpm-info" onClick={() => open(
-      <>
-        <h3>{title}</h3>
-        {sub ? <p className="gp-sheet__sub">{sub}</p> : <div style={{ height: 12 }} />}
-        <div className="gpm-tablewrap">
-          <table className="gpm-table">
-            <thead><tr>{head.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
-            <tbody>{rows.map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
-          </table>
-        </div>
-      </>,
-    )}>
+    <button type="button" className="gpm-info" onClick={() => open(<TableSheet title={title} sub={sub} head={head} rows={rows} after={after} />)}>
       <span aria-hidden>≡</span>{label}
     </button>
   );
@@ -220,7 +248,8 @@ export function Foot({ children }: { children: ReactNode }) {
   return <div className="gpm-foot">{children}</div>;
 }
 
-export const A = ({ href, children }: { href: string; children: ReactNode }) => <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+/** A source link. Opens in the same tab: the reader is never pushed into a new one. */
+export const A = ({ href, children }: { href: string; children: ReactNode }) => <a href={href}>{children}</a>;
 
 /** Kicker + figure, the head of a card whose plot answers to a tapped column. */
 export function Readout({ kicker, tag, value, unit, sub, tone }: { kicker: ReactNode; tag?: ReactNode; value: ReactNode; unit?: ReactNode; sub?: ReactNode; tone?: 'bad' | 'good' }) {

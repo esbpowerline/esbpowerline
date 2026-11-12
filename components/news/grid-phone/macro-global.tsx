@@ -56,7 +56,7 @@ export function MacroGlobal({ win }: { win: MacroWindow }) {
           <KV label="Margin / Subsidy Gap" prov="D" note="BD Retail Diesel minus Brent Cost (Tk/L equivalent)." tone={oilGap >= 0 ? 'good' : 'bad'} value={oilGap >= 0 ? `+${oilGap.toFixed(2)} Tk/L (Premium)` : `${oilGap.toFixed(2)} Tk/L (Subsidized)`} />
         </div>
         <div className="gpm-pills">
-          <TablePill title="Brent crude against Bangladesh retail diesel, by year" head={['Year', 'Brent Crude ($/bbl)', 'BD Retail Diesel (Tk/L)']} rows={all.map((x) => [x.year, x.globalOil, x.bdDiesel])} />
+          <TablePill title="Brent crude against Bangladesh retail diesel, by year" head={['Year', { label: 'Brent Crude', unit: 'USD/bbl' }, { label: 'BD Retail Diesel', unit: 'Tk/L' }]} rows={all.map((x) => [x.year, x.globalOil, x.bdDiesel])} />
         </div>
         <Foot>
           <span>Source: OPEC Bulletin Historical Spot Prices &amp; <A href="https://bpc.gov.bd/">BPC Official Pricing Gazettes</A></span>
@@ -84,7 +84,7 @@ export function MacroGlobal({ win }: { win: MacroWindow }) {
               <KV label="Subsidization Gap" prov="D" note="BD Avg Gas Tariff minus Global Gas (Tk/CM equivalent)." tone={gap >= 0 ? 'good' : 'bad'} value={gap >= 0 ? `+${gap.toFixed(2)} Tk/CM` : `${gap.toFixed(2)} Tk/CM (Subsidized)`} />
             </div>
             <div className="gpm-pills">
-              <TablePill title="Global LNG benchmark against Bangladesh average gas tariff, by year" head={['Year', 'Global LNG ($/MMBtu)', 'BD Avg Gas Tariff (Tk/CM)']} rows={gas.map((x) => [x.year, x.globalGas, x.bdGas])} />
+              <TablePill title="Global LNG benchmark against Bangladesh average gas tariff, by year" head={['Year', { label: 'Global LNG', unit: 'USD/MMBtu' }, { label: 'BD Avg Gas Tariff', unit: 'Tk/CM' }]} rows={gas.map((x) => [x.year, x.globalGas, x.bdGas])} />
             </div>
             <Foot>
               <span>Source: World Bank Pink Sheets &amp; <A href="https://www.petrobangla.org.bd/">Petrobangla Annual Reports</A></span>
@@ -114,7 +114,7 @@ export function MacroGlobal({ win }: { win: MacroWindow }) {
               <KV label="Domestic Contract Premium" tone={premium >= 0 ? 'bad' : 'good'} value={premium >= 0 ? `+${premium.toFixed(2)} Tk/kWh (Premium)` : `${premium.toFixed(2)} Tk/kWh`} />
             </div>
             <div className="gpm-pills">
-              <TablePill title="Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff" head={['Year', 'Global Solar LCOE (Tk/kWh)', 'BD Solar Tariff (Tk/kWh)']} rows={solar.map((x) => [x.year, x.globalSolarBdt.toFixed(2), x.bdSolar.toFixed(2)])} />
+              <TablePill title="Solar LCOE Global Trend vs. Bangladesh Feed-In Tariff" head={['Year', { label: 'Global Solar LCOE', unit: 'Tk/kWh' }, { label: 'BD Solar Tariff', unit: 'Tk/kWh' }]} rows={solar.map((x) => [x.year, x.globalSolarBdt.toFixed(2), x.bdSolar.toFixed(2)])} />
             </div>
             <Foot>
               <span>Source: IRENA Renewable Cost Databases &amp; BPDB Power Purchase Agreements (PPAs)</span>

@@ -1,0 +1,43 @@
+/* Macro Trends on the phone: Published vs Derived (macro-verify.tsx).
+   Only --gp-* tokens. */
+
+.gp .gpv-months { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.gp .gpv-months button { display: grid; gap: 1px; padding: 6px 0; border-radius: 12px; border: 1px solid var(--gp-line); background: none; color: var(--gp-on); font-variant-numeric: tabular-nums; }
+.gp .gpv-months b { font-size: 12px; font-weight: 700; }
+.gp .gpv-months small { font-size: 10px; color: var(--gp-muted); }
+.gp .gpv-months button.is-bad { border-color: var(--gp-warn); }
+.gp .gpv-months button.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
+.gp .gpv-months button.is-on small { color: var(--gp-surface); opacity: .8; }
+.gp .gpv-months button:disabled { color: var(--gp-faint); border-style: dashed; opacity: .55; }
+
+.gp .gpv-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.gp .gpv-days button { height: 34px; border-radius: 8px; border: 1px solid var(--gp-line); background: none; font-size: 12px; font-weight: 600; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp .gpv-days button.is-bad { background: var(--gp-warnC); border-color: var(--gp-warnC); color: var(--gp-warn); }
+.gp .gpv-days button.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
+
+.gp .gpv-withheld { display: block; margin-top: 8px; }
+.gp .gpv-withheld__l { display: block; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.gp .gpv-defect { display: grid; gap: 2px; }
+.gp .gpv-defect + .gpv-defect { margin-top: 8px; }
+.gp .gpv-defect b { margin: 0; }
+
+.gp .gpv-filters { display: grid; gap: 8px; margin-top: 14px; }
+.gp .gpv-check { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gp-muted); }
+.gp .gpv-check input { width: 16px; height: 16px; accent-color: var(--gp-primary); }
+
+.gp .gpv-head, .gp .gpv-row__v { display: grid; grid-template-columns: minmax(0, 1fr) 86px 86px 40px; gap: 6px; align-items: baseline; }
+.gp .gpv-head { margin-top: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--gp-line); font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--gp-faint); }
+.gp .gpv-head > :not(:first-child) { text-align: right; white-space: nowrap; }
+.gp .gpv-row { padding: 10px 0; border-bottom: 1px solid var(--gp-line); }
+.gp .gpv-row:last-child { border-bottom: 0; }
+.gp .gpv-row__n { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; font-size: 12px; font-weight: 600; line-height: 1.35; }
+.gp .gpv-row__n > span { margin-right: 2px; }
+.gp .gpv-row__v { margin-top: 4px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.gp .gpv-row__v span { font-size: 11px; color: var(--gp-faint); }
+.gp .gpv-row__v b { font-weight: 700; text-align: right; white-space: nowrap; }
+.gp .gpv-row__v b.is-bad { color: var(--gp-bad); }
+.gp .gpv-st { font-style: normal; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; background: var(--gp-surface2); color: var(--gp-muted); }
+.gp .gpv-st--exact { background: var(--gp-goodC, var(--gp-surface2)); color: var(--gp-good); }
+.gp .gpv-st--rounding { background: var(--gp-warnC); color: var(--gp-warn); }
+.gp .gpv-st--fail { background: var(--gp-badC, var(--gp-surface2)); color: var(--gp-bad); }
+.gp .gpv-st--ind { background: var(--gp-primaryC); color: var(--gp-primary); }

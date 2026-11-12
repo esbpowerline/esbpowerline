@@ -12,6 +12,7 @@ import { A, Foot, InfoPill, Key, KV, Plot, Readout, TablePill, useSel, useSeries
 import { glanceIndicators } from './macro-glance';
 
 const pc = (v: number | null) => (v !== null ? `${v.toFixed(2)}%` : '—');
+const n2 = (v: number | null) => (v !== null ? v.toFixed(2) : '—');
 
 export function MacroLoss({ win }: { win: MacroWindow }) {
   const sc = useSeriesColor();
@@ -71,9 +72,9 @@ export function MacroLoss({ win }: { win: MacroWindow }) {
               <p>Bangladesh has made significant strides in upgrading its grid performance over the last two decades. The total <strong>Transmission &amp; Distribution (T&amp;D) system loss</strong> dropped from a peak of <strong>27.97% in FY 2001-02</strong> to <strong>{systemLossData[0].total_td}% in FY {systemLossData[0].fiscal_year}</strong>.</p>
               <p>This rationalization was driven primarily by massive investments in prepaid metering, distribution substation reinforcement, and the conversion of low-voltage overhead lines to underground circuits in urban pockets. Technical transmission loss (high-voltage line resistance) has remained stable between <strong>2.6% and 4.0%</strong> during this period.</p>
             </InfoPill>
-            <TablePill label="Year-wise table" title="Year-wise System Loss Statistics" sub="Audit-verified utility-wise and overall grid system loss records — Tracked since 2001. Distribution, Transmission and Total T&D are published (P)."
-              head={['FY', 'BPDB', 'REB', 'DPDC', 'DESCO', 'WZPDCO', 'NESCO', 'Distribution', 'Transmission', 'Total T&D']}
-              rows={local.map((x) => [x.fiscal_year, pc(x.bpdb), pc(x.reb), pc(x.dpdc), pc(x.desco), pc(x.wzpdco), pc(x.nesco), pc(x.distribution), pc(x.transmission), pc(x.total_td)])} />
+            <TablePill label="Year-wise table" title="Year-wise System Loss Statistics" sub={<>Audit-verified utility-wise and overall grid system loss records — Tracked since 2001. Distribution, Transmission and Total T&amp;D are published<Prov kind="P" />.</>}
+              head={['FY', ...['BPDB', 'REB', 'DPDC', 'DESCO', 'WZPDCO', 'NESCO', 'Distribution', 'Transmission', 'Total T&D'].map((label) => ({ label, unit: '%' }))]}
+              rows={local.map((x) => [x.fiscal_year, n2(x.bpdb), n2(x.reb), n2(x.dpdc), n2(x.desco), n2(x.wzpdco), n2(x.nesco), n2(x.distribution), n2(x.transmission), n2(x.total_td)])} />
           </div>
           <Foot>
             <span>Source: <A href="http://www.powercell.gov.bd/">Power Cell, Ministry of Power, Energy and Mineral Resources</A></span>

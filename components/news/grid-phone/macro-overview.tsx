@@ -49,7 +49,9 @@ export function TariffCard({ win, title, desc, meta, tariff, cost, deficit, defi
       </div>
       <div className="gpm-pills">
         <InfoPill label="What is being shown?" sub={title}>{explain}</InfoPill>
-        <TablePill title={tableTitle} sub="Tk/kWh, as BPDB printed them" head={['Year', tariff, cost]} rows={data.map((x) => [x.year, x.tariff == null ? '—' : x.tariff.toFixed(2), x.cost == null ? '—' : x.cost.toFixed(2)])} />
+        <TablePill title={tableTitle} sub={<>As BPDB printed them<Prov kind="P" /> · the gap is ours<Prov kind="D" /></>}
+          head={['Year', { label: tariff.replace(/\s*\(.*\)$/, ''), unit: 'Tk/kWh' }, { label: cost.replace(/\s*\(.*\)$/, ''), unit: 'Tk/kWh' }, { label: deficit.replace(/\s*\(.*\)$/, ''), unit: 'Tk/kWh' }]}
+          rows={data.map((x) => [x.year, x.tariff == null ? '—' : x.tariff.toFixed(2), x.cost == null ? '—' : x.cost.toFixed(2), x.cost == null || x.tariff == null ? '—' : (x.cost - x.tariff).toFixed(2)])} />
       </div>
       <Foot>{foot}</Foot>
     </Section>
@@ -74,8 +76,8 @@ function GasMix({ win }: { win: MacroWindow }) {
       <Plot ariaLabel="Gas Supply Transition: Domestic vs. Imported LNG, chart" labels={data.map((x) => x.year)} sel={i} onSel={setI}
         series={[{ kind: 'bar', stack: 'g', values: data.map((x) => x.domestic), color: dom }, { kind: 'bar', stack: 'g', values: data.map((x) => x.lng), color: lng }]} />
       <div className="gpm-kvs">
-        <KV label="Domestic Fields" prov="P" value={`${d.domestic} MMCFD`} sub={<>{domesticPct}% of supply (D)</>} sw={dom} />
-        <KV label="Imported LNG (R-LNG)" prov="P" value={`${d.lng} MMCFD`} sub={<>{lngPct}% of supply (D)</>} sw={lng} />
+        <KV label="Domestic Fields" prov="P" value={`${d.domestic} MMCFD`} sub={<>{domesticPct}% of supply<Prov kind="D" /></>} sw={dom} />
+        <KV label="Imported LNG (R-LNG)" prov="P" value={`${d.lng} MMCFD`} sub={<>{lngPct}% of supply<Prov kind="D" /></>} sw={lng} />
         <KV label="Total Grid Supply" prov="D" note="Domestic fields plus imported LNG, added." value={`${total} MMCFD`} tone="primary" />
       </div>
       <div className="gpm-pills">
@@ -83,7 +85,7 @@ function GasMix({ win }: { win: MacroWindow }) {
           <p>This chart shows the volume (MMCFD) of natural gas supplied from local fields versus imported Liquefied Natural Gas (LNG). Each year is the mean of the daily figures Petrobangla published that year, from 12 January 2020, when this archive begins; the current year runs to the newest report held.</p>
           <p><strong>Analytical Insight:</strong> The visual depicts a major structural dependency shift: domestic gas production is stagnant or declining, while imported LNG share is rising to meet energy demand. Because imported LNG is purchased at volatile global spot prices (linked to Brent oil and Platts JKM), this shift directly exposes Bangladesh&apos;s power generation costs to global commodity shocks and foreign exchange reserves pressure.</p>
         </InfoPill>
-        <TablePill title="Gas supply by year" sub="Mean MMCFD over the days Petrobangla filed" head={['Year', 'Domestic Gas (MMCFD)', 'Imported LNG (MMCFD)']} rows={data.map((x) => [x.year, x.domestic, x.lng])} />
+        <TablePill title="Gas supply by year" sub="Mean MMCFD over the days Petrobangla filed" head={['Year', { label: 'Domestic Gas', unit: 'MMCFD' }, { label: 'Imported LNG', unit: 'MMCFD' }]} rows={data.map((x) => [x.year, x.domestic, x.lng])} />
       </div>
       <Foot>
         <span>Source: <A href="https://www.petrobangla.org.bd/">Petrobangla daily gas reports</A></span>
