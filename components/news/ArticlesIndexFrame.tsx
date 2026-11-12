@@ -18,9 +18,12 @@ export const ARTICLES_INDEX_LIMIT = 120;
 export async function ArticlesIndexFrame({
   page,
   sort,
+  featured = false,
 }: {
   page: number;
   sort: 'latest' | 'popular';
+  /** /articles/featured: only editor-flagged (isFeatured) stories, newest first, one page. */
+  featured?: boolean;
 }) {
   const locale = await getServerSiteLocale();
   const t = createTranslator(locale);
@@ -31,13 +34,15 @@ export async function ArticlesIndexFrame({
     getTrendingPublishedArticles(5, locale),
   ]);
 
+  const pool = featured ? allArticles.filter((a) => a.isFeatured) : allArticles;
   const ordered =
     sort === 'popular'
-      ? [...allArticles].sort((a, b) => b.views - a.views)
-      : [...allArticles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const totalPages = Math.max(1, Math.ceil(ordered.length / ARTICLES_PER_PAGE));
-  const articles =
-    sort === 'popular'
+      ? [...pool].sort((a, b) => b.views - a.views)
+      : [...pool].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const totalPages = featured ? 1 : Math.max(1, Math.ceil(ordered.length / ARTICLES_PER_PAGE));
+  const articles = featured
+    ? ordered
+    : sort === 'popular'
       ? ordered.slice(0, ARTICLES_PER_PAGE * 2)
       : ordered.slice((page - 1) * ARTICLES_PER_PAGE, page * ARTICLES_PER_PAGE);
 
@@ -45,7 +50,9 @@ export async function ArticlesIndexFrame({
     <div className="container container--shell articles-page py-8 md:py-10">
       <Breadcrumbs
         crumbs={
-          sort === 'popular'
+          featured
+            ? [{ name: 'News', path: '/articles' }, { name: 'Featured' }]
+            : sort === 'popular'
             ? [{ name: 'News', path: '/articles' }, { name: t('articles.mostRead') }]
             : page > 1
               ? [{ name: 'News', path: '/articles' }, { name: `${t('articles.page')} ${page}` }]
@@ -58,8 +65,8 @@ export async function ArticlesIndexFrame({
             {t('articles.kicker')}
           </div>
           <h1 className="text-3xl md:text-4xl font-display font-bold tracking-tight">
-            {sort === 'popular' ? t('articles.mostRead') : t('articles.title')}
-            {sort === 'latest' && page > 1 ? ` — ${t('articles.page')} ${page}` : ''}
+            {featured ? 'Featured' : sort === 'popular' ? t('articles.mostRead') : t('articles.title')}
+            {!featured && sort === 'latest' && page > 1 ? ` — ${t('articles.page')} ${page}` : ''}
           </h1>
           <p className="text-muted-foreground mt-2 text-sm md:text-base">{t('articles.subtitle')}</p>
         </div>
@@ -80,8 +87,8 @@ export async function ArticlesIndexFrame({
               prefetch={false}
               href="/articles"
               className="articles-page__sort-btn"
-              data-active={sort === 'latest' ? 'true' : 'false'}
-              aria-current={sort === 'latest' ? 'page' : undefined}
+              data-active={sort === 'latest' && !featured ? 'true' : 'false'}
+              aria-current={sort === 'latest' && !featured ? 'page' : undefined}
             >
               {t('articles.latest')}
             </Link>

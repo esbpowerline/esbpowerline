@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { POLICY_GROUPS, POLICIES, type Policy, type PolicyTint, type PolicyStatus } from '@/lib/data/policy/policies';
@@ -63,7 +64,7 @@ export function PolicyFramework({
       className={`hp-card hp-policy ${full ? 'mt-10' : 'mt-8'} rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden`}
       aria-labelledby="policy-framework-title"
     >
-      <div className={full ? 'p-5 md:p-6' : 'p-4 md:p-5'}>
+      <div className={`hp-policy__desk ${full ? 'p-5 md:p-6' : 'p-4 md:p-5'}`}>
         <header className="mb-4">
           <div className="flex items-center gap-2">
             <span aria-hidden className="h-px flex-1 rounded-full bg-gradient-to-r from-transparent to-border" />
@@ -116,6 +117,61 @@ export function PolicyFramework({
           <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
+      <PolicyPhone policies={policies} />
     </section>
+  );
+}
+
+/** Short tab labels for the phone's 2 x 2 group switch; the full title is the panel's label. */
+const SHORT: Record<string, string> = { acts: 'Acts & Laws', plans: 'Policies & Plans', regulations: 'Regulations', regulators: 'Regulators' };
+
+/**
+ * Phone only (<768px; hidden at every other width by app/home-phone.css). The
+ * desktop's four stacked/columned groups were a sideways rail of 84% columns at
+ * 390px, the second column cut at the screen edge. Same grammar as the phone
+ * Important official links module: title, segmented group switch, 56px rows
+ * with an icon tile, title, one meta line (status · issuer · year), chevron.
+ * Every featured item of every group and the library link stay.
+ */
+function PolicyPhone({ policies }: { policies: Policy[] }) {
+  const groups = POLICY_GROUPS.map((g) => ({ ...g, items: policies.filter((p) => p.group === g.key && p.featured) })).filter((g) => g.items.length > 0);
+  const [tab, setTab] = useState(0);
+  const cur = groups[Math.min(tab, groups.length - 1)];
+  if (!cur) return null;
+  const Icon = cur.icon;
+  return (
+    <div className="hp-pf">
+      <h2 className="hp-il__title">Policy &amp; Regulatory Framework</h2>
+      <p className="hp-il__sub">The laws, plans, rules and regulators that govern the sector.</p>
+      {groups.length > 1 && (
+        <div className="hp-il__seg hp-pf__seg" role="tablist" aria-label="Policy group">
+          {groups.map((g, i) => (
+            <button key={g.key} type="button" role="tab" aria-selected={g.key === cur.key} className={g.key === cur.key ? 'is-on' : undefined} onClick={() => setTab(i)}>
+              {SHORT[g.key] ?? g.title}
+              <span>{g.items.length}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <ul className="hp-il__list" role="tabpanel" aria-label={cur.title}>
+        {cur.items.map((item) => (
+          <li key={item.slug}>
+            <Link prefetch={false} href={`/energy-policy/${item.slug}`} className="hp-il__row">
+              <span className={`hp-il__tile ${TINT_BADGE[cur.tint]}`} aria-hidden><Icon width={18} height={18} strokeWidth={1.9} /></span>
+              <span className="hp-il__copy">
+                <span className="hp-pf__name">{item.title}</span>
+                <span className="hp-il__role">
+                  <span className={`hp-pf__status ${STATUS_STYLE[item.status]}`}>{item.status}</span> {item.authority} · {item.year}
+                </span>
+              </span>
+              <ChevronRight className="hp-il__chev" aria-hidden width={16} height={16} />
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <Link prefetch={false} href="/energy-policy" className="hp-pf__more">
+        View the full policy library <ArrowRight width={14} height={14} aria-hidden />
+      </Link>
+    </div>
   );
 }

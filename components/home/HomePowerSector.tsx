@@ -431,7 +431,7 @@ export function HomePowerSector({
         </div>
         <Link
           prefetch={false}
-          href="/articles"
+          href="/articles/featured"
           className="text-sm text-primary inline-flex items-center gap-1 hover:underline font-medium shrink-0"
         >
           {t('home.browseAllNews')}

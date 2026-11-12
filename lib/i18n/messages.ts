@@ -271,7 +271,7 @@ const EN: Record<MessageKey, string> = {
   'home.gridExplorerBlurb':
     'Generation mix, transmission corridors, demand curves and project pipelines — interactive sector data.',
   'home.gridExplorerCta': 'Open Grid Explorer',
-  'home.browseAllNews': 'Browse archive',
+  'home.browseAllNews': 'Browse all Featured',
   'home.aboutKicker': 'Editorial identity',
   'home.aboutTitle': 'About ESB PowerLine',
   'home.aboutLead':
@@ -466,7 +466,7 @@ const BN: Record<MessageKey, string> = {
   'home.gridExplorerBlurb':
     'উৎপাদন মিক্স, ট্রান্সমিশন লাইন, চাহিদা ও প্রকল্পের তথ্য — ইন্টারঅ্যাক্টিভ গ্রিড ড্যাশবোর্ড।',
   'home.gridExplorerCta': 'গ্রিড তথ্য দেখুন',
-  'home.browseAllNews': 'সব সংবাদ দেখুন',
+  'home.browseAllNews': 'সব নির্বাচিত সংবাদ',
   'home.aboutKicker': 'সম্পাদকীয় পরিচিতি',
   'home.aboutTitle': 'ইএসবি পাওয়ারলাইন সম্পর্কে',
   'home.aboutLead':
