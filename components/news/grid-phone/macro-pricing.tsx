@@ -82,7 +82,7 @@ export function MacroPricing({ win }: { win: MacroWindow }) {
           <Cell label="Exchange Rate (BDT/USD)" value={d.exchangeRate.toFixed(2)} unit="Tk" tone="primary" />
           <Cell label="Spot LNG (USD/MMBtu)" value={`$${d.spotLng.toFixed(2)}`} />
           <Cell label="Import Coal (USD/Ton)" value={`$${d.importCoal.toFixed(2)}`} />
-          <Cell label="Inflation Rate (CPI %)" value={`${d.inflation.toFixed(2)}%`} tone="warn" />
+          <Cell label="Inflation Rate (CPI)" value={`${d.inflation.toFixed(2)}%`} tone="warn" />
         </div>
         <div className="gpm-pills">
           <TablePill title="Retail Fuel & Macro Pricing Benchmarks" sub="Every year held"

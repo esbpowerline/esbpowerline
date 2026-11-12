@@ -14,7 +14,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { CHART_H, niceTicks } from './charts';
-import { Prov, useSheet } from './shared';
+import { Prov, nb, nbDate, nbUnits, useSheet } from './shared';
 import { useChartTheme } from '@/hooks/useChartTheme';
 import { seriesColor, type SeriesName } from '@/lib/data/grid/chart-palette';
 
@@ -163,13 +163,14 @@ export function Cell({ label, prov, note, value, unit, detail, tone, onClick }: 
     <div className={`gp-stat${tone ? ` gpm-is-${tone}` : ''}`} role={onClick ? 'button' : undefined} tabIndex={onClick ? 0 : undefined} onClick={onClick}>
       <div className="gp-stat__l">{marked(label, prov && <Prov kind={prov} note={note} />)}</div>
       <div className="gp-stat__v"><b>{value}</b>{unit && <small>{unit}</small>}</div>
-      <div className="gp-stat__d">{detail}</div>
+      <div className="gp-stat__d">{nb(detail)}</div>
     </div>
   );
 }
 
 /** Keeps a P/D mark on the line of the label's last word, so it never wraps alone. */
 function marked(label: ReactNode, mark: ReactNode) {
+  if (typeof label === 'string') label = nbDate(nbUnits(label));
   if (!mark || typeof label !== 'string') return <>{label}{mark}</>;
   const k = label.lastIndexOf(' ');
   return <>{k > 0 ? label.slice(0, k + 1) : ''}<span style={{ whiteSpace: 'nowrap' }}>{k > 0 ? label.slice(k + 1) : label}{mark}</span></>;
@@ -179,9 +180,9 @@ function marked(label: ReactNode, mark: ReactNode) {
 export function KV({ label, value, prov, note, tone, sw, sub }: { label: ReactNode; value: ReactNode; prov?: 'P' | 'D'; note?: string; tone?: 'good' | 'bad' | 'warn' | 'primary'; sw?: string; sub?: ReactNode }) {
   return (
     <div className="gpm-kv">
-      <span className="gpm-kv__l">{sw && <i style={{ background: sw }} />}<span>{marked(label, prov && <Prov kind={prov} note={note} />)}</span></span>
-      <b className={tone ? `is-${tone}` : undefined}>{value}</b>
-      {sub != null && sub !== false && <small>{sub}</small>}
+      <span className="gpm-kv__l">{sw && <i style={{ background: sw }} />}<span>{marked(nb(label), prov && <Prov kind={prov} note={note} />)}</span></span>
+      <b className={tone ? `is-${tone}` : undefined}>{nb(value)}</b>
+      {sub != null && sub !== false && <small>{nb(sub)}</small>}
     </div>
   );
 }
@@ -245,7 +246,7 @@ export function TablePill({ label = 'All years', title, sub, head, rows, after }
 
 /** Source, method and period lines under a card: each on its own line, small. */
 export function Foot({ children }: { children: ReactNode }) {
-  return <div className="gpm-foot">{children}</div>;
+  return <div className="gpm-foot">{nb(children)}</div>;
 }
 
 /** A source link. Opens in the same tab: the reader is never pushed into a new one. */
@@ -255,7 +256,7 @@ export const A = ({ href, children }: { href: string; children: ReactNode }) => 
 export function Readout({ kicker, tag, value, unit, sub, tone }: { kicker: ReactNode; tag?: ReactNode; value: ReactNode; unit?: ReactNode; sub?: ReactNode; tone?: 'bad' | 'good' }) {
   return (
     <>
-      <div className="gp-kicker"><span>{kicker}</span>{tag}</div>
+      <div className="gp-kicker"><span>{nb(kicker)}</span>{tag}</div>
       <div className={`gp-hero gp-hero--md${tone ? ` gpm-${tone}` : ''}`}><b>{value}</b>{unit && <small>{unit}</small>}</div>
       {sub != null && <div className="gp-subline">{sub}</div>}
     </>
@@ -264,7 +265,7 @@ export function Readout({ kicker, tag, value, unit, sub, tone }: { kicker: React
 
 /** A one-series caption over a short plot: swatch, name, the picked column's value. */
 export function Cap({ color, label, prov, note, value }: { color: string; label: ReactNode; prov?: 'P' | 'D'; note?: string; value: ReactNode }) {
-  return <div className="gpm-cap"><span><i style={{ background: color }} />{label}{prov && <Prov kind={prov} note={note} />}</span><b>{value}</b></div>;
+  return <div className="gpm-cap"><span><i style={{ background: color }} />{typeof label === 'string' ? nbUnits(label) : label}{prov && <Prov kind={prov} note={note} />}</span><b>{value}</b></div>;
 }
 
 /** A swipeable row of pills that keeps the picked one in view. */

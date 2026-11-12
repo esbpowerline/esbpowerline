@@ -1,8 +1,29 @@
 'use client';
 
-import { createContext, useContext, type ReactNode } from 'react';
+import { Children, cloneElement, createContext, Fragment, isValidElement, useContext, type ReactElement, type ReactNode } from 'react';
 import type { GridDailyData } from '@/lib/data/grid/types';
 import { fmt } from './charts';
+
+/**
+ * ISO dates never break at their hyphens. Chrome breaks "2026-11-12" after
+ * either hyphen ("2026-" / "11-12" was the most repeated wrap fault on these
+ * screens, 2026-11-12). The hyphens inside a date become U+2011 at render
+ * time; until this replaced it, a MutationObserver rewrote the text nodes
+ * React owned after every commit.
+ */
+const ISO = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
+export const nbDate = (s: string) => (s.length >= 10 ? s.replace(ISO, '$1‑$2‑$3') : s);
+/** nbDate through a node: strings and host elements' children; components render their own text. */
+export function nb(node: ReactNode): ReactNode {
+  // Short bracketed groups too — a range like "(2010 - 2026)" left "2026)" alone on a line.
+  if (typeof node === 'string') return nbDate(node.replace(/\([^()]{1,18}\)/g, (m) => m.replace(/ /g, ' ')));
+  if (Array.isArray(node)) return Children.map(node, nb);
+  if (isValidElement(node) && (typeof node.type === 'string' || node.type === Fragment)) {
+    const el = node as ReactElement<{ children?: ReactNode }>;
+    return el.props.children == null ? el : cloneElement(el, undefined, nb(el.props.children));
+  }
+  return node;
+}
 
 /** Opens the bottom sheet from anywhere in the app. */
 export const SheetContext = createContext<(content: ReactNode | null) => void>(() => {});
@@ -102,7 +123,7 @@ export function Prov({ kind, note }: { kind: 'P' | 'D'; note?: string }) {
 }
 
 export function Source({ children }: { children: ReactNode }) {
-  return <div className="gp-sec__foot">{children}</div>;
+  return <div className="gp-sec__foot">{nb(children)}</div>;
 }
 
 /** A surface on the page. Title row, optional one-line description, body, source footer. */
@@ -112,8 +133,8 @@ export function Section({ title, desc, meta, source, children, id }: { title?: R
       {(title || meta) && (
         <div className="gp-sec__head">
           <div>
-            {title && <h2 className="gp-sec__title">{title}</h2>}
-            {desc && <div className="gp-sec__desc">{desc}</div>}
+            {title && <h2 className="gp-sec__title">{nb(title)}</h2>}
+            {desc && <div className="gp-sec__desc">{nb(desc)}</div>}
           </div>
           {meta && <div className="gp-sec__meta">{meta}</div>}
         </div>
@@ -124,8 +145,16 @@ export function Section({ title, desc, meta, source, children, id }: { title?: R
   );
 }
 
+/**
+ * A unit group in a label never splits: "Inflation Rate (CPI %)" broke as
+ * "(CPI" / "%)" on a 390px card (2026-11-12). Spaces inside parentheses become
+ * no-break spaces, so the group moves to the next line whole.
+ */
+export const nbUnits = (s: string) => s.replace(/\(([^)]*)\)/g, (m) => m.replace(/ /g, ' '));
+
 /** Keeps a P/D mark on the same line as the label's last word, so it never wraps alone. */
 function withMark(label: ReactNode, mark: ReactNode) {
+  if (typeof label === 'string') label = nbUnits(label);
   if (!mark) return label;
   if (typeof label !== 'string') return <>{label}{mark}</>;
   const k = label.lastIndexOf(' ');
@@ -143,7 +172,7 @@ export function Stat({ label, value, unit, prefix, dp = 0, detail, prov, note, o
     <>
       <div className="gp-stat__l">{withMark(label, prov && <Prov kind={prov} note={note} />)}</div>
       <div className="gp-stat__v"><b>{isNum(value) && prefix ? prefix : ''}{fmt(value, dp)}</b>{unit && <small>{unit}</small>}</div>
-      {detail != null && detail !== false && <div className="gp-stat__d">{detail}</div>}
+      {detail != null && detail !== false && <div className="gp-stat__d">{nb(detail)}</div>}
     </>
   );
   return onClick ? (
@@ -160,12 +189,12 @@ export function Row({ sw, name, sub, value, small, meter, wrap, top, onClick, ch
     <>
       {sw && <span className="gp-sw" style={{ background: sw }} />}
       <div className="gp-row__main">
-        <div className={`gp-row__name${wrap ? ' gp-row__name--wrap' : ''}`}>{name}</div>
-        {sub && <div className="gp-row__sub">{sub}</div>}
+        <div className={`gp-row__name${wrap ? ' gp-row__name--wrap' : ''}`}>{nb(name)}</div>
+        {sub && <div className="gp-row__sub">{nb(sub)}</div>}
       </div>
       <div className="gp-row__val">
         {value != null && <b>{value}{chevron && <span className="gp-chev"> ›</span>}</b>}
-        {small != null && <small>{small}</small>}
+        {small != null && <small>{nb(small)}</small>}
       </div>
       {meter}
     </>

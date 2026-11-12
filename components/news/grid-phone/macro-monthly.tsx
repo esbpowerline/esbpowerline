@@ -2,8 +2,8 @@
 
 /**
  * PGCB Monthly Archives: pick a month, read its headline figures, fuel mix and
- * zone peaks, then the long monthly trend. The seventeen-sheet detail under it
- * is still the desktop panel (macro-hosted.tsx).
+ * zone peaks, then the long monthly trend, then the workbook detail drawn for
+ * the phone (macro-monthly-detail.tsx).
  */
 
 import { useEffect, useState } from 'react';
@@ -17,7 +17,7 @@ import { StackBar } from './charts';
 import { Prov, Section } from './shared';
 import { Cell, InfoPill, useFuelColor, type MacroWindow } from './macro-kit';
 import { MonthlyTrend } from './macro-monthly-trend';
-import { HostedMonthlyDetail } from './macro-hosted';
+import { MacroMonthlyDetail } from './macro-monthly-detail';
 
 const fuelName = (k: string) => (k === 'hfo' ? 'Furnace Oil (HFO)' : k === 'import' ? 'India Imports' : k.charAt(0).toUpperCase() + k.slice(1));
 
@@ -126,7 +126,7 @@ export function MacroMonthly({ win }: { win: MacroWindow }) {
         const [y, m] = key.split('-').map(Number);
         const prev = new Date(Date.UTC(y, m - 2, 1));
         return (
-          <HostedMonthlyDetail detail={record.detail} monthLabel={`${record.detail.month} ${record.detail.year}`}
+          <MacroMonthlyDetail detail={record.detail} monthLabel={`${record.detail.month} ${record.detail.year}`}
             prevMonthLabel={`${prev.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' })} ${prev.getUTCFullYear()}`}
             events={events} eventsLoading={eventsLoading} eventsOpened={eventsOpen} onLoadEvents={() => setEventsOpen(true)} />
         );

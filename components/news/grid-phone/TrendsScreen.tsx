@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { usePhone } from './context';
 import { Bars, fmt, Legend, LineChart, StackArea } from './charts';
 import type { MonthlyRow } from './useGridPhoneData';
-import { isNum, monthLabel, Prov, Section, wd } from './shared';
+import { isNum, monthLabel, Prov, Section, wd, nb, nbDate } from './shared';
 
 type K = 'peak' | 'energy' | 'fuel' | 'gap';
 const RANGES = [
@@ -88,7 +88,7 @@ export function TrendsScreen() {
             <button key={key} role="tab" aria-selected={k === key} className={k === key ? 'is-on' : ''} onClick={() => { setK(key); setI(null); }}>{l}</button>
           ))}
         </div>
-        <div className="gp-kicker"><span>{kicker}</span></div>
+        <div className="gp-kicker"><span>{nb(kicker)}</span></div>
         <div className="gp-hero"><b>{big}</b><small>{unit}</small></div>
         <div className="gp-subline">{sub}</div>
         {monthly ? chart : <div className="gp-skel" style={{ height: 240, marginTop: 16 }} />}
@@ -106,7 +106,7 @@ export function TrendsScreen() {
 
       {weekPeaks.filter(isNum).length > 1 && (
         <Section title="Evening peak, day by day" desc="Tap a bar" source="PGCB daily reports">
-          <div className="gp-kicker"><span>{weekDates[wsel] ? `${wd(weekDates[wsel])} ${weekDates[wsel]}` : ''}</span></div>
+          <div className="gp-kicker"><span>{weekDates[wsel] ? nbDate(`${wd(weekDates[wsel])} ${weekDates[wsel]}`) : ''}</span></div>
           <div className="gp-hero gp-hero--md"><b>{fmt(weekPeaks[wsel])}</b><small>MW</small></div>
           <div className="gp-plot">
             <Bars ariaLabel="Evening peak by day" values={weekPeaks} labels={weekDates.map(wd)} color="var(--gp-primary)" highlight={wsel} height={180} onPick={setWi} />

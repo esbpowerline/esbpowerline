@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react';
 import '@/app/grid-phone-gas.css';
 import { usePhone } from './context';
 import { fmt, LineChart, Meter, StackBar } from './charts';
-import { dm, Empty, isNum, Prov, Row, Section, Stat, useSheet, wd } from './shared';
+import { dm, Empty, isNum, Prov, Row, Section, Stat, useSheet, wd, nbDate } from './shared';
 import { distColor, gasKpis, GlossarySheet, DistributionSheet, prodColor, ProductionSheet, useGasFeed, type GasFeed } from './gas-detail';
 import { distributionCompanyForLabel, productionFieldsForLabel, cleanFieldName } from '@/components/news/power-grid/PetrobanglaSectionDetail';
 import { coverageLabel } from '@/lib/data/grid/coverage';
@@ -73,7 +73,7 @@ function Caption({ feed }: { feed: GasFeed }) {
   const keyed = a.report.gas_day_start === feed.gasDay ? 'start date' : a.report.gas_day_end === feed.gasDay ? 'end date' : 'file date';
   return (
     <p className="gpg-cap">
-      <b>Report: {a.report.report_date_label}</b> — 8:00 AM → 8:00 AM gas day, archived under its {keyed} ({feed.gasDay})
+      <b>Report: {nbDate(a.report.report_date_label)}</b> — 8:00 AM → 8:00 AM gas day, archived under its {keyed} ({nbDate(feed.gasDay)})
       {feed.gasDay !== date && <> • nearest report to your selected date</>}
     </p>
   );

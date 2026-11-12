@@ -10,7 +10,7 @@
 import { formatWindow, type ObservationWindow, petrobanglaGasDay, pgcbEnergyDay, pgcbFiledAs } from '@/lib/data/grid/observation-window';
 import { fmt } from './charts';
 import { usePhone } from './context';
-import { isNum, Prov } from './shared';
+import { isNum, Prov, nbDate } from './shared';
 import { KV, useNote } from './supply-bits';
 
 export function DaySlots() {
@@ -36,7 +36,7 @@ export function DaySlots() {
 
   const openWindows = () =>
     note(
-      <>What “{date}” covers</>,
+      <>What “{nbDate(date)}” covers</>,
       <>
         <p style={{ marginTop: 0 }}>Each agency measures a different 24 hours: PGCB’s energy day runs midnight to midnight, Petrobangla’s gas day 08:00 to 08:00, so they share only 16 of their 24 hours.</p>
         <KV
@@ -76,7 +76,7 @@ export function DaySlots() {
   return (
     <div className="gp-rows" style={{ marginTop: 'var(--s4)' }}>
       <button type="button" className="gps-link" onClick={openWindows} style={{ padding: 'var(--s3) var(--s4)' }}>
-        <span>What “{date}” covers<small>Each agency measures a different 24 hours</small></span>
+        <span>What “{nbDate(date)}” covers<small>Each agency measures a different 24 hours</small></span>
         <span className="gp-chev">›</span>
       </button>
       <button type="button" className="gps-link" onClick={openMethod} style={{ padding: 'var(--s3) var(--s4)' }}>

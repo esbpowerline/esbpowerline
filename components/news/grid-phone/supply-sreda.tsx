@@ -240,9 +240,11 @@ function YearTables({ table }: { table: SredaYearTable }) {
       {table.publishedTotalMwp !== null && (
         <div className="gp-rows" style={{ marginTop: 8 }}>
           <Row
-            name={<>Total<Prov kind="P" /></>}
-            sub={hasQ && table.publishedTotalQuantity != null ? `${int(table.publishedTotalQuantity)} installations` : undefined}
-            value={table.publishedTotalCapacity ?? `${fmt(table.publishedTotalMwp, 2)} ${table.publishedTotalUnit ?? 'MW'}`}
+            name="Total"
+            sub={hasQ && table.publishedTotalQuantity != null ? <>{int(table.publishedTotalQuantity)} installations<Prov kind="P" /></> : undefined}
+            // The mark sits after the figure, as on the year rows above, so the
+            // total's digits share their right edge (it sat ~18px left with the mark on the name).
+            value={<>{table.publishedTotalCapacity ?? `${fmt(table.publishedTotalMwp, 2)} ${table.publishedTotalUnit ?? 'MW'}`}<Prov kind="P" /></>}
           />
         </div>
       )}

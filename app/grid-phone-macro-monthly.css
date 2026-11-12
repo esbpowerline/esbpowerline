@@ -1,0 +1,40 @@
+/* PGCB monthly detail on the phone (macro-monthly-detail*.tsx). */
+.gp .gpmd-body { margin-top: 12px; }
+.gp .gpmd-body > .gp-seg { margin-bottom: 10px; }
+.gp .gpmd-lede { margin: 0 0 10px; font-size: 12px; line-height: 1.45; color: var(--gp-muted); font-weight: 450; }
+.gp .gpmd-nb { white-space: nowrap; }
+.gp .gpmd-mut { color: var(--gp-muted); font-weight: 450; }
+.gp .gpmd-bad { color: var(--gp-bad, #e11d48); }
+.gp .gpmd-line { display: block; }
+.gp .gpmd-colhead2 { display: flex; justify-content: space-between; gap: 8px; grid-template-columns: none; }
+.gp .gpmd-tap { width: 100%; border: 0; background: none; padding: 0; color: inherit; font: inherit; text-align: left; }
+.gp .gpmd-search { margin: 10px 0 8px; height: 40px; font-size: 13px; }
+.gp .gpmd-count { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.gp .gp-sec .gpm-pills { margin-top: 12px; }
+
+/* Daily load shed: one row per zone, a day strip, the month total. */
+.gp .gpmd-shedhead { display: grid; grid-template-columns: 84px minmax(0, 1fr) 56px 16px; gap: 6px; align-items: center; }
+.gp .gpmd-shedhead > :nth-child(2) { text-align: center; }
+.gp .gpmd-shed { display: grid; }
+.gp .gpmd-shed button { display: grid; grid-template-columns: 84px minmax(0, 1fr) 56px 16px; gap: 6px; align-items: center; min-height: 34px; border: 0; border-top: 1px solid var(--gp-line); background: none; color: var(--gp-on); font: inherit; padding: 0; text-align: left; }
+.gp .gpmd-shed button > span { font-size: 12px; font-weight: 550; }
+.gp .gpmd-shed button > b { font-size: 13px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.gp .gpmd-shed button.is-all > span, .gp .gpmd-shed button.is-all > b { font-weight: 700; }
+.gp .gpmd-strip { display: grid; gap: 1px; height: 14px; }
+.gp .gpmd-strip i { display: block; border-radius: 1px; }
+.gp .gpmd-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 4px; font-size: 11px; color: var(--gp-muted); }
+.gp .gpmd-legend span { display: inline-flex; align-items: center; gap: 3px; }
+.gp .gpmd-legend i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; }
+.gp .gpmd-legend b { color: var(--gp-on); font-weight: 700; }
+
+/* Area peaks: one two-segment bar per area. */
+.gp .gpmd-areas { display: grid; gap: 10px; margin: 8px 0 12px; }
+.gp .gpmd-area { border: 0; background: none; padding: 0; color: var(--gp-on); font: inherit; text-align: left; }
+.gp .gpmd-area__t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; font-size: 12px; }
+.gp .gpmd-area__t > span:first-child { font-weight: 600; }
+.gp .gpmd-area__t > span:last-child { font-size: 11px; color: var(--gp-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gp .gpmd-area__t b { color: var(--gp-on); font-size: 13px; font-weight: 700; }
+.gp .gpmd-area__t em { font-style: normal; font-weight: 600; }
+.gp .gpmd-dual { height: 10px; border-radius: 999px; background: var(--gp-surface2); overflow: hidden; }
+.gp .gpmd-dual > div { display: flex; gap: 2px; height: 100%; }
+.gp .gpmd-dual i { display: block; height: 100%; }

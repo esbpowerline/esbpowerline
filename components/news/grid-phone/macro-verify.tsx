@@ -14,7 +14,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import '@/app/grid-phone-macro-extra.css';
-import { Prov, Section } from './shared';
+import { Prov, Section, nbDate } from './shared';
 import { Cell, Foot, InfoPill, Pills } from './macro-kit';
 
 /* Shapes of the published JSON — the desktop declares them privately. */
@@ -105,11 +105,11 @@ export function MacroVerify({ latestGridDay }: { latestGridDay: string }) {
   return (
     <>
       <div className={`gpm-notice${behind ? '' : ' gpm-notice--plain'}`}>
-        <b>Checked through {coveredThrough ?? '—'}.</b>
+        <b>Checked through {nbDate(coveredThrough ?? '—')}.</b>
         {behind
-          ? <>The explorer now carries data to {latestGridDay}, which is past that — so the most recent days on this site have <strong>not been through these checks yet</strong>.</>
-          : <>Current with the newest day the explorer carries{latestGridDay ? ` (${latestGridDay})` : ''}.</>}{' '}
-        Last run {index.generated_at?.slice(0, 10)}.
+          ? <>The explorer now carries data to {nbDate(latestGridDay)}, which is past that — so the most recent days on this site have <strong>not been through these checks yet</strong>.</>
+          : <>Current with the newest day the explorer carries{latestGridDay ? ` (${nbDate(latestGridDay)})` : ''}.</>}{' '}
+        Last run {nbDate(index.generated_at?.slice(0, 10) ?? '')}.
       </div>
 
       <Section title="Published vs Derived" desc="Every control total the agencies print, beside our recomputation of it from the same document's rows" meta="All months">
@@ -166,7 +166,7 @@ export function MacroVerify({ latestGridDay }: { latestGridDay: string }) {
                 {monthData.dual.note}
                 {monthData.dual.withheld.map((w) => (
                   <span key={w.date} className="gpv-withheld">
-                    <strong>{w.date} withheld</strong> — engines disagreed on {w.disagreements.length} figure{w.disagreements.length === 1 ? '' : 's'} ({w.sources.join(', ')})
+                    <strong>{nbDate(w.date)} withheld</strong> — engines disagreed on {w.disagreements.length} figure{w.disagreements.length === 1 ? '' : 's'} ({w.sources.join(', ')})
                     {w.disagreements.slice(0, 4).map((g, i) => <span key={i} className="gpv-withheld__l">{g.source} · {g.figure}: {String(g.a ?? '—')} vs {String(g.b ?? '—')} — {g.why}</span>)}
                   </span>
                 ))}

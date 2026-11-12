@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Bars, fmt } from './charts';
-import { isNum, Prov, Row, useSheet, wd } from './shared';
+import { isNum, Prov, Row, useSheet, wd, nb } from './shared';
 
 /** "2026-08-24" -> "24 Aug". */
 export function dayLabel(iso: string | null | undefined): string {
@@ -38,13 +38,13 @@ export function Foot({ lead, rest }: { lead: ReactNode; rest: ReactNode[] }) {
   const lines = rest.filter(Boolean);
   return (
     <div className="gp-sec__foot gp-tfoot">
-      <div>{lead}</div>
+      <div>{nb(lead)}</div>
       {lines.length > 0 && (
         <details>
           <summary>Details</summary>
           <ul>
             {lines.map((l, i) => (
-              <li key={i}>{l}</li>
+              <li key={i}>{nb(l)}</li>
             ))}
           </ul>
         </details>

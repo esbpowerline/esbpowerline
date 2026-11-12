@@ -31,7 +31,7 @@ import { MemberToolsPanel } from '@/components/members/MemberToolsPanel';
 import { RefreshGridDataButton } from '@/components/members/RefreshGridDataButton';
 import { GridReportingStandards } from '@/components/news/power-grid/GridReportingStandards';
 import { PowerGridExplorerErrorBoundary } from '@/components/news/PowerGridExplorerErrorBoundary';
-import { SheetContext, dm, longDate, Skeleton, wd } from './shared';
+import { SheetContext, dm, longDate, nbDate, Skeleton, wd } from './shared';
 import { useCurve, useDay, useDays, useGasDay, useGasDays, useMonthly, usePlants, useWeekWindow } from './useGridPhoneData';
 import { TodayScreen } from './TodayScreen';
 import { SupplyScreen } from './SupplyScreen';
@@ -210,29 +210,9 @@ export function GridPhoneApp({
     queue();
     return () => { mo.disconnect(); main.removeEventListener('click', onClick); if (raf) cancelAnimationFrame(raf); };
   }, []);
-  // ISO dates never break at their hyphens ("2026-" / "11-11" on two lines was
-  // the most repeated wrap fault, 2026-11-12). Text nodes holding a date get
-  // non-breaking hyphens (U+2011); React rewrites the node on its next update
-  // and the observer marks it again. Only the hyphens inside a date change.
-  useEffect(() => {
-    const root = mainRef.current?.parentElement;
-    if (!root) return;
-    const DATE = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
-    let raf = 0;
-    const fix = () => {
-      raf = 0;
-      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-      for (let n = w.nextNode(); n; n = w.nextNode()) {
-        const v = n.nodeValue;
-        if (v && v.length >= 10 && DATE.test(v)) { DATE.lastIndex = 0; n.nodeValue = v.replace(DATE, '$1‑$2‑$3'); }
-        DATE.lastIndex = 0;
-      }
-    };
-    const mo = new MutationObserver(() => { if (!raf) raf = requestAnimationFrame(fix); });
-    mo.observe(root, { childList: true, subtree: true, characterData: true });
-    fix();
-    return () => { mo.disconnect(); if (raf) cancelAnimationFrame(raf); };
-  }, []);
+  // ISO dates keep their hyphens together through nbDate()/nb() in the kit
+  // (shared.tsx), applied where a date is rendered. A MutationObserver that
+  // rewrote React-owned text nodes did this until 2026-11-12.
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
@@ -498,7 +478,7 @@ export function GridPhoneApp({
             <div className="gp-access">
               <div>
                 <b>{tierMsg.statusLabel}</b> · {tierMsg.accessWindow}
-                <span>{access.earliestAllowedDate ? `${access.earliestAllowedDate} → ${access.latestDate}` : `Full archive · through ${access.latestDate}`}</span>
+                <span>{nbDate(access.earliestAllowedDate ? `${access.earliestAllowedDate} → ${access.latestDate}` : `Full archive · through ${access.latestDate}`)}</span>
               </div>
               {tierMsg.upgradeHref && (
                 <Link href={tierMsg.upgradeHref}>{access.tier === 'visitor' ? 'Sign up free' : 'Upgrade'}</Link>
