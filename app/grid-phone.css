@@ -210,7 +210,7 @@ button.gp-row:active { background: var(--gp-surface2); }
 @keyframes gp-shine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
 /* ── bottom nav ──────────────────────────────────────────────────────── */
-.gp-nav { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--s1) var(--s1) calc(env(safe-area-inset-bottom) + var(--s1)); display: grid; grid-template-columns: repeat(5, 1fr); background: color-mix(in srgb, var(--gp-surface) 92%, transparent); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border-top: 1px solid var(--gp-line); z-index: 3; }
+.gp-nav { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--s1) var(--s1) calc(env(safe-area-inset-bottom) + var(--s1)); display: grid; grid-template-columns: repeat(5, 1fr); background: var(--gp-surface); border-top: 1px solid var(--gp-line); z-index: 3; }
 .gp-nav button { border: 0; background: none; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11.5px; font-weight: 550; color: var(--gp-muted); }
 .gp-nav__ind { width: 56px; height: 30px; border-radius: 15px; display: grid; place-items: center; transition: background .18s; }
 .gp-nav button.is-on { color: var(--gp-on); }
