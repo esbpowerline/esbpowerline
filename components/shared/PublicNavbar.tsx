@@ -23,7 +23,6 @@ import type { TickerItem } from '@/components/news/LiveMarketTicker';
 import { PublicMarketStrip } from '@/components/news/PublicMarketStrip';
 import { MemberAuthButton } from '@/components/members/MemberAuthButton';
 import { MemberNavMenuLinks } from '@/components/members/MemberNavMenuLinks';
-import { LocaleToggle } from '@/components/shared/LocaleToggle';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { SiteThemeToggle } from '@/components/shared/SiteThemeToggle';
 
@@ -170,8 +169,12 @@ export function PublicNavbar({
 
   useEffect(() => {
     function onTabChange(event: Event) {
-      const tab = (event as CustomEvent<{ tab?: string }>).detail?.tab;
-      setGridImmersive(Boolean(tab) && tab !== 'overview');
+      const detail = (event as CustomEvent<{ tab?: string; picked?: boolean }>).detail;
+      const tab = detail?.tab;
+      // Overview folds too once the reader has picked a tab by hand, so every
+      // tab click lands the explorer in the same place. A first load on
+      // Overview (nothing picked yet) keeps the ribbon.
+      setGridImmersive(Boolean(tab) && (tab !== 'overview' || Boolean(detail?.picked)));
     }
     window.addEventListener('esb-grid-tab-change', onTabChange);
     return () => window.removeEventListener('esb-grid-tab-change', onTabChange);
@@ -322,10 +325,6 @@ export function PublicNavbar({
                     </Link>
 
                     <span className="public-nav-bar__pill-divider hidden sm:block" aria-hidden />
-
-                    <LocaleToggle className="public-nav-bar__locale" />
-
-                    <span className="public-nav-bar__pill-divider" aria-hidden />
 
                     <PublicNavLink
                       href="/search"

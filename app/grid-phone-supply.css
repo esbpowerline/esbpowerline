@@ -69,7 +69,7 @@ button.gps-pill { min-height: 28px; cursor: pointer; }
 .gps-hatch { fill: url(#gps-hatch); }
 
 /* provenance marks inside legends: the legend's own span/button rules must not stretch them */
-.gp-legend button.gp-prov { min-height: 24px; display: inline-grid; gap: 0; }
+.gp-legend .gp-prov { min-height: 24px; display: inline-grid; gap: 0; }
 .gp-legend .gp-prov span { display: grid; min-height: 15px; gap: 0; }
 
 /* inside a reconciliation box the label and value stack, so a long value never squeezes the label */

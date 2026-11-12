@@ -61,27 +61,42 @@ const PROV: Record<'P' | 'D', { title: string; body: string }> = {
   },
 };
 
-/** The site's P / D provenance mark, tappable on a phone. */
+/**
+ * The site's P / D provenance mark, tappable on a phone. A span with a button
+ * role, not a <button>: the mark sits inside tappable rows that are buttons
+ * themselves, and a button inside a button is invalid HTML (the browser
+ * re-parents it and React reports a hydration error).
+ */
 export function Prov({ kind, note }: { kind: 'P' | 'D'; note?: string }) {
   const open = useSheet();
+  const show = () =>
+    open(
+      <>
+        <h3>{PROV[kind].title}</h3>
+        <p className="gp-sheet__sub">{PROV[kind].body}</p>
+        {note ? <p style={{ fontSize: 14, lineHeight: 1.5, margin: 0 }}>{note}</p> : null}
+      </>,
+    );
   return (
-    <button
-      type="button"
+    <span
+      role="button"
+      tabIndex={0}
       className="gp-prov"
       aria-label={PROV[kind].title}
       onClick={(e) => {
         e.stopPropagation();
-        open(
-          <>
-            <h3>{PROV[kind].title}</h3>
-            <p className="gp-sheet__sub">{PROV[kind].body}</p>
-            {note ? <p style={{ fontSize: 14, lineHeight: 1.5, margin: 0 }}>{note}</p> : null}
-          </>,
-        );
+        e.preventDefault();
+        show();
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.stopPropagation();
+        e.preventDefault();
+        show();
       }}
     >
       <span>{kind}</span>
-    </button>
+    </span>
   );
 }
 

@@ -21,9 +21,6 @@ type LocaleContextValue = {
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 function readDocumentLocale(): SiteLocale {
-  if (typeof document === 'undefined') return 'en';
-  const fromDom = document.documentElement.dataset.siteLocale;
-  if (fromDom === 'en' || fromDom === 'bn') return fromDom;
   return getSavedSiteLocale();
 }
 
@@ -47,11 +44,10 @@ export function LocaleProvider({
   }, []);
 
   const setLocale = useCallback((next: SiteLocale) => {
-    setLocaleState(next);
-    applySiteLocale(next);
-    if (typeof window !== 'undefined') {
-      window.location.reload();
-    }
+    // English only: kept for the context's shape, never switches language.
+    void next;
+    setLocaleState('en');
+    applySiteLocale('en');
   }, []);
 
   const value = useMemo<LocaleContextValue>(

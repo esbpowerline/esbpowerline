@@ -912,3 +912,11 @@
      containing block of the fixed tooltip card above (it then sized to the tile). */
   .ge-root .grid-explorer-kpi:hover { transform: none !important; }
 }
+
+/* DESKTOP: keep the document tall enough while a tab's panel is swapping.
+   A lazy panel shows a short skeleton first; without this floor the page
+   briefly becomes shorter than scroll position + viewport and the browser
+   clamps the scroll to the top (the "click the tab twice" bug, 2026-11-12). */
+@media (min-width: 1024px) {
+  .ge-root { min-height: calc(100vh + 120px); }
+}

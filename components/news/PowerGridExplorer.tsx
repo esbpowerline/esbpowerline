@@ -86,6 +86,7 @@ import { GenerationPanel } from '@/components/news/power-grid/tabs/GenerationPan
 import { ImportsPanel } from '@/components/news/power-grid/tabs/ImportsPanel';
 import { RegionalPanel } from '@/components/news/power-grid/tabs/RegionalPanel';
 import { DEMO_DATE } from '@/components/news/power-grid/tabs/shared';
+import { useTabScroll } from '@/components/news/power-grid/useTabScroll';
 const GridTopologyMap = dynamic(
   () => import('@/components/news/GridTopologyMap').then((m) => m.GridTopologyMap),
   { ssr: false, loading: () => <div className="grid-explorer-skeleton h-[500px] rounded-2xl flex items-center justify-center border border-dashed"><span className="text-muted-foreground text-sm font-medium">Loading Network Map...</span></div> }
@@ -730,57 +731,7 @@ export function PowerGridExplorer({
     urlBoot?.tab ?? 'overview',
   );
   
-  const activeScrollIdRef = useRef<number | null>(null);
-  const tabScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const triggerScrollToElement = (elementId: string) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-      if (activeScrollIdRef.current !== null) {
-        cancelAnimationFrame(activeScrollIdRef.current);
-        activeScrollIdRef.current = null;
-      }
-
-      const navbar = document.querySelector('.public-nav-bar');
-      const navbarHeight = navbar ? navbar.getBoundingClientRect().height : 0;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      // Phone/tablet: the sticky context bar sits under the navbar, so the
-      // target must clear it too (0 on desktop, where the bar is display:none).
-      const shellBar = document.querySelector('[data-ge-shell-bar]');
-      const shellBarHeight = shellBar ? shellBar.getBoundingClientRect().height : 0;
-      const targetY = elementPosition - navbarHeight - shellBarHeight - 24;
-      
-      const startY = window.scrollY;
-      const difference = targetY - startY;
-
-      // If already pixel-perfect target position, skip animation to avoid layout jitter
-      if (Math.abs(difference) < 2) {
-        return;
-      }
-      const duration = 420;
-      const startTime = performance.now();
-
-      const easeInOutCubic = (t: number) => {
-        return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
-      };
-
-      const step = (currentTime: number) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const ease = easeInOutCubic(progress);
-        
-        window.scrollTo(0, startY + difference * ease);
-
-        if (progress < 1) {
-          activeScrollIdRef.current = requestAnimationFrame(step);
-        } else {
-          activeScrollIdRef.current = null;
-        }
-      };
-
-      activeScrollIdRef.current = requestAnimationFrame(step);
-    }
-  };
+  const { scrollAfterTabPick, tabPickedRef } = useTabScroll();
 
   // While the explorer is mounted, mark <html> so grid-explorer-mobile.css can
   // hide the fixed commodities ticker below 1024px (it sits over the bottom of
@@ -791,37 +742,13 @@ export function PowerGridExplorer({
   }, []);
 
   const handleTabClick = (tabId: typeof activeTab) => {
-    const foldsCategoryRibbon = (tabId !== 'overview') !== (activeTab !== 'overview');
     setActiveTab(tabId);
-    if (tabScrollTimerRef.current) clearTimeout(tabScrollTimerRef.current);
-    // The navbar folds its category ribbon away on any tab but Overview
-    // (PublicNavbar, `gridImmersive`), which changes the navbar's height and so
-    // the scroll target. `triggerScrollToElement` measures that height once and
-    // animates against a fixed distance, so scrolling while the ribbon is still
-    // folding lands short and then jumps as the document settles. Wait for the
-    // 260ms fold when it is happening; keep the old 50ms when it is not. The
-    // fold is itself the immediate feedback, so the wait does not read as lag.
-    tabScrollTimerRef.current = setTimeout(
-      () => {
-        tabScrollTimerRef.current = null;
-        triggerScrollToElement('grid-status-overview-header');
-      },
-      foldsCategoryRibbon ? 300 : 50,
-    );
+    scrollAfterTabPick(tabId);
   };
 
   useEffect(() => {
-    return () => {
-      if (tabScrollTimerRef.current) clearTimeout(tabScrollTimerRef.current);
-      if (activeScrollIdRef.current !== null) {
-        cancelAnimationFrame(activeScrollIdRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('esb-grid-tab-change', { detail: { tab: activeTab } }));
+      window.dispatchEvent(new CustomEvent('esb-grid-tab-change', { detail: { tab: activeTab, picked: tabPickedRef.current } }));
     }
   }, [activeTab]);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { useSession } from '@/utils/supabase/auth-context';
 import { getLatestAvailableDate } from '@/lib/data/grid/available-dates';
 import {
@@ -30,6 +30,8 @@ export type GridTierAccessState = {
   isStaff: boolean;
 };
 
+const subscribeNever = () => () => {};
+
 /**
  * @param runtimeLatestDate The newest day the site is actually serving, which
  * the server must supply. `availableDates` is compiled at build time, so a day
@@ -39,7 +41,12 @@ export type GridTierAccessState = {
  */
 export function useGridTierAccess(runtimeLatestDate?: string): GridTierAccessState {
   const { data: session, status } = useSession();
-  const loading = status === 'loading';
+  // The server always renders the session as loading; a browser can already
+  // know it at hydration, which made the first client render differ from the
+  // server's HTML (React #418 on the access banner). Hold `loading` through
+  // hydration so both agree, then let the real status through.
+  const hydrated = useSyncExternalStore(subscribeNever, () => true, () => false);
+  const loading = status === 'loading' || !hydrated;
 
   const role = session?.user?.role;
   const gridPlan: GridPlanId = session?.user?.gridPlan ?? 'none';
