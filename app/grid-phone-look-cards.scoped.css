@@ -218,3 +218,73 @@ html.theme-midnight .gp[data-look='cards'], html[data-site-theme='midnight'] .gp
 .gp[data-look='cards'] .gp-host table { font-size: 12px; }
 
 .gp[data-look='cards'] .gp-row__sub, .gp[data-look='cards'] .gp-stat__d, .gp[data-look='cards'] .gp-sec__desc { text-wrap: pretty; }
+
+/* ── phone scale v2 (2026-11-12) ────────────────────────────────────────
+   Owner: text "truncated way too much", small type is welcome on a phone,
+   cards "a bit too complex", wants a clean dashboard. Rethought for a 390px
+   screen with a 358px card and a 326px content column:
+     10  micro label, caps      11  note, sub-line, axis, legend
+     12  control, secondary     13  row name, body
+     15  card title             22  tile figure        34  hero figure
+   One container level: the card. Inside it, hairlines and space - the tinted
+   stat tiles were a box in a box and are gone. Nothing is ellipsized. */
+.gp[data-look='cards'] .gp-sec { padding: 14px 16px; border: 0; box-shadow: 0 1px 2px rgba(16, 24, 40, .05); }
+.gp[data-look='cards'] .gp-tstatus { border: 0; box-shadow: 0 1px 2px rgba(16, 24, 40, .05); }
+.gp[data-look='cards'] .gp-sec__head { margin-bottom: 8px; }
+.gp[data-look='cards'] .gp-sec__title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
+.gp[data-look='cards'] .gp-host h2 { font-size: 15px !important; }
+.gp[data-look='cards'] .gp-sec__desc, .gp[data-look='cards'] .gp-note, .gp[data-look='cards'] .gps-note, .gp[data-look='cards'] .gp-taudit { font-size: 11px; line-height: 1.45; color: var(--gp-muted); }
+.gp[data-look='cards'] [data-long='1']:not([data-open='1']) { -webkit-line-clamp: 4; line-clamp: 4; }
+.gp[data-look='cards'] .gp-sec__meta { font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 0; margin-top: 4px; background: none; border-radius: 0; color: var(--gp-faint); }
+.gp[data-look='cards'] .gp-sec__foot { margin-top: 10px; padding-top: 8px; font-size: 11px; color: var(--gp-faint); }
+.gp[data-look='cards'] .gp-kicker { font-size: 10px; font-weight: 700; letter-spacing: .08em; }
+.gp[data-look='cards'] .gp-kicker .gp-status { font-size: 11px; }
+.gp[data-look='cards'] .gp-hero b { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; }
+.gp[data-look='cards'] .gp-hero small { font-size: 13px; font-weight: 600; }
+.gp[data-look='cards'] .gp-subline { font-size: 11px; min-height: 0; }
+.gp[data-look='cards'] .gp-group-label { font-size: 10px; margin: 12px 0 2px; }
+
+/* stat cells: flat, hairline-ruled, label small and whole */
+.gp[data-look='cards'] .gp-stats, .gp[data-look='cards'] .gp-stats--3 { gap: 0; margin: 0; }
+.gp[data-look='cards'] .gp-stats > *, .gp[data-look='cards'] .gp-stats--3 > * { background: none; border-radius: 0; border-top: 1px solid var(--gp-line) !important; padding: 10px 12px 10px 0 !important; }
+.gp[data-look='cards'] .gp-stats:not(.gp-stats--3) > :nth-child(2n) { border-left: 1px solid var(--gp-line) !important; padding-left: 12px !important; padding-right: 0 !important; }
+.gp[data-look='cards'] .gp-stats--first > :nth-child(-n+2), .gp[data-look='cards'] .gp-sec__head + .gp-stats > :nth-child(-n+2), .gp[data-look='cards'] .gp-sec__head + .gp-stats--3 > :nth-child(-n+3) { border-top: 0 !important; padding-top: 2px !important; }
+.gp[data-look='cards'] .gp-stat__l, .gp[data-look='cards'] .gp-stats:not(.gp-stats--3) .gp-stat__l { font-size: 11px; font-weight: 500; line-height: 1.3; color: var(--gp-muted); }
+.gp[data-look='cards'] .gp-stat__v b { font-size: 22px; font-weight: 700; letter-spacing: -0.025em; }
+.gp[data-look='cards'] .gp-stat__v small { font-size: 11px; font-weight: 600; }
+.gp[data-look='cards'] .gp-stats--3 .gp-stat__v b { font-size: 17px; }
+.gp[data-look='cards'] .gp-stats--3 .gp-stat__v small { font-size: 11px; }
+.gp[data-look='cards'] .gp-stat__d { font-size: 11px; line-height: 1.35; margin-top: 3px; }
+
+/* rows */
+.gp[data-look='cards'] .gp-row { min-height: 44px; padding-top: 8px; padding-bottom: 8px; column-gap: 10px; }
+.gp[data-look='cards'] .gp-row__name { font-size: 13px; font-weight: 600; white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.3; }
+.gp[data-look='cards'] .gp-row__sub { font-size: 11px; margin-top: 2px; line-height: 1.4; }
+.gp[data-look='cards'] .gp-row__val b { font-size: 13px; font-weight: 700; }
+.gp[data-look='cards'] .gp-row__val small { font-size: 11px; margin-top: 2px; max-width: 12.5em; }
+.gp[data-look='cards'] .gp-row .gp-meter { margin-top: 6px; }
+.gp[data-look='cards'] .gp-meter, .gp[data-look='cards'] .gp-meter > div { height: 4px; }
+.gp[data-look='cards'] .gp-sw { width: 8px; height: 8px; border-radius: 2px; }
+.gp[data-look='cards'] .gp-tag { font-size: 10px; font-weight: 700; letter-spacing: .03em; }
+
+/* controls */
+.gp[data-look='cards'] .gp-tabs { margin-bottom: 10px; }
+.gp[data-look='cards'] .gp-tabs button { height: 32px; font-size: 12px; }
+.gp[data-look='cards'] .gp-seg { padding: 3px; }
+.gp[data-look='cards'] .gp-seg button { min-height: 32px; font-size: 12px; }
+.gp[data-look='cards'] .gp-more, .gp[data-look='cards'] .gp-thow, .gp[data-look='cards'] .gz-info { min-height: 40px; height: 40px; font-size: 12px; }
+.gp[data-look='cards'] .gp-secs button { height: 32px; font-size: 12px; padding: 0 12px; }
+.gp[data-look='cards'] .gp-chip { height: 42px; min-width: 54px; }
+.gp[data-look='cards'] .gp-chip small { font-size: 10px; }
+.gp[data-look='cards'] .gp-chip b { font-size: 15px; }
+.gp[data-look='cards'] .gp-nav button { font-size: 10px; letter-spacing: .02em; }
+
+/* plots */
+.gp[data-look='cards'] .gp-plot { margin-top: 10px; }
+.gp[data-look='cards'] .gp-tick { font-size: 10px; }
+.gp[data-look='cards'] .gp-legend, .gp[data-look='cards'] .gp-legend:has(> :nth-child(4)) { margin-top: 6px; gap: 0 12px; }
+.gp[data-look='cards'] .gp-legend span, .gp[data-look='cards'] .gp-legend button { font-size: 11px; min-height: 22px; gap: 6px; }
+.gp[data-look='cards'] .gp-legend i { width: 8px; height: 8px; border-radius: 2px; }
+.gp[data-look='cards'] .gp-legend i.is-line { width: 12px; height: 2px; }
+.gp[data-look='cards'] .gp-hint { font-size: 10px; margin-top: 4px; }
+.gp[data-look='cards'] .gp-prov span { font-size: 10px; }

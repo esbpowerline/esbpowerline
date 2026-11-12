@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
  * These checks fail the build when a value off the scale is added, so the
  * next section cannot invent one.
  */
-const TYPE = new Set([11, 12, 13, 15, 17, 22, 34, 44]);
+const TYPE = new Set([10, 11, 12, 13, 15, 17, 22, 34, 44]);
 const RADII = new Set([0, 1, 2, 3, 4, 8, 12, 20, 999]);
 
 const css = readdirSync('app')

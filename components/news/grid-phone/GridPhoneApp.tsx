@@ -169,7 +169,7 @@ export function GridPhoneApp({
   const mainRef = useRef<HTMLDivElement | null>(null);
 
 
-  // Long explanatory paragraphs fold to two lines; a tap opens them. Nothing is
+  // Long explanatory paragraphs fold to four small lines (two until 2026-11-12, which the owner found "truncated way too much"); a tap opens them. Nothing is
   // removed - the owner asked (2026-11-12) for explanations to be cut down or
   // hidden so the figures lead. Only paragraphs that actually overflow two
   // lines are folded (`data-long`), so a one-line caption is left alone. The
@@ -186,7 +186,7 @@ export function GridPhoneApp({
         const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
         const was = el.dataset.long;
         delete el.dataset.long;
-        const long = el.scrollHeight > lh * 2 + 6;
+        const long = el.scrollHeight > lh * 4 + 6;
         if (long) el.dataset.long = '1';
         else if (was) delete el.dataset.long;
       });
