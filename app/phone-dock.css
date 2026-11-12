@@ -15,8 +15,7 @@
     --gp-bg: #f1f3f7; --gp-surface: #ffffff; --gp-surface2: #eef0f5; --gp-line: #e3e6ed;
     --gp-on: #10131a; --gp-muted: #5b6270; --gp-faint: #8a909c;
     --gp-card-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 10px 24px -16px rgba(16, 24, 40, .18);
-    --gp-dock: #10131a; --gp-dock-fg: rgba(255, 255, 255, .64); --gp-dock-on: #ffffff; --gp-dock-on-fg: #10131a;
-    --gp-dock-shadow: 0 18px 36px -14px rgba(10, 14, 22, .55);
+    --gp-dock: #ffffff; --gp-dock-fg: #5b6270; --gp-dock-on: #10131a; --gp-dock-on-fg: #ffffff; --gp-dock-shadow: 0 10px 30px -12px rgba(16, 24, 40, .28), 0 0 0 1px rgba(16, 24, 40, .06);
   }
   html.theme-dark :is(.hp-dock, .hp-sheet-root, .hp-foot, main.home-page), html[data-site-theme='dark'] :is(.hp-dock, .hp-sheet-root, .hp-foot, main.home-page) {
     --gp-bg: #0b0e14; --gp-surface: #151922; --gp-surface2: #1f2430; --gp-line: #272c38;
@@ -134,3 +133,9 @@
 }
 
 @media (max-width: 767px) { html.dark .hp-sheet { box-shadow: 0 -1px 0 rgba(255, 255, 255, .1), 0 -12px 40px -12px rgba(0, 0, 0, .6); } }
+
+/* Dock palette, 2026-11-12: the owner asked for it reversed in the white
+   theme - "it should be white and the selection should be dark". White theme:
+   a white dock on the grey page, muted icons, the active item a dark pill.
+   Dark and midnight keep a dark dock with a light pill, i.e. the same rule in
+   every theme: the dock is a surface, the selection is its inverse. */

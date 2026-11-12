@@ -86,3 +86,27 @@
   .hp-appbar-auth > span { font-size: 13px; font-weight: 600; }
 }
 @keyframes hp-acct-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ── bar balance (2026-11-12): "the user icon, theme, search and date aren't
+   balanced with the logo". The logo was 24px against three 44px controls of
+   three different looks (two bare glyphs and a grey avatar disc). Now: one
+   48px brand block (28px logo + 10px clock line) on the bar's centre line,
+   and three identical 36px tinted discs (44px hit area) with 20px glyphs,
+   6px apart, the last one ending on the same 16px edge as the page. */
+@media (max-width: 767px) {
+  .public-nav-bar__inner { padding-left: 16px !important; padding-right: 10px !important; }
+  .public-nav-bar__main { min-height: 64px !important; height: 64px; }
+  .hp-appbar__brand { height: 48px; justify-content: center; gap: 2px; }
+  .hp-appbar__logo { height: 30px; }
+  .hp-appbar__logo img { height: 28px; }
+  .hp-appbar__clock { height: 14px; line-height: 14px; padding-left: 1px; }
+  .public-nav-bar__end .public-nav-bar__utilities, .public-nav-bar__start .public-nav-bar__start-cluster { gap: 2px !important; }
+  .public-nav-bar__search-pill, .hp-appbar__theme,
+  .public-nav-bar .public-nav-bar__account-pill.public-nav-bar__pill-btn--paired,
+  .public-nav-bar__utility-cluster .public-nav-bar__account-pill.public-nav-bar__pill-btn--paired {
+    width: 44px !important; height: 44px !important; min-width: 44px !important;
+    background: radial-gradient(circle, hsl(var(--muted)) 0 18px, transparent 18.5px) !important;
+  }
+  .public-nav-bar__search-pill svg, .hp-appbar__theme svg, .public-nav-bar__account-pill .public-nav-bar__account-glyph { width: 20px !important; height: 20px !important; stroke-width: 1.9; }
+  .public-nav-bar__account-pill .public-nav-bar__account-icon-slot { background: none !important; width: 20px !important; height: 20px !important; }
+}

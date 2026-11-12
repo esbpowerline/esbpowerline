@@ -4,7 +4,7 @@
 @media (max-width: 767px) {
   .gp-boot {
     --b-bg: #f1f3f7; --b-surface: #ffffff; --b-skel: #e6e9f0; --b-on: #10131a; --b-muted: #5b6270;
-    --b-dock: #10131a; --b-dock-fg: rgba(255, 255, 255, .64); --b-dock-on: #ffffff;
+    --b-dock: #ffffff; --b-dock-fg: #5b6270; --b-dock-on: #10131a;
     display: flex; flex-direction: column; position: fixed; inset: 0; z-index: 2147483000;
     background: var(--b-bg); color: var(--b-on);
     font-family: var(--font-sans, Inter, system-ui, sans-serif);
