@@ -3,7 +3,7 @@
 /**
  * Grid: the network view — demand and shedding by zone, the outage log,
  * generation by zone and the East–West interconnector (desktop "Regional
- * Grid"), plus the Technical Information reference hosted whole as Network.
+ * Grid"), plus the Technical Information reference (TechnicalScreen) as Network.
  */
 
 import dynamic from 'next/dynamic';
@@ -15,14 +15,13 @@ import { OutageLog } from './grid-outages';
 import { ZoneDemand, ZoneGeneration, ZoneKpis } from './grid-zones';
 import { Empty, Skeleton } from './shared';
 
-const TechnicalInfoTab = dynamic(() => import('@/components/news/power-grid/TechnicalInfoTab').then((m) => m.TechnicalInfoTab), {
+const TechnicalScreen = dynamic(() => import('./TechnicalScreen').then((m) => m.TechnicalScreen), {
   ssr: false,
   loading: () => <Skeleton heights={[120, 420]} />,
 });
 
 /** `view` is set by the app's section strip (Regional Grid / Technical Info); see SupplyScreen. */
 export function GridScreen({ view: controlled }: { view?: 'zones' | 'network' } = {}) {
-  const p = usePhone();
   const [own, setView] = useState<'zones' | 'network'>('zones');
   const view = controlled ?? own;
   return (
@@ -35,11 +34,7 @@ export function GridScreen({ view: controlled }: { view?: 'zones' | 'network' } 
         </div>
       )}
       {view === 'zones' && <ZonesView />}
-      {view === 'network' && (
-        <div className="gp-host grid-explorer">
-          <TechnicalInfoTab selectedDate={p.date} tierLockRequired={null} onTryDemo={() => {}} />
-        </div>
-      )}
+      {view === 'network' && <TechnicalScreen />}
     </div>
   );
 }

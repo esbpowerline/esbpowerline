@@ -1,0 +1,194 @@
+/* Technical Information on the phone (TechnicalScreen.tsx + technical-*.tsx). Kit tokens only. */
+
+.gp .gpt { display: grid; gap: var(--s3); min-width: 0; }
+
+/* Section pills: one swipeable row, the desktop sidebar's four groups as captions over their pills. */
+.gp .gpt-nav { position: sticky; top: 0; z-index: 2; display: flex; gap: var(--s4); overflow-x: auto; scrollbar-width: none; margin: 0 calc(var(--s3) * -1); padding: 2px var(--s3) var(--s2); background: var(--gp-bg); scroll-padding: 0 var(--s3); }
+.gp .gpt-nav::-webkit-scrollbar { display: none; }
+.gp .gpt-nav__group { flex: none; display: grid; gap: 5px; }
+.gp .gpt-nav__group > span { font-size: 10px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--gp-faint); padding-left: 2px; white-space: nowrap; }
+.gp .gpt-nav__group > div { display: flex; gap: 6px; }
+.gp .gpt-nav button { flex: none; height: 34px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--gp-line); background: var(--gp-surface); font-size: 13px; font-weight: 600; color: var(--gp-muted); white-space: nowrap; }
+.gp .gpt-nav button.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
+
+.gp .gpt-standing { display: flex; align-items: center; gap: var(--s3); padding: 0 var(--s1); font-size: 11px; line-height: 1.45; color: var(--gp-muted); }
+.gp .gpt-standing > span { flex: 1; min-width: 0; }
+.gp .gpt-standing b { color: var(--gp-on); font-weight: 650; }
+
+.gp .gpt .gp-prov { vertical-align: middle; margin: -6px -3px -4px 1px; }
+
+/* Info pill → bottom sheet. */
+.gp .gpt-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--s3); }
+.gp .gpt-pill { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 var(--s3) 0 6px; border-radius: 999px; border: 1px solid var(--gp-line); background: none; font-size: 12px; font-weight: 600; color: var(--gp-on); white-space: nowrap; }
+.gp .gpt-pill i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 999px; background: var(--gp-primaryC); color: var(--gp-primary); font-style: normal; font-size: 11px; font-weight: 700; font-family: Georgia, serif; }
+.gp .gpt-pill:active { background: var(--gp-surface2); }
+.gp .gpt-sheet p, .gp .gpt-sheet blockquote { margin: 0 0 var(--s3); font-size: 15px; line-height: 1.55; }
+.gp .gpt-sheet blockquote { padding-left: var(--s3); border-left: 2px solid var(--gp-primary); font-style: italic; color: var(--gp-muted); }
+.gp .gpt-sheet b { font-weight: 650; }
+.gp .gpt-terms { margin: 0; display: grid; gap: var(--s4); }
+.gp .gpt-terms dt { font-size: 15px; font-weight: 650; }
+.gp .gpt-terms dd { margin: 3px 0 0; font-size: 13px; line-height: 1.5; color: var(--gp-muted); }
+.gp .gpt-jargon { margin-top: 0; background: var(--gp-surface); }
+
+/* Type inside a card. */
+.gp .gpt-lead { margin: 0; font-size: 13px; line-height: 1.55; color: var(--gp-on); }
+.gp .gpt-lead--sm { color: var(--gp-muted); font-size: 12px; margin-top: var(--s2); }
+.gp .gpt-h { margin: 0 0 var(--s2); font-size: 11px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--gp-muted); }
+.gp .gpt-h--gap { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--gp-line); }
+.gp .gpt-note { margin: var(--s2) 0 0; font-size: 12px; line-height: 1.5; color: var(--gp-muted); }
+.gp .gpt-note b { color: var(--gp-on); font-weight: 650; }
+.gp .gpt-note--ruled { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--gp-line); }
+.gp .gpt-caveat { margin: var(--s3) 0 0; padding: var(--s2) var(--s3); border-radius: 8px; background: var(--gp-warnC); font-size: 11px; line-height: 1.45; color: var(--gp-on); }
+.gp .gpt-caveat b { font-weight: 700; }
+.gp .gpt-warn { color: var(--gp-warn) !important; }
+.gp .gpt-muted { margin: var(--s2) 0 0; font-size: 12px; color: var(--gp-muted); }
+.gp .gpt-stamp { margin: calc(var(--s2) * -1) 0 var(--s4); font-size: 11px; font-weight: 600; color: var(--gp-warn); }
+.gp .gpt-foot { display: grid; gap: 4px; align-items: start; font-size: 11px; }
+.gp .gpt-foot b { color: var(--gp-on); font-weight: 650; }
+.gp .gpt-foot__stamp { font-weight: 600; color: var(--gp-on); }
+
+/* "How power reaches you": voltage profile over three labelled zones. */
+.gp .gpt-flow { margin-top: var(--s4); padding-top: var(--s4); border-top: 1px solid var(--gp-line); }
+.gp .gpt-flow__pic { position: relative; height: 132px; }
+.gp .gpt-flow__pic > svg { position: absolute; left: 0; right: 0; top: 26px; width: 100%; height: 74px; overflow: visible; }
+.gp .gpt-flow__zone { fill: var(--gp-primaryC); }
+.gp .gpt-flow__fill { fill: var(--gp-primary); opacity: .1; }
+.gp .gpt-flow__line { fill: none; stroke: var(--gp-primary); stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.gp .gpt-flow__pulse { fill: none; stroke: var(--gp-surface); stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-dasharray: 3 21; stroke-linecap: round; opacity: .9; animation: gpt-flow 1.6s linear infinite; }
+@keyframes gpt-flow { to { stroke-dashoffset: -24; } }
+@media (prefers-reduced-motion: reduce) { .gp .gpt-flow__pulse { animation: none; opacity: 0; } }
+.gp .gpt-flow__volts { position: absolute; left: 33.33%; width: 33.34%; top: 0; text-align: center; font-size: 10px; line-height: 1.25; color: var(--gp-primary); font-weight: 600; white-space: nowrap; }
+.gp .gpt-flow__volts b { display: block; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; margin: 0 -40px; }
+.gp .gpt-flow__mark { position: absolute; top: 58px; font-size: 10px; font-weight: 600; color: var(--gp-muted); white-space: nowrap; }
+.gp .gpt-flow__mark--up { right: 68.5%; }
+.gp .gpt-flow__mark--down { left: 68.5%; }
+.gp .gpt-flow__cols { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+.gp .gpt-flow__cols > div { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11px; font-weight: 650; color: var(--gp-muted); }
+.gp .gpt-flow__cols > .is-pgcb { color: var(--gp-primary); }
+.gp .gpt-steps { list-style: none; margin: var(--s3) calc(var(--s4) * -1) 0; padding: 0; }
+.gp .gpt-steps li { display: grid; grid-template-columns: 24px 1fr; gap: var(--s3); padding: var(--s3) var(--s4); border-top: 1px solid var(--gp-line); }
+.gp .gpt-steps li > i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 999px; background: var(--gp-surface2); font-style: normal; font-size: 12px; font-weight: 700; color: var(--gp-muted); }
+.gp .gpt-steps li.is-pgcb > i { background: var(--gp-primary); color: var(--gp-surface); }
+.gp .gpt-steps small { display: block; font-size: 10px; font-weight: 650; letter-spacing: .06em; text-transform: uppercase; color: var(--gp-muted); }
+.gp .gpt-steps li.is-pgcb small { color: var(--gp-primary); }
+.gp .gpt-steps b { display: block; margin-top: 1px; font-size: 13px; font-weight: 650; }
+.gp .gpt-steps p { margin: 3px 0 0; font-size: 12px; line-height: 1.5; color: var(--gp-muted); }
+.gp .gpt-steps em { display: block; margin-top: 5px; font-style: normal; font-size: 11px; font-weight: 600; color: var(--gp-on); }
+.gp .gpt-steps li.is-pgcb em { color: var(--gp-primary); }
+
+/* Voltage bars. */
+.gp .gpt-bars { display: grid; gap: var(--s3); margin-top: var(--s3); }
+.gp .gpt-today + .gpt-bars { padding-top: var(--s3); border-top: 1px solid var(--gp-line); margin-top: 0; }
+.gp .gpt-bar__top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.gp .gpt-bar__top span { font-size: 12px; font-weight: 550; color: var(--gp-on); }
+.gp .gpt-bar__top b { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -0.01em; }
+.gp .gpt-bar__track { height: 8px; margin-top: 5px; border-radius: 4px; background: var(--gp-surface2); overflow: hidden; }
+.gp .gpt-bar__track i { display: block; height: 100%; border-radius: 4px; }
+.gp .gpt-bar__plus { margin-top: 4px; font-size: 11px; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp .gpt-colnote { display: flex; justify-content: space-between; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--gp-line); font-size: 11px; color: var(--gp-muted); }
+.gp .gpt-colnote + .gpt-bars { margin-top: var(--s2); }
+
+/* Label / printed figure rows. */
+.gp .gpt-pairs { margin: var(--s3) calc(var(--s4) * -1) 0; }
+.gp .gpt-h + .gpt-pairs, .gp .gp-sec__head + .gpt-pairs { margin-top: 0; }
+.gp .gpt-pair { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); padding: 10px var(--s4); border-top: 1px solid var(--gp-line); }
+.gp .gp-sec__head + .gpt-pairs .gpt-pair:first-child { border-top: 0; padding-top: 0; }
+.gp .gpt-pair > span { font-size: 12px; font-weight: 550; line-height: 1.35; min-width: 0; }
+.gp .gpt-pair > div { text-align: right; flex: none; max-width: 58%; }
+.gp .gpt-pair b { display: block; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.gp .gpt-pair small { display: block; margin-top: 1px; font-size: 11px; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+
+/* Then vs Now: class name over two columns. */
+.gp .gpt-tn { margin: 0 calc(var(--s4) * -1); }
+.gp .gpt-tn__head, .gp .gpt-tn__row { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--s3); padding: 10px var(--s4); }
+.gp .gpt-tn__head { padding-top: 0; font-size: 10px; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; color: var(--gp-muted); line-height: 1.35; }
+.gp .gpt-tn__row { border-top: 1px solid var(--gp-line); }
+.gp .gpt-tn__row h4 { grid-column: 1 / -1; margin: 0 0 4px; font-size: 12px; font-weight: 650; color: var(--gp-muted); }
+.gp .gpt-tn__row b { display: block; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.35; }
+.gp .gpt-tn__row small { display: block; font-size: 11px; color: var(--gp-muted); line-height: 1.4; font-variant-numeric: tabular-nums; }
+.gp .gpt-tn__row .is-none b { color: var(--gp-faint); }
+.gp .gpt-tn__row > div + div { padding-left: var(--s3); border-left: 1px solid var(--gp-line); }
+
+.gp .gpt-callout { display: grid; gap: 4px; width: 100%; padding: var(--s3) var(--s4); border: 0; border-radius: 20px; background: var(--gp-primaryC); text-align: left; color: var(--gp-on); }
+.gp .gpt-callout span { font-size: 12px; line-height: 1.45; font-weight: 550; }
+.gp .gpt-callout b { font-size: 13px; font-weight: 700; color: var(--gp-primary); }
+.gp .gpt-today .gp-stat__d b { color: var(--gp-on); font-weight: 650; }
+.gp .gpt-statword b { font-size: 15px !important; white-space: normal; }
+
+/* Substation class tables. */
+.gp .gpt-class { margin: var(--s3) calc(var(--s4) * -1) 0; border-top: 1px solid var(--gp-line); }
+.gp .gpt-class__head, .gp .gpt-class__row { display: grid; grid-template-columns: 1fr auto 104px; column-gap: var(--s3); padding: 10px var(--s4); align-items: baseline; }
+.gp .gpt-class__head { font-size: 10px; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; color: var(--gp-muted); padding-bottom: 6px; }
+.gp .gpt-class__head span:nth-child(n+2), .gp .gpt-class__row > span, .gp .gpt-class__row > strong { text-align: right; }
+.gp .gpt-class__row { border-top: 1px solid var(--gp-line); }
+.gp .gpt-class__row > b { font-size: 12px; font-weight: 600; line-height: 1.35; }
+.gp .gpt-class__row > span { font-size: 12px; color: var(--gp-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.gp .gpt-class__row > strong { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.gp .gpt-class__row > small { grid-column: 1 / -1; margin-top: 2px; font-size: 11px; color: var(--gp-muted); }
+.gp .gpt-class__row > small em { font-style: normal; font-weight: 600; color: var(--gp-on); font-variant-numeric: tabular-nums; }
+
+/* Register: pill selects and the list. */
+.gp .gpt-picks { display: flex; gap: 6px; margin: var(--s2) calc(var(--s4) * -1) 0; padding: 0 var(--s4); overflow-x: auto; scrollbar-width: none; }
+.gp .gpt-picks::-webkit-scrollbar { display: none; }
+.gp .gpt-pick { position: relative; flex: none; display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 var(--s3); border-radius: 999px; border: 1px solid var(--gp-line); font-size: 12px; font-weight: 600; color: var(--gp-muted); white-space: nowrap; }
+.gp .gpt-pick.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
+.gp .gpt-pick i { font-style: normal; font-size: 10px; opacity: .7; }
+.gp .gpt-pick select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; font-size: 15px; }
+.gp .gpt-pick--wide { display: flex; justify-content: space-between; margin-top: var(--s2); }
+.gp .gpt-none { min-height: 96px; margin-top: var(--s3); }
+.gp .gpt-subs { margin: var(--s3) calc(var(--s4) * -1) 0; }
+.gp .gpt-sub { display: grid; grid-template-columns: 1fr auto; column-gap: var(--s3); padding: 10px var(--s4); border-top: 1px solid var(--gp-line); }
+.gp .gpt-sub__main b { display: block; font-size: 13px; font-weight: 650; line-height: 1.3; }
+.gp .gpt-sub__main b i { display: inline-block; min-width: 20px; margin-right: 4px; font-style: normal; font-size: 11px; font-weight: 500; color: var(--gp-faint); font-variant-numeric: tabular-nums; }
+.gp .gpt-sub__main span { display: block; margin-top: 2px; font-size: 11px; color: var(--gp-muted); line-height: 1.4; font-variant-numeric: tabular-nums; }
+.gp .gpt-sub__val { text-align: right; }
+.gp .gpt-sub__val b { display: block; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.gp .gpt-kv { display: inline-block; margin-top: 3px; padding: 1px 7px; border-radius: 999px; font-size: 10px; font-weight: 700; background: var(--gp-surface2); color: var(--gp-muted); }
+.gp .gpt-kv.is-400 { background: var(--gp-badC); color: var(--gp-bad); }
+.gp .gpt-kv.is-230 { background: var(--gp-warnC); color: var(--gp-warn); }
+.gp .gpt-kv.is-132 { background: var(--gp-primaryC); color: var(--gp-primary); }
+
+/* Projects. */
+.gp .gpt-kinds > button { font: inherit; color: inherit; cursor: pointer; }
+.gp .gpt-kinds > button.is-on { box-shadow: inset 0 -3px 0 var(--gp-primary); }
+.gp .gpt-kinds > button:not(.is-on) .gp-stat__v b { color: var(--gp-muted); }
+.gp .gpt-psearch { margin-top: var(--s3); }
+.gp .gpt-projs { margin: var(--s3) calc(var(--s4) * -1) 0; }
+.gp .gpt-projrow { display: grid; gap: 4px; width: 100%; padding: var(--s3) var(--s4); border: 0; border-top: 1px solid var(--gp-line); background: none; text-align: left; color: var(--gp-on); }
+.gp .gpt-projrow:active { background: var(--gp-surface2); }
+.gp .gpt-projrow > b { font-size: 13px; font-weight: 650; line-height: 1.35; }
+.gp .gpt-projrow > span { font-size: 11px; color: var(--gp-muted); line-height: 1.4; }
+.gp .gpt-status { font-size: 11px; line-height: 1.5; color: var(--gp-muted); }
+.gp .gpt-status .gp-tag { margin-right: 4px; font-size: 11px; }
+.gp .gpt-progs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin-top: 4px; }
+.gp .gpt-prog > div:first-child { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; font-size: 11px; color: var(--gp-muted); }
+.gp .gpt-prog b { font-size: 12px; font-weight: 700; color: var(--gp-on); font-variant-numeric: tabular-nums; }
+.gp .gpt-projrow__foot { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s3); margin-top: 4px; }
+.gp .gpt-projrow__foot em { font-style: normal; font-size: 11px; font-weight: 600; color: var(--gp-primary); white-space: nowrap; }
+/* renderProjectCost comes with the desktop's utility classes; size it to the phone scale here. */
+.gp .gpt-cost > span { display: block; font-size: 10px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; color: var(--gp-muted); }
+.gp .gpt-cost div { font-size: 13px !important; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--gp-on); line-height: 1.35; }
+.gp .gpt-cost div > div + div { font-size: 11px !important; font-weight: 500; color: var(--gp-muted); }
+.gp .gpt-costs { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+.gp .gpt-proj__title { font-size: 17px !important; line-height: 1.3; }
+.gp .gpt-proj h4 { margin: var(--s4) 0 var(--s2); font-size: 11px; font-weight: 650; letter-spacing: .05em; text-transform: uppercase; color: var(--gp-primary); }
+.gp .gpt-proj ul { list-style: disc; margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; line-height: 1.5; }
+.gp .gpt-proj .gpt-status { font-size: 13px; }
+.gp .gpt-contact { margin-top: var(--s4) !important; padding-top: var(--s3); border-top: 1px solid var(--gp-line); font-size: 13px !important; line-height: 1.7 !important; color: var(--gp-muted); overflow-wrap: anywhere; }
+.gp .gpt-contact b { color: var(--gp-on); }
+.gp .gpt-proj .gpt-muted { font-size: 12px; }
+
+/* Map documents and keys. */
+.gp .gpt-doc { display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: var(--s3); margin-top: var(--s3); padding: var(--s2); padding-right: var(--s4); border-radius: 12px; background: var(--gp-surface2); text-decoration: none; color: var(--gp-on) !important; }
+.gp .gpt-doc__sheet { display: block; height: 56px; border-radius: 8px; background: var(--gp-surface); padding: 6px; }
+.gp .gpt-doc__sheet svg { width: 100%; height: 100%; overflow: visible; }
+.gp .gpt-doc__sheet path { fill: none; stroke: var(--gp-primary); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.gp .gpt-doc__sheet path + path { stroke: var(--gp-demand); }
+.gp .gpt-doc__sheet circle { fill: var(--gp-surface); stroke: var(--gp-on); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.gp .gpt-doc__txt b { display: block; font-size: 15px; font-weight: 700; }
+.gp .gpt-doc__txt small { display: block; margin-top: 2px; font-size: 11px; color: var(--gp-muted); line-height: 1.4; }
+.gp .gpt-keys { display: grid; gap: var(--s3); }
+.gp .gpt-keys--ruled { margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--gp-line); }
+.gp .gpt-keys b { font-size: 12px; font-weight: 650; }
+.gp .gpt-keys p { margin: 2px 0 0; font-size: 12px; line-height: 1.5; color: var(--gp-muted); }
+.gp .gpt-rate small { font-size: 13px; }

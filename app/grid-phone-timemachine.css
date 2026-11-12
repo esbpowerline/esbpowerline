@@ -1,0 +1,62 @@
+/* Time Machine on the phone (TimeMachineScreen.tsx). Kit tokens only. */
+
+.gp .gptm-series { margin-top: 0; }
+
+/* Range: two tappable fields. The native date input lies invisibly over each, so a tap opens the system picker. */
+.gp .gptm-range { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--s2); margin-top: var(--s3); }
+.gp .gptm-range > i { font-style: normal; color: var(--gp-faint); font-size: 13px; }
+.gp .gptm-date { position: relative; display: grid; gap: 1px; padding: 7px var(--s3) 8px; border-radius: 12px; background: var(--gp-surface2); min-width: 0; }
+.gp .gptm-date span { font-size: 10px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--gp-muted); }
+.gp .gptm-date b { font-size: 15px; font-weight: 650; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.gp .gptm-date input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; margin: 0; }
+.gp .gptm-date input::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; cursor: pointer; }
+.gp .gptm-date:focus-within { box-shadow: 0 0 0 2px var(--gp-primary); }
+
+.gp .gptm-presets { display: flex; gap: 6px; margin-top: var(--s2); }
+.gp .gptm-presets button { flex: 1; height: 30px; border-radius: 999px; border: 1px solid var(--gp-line); background: none; font-size: 12px; font-weight: 550; color: var(--gp-muted); padding: 0; }
+.gp .gptm-presets button.is-on { border-color: var(--gp-on); color: var(--gp-on); font-weight: 650; }
+.gp .gptm-res { margin-top: var(--s3); }
+
+.gp .gptm-notice { margin: var(--s3) 0 0; padding: var(--s3); border-radius: 12px; font-size: 12px; line-height: 1.5; }
+.gp .gptm-notice--plan { background: var(--gp-primaryC); color: var(--gp-on); }
+.gp .gptm-notice--plan b:first-child { color: var(--gp-primary); }
+.gp .gptm-notice--bad { background: var(--gp-badC); color: var(--gp-bad); }
+
+/* The reading keeps its height whichever state is shown, so the chart does not jump under the thumb. */
+.gp .gptm-body { margin-top: var(--s4); padding-top: var(--s3); border-top: 1px solid var(--gp-line); transition: opacity .15s; }
+.gp .gptm-body.is-loading { opacity: .45; }
+.gp .gptm-read { min-height: 118px; }
+.gp .gptm-say { margin: var(--s1) 0 0; font-size: 12px; line-height: 1.45; color: var(--gp-muted); }
+.gp .gptm-say b { color: var(--gp-on); font-weight: 650; }
+.gp .gptm-say .gp-prov { vertical-align: middle; margin: -6px 2px -4px -4px; }
+.gp .gptm-say--plan b { color: var(--gp-primary); }
+.gp .gptm-say--warn { color: var(--gp-warn); }
+.gp .gptm-say--warn span { display: block; }
+.gp .gptm-tag--plan { background: var(--gp-primaryC); color: var(--gp-primary); }
+.gp .gptm-body .gp-plot { margin-top: var(--s2); }
+.gp .gptm-empty { min-height: 220px; margin-top: var(--s4); }
+
+/* Gap marks in the plot. */
+.gp .gptm-plan { fill: var(--gp-primary); opacity: .07; }
+.gp .gptm-rule { stroke-width: 2; stroke-linecap: butt; }
+.gp .gptm-rule--plan { stroke: var(--gp-primary); stroke-dasharray: 5 4; opacity: .75; }
+.gp .gptm-rule--missing { stroke: var(--gp-muted); stroke-dasharray: 5 4; }
+.gp .gptm-planlabel { font-size: 11px; font-weight: 600; fill: var(--gp-primary); }
+
+/* Legend: one tappable block, five line styles. */
+.gp .gptm-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px var(--s3); width: 100%; margin-top: var(--s3); padding: var(--s3) 0 0; border: 0; border-top: 1px solid var(--gp-line); background: none; text-align: left; color: var(--gp-on); }
+.gp .gptm-legend span { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 550; }
+.gp .gptm-legend .gptm-legend__more { margin-left: auto; color: var(--gp-primary); font-weight: 600; }
+.gp .gptm-sw { display: inline-block; width: 18px; height: 0; border-top: 2px solid currentColor; flex: none; }
+.gp .gptm-sw--estimated { border-top-style: dotted; color: var(--gp-muted); }
+.gp .gptm-sw--missing { border-top-style: dashed; color: var(--gp-muted); }
+.gp .gptm-sw--restricted { border-top-style: dashed; color: var(--gp-primary); }
+
+.gp .gptm-counts { margin-top: var(--s3); border-top: 1px solid var(--gp-line); }
+.gp .gptm-counts > * { border-top: 0; }
+.gp .gptm-excluded { margin-top: var(--s2); }
+.gp .gptm-foot { margin-top: var(--s3); }
+
+.gp .gptm-defs { margin: 0; display: grid; gap: var(--s4); }
+.gp .gptm-defs dt { display: flex; align-items: center; gap: var(--s2); font-size: 15px; font-weight: 650; }
+.gp .gptm-defs dd { margin: 3px 0 0; font-size: 13px; line-height: 1.5; color: var(--gp-muted); }
