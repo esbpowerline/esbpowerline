@@ -177,7 +177,7 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
 
   return (
     <section className="hp-card hp-links mt-8 rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden" aria-labelledby="important-links-title">
-      <div className="p-4 md:p-5">
+      <div className="p-4 md:p-5 hp-links__desk">
         <header className="mb-4">
           <div className="flex items-center gap-2">
             <span aria-hidden className="h-px flex-1 rounded-full bg-gradient-to-r from-transparent to-border" />
@@ -255,6 +255,144 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
           ))}
         </div>
       </div>
+      <PhoneLinks data={data} />
     </section>
+  );
+}
+
+/* ── Phone module (below 768px only; app/home-phone.css shows it and hides the
+   desktop org chart above). Same data, every link kept: the ministry and its
+   divisions, the regulator, then the value chain behind a segmented switch —
+   one stage at a time, each org a 56px row (tinted icon tile, short name,
+   one-line role, chevron), subsidiaries opening in place. ─────────────────── */
+function PhoneTile({ Icon, tint }: { Icon: LucideIcon; tint?: ILTint }) {
+  return (
+    <span className={`hp-il__tile ${tint ? TINT_BADGE[tint] : 'bg-muted text-muted-foreground'}`} aria-hidden>
+      <Icon width={18} height={18} strokeWidth={1.9} />
+    </span>
+  );
+}
+
+function PhoneLinks({ data }: { data: ImportantLinksData }) {
+  const { ministry, divisions, regulator, sections } = data;
+  const [stage, setStage] = useState(0);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const toggle = (key: string) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const row = (org: ILOrgNode) => {
+    const Icon = iconFor(org.icon);
+    const kids = org.children ?? [];
+    if (!kids.length) {
+      return (
+        <li key={org.short}>
+          <a className="hp-il__row" href={org.href} target="_blank" rel="noopener noreferrer">
+            <PhoneTile Icon={Icon} tint={org.tint} />
+            <span className="hp-il__copy">
+              <span className="hp-il__name">{org.short}</span>
+              <span className="hp-il__role">{org.name}</span>
+            </span>
+            <ExternalLink className="hp-il__chev" aria-hidden width={16} height={16} />
+          </a>
+        </li>
+      );
+    }
+    const isOpen = !!open[org.short];
+    return (
+      <li key={org.short}>
+        <button type="button" className="hp-il__row" aria-expanded={isOpen} onClick={() => toggle(org.short)}>
+          <PhoneTile Icon={Icon} tint={org.tint} />
+          <span className="hp-il__copy">
+            <span className="hp-il__name">
+              {org.short}
+              <span className={`hp-il__count ${org.tint ? TINT_BADGE[org.tint] : ''}`}>{kids.length} companies</span>
+            </span>
+            <span className="hp-il__role">{org.name}</span>
+          </span>
+          <ChevronRight className={`hp-il__chev${isOpen ? ' is-open' : ''}`} aria-hidden width={18} height={18} />
+        </button>
+        {isOpen && (
+          <ul className="hp-il__kids">
+            <li>
+              <a className="hp-il__kid" href={org.href} target="_blank" rel="noopener noreferrer">
+                <i className={org.tint ? TINT_DOT[org.tint] : 'bg-muted-foreground'} aria-hidden />
+                <span className="hp-il__kid-copy"><span className="hp-il__kid-name">{org.short} website</span></span>
+                <ExternalLink className="hp-il__chev" aria-hidden width={14} height={14} />
+              </a>
+            </li>
+            {kids.map((c) => (
+              <li key={c.short}>
+                <a className="hp-il__kid" href={c.href} target="_blank" rel="noopener noreferrer">
+                  <i className={org.tint ? TINT_DOT[org.tint] : 'bg-muted-foreground'} aria-hidden />
+                  <span className="hp-il__kid-copy">
+                    <span className="hp-il__kid-name">
+                      {c.short}
+                      {c.note && <AlertTriangle aria-label={c.note} width={12} height={12} className="text-amber-500" />}
+                    </span>
+                    <span className="hp-il__role">{c.name}</span>
+                    {c.note && <span className="hp-il__note">{c.note}</span>}
+                  </span>
+                  <ExternalLink className="hp-il__chev" aria-hidden width={14} height={14} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    );
+  };
+
+  const current = sections[stage];
+  return (
+    <div className="hp-il">
+      <h2 className="hp-il__title">Important official links</h2>
+      <p className="hp-il__sub">Ministry, regulator and every agency along the energy value chain.</p>
+
+      <p className="hp-il__group">Ministry</p>
+      <ul className="hp-il__list">
+        <li>
+          <a className="hp-il__row" href={ministry.href} target="_blank" rel="noopener noreferrer">
+            <span className="hp-il__tile hp-il__tile--ministry" aria-hidden><Landmark width={18} height={18} strokeWidth={1.9} /></span>
+            <span className="hp-il__copy">
+              <span className="hp-il__name">{ministry.short}</span>
+              <span className="hp-il__role">{ministry.name}</span>
+            </span>
+            <ExternalLink className="hp-il__chev" aria-hidden width={16} height={16} />
+          </a>
+        </li>
+        {divisions.map((d) => (
+          <li key={d.short}>
+            <a className="hp-il__row hp-il__row--sub" href={d.href} target="_blank" rel="noopener noreferrer">
+              <PhoneTile Icon={iconFor(d.icon)} tint={d.tint} />
+              <span className="hp-il__copy">
+                <span className="hp-il__name">{d.short}</span>
+                <span className="hp-il__role">{d.name}</span>
+              </span>
+              <ExternalLink className="hp-il__chev" aria-hidden width={16} height={16} />
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <p className="hp-il__group">Regulator</p>
+      <ul className="hp-il__list">{row(regulator)}</ul>
+
+      <p className="hp-il__group">Value chain</p>
+      <div className="hp-il__seg" role="tablist" aria-label="Value chain stage">
+        {sections.map((sec, i) => (
+          <button
+            key={sec.title}
+            type="button"
+            role="tab"
+            aria-selected={i === stage}
+            className={i === stage ? 'is-on' : undefined}
+            onClick={() => setStage(i)}
+          >
+            {sec.title.replace(' & Resources', '')}
+            <span>{sec.orgs.length}</span>
+          </button>
+        ))}
+      </div>
+      {current && <ul className="hp-il__list" role="tabpanel" aria-label={current.title}>{current.orgs.map(row)}</ul>}
+    </div>
   );
 }

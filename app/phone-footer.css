@@ -40,4 +40,18 @@
   .hp-foot__legal a::after { content: ''; position: absolute; inset: -4px 0; }
   .hp-foot__copy { margin: 16px 4px 0; font-size: 12px; line-height: 1.6; color: hsl(var(--muted-foreground)); }
   .hp-foot__copy a { color: inherit; font-weight: 600; }
+
+  /* Round 4 sweep: the logo sat in the desktop's white bordered frame (a white
+     slab in dark/midnight); social chips were 36px tall. */
+  .hp-foot__brand .brand-logo__frame { border: 0 !important; background: none !important; box-shadow: none !important; padding: 0 !important; }
+  html.dark .hp-foot__brand img { filter: brightness(0) invert(1); opacity: .92; }
+  .hp-foot__social a { min-height: 44px; }
+  .hp-foot__card { box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 10px 24px -16px rgba(16, 24, 40, .18); }
+}
+
+/* Round 4: on the homepage the footer continues the app page colour instead
+   of a white band under the last card. */
+@media (max-width: 767px) {
+  body:has(main.home-page) footer:has(> .hp-foot) { background: var(--gp-bg) !important; }
+  body:has(main.home-page) .hp-foot { background: var(--gp-bg); }
 }

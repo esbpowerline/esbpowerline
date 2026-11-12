@@ -7,7 +7,7 @@
  * decorative on a phone (it repeated the logo); the commodities ticker stays
  * as one line. From 768px up nothing here applies.
  */
-.hp-appbar__logo, .hp-appbar__theme, .hp-appbar-auth { display: none; }
+.hp-appbar__brand, .hp-appbar__logo, .hp-appbar__theme, .hp-appbar-auth { display: none; }
 
 @media (max-width: 767px) {
   .site-banner-frame > a { display: none !important; }
@@ -15,11 +15,11 @@
 
   .public-nav-bar { box-shadow: none !important; border-bottom: 1px solid hsl(var(--border) / .6) !important; background: hsl(var(--background) / .92) !important; backdrop-filter: saturate(1.4) blur(12px); }
   .public-nav-bar__inner { padding-left: 16px !important; padding-right: 12px !important; }
-  .public-nav-bar__main { display: flex !important; align-items: center !important; justify-content: space-between !important; min-height: 52px !important; height: 52px; gap: 8px !important; padding: 0 !important; }
+  .public-nav-bar__main { display: flex !important; align-items: center !important; justify-content: space-between !important; min-height: 56px !important; height: 56px; gap: 8px !important; padding: 0 !important; }
   .public-nav-bar__start { display: flex !important; align-items: center !important; gap: 4px !important; flex: 1 1 auto; min-width: 0; }
   .public-nav-bar__center, .public-nav-bar__home, .public-nav-bar__pill-divider,
   .public-nav-bar__themes, .public-nav-bar__menu-btn,
-  .public-nav-bar__end .public-nav-bar__utilities > :not(.hp-appbar__theme) { display: none !important; }
+  .public-nav-bar__end .public-nav-bar__utilities > :not(.hp-appbar__theme, .public-nav-bar__account-pill) { display: none !important; }
   .public-nav-bar__start .public-nav-bar__start-cluster, .public-nav-bar__end .public-nav-bar__utility-cluster,
   .public-nav-bar__start .public-nav-bar__utilities, .public-nav-bar__end .public-nav-bar__utilities {
     background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; gap: 0 !important;
@@ -27,14 +27,54 @@
   .public-nav-bar__start .public-nav-bar__start-cluster { margin-left: auto; }
   .public-nav-bar__end { flex: none; }
 
-  .hp-appbar__logo { display: inline-flex; align-items: center; height: 44px; margin-right: auto; }
-  .hp-appbar__logo img { height: 28px; width: auto; display: block; }
+  .hp-appbar__brand { display: flex; flex-direction: column; justify-content: center; gap: 1px; margin-right: auto; min-width: 0; }
+  .hp-appbar__logo { display: inline-flex; align-items: center; height: 28px; }
+  .hp-appbar__logo img { height: 24px; width: auto; display: block; }
+  /* Round 4: date + time under the logo. Fixed width so the post-mount fill
+     never moves the buttons; tabular figures so the minute tick does not jitter. */
+  .hp-appbar__clock {
+    display: block; width: 168px; height: 14px; overflow: hidden; white-space: nowrap;
+    font-size: 10px; line-height: 14px; font-weight: 500; letter-spacing: .01em; font-variant-numeric: tabular-nums;
+    color: hsl(var(--muted-foreground));
+  }
   html.dark .hp-appbar__logo img { filter: brightness(0) invert(1); opacity: .92; }
 
-  /* Search and theme: two identical 40px round buttons. */
+  /* Right side, in order: search, theme, account. Three identical 44px round buttons. */
+  .public-nav-bar__end .public-nav-bar__utilities { display: flex !important; align-items: center; }
+  .public-nav-bar__end .hp-appbar__theme { order: 1; }
+  .public-nav-bar__end .public-nav-bar__account-pill { order: 2; }
+  .public-nav-bar .public-nav-bar__account-pill.public-nav-bar__pill-btn--paired,
+  .public-nav-bar__utility-cluster .public-nav-bar__account-pill.public-nav-bar__pill-btn--paired {
+    display: inline-flex !important; align-items: center; justify-content: center;
+    width: 44px !important; height: 44px !important; min-width: 44px !important; padding: 0 !important; margin: 0 !important;
+    border-radius: 999px !important; border: 0 !important; background: transparent !important; box-shadow: none !important;
+    color: hsl(var(--foreground)) !important;
+  }
+  .public-nav-bar__account-pill .public-nav-bar__pill-label { display: none !important; }
+  .public-nav-bar__account-pill .public-nav-bar__account-icon-slot {
+    width: 30px !important; height: 30px !important; border-radius: 999px; display: grid !important; place-items: center;
+    background: hsl(var(--muted)); margin: 0 !important;
+  }
+  .public-nav-bar__account-pill .public-nav-bar__account-glyph { width: 18px !important; height: 18px !important; }
+  .public-nav-bar__account-pill.public-nav-bar__pill-skeleton { background: transparent !important; }
+  .public-nav-bar__account-pill:active { background: hsl(var(--muted)) !important; }
+
+  /* Account panel: anchored to the top-right corner under the bar, app-sheet corners. */
+  .account-menu__panel {
+    left: auto !important; right: 12px !important; transform: none !important;
+    width: min(320px, calc(100vw - 24px)) !important; border-radius: 20px !important;
+    border: 1px solid hsl(var(--border) / .6) !important; background: hsl(var(--popover)) !important;
+    animation: hp-acct-in .18s cubic-bezier(.23, 1, .32, 1) !important;
+  }
+  .account-menu__panel :is(.account-menu__option, .account-menu__action) { min-height: 48px; border-radius: 12px !important; }
+  .account-menu__panel .account-menu__title { font-size: 15px !important; font-weight: 700 !important; }
+  .account-menu__panel .account-menu__eyebrow { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .08em !important; }
+  .account-menu__panel .account-menu__option-label { font-size: 15px !important; font-weight: 600 !important; }
+  .account-menu__panel .account-menu__option-hint { font-size: 12px !important; }
+
   .public-nav-bar__search-pill, .hp-appbar__theme {
     display: inline-flex !important; align-items: center; justify-content: center;
-    width: 40px !important; height: 40px !important; min-width: 40px; padding: 0 !important; margin: 0 !important;
+    width: 44px !important; height: 44px !important; min-width: 44px; padding: 0 !important; margin: 0 !important;
     border-radius: 999px !important; border: 0 !important; background: transparent !important; box-shadow: none !important;
     color: hsl(var(--foreground)) !important; -webkit-tap-highlight-color: transparent;
   }
@@ -45,3 +85,4 @@
   .hp-appbar-auth { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 2px; }
   .hp-appbar-auth > span { font-size: 13px; font-weight: 600; }
 }
+@keyframes hp-acct-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }

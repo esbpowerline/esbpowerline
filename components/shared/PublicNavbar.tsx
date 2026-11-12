@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ThemeBanner } from '@/components/shared/ThemeBanner';
 
 import { Search, Menu, X, Newspaper, BookOpen, BarChart3, Home } from 'lucide-react';
-import { useMemo, useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useMemo, useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { PublicHrefProvider, usePublicHref } from '@/lib/public-href-client';
 import type { PublicCategory } from '@/lib/category-types';
@@ -25,7 +25,7 @@ import { MemberAuthButton } from '@/components/members/MemberAuthButton';
 import { MemberNavMenuLinks } from '@/components/members/MemberNavMenuLinks';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { SiteThemeToggle } from '@/components/shared/SiteThemeToggle';
-import { PhoneDock } from '@/components/shared/PhoneDock';
+import { PhoneDock, PhoneMenuSheet } from '@/components/shared/PhoneDock';
 import { PhoneAppBarLogo, PhoneThemeCycle } from '@/components/shared/PhoneAppBar';
 
 type NavCategory = {
@@ -149,6 +149,7 @@ export function PublicNavbar({
   }, [categories, locale]);
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const closeMenu = useCallback(() => setMobileOpen(false), []);
   const onHomeClick = useHomeClick();
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
@@ -265,6 +266,9 @@ export function PublicNavbar({
       if (panel && panel.contains(e.target as Node)) {
         return;
       }
+      // The phone menu sheet scrolls its own body.
+      const sheet = document.getElementById('phone-menu-sheet');
+      if (sheet && sheet.contains(e.target as Node)) return;
       e.preventDefault();
     };
 
@@ -468,11 +472,11 @@ export function PublicNavbar({
         {mobileOpen && (
           <>
             <div
-              className="lg:hidden absolute top-[calc(100%-1px)] left-0 right-0 h-[100vh] bg-black/40 backdrop-blur-sm z-[240] transition-opacity duration-200 touch-none"
+              className="hp-old-menu lg:hidden absolute top-[calc(100%-1px)] left-0 right-0 h-[100vh] bg-black/40 backdrop-blur-sm z-[240] transition-opacity duration-200 touch-none"
               onClick={() => setMobileOpen(false)}
               aria-hidden="true"
             />
-            <div id="mobile-categories-panel" className="lg:hidden absolute top-[calc(100%-1px)] left-0 right-0 border-t border-border/70 bg-background/95 backdrop-blur-lg px-4 py-4 text-sm space-y-2 shadow-2xl max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain z-[250]">
+            <div id="mobile-categories-panel" className="hp-old-menu lg:hidden absolute top-[calc(100%-1px)] left-0 right-0 border-t border-border/70 bg-background/95 backdrop-blur-lg px-4 py-4 text-sm space-y-2 shadow-2xl max-h-[calc(100vh-3.5rem)] overflow-y-auto overscroll-contain z-[250]">
               <PublicNavLink href="/search" className="flex items-center gap-2 py-1.5">
                 <Search className="h-4 w-4" /> {t('nav.searchArticles')}
               </PublicNavLink>
@@ -529,6 +533,7 @@ export function PublicNavbar({
       {/* Phone only (hidden from 768px by app/phone-dock.css). A sibling of the
           nav, not a child: the nav is sticky with its own stacking context, and
           the dock has to float over the menu sheet the nav opens. */}
+      <PhoneMenuSheet open={mobileOpen} onClose={closeMenu} categories={navCategories} />
       <PhoneDock
         menuOpen={mobileOpen}
         onMenuToggle={() => setMobileOpen((open) => !open)}

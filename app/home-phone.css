@@ -25,7 +25,7 @@
  *   - no content is removed; the snapshot stays the fixed 2 x 6 of twelve
  */
 /* Phone-only controls are in the document at every width; off outside it. */
-.hp-cat-pills { display: none; }
+.hp-cat-pills, .hp-il { display: none; }
 
 @media (max-width: 767px) {
   /* ── page ─────────────────────────────────────────────────────────────── */
@@ -378,4 +378,98 @@
   main.home-page .home-block[aria-labelledby='home-power-sector-title'] > .mb-5 > .text-xs { font-size: 10px !important; letter-spacing: .08em !important; font-weight: 700 !important; }
   main.home-page .home-editorial__rail > section header > div > span:not([aria-hidden]) { font-size: 17px !important; letter-spacing: -.015em !important; }
   main.home-page .home-trending-hero-rail .section-inline-link { text-transform: none !important; letter-spacing: 0 !important; }
+
+  /* ── round 4 (owner, S25 Ultra) ───────────────────────────────────────── */
+  /* Latest News rows 02 and 03: a fixed 112 x 84 thumbnail, a 14px gutter,
+     and a text column of kicker / headline / one-line meta. 12px above and
+     below every row, a hairline between, all on the card's 16px inset. */
+  main.home-page .featured-hero__body { padding: 14px 16px 4px !important; }
+  main.home-page .featured-hero__story:not(:first-child) {
+    grid-template-columns: 112px minmax(0, 1fr) !important; column-gap: 14px !important; row-gap: 0;
+    grid-template-areas: 'img top' 'img title' 'img by'; grid-template-rows: auto auto auto !important; align-content: start !important;
+    padding: 12px 0 !important; align-items: start;
+  }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-image {
+    width: 112px !important; height: 84px !important; aspect-ratio: auto !important; border-radius: 12px !important; overflow: hidden; align-self: start;
+  }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-image img { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-topline { margin: 0 0 4px !important; align-items: center; min-height: 14px; }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__category { font-size: 10px !important; line-height: 14px !important; }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-index { font-size: 10px !important; color: var(--gp-faint) !important; }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-title { font-size: 15px !important; font-weight: 650 !important; line-height: 1.3 !important; letter-spacing: -.01em !important; }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-byline {
+    margin-top: 6px !important; flex-wrap: wrap !important; gap: 0 !important; row-gap: 1px !important;
+    font-size: 11px !important; font-weight: 500 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--gp-muted) !important;
+  }
+  main.home-page .featured-hero__story-byline > * { font-size: 11px !important; color: var(--gp-muted) !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 500 !important; }
+  main.home-page .featured-hero__story-byline > * + *::before { content: '\00b7'; margin: 0 5px; }
+  /* Compact rows: the author is its own line, date and read time the next,
+     so nothing is ellipsized in the 200px text column. */
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-byline-author { flex: 0 0 100%; max-width: none !important; overflow: visible !important; text-overflow: clip !important; white-space: normal !important; }
+  main.home-page .featured-hero__story:not(:first-child) .featured-hero__story-byline-author + *::before { content: none; }
+  main.home-page .featured-hero__story-byline-author { max-width: none !important; overflow: visible !important; text-overflow: clip !important; }
+  main.home-page .featured-hero__story:first-child .featured-hero__story-byline { text-transform: none !important; letter-spacing: 0 !important; gap: 0 !important; justify-content: flex-start !important; }
+
+  /* Trending list: same row grammar (even 12px, hairlines, 16px inset). */
+  main.home-page .home-trending-wave__queue-item { padding: 12px 0 !important; min-height: 52px !important; gap: 12px !important; }
+  main.home-page .home-trending-wave__queue-rank { width: 20px; text-align: left; color: var(--gp-faint) !important; }
+  main.home-page .home-trending-wave__queue-title { font-size: 15px !important; font-weight: 600 !important; line-height: 1.3 !important; }
+
+  /* Official links: the desktop org chart is hidden; the phone module below. */
+  main.home-page .hp-links__desk { display: none !important; }
+  main.home-page .hp-il { display: block; padding: 16px 16px 8px; }
+  main.home-page .hp-il__title { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.015em; line-height: 1.25; color: hsl(var(--foreground)); }
+  main.home-page .hp-il__sub { margin: 4px 0 0; font-size: 12px; line-height: 1.4; color: var(--gp-muted); }
+  main.home-page .hp-il__group { margin: 16px 0 2px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gp-muted); }
+  main.home-page .hp-il__list, main.home-page .hp-il__kids { list-style: none; margin: 0; padding: 0; }
+  main.home-page .hp-il__list > li + li { border-top: 1px solid var(--gp-line); }
+  main.home-page .hp-il__row {
+    display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 10px 0; border: 0; background: none;
+    text-align: left; color: hsl(var(--foreground)); text-decoration: none; font: inherit; -webkit-tap-highlight-color: transparent;
+  }
+  main.home-page .hp-il__row:active { opacity: .7; }
+  main.home-page .hp-il__tile { flex: none; width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; }
+  main.home-page .hp-il__tile--ministry { background: color-mix(in srgb, #e11d48 12%, transparent); color: #e11d48; }
+  html.dark main.home-page .hp-il__tile--ministry { color: #fb7185; }
+  main.home-page .hp-il__copy { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  main.home-page .hp-il__name { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 15px; font-weight: 650; line-height: 1.25; }
+  main.home-page .hp-il__role { font-size: 12px; font-weight: 450; line-height: 1.35; color: var(--gp-muted); }
+  main.home-page .hp-il__count { font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 999px; line-height: 1.5; }
+  main.home-page .hp-il__chev { flex: none; color: var(--gp-faint); transition: transform .2s; }
+  main.home-page .hp-il__chev.is-open { transform: rotate(90deg); }
+  main.home-page .hp-il__kids { margin: 0 0 8px 48px; border-left: 1px solid var(--gp-line); }
+  main.home-page .hp-il__kids > li + li { border-top: 1px solid var(--gp-line); }
+  main.home-page .hp-il__kid { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 0 8px 12px; color: hsl(var(--foreground)); text-decoration: none; }
+  main.home-page .hp-il__kid > i { flex: none; width: 7px; height: 7px; border-radius: 999px; }
+  main.home-page .hp-il__kid-copy { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  main.home-page .hp-il__kid-name { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; }
+  main.home-page .hp-il__note { font-size: 11px; line-height: 1.35; color: #b45309; }
+  html.dark main.home-page .hp-il__note { color: #fbbf24; }
+  main.home-page .hp-il__seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin: 6px 0 4px; border-radius: 20px; background: var(--gp-surface2); }
+  main.home-page .hp-il__seg::-webkit-scrollbar { display: none; }
+  main.home-page .hp-il__seg > button {
+    min-width: 0; height: 40px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; position: relative;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    font: inherit; font-size: 13px; font-weight: 600; color: var(--gp-muted); white-space: nowrap; -webkit-tap-highlight-color: transparent;
+  }
+  main.home-page .hp-il__seg > button::after { content: ''; position: absolute; inset: -4px 0; }
+  main.home-page .hp-il__seg > button > span { font-size: 11px; font-weight: 600; opacity: .7; }
+  main.home-page .hp-il__seg > button.is-on { background: var(--gp-surface); color: hsl(var(--foreground)); box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+
+  /* Sweep: leftovers still in the desktop grammar. */
+  /* Trending list titles were the desktop's muted grey; foreground now, the
+     story in the featured slot keeps its accent. */
+  main.home-page .home-trending-wave__queue-item:not(.home-trending-wave__queue-item--active) .home-trending-wave__queue-title { color: hsl(var(--foreground)) !important; }
+  /* Bare text links ("View all in All News", "Read Vol 001 Issue") become the page's one secondary pill. */
+  main.home-page .home-article-grid + div > a,
+  main.home-page .home-bottom-row__card > a:not(.btn) {
+    display: inline-flex !important; align-items: center; gap: 4px; height: 44px; min-height: 44px; padding: 0 16px !important;
+    border-radius: 999px; background: var(--gp-surface2); color: hsl(var(--foreground)) !important;
+    font-size: 13px !important; font-weight: 600 !important; text-decoration: none !important; letter-spacing: 0 !important; text-transform: none !important;
+  }
+  main.home-page .home-article-grid + div { margin-top: 4px !important; }
+  main.home-page .home-bottom-row__card > a:not(.btn) { justify-content: center; }
+  /* Policy library rows: no tinted "selected" slab on a phone row, chevron faint. */
+  main.home-page .hp-policy :is(a, button).group.-mx-2 { background: none !important; }
+  main.home-page .hp-policy :is(a, button).group.-mx-2 > svg:last-child { color: var(--gp-faint) !important; align-self: center; }
 }
