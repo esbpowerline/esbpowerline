@@ -167,6 +167,11 @@ export function GridPhoneApp({
   const swipe = useRef<number | null>(null);
 
   const mainRef = useRef<HTMLDivElement | null>(null);
+  // The app is drawn: retire the server boot frame (see GridPhoneGate).
+  useEffect(() => {
+    document.documentElement.classList.add('gp-ready');
+    return () => document.documentElement.classList.remove('gp-ready');
+  }, []);
 
 
   // Long explanatory paragraphs fold to four small lines (two until 2026-11-12, which the owner found "truncated way too much"); a tap opens them. Nothing is
@@ -363,7 +368,7 @@ export function GridPhoneApp({
         <Link className="gp-btn" href={access.signedIn ? '/members/subscription' : '/sign-up'}>{access.signedIn ? 'See plans' : 'Sign up free'}</Link>
       </div>
     );
-  } else if (day.status === 'loading' && !day.data) body = <Skeleton />;
+  } else if ((day.status === 'loading' || day.status === 'idle' || access.loading) && !day.data) body = <Skeleton />; // idle too: the first frame showed "Report file not loaded yet" before the fetch began
   else if (!day.data) {
     body = (
       <div className="gp-sec gp-lock">

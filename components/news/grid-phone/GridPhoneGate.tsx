@@ -42,11 +42,17 @@ export function GridPhoneGate({ latestDate, runtimeDates, verificationLedger }: 
   }, []);
 
   const on = phone && !classic;
-  // Retires the server-drawn boot frame (PhoneBootShell) in either view.
+  // Retires the server-drawn boot frame (PhoneBootShell) - but only once
+  // something real is on screen to replace it: the classic view here, or the
+  // app itself (GridPhoneApp sets the class when it mounts). Retiring it on the
+  // gate's own mount, as first written, uncovered the squeezed desktop
+  // explorer for ~2s on the S25 while the app chunk loaded - the "second
+  // style" the owner saw on the homepage -> Grid hop (2026-11-12).
   useEffect(() => {
+    if (!classic) return;
     document.documentElement.classList.add('gp-ready');
     return () => document.documentElement.classList.remove('gp-ready');
-  }, []);
+  }, [classic]);
   useEffect(() => {
     document.documentElement.classList.toggle('gp-on', on);
     return () => document.documentElement.classList.remove('gp-on');
