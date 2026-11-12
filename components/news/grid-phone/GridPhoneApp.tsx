@@ -13,6 +13,10 @@
  */
 
 import '@/app/grid-phone.css';
+import '@/app/grid-phone-polish.css';
+import '@/app/grid-phone-look-editorial.scoped.css';
+import '@/app/grid-phone-look-cards.scoped.css';
+import '@/app/grid-phone-look-ink.scoped.css';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/available-dates';
@@ -131,6 +135,51 @@ export function GridPhoneApp({
   const swipe = useRef<number | null>(null);
 
   const mainRef = useRef<HTMLDivElement | null>(null);
+
+  // TRIAL (2026-11-12): three looks in one bundle so the owner can compare them
+  // on the phone. Remove the switcher and two of the sheets once one is chosen.
+  const [look, setLook] = useState<'editorial' | 'cards' | 'ink'>('cards');
+  useEffect(() => {
+    try { const v = localStorage.getItem('gp-look'); if (v === 'editorial' || v === 'cards' || v === 'ink') setLook(v); } catch {}
+  }, []);
+  const pickLook = (v: 'editorial' | 'cards' | 'ink') => { setLook(v); try { localStorage.setItem('gp-look', v); } catch {} };
+
+  // Long explanatory paragraphs fold to two lines; a tap opens them. Nothing is
+  // removed - the owner asked (2026-11-12) for explanations to be cut down or
+  // hidden so the figures lead. Only paragraphs that actually overflow two
+  // lines are folded (`data-long`), so a one-line caption is left alone. The
+  // observer re-marks after lazy sections and date changes swap content in.
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    const PROSE = '.gp-taudit, .gp-note, .gps-note, .gp-sec__desc';
+    let raf = 0;
+    const mark = () => {
+      raf = 0;
+      main.querySelectorAll<HTMLElement>(PROSE).forEach((el) => {
+        if (el.dataset.open === '1') return;
+        const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
+        const was = el.dataset.long;
+        delete el.dataset.long;
+        const long = el.scrollHeight > lh * 2 + 6;
+        if (long) el.dataset.long = '1';
+        else if (was) delete el.dataset.long;
+      });
+    };
+    const queue = () => { if (!raf) raf = requestAnimationFrame(mark); };
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest('button, a, [role="button"]')) return;
+      const el = t.closest<HTMLElement>(PROSE);
+      if (!el || !(el.dataset.long || el.dataset.open)) return;
+      if (el.dataset.open === '1') { delete el.dataset.open; el.dataset.long = '1'; } else { el.dataset.open = '1'; delete el.dataset.long; }
+    };
+    const mo = new MutationObserver(queue);
+    mo.observe(main, { childList: true, subtree: true });
+    main.addEventListener('click', onClick);
+    queue();
+    return () => { mo.disconnect(); main.removeEventListener('click', onClick); if (raf) cancelAnimationFrame(raf); };
+  }, []);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0 });
@@ -325,7 +374,12 @@ export function GridPhoneApp({
 
   return (
     <SheetContext.Provider value={openSheet}>
-      <div className="gp" role="application" aria-label="Power Grid Explorer">
+      <div className="gp" data-look={look} role="application" aria-label="Power Grid Explorer">
+        <div className="gp-looks" aria-label="Trial look">
+          {(['editorial', 'cards', 'ink'] as const).map((v, i) => (
+            <button key={v} type="button" className={look === v ? 'is-on' : ''} onClick={() => pickLook(v)} aria-label={`Look ${v}`}>{'ABC'[i]}</button>
+          ))}
+        </div>
         <header className={`gp-bar${scrolled ? ' is-scrolled' : ''}`}>
           <div className="gp-bar__row">
             <button type="button" className="gp-icon" aria-label="Menu" onClick={openMenu}>

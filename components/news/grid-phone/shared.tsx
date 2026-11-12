@@ -82,6 +82,7 @@ export function Prov({ kind, note }: { kind: 'P' | 'D'; note?: string }) {
       role="button"
       tabIndex={0}
       className="gp-prov"
+      data-kind={kind}
       aria-label={PROV[kind].title}
       onClick={(e) => {
         e.stopPropagation();

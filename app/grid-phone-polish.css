@@ -1,0 +1,36 @@
+/*
+ * Phone Grid Explorer - shared polish for every trial look (2026-11-12):
+ * one face (Inter, tabular figures), superscript P/D marks, folded
+ * explanations, and a title size that lets the figures lead.
+ */
+/* ── polish pass, 2026-11-12 (owner: balance off, P/D marks, the font) ── */
+
+/* One face. Space Grotesk's quirky numerals read as a novelty beside data;
+   Inter with tabular figures is the workhorse of data interfaces and is
+   already the site's body face. Hierarchy now comes from size and weight. */
+.gp { --gp-display: var(--font-sans, Inter, system-ui, sans-serif); font-feature-settings: 'tnum' 1, 'cv11' 1, 'ss01' 1; }
+.gp-bar__title strong { font-weight: 700; letter-spacing: -0.02em; }
+.gp-hero b { font-weight: 650; letter-spacing: -0.04em; }
+.gp-stat__v b { font-weight: 650; letter-spacing: -0.025em; }
+.gp-row__val b { font-weight: 600; letter-spacing: -0.01em; }
+.gp-chip b { font-weight: 500; }
+
+/* P / D: a superscript letter, not a boxed badge on every label. Published
+   is the normal case and stays faint; Derived is the one worth noticing. */
+.gp .gp-prov { width: auto; height: auto; min-width: 16px; min-height: 0; margin: 0 0 0 1px; padding: 6px 4px 6px 2px; vertical-align: super; display: inline-block; line-height: 0; }
+.gp .gp-prov span { display: inline; width: auto; height: auto; min-height: 0; border: 0; border-radius: 0; font-size: 11px; font-weight: 700; line-height: 1; color: var(--gp-faint); letter-spacing: 0; }
+.gp .gp-prov[data-kind='D'] span { color: var(--gp-primary); }
+.gp .gp-stat__l .gp-prov { vertical-align: super; margin-left: 1px; }
+
+/* Folded explanations: two lines, faded, tap to open (see GridPhoneApp). */
+.gp [data-long='1'] { max-height: 3em; overflow: hidden; cursor: pointer; -webkit-mask-image: linear-gradient(180deg, #000 45%, transparent 100%); mask-image: linear-gradient(180deg, #000 45%, transparent 100%); }
+.gp [data-open='1'] { cursor: pointer; }
+
+
+.gp-sec__title { font-size: 17px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
+.gp-legend span, .gp-legend button { min-height: 24px; font-size: 12px; }
+
+/* look switcher (trial builds only) */
+.gp-looks { position: absolute; right: 8px; top: 40%; z-index: 4; display: grid; gap: 6px; }
+.gp-looks button { width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(127,127,127,.4); background: rgba(20,22,28,.82); color: #fff; font-size: 13px; font-weight: 700; }
+.gp-looks button.is-on { background: #f6b40e; color: #1a1203; border-color: #f6b40e; }

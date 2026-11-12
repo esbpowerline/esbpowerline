@@ -1,0 +1,126 @@
+/*
+ * Look B - "cards": containers and pills, refined. LOCAL TRIAL (2026-11-12).
+ * The owner found the editorial look (A) too bare: "no containers, pills".
+ * This keeps the app feel - grouped cards, pill switches, a pill-indicator
+ * tab bar - and fixes what made the first build read as generic: uneven
+ * insets, flat grey-on-white with no depth cue, and controls of four shapes.
+ * Written unscoped; scripts/scope-phone-looks.py prefixes every selector.
+ */
+.gp {
+  --gp-bg: #f1f3f7;
+  --gp-surface: #ffffff;
+  --gp-surface2: #eef0f5;
+  --gp-line: #e3e6ed;
+  --gp-on: #10131a;
+  --gp-muted: #5b6270;
+  --gp-faint: #8a909c;
+  --gp-card-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 10px 24px -16px rgba(16, 24, 40, .18);
+}
+html.theme-white .gp, html[data-site-theme='white'] .gp { --gp-bg: #f1f3f7; }
+html.theme-dark .gp, html.theme-midnight .gp, html[data-site-theme='dark'] .gp, html[data-site-theme='midnight'] .gp {
+  --gp-bg: #0b0e14; --gp-surface: #151922; --gp-surface2: #1f2430; --gp-line: #272c38; --gp-on: #eef0f4; --gp-muted: #a1a7b3; --gp-faint: #767c88; --gp-card-shadow: 0 0 0 1px rgba(255, 255, 255, .05);
+}
+
+/* bar */
+.gp-bar { background: var(--gp-bg); padding-left: 4px; padding-right: 4px; }
+.gp-bar.is-scrolled { box-shadow: 0 1px 0 var(--gp-line); }
+.gp-chips { gap: 8px; padding: 4px 16px 12px; scroll-padding: 0 16px; }
+.gp-chip { min-width: 48px; height: 56px; border-radius: 999px; border: 0; background: var(--gp-surface); box-shadow: var(--gp-card-shadow); gap: 3px; }
+.gp-chip small { font-weight: 600; letter-spacing: .06em; }
+.gp-chip b { font-weight: 600; }
+.gp-chip.is-on { background: var(--gp-on); color: var(--gp-surface); box-shadow: none; }
+.gp-chip--cal { width: 48px; min-width: 48px; }
+.gp-chip--latest { box-shadow: none; border: 1px dashed var(--gp-faint); background: none; }
+
+/* page: one 16px gutter, one 16px card inset - every edge is one of two lines */
+.gp-main { padding-left: 16px; padding-right: 16px; }
+.gp-screen { gap: 12px; }
+.gp-sec { background: var(--gp-surface); border-radius: 20px; padding: 16px 16px 16px; box-shadow: var(--gp-card-shadow); border: 1px solid color-mix(in srgb, var(--gp-line) 60%, transparent); }
+.gp-sec__head { margin-bottom: 12px; align-items: center; }
+.gp-sec__meta { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: var(--gp-surface2); }
+.gp-sec__foot { margin-top: 12px; }
+.gp .gp-tstatus { background: var(--gp-surface); border-radius: 20px; padding: 12px 16px; box-shadow: var(--gp-card-shadow); border: 1px solid color-mix(in srgb, var(--gp-line) 60%, transparent); }
+
+/* headline */
+.gp-kicker { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.gp-kicker .gp-status { text-transform: none; letter-spacing: 0; }
+.gp-tabs { border-bottom: 0; background: var(--gp-surface2); border-radius: 999px; padding: 3px; gap: 0; margin: 0 0 16px; }
+.gp-tabs button { flex: 1 1 0; height: 36px; border-radius: 999px; border-bottom: 0; margin: 0; font-size: 13px; font-weight: 600; text-align: center !important; padding: 0 8px !important; }
+.gp-tabs button.is-on { background: var(--gp-surface); color: var(--gp-on); box-shadow: 0 1px 2px rgba(16, 24, 40, .12); }
+
+/* stats as inset tiles inside the card: a container with a reason */
+.gp-stats { margin: 0; gap: 8px; }
+.gp-stats > * { border: 0 !important; background: var(--gp-surface2); border-radius: 12px; padding: 12px !important; }
+.gp-stats--3 { gap: 6px; }
+.gp-stats--3 > * { padding: 10px !important; }
+.gp-rows { margin: 0 -16px; }
+.gp-row { padding-left: 16px; padding-right: 16px; }
+.gp-sw, .gp-legend i { border-radius: 4px; }
+.gp-meter, .gp-meter > div { border-radius: 999px; height: 6px; }
+
+/* controls: everything tappable is a pill */
+.gp-seg { border-radius: 999px; padding: 4px; background: var(--gp-surface2); }
+.gp-seg button { border-radius: 999px; min-height: 38px; font-weight: 600; }
+.gp-seg button.is-on { box-shadow: 0 1px 2px rgba(16, 24, 40, .14); }
+.gp-seg--sticky { background: color-mix(in srgb, var(--gp-surface2) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 6px var(--gp-bg); }
+.gp-more, .gp .gp-thow { border: 0; border-radius: 999px; background: var(--gp-surface2); min-height: 44px; height: 44px; padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--gp-on); }
+.gp-filter button { border-radius: 999px; }
+.gp-search { border-radius: 999px; border: 0; }
+.gp-btn { border-radius: 999px; }
+.gp-access { border-radius: 20px; background: var(--gp-surface); border: 1px dashed var(--gp-line); }
+.gp-access a, .gp-access button { border-radius: 999px; }
+
+/* tab bar */
+.gp-nav { background: var(--gp-surface); border-top: 1px solid var(--gp-line); }
+.gp-nav button { font-size: 11px; font-weight: 600; }
+.gp-nav button.is-on .gp-nav__ind { background: var(--gp-on); color: var(--gp-surface); }
+
+/* sheet */
+.gp-scrim { background: rgba(10, 14, 22, .45); }
+.gp-sheet { border-radius: 20px 20px 0 0; }
+.gp-cal button { border-radius: 999px; }
+
+/* ── maturity pass (2026-11-12), from a five-screen review ────────────── */
+
+/* The sticky sub-view switch was 92% glass: section text read through it
+   while scrolling. Solid, on a full-width strip of the page colour so content
+   disappears cleanly behind it instead of sliding under a floating capsule. */
+.gp-seg--sticky { background: var(--gp-surface2); backdrop-filter: none; -webkit-backdrop-filter: none; box-shadow: none; margin: 0; }
+.gp-seg--sticky::before { content: ''; position: absolute; z-index: -1; top: -8px; bottom: -8px; left: -16px; right: -16px; background: var(--gp-bg); }
+.gp-seg--sticky { isolation: isolate; }
+.gp-seg--sticky::after { content: ''; position: absolute; z-index: -1; inset: 0; border-radius: 999px; background: var(--gp-surface2); }
+.gp-seg button { font-size: 13px; padding: 0 6px; white-space: nowrap; }
+
+/* Card header: a title that wraps keeps its badge on the first line. */
+.gp-sec__head { align-items: flex-start; }
+.gp-sec__meta { margin-top: 1px; flex: none; }
+.gp-sec__desc { margin-top: 4px; }
+
+/* Two-across tiles: reserve two label lines so the figures in a row sit on
+   one baseline whether a label wraps or not. */
+.gp-stats:not(.gp-stats--3) .gp-stat__l { min-height: 2.6em; display: block; }
+.gp-stat__v { margin-top: 2px; }
+.gp-stat__d { margin-top: 6px; }
+
+/* Three-across: tiles left ~74px of text width and labels broke mid-phrase.
+   Plain columns on hairlines instead - same figures, a third more room. */
+.gp-stats--3 { gap: 0; }
+.gp-stats--3 > * { background: none; border-radius: 0; padding: 10px 10px 10px 0 !important; border-top: 1px solid var(--gp-line) !important; }
+.gp-stats--3 > :not(:nth-child(3n+1)) { border-left: 1px solid var(--gp-line) !important; padding-left: 10px !important; }
+.gp-stats--3 > :nth-child(3n) { padding-right: 0 !important; }
+
+/* Lists: one row rhythm everywhere, values on a shared right edge. */
+.gp-row { min-height: 56px; padding-top: 12px; padding-bottom: 12px; column-gap: 12px; }
+.gp-row__sub { margin-top: 3px; }
+.gp-row__val small { margin-top: 3px; }
+.gp-row .gp-meter { margin-top: 10px; }
+.gp-chev { color: var(--gp-faint); }
+.gp-group-label { margin: 16px 0 4px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+
+/* Charts sit 16px under whatever precedes them and 8px above their legend. */
+.gp-plot { margin-top: 16px; }
+.gp-legend { margin-top: 8px; }
+.gp-hint { margin-top: 8px; text-align: left; }
+
+/* Footers: one quiet line, never competing with the figures. */
+.gp-sec__foot { margin-top: 16px; padding-top: 12px; font-size: 12px; line-height: 1.45; }
