@@ -291,11 +291,20 @@ export async function middleware(request: NextRequest) {
     // window of the shipped catalog. Unbounded, this made EVERY runtime-
     // published day public at any tier — including a backfilled 2019 day,
     // which is exactly the kind of day the tier exists to sell.
-    const isBeyondShippedArchive =
-      !!isoDate &&
-      !!latestDate &&
-      isoDate > latestDate &&
-      (Date.parse(isoDate) - Date.parse(latestDate)) / 86_400_000 <= 7;
+    //
+    // The bound is measured from TODAY (Dhaka), not from the shipped catalog.
+    // Measured from the catalog (<= 7 days past it) it silently assumed a
+    // deploy at least once a week: on 2026-11-12 production still carried a
+    // catalog ending 2026-10-31, so the runtime-published 9 and 10 November
+    // were refused for every reader and the whole explorer showed "locked".
+    // A just-published day is by definition recent, so "recent" is what is
+    // tested: no older than the visitor window plus the usual two-to-three
+    // day reporting lag, and not in the future. A backfilled old day still
+    // fails this and falls through to the tier gate below.
+    const todayDhaka = new Date(Date.now() + 6 * 3_600_000).toISOString().slice(0, 10);
+    const ageDays = isoDate ? (Date.parse(todayDhaka) - Date.parse(isoDate)) / 86_400_000 : NaN;
+    const isPastShippedArchive = !!isoDate && !!latestDate && isoDate > latestDate;
+    const isBeyondShippedArchive = isPastShippedArchive && ageDays >= -1 && ageDays <= 9;
 
     const isPublicDate =
       !isoDate ||
@@ -333,7 +342,11 @@ export async function middleware(request: NextRequest) {
       gridPlan,
     });
 
-    if (!isDateAllowedForTier(isoDate!, tier, latestDate!)) {
+    // A day past the shipped catalog is measured from today instead:
+    // isDateAllowedForTier refuses anything newer than its anchor, which on a
+    // stale build would lock members out of days they are entitled to.
+    const tierAnchor = isPastShippedArchive ? todayDhaka : latestDate!;
+    if (!isDateAllowedForTier(isoDate!, tier, tierAnchor)) {
       return denyDailyJson('Subscription required for historical grid data access.');
     }
 
