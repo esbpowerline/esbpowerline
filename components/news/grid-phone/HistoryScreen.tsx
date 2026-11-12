@@ -22,10 +22,12 @@ const TimeMachineTab = dynamic(() => import('@/components/news/power-grid/TimeMa
 type MacroId = 'overview' | 'budget' | 'monthly' | 'pricing' | 'global' | 'reports' | 'reserves' | 'system_loss' | 'insights' | 'verification';
 type View = 'trends' | 'macro' | 'machine';
 
-export function HistoryScreen({ initialView = 'trends', initialMacro = 'overview' }: { initialView?: View; initialMacro?: MacroId }) {
+export function HistoryScreen({ initialView = 'trends', initialMacro = 'overview', view: controlled, onView }: { initialView?: View; initialMacro?: MacroId; view?: View; onView?: (v: View) => void }) {
   const p = usePhone();
   const chartTheme = useChartTheme();
-  const [view, setView] = useState<View>(initialView);
+  const [own, setOwn] = useState<View>(initialView);
+  const view = controlled ?? own;
+  const setView = (v: View) => { setOwn(v); onView?.(v); };
   const [macro, setMacro] = useState<MacroId>(initialMacro);
   // Petrobangla production as the desktop sums it for Macro (PowerGridExplorer.tsx:663).
   const totalGasSupply = (p.day.gasProductionData ?? []).reduce((a, g) => a + (g.gas || 0), 0);

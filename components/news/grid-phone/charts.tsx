@@ -148,7 +148,7 @@ function useScrub(n: number, f: Frame | null, onScrub?: (i: number | null) => vo
  * read as unbalanced. Callers' aspect/min/max are accepted and ignored so the
  * call sites need not change; a chart without axes (a sparkline) keeps `minH`.
  */
-export const CHART_H = 220;
+export const CHART_H = 200;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const heightFor = (_w: number, _aspect: number, _min: number, _max: number) => CHART_H;
 

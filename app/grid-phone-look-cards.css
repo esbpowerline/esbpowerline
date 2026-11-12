@@ -124,3 +124,23 @@ html.theme-dark .gp, html.theme-midnight .gp, html[data-site-theme='dark'] .gp, 
 
 /* Footers: one quiet line, never competing with the figures. */
 .gp-sec__foot { margin-top: 16px; padding-top: 12px; font-size: 12px; line-height: 1.45; }
+
+/* ── proportion pass (2026-11-12): the owner read the look as "stretched on
+   vertical". Measured causes: day chips taller than wide (48x56), stat tiles
+   with a reserved two-line label, 56px rows. Everything now sits wider than
+   it is tall, and a screen holds roughly a third more. ─────────────────── */
+.gp-chips { padding: 2px 16px 10px; gap: 6px; }
+.gp-chip { min-width: 58px; height: 44px; gap: 1px; }
+.gp-chip--cal { width: 44px; min-width: 44px; }
+.gp-screen { gap: 10px; }
+.gp-sec { padding: 14px 16px; }
+.gp-sec__head { margin-bottom: 10px; }
+.gp-stats > * { padding: 10px 12px !important; }
+.gp-stats:not(.gp-stats--3) .gp-stat__l { min-height: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gp-stat__d { margin-top: 4px; }
+.gp-row { min-height: 48px; padding-top: 9px; padding-bottom: 9px; }
+.gp-row .gp-meter { margin-top: 8px; }
+.gp-tabs { margin-bottom: 12px; }
+.gp-tabs button { height: 34px; }
+.gp-plot { margin-top: 12px; }
+.gp-sec__foot { margin-top: 12px; padding-top: 10px; }

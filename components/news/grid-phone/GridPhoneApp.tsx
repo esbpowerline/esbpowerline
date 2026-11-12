@@ -55,6 +55,19 @@ const NEEDS: Record<PhoneTab, { curve?: boolean; plants?: boolean; gas?: boolean
   history: { monthly: true },
 };
 
+const SECTIONS: { label: string; tab: PhoneTab; sub?: string }[] = [
+  { label: 'Overview', tab: 'today' },
+  { label: 'Regional Grid', tab: 'grid', sub: 'zones' },
+  { label: 'Gas & LNG Supply', tab: 'gas' },
+  { label: 'Generation & Cost', tab: 'supply', sub: 'fuel' },
+  { label: 'Power Stations', tab: 'plants' },
+  { label: 'C/B Imports', tab: 'supply', sub: 'imports' },
+  { label: 'Renewables', tab: 'supply', sub: 'renewables' },
+  { label: 'Macro Trends', tab: 'history', sub: 'macro' },
+  { label: 'Technical Info', tab: 'grid', sub: 'network' },
+  { label: 'Time Machine', tab: 'history', sub: 'machine' },
+];
+
 const TABS: { id: PhoneTab; label: string; icon: ReactNode }[] = [
   { id: 'today', label: 'Today', icon: <path d="M3 17l5-6 4 3 6-8 3 4" /> },
   { id: 'supply', label: 'Supply', icon: <path d="M13 2L4 14h7l-1 8 9-12h-7z" /> },
@@ -117,6 +130,17 @@ export function GridPhoneApp({
   const locked = current && !pendingDay && !future ? !access.loading && !access.canAccessDate(current) : false;
   const skipFetch = locked || !!pendingDay || future;
   const [tab, setTab] = useState<PhoneTab>(initialTab);
+  // Sub-views the section strip can address directly (see SECTIONS).
+  const [supplyView, setSupplyView] = useState<'fuel' | 'imports' | 'renewables'>('fuel');
+  const [gridView, setGridView] = useState<'zones' | 'network'>('zones');
+  const [histView, setHistView] = useState<'trends' | 'macro' | 'machine'>(initialHistory);
+  const secsRef = useRef<HTMLElement | null>(null);
+  // Keep the active section pill in view as the reader moves between tabs.
+  useEffect(() => {
+    const nav = secsRef.current;
+    const on = nav?.querySelector<HTMLElement>('.is-on');
+    if (on && nav) nav.scrollTo({ left: on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2, behavior: 'smooth' });
+  }, [tab, supplyView, gridView, histView]);
 
   const week = useWeekWindow(allowedHeld, current, 7);
   const prevDate = week.length > 1 ? week[week.length - 2] : null;
@@ -360,11 +384,11 @@ export function GridPhoneApp({
     };
     const screen =
       tab === 'today' ? <TodayScreen /> :
-      tab === 'supply' ? <SupplyScreen /> :
-      tab === 'grid' ? <GridScreen /> :
+      tab === 'supply' ? <SupplyScreen view={supplyView} onView={setSupplyView} /> :
+      tab === 'grid' ? <GridScreen view={gridView} /> :
       tab === 'plants' ? (plants.status === 'loading' && !plants.data ? <Skeleton /> : <PlantsScreen />) :
       tab === 'gas' ? (gas.status === 'loading' && !gas.data ? <Skeleton /> : <GasScreen />) :
-      <HistoryScreen initialView={initialHistory} />;
+      <HistoryScreen initialView={initialHistory} view={histView} onView={setHistView} />;
     body = (
       <PhoneDataContext.Provider value={ctx}>
         <PowerGridExplorerErrorBoundary>{screen}</PowerGridExplorerErrorBoundary>
@@ -416,6 +440,23 @@ export function GridPhoneApp({
               <Icon size={20}><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
             </button>
           </div>
+          {/* Every desktop tab, by its desktop name and in desktop order. The
+              phone groups them under five thumb tabs, and the owner could not
+              find half of them (2026-11-12: "why don't I see all the menus we
+              have on the PC?"). The grouping stays; this names what is inside. */}
+          <nav className="gp-secs" aria-label="Sections" ref={secsRef}>
+            {SECTIONS.map((x) => {
+              const on = x.tab === tab && (x.tab === 'supply' ? x.sub === supplyView : x.tab === 'grid' ? x.sub === gridView : x.tab === 'history' ? x.sub === histView : true);
+              return (
+                <button key={x.label} type="button" className={on ? 'is-on' : ''} aria-current={on ? 'page' : undefined} onClick={() => {
+                  setTab(x.tab);
+                  if (x.tab === 'supply') setSupplyView(x.sub as typeof supplyView);
+                  if (x.tab === 'grid') setGridView(x.sub as typeof gridView);
+                  if (x.tab === 'history') setHistView(x.sub as typeof histView);
+                }}>{x.label}</button>
+              );
+            })}
+          </nav>
         </header>
 
         <main ref={mainRef} className="gp-main" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}>

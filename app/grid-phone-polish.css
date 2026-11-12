@@ -34,3 +34,11 @@
 .gp-looks { position: absolute; right: 8px; top: 40%; z-index: 4; display: grid; gap: 6px; }
 .gp-looks button { width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(127,127,127,.4); background: rgba(20,22,28,.82); color: #fff; font-size: 13px; font-weight: 700; }
 .gp-looks button.is-on { background: #f6b40e; color: #1a1203; border-color: #f6b40e; }
+
+/* Section strip: the ten desktop tabs by name, one swipeable row under the
+   day strip. Shared by every look; the active one is the dark pill. */
+.gp .gp-secs { display: flex; gap: 6px; overflow-x: auto; padding: 0 16px 10px; scroll-padding: 0 16px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.gp .gp-secs::-webkit-scrollbar { display: none; }
+.gp .gp-secs button { flex: none; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--gp-line); background: var(--gp-surface); color: var(--gp-muted); font-size: 13px; font-weight: 600; white-space: nowrap; position: relative; }
+.gp .gp-secs button::after { content: ''; position: absolute; inset: -5px 0; }
+.gp .gp-secs button.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }

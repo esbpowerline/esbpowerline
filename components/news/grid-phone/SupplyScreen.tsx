@@ -51,15 +51,25 @@ const VIEWS: [View, string][] = [
   ['renewables', 'Renewables'],
 ];
 
-export function SupplyScreen() {
-  const [view, setView] = useState<View>('fuel');
+/**
+ * `view`/`onView` let the app's section strip drive this screen (it lists the
+ * desktop's own tab names, so Generation & Cost, C/B Imports and Renewables
+ * are each one tap away). Driven that way the in-screen switch is redundant
+ * and is not drawn.
+ */
+export function SupplyScreen({ view: controlled, onView }: { view?: View; onView?: (v: View) => void } = {}) {
+  const [own, setOwn] = useState<View>('fuel');
+  const view = controlled ?? own;
+  const setView = (v: View) => { setOwn(v); onView?.(v); };
   return (
     <div className="gp-screen">
-      <div className="gp-seg gp-seg--sticky" role="tablist" aria-label="Supply view">
-        {VIEWS.map(([id, l]) => (
-          <button key={id} role="tab" aria-selected={view === id} className={view === id ? 'is-on' : ''} onClick={() => setView(id)}>{l}</button>
-        ))}
-      </div>
+      {!controlled && (
+        <div className="gp-seg gp-seg--sticky" role="tablist" aria-label="Supply view">
+          {VIEWS.map(([id, l]) => (
+            <button key={id} role="tab" aria-selected={view === id} className={view === id ? 'is-on' : ''} onClick={() => setView(id)}>{l}</button>
+          ))}
+        </div>
+      )}
       {view === 'fuel' && <FuelView />}
       {view === 'imports' && <ImportsView />}
       {view === 'renewables' && <RenewablesView />}

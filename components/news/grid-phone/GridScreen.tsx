@@ -20,16 +20,20 @@ const TechnicalInfoTab = dynamic(() => import('@/components/news/power-grid/Tech
   loading: () => <Skeleton heights={[120, 420]} />,
 });
 
-export function GridScreen() {
+/** `view` is set by the app's section strip (Regional Grid / Technical Info); see SupplyScreen. */
+export function GridScreen({ view: controlled }: { view?: 'zones' | 'network' } = {}) {
   const p = usePhone();
-  const [view, setView] = useState<'zones' | 'network'>('zones');
+  const [own, setView] = useState<'zones' | 'network'>('zones');
+  const view = controlled ?? own;
   return (
     <div className="gp-screen">
-      <div className="gp-seg gp-seg--sticky" role="tablist" aria-label="Grid view">
-        {([['zones', 'Zones & flows'], ['network', 'Network']] as const).map(([id, l]) => (
-          <button key={id} role="tab" aria-selected={view === id} className={view === id ? 'is-on' : ''} onClick={() => setView(id)}>{l}</button>
-        ))}
-      </div>
+      {!controlled && (
+        <div className="gp-seg gp-seg--sticky" role="tablist" aria-label="Grid view">
+          {([['zones', 'Zones & flows'], ['network', 'Network']] as const).map(([id, l]) => (
+            <button key={id} role="tab" aria-selected={view === id} className={view === id ? 'is-on' : ''} onClick={() => setView(id)}>{l}</button>
+          ))}
+        </div>
+      )}
       {view === 'zones' && <ZonesView />}
       {view === 'network' && (
         <div className="gp-host grid-explorer">
