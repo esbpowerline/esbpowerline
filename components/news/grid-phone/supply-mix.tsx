@@ -81,7 +81,8 @@ export function MixSection({ curve, day, date }: { curve: EnergyCurve | null; da
 
   // ── geometry ──
   const h = Math.round(Math.max(260, Math.min(380, w * 0.74)));
-  const f = { l: 36, r: 4, t: 10, b: 22 };
+  // Full card width (owner, 2026-11-12): y labels are drawn inside, over the stack, with the tick halo.
+  const f = { l: 0, r: 0, t: 10, b: 20 };
   const val = (i: number, name: string) => (pts[i][name] as number) || 0;
   const tot = (i: number) => pts[i].total;
   const sh = (i: number) => (useShort && isNum(short[i]) ? (short[i] as number) : 0);
@@ -170,7 +171,6 @@ export function MixSection({ curve, day, date }: { curve: EnergyCurve | null; da
                     {nt.ticks.map((v, k) => (
                       <g key={k}>
                         <line x1={f.l} x2={w - f.r} y1={y(v)} y2={y(v)} className={k === 0 ? 'gp-base' : 'gp-grid'} />
-                        <text x={f.l - 6} y={y(v) + 4} textAnchor="end" className="gp-tick gp-tick--out">{tickText(v, mode)}</text>
                       </g>
                     ))}
                     {labelIdx.map((i) => (
@@ -179,6 +179,11 @@ export function MixSection({ curve, day, date }: { curve: EnergyCurve | null; da
                   </g>
                   {areas}
                   {band}
+                  <g aria-hidden>
+                    {nt.ticks.slice(1).map((v) => (
+                      <text key={v} x={0} y={y(v) - 3} className="gp-tick">{tickText(v, mode)}</text>
+                    ))}
+                  </g>
                   <line x1={x(at)} x2={x(at)} y1={f.t - 6} y2={h - f.b} className="gp-cursor gp-cursor--on-fill" />
                 </>
               )}

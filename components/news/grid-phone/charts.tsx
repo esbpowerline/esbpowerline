@@ -86,8 +86,12 @@ function Axes({ f, ticks, y, labels, x, idx, step }: { f: Frame; ticks: number[]
       {ticks.map((v, k) => (
         <g key={k}>
           <line x1={f.l} x2={f.w - f.r} y1={y(v)} y2={y(v)} className={k === 0 ? 'gp-base' : 'gp-grid'} />
+          {/* Labels sit inside the plot, left-aligned just above their gridline; the
+              tick's surface-coloured halo keeps them legible over a line or a fill.
+              The owner (2026-11-12, S25 Ultra) asked for the graphs to use the full
+              card width — a 30px gutter was 9% of a 340px plot spent on numbers. */}
           {k > 0 && f.l === 0 && (
-            <text x={0} y={y(v) - 4} className="gp-tick">
+            <text x={0} y={y(v) - 3} className="gp-tick">
               {tickLabel(v, step)}
             </text>
           )}
@@ -183,8 +187,8 @@ export function LineChart({
   const gid = useId().replace(/:/g, '');
   const { ref, w } = useWidth<HTMLDivElement>();
   const h = axis ? heightFor(w, aspect, minH, maxH) : minH;
-  // A 30px label gutter: labels inside the plot collided with the line at the left edge.
-  const f: Frame = { w, h, l: axis ? 30 : 0, r: 0, t: axis ? 10 : 3, b: axis ? 22 : 3 };
+  // Full card width: y labels sit inside the plot over their gridlines (halo stroke).
+  const f: Frame = { w, h, l: 0, r: 0, t: axis ? 10 : 3, b: axis ? 20 : 3 };
   const n = labels.length;
   const { svg, idx, handlers } = useScrub(n, w ? f : null, onScrub);
   const all = series.flatMap((s) => s.values.filter((v): v is number => v != null && Number.isFinite(v)));
@@ -302,8 +306,9 @@ export function StackArea({
 }) {
   const { ref, w } = useWidth<HTMLDivElement>();
   const h = heightFor(w, aspect, minH, maxH);
-  // Labels sit in a left gutter here: over a filled stack they would vanish.
-  const f: Frame = { w, h, l: 30, r: 0, t: 10, b: 22 };
+  // Full card width; the y labels sit inside, above their gridlines, with the
+  // tick halo (gp-tick--fill strengthens it) so they read over the stack.
+  const f: Frame = { w, h, l: 0, r: 0, t: 10, b: 20 };
   const n = rows.length;
   const { svg, idx, handlers } = useScrub(n, w ? f : null, onScrub);
   if (n < 2) return <div className="gp-empty" style={{ height: 160 }}>Not published for this day</div>;
@@ -342,6 +347,15 @@ export function StackArea({
       <>
         <Axes f={f} ticks={nt.ticks} y={y} labels={labels} x={x} idx={xLabelIdx(labels, w)} step={step} />
         {paths}
+        {/* Gridlines and y labels again above the fill, so the scale stays readable over the stack. */}
+        <g aria-hidden>
+          {nt.ticks.slice(1).map((v) => (
+            <g key={v}>
+              <line x1={0} x2={w} y1={y(v)} y2={y(v)} className="gp-grid" opacity={0.6} />
+              <text x={0} y={y(v) - 3} className="gp-tick">{tickLabel(v, step)}</text>
+            </g>
+          ))}
+        </g>
         {idx != null && <line x1={x(idx)} x2={x(idx)} y1={f.t - 6} y2={h - f.b} className="gp-cursor gp-cursor--on-fill" />}
       </>
     );

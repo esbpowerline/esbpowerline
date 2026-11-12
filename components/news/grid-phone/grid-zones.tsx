@@ -5,7 +5,7 @@ import { useChartTheme } from '@/hooks/useChartTheme';
 import { canonicalFuelName, FUEL_DISPLAY_ORDER } from '@/lib/data/grid/chart-palette';
 import { coverageLabel } from '@/lib/data/grid/coverage';
 import type { GridDailyData, RegionalDemandItem, ZoneGenerationItem } from '@/lib/data/grid/types';
-import { fmt, Meter, StackBar } from './charts';
+import { fmt, StackBar } from './charts';
 import { Cite, Fact, sourceLabel, U } from './grid-common';
 import { isNum, Prov, Row, Section, useSheet } from './shared';
 
@@ -132,7 +132,7 @@ function ZoneSheet({ day, z, s }: { day: GridDailyData; z: RegionalDemandItem; s
       <dl className="gz-dl">
         <Fact k={derived ? 'D' : 'P'} label="Evening demand" value={<>{fmt(z.demand)} <U>MW</U></>} note={derived ? 'Reconstructed as area served plus load-shed.' : undefined} />
         <Fact k="P" label="Load-shedding" value={<>{fmt(z.loadShed)} <U>MW</U></>} />
-        <Fact k="D" label="Shedding severity" value={z.loadShed > 0 ? pct1(sev(z)) : 'Clean (0%)'} note="Load-shed ÷ demand × 100, to one decimal." />
+        <Fact k="D" label="Shedding severity" value={!isNum(z.loadShed) ? 'not stated' : z.loadShed > 0 ? pct1(sev(z)) : 'Clean (0%)'} note="Load-shed ÷ demand × 100, to one decimal." />
         <Fact k="D" label="Share of grid demand" value={s.demand > 0 ? pct1((z.demand / s.demand) * 100) : '—'} note="This zone’s demand over the sum of all zones’ demand." />
         {s.shed > 0 && <Fact k="D" label="Share of all shed" value={pct1(((z.loadShed || 0) / s.shed) * 100)} note="This zone’s shed over the sum of all zones’ shed." />}
       </dl>
@@ -209,29 +209,57 @@ export function ZoneDemand({ day }: { day: GridDailyData }) {
         <span>· Load-shed</span><Prov kind="P" />
         <span>· Severity</span><Prov kind="D" note="Load-shed ÷ demand × 100, to one decimal." />
       </div>
-      <div className="gp-rows">
+      {/*
+        Rebuilt for the phone 2026-11-12 ("fix the daily load shedding by Zone graph").
+        The old rows drew a severity meter scaled to max(10%, worst zone), so 3.9% filled
+        ~40% of the track and read as a big share; seven "Clean (0%)" rows of equal weight
+        buried the two that shed. Now each zone is one bar whose length is its demand on a
+        common MW scale, with the shed drawn as the red tail of that same bar at its true
+        share — so a 43 MW shed on 1,094 MW looks like 4%, because it is. A zone whose
+        shed cell is not published is marked "not stated", never drawn or counted as clean.
+      */}
+      <div className="gz-zbars" role="list">
         {all.map((z) => {
-          const p = sev(z);
+          const shed = isNum(z.loadShed) ? z.loadShed : null;
+          const dem = isNum(z.demand) ? z.demand : null;
+          const maxD = Math.max(1, ...all.map((r) => (isNum(r.demand) ? r.demand : 0)));
+          const wPct = dem != null ? Math.max(1, (dem / maxD) * 100) : 0;
+          const shedPct = dem && shed != null && shed > 0 ? Math.max(2, (shed / dem) * 100) : 0;
           return (
-            <Row
-              key={z.zone}
-              name={z.zone}
-              sub={z.loadShed > 0 ? <span className="gz-sevtxt">{fmt(p, 1)}% severity</span> : <span className="gz-sevtxt good">Clean (0%)</span>}
-              chevron
-              value={<>{fmt(z.demand)} <U>MW</U></>}
-              small={z.loadShed > 0 ? <span style={{ color: 'var(--gp-bad)', fontWeight: 600 }}>{fmt(z.loadShed)} MW shed</span> : '0 MW shed'}
-              onClick={() => open(<ZoneSheet day={day} z={z} s={s} />)}
-              meter={z.loadShed > 0 ? <Meter value={Math.min(p, 100)} max={Math.max(10, ...all.map(sev))} color="var(--gp-warn)" /> : undefined}
-            />
+            <button key={z.zone} type="button" role="listitem" className={`gz-zbar${shed != null && shed > 0 ? ' is-shed' : ''}`} onClick={() => open(<ZoneSheet day={day} z={z} s={s} />)}>
+              <span className="gz-zbar__name">{z.zone}</span>
+              <span className="gz-zbar__dem"><b>{fmt(dem)}</b> MW</span>
+              <span className="gz-zbar__track" aria-hidden>
+                <span className="gz-zbar__fill" style={{ width: `${wPct}%` }}>
+                  {shedPct > 0 && <span className="gz-zbar__shed" style={{ width: `${shedPct}%` }} />}
+                </span>
+              </span>
+              <span className="gz-zbar__shedtxt">
+                {shed == null ? (
+                  <span className="is-nil">shed not stated</span>
+                ) : shed > 0 ? (
+                  <><b>{fmt(shed)} MW shed</b> · {fmt(sev(z), 1)}%</>
+                ) : (
+                  <span className="is-ok">0 MW shed</span>
+                )}
+              </span>
+            </button>
           );
         })}
-        <Row
-          name={<>Entire grid total<Prov kind="D" note="Sums of the zone rows; the percentage is summed shed over summed demand." /></>}
-          wrap
-          value={<>{fmt(s.demand)} <U>MW</U></>}
-          small={<>{fmt(s.shed)} MW shed</>}
-          meter={<div className="gz-sev"><span>Grid-wide severity</span><b>{s.gridPct == null ? '—' : `${s.gridPct.toFixed(1)}% grid-wide`}</b></div>}
-        />
+      </div>
+      <div className="gz-ztotal">
+        <div>
+          <span className="gz-ztotal__l">Entire grid<Prov kind="D" note="Sums of the zone rows; the percentage is summed shed over summed demand." /></span>
+          <span className="gz-ztotal__v"><b>{fmt(s.demand)}</b> MW demand</span>
+        </div>
+        <div>
+          <span className="gz-ztotal__l">Shed · grid-wide severity</span>
+          <span className="gz-ztotal__v"><b className={s.shed > 0 ? 'bad' : undefined}>{fmt(s.shed)} MW</b> · {s.gridPct == null ? '—' : `${s.gridPct.toFixed(1)}%`}</span>
+        </div>
+      </div>
+      <div className="gz-zkey">
+        <span><i className="is-dem" />Demand, common MW scale</span>
+        <span><i className="is-shed" />Shed, true share of the zone</span>
       </div>
       <button type="button" className="gz-info" onClick={how}>How to read this, and the source</button>
     </Section>

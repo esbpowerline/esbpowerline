@@ -33,3 +33,29 @@
 /* Severity lives in the row's sub-line; the bar is scaled to the worst zone (≥ 10%) so small cuts stay visible. */
 .gz-sevtxt { color: var(--gp-warn); font-weight: 600; }
 .gz-sevtxt.good { color: var(--gp-good); }
+
+/* Zone demand + shed bars (grid-zones.tsx ZoneDemand), rebuilt for the phone 2026-11-12. */
+.gp .gz-zbars { display: flex; flex-direction: column; margin-top: 8px; }
+.gp .gz-zbar { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "name dem" "track track" "shed shed"; column-gap: 8px; row-gap: 3px; width: 100%; padding: 7px 0; border: 0; border-top: 1px solid var(--gp-line); background: none; text-align: left; color: var(--gp-on); }
+.gp .gz-zbar:first-child { border-top: 0; }
+.gp .gz-zbar__name { grid-area: name; font-size: 13px; font-weight: 600; }
+.gp .gz-zbar__dem { grid-area: dem; font-size: 11px; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp .gz-zbar__dem b { font-size: 13px; color: var(--gp-on); font-weight: 700; }
+.gp .gz-zbar__track { grid-area: track; display: block; height: 8px; }
+.gp .gz-zbar__fill { display: flex; justify-content: flex-end; height: 100%; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, var(--gp-primary) 30%, transparent); }
+.gp .gz-zbar__shed { display: block; height: 100%; background: var(--gp-bad); }
+.gp .gz-zbar__shedtxt { grid-area: shed; font-size: 11px; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp .gz-zbar.is-shed .gz-zbar__shedtxt b { color: var(--gp-bad); font-weight: 700; }
+.gp .gz-zbar__shedtxt .is-ok { color: var(--gp-faint); }
+.gp .gz-zbar__shedtxt .is-nil { color: var(--gp-faint); font-style: italic; }
+.gp .gz-ztotal { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--gp-line); }
+.gp .gz-ztotal > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gp .gz-ztotal__l { font-size: 11px; color: var(--gp-muted); display: inline-flex; align-items: center; gap: 4px; }
+.gp .gz-ztotal__v { font-size: 12px; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp .gz-ztotal__v b { font-size: 15px; font-weight: 700; color: var(--gp-on); }
+.gp .gz-ztotal__v b.bad { color: var(--gp-bad); }
+.gp .gz-zkey { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 10px; font-size: 11px; color: var(--gp-muted); }
+.gp .gz-zkey span { display: inline-flex; align-items: center; gap: 5px; }
+.gp .gz-zkey i { width: 10px; height: 8px; border-radius: 2px; }
+.gp .gz-zkey i.is-dem { background: color-mix(in srgb, var(--gp-primary) 30%, transparent); }
+.gp .gz-zkey i.is-shed { background: var(--gp-bad); }

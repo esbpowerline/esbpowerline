@@ -99,3 +99,17 @@
 .gp-tstrip { position: relative; padding-left: 30px; }
 .gp-tstrip .gp-plot { margin-top: 2px; }
 .gp-tstrip__l { position: absolute; left: 0; top: 18px; width: 28px; text-align: right; font-size: 11px; color: var(--gp-faint); }
+
+/* Forecast curve (today-forecast.tsx ForecastCurve), rebuilt for the phone 2026-11-12. */
+.gp .gp-tfc__read { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-height: 36px; padding: 6px 10px; margin-bottom: 8px; border-radius: 8px; background: var(--gp-surface2); font-size: 12px; color: var(--gp-muted); font-variant-numeric: tabular-nums; line-height: 1.35; }
+.gp .gp-tfc__read b { color: var(--gp-on); font-weight: 700; }
+.gp .gp-tfc__t { font-weight: 700; color: var(--gp-on); }
+.gp .gp-tfc__n { font-size: 11px; }
+.gp .gp-tfc__read i, .gp .gp-tfc__key i { display: inline-block; vertical-align: middle; margin-right: 5px; }
+.gp .gp-tfc__key { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 11px; color: var(--gp-muted); }
+.gp .gp-tfc__key span { display: inline-flex; align-items: center; white-space: nowrap; }
+.gp .gp-tfc i.is-fc { width: 14px; height: 0; border-top: 2px dashed var(--gp-fc); }
+.gp .gp-tfc i.is-act { width: 14px; height: 0; border-top: 2.5px solid var(--gp-primary); }
+.gp .gp-tfc i.is-short { width: 10px; height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--gp-bad) 35%, transparent); border: 1px solid var(--gp-bad); }
+.gp .gp-tfc i.is-beat { width: 10px; height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--gp-primary) 35%, transparent); border: 1px solid var(--gp-primary); }
+.gp .gp-tfc i.is-half { width: 8px; height: 8px; border-radius: 999px; border: 1.5px solid var(--gp-primary); background: var(--gp-surface); }

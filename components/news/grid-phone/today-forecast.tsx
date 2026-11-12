@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { compareForecastToLive, friendlyHour, minutesOfRow, type ForecastVsLive, type ForwardForecast, type LiveHourLike } from '@/lib/data/grid/forward-forecast';
 import type { GridForecast } from '@/lib/data/grid/types';
 import { fetchJsonDeduped } from '@/lib/data/json-request-dedupe';
-import { fmt, Legend, niceTicks } from './charts';
+import { fmt, niceTicks } from './charts';
 import { usePhone } from './context';
 import { isNum, Prov, Section, Stat, useSheet } from './shared';
 import { dayLabel, Foot, Gap, HowTo, nextDay, useBox } from './today-util';
@@ -28,30 +28,32 @@ const mins = (t: string) => minutesOfRow(t);
 /* ───────────────────────────── forecast curve ───────────────────────────── */
 
 /**
- * Forecast against measured over a fixed 00:00–24:00 axis. Dashed and faded
- * before the issue time (those hours had already happened), solid after;
- * shaded between the curves where an hour was forecast ahead; a signed miss
- * strip underneath. Touch to read an hour; touch a blank part to clear.
+ * Forecast against measured over a fixed 00:00–24:00 axis, drawn for a 390px
+ * phone (rebuilt 2026-11-12 after the owner called the old one cramped): the
+ * plot runs the full card width with its y labels inside, the signed gap is the
+ * shading between the curves (red where the grid fell short, blue where it beat
+ * the forecast), and a fixed readout above the plot gives any hour's forecast,
+ * measured and signed gap on touch. The separate miss strip is gone — it drew
+ * the same signed gaps a second time; every hour's figure is in the readout.
+ * Hours before the issue time are faded (they had already happened) and are
+ * never shaded: only hours the forecast actually looked ahead to are compared.
  */
 function ForecastCurve({ rows, issuedClock, nowMinutes, peakTime, aria }: { rows: CurveRow[]; issuedClock: string | null; nowMinutes?: number | null; peakTime?: string | null; aria: string }) {
   const { ref, w } = useBox<HTMLDivElement>();
   const [sel, setSel] = useState<number | null>(null);
   const issueM = issuedClock ? mins(issuedClock) : null;
-  const L = 34;
-  const R = 6;
-  const T = 16;
-  const h = Math.round(Math.max(230, Math.min(340, w * 0.62)));
-  const B = 22;
-  const strip = 44;
-  const total = h + 8 + strip;
+  const T = 18;
+  const B = 20;
+  const h = 236;
   const gen = rows.flatMap((r) => [r.forecast, r.actual]).filter(isNum);
+  const gap = (r: CurveRow) => (isNum(r.actual) && isNum(r.forecast) ? r.actual - r.forecast : null);
+  const halfHours = rows.some((r) => !r.time.endsWith(':00'));
   const body = (() => {
     if (!w || gen.length < 2) return null;
     const { lo, hi, ticks } = niceTicks(Math.min(...gen), Math.max(...gen), 4);
     const step = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
-    const x = (m: number) => L + (m / 1440) * (w - L - R);
+    const x = (m: number) => (m / 1440) * w;
     const y = (v: number) => T + (1 - (v - lo) / (hi - lo || 1)) * (h - T - B);
-    const gap = (r: CurveRow) => (isNum(r.actual) && isNum(r.forecast) ? r.actual - r.forecast : null);
     const path = (pick: (r: CurveRow) => number | null, keep: (r: CurveRow) => boolean) => {
       let d = '';
       let pen = false;
@@ -63,112 +65,85 @@ function ForecastCurve({ rows, issuedClock, nowMinutes, peakTime, aria }: { rows
       });
       return d;
     };
-    // The forecast line stays continuous across the issue time; only its style changes.
-    const fcPast = path((r) => r.forecast, (r) => r.before || (issueM != null && mins(r.time) <= issueM + 60));
+    const early = (r: CurveRow) => r.before || (issueM != null && mins(r.time) <= issueM + 60);
+    const fcPast = path((r) => r.forecast, early);
     const fcAhead = path((r) => r.forecast, (r) => !r.before);
-    const act = path((r) => r.actual, () => true);
-    const scored = rows.filter((r) => !r.before && gap(r) != null);
-    const maxErr = Math.max(1, ...scored.map((r) => Math.abs(gap(r) as number)));
-    const bw = Math.max(3, Math.min(12, (w - L - R) / Math.max(rows.length, 1) - 3));
+    const actPast = path((r) => r.actual, early);
+    const actAhead = path((r) => r.actual, (r) => !r.before);
     const bands: ReactNode[] = [];
     for (let i = 1; i < rows.length; i++) {
       const a = rows[i - 1];
       const b = rows[i];
       if (a.before || b.before || gap(a) == null || gap(b) == null) continue;
-      const ga = gap(a) as number;
-      const gb = gap(b) as number;
-      const short = ga + gb < 0;
+      const short = (gap(a) as number) + (gap(b) as number) < 0;
       bands.push(
         <path
           key={i}
           d={`M${x(mins(a.time))},${y(a.actual as number)}L${x(mins(b.time))},${y(b.actual as number)}L${x(mins(b.time))},${y(b.forecast as number)}L${x(mins(a.time))},${y(a.forecast as number)}Z`}
           fill={short ? 'var(--gp-bad)' : 'var(--gp-primary)'}
-          opacity={0.2}
+          opacity={0.28}
         />,
       );
     }
     const peakM = peakTime ? mins(peakTime) : null;
-    const peakRow = peakM != null ? rows.find((r) => mins(r.time) === peakM) : null;
     const selRow = sel != null ? rows[sel] : null;
+    const tl = (t: number) => (Math.abs(t) >= 1000 && step >= 500 ? `${+(t / 1000).toFixed(step >= 1000 ? 0 : 1)}k` : fmt(t));
+    const nowX = nowMinutes != null ? x(nowMinutes) : null;
     return (
       <>
-        {ticks.map((t) => (
-          <g key={t}>
-            <line x1={L} x2={w - R} y1={y(t)} y2={y(t)} className="gp-grid" />
-            <text x={L - 5} y={y(t) + 4} textAnchor="end" className="gp-tick gp-tick--out">
-              {Math.abs(t) >= 1000 && step >= 500 ? `${+(t / 1000).toFixed(step >= 1000 ? 0 : 1)}k` : fmt(t)}
-            </text>
-          </g>
+        {issueM != null && <rect x={0} y={T} width={Math.max(0, x(issueM))} height={h - T - B} fill="var(--gp-surface2)" opacity={0.7} />}
+        {nowX != null && <rect x={nowX} y={T} width={Math.max(0, w - nowX)} height={h - T - B} fill="var(--gp-surface2)" opacity={0.7} />}
+        {ticks.map((t, k) => (
+          <line key={t} x1={0} x2={w} y1={y(t)} y2={y(t)} className={k === 0 ? 'gp-base' : 'gp-grid'} />
+        ))}
+        {peakM != null && <line x1={x(peakM)} x2={x(peakM)} y1={T} y2={h - B} stroke="var(--gp-faint)" strokeDasharray="1 3" />}
+        {bands}
+        {fcPast && <path d={fcPast} fill="none" stroke="var(--gp-fc)" strokeWidth={1.5} strokeDasharray="3 4" opacity={0.45} />}
+        {fcAhead && <path d={fcAhead} fill="none" stroke="var(--gp-fc)" strokeWidth={2} strokeDasharray="5 3" />}
+        {actPast && <path d={actPast} fill="none" stroke="var(--gp-primary)" strokeWidth={2} opacity={0.45} strokeLinejoin="round" strokeLinecap="round" />}
+        {actAhead && <path d={actAhead} fill="none" stroke="var(--gp-primary)" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />}
+        {/* Half-hour readings (18:30 / 19:30) as open rings on the measured line. */}
+        {rows.filter((r) => !r.time.endsWith(':00') && isNum(r.actual)).map((r) => (
+          <circle key={r.time} cx={x(mins(r.time))} cy={y(r.actual as number)} r={3} fill="var(--gp-surface)" stroke="var(--gp-primary)" strokeWidth={1.5} />
+        ))}
+        {/* Labels last so their halo sits over the lines. */}
+        {ticks.slice(1).map((t) => (
+          <text key={t} x={0} y={y(t) - 3} className="gp-tick">{tl(t)}</text>
         ))}
         {[0, 6, 12, 18, 24].map((hr) => (
-          <text key={hr} x={x(hr * 60)} y={h - 5} textAnchor={hr === 0 ? 'start' : hr === 24 ? 'end' : 'middle'} className="gp-tick gp-tick--out">
+          <text key={hr} x={x(hr * 60)} y={h - 5} textAnchor={hr === 0 ? 'start' : hr === 24 ? 'end' : 'middle'} className="gp-tick">
             {String(hr).padStart(2, '0')}:00
           </text>
         ))}
         {issueM != null && (
           <g aria-hidden>
-            <rect x={L} y={T} width={Math.max(0, x(issueM) - L)} height={h - T - B} fill="var(--gp-surface2)" opacity={0.55} />
-            <line x1={x(issueM)} x2={x(issueM)} y1={T - 4} y2={h - B} className="gp-marker" />
-            <text x={x(issueM) + 4} y={T + 10} className="gp-tick gp-tick--out">forecast from {issuedClock}</text>
+            <line x1={x(issueM)} x2={x(issueM)} y1={4} y2={h - B} className="gp-marker" />
+            <text x={x(issueM) + 4} y={11} className="gp-tick gp-tick--strong">issued {issuedClock}</text>
           </g>
         )}
-        {nowMinutes != null && (
+        {nowX != null && (
           <g aria-hidden>
-            <rect x={x(nowMinutes)} y={T} width={Math.max(0, w - R - x(nowMinutes))} height={h - T - B} fill="var(--gp-surface2)" opacity={0.6} />
-            <line x1={x(nowMinutes)} x2={x(nowMinutes)} y1={T - 4} y2={h - B} className="gp-marker" />
-            <text x={x(nowMinutes) - 4} y={T + 10} textAnchor="end" className="gp-tick gp-tick--strong gp-tick--out">now</text>
+            <line x1={nowX} x2={nowX} y1={4} y2={h - B} className="gp-marker" />
+            <text x={nowX + (nowX > w - 40 ? -4 : 4)} y={11} textAnchor={nowX > w - 40 ? 'end' : 'start'} className="gp-tick gp-tick--strong">now</text>
           </g>
         )}
         {peakM != null && (
-          <g aria-hidden>
-            <line x1={x(peakM)} x2={x(peakM)} y1={T} y2={h - B} stroke="var(--gp-faint)" strokeDasharray="1 3" />
-            <text x={x(peakM)} y={h - B - 5} textAnchor="middle" className="gp-tick gp-tick--out">evening peak</text>
-            {peakRow && isNum(peakRow.forecast) && <circle cx={x(peakM)} cy={y(peakRow.forecast)} r={3.5} fill="var(--gp-fc)" className="gp-dot" />}
-            {peakRow && isNum(peakRow.actual) && <circle cx={x(peakM)} cy={y(peakRow.actual)} r={3.5} fill="var(--gp-primary)" className="gp-dot" />}
-          </g>
+          <text x={x(peakM) + (x(peakM) > w - 70 ? -4 : 4)} y={h - B - 5} textAnchor={x(peakM) > w - 70 ? 'end' : 'start'} className="gp-tick">evening peak</text>
         )}
-        {bands}
-        {fcPast && <path d={fcPast} fill="none" stroke="var(--gp-fc)" strokeWidth={1.5} strokeDasharray="3 4" opacity={0.5} />}
-        {fcAhead && <path d={fcAhead} fill="none" stroke="var(--gp-fc)" strokeWidth={1.75} strokeDasharray="5 3" />}
-        {act && <path d={act} fill="none" stroke="var(--gp-primary)" strokeWidth={2.25} strokeLinejoin="round" strokeLinecap="round" />}
         {selRow && (
           <g aria-hidden>
-            <line x1={x(mins(selRow.time))} x2={x(mins(selRow.time))} y1={T - 4} y2={h + 8 + strip} className="gp-cursor" />
+            <line x1={x(mins(selRow.time))} x2={x(mins(selRow.time))} y1={T - 4} y2={h - B} className="gp-cursor" />
             {isNum(selRow.forecast) && <circle cx={x(mins(selRow.time))} cy={y(selRow.forecast)} r={4.5} fill="var(--gp-fc)" className="gp-dot" />}
             {isNum(selRow.actual) && <circle cx={x(mins(selRow.time))} cy={y(selRow.actual)} r={4.5} fill="var(--gp-primary)" className="gp-dot" />}
           </g>
         )}
-        {/* signed miss strip */}
-        <g transform={`translate(0 ${h + 8})`}>
-          <text x={L - 5} y={12} textAnchor="end" className="gp-tick gp-tick--out">miss</text>
-          <line x1={L} x2={w - R} y1={strip / 2} y2={strip / 2} className="gp-base" />
-          {scored.map((r) => {
-            const g = gap(r) as number;
-            const bh = Math.max(1.5, (Math.abs(g) / maxErr) * (strip / 2 - 2));
-            const half = !r.time.endsWith(':00');
-            return (
-              <rect
-                key={r.time}
-                x={x(mins(r.time)) - bw / 2}
-                y={g >= 0 ? strip / 2 - bh : strip / 2}
-                width={bw}
-                height={bh}
-                rx={2}
-                fill={g < 0 ? 'var(--gp-bad)' : 'var(--gp-primary)'}
-                stroke={half ? 'var(--gp-on)' : undefined}
-                strokeWidth={half ? 0.75 : 0}
-                opacity={selRow && selRow.time !== r.time ? 0.35 : 1}
-              />
-            );
-          })}
-        </g>
       </>
     );
   })();
 
   const pick = (clientX: number, el: SVGSVGElement) => {
     const r = el.getBoundingClientRect();
-    const m = ((clientX - r.left - L) / (r.width - L - R)) * 1440;
+    const m = ((clientX - r.left) / r.width) * 1440;
     let best = -1;
     let bd = 60;
     rows.forEach((row, i) => {
@@ -181,48 +156,44 @@ function ForecastCurve({ rows, issuedClock, nowMinutes, peakTime, aria }: { rows
     setSel(best >= 0 ? best : null);
   };
   const s = sel != null ? rows[sel] : null;
-  const g = s && isNum(s.actual) && isNum(s.forecast) ? s.actual - s.forecast : null;
+  const g = s ? gap(s) : null;
   return (
-    <div ref={ref} className="gp-plot" style={{ marginTop: 12 }}>
-      <div className="gp-subline" style={{ minHeight: 38, marginTop: 0 }}>
+    <div ref={ref} className="gp-plot gp-tfc">
+      <div className="gp-tfc__read" aria-live="polite">
         {s ? (
           <>
-            <b>{s.time}</b>
-            {s.before ? ' · already happened' : ''}
-            <br />
-            Forecast <b>{fmt(s.forecast)}</b> · Measured <b>{isNum(s.actual) ? fmt(s.actual) : 'not posted'}</b>
-            {!s.before && g != null ? <> · Miss <Gap mw={g} /></> : null}
+            <span className="gp-tfc__t">{s.time}</span>
+            <span><i className="is-fc" />Forecast <b>{fmt(s.forecast)}</b></span>
+            <span><i className="is-act" />Measured <b>{isNum(s.actual) ? fmt(s.actual) : 'not posted'}</b></span>
+            {s.before ? <span className="gp-tfc__n">already past when issued</span> : g != null ? <span>Gap <Gap mw={g} unit="MW" /></span> : null}
           </>
         ) : (
-          'Touch the curve to read an hour'
+          <span className="gp-tfc__n">Touch the curve to read an hour (MW)</span>
         )}
       </div>
       {body ? (
         <svg
           width={w}
-          height={total}
-          viewBox={`0 0 ${w} ${total}`}
+          height={h}
+          viewBox={`0 0 ${w} ${h}`}
           className="gp-svg"
           role="img"
           aria-label={aria}
           onPointerDown={(e) => pick(e.clientX, e.currentTarget)}
-          onPointerMove={(e) => e.buttons || e.pointerType === 'touch' ? pick(e.clientX, e.currentTarget) : undefined}
+          onPointerMove={(e) => (e.buttons || e.pointerType === 'touch' ? pick(e.clientX, e.currentTarget) : undefined)}
         >
           {body}
         </svg>
       ) : (
         <div className="gp-empty" style={{ height: 150 }}>Not published for this day</div>
       )}
-      <Legend
-        items={[
-          { label: 'Forecast', color: 'var(--gp-fc)', dash: true },
-          { label: 'Measured', color: 'var(--gp-primary)', line: true },
-          { label: 'Grid fell short of forecast', color: 'var(--gp-bad)' },
-          { label: 'Grid beat forecast', color: 'var(--gp-primary)' },
-          ...(nowMinutes != null ? [{ label: 'Still ahead of now', color: 'var(--gp-surface2)' }] : []),
-          ...(rows.some((r) => !r.time.endsWith(':00')) ? [{ label: '18:30 / 19:30 half-hour reading (outlined)', color: 'var(--gp-on)' }] : []),
-        ]}
-      />
+      <div className="gp-tfc__key">
+        <span><i className="is-fc" />Forecast</span>
+        <span><i className="is-act" />Measured</span>
+        <span><i className="is-short" />Fell short</span>
+        <span><i className="is-beat" />Beat forecast</span>
+        {halfHours && <span><i className="is-half" />Half-hour</span>}
+      </div>
     </div>
   );
 }
