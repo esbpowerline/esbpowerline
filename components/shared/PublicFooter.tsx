@@ -12,6 +12,7 @@ import type { PublicCategory } from '@/lib/category-types';
 import { CATEGORIES } from '@/lib/constants';
 import { slugify } from '@/lib/utils';
 import { localizeCategoryFields } from '@/lib/i18n/categories';
+import { PhoneFooter } from '@/components/shared/PhoneFooter';
 
 function FooterHeading({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
@@ -113,7 +114,9 @@ export function PublicFooter({ categories = [] }: { categories?: PublicCategory[
 
   return (
     <footer className="border-t border-border/60 bg-card/30">
-      <div className="container container--shell py-10 md:py-12">
+      {/* Phone only (app/phone-footer.css): the same links as grouped rows. */}
+      <PhoneFooter exploreLinks={exploreLinks} sectorLinks={sectorNavLinks} year={year} />
+      <div className="hp-foot-desk container container--shell py-10 md:py-12">
         <div className="flex flex-col items-start gap-4 border-b border-border/40 pb-8 sm:flex-row sm:items-center sm:gap-6">
           <BrandLogo
             className="public-footer-logo"

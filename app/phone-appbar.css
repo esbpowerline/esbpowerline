@@ -1,0 +1,47 @@
+/*
+ * Phone app bar (2026-11-12, pass 3). Below 768px the public header becomes a
+ * slim bar like the Grid Explorer app's: logo left, search and one theme
+ * button right. Every destination the desktop bar carried stays reachable:
+ * Home / Grid / News / Magazine are on the dock, categories, search and the
+ * member button are in the dock's Menu sheet. The illustrated banner strip is
+ * decorative on a phone (it repeated the logo); the commodities ticker stays
+ * as one line. From 768px up nothing here applies.
+ */
+.hp-appbar__logo, .hp-appbar__theme, .hp-appbar-auth { display: none; }
+
+@media (max-width: 767px) {
+  .site-banner-frame > a { display: none !important; }
+  .site-banner-frame { border: 0 !important; }
+
+  .public-nav-bar { box-shadow: none !important; border-bottom: 1px solid hsl(var(--border) / .6) !important; background: hsl(var(--background) / .92) !important; backdrop-filter: saturate(1.4) blur(12px); }
+  .public-nav-bar__inner { padding-left: 16px !important; padding-right: 12px !important; }
+  .public-nav-bar__main { display: flex !important; align-items: center !important; justify-content: space-between !important; min-height: 52px !important; height: 52px; gap: 8px !important; padding: 0 !important; }
+  .public-nav-bar__start { display: flex !important; align-items: center !important; gap: 4px !important; flex: 1 1 auto; min-width: 0; }
+  .public-nav-bar__center, .public-nav-bar__home, .public-nav-bar__pill-divider,
+  .public-nav-bar__themes, .public-nav-bar__menu-btn,
+  .public-nav-bar__end .public-nav-bar__utilities > :not(.hp-appbar__theme) { display: none !important; }
+  .public-nav-bar__start .public-nav-bar__start-cluster, .public-nav-bar__end .public-nav-bar__utility-cluster,
+  .public-nav-bar__start .public-nav-bar__utilities, .public-nav-bar__end .public-nav-bar__utilities {
+    background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; gap: 0 !important;
+  }
+  .public-nav-bar__start .public-nav-bar__start-cluster { margin-left: auto; }
+  .public-nav-bar__end { flex: none; }
+
+  .hp-appbar__logo { display: inline-flex; align-items: center; height: 44px; margin-right: auto; }
+  .hp-appbar__logo img { height: 28px; width: auto; display: block; }
+  html.dark .hp-appbar__logo img { filter: brightness(0) invert(1); opacity: .92; }
+
+  /* Search and theme: two identical 40px round buttons. */
+  .public-nav-bar__search-pill, .hp-appbar__theme {
+    display: inline-flex !important; align-items: center; justify-content: center;
+    width: 40px !important; height: 40px !important; min-width: 40px; padding: 0 !important; margin: 0 !important;
+    border-radius: 999px !important; border: 0 !important; background: transparent !important; box-shadow: none !important;
+    color: hsl(var(--foreground)) !important; -webkit-tap-highlight-color: transparent;
+  }
+  .public-nav-bar__search-pill .public-nav-bar__pill-label { display: none !important; }
+  .public-nav-bar__search-pill svg { width: 20px !important; height: 20px !important; opacity: 1 !important; }
+  .public-nav-bar__search-pill:active, .hp-appbar__theme:active { background: hsl(var(--muted)) !important; }
+
+  .hp-appbar-auth { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 0 2px; }
+  .hp-appbar-auth > span { font-size: 13px; font-weight: 600; }
+}

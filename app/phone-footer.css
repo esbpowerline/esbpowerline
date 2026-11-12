@@ -1,0 +1,43 @@
+/* Phone footer (components/shared/PhoneFooter.tsx). From 768px up it is not
+   shown and the desktop footer is untouched. */
+.hp-foot { display: none; }
+
+@media (max-width: 767px) {
+  .hp-foot-desk { display: none !important; }
+  footer:has(> .hp-foot) { background: transparent !important; border-top: 0 !important; }
+  .hp-foot { display: block; padding: 24px 16px calc(env(safe-area-inset-bottom) + 104px); font-size: 13px; color: hsl(var(--foreground)); }
+  .hp-foot__brand { display: flex; flex-direction: column; gap: 8px; padding: 0 4px 16px; }
+  .hp-foot__brand p { font-size: 13px; line-height: 1.45; color: hsl(var(--muted-foreground)); margin: 0; }
+  .hp-foot__card {
+    background: hsl(var(--card)); border: 1px solid hsl(var(--border) / .6); border-radius: 20px; padding: 0 16px; overflow: hidden;
+  }
+  .hp-foot__group + .hp-foot__group { border-top: 1px solid hsl(var(--border) / .7); }
+  .hp-foot__group > summary {
+    list-style: none; display: flex; align-items: center; justify-content: space-between; min-height: 48px; cursor: pointer;
+    font-size: 15px; font-weight: 700; -webkit-tap-highlight-color: transparent;
+  }
+  .hp-foot__group > summary::-webkit-details-marker { display: none; }
+  .hp-foot__group > summary svg { color: hsl(var(--muted-foreground)); transition: transform .2s; }
+  .hp-foot__group[open] > summary svg { transform: rotate(180deg); }
+  .hp-foot__body { padding: 0 0 12px; }
+  .hp-foot__links { list-style: none; margin: 0; padding: 0; }
+  .hp-foot__links a { display: flex; align-items: center; min-height: 44px; font-size: 13px; font-weight: 550; color: hsl(var(--foreground) / .88); text-decoration: none; }
+  .hp-foot__links li + li { border-top: 1px solid hsl(var(--border) / .45); }
+  .hp-foot__office { margin: 0; display: grid; gap: 10px; }
+  .hp-foot__office dt { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+  .hp-foot__office dd { margin: 2px 0 0; font-size: 13px; line-height: 1.45; }
+  .hp-foot__office a { color: hsl(var(--primary)); display: inline-block; padding: 4px 0; }
+  .hp-foot__social { display: flex; flex-direction: column; gap: 8px; padding: 20px 4px 4px; }
+  .hp-foot__social > span { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+  .hp-foot__social a { min-height: 36px; padding: 0 14px !important; font-size: 12px !important; font-weight: 600; border-radius: 999px !important; display: inline-flex !important; align-items: center; gap: 6px; }
+  .hp-foot__social a * { font-size: 12px !important; }
+  .hp-foot__social svg { width: 16px !important; height: 16px !important; }
+  .hp-foot__legal { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 0 0; }
+  .hp-foot__legal a {
+    display: inline-flex; align-items: center; gap: 4px; height: 36px; padding: 0 14px; border-radius: 999px;
+    background: hsl(var(--muted)); font-size: 12px; font-weight: 600; color: hsl(var(--foreground)); text-decoration: none; position: relative;
+  }
+  .hp-foot__legal a::after { content: ''; position: absolute; inset: -4px 0; }
+  .hp-foot__copy { margin: 16px 4px 0; font-size: 12px; line-height: 1.6; color: hsl(var(--muted-foreground)); }
+  .hp-foot__copy a { color: inherit; font-weight: 600; }
+}

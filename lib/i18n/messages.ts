@@ -209,7 +209,7 @@ const EN: Record<MessageKey, string> = {
   'footer.analysis': 'Event Studies',
   'footer.titasGas': 'Titas Gas Record',
   'footer.search': 'Search',
-  'footer.copyright': '© {year} ESB PowerLine. All rights reserved.',
+  'footer.copyright': '© {year} ESB Power Line. All rights reserved.',
   'footer.tagline':
     'Authoritative coverage for utilities, regulators, IPPs, investors and policymakers.',
   'footer.about': 'About Us',

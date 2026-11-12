@@ -26,6 +26,7 @@ import { MemberNavMenuLinks } from '@/components/members/MemberNavMenuLinks';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { SiteThemeToggle } from '@/components/shared/SiteThemeToggle';
 import { PhoneDock } from '@/components/shared/PhoneDock';
+import { PhoneAppBarLogo, PhoneThemeCycle } from '@/components/shared/PhoneAppBar';
 
 type NavCategory = {
   name: string;
@@ -307,6 +308,7 @@ export function PublicNavbar({
           <div className="public-nav-bar__hub-band">
             <div className="public-nav-bar__main">
               <div className="public-nav-bar__start">
+                <PhoneAppBarLogo />
                 <div className="public-nav-bar__pill-cluster public-nav-bar__start-cluster">
                   <div className="public-nav-bar__utilities">
                     <Link
@@ -397,6 +399,7 @@ export function PublicNavbar({
                     <span className="public-nav-bar__pill-divider hidden sm:block" aria-hidden />
 
                     <SiteThemeToggle className="public-nav-bar__themes" />
+                    <PhoneThemeCycle />
                   </div>
 
                   <button
@@ -473,6 +476,12 @@ export function PublicNavbar({
               <PublicNavLink href="/search" className="flex items-center gap-2 py-1.5">
                 <Search className="h-4 w-4" /> {t('nav.searchArticles')}
               </PublicNavLink>
+              {/* Phone app bar keeps only logo, search and theme; the member
+                  button moves here so it stays one tap from the dock's Menu. */}
+              <div className="hp-appbar-auth md:hidden">
+                <span>Members</span>
+                <MemberAuthButton />
+              </div>
 
               <div className="pt-4 pb-2">
                 <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-2">

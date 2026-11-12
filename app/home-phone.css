@@ -306,4 +306,76 @@
   main.home-page .home-bottom-row__card p { -webkit-line-clamp: unset !important; display: block !important; overflow: visible !important; }
   main.home-page .home-bottom-row__card > a { min-height: 44px; margin-top: 4px !important; }
   main.home-page .home-bottom-row__card .btn { min-height: 44px; border-radius: 999px !important; font-size: 13px !important; font-weight: 600; }
+
+  /* ── pass 2 (owner on an S25 Ultra: "homepage is nasty") ─────────────── */
+  /* One typeface. The desktop's mono/display faces on kickers, timestamps,
+     ranks and source lines read as a terminal inside an app; Inter with
+     tabular figures keeps the alignment they were there for. */
+  main.home-page :is(.font-mono, .font-display, .section-kicker, .featured-hero__eyebrow, .home-snapshot-segment__kicker, .home-snapshot-segment__updated, .home-snapshot-segment__foot, .home-trending-wave__queue-rank, .home-trending-wave__badge),
+  main.home-page :is(.home-snapshot-segment__updated, .home-snapshot-segment__foot, .home-snapshot-segment__title) * {
+    font-family: inherit !important; font-style: normal !important; font-variant-numeric: tabular-nums;
+  }
+  main.home-page .home-snapshot-segment__kicker { color: var(--gp-muted) !important; font-weight: 700 !important; }
+  main.home-page .home-snapshot-segment__updated { font-weight: 600 !important; }
+  main.home-page .home-snapshot-segment__foot { color: var(--gp-muted) !important; }
+
+  /* The hero rotation faded the whole card to nothing between stories, so a
+     glance (or a screenshot) caught an empty white or black frame. The old
+     set now stays put and the new one slides in over it. */
+  main.home-page .featured-hero__story.is-swapping { opacity: 1 !important; transform: none !important; }
+  main.home-page .featured-hero__story { animation-duration: .28s !important; }
+
+  /* Interviews: one card and a clear peek of the next; titles whole. */
+  main.home-page .home-editorial__interview-grid > * { flex-basis: 272px; width: 272px !important; }
+  main.home-page .interview-card > div:first-child { aspect-ratio: 16 / 9; height: auto !important; }
+  main.home-page .interview-card :is(h3, p) { -webkit-line-clamp: unset !important; display: block !important; overflow: visible !important; max-height: none !important; }
+
+  /* Article cards: the excerpt was cut with an ellipsis; let it finish. */
+  main.home-page .article-card h3 + p { -webkit-line-clamp: unset !important; display: block !important; overflow: visible !important; max-height: none !important; }
+
+  /* Trending: the rotating slot keeps a floor so a short story does not jump
+     the page, but no ceiling, so nothing is cut. */
+  main.home-page .home-trending-wave__title { max-height: none !important; -webkit-line-clamp: unset !important; display: block !important; overflow: visible !important; }
+  main.home-page .home-trending-wave__excerpt { max-height: none !important; -webkit-line-clamp: unset !important; display: block !important; overflow: visible !important; min-height: 76px !important; }
+  main.home-page .home-trending-wave__meta { max-height: none !important; }
+
+  /* Ads: they keep every slot, but sit as quiet labelled cards instead of
+     the loudest things on the page. The square creative is shown whole in a
+     banner-height card rather than as a 300px block. */
+  main.home-page .home-ad-space--sidebar.max-w-sm { max-width: none !important; }
+  main.home-page .home-ad-space--sidebar.max-w-sm > a {
+    display: flex !important; justify-content: center; align-items: center; height: 180px;
+    background: var(--gp-surface) !important; border: 1px solid color-mix(in srgb, var(--gp-line) 60%, transparent);
+  }
+  main.home-page .home-ad-space--sidebar.max-w-sm > a > img { width: auto !important; height: 100% !important; object-fit: contain !important; }
+  main.home-page :is(.home-ad-space--sidebar.max-w-sm, .home-ad-space--pre-footer, a.category-ad-block-1, .hp-inline-ad)::before {
+    content: 'Advertisement'; display: block; margin: 0 0 6px 4px; font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--gp-muted);
+  }
+  main.home-page .home-ad-space--pre-footer { row-gap: 0 !important; }
+  main.home-page a.category-ad-block-1 { overflow: visible !important; border-radius: 0 !important; }
+  main.home-page a.category-ad-block-1 > img { border-radius: 12px; }
+  main.home-page .category-ad-block-3 > a { flex-basis: 66%; border-radius: 12px !important; }
+  main.home-page .category-ad-block-3 { margin-top: 8px !important; }
+
+  /* Official links: the ministry tile was a pink bordered box in a card. */
+  main.home-page .hp-links > div > a.group { border: 0 !important; }
+
+  /* ── pass 3 ───────────────────────────────────────────────────────────── */
+  /* Ads: at most one unit per gap and about one per 1.5 screens. On a phone
+     the feed's slots all landed together after the one visible category
+     (banner + two panel rails back to back above Trending), and the mobile
+     inline banner sat 700px under the square. Every slot stays in the DOM and
+     on desktop; on a phone the visible set is: the square after Interviews,
+     the first full-width banner after the category feed, the pre-footer. */
+  main.home-page :is(.hp-inline-ad, .category-ad-block-3),
+  main.home-page .category-feed-container > a.category-ad-block-1 ~ a.category-ad-block-1 { display: none !important; }
+  main.home-page .category-feed-container > a.category-ad-block-1 { margin-top: 24px !important; }
+
+  /* One header grammar: 10px caps kicker, 17px/700 title, pill action right. */
+  main.home-page .section-kicker,
+  main.home-page .home-snapshot-segment__kicker,
+  main.home-page .featured-hero__eyebrow,
+  main.home-page .home-block[aria-labelledby='home-power-sector-title'] > .mb-5 > .text-xs { font-size: 10px !important; letter-spacing: .08em !important; font-weight: 700 !important; }
+  main.home-page .home-editorial__rail > section header > div > span:not([aria-hidden]) { font-size: 17px !important; letter-spacing: -.015em !important; }
+  main.home-page .home-trending-hero-rail .section-inline-link { text-transform: none !important; letter-spacing: 0 !important; }
 }
