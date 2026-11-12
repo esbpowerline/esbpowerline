@@ -167,3 +167,17 @@
 .gp .gpm-years { position: relative; }
 .gp .gpm-kvs--r .gpm-kv small { text-align: right; }
 .gp .gpm-sup { font-size: 10px; line-height: 0; }
+
+/* Round 3 sweep (2026-11-12). A head meta tag (BULK TARIFF GAP, LNG RELIANCE…) beside the title squeezed
+   the title and description into a 200px column; on Macro it sits above the title as a kicker instead. */
+.gp .gpm-tabs ~ .gp-sec > .gp-sec__head { flex-direction: column-reverse; align-items: flex-start; gap: 6px; }
+.gp .gpm-tabs ~ .gp-sec > .gp-sec__head > div:last-child { width: 100%; }
+/* The owner asked for no clamped prose: macro notes print whole. */
+.gp .gpm-tabs ~ .gp-sec [data-long='1']:not([data-open='1']) { display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; max-height: none; }
+/* The hosted monthly detail (PgcbMonthlyDetail, still the desktop's): one level of card, kit surfaces,
+   tables that scroll sideways under a pinned first column instead of a bordered box inside the card. */
+.gp .gpm-hosted .grid-explorer-chart-card { background: var(--gp-surface); border: 0; border-radius: 20px; box-shadow: none; }
+.gp .gpm-hosted .grid-explorer-table-wrap { border: 0; border-radius: 0; border-top: 1px solid var(--gp-line); }
+.gp .gpm-hosted .grid-pager { border: 0; background: none; }
+.gp .gpm-hosted .grid-explorer-table-wrap th:first-child,
+.gp .gpm-hosted .grid-explorer-table-wrap td:first-child { position: sticky; left: 0; z-index: 1; background: var(--gp-surface); }

@@ -11,11 +11,9 @@
  * the reserve balance above, production stacked by field below) is redrawn
  * here at card width, y labels inside the plot, with a tapped year read out
  * underneath instead of a hover. The "Field evidence" panel (live week and
- * archive) is still the desktop's, hosted, because it is a separate
- * multi-panel component with its own loaders.
+ * archive) is drawn natively in macro-evidence.tsx.
  */
 
-import dynamic from 'next/dynamic';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import '@/app/grid-phone-macro-reserves.css';
 import { useChartTheme } from '@/hooks/useChartTheme';
@@ -27,6 +25,7 @@ import {
 import { RESERVE_BENCHMARKS } from '@/lib/data/macro/reserveBenchmarks';
 import { niceTicks } from './charts';
 import { Prov, Section, useSheet } from './shared';
+import { MacroEvidence } from './macro-evidence';
 import { Foot, InfoPill, KV, TablePill, useSeriesColor } from './macro-kit';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -35,11 +34,6 @@ const RETRIEVED = '18 Aug 2026';
 const gasDay = (iso: string) => { const [y, m, d] = iso.split('-').map(Number); return `${d} ${MONTHS[m - 1]} ${y}`; };
 const monthYear = (iso: string) => { const [y, m] = iso.split('-').map(Number); return `${MONTHS[m - 1]} ${y}`; };
 const n0 = (v: number) => Math.round(v).toLocaleString('en-US');
-
-const HostedFieldEvidence = dynamic(() => import('@/components/news/power-grid/PetrobanglaMacroGasSection').then((m) => m.PetrobanglaMacroGasSection), {
-  ssr: false,
-  loading: function Loading() { return <div className="gp-skel" style={{ height: 320 }} />; },
-});
 
 type Props = { selectedDate: string; systemStatsDate: string; pgcbGasTotal: number };
 
@@ -76,9 +70,7 @@ export function MacroReserves({ selectedDate, systemStatsDate, pgcbGasTotal }: P
       <Replacement model={model} />
       <Limits model={model} />
       <Sources model={model} />
-      <div className="gp-host grid-explorer gpm-hosted">
-        <HostedFieldEvidence selectedDate={selectedDate} systemStatsDate={systemStatsDate} pgcbGasTotal={pgcbGasTotal} embedded />
-      </div>
+      <MacroEvidence selectedDate={selectedDate} systemStatsDate={systemStatsDate} pgcbGasTotal={pgcbGasTotal} />
     </>
   );
 }
@@ -105,7 +97,7 @@ function Hero({ model }: { model: ReserveModel }) {
       <div className="gp-stats">
         {cells.map((c) => (
           <div key={c.l} className={`gp-stat${c.tone ? ` gpm-is-${c.tone}` : ''}`}>
-            <div className="gp-stat__l">{c.l}<Prov kind="D" /></div>
+            <div className="gp-stat__l">{c.l.slice(0, c.l.lastIndexOf(' ') + 1)}<span style={{ whiteSpace: 'nowrap' }}>{c.l.slice(c.l.lastIndexOf(' ') + 1)}<Prov kind="D" /></span></div>
             <div className="gp-stat__v"><b>{c.v}{c.u === '%' ? '%' : ''}</b>{c.u && c.u !== '%' && <small>{c.u}</small>}</div>
             <div className="gp-stat__d">{c.d}</div>
           </div>

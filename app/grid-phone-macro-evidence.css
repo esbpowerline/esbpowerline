@@ -1,0 +1,39 @@
+/* Field evidence on Gas reserves (components/news/grid-phone/macro-evidence.tsx). Only --gp-* tokens. */
+
+.gp .gpe-meta { margin: 0; font-size: 11px; line-height: 1.45; color: var(--gp-muted); font-variant-numeric: tabular-nums; }
+.gp .gpe-seg { margin-top: 6px; }
+.gp .gpe-seg button { font-size: 12px; padding: 0 4px; min-height: 32px; }
+.gp .gpe-latest { display: inline-block; padding: 3px 8px; border-radius: 999px; background: var(--gp-goodC, var(--gp-surface2)); color: var(--gp-good); font-size: 10px; font-weight: 700; }
+.gp .gpe-since { font-size: 10px; font-weight: 700; color: var(--gp-primary); vertical-align: super; }
+.gp .gpe-note { margin: 10px 0 0; font-size: 11px; line-height: 1.5; color: var(--gp-muted); }
+.gp .gpe-note strong { color: var(--gp-on); font-weight: 600; }
+.gp .gpe-gap { margin-top: 12px; }
+.gp .gpe-up { color: var(--gp-good); font-weight: 700; }
+.gp .gpe-down { color: var(--gp-bad); font-weight: 700; }
+.gp .gpe-on { background: var(--gp-primaryC); color: var(--gp-primary); }
+.gp .gpe-link { border: 0; background: none; padding: 0; color: var(--gp-primary); font-weight: 600; font-size: 11px; text-decoration: underline; }
+.gp .gpe-ctx { margin-top: 4px; }
+.gp .gpe-spark { stroke: var(--gp-primary); vertical-align: middle; }
+.gp .gpe-files { display: grid; gap: 6px; font-size: 12px; }
+.gp .gpe-files a { color: var(--gp-primary); word-break: break-all; }
+
+/* Field lifelines: ruled rows, one per field, inside the card. */
+.gp .gpe-fields { display: grid; margin-top: 10px; border-top: 1px solid var(--gp-line); }
+.gp .gpe-field { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "n v" "s s" "d d" "e e"; gap: 2px 10px; align-items: baseline; padding: 10px 0; border: 0; border-bottom: 1px solid var(--gp-line); background: none; text-align: left; color: var(--gp-on); }
+.gp .gpe-field:last-child { border-bottom: 0; }
+.gp .gpe-field__n { grid-area: n; font-size: 13px; font-weight: 600; display: inline-flex; gap: 6px; align-items: center; }
+.gp .gpe-field__n em { font-style: normal; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: var(--gp-surface2); color: var(--gp-muted); }
+.gp .gpe-field__n em.is-bad { color: var(--gp-bad); }
+.gp .gpe-field > b { grid-area: v; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.gp .gpe-field > b small { font-size: 10px; font-weight: 500; color: var(--gp-muted); }
+.gp .gpe-field__s { grid-area: s; width: 100%; margin: 4px 0 2px; }
+.gp .gpe-field__d { font-size: 11px; color: var(--gp-muted); font-variant-numeric: tabular-nums; grid-column: 1 / -1; }
+.gp .gpe-field__d.gpe-down { font-weight: 600; }
+
+/* Compare: a four-column ruled grid. */
+.gp .gpe-cmp { margin: 12px 0 0; font-size: 12px; font-variant-numeric: tabular-nums; }
+.gp .gpe-cmp span { display: block; font-size: 11px; color: var(--gp-muted); }
+.gp .gpe-cmpgrid { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 0 12px; margin-top: 10px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.gp .gpe-cmpgrid > * { padding: 8px 0; border-bottom: 1px solid var(--gp-line); text-align: right; white-space: nowrap; }
+.gp .gpe-cmpgrid > :nth-child(-n+4) { font-size: 10px; font-weight: 700; color: var(--gp-faint); padding-top: 0; }
+.gp .gpe-cmpgrid__l { text-align: left !important; font-weight: 600; white-space: normal !important; }
