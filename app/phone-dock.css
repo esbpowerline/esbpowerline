@@ -1,0 +1,74 @@
+/*
+ * Phone dock for the public site (2026-11-12). Phone only: nothing here
+ * applies from 768px up, where the element is not displayed at all.
+ *
+ * Geometry and palette are the Grid Explorer phone app's dock (`.gp-nav` in
+ * app/grid-phone-look-cards.css) so the newsroom and the explorer read as one
+ * app. The `--gp-*` names are re-declared here because the kit scopes them to
+ * `.gp`, which only exists inside /grid-explorer. If the kit's dock palette is
+ * retuned, retune these three blocks with it.
+ */
+.hp-dock { display: none; }
+
+@media (max-width: 767px) {
+  .hp-dock, main.home-page {
+    --gp-bg: #f1f3f7; --gp-surface: #ffffff; --gp-surface2: #eef0f5; --gp-line: #e3e6ed;
+    --gp-on: #10131a; --gp-muted: #5b6270; --gp-faint: #8a909c;
+    --gp-card-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 10px 24px -16px rgba(16, 24, 40, .18);
+    --gp-dock: #10131a; --gp-dock-fg: rgba(255, 255, 255, .64); --gp-dock-on: #ffffff; --gp-dock-on-fg: #10131a;
+    --gp-dock-shadow: 0 18px 36px -14px rgba(10, 14, 22, .55);
+  }
+  html.theme-dark :is(.hp-dock, main.home-page), html[data-site-theme='dark'] :is(.hp-dock, main.home-page) {
+    --gp-bg: #0b0e14; --gp-surface: #151922; --gp-surface2: #1f2430; --gp-line: #272c38;
+    --gp-on: #eef0f4; --gp-muted: #a1a7b3; --gp-faint: #767c88;
+    --gp-card-shadow: 0 0 0 1px rgba(255, 255, 255, .05);
+    --gp-dock: #232834; --gp-dock-fg: rgba(238, 240, 244, .62); --gp-dock-on: #eef0f4; --gp-dock-on-fg: #0b0e14;
+    --gp-dock-shadow: 0 18px 36px -14px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .08);
+  }
+  html.theme-midnight :is(.hp-dock, main.home-page), html[data-site-theme='midnight'] :is(.hp-dock, main.home-page) {
+    --gp-bg: #060a16; --gp-surface: #0f1628; --gp-surface2: #19223a; --gp-line: #222c46;
+    --gp-on: #edf1fa; --gp-muted: #9ba6bf; --gp-faint: #6c7791;
+    --gp-card-shadow: 0 0 0 1px rgba(255, 255, 255, .05);
+    --gp-dock: #1a2440; --gp-dock-fg: rgba(237, 241, 250, .62); --gp-dock-on: #edf1fa; --gp-dock-on-fg: #060a16;
+    --gp-dock-shadow: 0 18px 36px -14px rgba(0, 0, 0, .85), 0 0 0 1px rgba(255, 255, 255, .08);
+  }
+
+  .hp-dock {
+    position: fixed; z-index: 120;
+    left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px);
+    display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 6px; border-radius: 999px;
+    background: var(--gp-dock); box-shadow: var(--gp-dock-shadow);
+    font-family: inherit;
+  }
+  .hp-dock > :is(a, button) {
+    height: 52px; min-width: 0; padding: 0; border: 0; background: none; border-radius: 999px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    font-size: 11px; font-weight: 600; letter-spacing: .01em; line-height: 1.2; white-space: nowrap;
+    color: var(--gp-dock-fg); text-decoration: none; -webkit-tap-highlight-color: transparent;
+  }
+  .hp-dock__ind { width: 48px; height: 28px; border-radius: 999px; display: grid; place-items: center; transition: background .18s; }
+  .hp-dock__ind svg { width: 20px; height: 20px; stroke-width: 1.9; }
+  .hp-dock > .is-on { color: var(--gp-dock-on); }
+  .hp-dock > .is-on .hp-dock__ind { background: var(--gp-dock-on); color: var(--gp-dock-on-fg); }
+  .hp-dock > :is(a, button):focus-visible { outline: 2px solid var(--gp-dock-on); outline-offset: -2px; }
+
+  /* The commodities ticker was pinned to the bottom edge on phones. A dock and
+     a ticker cannot both own that edge, so wherever the dock is present the
+     ticker goes back to where it sits on desktop: in the masthead, under the
+     banner. Nothing is removed; it is the same strip, one screen up. */
+  body:has(.hp-dock) .public-market-strip {
+    position: static !important; box-shadow: none !important; border-top: 0 !important;
+  }
+  /* Room for the dock at the end of every page it floats over. */
+  body:has(.hp-dock) { padding-bottom: calc(env(safe-area-inset-bottom) + 88px) !important; }
+  /* The navbar's menu sheet opens under the dock: let its last row clear it. */
+  body:has(.hp-dock) #mobile-categories-panel {
+    max-height: calc(100dvh - 3.5rem) !important; padding-bottom: calc(env(safe-area-inset-bottom) + 96px) !important;
+  }
+}
+
+@media (max-width: 359px) {
+  .hp-dock { left: 8px; right: 8px; }
+  .hp-dock__ind { width: 40px; }
+}

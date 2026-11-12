@@ -401,6 +401,19 @@ export function HomePowerSector({
 
   const categories = categoriesWithArticles.map(({ articles, ...cat }) => cat);
 
+  /**
+   * Phone only (below 768px): the category rows are shown one at a time, picked
+   * from a row of pills, instead of ten rows stacked — at 390px the stack alone
+   * was ~4,300px of the page. Every row stays in the document; app/home-phone.css
+   * hides the unpicked ones under its phone media query and hides the pills
+   * everywhere else, so from 768px up this state changes nothing a reader sees.
+   * `null` means "the first row", which keeps the server render and the first
+   * client render identical.
+   */
+  const feedCategories = categoriesWithArticles.filter((cat) => cat.articles.length >= MIN_CATEGORY_ARTICLES);
+  const [phoneCategoryId, setPhoneCategoryId] = useState<string | null>(null);
+  const activePhoneCategoryId = phoneCategoryId ?? (feedCategories[0] ? String(feedCategories[0].id) : null);
+
   return (
     <section className="home-block" aria-labelledby="home-power-sector-title">
       <div className="home-section-head flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
@@ -444,7 +457,7 @@ export function HomePowerSector({
       </div>
 
       {/* Mobile Inline Ad block for 007.png */}
-      <div className="block md:hidden mb-12">
+      <div className="hp-inline-ad block md:hidden mb-12">
         <Link prefetch={false} href="/contact#advertising" className="rounded-2xl overflow-hidden relative group w-full block">
           <Image src="/images/promotions/007.png" alt="Advertisement" width={2184} height={480} sizes="(max-width: 767px) 100vw, 0px" className="w-full h-auto object-cover block" />
         </Link>
@@ -452,13 +465,33 @@ export function HomePowerSector({
 
       {/* 10 Vertical Categories Section */}
       <div className="category-feed-container border-t border-border/40">
-        {categoriesWithArticles
-          .filter((cat) => cat.articles.length >= MIN_CATEGORY_ARTICLES)
-          .map((cat, index) => {
+        <div className="hp-cat-pills" role="group" aria-label="News categories">
+          {feedCategories.map((cat) => {
+            const on = String(cat.id) === activePhoneCategoryId;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                className={on ? 'is-on' : undefined}
+                aria-pressed={on}
+                onClick={(event) => {
+                  setPhoneCategoryId(String(cat.id));
+                  // Keep the picked pill in view: the row scrolls sideways.
+                  event.currentTarget.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+                }}
+              >
+                <i aria-hidden style={{ backgroundColor: cat.color || '#3b82f6' }} />
+                {cat.name}
+                <span>{cat.articles.length}</span>
+              </button>
+            );
+          })}
+        </div>
+        {feedCategories.map((cat, index) => {
             const IconComponent = (cat.icon && IconMap[cat.icon]) || Zap;
             return (
               <React.Fragment key={cat.id}>
-                <div className="category-section">
+                <div className="category-section" data-hp-on={String(cat.id) === activePhoneCategoryId ? '1' : undefined}>
                   <div className="category-section__header flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div

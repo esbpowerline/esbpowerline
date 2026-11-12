@@ -1,4 +1,6 @@
 import { getServerSiteLocale } from '@/lib/locale-server';
+// Phone layout (below 768px only). Every rule in it is inside one media query.
+import '@/app/home-phone.css';
 import {
   DeferredHomeBottomRow as HomeBottomRow,
   DeferredHomePowerSector as HomePowerSector,

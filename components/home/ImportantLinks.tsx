@@ -176,7 +176,7 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
   };
 
   return (
-    <section className="mt-8 rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden" aria-labelledby="important-links-title">
+    <section className="hp-card hp-links mt-8 rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden" aria-labelledby="important-links-title">
       <div className="p-4 md:p-5">
         <header className="mb-4">
           <div className="flex items-center gap-2">
@@ -244,7 +244,7 @@ export function ImportantLinks({ data = DEFAULT_IMPORTANT_LINKS }: { data?: Impo
         </div>
 
         {/* Tier 4 — the energy value chain: Fuel → Generation → Transmission → Distribution */}
-        <div className="mt-5 flex flex-col gap-5">
+        <div className="hp-links__chain mt-5 flex flex-col gap-5">
           {sections.map((section) => (
             <div key={section.title}>
               <SectionHeader title={section.title} tint={section.tint} />

@@ -60,7 +60,7 @@ export function PolicyFramework({
   const full = layout === 'full';
   return (
     <section
-      className={`${full ? 'mt-10' : 'mt-8'} rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden`}
+      className={`hp-card hp-policy ${full ? 'mt-10' : 'mt-8'} rounded-2xl border border-border/60 bg-card shadow-sm overflow-hidden`}
       aria-labelledby="policy-framework-title"
     >
       <div className={full ? 'p-5 md:p-6' : 'p-4 md:p-5'}>
@@ -74,7 +74,7 @@ export function PolicyFramework({
           </div>
         </header>
 
-        <div className={full ? 'grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4' : 'flex flex-col gap-5'}>
+        <div className={`hp-policy__groups ${full ? 'grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4' : 'flex flex-col gap-5'}`}>
           {POLICY_GROUPS.map((group) => {
             const Icon = group.icon;
             const items = policies.filter((p) => p.group === group.key && p.featured);

@@ -25,6 +25,7 @@ import { MemberAuthButton } from '@/components/members/MemberAuthButton';
 import { MemberNavMenuLinks } from '@/components/members/MemberNavMenuLinks';
 import { useLocale } from '@/components/shared/LocaleProvider';
 import { SiteThemeToggle } from '@/components/shared/SiteThemeToggle';
+import { PhoneDock } from '@/components/shared/PhoneDock';
 
 type NavCategory = {
   name: string;
@@ -515,6 +516,15 @@ export function PublicNavbar({
           </>
         )}
       </nav>
+
+      {/* Phone only (hidden from 768px by app/phone-dock.css). A sibling of the
+          nav, not a child: the nav is sticky with its own stacking context, and
+          the dock has to float over the menu sheet the nav opens. */}
+      <PhoneDock
+        menuOpen={mobileOpen}
+        onMenuToggle={() => setMobileOpen((open) => !open)}
+        onHomeClick={(event) => onHomeClick(event, () => setMobileOpen(false))}
+      />
     </PublicHrefProvider>
   );
 }
