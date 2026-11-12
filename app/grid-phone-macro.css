@@ -3,7 +3,7 @@
    from the desktop palette in the components. */
 
 /* Sub-tab pills: one swipeable row that stays put while the page scrolls. */
-.gp .gpm-tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 6px; overflow-x: auto; margin: 0 -16px; padding: 6px 16px 8px; scroll-padding: 0 16px; scrollbar-width: none; background: var(--gp-bg); }
+.gp .gpm-tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 6px; overflow-x: auto; margin: 0 -8px; padding: 6px 8px 8px; scroll-padding: 0 16px; scrollbar-width: none; background: var(--gp-bg); }
 .gp .gpm-tabs::-webkit-scrollbar { display: none; }
 .gp .gpm-tabs button { flex: none; height: 34px; padding: 0 13px; border-radius: 999px; border: 1px solid var(--gp-line); background: var(--gp-surface); color: var(--gp-muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
 .gp .gpm-tabs button.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }

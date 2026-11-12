@@ -358,3 +358,11 @@ html.theme-midnight .gp, html[data-site-theme='midnight'] .gp {
 .gp-main { padding-bottom: calc(env(safe-area-inset-bottom) + 84px); }
 
 .gp-icon--home, .gp-icon--home:visited { color: var(--gp-on); }
+
+/* Side gutter 16 → 8, as on the homepage (2026-11-12). The day strip and the
+   section strip move with it so their first pill lines up with the card edge. */
+.gp-main { padding-left: 8px; padding-right: 8px; }
+.gp-chips { padding-left: 8px; padding-right: 8px; scroll-padding: 0 8px; }
+.gp .gp-secs { padding-left: 8px; padding-right: 8px; scroll-padding: 0 8px; }
+.gp-seg--sticky::before { left: -8px; right: -8px; }
+.gp-bar { padding-left: 0; padding-right: 0; }

@@ -30,7 +30,7 @@
 @media (max-width: 767px) {
   /* ── page ─────────────────────────────────────────────────────────────── */
   main.home-page { background: var(--gp-bg); overflow-x: clip; padding-bottom: 8px; }
-  main.home-page > .container { padding-left: 16px !important; padding-right: 16px !important; max-width: none !important; }
+  main.home-page > .container { padding-left: 8px !important; padding-right: 8px !important; max-width: none !important; }
   main.home-page > .home-hero-band { padding-top: 12px !important; padding-bottom: 0 !important; margin: 0 !important; }
   main.home-page > .home-editorial { padding-top: 0 !important; margin-top: 12px !important; }
   main.home-page .home-hero-band__grid { display: flex !important; flex-direction: column; gap: 12px !important; }
@@ -102,7 +102,7 @@
   }
   main.home-page :is(.home-editorial__interview-grid, .home-article-grid, .category-grid-track, .category-ad-block-3, .hp-links__chain, .hp-policy__groups)::-webkit-scrollbar { display: none; }
   main.home-page :is(.home-editorial__interview-grid, .home-article-grid, .category-grid-track, .category-ad-block-3) {
-    margin: 0 -16px !important; width: calc(100% + 32px) !important; max-width: none !important; padding: 2px 16px 12px !important; scroll-padding: 0 16px; gap: 12px !important; align-items: stretch !important;
+    margin: 0 -8px !important; width: calc(100% + 16px) !important; max-width: none !important; padding: 2px 8px 12px !important; scroll-padding: 0 8px; gap: 12px !important; align-items: stretch !important;
   }
 
   /* ── 1. hero: lead story, then two compact rows ───────────────────────── */
@@ -198,7 +198,7 @@
      stacked rows were ~4,300px; every one of them is a tap away instead. */
   main.home-page .hp-cat-pills {
     display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; overscroll-behavior-x: contain;
-    margin: 24px -16px 0; padding: 2px 16px 4px; scroll-padding: 0 16px;
+    margin: 24px -8px 0; padding: 2px 8px 4px; scroll-padding: 0 8px;
   }
   main.home-page .hp-cat-pills::-webkit-scrollbar { display: none; }
   main.home-page .hp-cat-pills > button {
@@ -553,3 +553,9 @@
 
 /* round 5: editorial already sits 12 under the hero band; +4 = the 16 section step. */
 @media (max-width: 767px) { main.home-page .home-editorial__interviews { margin-top: 4px !important; } }
+
+/* Side gutter 16 → 8 (owner, 2026-11-12: shrink the gap between the cards and
+   the screen edge "for all the cards, it'll make the site feel premium").
+   Cards keep their 16px inner padding; only the page margin narrows, so a
+   390px phone gives each card 374px instead of 358px. Rails bleed by the same
+   8px so they still run edge to edge. */
