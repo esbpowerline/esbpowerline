@@ -145,3 +145,76 @@ html.theme-dark .gp[data-look='cards'], html.theme-midnight .gp[data-look='cards
 .gp[data-look='cards'] .gp-tabs button { height: 34px; }
 .gp[data-look='cards'] .gp-plot { margin-top: 12px; }
 .gp[data-look='cards'] .gp-sec__foot { margin-top: 12px; padding-top: 10px; }
+
+/* ── chosen look (2026-11-12): B is the app; the tab bar is C's floating
+   dock, which the owner singled out. Three themes, each with its own dock. */
+.gp[data-look='cards'] { --gp-dock: #10131a; --gp-dock-fg: rgba(255, 255, 255, .64); --gp-dock-on: #ffffff; --gp-dock-on-fg: #10131a; --gp-dock-shadow: 0 18px 36px -14px rgba(10, 14, 22, .55); }
+html.theme-dark .gp[data-look='cards'], html[data-site-theme='dark'] .gp[data-look='cards'] { --gp-dock: #232834; --gp-dock-fg: rgba(238, 240, 244, .62); --gp-dock-on: #eef0f4; --gp-dock-on-fg: #0b0e14; --gp-dock-shadow: 0 18px 36px -14px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .08); }
+html.theme-midnight .gp[data-look='cards'], html[data-site-theme='midnight'] .gp[data-look='cards'] {
+  --gp-bg: #060a16; --gp-surface: #0f1628; --gp-surface2: #19223a; --gp-line: #222c46; --gp-on: #edf1fa; --gp-muted: #9ba6bf; --gp-faint: #6c7791;
+  --gp-dock: #1a2440; --gp-dock-fg: rgba(237, 241, 250, .62); --gp-dock-on: #edf1fa; --gp-dock-on-fg: #060a16; --gp-dock-shadow: 0 18px 36px -14px rgba(0, 0, 0, .85), 0 0 0 1px rgba(255, 255, 255, .08);
+}
+.gp[data-look='cards'] .gp-nav { left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px); padding: 6px; border: 0; border-radius: 999px; background: var(--gp-dock); box-shadow: var(--gp-dock-shadow); }
+.gp[data-look='cards'] .gp-nav button { height: 52px; gap: 2px; font-size: 11px; font-weight: 600; letter-spacing: .01em; color: var(--gp-dock-fg); border-radius: 999px; }
+.gp[data-look='cards'] .gp-nav__ind { width: 48px; height: 28px; }
+.gp[data-look='cards'] .gp-nav button.is-on { color: var(--gp-dock-on); }
+.gp[data-look='cards'] .gp-nav button.is-on .gp-nav__ind { background: var(--gp-dock-on); color: var(--gp-dock-on-fg); }
+.gp[data-look='cards'] .gp-nav button.is-empty .gp-nav__ind::after { box-shadow: 0 0 0 2px var(--gp-dock); }
+.gp[data-look='cards'] .gp-main { padding-bottom: calc(env(safe-area-inset-bottom) + 104px); }
+.gp[data-look='cards'] .gp-secs button.is-empty { border-style: dashed; }
+
+/* ── section-by-section review (2026-11-12), all eleven sections ───────── */
+
+/* One typeface. Titles written as h3/h4 were picking up the site's display
+   face while div titles stayed Inter - two fonts for one role. */
+.gp[data-look='cards'] :is(h1, .gp[data-look='cards'] h2, .gp[data-look='cards'] h3, .gp[data-look='cards'] h4, .gp[data-look='cards'] h5, .gp[data-look='cards'] h6) { font-family: inherit; letter-spacing: -0.015em; }
+.gp[data-look='cards'] .gp-sec__title { font-weight: 700; }
+.gp[data-look='cards'] .gp-sec__desc { font-size: 13px; line-height: 1.45; color: var(--gp-muted); }
+
+/* Stat tiles: the ellipsis cut "Evening peak gener...", which dropped a word
+   the figure needs. Labels wrap again, and each row of tiles shares its
+   label / figure / note tracks (subgrid), so figures sit on one baseline
+   without reserving space where no label wraps. */
+.gp[data-look='cards'] .gp-stats:not(.gp-stats--3) > * { display: grid; grid-template-rows: subgrid; grid-row: span 3; row-gap: 0; align-content: start; }
+.gp[data-look='cards'] .gp-stats:not(.gp-stats--3) .gp-stat__l { white-space: normal; overflow: visible; text-overflow: clip; font-weight: 500; line-height: 1.3; }
+.gp[data-look='cards'] .gp-stat__v { margin-top: 4px; align-self: end; }
+.gp[data-look='cards'] .gp-stat__v b { font-weight: 700; }
+.gp[data-look='cards'] .gp-stat__d { align-self: start; }
+
+/* Folded prose: a clean two-line clamp. The fade mask let the P/D marks of
+   the hidden lines ghost through and read as a rendering fault. */
+.gp[data-look='cards'] [data-long='1']:not([data-open='1']) { -webkit-mask-image: none; mask-image: none; max-height: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+
+/* Rows: the right-hand note may take two lines so the left-hand detail does
+   not have to take three. */
+.gp[data-look='cards'] .gp-row__val small { white-space: normal; max-width: 11.5em; margin-left: auto; line-height: 1.3; }
+.gp[data-look='cards'] .gp-row__name { font-weight: 550; }
+.gp[data-look='cards'] .gp-row__val b { font-weight: 650; }
+
+/* Legends of four or more: two even columns instead of a ragged wrap. */
+.gp[data-look='cards'] .gp-legend:has(> :nth-child(4)) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 12px; align-items: start; }
+.gp[data-look='cards'] .gp-legend span, .gp[data-look='cards'] .gp-legend button { text-align: left; line-height: 1.3; }
+
+/* Text-only "how to read" links become the same pill every other secondary
+   action uses. */
+.gp[data-look='cards'] .gz-info { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; margin-top: 12px; padding: 0 16px; border: 0; border-radius: 999px; background: var(--gp-surface2); color: var(--gp-on); font-size: 13px; font-weight: 600; }
+
+/* Hosted desktop sections (Technical Info, Macro Trends, Time Machine): the
+   desktop components render inside the app, so they are dressed in the same
+   card, type floor and pill controls rather than left in desktop clothes. */
+.gp[data-look='cards'] .gp-host { font-size: 13px; line-height: 1.5; color: var(--gp-on); }
+.gp[data-look='cards'] .gp-host :is(p, .gp[data-look='cards'] li, .gp[data-look='cards'] span, .gp[data-look='cards'] div, .gp[data-look='cards'] td, .gp[data-look='cards'] th, .gp[data-look='cards'] label, .gp[data-look='cards'] button, .gp[data-look='cards'] a, .gp[data-look='cards'] small) { font-size: max(1em, 11px); }
+.gp[data-look='cards'] .gp-host :is(.text-\[7px\], .gp[data-look='cards'] .text-\[8px\], .gp[data-look='cards'] .text-\[9px\], .gp[data-look='cards'] .text-\[10px\], .gp[data-look='cards'] .text-\[10\.5px\], .gp[data-look='cards'] .text-\[11px\]) { font-size: 11px !important; line-height: 1.4; }
+.gp[data-look='cards'] .gp-host .text-xs { font-size: 12px !important; line-height: 1.45; }
+.gp[data-look='cards'] .gp-host h2 { font-size: 17px !important; font-weight: 700; line-height: 1.25; }
+.gp[data-look='cards'] .gp-host :is(h3, .gp[data-look='cards'] h4) { font-size: 15px !important; font-weight: 650; line-height: 1.3; }
+.gp[data-look='cards'] .gp-host :is(.rounded-xl, .gp[data-look='cards'] .rounded-2xl, .gp[data-look='cards'] .rounded-lg) { border-radius: 20px; }
+.gp[data-look='cards'] .gp-host :is(.rounded-xl, .gp[data-look='cards'] .rounded-2xl, .gp[data-look='cards'] .rounded-lg) :is(.rounded-xl, .gp[data-look='cards'] .rounded-2xl, .gp[data-look='cards'] .rounded-lg) { border-radius: 12px; }
+.gp[data-look='cards'] .gp-host div:has(> button[data-active]) { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 10px; scrollbar-width: none; border: 0; }
+.gp[data-look='cards'] .gp-host div:has(> button[data-active])::-webkit-scrollbar { display: none; }
+.gp[data-look='cards'] .gp-host div:has(> button[data-active]) > button { flex: none; height: 36px; padding: 0 14px; border-radius: 999px !important; border: 1px solid var(--gp-line); background: var(--gp-surface); color: var(--gp-muted); font-size: 13px !important; font-weight: 600; white-space: nowrap; box-shadow: none; }
+.gp[data-look='cards'] .gp-host div:has(> button[data-active]) > button[data-active='true'] { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
+.gp[data-look='cards'] .gp-host select { min-height: 44px; border-radius: 12px; font-size: 15px !important; font-weight: 600; }
+.gp[data-look='cards'] .gp-host table { font-size: 12px; }
+
+.gp[data-look='cards'] .gp-row__sub, .gp[data-look='cards'] .gp-stat__d, .gp[data-look='cards'] .gp-sec__desc { text-wrap: pretty; }

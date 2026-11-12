@@ -34,11 +34,11 @@ export function HistoryScreen({ initialView = 'trends', initialMacro = 'overview
 
   return (
     <div className="gp-screen">
-      <div className="gp-seg gp-seg--sticky" role="tablist" aria-label="History view">
+      {!controlled && <div className="gp-seg gp-seg--sticky" role="tablist" aria-label="History view">
         {([['trends', 'Trends'], ['macro', 'Macro'], ['machine', 'Time machine']] as const).map(([id, l]) => (
           <button key={id} role="tab" aria-selected={view === id} className={view === id ? 'is-on' : ''} onClick={() => setView(id)}>{l}</button>
         ))}
-      </div>
+      </div>}
       {view === 'trends' && <TrendsScreen />}
       {view === 'macro' && (
         <div className="gp-host grid-explorer">

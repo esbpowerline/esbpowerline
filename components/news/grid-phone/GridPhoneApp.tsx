@@ -14,9 +14,7 @@
 
 import '@/app/grid-phone.css';
 import '@/app/grid-phone-polish.css';
-import '@/app/grid-phone-look-editorial.scoped.css';
 import '@/app/grid-phone-look-cards.scoped.css';
-import '@/app/grid-phone-look-ink.scoped.css';
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { availableDates, getLatestAvailableDate } from '@/lib/data/grid/available-dates';
@@ -55,25 +53,35 @@ const NEEDS: Record<PhoneTab, { curve?: boolean; plants?: boolean; gas?: boolean
   history: { monthly: true },
 };
 
-const SECTIONS: { label: string; tab: PhoneTab; sub?: string }[] = [
-  { label: 'Overview', tab: 'today' },
-  { label: 'Regional Grid', tab: 'grid', sub: 'zones' },
-  { label: 'Gas & LNG Supply', tab: 'gas' },
-  { label: 'Generation & Cost', tab: 'supply', sub: 'fuel' },
-  { label: 'Power Stations', tab: 'plants' },
-  { label: 'C/B Imports', tab: 'supply', sub: 'imports' },
-  { label: 'Renewables', tab: 'supply', sub: 'renewables' },
-  { label: 'Macro Trends', tab: 'history', sub: 'macro' },
-  { label: 'Technical Info', tab: 'grid', sub: 'network' },
-  { label: 'Time Machine', tab: 'history', sub: 'machine' },
+type Group = 'overview' | 'supply' | 'grid' | 'gas' | 'trends';
+
+/**
+ * Every desktop tab, under the bottom-bar group it lives in. The bar's five
+ * groups between them reach all ten desktop tabs (owner, 2026-11-12: "from
+ * these 5 navigation I can literally browse the entire grid-explorer"); the
+ * strip under the day chips lists the active group's own sections by their
+ * desktop names. `avail` is the desktop tab id tab-availability.ts reports on.
+ */
+const SECTIONS: { label: string; group: Group; tab: PhoneTab; sub?: string; avail?: string }[] = [
+  { label: 'Overview', group: 'overview', tab: 'today', avail: 'overview' },
+  { label: 'Generation & Cost', group: 'supply', tab: 'supply', sub: 'fuel', avail: 'gen' },
+  { label: 'Power Stations', group: 'supply', tab: 'plants', avail: 'plants' },
+  { label: 'C/B Imports', group: 'supply', tab: 'supply', sub: 'imports', avail: 'imports' },
+  { label: 'Renewables', group: 'supply', tab: 'supply', sub: 'renewables', avail: 'renewables' },
+  { label: 'Regional Grid', group: 'grid', tab: 'grid', sub: 'zones', avail: 'regional' },
+  { label: 'Technical Info', group: 'grid', tab: 'grid', sub: 'network', avail: 'transmission' },
+  { label: 'Gas & LNG Supply', group: 'gas', tab: 'gas', avail: 'gas' },
+  { label: 'Recent Trends', group: 'trends', tab: 'history', sub: 'trends' },
+  { label: 'Macro Trends', group: 'trends', tab: 'history', sub: 'macro' },
+  { label: 'Time Machine', group: 'trends', tab: 'history', sub: 'machine' },
 ];
 
-const TABS: { id: PhoneTab; label: string; icon: ReactNode }[] = [
-  { id: 'today', label: 'Today', icon: <path d="M3 17l5-6 4 3 6-8 3 4" /> },
+const TABS: { id: Group; label: string; icon: ReactNode }[] = [
+  { id: 'overview', label: 'Overview', icon: <path d="M3 17l5-6 4 3 6-8 3 4" /> },
   { id: 'supply', label: 'Supply', icon: <path d="M13 2L4 14h7l-1 8 9-12h-7z" /> },
   { id: 'grid', label: 'Grid', icon: <><circle cx="6" cy="6" r="2.2" /><circle cx="18" cy="6" r="2.2" /><circle cx="12" cy="18" r="2.2" /><path d="M8 6h8M7 8l4 8M17 8l-4 8" /></> },
-  { id: 'plants', label: 'Plants', icon: <path d="M3 21V10l5 3V10l5 3V6l8-3v18z" /> },
   { id: 'gas', label: 'Gas', icon: <path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z" /> },
+  { id: 'trends', label: 'Trends', icon: <><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></> },
 ];
 
 /** Desktop ?tab= values, so a shared desktop link opens the right phone screen. */
@@ -160,13 +168,6 @@ export function GridPhoneApp({
 
   const mainRef = useRef<HTMLDivElement | null>(null);
 
-  // TRIAL (2026-11-12): three looks in one bundle so the owner can compare them
-  // on the phone. Remove the switcher and two of the sheets once one is chosen.
-  const [look, setLook] = useState<'editorial' | 'cards' | 'ink'>('cards');
-  useEffect(() => {
-    try { const v = localStorage.getItem('gp-look'); if (v === 'editorial' || v === 'cards' || v === 'ink') setLook(v); } catch {}
-  }, []);
-  const pickLook = (v: 'editorial' | 'cards' | 'ink') => { setLook(v); try { localStorage.setItem('gp-look', v); } catch {} };
 
   // Long explanatory paragraphs fold to two lines; a tap opens them. Nothing is
   // removed - the owner asked (2026-11-12) for explanations to be cut down or
@@ -238,7 +239,20 @@ export function GridPhoneApp({
     return older[older.length - 1] ?? null;
   }, [allowedHeld, heldDates]);
   const avail = useMemo(() => (day.data ? tabAvailability(day.data) : null), [day.data]);
-  const NAV_TAB: Partial<Record<PhoneTab, string>> = { today: 'overview', supply: 'gen', grid: 'regional', plants: 'plants', gas: 'gas' };
+  const subOf = (t: PhoneTab) => (t === 'supply' ? supplyView : t === 'grid' ? gridView : t === 'history' ? histView : undefined);
+  const section = SECTIONS.find((x) => x.tab === tab && (x.sub === undefined || x.sub === subOf(tab))) ?? SECTIONS[0];
+  const groupSections = SECTIONS.filter((x) => x.group === section.group);
+  const goSection = (x: (typeof SECTIONS)[number]) => {
+    setTab(x.tab);
+    if (x.tab === 'supply') setSupplyView(x.sub as typeof supplyView);
+    if (x.tab === 'grid') setGridView(x.sub as typeof gridView);
+    if (x.tab === 'history') setHistView(x.sub as typeof histView);
+    mainRef.current?.scrollTo({ top: 0 });
+  };
+  const emptyReason = (x: (typeof SECTIONS)[number]) => {
+    const a = avail && x.avail ? (avail as Record<string, { hasData?: boolean; reason?: string } | undefined>)[x.avail] : undefined;
+    return a?.hasData === false ? a.reason ?? 'Not published for this day' : null;
+  };
   const weekData = weekDays.data ?? [];
   const prevDay = weekData.length > 1 ? weekData[weekData.length - 2] : null;
 
@@ -398,12 +412,7 @@ export function GridPhoneApp({
 
   return (
     <SheetContext.Provider value={openSheet}>
-      <div className="gp" data-look={look} role="application" aria-label="Power Grid Explorer">
-        <div className="gp-looks" aria-label="Trial look">
-          {(['editorial', 'cards', 'ink'] as const).map((v, i) => (
-            <button key={v} type="button" className={look === v ? 'is-on' : ''} onClick={() => pickLook(v)} aria-label={`Look ${v}`}>{'ABC'[i]}</button>
-          ))}
-        </div>
+      <div className="gp" data-look="cards" role="application" aria-label="Power Grid Explorer">
         <header className={`gp-bar${scrolled ? ' is-scrolled' : ''}`}>
           <div className="gp-bar__row">
             <button type="button" className="gp-icon" aria-label="Menu" onClick={openMenu}>
@@ -416,8 +425,8 @@ export function GridPhoneApp({
                 {current && newest ? <> · <em className="gp-badge">{backlogBadge(current, newest, pendingDay?.status ?? null).text}</em></> : null}
               </span>
             </div>
-            <button type="button" className={`gp-icon${tab === 'history' ? ' is-on' : ''}`} aria-label="History: trends, macro and the time machine" aria-pressed={tab === 'history'} onClick={() => setTab(tab === 'history' ? 'today' : 'history')}>
-              <Icon><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8" /><path d="M3 3v5h5M12 7v5l4 2" /></Icon>
+            <button type="button" className="gp-icon" aria-label="Older days" onClick={openCalendar}>
+              <Icon><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
             </button>
           </div>
           <div className="gp-chips" ref={chipsRef} role="tablist" aria-label="Day">
@@ -436,27 +445,16 @@ export function GridPhoneApp({
                 <b>Latest</b>
               </button>
             )}
-            <button className="gp-chip gp-chip--cal" aria-label="Older days" onClick={openCalendar}>
-              <Icon size={20}><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
-            </button>
           </div>
-          {/* Every desktop tab, by its desktop name and in desktop order. The
-              phone groups them under five thumb tabs, and the owner could not
-              find half of them (2026-11-12: "why don't I see all the menus we
-              have on the PC?"). The grouping stays; this names what is inside. */}
-          <nav className="gp-secs" aria-label="Sections" ref={secsRef}>
-            {SECTIONS.map((x) => {
-              const on = x.tab === tab && (x.tab === 'supply' ? x.sub === supplyView : x.tab === 'grid' ? x.sub === gridView : x.tab === 'history' ? x.sub === histView : true);
-              return (
-                <button key={x.label} type="button" className={on ? 'is-on' : ''} aria-current={on ? 'page' : undefined} onClick={() => {
-                  setTab(x.tab);
-                  if (x.tab === 'supply') setSupplyView(x.sub as typeof supplyView);
-                  if (x.tab === 'grid') setGridView(x.sub as typeof gridView);
-                  if (x.tab === 'history') setHistView(x.sub as typeof histView);
-                }}>{x.label}</button>
-              );
-            })}
-          </nav>
+          {/* The active group's sections, by their desktop names. A group of
+              one (Overview, Gas) needs no strip and gives the row back. */}
+          {groupSections.length > 1 && (
+            <nav className="gp-secs" aria-label={`${section.group} sections`} ref={secsRef}>
+              {groupSections.map((x) => (
+                <button key={x.label} type="button" className={`${x === section ? 'is-on' : ''}${emptyReason(x) ? ' is-empty' : ''}`} aria-current={x === section ? 'page' : undefined} title={emptyReason(x) ?? undefined} onClick={() => goSection(x)}>{x.label}</button>
+              ))}
+            </nav>
+          )}
         </header>
 
         <main ref={mainRef} className="gp-main" onScroll={(e) => setScrolled(e.currentTarget.scrollTop > 4)}>
@@ -485,19 +483,24 @@ export function GridPhoneApp({
         </main>
 
         <nav className="gp-nav" aria-label="Sections">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`${t.id === tab ? 'is-on' : ''}${avail && NAV_TAB[t.id] && avail[NAV_TAB[t.id] as keyof typeof avail]?.hasData === false ? ' is-empty' : ''}`}
-              aria-current={t.id === tab ? 'page' : undefined}
-              title={avail && NAV_TAB[t.id] ? avail[NAV_TAB[t.id] as keyof typeof avail]?.reason : undefined}
-              onClick={() => setTab(t.id)}
-            >
-              <span className="gp-nav__ind"><Icon>{t.icon}</Icon></span>
-              {t.label}
-            </button>
-          ))}
+          {TABS.map((t) => {
+            const kids = SECTIONS.filter((x) => x.group === t.id);
+            const on = t.id === section.group;
+            const empty = kids.every((x) => emptyReason(x));
+            return (
+              <button
+                key={t.id}
+                type="button"
+                className={`${on ? 'is-on' : ''}${empty ? ' is-empty' : ''}`}
+                aria-current={on ? 'page' : undefined}
+                title={empty ? emptyReason(kids[0]) ?? undefined : undefined}
+                onClick={() => (on ? mainRef.current?.scrollTo({ top: 0, behavior: 'smooth' }) : goSection(kids[0]))}
+              >
+                <span className="gp-nav__ind"><Icon>{t.icon}</Icon></span>
+                {t.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className={`gp-scrim${sheet ? ' is-on' : ''}`} onClick={closeSheet} />
