@@ -59,18 +59,7 @@
   .public-nav-bar__account-pill.public-nav-bar__pill-skeleton { background: transparent !important; }
   .public-nav-bar__account-pill:active { background: hsl(var(--muted)) !important; }
 
-  /* Account panel: anchored to the top-right corner under the bar, app-sheet corners. */
-  .account-menu__panel {
-    left: auto !important; right: 12px !important; transform: none !important;
-    width: min(320px, calc(100vw - 24px)) !important; border-radius: 20px !important;
-    border: 1px solid hsl(var(--border) / .6) !important; background: hsl(var(--popover)) !important;
-    animation: hp-acct-in .18s cubic-bezier(.23, 1, .32, 1) !important;
-  }
-  .account-menu__panel :is(.account-menu__option, .account-menu__action) { min-height: 48px; border-radius: 12px !important; }
-  .account-menu__panel .account-menu__title { font-size: 15px !important; font-weight: 700 !important; }
-  .account-menu__panel .account-menu__eyebrow { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .08em !important; }
-  .account-menu__panel .account-menu__option-label { font-size: 15px !important; font-weight: 600 !important; }
-  .account-menu__panel .account-menu__option-hint { font-size: 12px !important; }
+  /* Account panel: a bottom sheet on phones, styled in app/account-sheet-phone.css (round 6). */
 
   .public-nav-bar__search-pill, .hp-appbar__theme {
     display: inline-flex !important; align-items: center; justify-content: center;

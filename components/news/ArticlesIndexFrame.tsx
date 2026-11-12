@@ -1,3 +1,4 @@
+import '@/app/articles-phone.css';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
 import { HomeTrendingSection } from '@/components/home/HomeTrendingSection';

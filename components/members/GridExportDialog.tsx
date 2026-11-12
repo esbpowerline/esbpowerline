@@ -1,5 +1,6 @@
 'use client';
 
+import '@/app/grid-phone-export.css';
 import { useState, useTransition, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -279,7 +280,7 @@ export function GridExportDialog({
           Download grid data
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="grid-export max-w-3xl">
         <DialogHeader>
           <DialogTitle>Export grid data</DialogTitle>
           <DialogDescription>
@@ -287,10 +288,10 @@ export function GridExportDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-6 sm:grid-cols-[240px_minmax(0,1fr)]">
+        <div className="grid-export__cols grid gap-6 sm:grid-cols-[240px_minmax(0,1fr)]">
           <div className="space-y-5">
           {/* Format */}
-          <fieldset className="space-y-2">
+          <fieldset className="grid-export__format space-y-2">
             <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Format</legend>
             <div className="flex flex-col gap-1.5">
               <OptionButton
@@ -318,9 +319,9 @@ export function GridExportDialog({
           </fieldset>
 
           {/* Scope */}
-          <fieldset className="space-y-2">
+          <fieldset className="grid-export__range space-y-2">
             <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Date range</legend>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid-export__presets grid grid-cols-2 gap-2">
               {(['day', '7', '30', 'max', 'custom'] as ScopePreset[]).map((p) => (
                 <OptionButton
                   key={p}
@@ -331,7 +332,7 @@ export function GridExportDialog({
               ))}
             </div>
             {preset === 'custom' && (
-              <div className="space-y-1.5 rounded-2xl border border-border/50 bg-muted/25 p-2.5 shadow-inner">
+              <div className="grid-export__custom space-y-1.5 rounded-2xl border border-border/50 bg-muted/25 p-2.5 shadow-inner">
                 <DatePickerField
                   label="From"
                   value={customFrom}
@@ -359,7 +360,7 @@ export function GridExportDialog({
           </fieldset>
 
           {/* Tier note */}
-          <div className="flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/25 px-3 py-2 text-xs">
+          <div className="grid-export__tier flex items-center justify-between gap-2 rounded-lg border border-border/60 bg-muted/25 px-3 py-2 text-xs">
             <span className="text-muted-foreground">
               Access: <span className="font-semibold text-foreground">{tierLimits.label}</span> · {tierLimits.shortLabel}
             </span>
@@ -374,7 +375,7 @@ export function GridExportDialog({
 
           <div className="min-w-0">
           {/* Datasets */}
-          <fieldset className="space-y-2">
+          <fieldset className="grid-export__datasets space-y-2">
             <div className="flex items-center justify-between">
               <legend className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Datasets
@@ -420,7 +421,7 @@ export function GridExportDialog({
               {GRID_EXPORT_CATEGORIES.map((cat) => {
                 const allOn = cat.keys.every((k) => selectedKeys.has(k));
                 return (
-                  <div key={cat.id} className="rounded-lg border border-border/50 p-2.5">
+                  <div key={cat.id} className="grid-export__cat rounded-lg border border-border/50 p-2.5">
                     <div className="mb-1.5 flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-foreground">{cat.label}</p>
@@ -508,7 +509,7 @@ export function GridExportDialog({
           type="button"
           onClick={handleDownload}
           disabled={pending || onCooldown || activeKeys.length === 0}
-          className="btn btn-primary mt-1 flex w-full items-center justify-center gap-2 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
+          className="grid-export__go btn btn-primary mt-1 flex w-full items-center justify-center gap-2 py-2.5 text-sm disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Download className="h-4 w-4" />
           {pending

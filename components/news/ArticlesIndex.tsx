@@ -5,7 +5,8 @@ import { createTranslator } from '@/lib/i18n/messages';
 import type { PublicArticleCard, PublicCategory } from '@/lib/category-types';
 import type { SiteLocale } from '@/lib/locale';
 
-export const ARTICLES_PER_PAGE = 9;
+/** 18 = six full rows of the 3-column desktop grid; 120 indexed articles make 7 pages. */
+export const ARTICLES_PER_PAGE = 18;
 
 /**
  * The news index, rendered on the server.

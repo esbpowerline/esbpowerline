@@ -1,0 +1,111 @@
+/*
+ * Grid data export on phones (round 6, 2026-11-12). Owner: the "Download grid
+ * data" mini container in the Grid Explorer menu looked like a box inside a
+ * row. Now the whole menu row is the button (the dialog trigger is laid over
+ * it), with a chevron like every other row. And below 768px the export dialog
+ * is a bottom sheet: format as a three-way segmented pill, the date presets as
+ * pills with the custom range as two full-width date fields, the plan limit as
+ * a muted line, one full-width primary button pinned to the sheet's foot.
+ * Every option and handler is unchanged; from 768px up nothing here applies.
+ */
+
+/* ── the menu row ── */
+.gp .gp-menu .gp-menu__export { position: relative; grid-template-columns: auto 1fr auto !important; column-gap: 12px; padding: 10px 0 !important; }
+.gp .gp-menu .gp-menu__export::after {
+  content: ''; grid-row: 1; grid-column: 3; width: 18px; height: 18px; align-self: center;
+  background: var(--gp-faint); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.gp .gp-menu .gp-menu__export > button {
+  position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important;
+  opacity: 0; border: 0 !important; background: transparent !important; grid-column: auto !important; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.gp .gp-menu .gp-menu__export:active { opacity: .7; }
+
+/* ── the export dialog as a bottom sheet ── */
+@media (max-width: 767px) {
+  .grid-export {
+    --gp-bg: #f1f3f7; --gp-surface: #ffffff; --gp-surface2: #eef0f5; --gp-line: #e3e6ed;
+    --gp-on: #10131a; --gp-muted: #5b6270; --gp-faint: #8a909c;
+  }
+  html.dark .grid-export { --gp-bg: #0b0e14; --gp-surface: #151922; --gp-surface2: #1f2430; --gp-line: #272c38; --gp-on: #eef0f4; --gp-muted: #a1a7b3; --gp-faint: #767c88; }
+  html.theme-midnight .grid-export, html[data-site-theme='midnight'] .grid-export { --gp-bg: #060a16; --gp-surface: #0f1628; --gp-surface2: #19223a; --gp-line: #222c46; --gp-on: #edf1fa; --gp-muted: #9ba6bf; --gp-faint: #6c7791; }
+
+  html body .grid-export[role='dialog'] {
+    top: auto !important; bottom: 0 !important; left: 0 !important; right: 0 !important; transform: none !important; translate: none !important;
+    width: 100% !important; max-width: none !important; max-height: 92dvh; overflow-y: auto; overscroll-behavior: contain;
+    display: block !important; padding: 20px 16px 0 !important; margin: 0 !important; border: 0 !important; border-radius: 20px 20px 0 0 !important;
+    background: var(--gp-bg) !important; color: var(--gp-on); box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, .35) !important;
+    animation: gx-sheet-up .28s cubic-bezier(.2, .9, .25, 1) !important;
+  }
+  html body .grid-export[role='dialog']::before { content: ''; position: absolute; top: 8px; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 999px; background: var(--gp-line); }
+  .grid-export > button.absolute { top: 12px !important; right: 8px !important; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px; }
+  .grid-export > div:first-of-type { text-align: left !important; margin-bottom: 16px; padding-right: 40px; }
+  .grid-export h2 { font-size: 17px !important; font-weight: 700 !important; letter-spacing: -.015em; }
+  .grid-export h2 + p { font-size: 12px !important; color: var(--gp-muted) !important; margin-top: 2px; }
+
+  .grid-export .grid-export__cols { display: block !important; }
+  .grid-export .grid-export__cols > * + * { margin-top: 20px; }
+  .grid-export .grid-export__cols > div:first-child > * + * { margin-top: 20px !important; }
+  .grid-export legend { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .08em !important; color: var(--gp-muted) !important; margin-bottom: 8px; padding: 0 4px; }
+
+  /* Format: segmented pill. */
+  .grid-export .grid-export__format > div {
+    display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 !important; padding: 3px; border-radius: 999px; background: var(--gp-surface2);
+  }
+  .grid-export .grid-export__format button {
+    display: flex !important; flex-direction: column; align-items: center !important; justify-content: center; gap: 0 !important; min-height: 48px; padding: 4px 6px !important;
+    border: 0 !important; border-radius: 999px !important; background: transparent !important; box-shadow: none !important; outline: 0; text-align: center !important; color: var(--gp-muted) !important;
+  }
+  .grid-export .grid-export__format button > span:first-child { font-size: 13px !important; font-weight: 600; gap: 5px !important; }
+  .grid-export .grid-export__format button > span:first-child svg { width: 14px; height: 14px; }
+  .grid-export .grid-export__format button > span + span { font-size: 10px !important; line-height: 1.2; -webkit-line-clamp: unset !important; display: block !important; overflow: visible !important; color: var(--gp-faint) !important; }
+  .grid-export .grid-export__format button[aria-pressed='true'] { background: var(--gp-surface) !important; color: var(--gp-on) !important; box-shadow: 0 1px 3px rgba(16, 24, 40, .14) !important; }
+  .grid-export .grid-export__format button[aria-pressed='true'] > span:first-child { font-weight: 700; }
+
+  /* Date range: preset pills, then two date fields. */
+  .grid-export .grid-export__presets { display: flex !important; flex-wrap: wrap; gap: 8px !important; }
+  .grid-export .grid-export__presets button {
+    flex: none; min-height: 36px; padding: 0 14px !important; display: inline-flex !important; align-items: center; justify-content: center;
+    border-radius: 999px !important; border: 1px solid var(--gp-line) !important; background: var(--gp-surface) !important; box-shadow: none !important; outline: 0;
+    font-size: 13px !important; color: var(--gp-on) !important;
+  }
+  .grid-export .grid-export__presets button > span { font-size: 13px !important; font-weight: 600 !important; }
+  .grid-export .grid-export__presets button[aria-pressed='true'] { background: var(--gp-on) !important; border-color: var(--gp-on) !important; color: var(--gp-surface) !important; }
+  .grid-export .grid-export__custom { margin-top: 12px !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; display: flex; flex-direction: column; gap: 8px; }
+  .grid-export .grid-export__custom > * { margin: 0 !important; }
+  .grid-export .grid-export__custom > .flex.justify-center { display: none !important; }
+  .grid-export .grid-export__custom > .relative > button {
+    width: 100%; min-height: 52px; padding: 8px 14px !important; border-radius: 12px !important; border: 1px solid var(--gp-line) !important; background: var(--gp-surface) !important; box-shadow: none !important;
+  }
+  .grid-export .grid-export__custom > .relative > button span.text-\[9px\] { font-size: 10px !important; }
+  .grid-export .grid-export__custom > .relative > button span.text-xs { font-size: 15px !important; font-weight: 600 !important; }
+  .grid-export .grid-export__custom > p { font-size: 11px !important; color: var(--gp-muted) !important; padding: 0 4px !important; }
+
+  /* Plan limit: a muted line. */
+  .grid-export .grid-export__tier { padding: 0 4px !important; border: 0 !important; background: none !important; font-size: 12px !important; min-height: 32px; }
+  .grid-export .grid-export__tier a { font-size: 13px; min-height: 32px; }
+
+  /* Datasets: one card per group, rows at tap height, labels never ellipsized. */
+  .grid-export .grid-export__datasets > div:first-child > span { font-size: 11px !important; color: var(--gp-muted) !important; }
+  .grid-export .grid-export__datasets .flex-wrap > button { min-height: 32px; padding: 0 12px !important; font-size: 12px !important; background: var(--gp-surface) !important; border-color: var(--gp-line) !important; }
+  .grid-export .grid-export__cat { padding: 12px 16px !important; border-radius: 20px !important; background: var(--gp-surface); border: 1px solid color-mix(in srgb, var(--gp-line) 60%, transparent) !important; }
+  .grid-export .grid-export__cat p.text-xs { font-size: 13px !important; font-weight: 700 !important; }
+  .grid-export .grid-export__cat p.text-\[10px\] { font-size: 11px !important; color: var(--gp-muted) !important; }
+  .grid-export .grid-export__cat label { min-height: 40px; font-size: 13px !important; gap: 10px !important; }
+  .grid-export .grid-export__cat label input { width: 18px !important; height: 18px !important; }
+  .grid-export .grid-export__cat .truncate { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+  .grid-export .grid-export__cat .space-y-0\.5 > div + div { border-top: 1px solid var(--gp-line); }
+  .grid-export .grid-export__cat button { font-size: 12px !important; min-height: 32px; }
+  .grid-export .grid-export__cat .grid-cols-2 label { min-height: 32px; font-size: 11px !important; gap: 6px !important; }
+  .grid-export .grid-export__cat .grid-cols-2 label input { width: 14px !important; height: 14px !important; }
+  .grid-export .grid-export__cat .ml-5 .text-\[10px\] { font-size: 11px !important; }
+
+  /* One full-width primary button, pinned to the sheet's foot. */
+  .grid-export .grid-export__go {
+    position: sticky; bottom: calc(env(safe-area-inset-bottom) + 12px); z-index: 2; margin: 20px 0 calc(env(safe-area-inset-bottom) + 16px) !important;
+    width: 100% !important; min-height: 48px; border-radius: 999px !important; font-size: 15px !important; font-weight: 700 !important;
+    box-shadow: 0 8px 24px -10px rgba(16, 24, 40, .45), 0 0 0 6px var(--gp-bg) !important;
+  }
+}
+@keyframes gx-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }

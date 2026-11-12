@@ -1,0 +1,81 @@
+/*
+ * Account menu as a phone bottom sheet (round 6, 2026-11-12). Owner on the
+ * S25: the popover "looks old". Below 768px the panel takes the dock Menu
+ * sheet's grammar (phone-dock.css .hp-sheet): scrim, grab handle, a header
+ * with avatar + name + tier, 48px rows in one white card with 32px icon tiles
+ * and chevrons, and Sign out as its own row in a muted danger tone. Same links,
+ * same handlers. The scrim, grab and chevron elements are hidden on desktop.
+ */
+.account-menu__scrim, .account-menu__grab, .account-menu__chev { display: none; }
+
+@media (max-width: 767px) {
+  .account-menu__scrim, .account-menu__panel {
+    --gp-bg: #f1f3f7; --gp-surface: #ffffff; --gp-surface2: #eef0f5; --gp-line: #e3e6ed;
+    --gp-on: #10131a; --gp-muted: #5b6270; --gp-faint: #8a909c; --gp-danger: #b42318;
+    --gp-card-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 10px 24px -16px rgba(16, 24, 40, .18);
+  }
+  html.dark .account-menu__panel {
+    --gp-bg: #0b0e14; --gp-surface: #151922; --gp-surface2: #1f2430; --gp-line: #272c38;
+    --gp-on: #eef0f4; --gp-muted: #a1a7b3; --gp-faint: #767c88; --gp-danger: #f97066; --gp-card-shadow: 0 0 0 1px rgba(255, 255, 255, .05);
+  }
+  html.theme-midnight .account-menu__panel, html[data-site-theme='midnight'] .account-menu__panel {
+    --gp-bg: #060a16; --gp-surface: #0f1628; --gp-surface2: #19223a; --gp-line: #222c46;
+    --gp-on: #edf1fa; --gp-muted: #9ba6bf; --gp-faint: #6c7791;
+  }
+
+  .account-menu__scrim { display: block; position: fixed; inset: 0; z-index: 99998; background: rgba(6, 10, 22, .48); animation: acct-sheet-fade .2s ease-out; }
+  html body .account-menu__panel {
+    position: fixed !important; top: auto !important; left: 0 !important; right: 0 !important; bottom: 0 !important; transform: none !important;
+    width: auto !important; max-width: none !important; max-height: 88dvh; overflow-y: auto; margin: 0 !important;
+    padding: 8px 16px calc(env(safe-area-inset-bottom) + 24px) !important; border: 0 !important; border-radius: 20px 20px 0 0 !important;
+    background: var(--gp-bg) !important; color: var(--gp-on); box-shadow: 0 -12px 40px -12px rgba(0, 0, 0, .35) !important;
+    display: flex; flex-direction: column; gap: 0; animation: acct-sheet-up .28s cubic-bezier(.2, .9, .25, 1) !important;
+  }
+  .account-menu__panel .account-menu__grab { display: block; flex: none; width: 40px; height: 4px; border-radius: 999px; background: var(--gp-line); margin: 0 auto 12px; }
+
+  /* Header: guest copy, or avatar + name + tier. */
+  .account-menu__panel .account-menu__header { padding: 0 4px 12px !important; margin: 0 !important; border: 0 !important; background: none !important; }
+  .account-menu__panel .account-menu__eyebrow { font-size: 10px !important; font-weight: 700 !important; letter-spacing: .08em !important; text-transform: uppercase; color: var(--gp-muted) !important; margin: 0 0 2px !important; }
+  .account-menu__panel .account-menu__title { font-size: 17px !important; font-weight: 700 !important; letter-spacing: -.015em; color: var(--gp-on) !important; margin: 0 !important; }
+  .account-menu__panel .account-menu__profile { display: flex !important; align-items: center; gap: 12px !important; padding: 0 4px 16px !important; margin: 0 !important; border: 0 !important; background: none !important; }
+  .account-menu__panel .account-menu__profile-name { font-size: 17px !important; font-weight: 700 !important; letter-spacing: -.015em; color: var(--gp-on) !important; }
+  .account-menu__panel .account-menu__profile-role { display: flex !important; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 13px !important; font-weight: 500 !important; color: var(--gp-muted) !important; margin-top: 2px; }
+  .account-menu__panel .account-menu__signed-in { font-size: 10px !important; margin: 0 !important; }
+
+  /* Rows: one white card, 48px rows, icon tiles, chevrons. */
+  .account-menu__panel :is(.account-menu__options, .account-menu__actions) { display: flex !important; flex-direction: column; gap: 0 !important; padding: 0 !important; margin: 0 !important; border: 0 !important; background: none !important; }
+  .account-menu__panel .account-menu__options, .account-menu__panel .account-menu__action:not(.account-menu__action--signout) {
+    background: var(--gp-surface) !important; border-radius: 20px !important; box-shadow: var(--gp-card-shadow) !important;
+    border: 1px solid color-mix(in srgb, var(--gp-line) 60%, transparent) !important;
+  }
+  .account-menu__panel .account-menu__options { padding: 0 16px !important; }
+  .account-menu__panel :is(.account-menu__option, .account-menu__action) {
+    display: flex !important; align-items: center; gap: 12px !important; min-height: 48px; padding: 8px 0 !important; margin: 0 !important;
+    border-radius: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important;
+    color: var(--gp-on) !important; text-decoration: none; font-size: 15px !important; font-weight: 600 !important; text-align: left; width: 100%;
+  }
+  .account-menu__panel .account-menu__option + .account-menu__option { border-top: 1px solid var(--gp-line) !important; }
+  .account-menu__panel .account-menu__action:not(.account-menu__action--signout) { padding: 8px 16px !important; }
+  .account-menu__panel :is(.account-menu__option-icon, .account-menu__action > svg:first-child) {
+    flex: none; box-sizing: border-box; width: 32px !important; height: 32px !important; border-radius: 8px !important; display: grid; place-items: center;
+    padding: 7px; background: var(--gp-surface2) !important; color: var(--gp-on) !important; margin: 0 !important; box-shadow: none !important; border: 0 !important;
+  }
+  .account-menu__panel .account-menu__option-icon svg { width: 18px !important; height: 18px !important; }
+  .account-menu__panel .account-menu__option-copy { flex: 1 1 auto; min-width: 0; display: flex !important; flex-direction: column; gap: 1px; }
+  .account-menu__panel .account-menu__option-label { font-size: 15px !important; font-weight: 600 !important; color: var(--gp-on) !important; }
+  .account-menu__panel .account-menu__option-hint { font-size: 12px !important; font-weight: 500 !important; color: var(--gp-muted) !important; white-space: normal !important; }
+  .account-menu__panel .account-menu__action > span { flex: 1 1 auto; }
+  .account-menu__panel :is(.account-menu__option-arrow, .account-menu__chev) { display: block; flex: none; width: 18px !important; height: 18px !important; color: var(--gp-faint) !important; opacity: 1 !important; transform: none !important; }
+
+  /* Sign out: its own row below the card, muted danger. */
+  .account-menu__panel .account-menu__action--signout {
+    margin-top: 12px !important; padding: 8px 16px !important; border-radius: 20px !important;
+    background: var(--gp-surface) !important; border: 1px solid color-mix(in srgb, var(--gp-line) 60%, transparent) !important;
+    color: var(--gp-danger) !important; box-shadow: var(--gp-card-shadow) !important;
+  }
+  .account-menu__panel .account-menu__action--signout > svg:first-child { background: color-mix(in srgb, var(--gp-danger) 10%, transparent) !important; color: var(--gp-danger) !important; }
+  .account-menu__panel :is(.account-menu__option, .account-menu__action):active { opacity: .7; }
+}
+@keyframes acct-sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes acct-sheet-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .account-menu__panel, .account-menu__scrim { animation: none !important; } }

@@ -1,5 +1,6 @@
 'use client';
 
+import '@/app/account-sheet-phone.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -87,6 +88,9 @@ export function AccountMenu() {
   }
 
   const menu = open && mounted ? createPortal(
+    <>
+    {/* Phone only (account-sheet-phone.css): the scrim behind the bottom sheet. Hidden on desktop. */}
+    <div className="account-menu__scrim" aria-hidden onClick={close} />
     <div
       ref={menuRef}
       id="account-menu-panel"
@@ -100,6 +104,7 @@ export function AccountMenu() {
         zIndex: 99999,
       }}
     >
+      <span className="account-menu__grab" aria-hidden />
       {access.state === 'guest' ? (
         <>
           <div className="account-menu__header">
@@ -169,6 +174,7 @@ export function AccountMenu() {
                     ? 'Open admin'
                     : 'Open workspace'}
               </span>
+              <ChevronRight className="account-menu__chev" aria-hidden />
             </Link>
             <button
               type="button"
@@ -185,7 +191,8 @@ export function AccountMenu() {
           </div>
         </>
       )}
-    </div>,
+    </div>
+    </>,
     document.body,
   ) : null;
 
