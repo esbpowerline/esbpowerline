@@ -238,12 +238,13 @@ button.gp-row:active { background: var(--gp-surface2); }
 
 .gp-u { font-size: 12px; font-weight: 500; color: var(--gp-muted); }
 .gp-funnel { display: grid; gap: var(--s3); }
-.gp-funnel__row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; font-size: 15px; color: var(--gp-muted); }
+.gp-funnel__row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; font-size: 13px; font-weight: 500; color: var(--gp-muted); }
 .gp-funnel__row b { color: var(--gp-on); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .gp-funnel__bar { grid-column: 1 / -1; height: 14px; border-radius: 4px; margin-top: 6px; }
 .gp-row .gp-tag { white-space: normal; }
-.gp-stats--3 .gp-stat__l { overflow-wrap: anywhere; }
-.gp-stats--3 .gp-stat__l > span { white-space: normal !important; }
+.gp-stats--3 .gp-stat__l { overflow-wrap: break-word; }
+/* the last word keeps its P/D mark (withMark); only that pair is unbreakable */
+.gp-stats--3 .gp-stat__l > span { white-space: nowrap; }
 .gp-prov span { font-size: 11px; }
 /* Four tabs must fit a 360px phone without scrolling: share the row. */
 .gp-tabs { gap: 0; }
@@ -283,3 +284,33 @@ html.gp-on [data-sonner-toaster] { z-index: 2147483640 !important; }
 /* A legend of five or more keys sets in three even columns. Wrapping freely it
    broke 3 + 3 + 1 + 1 on a phone and read as ragged (2026-11-12). */
 .gp-legend:has(> :nth-child(5)) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s1) var(--s3); }
+
+/* Round 3 grid sweep: the chip row ends on a spacer (flex scrollers drop
+   padding-right, which clipped the Go to Latest chip); menu icons never shrink. */
+.gp-chips::after { content: ''; flex: 0 0 8px; }
+.gp-menu a > svg, .gp-menu button > svg, .gp-menu__export > svg { flex: none; }
+.gp-menu small { font-family: inherit; font-variant-numeric: tabular-nums; }
+
+/* Folded prose says it is folded: a "Show all" cue under the four lines,
+   instead of a bare ellipsis that read as truncation. */
+.gp [data-long='1']:not([data-open='1']) { position: relative; padding-bottom: 18px; }
+.gp [data-long='1']:not([data-open='1'])::after { content: 'Show all \203A'; position: absolute; left: 0; bottom: 0; font-size: 11px; font-weight: 600; line-height: 16px; color: var(--gp-on); }
+
+/* A row with a second line sets its swatch and value against the name, not
+   the middle of the block (Fleet, Stations: the swatch floated beside the sub). */
+.gp-row:has(> .gp-row__main > .gp-row__sub) { align-items: start; }
+.gp-row:has(> .gp-row__main > .gp-row__sub) > .gp-sw { margin-top: 5px; }
+
+/* A P/D mark must not grow its line: its 14px box, raised .38em, pushed the
+   label down ~5px against a value on the same row ("Share [D] … 3.23%").
+   Negative block margins take it out of the line-box height. */
+.gp .gp-prov span { margin-block: -4px; }
+
+/* Sideways-scrolling tables inside a sheet keep their own width: the sheet's
+   generic `table { width: 100% }` squeezed them, so rows broke to uneven
+   heights and "National total" stacked word by word. */
+.gp.gp.gp .gp-sheet :is(.gz-tbl, .gps-tbl) table { width: max-content; min-width: 100%; }
+.gp.gp.gp .gp-sheet :is(.gz-tbl, .gps-tbl) :is(td, th) { white-space: nowrap; }
+.gp.gp.gp .gp-sheet :is(.gz-tbl, .gps-tbl) :is(td, th):first-child { padding-left: 20px; padding-right: 12px; }
+.gp.gp.gp .gp-sheet :is(.gz-tbl, .gps-tbl) :is(td, th):last-child { padding-right: 20px; }
+.gp.gp.gp .gp-sheet :is(.gps-tbl, .gz-tbl) { margin-left: -20px; margin-right: -20px; }

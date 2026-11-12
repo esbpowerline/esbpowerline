@@ -146,7 +146,7 @@ export function FuelProducerView({ ctx, plants }: { ctx: Ctx; plants: PlantActua
             const u = isSolar(g.key) || g.installed == null || g.installed <= 0 ? null : (g.evening / g.installed) * 100;
             const c = ctx.pal[fuelOf(g.key)] ?? '#94a3b8';
             return (
-              <Row key={g.key} sw={c} name={<>{g.key}<Prov kind="P" /></>} sub={<>{g.n} stations<Prov kind="D" note={srcD} /> · installed {mw(g.installed)} MW · peak {mw(g.evening)} MW</>} value={u == null ? '—' : pct1(u)} small={isSolar(g.key) ? 'after sunset' : 'utilisation'} wrap
+              <Row key={g.key} sw={c} name={<>{g.key}<Prov kind="P" /></>} sub={<>{g.n} stations<Prov kind="D" note={srcD} /> · <span style={{ whiteSpace: 'nowrap' }}>installed {mw(g.installed)} MW</span> · <span style={{ whiteSpace: 'nowrap' }}>peak {mw(g.evening)} MW</span></>} value={u == null ? '—' : pct1(u)} small={isSolar(g.key) ? 'after sunset' : 'utilisation'} wrap
                 meter={u != null ? <Meter value={g.evening} max={g.installed ?? 1} color={c} /> : undefined} />
             );
           })}
@@ -169,7 +169,7 @@ export function FuelProducerView({ ctx, plants }: { ctx: Ctx; plants: PlantActua
             const share = totals.evening > 0 ? (g.evening / totals.evening) * 100 : null;
             const other = g.key.startsWith('Other producers');
             return (
-              <Row key={g.key} sw="var(--gp-primary)" name={<>{g.key}{other ? <Prov kind="D" note="The smaller producer groups, rolled up by us." /> : <Prov kind="P" />}</>} sub={<>{g.n} stations<Prov kind="D" note={srcD} /> · installed {mw(g.installed)} MW · peak {mw(g.evening)} MW</>} value={pct1(share)} small="of output" wrap
+              <Row key={g.key} sw="var(--gp-primary)" name={<>{g.key}{other ? <Prov kind="D" note="The smaller producer groups, rolled up by us." /> : <Prov kind="P" />}</>} sub={<>{g.n} stations<Prov kind="D" note={srcD} /> · <span style={{ whiteSpace: 'nowrap' }}>installed {mw(g.installed)} MW</span> · <span style={{ whiteSpace: 'nowrap' }}>peak {mw(g.evening)} MW</span></>} value={pct1(share)} small="of output" wrap
                 meter={<Meter value={g.evening} max={maxEv} color="var(--gp-primary)" />} />
             );
           })}

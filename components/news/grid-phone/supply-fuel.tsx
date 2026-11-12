@@ -247,7 +247,7 @@ export function FuelView() {
             <p><b>Imports cannot simply be increased.</b> The rate is contractual, and the volume is capped by what the interconnectors can physically carry — the HVDC link, Adani and Tripura are near their limits on most days. A low rate on a capped supply is not an option to buy more of.</p>
             <p>The columns that do compare fairly are the two beside each other: <b>Generation Share against Cost Share</b>. A fuel taking a larger share of the bill than of the electricity is the one raising the average — which is the question the rate column is usually being asked, and cannot answer.</p>
           </How>
-          <How title="How the unit cost is derived" label="How the unit cost is derived, and what 2× / flat mean">
+          <How title="How the unit cost is derived" label="How unit cost is derived · what 2× and flat mean">
             <p style={{ marginTop: 0 }}><b>How the unit cost is arrived at.</b> No agency publishes a Tk/kWh rate. PGCB publishes a production cost in Taka and an energy total in MKWh for each fuel; the rate here is the first divided by the second, which is why it is marked D. The marker beside each rate says what independent evidence supports it:</p>
             <p><b>Why the columns may not divide exactly.</b> The rate is computed from the energy PGCB publishes at full precision, while the Generation column is rounded to two decimals to read cleanly. On small fuels the two printed columns therefore divide to something slightly different — Wind shows 0.31 MKWh against an actual 0.30624 — so the rate shown is the more precise one, not the one the visible columns produce.</p>
             <div className="gp-rows">

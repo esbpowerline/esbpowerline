@@ -191,7 +191,7 @@ export function GridPhoneApp({
         const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
         const was = el.dataset.long;
         delete el.dataset.long;
-        const long = el.scrollHeight > lh * 4 + 6;
+        const long = el.scrollHeight > lh * 5 + 6; // five lines show whole; longer folds to four plus a "Show all" cue
         if (long) el.dataset.long = '1';
         else if (was) delete el.dataset.long;
       });
@@ -209,6 +209,29 @@ export function GridPhoneApp({
     main.addEventListener('click', onClick);
     queue();
     return () => { mo.disconnect(); main.removeEventListener('click', onClick); if (raf) cancelAnimationFrame(raf); };
+  }, []);
+  // ISO dates never break at their hyphens ("2026-" / "11-11" on two lines was
+  // the most repeated wrap fault, 2026-11-12). Text nodes holding a date get
+  // non-breaking hyphens (U+2011); React rewrites the node on its next update
+  // and the observer marks it again. Only the hyphens inside a date change.
+  useEffect(() => {
+    const root = mainRef.current?.parentElement;
+    if (!root) return;
+    const DATE = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
+    let raf = 0;
+    const fix = () => {
+      raf = 0;
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let n = w.nextNode(); n; n = w.nextNode()) {
+        const v = n.nodeValue;
+        if (v && v.length >= 10 && DATE.test(v)) { DATE.lastIndex = 0; n.nodeValue = v.replace(DATE, '$1‑$2‑$3'); }
+        DATE.lastIndex = 0;
+      }
+    };
+    const mo = new MutationObserver(() => { if (!raf) raf = requestAnimationFrame(fix); });
+    mo.observe(root, { childList: true, subtree: true, characterData: true });
+    fix();
+    return () => { mo.disconnect(); if (raf) cancelAnimationFrame(raf); };
   }, []);
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {

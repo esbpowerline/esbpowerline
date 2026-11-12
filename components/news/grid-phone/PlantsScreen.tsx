@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { PlantActual } from '@/lib/data/grid/types';
 import { countBySector, SECTOR_LABEL } from '@/lib/data/grid/producer-sector';
 import { usePhone } from './context';
@@ -259,12 +259,12 @@ function StationsView({ ctx, all, q, setQ }: { ctx: Ctx; all: PlantActual[]; q: 
       </div>
       {!q && (
         <div className="gp-stats gp-stats--3" style={{ marginTop: 16 }}>
-          <Stat label="All stations · day peak" value={tot.day} unit="MW" prov="D" note="Sum of the stations’ day-peak figures; a dash where the report publishes none." />
+          <Stat label="Day peak" value={tot.day} unit="MW" prov="D" note="Sum of the stations’ day-peak figures; a dash where the report publishes none." />
           <Stat label="Evening peak" value={tot.evening} unit="MW" prov="D" note="Sum of the stations’ evening-peak figures." />
           <Stat label="Day’s energy" value={tot.energy} unit="MWh" prov="D" note="Sum of the stations’ day energy, in MWh." />
         </div>
       )}
-      <div className="gp-hint" style={{ textAlign: 'left' }}>Sorted by {active.l}, {dir === 'asc' ? 'low to high' : 'high to low'}; blanks last.</div>
+      <div className="gp-hint" style={{ textAlign: 'left' }}>Totals are all stations. Sorted by {active.l}, {dir === 'asc' ? 'low to high' : 'high to low'}; blanks last.</div>
       <div className="gp-rows" style={{ marginTop: 4 }}>
         {rows.slice(0, n).map((p) => <StationRow key={p.name} p={p} ctx={ctx} />)}
         {!rows.length && <div className="gp-empty" style={{ minHeight: 72 }}>No station matches “{q}”.</div>}
@@ -284,6 +284,9 @@ function StationsView({ ctx, all, q, setQ }: { ctx: Ctx; all: PlantActual[]; q: 
   );
 }
 
+/** Keeps a figure with its label when a sub line wraps. */
+const N = ({ children }: { children: ReactNode }) => <span style={{ whiteSpace: 'nowrap' }}>{children}</span>;
+
 function StationRow({ p, ctx }: { p: PlantActual; ctx: Ctx }) {
   const open = useSheet();
   const c = ctx.pal[fuelOf(p.fuel)] ?? '#94a3b8';
@@ -293,7 +296,7 @@ function StationRow({ p, ctx }: { p: PlantActual; ctx: Ctx }) {
   return (
     <div className={dim ? 'gp-dim' : undefined}>
       <Row top wrap sw={c} name={short(p.name)}
-        sub={<>{p.fuel || '—'} · {p.producer || '—'}<br />Inst {mw(p.installedMw)} · present {mw(p.presentCapacityMw)} · day {mw(p.dayPeakMw)} MW<br />{mw(isNum(p.energyKwh) ? p.energyKwh / 1000 : null)} MWh{u != null ? <> · {pct1(u)} of installed</> : null}{remark ? <><br /><span className="gp-tag warn">{remark}</span></> : null}</>}
+        sub={<>{p.fuel || '—'} · {p.producer || '—'}<br /><N>Inst {mw(p.installedMw)}</N> · <N>present {mw(p.presentCapacityMw)}</N> · <N>day {mw(p.dayPeakMw)} MW</N><br />{mw(isNum(p.energyKwh) ? p.energyKwh / 1000 : null)} MWh{u != null ? <> · {pct1(u)} of installed</> : null}{remark ? <><br /><span className="gp-tag warn">{remark}</span></> : null}</>}
         value={mw(p.eveningPeakMw)} small="MW evening peak" chevron onClick={() => open(<StationSheet p={p} ctx={ctx} />)} />
     </div>
   );

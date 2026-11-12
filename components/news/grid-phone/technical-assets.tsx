@@ -26,7 +26,7 @@ function ClassRows({ rows, cols, prov }: { rows: SubClass[]; cols: string[]; pro
       <div className="gpt-class__head">
         <span>{cols[0]}</span>
         <span>{cols[1]}{prov && <Prov kind="P" />}</span>
-        <span>{cols[2]}{prov && <Prov kind="P" />}</span>
+        <span>{cols[2].replace(/ \((\w+)\)$/, '')}{/\((\w+)\)$/.test(cols[2]) ? <> <span style={{ whiteSpace: 'nowrap' }}>({cols[2].match(/\((\w+)\)$/)![1]}){prov && <Prov kind="P" />}</span></> : prov && <Prov kind="P" />}</span>
       </div>
       {rows.map((r) => (
         <div key={r.cls} className="gpt-class__row">

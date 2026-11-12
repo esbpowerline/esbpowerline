@@ -7,7 +7,7 @@
  * Mirrors power-grid/EnergyCurveChart + GenerationMixCanvas.
  */
 
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { EnergyCurve, GridDailyData } from '@/lib/data/grid/types';
 import { buildEnergyCurveSeries } from '@/lib/data/grid/energy-curve';
 import { fmt, Legend, niceTicks } from './charts';
@@ -15,18 +15,19 @@ import { fuelPalette, isNum, Prov, Row, Section } from './shared';
 import { How, Note, U } from './supply-bits';
 
 const MERIT = ['Coal', 'Gas', 'Hydro', 'Imports', 'Wind', 'Solar', 'HFO', 'Oil (HFO+HSD)', 'HSD'];
-const useIso = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
+// A callback ref, so the plot re-measures when Chart/Table remounts it
+// (an effect with [] deps measured once and left the chart 0 px wide).
 function useW<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
   const [w, setW] = useState(0);
-  useIso(() => {
-    const el = ref.current;
+  const ro = useRef<ResizeObserver | null>(null);
+  const ref = useCallback((el: T | null) => {
+    ro.current?.disconnect();
+    ro.current = null;
     if (!el) return;
     setW(el.clientWidth);
-    const ro = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)));
-    ro.observe(el);
-    return () => ro.disconnect();
+    ro.current = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)));
+    ro.current.observe(el);
   }, []);
   return { ref, w };
 }
@@ -89,7 +90,9 @@ export function MixSection({ curve, day, date }: { curve: EnergyCurve | null; da
   const norm = (i: number, v: number) => (mode === 'share' ? (tot(i) > 0 ? (v / tot(i)) * 100 : 0) : v);
   let ceil = 1;
   for (let i = 0; i < n; i++) ceil = Math.max(ceil, norm(i, tot(i) + sh(i)));
-  const nt = niceTicks(0, mode === 'share' ? Math.max(100, ceil) : ceil, 4);
+  // Share mode: quarters up to 100%, headroom only as far as the unserved band
+  // reaches (round ticks put the top at 150% and left a third of the plot empty).
+  const nt = mode === 'share' ? { lo: 0, hi: Math.ceil(Math.max(100, ceil) / 5) * 5, ticks: [0, 25, 50, 75, 100] } : niceTicks(0, ceil, 4);
   const x = (i: number) => f.l + (i / Math.max(1, n - 1)) * (w - f.l - f.r);
   const y = (v: number) => f.t + (1 - v / nt.hi) * (h - f.t - f.b);
   const base = new Array(n).fill(0) as number[];
@@ -218,8 +221,7 @@ export function MixSection({ curve, day, date }: { curve: EnergyCurve | null; da
             )}
           </div>
           <Note>Shares are each fuel against the half-hour total <Prov kind="D" note="Each fuel’s MW over that half hour’s total." /> Stacked in dispatch order <Prov kind="D" note="The order is ours." /> — always-on plant at the foot, last-resort plant at the top.</Note>
-          <Legend items={stack.map((g) => ({ label: <>{g.name}<Prov kind={derived.get(g.name) ? 'D' : 'P'} /></>, color: col(g.name) }))} />
-          {useShort && <Legend items={[{ label: <>Unserved load<Prov kind="P" /></>, color: 'var(--gp-bad)', dash: true }]} />}
+          <Legend items={[...stack.map((g) => ({ label: <>{g.name}<Prov kind={derived.get(g.name) ? 'D' : 'P'} /></>, color: col(g.name) })), ...(useShort ? [{ label: <>Unserved<Prov kind="P" /></>, color: 'var(--gp-bad)', dash: true }] : [])]} />
         </>
       )}
 

@@ -160,17 +160,17 @@ export function RenewablesView() {
       <>
       <Section title="Renewables today" desc="Tap a figure for its briefing" source="PGCB daily report · SREDA register">
         <div className="gp-stats gp-stats--first">
-          <Tile label="Renewable Generation" prov="D" note="Our sum of PGCB’s solar, hydro and wind rows." value={dRows.length ? fmt(energy, 2) : '—'} unit={dRows.length ? 'MKWh' : undefined} detail={`PGCB daily report · ${date}`} onClick={bEnergy} />
+          <Tile label="Renewable Generation" prov="D" note="Our sum of PGCB’s solar, hydro and wind rows." value={dRows.length ? fmt(energy, 2) : '—'} unit={dRows.length ? 'MKWh' : undefined} detail={<>PGCB daily report · <span style={{ whiteSpace: 'nowrap' }}>{date}</span></>} onClick={bEnergy} />
           <Tile label="Share of Generation" prov="D" note="Renewable energy over all energy generated that day." value={share != null ? share.toFixed(2) : '—'} unit={share != null ? '%' : undefined} detail="of all energy generated that day" onClick={bShare} />
           <Tile label="Renewable Plants Online" prov="P" value={plantsAll ? String(stations.length) : p.plantsLoading ? '…' : '—'} detail={plantsAll && tPres.n ? `${Math.round(tPres.v).toLocaleString('en-US')} MW available capacity` : 'per-station detail not published'} onClick={bFleet} />
-          <Tile label="Installed Capacity" prov="P" value={sreda?.technologyTotals ? fmt(sreda.technologyTotals.totalMwp, 2) : '—'} unit={sreda?.technologyTotals ? 'MWp' : undefined} detail={sreda ? `SREDA register · ${sreda.date}` : 'SREDA register'} onClick={bCap} />
+          <Tile label="Installed Capacity" prov="P" value={sreda?.technologyTotals ? fmt(sreda.technologyTotals.totalMwp, 2) : '—'} unit={sreda?.technologyTotals ? 'MWp' : undefined} detail={sreda ? <>SREDA register · <span style={{ whiteSpace: 'nowrap' }}>{sreda.date}</span></> : 'SREDA register'} onClick={bCap} />
         </div>
       </Section>
 
       <Section
         title="Renewable Output by Fuel"
         desc={`PGCB daily report · ${date}`}
-        source={<span>Source: PGCB Daily Generation Report · Reported day: {date}</span>}
+        source={<span>Source: PGCB Daily Generation Report · Reported day: <span style={{ whiteSpace: 'nowrap' }}>{date}</span></span>}
       >
         {dRows.length === 0 ? (
           <Absent>PGCB published no fuel-wise generation for this date.</Absent>
@@ -288,7 +288,7 @@ export function RenewablesView() {
         title="Renewable Power Stations"
         desc="Every renewable station PGCB lists for this day, with its own output"
         meta={stations.length > 0 ? `${stations.length} stations` : undefined}
-        source={<span>Source: PGCB Daily Report — station table · Reported day: {date}</span>}
+        source={<span>Source: PGCB Daily Report — station table · Reported day: <span style={{ whiteSpace: 'nowrap' }}>{date}</span></span>}
       >
         {plantsAll === null ? (
           <Absent>{p.plantsLoading ? 'Loading station detail…' : `PGCB published no per-station table for ${date}, or the day’s workbook did not reconcile against its own totals. Nothing from a neighbouring day is shown in its place.`}</Absent>

@@ -325,14 +325,14 @@ export function ZoneGeneration({ day }: { day: GridDailyData }) {
                   <td>{z.zone}</td>
                   {fuels.map((f) => <td key={f} className={z.fuels[f] === 0 ? 'is-zero' : ''}>{fz(z.fuels[f])}</td>)}
                   <td>{z.total.toFixed(2)}</td>
-                  <td style={{ whiteSpace: 'normal', minWidth: 120, textAlign: 'left' }}>{noOutput(z.fuels).join(', ') || '—'}</td>
+                  <td style={{ whiteSpace: 'normal', minWidth: 210, textAlign: 'left' }}>{noOutput(z.fuels).join(', ') || '—'}</td>
                 </tr>
               ))}
               <tr className="is-total">
                 <td>National total</td>
                 {fuels.map((f) => <td key={f}>{fz(published[f])}</td>)}
                 <td>{natTotal.toFixed(2)}</td>
-                <td style={{ whiteSpace: 'normal', minWidth: 120, textAlign: 'left' }}>{fuels.filter((f) => published[f] === 0).join(', ') || '—'}</td>
+                <td style={{ whiteSpace: 'normal', minWidth: 210, textAlign: 'left' }}>{fuels.filter((f) => published[f] === 0).join(', ') || '—'}</td>
               </tr>
             </tbody>
           </table>
