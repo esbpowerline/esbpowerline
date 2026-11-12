@@ -97,7 +97,7 @@
 .gp .gpm-hbars .gpm-colhead { grid-template-columns: 84px minmax(0, 1fr) 48px 52px; }
 
 /* Period / year pickers. */
-.gp .gpm-years { display: flex; gap: 6px; overflow-x: auto; margin: 0 -16px; padding: 0 16px; scrollbar-width: none; }
+.gp .gpm-years { display: flex; gap: 6px; overflow-x: auto; margin: 0 -20px; padding: 0 20px; scrollbar-width: none; }
 .gp .gpm-years::-webkit-scrollbar { display: none; }
 .gp .gpm-years button, .gp .gpm-months button { flex: none; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--gp-line); background: none; font-size: 12px; font-weight: 600; color: var(--gp-on); font-variant-numeric: tabular-nums; }
 .gp .gpm-years button.is-on, .gp .gpm-months button.is-on { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
@@ -107,7 +107,7 @@
 .gp .gpm-pickl { margin: 0 0 6px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gp-faint); }
 
 /* Glance grid: twelve tappable cells on hairlines. */
-.gp .gpm-glance { display: grid; grid-template-columns: 1fr 1fr; margin: 0 -16px; }
+.gp .gpm-glance { display: grid; grid-template-columns: 1fr 1fr; margin: 0 -20px; }
 .gp .gpm-glance button { display: block; text-align: left; border: 0; border-top: 1px solid var(--gp-line); background: none; padding: 10px 16px; min-width: 0; }
 .gp .gpm-glance button:nth-child(2n) { border-left: 1px solid var(--gp-line); }
 .gp .gpm-glance button:active { background: var(--gp-surface2); }
@@ -116,7 +116,7 @@
 .gp .gpm-glance__v { display: block; margin-top: 3px; font-size: 17px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .gp .gpm-glance__v.is-primary { color: var(--gp-primary); }
 .gp .gpm-glance__d { display: block; margin-top: 2px; font-size: 10px; line-height: 1.35; color: var(--gp-faint); }
-.gp .gpm-target { margin: 0 -16px; padding: 14px 16px 2px; border-top: 1px solid var(--gp-line); text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; display: block; width: calc(100% + 32px); }
+.gp .gpm-target { margin: 0 -20px; padding: 14px 20px 2px; border-top: 1px solid var(--gp-line); text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; display: block; width: calc(100% + 32px); }
 .gp .gpm-target .gp-hero b { color: var(--gp-warn); }
 
 /* Insight cards. */

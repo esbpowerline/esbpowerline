@@ -54,7 +54,7 @@ html.theme-dark .gp[data-look='cards'], html.theme-midnight .gp[data-look='cards
 .gp[data-look='cards'] .gp-stats > * { border: 0 !important; background: var(--gp-surface2); border-radius: 12px; padding: 12px !important; }
 .gp[data-look='cards'] .gp-stats--3 { gap: 6px; }
 .gp[data-look='cards'] .gp-stats--3 > * { padding: 10px !important; }
-.gp[data-look='cards'] .gp-rows { margin: 0 -16px; }
+.gp[data-look='cards'] .gp-rows { margin: 0 -20px; }
 .gp[data-look='cards'] .gp-row { padding-left: 16px; padding-right: 16px; }
 .gp[data-look='cards'] .gp-sw, .gp[data-look='cards'] .gp-legend i { border-radius: 4px; }
 .gp[data-look='cards'] .gp-meter, .gp[data-look='cards'] .gp-meter > div { border-radius: 999px; height: 6px; }
@@ -210,7 +210,7 @@ html.theme-midnight .gp[data-look='cards'], html[data-site-theme='midnight'] .gp
 .gp[data-look='cards'] .gp-host :is(h3, .gp[data-look='cards'] h4) { font-size: 15px !important; font-weight: 650; line-height: 1.3; }
 .gp[data-look='cards'] .gp-host :is(.rounded-xl, .gp[data-look='cards'] .rounded-2xl, .gp[data-look='cards'] .rounded-lg) { border-radius: 20px; }
 .gp[data-look='cards'] .gp-host :is(.rounded-xl, .gp[data-look='cards'] .rounded-2xl, .gp[data-look='cards'] .rounded-lg) :is(.rounded-xl, .gp[data-look='cards'] .rounded-2xl, .gp[data-look='cards'] .rounded-lg) { border-radius: 12px; }
-.gp[data-look='cards'] .gp-host div:has(> button[data-active]) { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 10px; scrollbar-width: none; border: 0; }
+.gp[data-look='cards'] .gp-host div:has(> button[data-active]) { display: flex; flex-wrap: nowrap; gap: 6px; overflow-x: auto; margin: 0 -20px; padding: 2px 20px 10px; scrollbar-width: none; border: 0; }
 .gp[data-look='cards'] .gp-host div:has(> button[data-active])::-webkit-scrollbar { display: none; }
 .gp[data-look='cards'] .gp-host div:has(> button[data-active]) > button { flex: none; height: 36px; padding: 0 14px; border-radius: 999px !important; border: 1px solid var(--gp-line); background: var(--gp-surface); color: var(--gp-muted); font-size: 13px !important; font-weight: 600; white-space: nowrap; box-shadow: none; }
 .gp[data-look='cards'] .gp-host div:has(> button[data-active]) > button[data-active='true'] { background: var(--gp-on); border-color: var(--gp-on); color: var(--gp-surface); }
@@ -367,3 +367,15 @@ html.theme-midnight .gp[data-look='cards'], html[data-site-theme='midnight'] .gp
 .gp[data-look='cards'] .gp-secs { padding-left: 8px; padding-right: 8px; scroll-padding: 0 8px; }
 .gp[data-look='cards'] .gp-seg--sticky::before { left: -8px; right: -8px; }
 .gp[data-look='cards'] .gp-bar { padding-left: 0; padding-right: 0; }
+
+/* Card inset 16 → 20 (owner, 2026-11-12: with the side gutter down to 8,
+   "increase the inside padding proportionally too"). 8 outside, 20 inside:
+   content still starts 28px from the screen edge, 4px further in than before,
+   on a wider card. Ruled rows and bleeding rails follow the new inset. */
+.gp[data-look='cards'] .gp-sec { padding: 18px 20px; }
+.gp[data-look='cards'] .gp-tstatus { padding: 14px 20px; }
+.gp[data-look='cards'] .gp-row { padding-left: 20px; padding-right: 20px; }
+.gp[data-look='cards'] .gp-sheet { padding-left: 20px; padding-right: 20px; }
+
+/* Bleeds and row insets inside cards and sheets are written as var(--s4); re-point it to the new 20px inset there. */
+.gp[data-look='cards'] .gp-sec, .gp[data-look='cards'] .gp-sheet { --s4: 20px; }

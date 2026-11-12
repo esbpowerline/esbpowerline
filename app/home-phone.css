@@ -270,7 +270,7 @@
   main.home-page :is(.hp-links, .hp-policy) :is(a, button).group.-mx-2 > div:first-child { border-radius: 12px !important; border: 0 !important; background: var(--gp-surface2) !important; width: 32px; height: 32px; }
   main.home-page :is(.hp-links, .hp-policy) .font-bold.text-sm { font-size: 13px !important; font-weight: 650 !important; }
   main.home-page .hp-policy .font-bold.text-\[12\.5px\] { font-weight: 600 !important; text-wrap: pretty; }
-  main.home-page :is(.hp-links__chain, .hp-policy__groups) { margin: 12px -16px 0 !important; width: calc(100% + 32px) !important; padding: 0 16px 4px !important; scroll-padding: 0 16px; gap: 0 !important; align-items: flex-start !important; }
+  main.home-page :is(.hp-links__chain, .hp-policy__groups) { margin: 12px -20px 0 !important; width: calc(100% + 40px) !important; padding: 0 20px 4px !important; scroll-padding: 0 16px; gap: 0 !important; align-items: flex-start !important; }
   main.home-page :is(.hp-links__chain, .hp-policy__groups) > div { flex: 0 0 84%; min-width: 0; scroll-snap-align: start; padding-right: 16px; }
   main.home-page :is(.hp-links__chain, .hp-policy__groups) > div + div { padding-left: 16px; border-left: 1px solid var(--gp-line); }
   main.home-page :is(.hp-links__chain, .hp-policy__groups) > div:last-child { padding-right: 0; flex-basis: calc(84% - 16px); }
@@ -417,7 +417,7 @@
 
   /* Official links: the desktop org chart is hidden; the phone module below. */
   main.home-page .hp-links__desk { display: none !important; }
-  main.home-page .hp-il { display: block; padding: 16px 16px 8px; }
+  main.home-page .hp-il { display: block; padding: 20px 20px 8px; }
   main.home-page .hp-il__title { margin: 0; font-size: 17px; font-weight: 700; letter-spacing: -.015em; line-height: 1.25; color: hsl(var(--foreground)); }
   main.home-page .hp-il__sub { margin: 4px 0 0; font-size: 12px; line-height: 1.4; color: var(--gp-muted); }
   main.home-page .hp-il__group { margin: 16px 0 2px; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gp-muted); }
@@ -490,14 +490,14 @@
   main.home-page .category-section { margin-top: 12px !important; }
 
   /* Card insets: 16 everywhere. */
-  main.home-page .featured-hero__body { padding: 16px 16px 4px !important; }
+  main.home-page .featured-hero__body { padding: 20px 20px 4px !important; }
   main.home-page .featured-hero__story:last-child { padding-bottom: 12px !important; }
-  main.home-page .home-snapshot-segment__card { padding: 16px !important; }
+  main.home-page .home-snapshot-segment__card { padding: 20px !important; }
   main.home-page .home-snapshot-segment__foot { margin-top: 12px !important; }
-  main.home-page .home-trending-hero-rail { padding: 16px 16px 4px !important; }
-  main.home-page .home-editorial__rail > section > div:first-child { padding: 16px !important; }
-  main.home-page .hp-il { padding: 16px 16px 4px; }
-  main.home-page .home-bottom-row__card { padding: 16px !important; }
+  main.home-page .home-trending-hero-rail { padding: 20px 20px 4px !important; }
+  main.home-page .home-editorial__rail > section > div:first-child { padding: 20px !important; }
+  main.home-page .hp-il { padding: 20px 20px 4px; }
+  main.home-page .home-bottom-row__card { padding: 20px !important; }
   main.home-page .interview-card > div.p-4,
   main.home-page .article-card__body { padding: 12px 16px 16px !important; }
   main.home-page .article-card__kicker { margin-bottom: 4px !important; }
@@ -539,7 +539,7 @@
      PolicyPhone) replaces the sideways column rail; it reuses the links
      module's row grammar so the two cards read as one family. */
   main.home-page .hp-policy__desk { display: none !important; }
-  main.home-page .hp-pf { display: block; padding: 16px; }
+  main.home-page .hp-pf { display: block; padding: 20px; }
   main.home-page .hp-pf__seg { grid-template-columns: 1fr 1fr; }
   main.home-page .hp-pf__name { font-size: 15px; font-weight: 600; line-height: 1.3; color: hsl(var(--foreground)); text-wrap: pretty; }
   main.home-page .hp-pf .hp-il__tile { width: 36px; height: 36px; }
