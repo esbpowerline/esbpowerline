@@ -42,6 +42,11 @@ export function GridPhoneGate({ latestDate, runtimeDates, verificationLedger }: 
   }, []);
 
   const on = phone && !classic;
+  // Retires the server-drawn boot frame (PhoneBootShell) in either view.
+  useEffect(() => {
+    document.documentElement.classList.add('gp-ready');
+    return () => document.documentElement.classList.remove('gp-ready');
+  }, []);
   useEffect(() => {
     document.documentElement.classList.toggle('gp-on', on);
     return () => document.documentElement.classList.remove('gp-on');

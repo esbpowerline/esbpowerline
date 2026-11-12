@@ -1,0 +1,57 @@
+/* The phone app's first-paint frame. See components/news/grid-phone/PhoneBootShell.tsx.
+   Colours mirror the cards look's tokens (app/grid-phone-look-cards.css) per theme. */
+.gp-boot { display: none; }
+@media (max-width: 767px) {
+  .gp-boot {
+    --b-bg: #f1f3f7; --b-surface: #ffffff; --b-skel: #e6e9f0; --b-on: #10131a; --b-muted: #5b6270;
+    --b-dock: #10131a; --b-dock-fg: rgba(255, 255, 255, .64); --b-dock-on: #ffffff;
+    display: flex; flex-direction: column; position: fixed; inset: 0; z-index: 2147483000;
+    background: var(--b-bg); color: var(--b-on);
+    font-family: var(--font-sans, Inter, system-ui, sans-serif);
+    padding-top: env(safe-area-inset-top);
+  }
+  html.theme-dark .gp-boot, html[data-site-theme='dark'] .gp-boot {
+    --b-bg: #0b0e14; --b-surface: #151922; --b-skel: #1f2430; --b-on: #eef0f4; --b-muted: #a1a7b3;
+    --b-dock: #232834; --b-dock-fg: rgba(238, 240, 244, .62); --b-dock-on: #eef0f4;
+  }
+  html.theme-midnight .gp-boot, html[data-site-theme='midnight'] .gp-boot {
+    --b-bg: #060a16; --b-surface: #0f1628; --b-skel: #19223a; --b-on: #edf1fa; --b-muted: #9ba6bf;
+    --b-dock: #1a2440; --b-dock-fg: rgba(237, 241, 250, .62); --b-dock-on: #edf1fa;
+  }
+  html.gp-ready .gp-boot { display: none; }
+
+  .gp-boot__bar { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 16px; }
+  .gp-boot__icon { width: 22px; height: 22px; border-radius: 4px; background: var(--b-skel); }
+  .gp-boot__title { flex: 1; display: grid; gap: 4px; }
+  .gp-boot__title b { font-size: 17px; font-weight: 700; line-height: 1.2; }
+  .gp-boot__title i { display: block; width: 150px; height: 10px; border-radius: 999px; background: var(--b-skel); }
+
+  .gp-boot__chips { display: flex; gap: 6px; padding: 2px 16px 10px; overflow: hidden; }
+  .gp-boot__chips span { flex: none; width: 54px; height: 42px; border-radius: 999px; background: var(--b-surface); }
+  .gp-boot__chips span.is-on { background: var(--b-on); }
+
+  .gp-boot__main { display: grid; gap: 10px; padding: 0 16px; }
+  .gp-boot__card { border-radius: 20px; background: var(--b-surface); padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
+  .gp-boot__card--sm { height: 64px; }
+  .gp-boot__card--lg { height: 380px; }
+  .gp-boot__card--md { height: 150px; }
+  .gp-boot__card i { display: block; height: 10px; border-radius: 999px; background: var(--b-skel); animation: gp-boot-pulse 1.2s ease-in-out infinite alternate; }
+  .gp-boot__card i.w40 { width: 40%; }
+  .gp-boot__card i.w60 { width: 60%; height: 14px; }
+  .gp-boot__card i.w90 { width: 90%; }
+  .gp-boot__card i.hero { width: 55%; height: 34px; border-radius: 8px; }
+  .gp-boot__card i.plot { height: 220px; border-radius: 12px; }
+
+  .gp-boot__dock {
+    position: absolute; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px);
+    display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px; border-radius: 999px;
+    background: var(--b-dock); box-shadow: 0 18px 36px -14px rgba(10, 14, 22, .55);
+  }
+  .gp-boot__dock span { height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-size: 10px; font-weight: 600; color: var(--b-dock-fg); }
+  .gp-boot__dock em { display: block; width: 48px; height: 28px; border-radius: 999px; }
+  .gp-boot__dock span.is-on { color: var(--b-dock-on); }
+  .gp-boot__dock span.is-on em { background: var(--b-dock-on); }
+
+  @keyframes gp-boot-pulse { from { opacity: 1; } to { opacity: .55; } }
+  @media (prefers-reduced-motion: reduce) { .gp-boot__card i { animation: none; } }
+}

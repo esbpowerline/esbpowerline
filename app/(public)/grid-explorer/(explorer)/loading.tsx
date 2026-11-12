@@ -1,6 +1,10 @@
+import { PhoneBootShell } from '@/components/news/grid-phone/PhoneBootShell';
+
 export default function PowerGridLoading() {
   return (
     <div className="container py-8">
+      {/* Phones see the app frame, not this desktop skeleton (see PhoneBootShell). */}
+      <PhoneBootShell />
       <div className="mb-8 space-y-3">
         <div className="h-3 w-40 rounded bg-muted/60 animate-pulse" />
         <div className="h-9 w-full max-w-xl rounded bg-muted/50 animate-pulse" />

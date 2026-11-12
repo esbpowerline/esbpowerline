@@ -25,18 +25,22 @@ function DockLink({
   label,
   children,
   onClick,
+  prefetch = false,
 }: {
   href: string;
   on: boolean;
   label: string;
   children: React.ReactNode;
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+  /** The Grid Explorer is the dock's heaviest hop; prefetching it keeps the
+      homepage → app transition seamless (owner, 2026-11-12). */
+  prefetch?: boolean;
 }) {
   const resolved = usePublicHref(href);
   return (
     <Link
       href={resolved}
-      prefetch={false}
+      prefetch={prefetch}
       className={on ? 'is-on' : undefined}
       aria-current={on ? 'page' : undefined}
       onClick={onClick}
@@ -73,7 +77,7 @@ export function PhoneDock({
       <DockLink href="/" on={at(pathname === '/')} label={t('nav.home')} onClick={onHomeClick}>
         <Home />
       </DockLink>
-      <DockLink href="/grid-explorer" on={false} label={bn ? t('nav.gridExplorer') : 'Grid'}>
+      <DockLink href="/grid-explorer" prefetch on={false} label={bn ? t('nav.gridExplorer') : 'Grid'}>
         <BarChart3 />
       </DockLink>
       <DockLink
