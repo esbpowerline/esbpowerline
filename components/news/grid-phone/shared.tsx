@@ -74,7 +74,7 @@ export function Prov({ kind, note }: { kind: 'P' | 'D'; note?: string }) {
       <>
         <h3>{PROV[kind].title}</h3>
         <p className="gp-sheet__sub">{PROV[kind].body}</p>
-        {note ? <p style={{ fontSize: 14, lineHeight: 1.5, margin: 0 }}>{note}</p> : null}
+        {note ? <p style={{ fontSize: 15, lineHeight: 1.5, margin: 0 }}>{note}</p> : null}
       </>,
     );
   return (

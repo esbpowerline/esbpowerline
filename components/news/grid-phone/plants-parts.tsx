@@ -106,7 +106,7 @@ export function StationSheet({ p, ctx }: { p: PlantActual; ctx: Ctx }) {
           <Stat label="Effective available" value={fc.effectiveEveningPeakMw} unit="MW" prov="P" detail={held != null && held > 0.05 ? `held back ${fmt(held)} MW` : undefined} />
           <Stat label="Forecast day peak" value={fc.forecastDayPeakMw} unit="MW" prov="P" />
           <Stat label="Effective day peak" value={fc.effectiveDayPeakMw} unit="MW" prov="P" />
-          {remarkOf(fc.remarks) && <div className="gp-stat" style={{ gridColumn: '1 / -1' }}><div className="gp-stat__l">PGCB’s reason<Prov kind="P" /></div><div className="gp-stat__d" style={{ fontSize: 14, color: 'var(--gp-on)' }}>{remarkOf(fc.remarks)}</div></div>}
+          {remarkOf(fc.remarks) && <div className="gp-stat" style={{ gridColumn: '1 / -1' }}><div className="gp-stat__l">PGCB’s reason<Prov kind="P" /></div><div className="gp-stat__d" style={{ fontSize: 15, color: 'var(--gp-on)' }}>{remarkOf(fc.remarks)}</div></div>}
         </div>
       ) : (
         <p className="gp-note">{ctx.detail.plantForecast ? 'The projection carries no line under this station’s name.' : 'No station projection is published for this day.'}</p>

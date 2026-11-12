@@ -141,7 +141,16 @@ function useScrub(n: number, f: Frame | null, onScrub?: (i: number | null) => vo
 }
 
 /** Height from width: `aspect` × width, clamped. */
-const heightFor = (w: number, aspect: number, min: number, max: number) => Math.round(Math.max(min, Math.min(max, w * aspect)));
+/**
+ * One plot height for every chart with axes (2026-11-12). Each chart used to
+ * derive its own from an aspect and a clamp, which gave six different
+ * heights at the same width (170-282px on one phone) and made the screens
+ * read as unbalanced. Callers' aspect/min/max are accepted and ignored so the
+ * call sites need not change; a chart without axes (a sparkline) keeps `minH`.
+ */
+export const CHART_H = 220;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const heightFor = (_w: number, _aspect: number, _min: number, _max: number) => CHART_H;
 
 export function LineChart({
   labels,
@@ -376,7 +385,8 @@ export function Bars({
   const nums = values.filter((v): v is number => v != null && Number.isFinite(v));
   const top = valueLabels ? 18 : 4;
   const bottom = labels ? 20 : 0;
-  const H = height;
+  // Day/fuel pickers share the standard plot height; small bars (< 100) keep theirs.
+  const H = height >= 100 ? CHART_H : height;
   let body: ReactNode = null;
   if (w > 0 && n) {
     const gap = n > 20 ? 2 : n > 10 ? 4 : 8;

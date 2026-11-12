@@ -21,23 +21,23 @@
 .gp-tfoot ul { margin: var(--s1) 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
 
 /* how-to-read button: quiet, full width */
-.gp-thow { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 48px; margin-top: var(--s3); padding: 0 var(--s4); border: 1px solid var(--gp-line); border-radius: 12px; background: none; font-size: 14px; font-weight: 600; text-align: left; }
+.gp-thow { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 48px; margin-top: var(--s3); padding: 0 var(--s4); border: 1px solid var(--gp-line); border-radius: 12px; background: none; font-size: 15px; font-weight: 600; text-align: left; }
 .gp-thow:active { background: var(--gp-surface2); }
-.gp-thow span:last-child { color: var(--gp-faint); font-size: 18px; }
+.gp-thow span:last-child { color: var(--gp-faint); font-size: 17px; }
 
 /* glossary inside a sheet */
 .gp-tdl { display: grid; gap: var(--s4); margin: var(--s4) 0 0; }
-.gp-tdl dt { font-size: 14px; font-weight: 650; display: flex; align-items: center; gap: 6px; }
-.gp-tdl dd { margin: 3px 0 0; font-size: 14px; line-height: 1.5; color: var(--gp-muted); }
+.gp-tdl dt { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 6px; }
+.gp-tdl dd { margin: 3px 0 0; font-size: 15px; line-height: 1.5; color: var(--gp-muted); }
 
 /* the status row at the top of the screen */
-.gp-tstatus { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 52px; padding: var(--s2) var(--s4); border: 0; border-radius: 16px; background: var(--gp-surface); text-align: left; }
+.gp-tstatus { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 52px; padding: var(--s2) var(--s4); border: 0; border-radius: 12px; background: var(--gp-surface); text-align: left; }
 .gp-tstatus:active { background: var(--gp-surface2); }
 .gp-tstatus__main { flex: 1; min-width: 0; font-size: 13px; line-height: 1.35; }
-.gp-tstatus__main b { display: block; font-size: 14px; font-weight: 600; }
+.gp-tstatus__main b { display: block; font-size: 15px; font-weight: 600; }
 .gp-tstatus__main span { color: var(--gp-muted); }
-.gp-tstatus__go { color: var(--gp-faint); font-size: 20px; }
-.gp-tnote { margin: 0 0 var(--s3); padding: var(--s3) var(--s4); border-radius: 12px; background: var(--gp-warnC); color: var(--gp-on); font-size: 14px; line-height: 1.5; }
+.gp-tstatus__go { color: var(--gp-faint); font-size: 22px; }
+.gp-tnote { margin: 0 0 var(--s3); padding: var(--s3) var(--s4); border-radius: 12px; background: var(--gp-warnC); color: var(--gp-on); font-size: 15px; line-height: 1.5; }
 .gp-tnote b { color: var(--gp-warn); }
 .gp-tmono { display: grid; gap: 2px; margin: var(--s2) 0; padding: var(--s3); border-radius: 12px; background: var(--gp-surface2); font-variant-numeric: tabular-nums; font-size: 13px; }
 .gp-tmono b { color: var(--gp-on); }
@@ -59,34 +59,34 @@
 .gp-trow:first-child { border-top: 0; }
 .gp-trow.is-now { background: var(--gp-primaryC); }
 .gp-trow.is-dim { opacity: .62; }
-.gp-trow b { font-weight: 600; font-size: 14px; }
+.gp-trow b { font-weight: 600; font-size: 15px; }
 .gp-trow small { display: block; font-size: 12px; color: var(--gp-muted); line-height: 1.3; }
-.gp-trow__v { text-align: right; font-size: 14px; }
-.gp-thead { display: grid; grid-template-columns: 52px 1fr auto auto; column-gap: var(--s3); padding: 0 var(--s4) var(--s2); font-size: 11.5px; color: var(--gp-muted); }
+.gp-trow__v { text-align: right; font-size: 15px; }
+.gp-thead { display: grid; grid-template-columns: 52px 1fr auto auto; column-gap: var(--s3); padding: 0 var(--s4) var(--s2); font-size: 12px; color: var(--gp-muted); }
 .gp-thead span:nth-child(n+3) { text-align: right; min-width: 64px; }
 .gp-trow > .gp-trow__v { min-width: 64px; }
 
 /* chip lists */
 .gp-tchips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s2); }
-.gp-tchips .gp-tag { font-size: 12.5px; padding: 3px 9px; }
+.gp-tchips .gp-tag { font-size: 13px; padding: 3px 9px; }
 
 /* workbook split diagram */
 .gp-tsplit { margin-top: var(--s3); padding: var(--s3); border: 1px solid var(--gp-line); border-radius: 12px; font-size: 13px; }
-.gp-tsplit__name { font-weight: 600; word-break: break-all; font-size: 12.5px; }
+.gp-tsplit__name { font-weight: 600; word-break: break-all; font-size: 13px; }
 .gp-tsplit__note { color: var(--gp-muted); font-size: 12px; margin-top: 2px; }
 .gp-tsplit__halves { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: var(--s2); }
-.gp-tsplit__halves > div { padding: var(--s2) var(--s3); background: var(--gp-surface2); color: var(--gp-muted); font-size: 12.5px; line-height: 1.35; }
+.gp-tsplit__halves > div { padding: var(--s2) var(--s3); background: var(--gp-surface2); color: var(--gp-muted); font-size: 13px; line-height: 1.35; }
 .gp-tsplit__halves > div:first-child { border-radius: 8px 0 0 8px; }
 .gp-tsplit__halves > div:last-child { border-radius: 0 8px 8px 0; }
 .gp-tsplit__halves > div.is-lit { background: var(--gp-primaryC); color: var(--gp-on); font-weight: 600; }
-.gp-tsplit__feeds { margin-top: var(--s2); color: var(--gp-muted); font-size: 12.5px; }
+.gp-tsplit__feeds { margin-top: var(--s2); color: var(--gp-muted); font-size: 13px; }
 
 /* measures: forecast / actual / difference as a three-column ruled row */
 .gp-tmeasure { padding: var(--s3) var(--s4); border-top: 1px solid var(--gp-line); }
 .gp-tmeasure:first-child { border-top: 0; }
-.gp-tmeasure__name { font-size: 14px; font-weight: 550; }
+.gp-tmeasure__name { font-size: 15px; font-weight: 550; }
 .gp-tmeasure__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); margin-top: 6px; font-variant-numeric: tabular-nums; }
-.gp-tmeasure__cols small { display: block; font-size: 11.5px; color: var(--gp-muted); }
+.gp-tmeasure__cols small { display: block; font-size: 12px; color: var(--gp-muted); }
 .gp-tmeasure__cols b { font-size: 15px; font-weight: 600; }
 .gp-tmeasure__note { margin-top: 4px; font-size: 12px; color: var(--gp-muted); }
 
