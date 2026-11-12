@@ -433,6 +433,10 @@ export function GridPhoneApp({
                 {current && newest ? <> · <em className="gp-badge">{backlogBadge(current, newest, pendingDay?.status ?? null).text}</em></> : null}
               </span>
             </div>
+            {/* One tap home (owner, 2026-11-12: "on top in grid must show that one tap to homepage"). */}
+            <Link className="gp-icon gp-icon--home" href="/" aria-label="ESB Power Line home">
+              <Icon size={20}><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z" /></Icon>
+            </Link>
             <button type="button" className="gp-icon" aria-label="Older days" onClick={openCalendar}>
               <Icon><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M3 10h18M8 3v4M16 3v4" /></Icon>
             </button>

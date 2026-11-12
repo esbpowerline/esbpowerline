@@ -139,3 +139,12 @@
    a white dock on the grey page, muted icons, the active item a dark pill.
    Dark and midnight keep a dark dock with a light pill, i.e. the same rule in
    every theme: the dock is a surface, the selection is its inverse. */
+
+/* Slimmer dock (2026-11-12, owner: "takes a bit more space"), same geometry as
+   the Grid app's: 4px rim, 46px items, 26px indicator, 10px off the edge. */
+@media (max-width: 767px) {
+  .hp-dock { padding: 4px !important; bottom: calc(env(safe-area-inset-bottom) + 10px) !important; }
+  .hp-dock > :is(a, button) { height: 46px !important; gap: 1px !important; }
+  .hp-dock__ind { height: 26px !important; width: 46px !important; }
+  body:has(.hp-dock) { padding-bottom: calc(env(safe-area-inset-bottom) + 74px) !important; }
+}

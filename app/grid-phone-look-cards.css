@@ -323,3 +323,38 @@ html.theme-midnight .gp, html[data-site-theme='midnight'] .gp {
 .gp-sheet th { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gp-faint); border-top: 0; padding-top: 0; }
 .gp-sheet td { color: var(--gp-on); }
 .gp-sheet td:first-child { font-weight: 600; }
+
+/* ── app bar + menu, matched to the homepage (2026-11-12) ───────────────
+   Owner: the Grid Explorer's side panel "should be sleek and modern and
+   professional like the styling on the homepage", and the top must offer
+   "one tap to homepage". Bar controls become the homepage bar's 36px tinted
+   discs (44px hit area); a Home disc sits beside the calendar. The menu sheet
+   takes the homepage menu's shape: grey sheet, one white grouped card, 48px
+   rows, 32px icon tiles, chevrons. */
+.gp-bar__row { min-height: 56px; padding-right: 2px; }
+.gp-bar__title strong { font-size: 17px; font-weight: 700; }
+.gp-bar__title span { font-size: 11px; }
+.gp-icon { width: 44px; height: 44px; border-radius: 999px; background: radial-gradient(circle, var(--gp-surface2) 0 18px, transparent 18.5px); }
+.gp-bar__row > .gp-icon:first-child { background: none; }
+.gp-icon:active { background: radial-gradient(circle, var(--gp-line) 0 18px, transparent 18.5px); }
+
+.gp-sheet:has(> .gp-menu) { background: var(--gp-bg); }
+.gp-sheet:has(> .gp-menu) h3 { margin-top: 4px; }
+.gp-menu { margin-top: 12px; background: var(--gp-surface); border-radius: 20px; padding: 0 16px; box-shadow: var(--gp-card-shadow); }
+.gp-menu a, .gp-menu button { min-height: 52px; gap: 12px; padding: 8px 0; font-size: 15px; font-weight: 600; position: relative; }
+.gp-menu a::after, .gp-menu button::after { content: ''; flex: none; width: 7px; height: 7px; margin-left: auto; margin-right: 4px; border-right: 1.6px solid var(--gp-faint); border-top: 1.6px solid var(--gp-faint); transform: rotate(45deg); }
+.gp-menu a > svg, .gp-menu button > svg, .gp-menu__export > svg { box-sizing: border-box; width: 32px; height: 32px; padding: 7px; border-radius: 8px; background: var(--gp-surface2); color: var(--gp-on); }
+.gp-menu a > span, .gp-menu button > span { min-width: 0; }
+.gp-menu small { font-size: 11px; font-weight: 500; margin-top: 2px; line-height: 1.35; }
+.gp-menu__export { column-gap: 12px; padding: 10px 0; font-size: 15px; font-weight: 600; }
+.gp-menu__export small { font-size: 11px; }
+
+/* Dock: slimmer (owner: "bottom nav bar takes a bit more space"). 46px items
+   in a 4px rim, 10px off the bottom edge: 54px tall, down from 64. */
+.gp-nav { padding: 4px; bottom: calc(env(safe-area-inset-bottom) + 10px); }
+.gp-nav button { height: 46px; gap: 1px; }
+.gp-nav__ind { height: 26px; width: 46px; }
+.gp-nav__ind svg { width: 20px; height: 20px; }
+.gp-main { padding-bottom: calc(env(safe-area-inset-bottom) + 84px); }
+
+.gp-icon--home, .gp-icon--home:visited { color: var(--gp-on); }
