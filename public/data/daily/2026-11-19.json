@@ -1,0 +1,1583 @@
+{
+  "systemStats": {
+    "date": "19 Nov 2026",
+    "dayPeakGen": 11971.89,
+    "eveningPeakGen": 12341.36,
+    "dayPeakDemand": 11971.89,
+    "eveningPeakDemand": 12341.36,
+    "minGen": 9187.27,
+    "maxGen": 12341.36,
+    "totalEnergyGen": 263.59325277,
+    "totalEnergyUnserved": null,
+    "totalEnergyDemand": 263.593,
+    "maxTemp": 25.3,
+    "totalGasSuppliedPower": 787.16,
+    "avgProductionCost": 6.19,
+    "totalDailyCost": 1631650330,
+    "peakTimes": {
+      "dayPeakGen": "12:00",
+      "dayPeakDemand": "12:00",
+      "eveningPeakGen": "18:00",
+      "eveningPeakDemand": "18:00",
+      "minGen": "05:00",
+      "maxGen": "18:00"
+    }
+  },
+  "generationData": [
+    {
+      "name": "Gas",
+      "gen": 109.28,
+      "cost": 387036462,
+      "unitCost": 3.5417,
+      "color": "#0ea5e9"
+    },
+    {
+      "name": "Coal",
+      "gen": 91.57,
+      "cost": 710696524,
+      "unitCost": 7.7616,
+      "color": "#64748b"
+    },
+    {
+      "name": "HFO",
+      "gen": 7.93,
+      "cost": 159873662,
+      "unitCost": 20.1485,
+      "color": "#f97316"
+    },
+    {
+      "name": "Hydro",
+      "gen": 0.97,
+      "cost": 97200,
+      "unitCost": 0.1,
+      "color": "#06b6d4"
+    },
+    {
+      "name": "Solar",
+      "gen": 2.12,
+      "cost": 36341516,
+      "unitCost": 17.1329,
+      "color": "#eab308"
+    },
+    {
+      "name": "Imports",
+      "gen": 51.42,
+      "cost": 333100318,
+      "unitCost": 6.4785,
+      "color": "#a855f7"
+    },
+    {
+      "name": "HSD",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#ef4444"
+    },
+    {
+      "name": "Wind",
+      "gen": 0.3,
+      "cost": 4504646,
+      "unitCost": 14.92,
+      "color": "#22c55e"
+    }
+  ],
+  "zoneGenerationData": [
+    {
+      "zone": "Dhaka",
+      "fuels": {
+        "Gas": 26.96508,
+        "Coal": 0.0,
+        "HFO": 1.938172,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.04945,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 28.952702
+    },
+    {
+      "zone": "Chattogram",
+      "fuels": {
+        "Gas": 5.41268,
+        "Coal": 34.970908,
+        "HFO": 1.111835,
+        "HSD": 0.0,
+        "Hydro": 0.972,
+        "Solar": 0.03807,
+        "Imports": 0.0,
+        "Wind": 0.30192
+      },
+      "total": 42.807413
+    },
+    {
+      "zone": "Cumilla",
+      "fuels": {
+        "Gas": 30.187703,
+        "Coal": 0.0,
+        "HFO": 2.67909,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.138418,
+        "Imports": 2.42688,
+        "Wind": 0.0
+      },
+      "total": 35.432091
+    },
+    {
+      "zone": "Mymensingh",
+      "fuels": {
+        "Gas": 0.44352,
+        "Coal": 0.0,
+        "HFO": 1.59816,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.152248,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 2.193928
+    },
+    {
+      "zone": "Sylhet",
+      "fuels": {
+        "Gas": 28.464514,
+        "Coal": 0.0,
+        "HFO": 0.0,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.015484,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 28.479998
+    },
+    {
+      "zone": "Khulna",
+      "fuels": {
+        "Gas": 0.183128,
+        "Coal": 25.01091,
+        "HFO": 0.0108,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.07056,
+        "Imports": 22.414545,
+        "Wind": 0.0
+      },
+      "total": 47.689943
+    },
+    {
+      "zone": "Barishal",
+      "fuels": {
+        "Gas": 7.28302,
+        "Coal": 31.58409,
+        "HFO": 0.1344,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.000609,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 39.002119
+    },
+    {
+      "zone": "Rajshahi",
+      "fuels": {
+        "Gas": 10.341637,
+        "Coal": 0.0,
+        "HFO": 0.25488,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 0.39431,
+        "Imports": 26.5748,
+        "Wind": 0.0
+      },
+      "total": 37.565627
+    },
+    {
+      "zone": "Rangpur",
+      "fuels": {
+        "Gas": 0.0,
+        "Coal": 0.0,
+        "HFO": 0.207432,
+        "HSD": 0.0,
+        "Hydro": 0.0,
+        "Solar": 1.261999,
+        "Imports": 0.0,
+        "Wind": 0.0
+      },
+      "total": 1.469431
+    }
+  ],
+  "borderImportsData": [
+    {
+      "source": "HVDC Bheramara (India)",
+      "energy": 22.41,
+      "peakFlow": 931.0,
+      "type": "C/B Interconnector (West)"
+    },
+    {
+      "source": "Adani Godda (India)",
+      "energy": 26.57,
+      "peakFlow": 1304.06,
+      "type": "C/B Interconnector (North)"
+    },
+    {
+      "source": "Tripura Cumilla (India)",
+      "energy": 2.43,
+      "peakFlow": 114.0,
+      "type": "C/B Interconnector (East)"
+    }
+  ],
+  "regionalDemandData": [
+    {
+      "zone": "Dhaka",
+      "loadShed": 0.0,
+      "demand": 4920.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Chattogram",
+      "loadShed": 0.0,
+      "demand": 1247.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Cumilla",
+      "loadShed": 0.0,
+      "demand": 997.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Mymensingh",
+      "loadShed": 0.0,
+      "demand": 974.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Sylhet",
+      "loadShed": 0.0,
+      "demand": 451.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Khulna",
+      "loadShed": 0.0,
+      "demand": 1291.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Barishal",
+      "loadShed": 0.0,
+      "demand": 341.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Rajshahi",
+      "loadShed": 0.0,
+      "demand": 1121.0,
+      "pct": 0.0
+    },
+    {
+      "zone": "Rangpur",
+      "loadShed": 0.0,
+      "demand": 797.0,
+      "pct": 0.0
+    }
+  ],
+  "regionalDemandSource": "p1-published",
+  "dailyOutages": [
+    {
+      "time": "08:07",
+      "plant": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-1",
+      "load": "120 MW",
+      "reason": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-1",
+      "full_desc": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-1"
+    },
+    {
+      "time": "08:13",
+      "plant": "Madaripur-Shariatpur  132kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance Work. and from Madaripur 132/33kV end Due to Annual Maintenance",
+      "full_desc": "Madaripur-Shariatpur  132kV Ckt-2 Scheduled S/D from Shariatpur 132/33kV end Due to Annual Maintenance Work. and from Madaripur 132/33kV end Due to Annual Maintenance"
+    },
+    {
+      "time": "08:18 - 12:57",
+      "plant": "Rajshahi 230/132/33kV S/S 132/33 kV T-02 (416T) LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Rajshahi 230/132/33kV S/S 132/33 kV T-02 (416T) LT Scheduled S/D Due to Annual maintenance"
+    },
+    {
+      "time": "08:19 - 12:56",
+      "plant": "Rajshahi 230/132/33kV S/S 132/33 kV T-02 (416T) HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Rajshahi 230/132/33kV S/S 132/33 kV T-02 (416T) HT Scheduled S/D Due to Annual maintenance"
+    },
+    {
+      "time": "08:19 - 14:48",
+      "plant": "Naogaon 230/132/33kV S/S ATR-3 LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance",
+      "full_desc": "Naogaon 230/132/33kV S/S ATR-3 LT Scheduled S/D Due to annual maintenance"
+    },
+    {
+      "time": "08:19 - 14:53",
+      "plant": "Naogaon 230/132/33kV S/S ATR-3 HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to annual maintenance",
+      "full_desc": "Naogaon 230/132/33kV S/S ATR-3 HT Scheduled S/D Due to annual maintenance"
+    },
+    {
+      "time": "08:19",
+      "plant": "Khagrachari-Rangamati  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Maintenance at Khagrachari grid. and from Khagrachori 132/33kV end Due to Schedule shutdown for annual maintenance of transmission line.",
+      "full_desc": "Khagrachari-Rangamati  132kV Ckt-1 Scheduled S/D from Rangamati 132/33kV end Due to Maintenance at Khagrachari grid. and from Khagrachori 132/33kV end Due to Schedule shutdown for annual maintenance of transmission line."
+    },
+    {
+      "time": "08:30 - 16:13",
+      "plant": "Bogura South-Bogura West ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to None and from Bogura 400/230kV end Due to Annual Maintenance",
+      "full_desc": "Bogura South-Bogura West ckt-2 Scheduled S/D from Bogura 230/132kV end Due to None and from Bogura 400/230kV end Due to Annual Maintenance"
+    },
+    {
+      "time": "08:30 - 16:42",
+      "plant": "Baghabari-Ishwardi 230 kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to A/M and from Baghabari 230/132kV end Due to Annual Maintenance work.",
+      "full_desc": "Baghabari-Ishwardi 230 kV Ckt-1 Scheduled S/D from Ishurdi 230/132kV end Due to A/M and from Baghabari 230/132kV end Due to Annual Maintenance work."
+    },
+    {
+      "time": "08:31 - 14:39",
+      "plant": "Faridpur 132/33kV S/S ATR-2 LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Faridpur 132/33kV S/S ATR-2 LT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:31 - 14:38",
+      "plant": "Faridpur 132/33kV S/S ATR-2 HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Faridpur 132/33kV S/S ATR-2 HT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:32 - 15:45",
+      "plant": "Haripur-Siddirganj  230kV Ckt-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance.",
+      "full_desc": "Haripur-Siddirganj  230kV Ckt-2 Scheduled S/D from Haripur 230/132kV end Due to Annual maintenance."
+    },
+    {
+      "time": "08:34 - 14:48",
+      "plant": "Feni-PHP  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Feni-PHP  132kV Ckt-1 Scheduled S/D from Feni 132/33kV end Due to Annual maintenance"
+    },
+    {
+      "time": "08:35 - 14:26",
+      "plant": "Aggreko-keraniganj 132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance at Keraniganj end.",
+      "full_desc": "Aggreko-keraniganj 132kV Ckt-1 Scheduled S/D from Keranigonj 230/132/33kV end Due to Annual maintenance at Keraniganj end."
+    },
+    {
+      "time": "08:37 - 16:25",
+      "plant": "Rahanpur 132/33kV S/S TR-2 (414T) HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Rahanpur 132/33kV S/S TR-2 (414T) HT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:37 - 16:30",
+      "plant": "Rahanpur 132/33kV S/S TR-2 (414T) LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Rahanpur 132/33kV S/S TR-2 (414T) LT Scheduled S/D Due to Annual maintenance"
+    },
+    {
+      "time": "08:40 - 17:27",
+      "plant": "Kodda 132/33kV S/S RPCL 100 MW PS Scheduled",
+      "load": "100 MW",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Kodda 132/33kV S/S RPCL 100 MW PS Scheduled S/D Due to Annual maintenance"
+    },
+    {
+      "time": "08:44",
+      "plant": "Narail 132/33kV S/S TR2 (413-T) HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Narail 132/33kV S/S TR2 (413-T) HT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:44",
+      "plant": "Narail 132/33kV S/S TR2 (413-T) LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Narail 132/33kV S/S TR2 (413-T) LT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "08:57 - 13:47",
+      "plant": "Korerhat 400/230/132kV S/S 400/132 KV ATR-2 (7203T) LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to For annual maintenance",
+      "full_desc": "Korerhat 400/230/132kV S/S 400/132 KV ATR-2 (7203T) LT Scheduled S/D Due to For annual maintenance"
+    },
+    {
+      "time": "08:57 - 16:12",
+      "plant": "Jaldhaka 132/33kV S/S 416T-2 LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance work.",
+      "full_desc": "Jaldhaka 132/33kV S/S 416T-2 LT Scheduled S/D Due to Annual maintenance work."
+    },
+    {
+      "time": "08:58 - 13:45",
+      "plant": "Korerhat 400/230/132kV S/S 400/132 KV ATR-2 (7203T) HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to For annual maintenance",
+      "full_desc": "Korerhat 400/230/132kV S/S 400/132 KV ATR-2 (7203T) HT Scheduled S/D Due to For annual maintenance"
+    },
+    {
+      "time": "09:02 - 16:08",
+      "plant": "Sherpur 132/33kV S/S Transformer- 04 HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenances.",
+      "full_desc": "Sherpur 132/33kV S/S Transformer- 04 HT Scheduled S/D Due to Annual Maintenances."
+    },
+    {
+      "time": "09:02 - 16:08",
+      "plant": "Sherpur 132/33kV S/S Transformer- 04 LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenances.",
+      "full_desc": "Sherpur 132/33kV S/S Transformer- 04 LT Scheduled S/D Due to Annual Maintenances."
+    },
+    {
+      "time": "09:05 - 15:55",
+      "plant": "Narshingdi 132/33kV S/S T-4 HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to For annual Maintenance.",
+      "full_desc": "Narshingdi 132/33kV S/S T-4 HT Scheduled S/D Due to For annual Maintenance."
+    },
+    {
+      "time": "09:05 - 15:56",
+      "plant": "Narshingdi 132/33kV S/S T-4 LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to For annual maintenance.",
+      "full_desc": "Narshingdi 132/33kV S/S T-4 LT Scheduled S/D Due to For annual maintenance."
+    },
+    {
+      "time": "09:15 - 15:51",
+      "plant": "Gallamari- Khulna (S)  132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Due to replace Busbar Protection relay by SPMD. and from Khulna(S) 230/132kVend.",
+      "full_desc": "Gallamari- Khulna (S)  132kV Ckt-1 Scheduled S/D from Gollamari 132/33kV end Due to Due to replace Busbar Protection relay by SPMD. and from Khulna(S) 230/132kVend."
+    },
+    {
+      "time": "09:19",
+      "plant": "Barishal 230/132kV S/S T-4 HT",
+      "load": "HT Outage",
+      "reason": "Barishal 230/132kV S/S T-4 HT is restored.",
+      "full_desc": "Barishal 230/132kV S/S T-4 HT is restored."
+    },
+    {
+      "time": "09:19",
+      "plant": "Barishal 230/132kV S/S T-5 HT",
+      "load": "HT Outage",
+      "reason": "Barishal 230/132kV S/S T-5 HT is restored.",
+      "full_desc": "Barishal 230/132kV S/S T-5 HT is restored."
+    },
+    {
+      "time": "09:20",
+      "plant": "Barishal 230/132kV S/S T-4 LT",
+      "load": "HT Outage",
+      "reason": "Barishal 230/132kV S/S T-4 LT is restored.",
+      "full_desc": "Barishal 230/132kV S/S T-4 LT is restored."
+    },
+    {
+      "time": "09:21",
+      "plant": "Barishal 230/132kV S/S T-5 LT",
+      "load": "HT Outage",
+      "reason": "Barishal 230/132kV S/S T-5 LT is restored.",
+      "full_desc": "Barishal 230/132kV S/S T-5 LT is restored."
+    },
+    {
+      "time": "09:24",
+      "plant": "Shajibazar 330 MW CCPP Synchronized with remarks:- GT1",
+      "load": "330 MW",
+      "reason": "Shajibazar 330 MW CCPP Synchronized with remarks:- GT1",
+      "full_desc": "Shajibazar 330 MW CCPP Synchronized with remarks:- GT1"
+    },
+    {
+      "time": "09:30 - 12:50",
+      "plant": "Sonargaon 132/33kV S/S BUS B Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance work purpose",
+      "full_desc": "Sonargaon 132/33kV S/S BUS B Scheduled S/D Due to Annual maintenance work purpose"
+    },
+    {
+      "time": "09:38 - 12:57",
+      "plant": "Sonargaon 132/33kV S/S Bashundhara Line Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance work purpose shutdown taken by Bashundhara authority people.",
+      "full_desc": "Sonargaon 132/33kV S/S Bashundhara Line Scheduled S/D Due to Annual maintenance work purpose shutdown taken by Bashundhara authority people."
+    },
+    {
+      "time": "09:48 - 14:27",
+      "plant": "Beanibazar 132/33kV S/S 132 KV BUS-2 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Beanibazar 132/33kV S/S 132 KV BUS-2 Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "09:56 - 16:04",
+      "plant": "Tongi 230/132/33kV S/S T-3 LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual maintenance",
+      "full_desc": "Tongi 230/132/33kV S/S T-3 LT Scheduled S/D Due to Annual maintenance"
+    },
+    {
+      "time": "10:09 - 16:51",
+      "plant": "Brahmanbaria 132/33kV S/S 402T HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Brahmanbaria 132/33kV S/S 402T HT Scheduled S/D",
+      "full_desc": "Brahmanbaria 132/33kV S/S 402T HT Scheduled S/D"
+    },
+    {
+      "time": "10:09",
+      "plant": "Brahmanbaria 132/33kV S/S 402T LT Scheduled",
+      "load": "HT Outage",
+      "reason": "Brahmanbaria 132/33kV S/S 402T LT Scheduled S/D",
+      "full_desc": "Brahmanbaria 132/33kV S/S 402T LT Scheduled S/D"
+    },
+    {
+      "time": "10:32",
+      "plant": "Hasnabad 230/132kV S/S AUTO TR-2 LT",
+      "load": "HT Outage",
+      "reason": "Hasnabad 230/132kV S/S AUTO TR-2 LT is restored.",
+      "full_desc": "Hasnabad 230/132kV S/S AUTO TR-2 LT is restored."
+    },
+    {
+      "time": "10:32",
+      "plant": "Hasnabad 230/132kV S/S AUTO TR-2 HT",
+      "load": "HT Outage",
+      "reason": "Hasnabad 230/132kV S/S AUTO TR-2 HT is restored.",
+      "full_desc": "Hasnabad 230/132kV S/S AUTO TR-2 HT is restored."
+    },
+    {
+      "time": "10:42 - 11:45",
+      "plant": "Shahjadpur 132/33kV S/S T-3(425T) HT Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Annual Maintenance",
+      "full_desc": "Shahjadpur 132/33kV S/S T-3(425T) HT Scheduled S/D Due to Annual Maintenance"
+    },
+    {
+      "time": "11:00",
+      "plant": "Shajibazar 330 MW CCPP Synchronized with remarks:- STG",
+      "load": "330 MW",
+      "reason": "Shajibazar 330 MW CCPP Synchronized with remarks:- STG",
+      "full_desc": "Shajibazar 330 MW CCPP Synchronized with remarks:- STG"
+    },
+    {
+      "time": "11:30 - 12:52",
+      "plant": "Mymensingh-Netrokona 132kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Mymensingh-Netrokona 132kV Ckt-1 Scheduled S/D from Mymensingh 132/33kV end.",
+      "full_desc": "Mymensingh-Netrokona 132kV Ckt-1 Scheduled S/D from Mymensingh 132/33kV end."
+    },
+    {
+      "time": "11:39",
+      "plant": "Sunamganj 132/33kV S/S Main Bus -1",
+      "load": "HT Outage",
+      "reason": "Sunamganj 132/33kV S/S Main Bus -1 is restored.",
+      "full_desc": "Sunamganj 132/33kV S/S Main Bus -1 is restored."
+    },
+    {
+      "time": "12:50",
+      "plant": "Sonargaon 132/33kV S/S BUS B",
+      "load": "HT Outage",
+      "reason": "Sonargaon 132/33kV S/S BUS B is restored.",
+      "full_desc": "Sonargaon 132/33kV S/S BUS B is restored."
+    },
+    {
+      "time": "13:12 - 13:26",
+      "plant": "Barishal 132/33kV S/S T-1 (405T) LT Tripped showing Instt.O/C, Definite O/C, instt. E/F relays",
+      "load": "41.0MW",
+      "reason": "Due to 33kV WZPDCL Padma Blowing Feeder Fault",
+      "full_desc": "Barishal 132/33kV S/S T-1 (405T) LT Tripped showing Instt.O/C, Definite O/C, instt. E/F relays Due to 33kV WZPDCL Padma Blowing Feeder Fault"
+    },
+    {
+      "time": "14:58",
+      "plant": "Chowmuhani-Feni 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Chowmuhani-Feni 132 kV Ckt-1 is restored.",
+      "full_desc": "Chowmuhani-Feni 132 kV Ckt-1 is restored."
+    },
+    {
+      "time": "14:58",
+      "plant": "Chowmuhani-Feni 132 kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "Chowmuhani-Feni 132 kV Ckt-1 is restored.",
+      "full_desc": "Chowmuhani-Feni 132 kV Ckt-1 is restored."
+    },
+    {
+      "time": "15:06",
+      "plant": "Rajshahi 132/33kV S/S Transformer T-3 (425T) HT",
+      "load": "HT Outage",
+      "reason": "Rajshahi 132/33kV S/S Transformer T-3 (425T) HT is restored.",
+      "full_desc": "Rajshahi 132/33kV S/S Transformer T-3 (425T) HT is restored."
+    },
+    {
+      "time": "15:07",
+      "plant": "Rajshahi 132/33kV S/S Transformer T-3 (425T) LT",
+      "load": "HT Outage",
+      "reason": "Rajshahi 132/33kV S/S Transformer T-3 (425T) LT is restored.",
+      "full_desc": "Rajshahi 132/33kV S/S Transformer T-3 (425T) LT is restored."
+    },
+    {
+      "time": "15:29 - 17:21",
+      "plant": "Madunaghat-Meghnaghat 400kV Ckt-1 Scheduled",
+      "load": "HT Outage",
+      "reason": "Due to Taken by korerhat",
+      "full_desc": "Madunaghat-Meghnaghat 400kV Ckt-1 Scheduled S/D from Meghnaghat 400/230kV end Due to Taken by korerhat"
+    },
+    {
+      "time": "15:30 - 17:21",
+      "plant": "Korerhat 400/230/132kV S/S Meghnaghat-1 (C04) Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Project work (Shunt Reactor)",
+      "full_desc": "Korerhat 400/230/132kV S/S Meghnaghat-1 (C04) Project Work S/D Due to Project work (Shunt Reactor)"
+    },
+    {
+      "time": "16:11",
+      "plant": "Jaldhaka 132/33kV S/S 416T-2 HT",
+      "load": "HT Outage",
+      "reason": "Jaldhaka 132/33kV S/S 416T-2 HT is restored.",
+      "full_desc": "Jaldhaka 132/33kV S/S 416T-2 HT is restored."
+    },
+    {
+      "time": "16:37",
+      "plant": "HVDC Bheramera- Jhenaidah   230kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "HVDC Bheramera- Jhenaidah   230kV Ckt-1 is restored.",
+      "full_desc": "HVDC Bheramera- Jhenaidah   230kV Ckt-1 is restored."
+    },
+    {
+      "time": "16:37",
+      "plant": "HVDC Bheramera- Jhenaidah   230kV Ckt-1",
+      "load": "HT Outage",
+      "reason": "HVDC Bheramera- Jhenaidah   230kV Ckt-1 is restored.",
+      "full_desc": "HVDC Bheramera- Jhenaidah   230kV Ckt-1 is restored."
+    },
+    {
+      "time": "17:42 - 19:10",
+      "plant": "Haripur 230/132kV S/S Ullon (Maniknagar-2) Tripped showing PH-R,Z1,Dist.send relays.",
+      "load": "HT Outage",
+      "reason": "Haripur 230/132kV S/S Ullon (Maniknagar-2) Tripped showing PH-R,Z1,Dist.send relays.",
+      "full_desc": "Haripur 230/132kV S/S Ullon (Maniknagar-2) Tripped showing PH-R,Z1,Dist.send relays."
+    },
+    {
+      "time": "18:27",
+      "plant": "Bhola Nutan Biddut BD LTD, FGMO",
+      "load": "HT Outage",
+      "reason": "Bhola Nutan Biddut BD LTD, FGMO is ON with remarks:-",
+      "full_desc": "Bhola Nutan Biddut BD LTD, FGMO is ON with remarks:-"
+    },
+    {
+      "time": "18:49 - 19:11",
+      "plant": "Daganbhuiyan 132/33kV S/S Transformer-2 LT Forced",
+      "load": "HT Outage",
+      "reason": "Due to Auxiliary transformer-02 fuse change",
+      "full_desc": "Daganbhuiyan 132/33kV S/S Transformer-2 LT Forced S/D Due to Auxiliary transformer-02 fuse change"
+    },
+    {
+      "time": "18:50 - 19:10",
+      "plant": "Daganbhuiyan 132/33kV S/S Transformer-2 HT Forced",
+      "load": "HT Outage",
+      "reason": "Due to for Auxiliary transformer-02 fuse change",
+      "full_desc": "Daganbhuiyan 132/33kV S/S Transformer-2 HT Forced S/D Due to for Auxiliary transformer-02 fuse change"
+    },
+    {
+      "time": "19:13 - 19:33",
+      "plant": "Haripur-Siddirganj  230kV Ckt-2 Tripped from Siddhirganj 132/33kV end showing General trip, R-Phase Trip & Aided Trip. relays",
+      "load": "HT Outage",
+      "reason": "Due to Line fault.",
+      "full_desc": "Haripur-Siddirganj  230kV Ckt-2 Tripped from Siddhirganj 132/33kV end showing General trip, R-Phase Trip & Aided Trip. relays Due to Line fault."
+    },
+    {
+      "time": "19:13 - 19:33",
+      "plant": "Haripur-Siddirganj  230kV Ckt-2 Tripped from Siddhirganj 132/33kV end showing GEN TRIP, R- PHASE TRIP relays",
+      "load": "HT Outage",
+      "reason": "Due to Adided trip",
+      "full_desc": "Haripur-Siddirganj  230kV Ckt-2 Tripped from Siddhirganj 132/33kV end showing GEN TRIP, R- PHASE TRIP relays Due to Adided trip"
+    },
+    {
+      "time": "19:13",
+      "plant": "Haripur 230/132kV S/S Ullon (Maniknagar-2) Tripped showing showing signal PH-R,Z1,Dist.send relays.",
+      "load": "HT Outage",
+      "reason": "Haripur 230/132kV S/S Ullon (Maniknagar-2) Tripped showing showing signal PH-R,Z1,Dist.send relays.",
+      "full_desc": "Haripur 230/132kV S/S Ullon (Maniknagar-2) Tripped showing showing signal PH-R,Z1,Dist.send relays."
+    },
+    {
+      "time": "19:19 - 20:05",
+      "plant": "Daganbhuiyan 132/33kV S/S Transformer-1 LT Forced",
+      "load": "HT Outage",
+      "reason": "Due to Auxiliary transformer-01 fuse change",
+      "full_desc": "Daganbhuiyan 132/33kV S/S Transformer-1 LT Forced S/D Due to Auxiliary transformer-01 fuse change"
+    },
+    {
+      "time": "19:20 - 20:04",
+      "plant": "Daganbhuiyan 132/33kV S/S Transformer-1 HT Forced",
+      "load": "HT Outage",
+      "reason": "Due to Auxiliary transformer-01 fuse change",
+      "full_desc": "Daganbhuiyan 132/33kV S/S Transformer-1 HT Forced S/D Due to Auxiliary transformer-01 fuse change"
+    },
+    {
+      "time": "20:49 - 22:30",
+      "plant": "Madanganj-Munsiganj 132 kV Ckt-1 Forced",
+      "load": "HT Outage",
+      "reason": "Due to Redhot maintenance and from Munshiganj 132/33kV end Due to Shutdown Schedule has taken from Madanganj S/S for Maintenance.",
+      "full_desc": "Madanganj-Munsiganj 132 kV Ckt-1 Forced S/D from Madanganj 132/33kV end Due to Redhot maintenance and from Munshiganj 132/33kV end Due to Shutdown Schedule has taken from Madanganj S/S for Maintenance."
+    },
+    {
+      "time": "22:45",
+      "plant": "Araihazar 132/33kV S/S T-1 HT Scheduled",
+      "load": "40.0MW",
+      "reason": "Due to Transformer-01 trip shown PRV trip signal",
+      "full_desc": "Araihazar 132/33kV S/S T-1 HT Scheduled S/D Due to Transformer-01 trip shown PRV trip signal"
+    },
+    {
+      "time": "00:35",
+      "plant": "Rampal 400/230kV S/S Bus Reactor",
+      "load": "HT Outage",
+      "reason": "Rampal 400/230kV S/S Bus Reactor is restored.",
+      "full_desc": "Rampal 400/230kV S/S Bus Reactor is restored."
+    },
+    {
+      "time": "01:42",
+      "plant": "Ashuganj 450 MW CCPP(North) GT Shutdown with remarks:- None",
+      "load": "450 MW",
+      "reason": "Ashuganj 450 MW CCPP(North) GT Shutdown with remarks:- None",
+      "full_desc": "Ashuganj 450 MW CCPP(North) GT Shutdown with remarks:- None"
+    },
+    {
+      "time": "01:42",
+      "plant": "Ashuganj 450 MW CCPP(North) Shutdown with remarks:- GT",
+      "load": "450 MW",
+      "reason": "Ashuganj 450 MW CCPP(North) Shutdown with remarks:- GT",
+      "full_desc": "Ashuganj 450 MW CCPP(North) Shutdown with remarks:- GT"
+    },
+    {
+      "time": "05:03 - 05:12",
+      "plant": "Gopalganj 132/33kV S/S T2 LT Tripped showing E/F relays.",
+      "load": "HT Outage",
+      "reason": "Gopalganj 132/33kV S/S T2 LT Tripped showing E/F relays.",
+      "full_desc": "Gopalganj 132/33kV S/S T2 LT Tripped showing E/F relays."
+    },
+    {
+      "time": "05:03 - 05:13",
+      "plant": "Gopalganj 132/33kV S/S T1 LT Tripped showing E/F relays",
+      "load": "HT Outage",
+      "reason": "Due to Reb-6 Feeder fault",
+      "full_desc": "Gopalganj 132/33kV S/S T1 LT Tripped showing E/F relays Due to Reb-6 Feeder fault"
+    },
+    {
+      "time": "07:13",
+      "plant": "Rangpur - Teesta Solar 132kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Project Work",
+      "full_desc": "Rangpur - Teesta Solar 132kV Ckt-1 Project Work S/D from Rangpur 132/33kV end Due to Project Work"
+    },
+    {
+      "time": "07:16",
+      "plant": "Rangpur - Teesta Solar 132kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to Project Work",
+      "full_desc": "Rangpur - Teesta Solar 132kV Ckt-2 Project Work S/D from Rangpur 132/33kV end Due to Project Work"
+    },
+    {
+      "time": "07:20",
+      "plant": "Barapukuria-Rangpur 132 kV Ckt-1 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to For Project Work and from Barapukuria 230/132/33kV end Due to None",
+      "full_desc": "Barapukuria-Rangpur 132 kV Ckt-1 Project Work S/D from Rangpur 132/33kV end Due to For Project Work and from Barapukuria 230/132/33kV end Due to None"
+    },
+    {
+      "time": "07:21",
+      "plant": "Barapukuria-Rangpur 132 kV Ckt-2 Project Work",
+      "load": "HT Outage",
+      "reason": "Due to For Project Work",
+      "full_desc": "Barapukuria-Rangpur 132 kV Ckt-2 Project Work S/D from Barapukuria 230/132/33kV end. and from Rangpur 132/33kV end Due to For Project Work"
+    }
+  ],
+  "hourlyLoadData": [
+    {
+      "time": "00:00",
+      "generation": 10813.13,
+      "loadShed": 0.0,
+      "demand": 10813.13
+    },
+    {
+      "time": "01:00",
+      "generation": 10363.89,
+      "loadShed": 0.0,
+      "demand": 10363.89
+    },
+    {
+      "time": "02:00",
+      "generation": 9909.77,
+      "loadShed": 0.0,
+      "demand": 9909.77
+    },
+    {
+      "time": "03:00",
+      "generation": 9555.34,
+      "loadShed": 0.0,
+      "demand": 9555.34
+    },
+    {
+      "time": "04:00",
+      "generation": 9329.65,
+      "loadShed": 0.0,
+      "demand": 9329.65
+    },
+    {
+      "time": "05:00",
+      "generation": 9187.27,
+      "loadShed": 0.0,
+      "demand": 9187.27
+    },
+    {
+      "time": "06:00",
+      "generation": 9446.77,
+      "loadShed": 0.0,
+      "demand": 9446.77
+    },
+    {
+      "time": "07:00",
+      "generation": 10311.66,
+      "loadShed": 0.0,
+      "demand": 10311.66
+    },
+    {
+      "time": "08:00",
+      "generation": 10836.92,
+      "loadShed": 0.0,
+      "demand": 10836.92
+    },
+    {
+      "time": "09:00",
+      "generation": 11003.65,
+      "loadShed": 0.0,
+      "demand": 11003.65
+    },
+    {
+      "time": "10:00",
+      "generation": 11002.93,
+      "loadShed": 0.0,
+      "demand": 11002.93
+    },
+    {
+      "time": "11:00",
+      "generation": 11244.73,
+      "loadShed": 0.0,
+      "demand": 11244.73
+    },
+    {
+      "time": "12:00",
+      "generation": 11971.89,
+      "loadShed": 0.0,
+      "demand": 11971.89
+    },
+    {
+      "time": "13:00",
+      "generation": 11980.86,
+      "loadShed": 0.0,
+      "demand": 11980.86
+    },
+    {
+      "time": "14:00",
+      "generation": 11419.77,
+      "loadShed": 0.0,
+      "demand": 11419.77
+    },
+    {
+      "time": "15:00",
+      "generation": 11006.7,
+      "loadShed": 0.0,
+      "demand": 11006.7
+    },
+    {
+      "time": "16:00",
+      "generation": 10814.58,
+      "loadShed": 0.0,
+      "demand": 10814.58
+    },
+    {
+      "time": "17:00",
+      "generation": 11277.57,
+      "loadShed": 0.0,
+      "demand": 11277.57
+    },
+    {
+      "time": "18:00",
+      "generation": 12341.36,
+      "loadShed": 0.0,
+      "demand": 12341.36
+    },
+    {
+      "time": "19:00",
+      "generation": 12005.63,
+      "loadShed": 0.0,
+      "demand": 12005.63
+    },
+    {
+      "time": "19:30",
+      "generation": 11823.55,
+      "loadShed": 0.0,
+      "demand": 11823.55
+    },
+    {
+      "time": "20:00",
+      "generation": 11618.82,
+      "loadShed": 0.0,
+      "demand": 11618.82
+    },
+    {
+      "time": "21:00",
+      "generation": 11528.95,
+      "loadShed": 0.0,
+      "demand": 11528.95
+    },
+    {
+      "time": "22:00",
+      "generation": 11112.09,
+      "loadShed": 0.0,
+      "demand": 11112.09
+    },
+    {
+      "time": "23:00",
+      "generation": 10778.17,
+      "loadShed": 0.0,
+      "demand": 10778.17
+    }
+  ],
+  "ewicData": {
+    "corridors": [
+      "Ishurdi-Ghorashal",
+      "Sirajganj-Sreepur",
+      "Gopalganj-Aminbazar"
+    ],
+    "rows": [
+      {
+        "time": "00:00",
+        "mw": [
+          158.0,
+          350.0,
+          1550.0
+        ],
+        "mvar": [
+          4.0,
+          96.0,
+          446.0
+        ]
+      },
+      {
+        "time": "01:00",
+        "mw": [
+          164.0,
+          372.0,
+          1466.0
+        ],
+        "mvar": [
+          2.0,
+          88.0,
+          430.0
+        ]
+      },
+      {
+        "time": "02:00",
+        "mw": [
+          170.0,
+          384.0,
+          1456.0
+        ],
+        "mvar": [
+          3.0,
+          84.0,
+          434.0
+        ]
+      },
+      {
+        "time": "03:00",
+        "mw": [
+          165.0,
+          374.0,
+          1310.0
+        ],
+        "mvar": [
+          3.0,
+          90.0,
+          424.0
+        ]
+      },
+      {
+        "time": "04:00",
+        "mw": [
+          165.0,
+          366.0,
+          1294.0
+        ],
+        "mvar": [
+          1.0,
+          82.0,
+          426.0
+        ]
+      },
+      {
+        "time": "05:00",
+        "mw": [
+          161.0,
+          350.0,
+          1218.0
+        ],
+        "mvar": [
+          -1.0,
+          80.0,
+          422.0
+        ]
+      },
+      {
+        "time": "06:00",
+        "mw": [
+          155.0,
+          332.0,
+          1194.0
+        ],
+        "mvar": [
+          0.0,
+          86.0,
+          432.0
+        ]
+      },
+      {
+        "time": "07:00",
+        "mw": [
+          132.0,
+          290.0,
+          1384.0
+        ],
+        "mvar": [
+          -8.0,
+          84.0,
+          424.0
+        ]
+      },
+      {
+        "time": "08:00",
+        "mw": [
+          153.0,
+          320.0,
+          1604.0
+        ],
+        "mvar": [
+          -2.0,
+          94.0,
+          526.0
+        ]
+      },
+      {
+        "time": "09:00",
+        "mw": [
+          191.0,
+          394.0,
+          1682.0
+        ],
+        "mvar": [
+          8.0,
+          94.0,
+          550.0
+        ]
+      },
+      {
+        "time": "10:00",
+        "mw": [
+          205.0,
+          430.0,
+          1714.0
+        ],
+        "mvar": [
+          12.0,
+          88.0,
+          550.0
+        ]
+      },
+      {
+        "time": "11:00",
+        "mw": [
+          202.0,
+          400.0,
+          1688.0
+        ],
+        "mvar": [
+          12.0,
+          82.0,
+          570.0
+        ]
+      },
+      {
+        "time": "12:00",
+        "mw": [
+          202.0,
+          430.0,
+          1742.0
+        ],
+        "mvar": [
+          20.0,
+          102.0,
+          596.0
+        ]
+      },
+      {
+        "time": "13:00",
+        "mw": [
+          210.0,
+          474.0,
+          1820.0
+        ],
+        "mvar": [
+          28.0,
+          98.0,
+          598.0
+        ]
+      },
+      {
+        "time": "14:00",
+        "mw": [
+          216.0,
+          480.0,
+          1880.0
+        ],
+        "mvar": [
+          32.0,
+          100.0,
+          616.0
+        ]
+      },
+      {
+        "time": "15:00",
+        "mw": [
+          229.0,
+          494.0,
+          1934.0
+        ],
+        "mvar": [
+          36.0,
+          82.0,
+          600.0
+        ]
+      },
+      {
+        "time": "16:00",
+        "mw": [
+          208.0,
+          420.0,
+          1786.0
+        ],
+        "mvar": [
+          31.0,
+          86.0,
+          620.0
+        ]
+      },
+      {
+        "time": "17:00",
+        "mw": [
+          193.0,
+          390.0,
+          1942.0
+        ],
+        "mvar": [
+          32.0,
+          76.0,
+          632.0
+        ]
+      },
+      {
+        "time": "18:00",
+        "mw": [
+          151.0,
+          390.0,
+          1792.0
+        ],
+        "mvar": [
+          12.0,
+          171.0,
+          480.0
+        ]
+      },
+      {
+        "time": "18:30",
+        "mw": [
+          167.0,
+          340.0,
+          1824.0
+        ],
+        "mvar": [
+          18.0,
+          60.0,
+          500.0
+        ]
+      },
+      {
+        "time": "19:00",
+        "mw": [
+          170.0,
+          350.0,
+          1844.0
+        ],
+        "mvar": [
+          20.0,
+          68.0,
+          512.0
+        ]
+      },
+      {
+        "time": "19:30",
+        "mw": [
+          173.0,
+          370.0,
+          1884.0
+        ],
+        "mvar": [
+          19.0,
+          68.0,
+          500.0
+        ]
+      },
+      {
+        "time": "20:00",
+        "mw": [
+          174.0,
+          370.0,
+          1914.0
+        ],
+        "mvar": [
+          18.0,
+          70.0,
+          508.0
+        ]
+      },
+      {
+        "time": "21:00",
+        "mw": [
+          172.0,
+          370.0,
+          1892.0
+        ],
+        "mvar": [
+          18.0,
+          72.0,
+          504.0
+        ]
+      },
+      {
+        "time": "22:00",
+        "mw": [
+          172.0,
+          370.0,
+          1802.0
+        ],
+        "mvar": [
+          17.0,
+          72.0,
+          488.0
+        ]
+      },
+      {
+        "time": "23:00",
+        "mw": [
+          167.0,
+          350.0,
+          1722.0
+        ],
+        "mvar": [
+          11.0,
+          66.0,
+          504.0
+        ]
+      }
+    ],
+    "circuits": [
+      {
+        "circuit": "Ishurdi-Ghorashal Ckt-1",
+        "direction": "Export",
+        "energyKwh": 0.0
+      },
+      {
+        "circuit": "Ishurdi-Ghorashal Ckt-1",
+        "direction": "Import",
+        "energyKwh": 0.0
+      },
+      {
+        "circuit": "Ishurdi-Ghorashal Ckt-2",
+        "direction": "Export",
+        "energyKwh": 4292218.18
+      },
+      {
+        "circuit": "Ishurdi-Ghorashal Ckt-2",
+        "direction": "Import",
+        "energyKwh": 0.0
+      },
+      {
+        "circuit": "Sirajganj-Sreepur Ckt-1",
+        "direction": "Export",
+        "energyKwh": 1451000.0
+      },
+      {
+        "circuit": "Sirajganj-Sreepur Ckt-1",
+        "direction": "Import",
+        "energyKwh": 0.0
+      },
+      {
+        "circuit": "Sirajganj-Sreepur Ckt-2",
+        "direction": "Export",
+        "energyKwh": 1458000.0
+      },
+      {
+        "circuit": "Sirajganj-Sreepur Ckt-2",
+        "direction": "Import",
+        "energyKwh": 0.0
+      },
+      {
+        "circuit": "Gopalganj-Aminbazar Ckt-1",
+        "direction": "Export",
+        "energyKwh": 20060000.0
+      },
+      {
+        "circuit": "Gopalganj-Aminbazar Ckt-1",
+        "direction": "Import",
+        "energyKwh": 0.0
+      },
+      {
+        "circuit": "Gopalganj-Aminbazar Ckt-2",
+        "direction": "Export",
+        "energyKwh": 20100000.0
+      },
+      {
+        "circuit": "Gopalganj-Aminbazar Ckt-2",
+        "direction": "Import",
+        "energyKwh": 0.0
+      }
+    ],
+    "totals": {
+      "export": 47361218.18,
+      "import": 0.0
+    },
+    "checks": [
+      {
+        "scope": "Sirajganj-Sreepur",
+        "message": "Sirajganj-Sreepur: the MW curve integrates to 9,240,000 kWh but its circuits are metered at 2,909,000 kWh (3.18x). Both are reproduced as published."
+      }
+    ]
+  },
+  "sourceFiles": {
+    "pgcb": "Daily Report 20-11-2026.xlsx"
+  },
+  "observationWindows": {
+    "timezone": "+06:00",
+    "pgcb": {
+      "unit": "energy day",
+      "start": "2026-11-19T00:00:00+06:00",
+      "end": "2026-11-20T00:00:00+06:00",
+      "filedAs": "2026-11-20",
+      "sourceFile": "Daily Report 20-11-2026.xlsx"
+    }
+  },
+  "forecast": {
+    "maxDemandEveningMw": 13090.0,
+    "maxDemandDayMw": 11790.0,
+    "maxGenEveningMw": 13090.0,
+    "totalEnergyGenMkwh": 269.96,
+    "maxTempC": 26.0,
+    "totalLoadShedMw": 0.0,
+    "hourly": [
+      {
+        "time": "00:00",
+        "generationMw": 11280.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11280.0
+      },
+      {
+        "time": "01:00",
+        "generationMw": 10820.0,
+        "loadShedMw": 0.0,
+        "demandMw": 10820.0
+      },
+      {
+        "time": "02:00",
+        "generationMw": 10390.0,
+        "loadShedMw": 0.0,
+        "demandMw": 10390.0
+      },
+      {
+        "time": "03:00",
+        "generationMw": 9820.0,
+        "loadShedMw": 0.0,
+        "demandMw": 9820.0
+      },
+      {
+        "time": "04:00",
+        "generationMw": 9600.0,
+        "loadShedMw": 0.0,
+        "demandMw": 9600.0
+      },
+      {
+        "time": "05:00",
+        "generationMw": 9390.0,
+        "loadShedMw": 0.0,
+        "demandMw": 9390.0
+      },
+      {
+        "time": "06:00",
+        "generationMw": 9690.0,
+        "loadShedMw": 0.0,
+        "demandMw": 9690.0
+      },
+      {
+        "time": "07:00",
+        "generationMw": 10550.0,
+        "loadShedMw": 0.0,
+        "demandMw": 10550.0
+      },
+      {
+        "time": "08:00",
+        "generationMw": 11050.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11050.0
+      },
+      {
+        "time": "09:00",
+        "generationMw": 10980.0,
+        "loadShedMw": 0.0,
+        "demandMw": 10980.0
+      },
+      {
+        "time": "10:00",
+        "generationMw": 11020.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11020.0
+      },
+      {
+        "time": "11:00",
+        "generationMw": 11300.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11300.0
+      },
+      {
+        "time": "12:00",
+        "generationMw": 11790.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11790.0
+      },
+      {
+        "time": "13:00",
+        "generationMw": 12200.0,
+        "loadShedMw": 0.0,
+        "demandMw": 12200.0
+      },
+      {
+        "time": "14:00",
+        "generationMw": 11880.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11880.0
+      },
+      {
+        "time": "15:00",
+        "generationMw": 11720.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11720.0
+      },
+      {
+        "time": "16:00",
+        "generationMw": 11460.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11460.0
+      },
+      {
+        "time": "17:00",
+        "generationMw": 11800.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11800.0
+      },
+      {
+        "time": "18:00",
+        "generationMw": 13090.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13090.0
+      },
+      {
+        "time": "18:30",
+        "generationMw": 13030.0,
+        "loadShedMw": 0.0,
+        "demandMw": 13030.0
+      },
+      {
+        "time": "19:00",
+        "generationMw": 12660.0,
+        "loadShedMw": 0.0,
+        "demandMw": 12660.0
+      },
+      {
+        "time": "19:30",
+        "generationMw": 12570.0,
+        "loadShedMw": 0.0,
+        "demandMw": 12570.0
+      },
+      {
+        "time": "20:00",
+        "generationMw": 12440.0,
+        "loadShedMw": 0.0,
+        "demandMw": 12440.0
+      },
+      {
+        "time": "21:00",
+        "generationMw": 12130.0,
+        "loadShedMw": 0.0,
+        "demandMw": 12130.0
+      },
+      {
+        "time": "22:00",
+        "generationMw": 11630.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11630.0
+      },
+      {
+        "time": "23:00",
+        "generationMw": 11270.0,
+        "loadShedMw": 0.0,
+        "demandMw": 11270.0
+      }
+    ],
+    "issuedAt": "2026-11-19T08:05:00+06:00",
+    "areaLoadShedMw": {
+      "Dhaka": 0.0,
+      "Chattogram": 0.0,
+      "Cumilla": 0.0,
+      "Mymensingh": 0.0,
+      "Sylhet": 0.0,
+      "Khulna": 0.0,
+      "Barishal": 0.0,
+      "Rajshahi": 0.0,
+      "Rangpur": 0.0
+    },
+    "issuedOn": "2026-11-18",
+    "issuedIn": "Daily Report 19-11-2026",
+    "targetDay": "2026-11-19",
+    "layout": "scenario",
+    "issuedFrom": "source-copy"
+  }
+}
