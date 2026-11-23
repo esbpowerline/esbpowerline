@@ -62,11 +62,10 @@ begin
     coalesce(new.raw_app_meta_data->>'role', 'SUBSCRIBER'),
     coalesce(new.raw_app_meta_data->>'status', 'ACTIVE')
   )
-  on conflict (id) do update
-    set full_name = excluded.full_name,
-        role = excluded.role,
-        status = excluded.status,
-        updated_at = now();
+  -- Role only ever from raw_app_meta_data (service-role written). Never raw_user_meta_data:
+  -- the live copy of this trigger read role from there until 2026-11-23, which let anyone
+  -- sign up as SUPER_ADMIN. Migration 0027 is the deployed version of this function.
+  on conflict (id) do nothing;
   return new;
 end;
 $$;

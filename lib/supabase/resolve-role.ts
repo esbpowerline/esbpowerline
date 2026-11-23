@@ -16,7 +16,16 @@ function normalizeRole(value: unknown): Role | null {
   return VALID_ROLES.has(role) ? (role as Role) : null;
 }
 
-/** Resolve app role from Supabase Auth user metadata or profiles row. */
+/**
+ * Resolve the app role for a Supabase Auth user.
+ *
+ * app_metadata wins. Only the service role can write it (lib/supabase/auth-user-sync.ts sets
+ * it on every create and role change), so a user cannot choose their own. profiles.role used
+ * to win instead, and on 2026-11-23 the live handle_new_user() trigger was found filling it
+ * from raw_user_meta_data — the sign-up payload — so anyone could sign up as SUPER_ADMIN.
+ * The profile row is now only a fallback for the few early accounts created before
+ * app_metadata.role existed.
+ */
 export function resolveRoleFromSupabaseUser(
   user:
     | Pick<User, 'user_metadata' | 'app_metadata'>
@@ -25,11 +34,5 @@ export function resolveRoleFromSupabaseUser(
     | undefined,
   profileRole?: string | null,
 ): Role | null {
-  const fromProfile = normalizeRole(profileRole);
-  if (fromProfile) return fromProfile;
-
-  return (
-    normalizeRole(user?.app_metadata?.role) ??
-    null
-  );
+  return normalizeRole(user?.app_metadata?.role) ?? normalizeRole(profileRole);
 }
