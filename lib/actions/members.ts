@@ -270,6 +270,9 @@ export async function getMemberSavedMagazines(): Promise<PublicMagazineIssue[]> 
 }
 
 export async function getAllMagazineIssues(): Promise<PublicMagazineIssue[]> {
+  // Only the members panel calls this, but as a server action it is public: without a
+  // session check it handed every published issue's PDF URL to anyone (2026-11-23 audit).
+  if (!(await getMemberSession())) return [];
   const issues = await prisma.magazineIssue.findMany({
     where: { status: 'published' },
     orderBy: { issueDate: 'desc' },
@@ -337,10 +340,14 @@ export async function getMemberDownloads(): Promise<MemberDownloadRow[]> {
 }
 
 export async function getArticleComments(articleId: string) {
+  // Public action: select only what the page shows. Without a select it returned every
+  // column, including authorEmail — which for phone-only members is their phone number
+  // (<digits>@phone.esbpowerline.local) — to anyone who invoked it (2026-11-23 audit).
   return prisma.comment.findMany({
     where: { articleId, status: 'APPROVED' },
     orderBy: { createdAt: 'desc' },
     take: 20,
+    select: { id: true, authorName: true, content: true, createdAt: true },
   });
 }
 

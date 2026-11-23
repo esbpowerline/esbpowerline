@@ -47,20 +47,24 @@ export async function GET(request: NextRequest) {
   const handoffUrl = buildHandoffUrl(destination);
   const handoffOrigin = new URL(handoffUrl).origin;
   const currentOrigin = `${proto}://${host}`;
-  const response = NextResponse.redirect(
-    handoffOrigin === currentOrigin
-      ? handoffUrl
-      : `${handoffUrl}${handoffUrl.includes('?') ? '&' : '?'}token=${encodeURIComponent(token)}`,
-  );
 
-  if (handoffOrigin === currentOrigin) {
-    response.cookies.set(HANDOFF_COOKIE, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/api/auth/handoff',
-      maxAge: 60,
-    });
+  // Never put the token in a URL. It is the user's access AND refresh token, signed but not
+  // encrypted, and safeAuthRedirectPath accepts any *.esbpowerline.com host — so a `?token=`
+  // on a cross-origin hop handed a full session to whoever serves or logs that subdomain
+  // (2026-11-23 audit). The receiver has read only the cookie since 2026-08-08, so the URL
+  // copy never signed anyone in anyway. A cross-origin destination just gets sent there; it
+  // asks for sign-in on its own origin. Production is one origin, so this is the dev split.
+  if (handoffOrigin !== currentOrigin) {
+    return NextResponse.redirect(handoffUrl);
   }
+
+  const response = NextResponse.redirect(handoffUrl);
+  response.cookies.set(HANDOFF_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/api/auth/handoff',
+    maxAge: 60,
+  });
   return response;
 }
