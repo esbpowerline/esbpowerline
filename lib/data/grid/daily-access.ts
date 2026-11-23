@@ -169,11 +169,29 @@ export function isProtectedHistoryPath(pathname: string): boolean {
   return HISTORY_API_RE.test(pathname);
 }
 
+/**
+ * The verification archive: one file per month from 2014 with ~600 checks a day, each
+ * carrying the PUBLISHED value it checked — the load-curve total, both grid halves and every
+ * fuel's half-hourly energy, i.e. the same figures `curves/` gates. It sat outside every rule
+ * and answered 200 to a bare curl with no Referer (2026-11-23 audit).
+ *
+ * It gets the bot and same-origin check, NOT the tier window: the Published-vs-Derived tab
+ * deliberately lets every reader open any month, so tier-gating these would break a public
+ * feature. Whether old months should be tier-gated is the owner's call; this closes scraping.
+ * Directory pattern, not a roster, for the reason given above HISTORY_API_RE.
+ */
+const GRID_VERIFICATION_JSON_RE = /^\/data\/grid-verification\/[A-Za-z0-9_][A-Za-z0-9._-]*\.json$/;
+
+export function isGridVerificationJsonPath(pathname: string): boolean {
+  return GRID_VERIFICATION_JSON_RE.test(pathname);
+}
+
 export function isProtectedDataJsonPath(pathname: string): boolean {
   const canonical = canonicalDataPath(pathname);
   return (
     isDailyJsonPath(canonical) ||
     isPetrobanglaJsonPath(canonical) ||
+    isGridVerificationJsonPath(canonical) ||
     isProtectedHistoryPath(pathname)
   );
 }

@@ -13,6 +13,7 @@ import {
   RULES_VERSION,
 } from '@/lib/data/grid/history.server';
 import type { Aggregation, Resolution } from '@/lib/data/grid/history-aggregate';
+import { parseIsoDate } from '@/lib/data/grid/date-utils';
 
 /**
  * A derived historical series.
@@ -33,7 +34,14 @@ export const dynamic = 'force-dynamic';
 
 const RESOLUTIONS: Resolution[] = ['hour', 'day', 'month'];
 const AGGREGATIONS: Aggregation[] = ['mean', 'max', 'min', 'sum'];
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+/**
+ * Most periods one request may ask for. `fillMissing` emits a point for every period in the
+ * range, and `to` was unbounded, so `resolution=hour&from=2014-01-01&to=9999-12-31` built
+ * ~70 million objects in one function invocation (2026-11-23 audit). The explorer asks for
+ * day and month only; 20,000 is ~54 years of days or ~2.3 years of hours.
+ */
+const MAX_PERIODS = 20_000;
+const PERIOD_MS: Record<Resolution, number> = { hour: 3_600_000, day: 86_400_000, month: 28 * 86_400_000 };
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -41,7 +49,7 @@ export async function GET(request: Request) {
   const resolution = (url.searchParams.get('resolution') ?? 'day') as Resolution;
   const aggregation = (url.searchParams.get('agg') ?? 'mean') as Aggregation;
   const requestedFrom = url.searchParams.get('from') ?? '';
-  const to = url.searchParams.get('to') ?? '';
+  const requestedTo = url.searchParams.get('to') ?? '';
   const dense = url.searchParams.get('dense') !== '0';
 
   if (!HISTORY_METRICS.includes(metric as never)) {
@@ -50,9 +58,14 @@ export async function GET(request: Request) {
   if (!RESOLUTIONS.includes(resolution) || !AGGREGATIONS.includes(aggregation)) {
     return NextResponse.json({ error: 'Unknown resolution or aggregation' }, { status: 400 });
   }
-  if (!ISO_DATE.test(requestedFrom) || !ISO_DATE.test(to)) {
+  // A real calendar date, not just the shape: 2026-02-31 passed the regex.
+  if (!parseIsoDate(requestedFrom) || !parseIsoDate(requestedTo)) {
     return NextResponse.json({ error: 'from and to must be YYYY-MM-DD' }, { status: 400 });
   }
+  // Nothing exists after today in Dhaka (the hourly capture can run ahead of the daily
+  // catalog, so the bound is the clock, not `latest`).
+  const todayDhaka = new Date(Date.now() + 6 * 3_600_000).toISOString().slice(0, 10);
+  const to = requestedTo > todayDhaka ? todayDhaka : requestedTo;
 
   // Tier window, resolved exactly as /api/members/grid-export resolves it, and
   // clamped with the same helper the static gate uses.
@@ -82,7 +95,7 @@ export async function GET(request: Request) {
   }
 
   const restriction = {
-    requested: { from: requestedFrom, to },
+    requested: { from: requestedFrom, to: requestedTo },
     effective: { from: clamped ? from : requestedFrom, to },
     restricted: Boolean(clamped),
     reason: clamped ? ('tier' as const) : null,
@@ -104,6 +117,14 @@ export async function GET(request: Request) {
     );
   }
 
+  const periods = (Date.parse(to) - Date.parse(from)) / PERIOD_MS[resolution] + 1;
+  if (periods > MAX_PERIODS) {
+    return NextResponse.json(
+      { error: `Range too long for ${resolution} resolution; narrow it or use a coarser one.` },
+      { status: 400 },
+    );
+  }
+
   const result = await getHistorySeries({
     metric,
     resolution,
@@ -118,9 +139,14 @@ export async function GET(request: Request) {
     { ...result, restriction },
     {
       headers: {
-        // Same reasoning as the data routes: middleware gates before the edge
-        // cache, so what is cached is the same bytes every passing reader gets.
-        'Cache-Control': 'public, max-age=0, s-maxage=600, stale-while-revalidate=86400',
+        // Only a visitor's answer may sit in the shared cache. The body depends on the
+        // SESSION (the tier clamp above), and the URL does not carry it: a subscriber's
+        // unclamped decade cached under a public URL was served to the next anonymous
+        // reader, and a visitor's clamped copy to the next subscriber (2026-11-23 audit).
+        'Cache-Control':
+          tier === 'visitor'
+            ? 'public, max-age=0, s-maxage=600, stale-while-revalidate=86400'
+            : 'private, no-store',
       },
     },
   );

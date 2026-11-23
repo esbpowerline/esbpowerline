@@ -157,9 +157,15 @@ async function compute(
  * layer's 600 s window because the archive is still being written into it.
  */
 function isSettled(toIso: string): boolean {
-  const endOfYesterday = new Date();
-  endOfYesterday.setUTCHours(0, 0, 0, 0);
-  return new Date(toIso) <= endOfYesterday;
+  // Two weeks back, not "before today". Rows keep landing for days after the hour they
+  // describe — the Pi refills missed hours from NLDC's retention window, PGCB files two to
+  // three days late — and a range ending yesterday was cached for a YEAR with whatever it
+  // held at first request. Paired with stale bounds, the scrubber's default range (ending at
+  // the stale latest) was frozen that way (2026-11-23 audit).
+  const settledBefore = new Date();
+  settledBefore.setUTCHours(0, 0, 0, 0);
+  settledBefore.setUTCDate(settledBefore.getUTCDate() - 14);
+  return new Date(toIso) <= settledBefore;
 }
 
 export function getHistorySeries(args: {
@@ -234,9 +240,22 @@ export async function getHistoryAt(instantIso: string) {
   };
 }
 
-/** The archive's own bounds, for the scrubber's extent. */
-export const getHistoryBounds = unstable_cache(
-  async () => {
+/**
+ * The archive's own bounds, for the scrubber's extent.
+ *
+ * Keyed by the Dhaka hour as well. With a constant key and `revalidate: 600` alone, Vercel's
+ * data cache kept serving the 2026-11-12 bounds on 2026-11-23 while the hourly capture had
+ * written eleven more days — the scrubber could not reach anything newer (2026-11-23 audit).
+ * A key that changes each hour bounds the staleness however revalidation behaves.
+ */
+export async function getHistoryBounds() {
+  const hourKey = new Date(Date.now() + 6 * 3_600_000).toISOString().slice(0, 13);
+  return getHistoryBoundsCached(hourKey);
+}
+
+const getHistoryBoundsCached = unstable_cache(
+  // The argument is part of the cache key; the query itself does not need it.
+  async (_hourKey: string) => {
     const r = await prisma.$queryRawUnsafe<Array<{ series: string; lo: Date; hi: Date; n: bigint }>>(
       `SELECT "series"::text AS series, MIN("observedAt") lo, MAX("observedAt") hi, COUNT(*)::bigint n
        FROM "GridHourlyObservation" GROUP BY 1`,
