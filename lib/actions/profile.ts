@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import type { Role } from '@/lib/constants';
 import {
+  changeSupabaseAuthUserEmail,
   upsertSupabaseAuthUser,
   syncSupabaseAuthUserMetadata,
   syncSupabaseAuthUserStatus,
@@ -94,6 +95,16 @@ export async function updateProfile(data: {
       select: { id: true },
     });
     if (existing) throw new Error('Email already in use');
+    // Move the Auth identity first; this used to change Prisma only, which left the next
+    // password change overwriting whichever Auth user owned the new address.
+    try {
+      await changeSupabaseAuthUserEmail(user.email, nextEmailNormalized);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'EMAIL_ALREADY_REGISTERED') {
+        throw new Error('Email already in use');
+      }
+      throw error;
+    }
     updateData.email = nextEmailNormalized;
   }
 
@@ -108,12 +119,11 @@ export async function updateProfile(data: {
     });
   }
 
-  const nextEmail = (data.email ?? user.email).toLowerCase();
   const nextName = (updateData.name as string | undefined) ?? user.name;
 
   if (data.name || data.email) {
     await syncSupabaseAuthUserMetadata({
-      email: user.email,
+      email: (updateData.email as string | undefined) ?? user.email,
       name: nextName,
       role: user.role as Role,
       status: user.status,

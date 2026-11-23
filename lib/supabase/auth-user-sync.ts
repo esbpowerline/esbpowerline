@@ -119,6 +119,39 @@ export async function upsertAuthUserWithClient(
   return userId;
 }
 
+/**
+ * Move an Auth identity to a new email address, before the Prisma row changes.
+ *
+ * Every other sync helper finds the Auth user BY EMAIL. When the email changed in Prisma
+ * only (staff profile, admin edit) or Prisma first and Supabase second (member profile, which
+ * also read just the first page of 200 users), the two drifted apart — and the next password
+ * change upserted by the new address, overwriting whichever Auth identity owned it: its
+ * password and its role (2026-11-23 audit). So: refuse an address another Auth user holds,
+ * and change Supabase first so a failure leaves both sides on the old address.
+ */
+export async function changeAuthUserEmailWithClient(
+  admin: SupabaseClient,
+  currentEmail: string,
+  nextEmail: string,
+): Promise<void> {
+  const from = currentEmail.trim().toLowerCase();
+  const to = nextEmail.trim().toLowerCase();
+  if (from === to) return;
+
+  const owner = await findUserIdByEmail(admin, to);
+  const userId = await findUserIdByEmail(admin, from);
+  if (owner && owner !== userId) throw new Error('EMAIL_ALREADY_REGISTERED');
+  if (!userId) {
+    throw new Error(`Supabase user not found for email change: ${from}`);
+  }
+
+  const { error } = await admin.auth.admin.updateUserById(userId, {
+    email: to,
+    email_confirm: true,
+  });
+  if (error) throw error;
+}
+
 /** Update Supabase Auth metadata when profile changes (no password change). */
 export async function syncAuthUserMetadataWithClient(
   admin: SupabaseClient,

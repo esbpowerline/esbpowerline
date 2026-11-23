@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
 import {
+  changeSupabaseAuthUserEmail,
   upsertSupabaseAuthUser,
   syncSupabaseAuthUserMetadata,
   syncSupabaseAuthUserStatus,
@@ -256,6 +257,20 @@ export async function updateUser(id: string, data: Partial<UserInput>) {
     assertRoleAssignment(admin.role as Role, parsed.role as Role, existing.role as Role);
   }
 
+  // An email edit moves the Auth identity first (see changeAuthUserEmailWithClient). It used
+  // to change Prisma only, and every sync below then looked the Auth user up by the OLD
+  // address while sign-in kept using it.
+  const emailChanged = Boolean(parsed.email && parsed.email !== existing.email.toLowerCase());
+  if (emailChanged) {
+    const taken = await prisma.user.findFirst({
+      where: { email: { equals: parsed.email!, mode: 'insensitive' }, NOT: { id } },
+      select: { id: true },
+    });
+    if (taken) throw new Error('Email already exists');
+    await changeSupabaseAuthUserEmail(existing.email, parsed.email!);
+  }
+  const authEmail = emailChanged ? parsed.email! : existing.email;
+
   // Track original values for potential rollback
   const originalData: Record<string, unknown> = {};
   for (const key of Object.keys(updateData)) {
@@ -271,7 +286,7 @@ export async function updateUser(id: string, data: Partial<UserInput>) {
 
     if (parsed.password) {
       const supabaseUserId = await upsertSupabaseAuthUser({
-        email: existing.email,
+        email: authEmail,
         password: parsed.password,
         name: nextName,
         role: nextRole,
@@ -285,7 +300,7 @@ export async function updateUser(id: string, data: Partial<UserInput>) {
       }
     } else if (parsed.name || parsed.role || parsed.status) {
       await syncSupabaseAuthUserMetadata({
-        email: existing.email,
+        email: authEmail,
         name: nextName,
         role: nextRole,
         status: nextStatus,
@@ -293,18 +308,21 @@ export async function updateUser(id: string, data: Partial<UserInput>) {
     }
 
     if (parsed.status === 'SUSPENDED') {
-      await syncSupabaseAuthUserStatus(existing.email, 'SUSPENDED');
-      await invalidateSupabaseAuthSession(existing.email);
+      await syncSupabaseAuthUserStatus(authEmail, 'SUSPENDED');
+      await invalidateSupabaseAuthSession(authEmail);
     } else if (parsed.status === 'ACTIVE') {
-      await syncSupabaseAuthUserStatus(existing.email, 'ACTIVE');
+      await syncSupabaseAuthUserStatus(authEmail, 'ACTIVE');
     }
 
     // Force immediate session invalidation if role is reduced
     if (parsed.role && ROLES[parsed.role].level < ROLES[existing.role].level) {
-      await invalidateSupabaseAuthSession(existing.email);
+      await invalidateSupabaseAuthSession(authEmail);
     }
   } catch (error: any) {
-    // Rollback local changes on Supabase sync failure
+    // Rollback local changes on Supabase sync failure, including the Auth email moved above.
+    if (emailChanged) {
+      await changeSupabaseAuthUserEmail(authEmail, existing.email).catch(() => undefined);
+    }
     await prisma.user.update({
       where: { id },
       data: originalData as any,

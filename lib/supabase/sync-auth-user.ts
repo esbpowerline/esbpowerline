@@ -3,6 +3,7 @@ import 'server-only';
 import type { Role } from '@/lib/constants';
 import { createServiceRoleClient } from '@/lib/supabase/admin-client';
 import {
+  changeAuthUserEmailWithClient,
   invalidateAuthSessionWithClient,
   syncAuthUserMetadataWithClient,
   syncAuthUserStatusWithClient,
@@ -23,6 +24,18 @@ export async function upsertSupabaseAuthUser(input: AuthUserSyncInput): Promise<
     return null;
   }
   return upsertAuthUserWithClient(admin, input);
+}
+
+/**
+ * Move the Auth identity to a new email. Call BEFORE writing the new email to Prisma; it
+ * throws EMAIL_ALREADY_REGISTERED when another Auth user holds the address.
+ */
+export async function changeSupabaseAuthUserEmail(currentEmail: string, nextEmail: string): Promise<void> {
+  const admin = createServiceRoleClient();
+  if (!admin) {
+    throw new Error('Supabase service role not configured — cannot change the sign-in email');
+  }
+  await changeAuthUserEmailWithClient(admin, currentEmail, nextEmail);
 }
 
 /** Update Supabase Auth metadata when Prisma user profile changes (no password change). */

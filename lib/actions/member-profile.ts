@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { getMemberSession } from '@/lib/member-session';
 import {
+  changeSupabaseAuthUserEmail,
   upsertSupabaseAuthUser,
   syncSupabaseAuthUserMetadata,
 } from '@/lib/supabase/sync-auth-user';
@@ -62,40 +63,30 @@ export async function updateMemberProfile(input: { name?: string; email?: string
 
   const nextName = updateData.name ?? user.name;
 
+  // Supabase first, then Prisma: see changeAuthUserEmailWithClient for why the order and
+  // the ownership check matter.
+  if (updateData.email) {
+    try {
+      await changeSupabaseAuthUserEmail(user.email, updateData.email);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'EMAIL_ALREADY_REGISTERED') {
+        throw new Error('This email is already registered');
+      }
+      throw error;
+    }
+  }
+
   await prisma.user.update({
     where: { id: user.id },
     data: updateData,
   });
 
-  if (updateData.email) {
-    const { createServiceRoleClient } = await import('@/lib/supabase/admin-client');
-    const admin = createServiceRoleClient();
-    if (admin) {
-      const { data } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-      const supabaseUser = data.users.find((u) => u.email?.toLowerCase() === user.email.toLowerCase());
-      if (supabaseUser) {
-        const { error } = await admin.auth.admin.updateUserById(supabaseUser.id, {
-          email: updateData.email,
-          user_metadata: {
-            name: nextName,
-            full_name: nextName,
-          },
-        });
-        if (error) throw error;
-        await admin
-          .from('profiles')
-          .update({ full_name: nextName, updated_at: new Date().toISOString() })
-          .eq('id', supabaseUser.id);
-      }
-    }
-  } else if (updateData.name) {
-    await syncSupabaseAuthUserMetadata({
-      email: user.email,
-      name: nextName,
-      role: 'SUBSCRIBER',
-      status: user.status,
-    });
-  }
+  await syncSupabaseAuthUserMetadata({
+    email: updateData.email ?? user.email,
+    name: nextName,
+    role: 'SUBSCRIBER',
+    status: user.status,
+  });
 
   revalidatePath('/members/account');
   revalidatePath('/', 'layout');
