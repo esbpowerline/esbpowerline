@@ -7,6 +7,7 @@
  */
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { PETROBANGLA_STATEMENTS, PETROBANGLA_BALANCE_SHEET, PETROBANGLA_FINANCIALS_PROVENANCE } from '@/lib/data/companies/petrobangla-financials';
 import { formatNumber } from '@/lib/utils';
 import { bpdbAuditedFinancials, BPDB_FINANCIALS_COVERAGE_NOTE } from '@/lib/data/companies/bpdb';
@@ -80,14 +81,14 @@ function FullReport() {
       <p className="gpm-sub">Balance sheet</p>
       <DataTable head={['Line', ...PETROBANGLA_STATEMENTS.map((y) => ({ label: y.fy, unit: 'Crore BDT' }))]}
         rows={PETROBANGLA_BALANCE_SHEET.map((r) => [r.label, ...PETROBANGLA_STATEMENTS.map((y) => (r.byYear[y.shortLabel] == null ? '—' : formatNumber(r.byYear[y.shortLabel])))])} />
-      <div className="gpm-foot"><span>Full page, with BPDB beside it: <a href="/annual-reports/financials">Annual Reports · Financials</a></span></div>
+      <div className="gpm-foot"><span>Full page, with BPDB beside it: <Link href="/annual-reports/financials">Annual Reports · Financials</Link></span></div>
     </>
   );
 }
 
 function FullReportLink() {
   const open = useSheet();
-  return <a href="/annual-reports/financials" onClick={(e) => { e.preventDefault(); open(<FullReport />); }}>View</a>;
+  return <Link href="/annual-reports/financials" onClick={(e) => { e.preventDefault(); open(<FullReport />); }}>View</Link>;
 }
 
 function FullReportPill() {

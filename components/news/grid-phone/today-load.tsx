@@ -84,6 +84,12 @@ export function TodayLoadNotes() {
           {' '}At the evening peak (<b>{peakRow.time} Hr</b>) PGCB reported demand of <b>{fmt(Math.round(peakRow.demand))} MW</b>
           {isNum(peakRow.loadShed) && peakRow.loadShed > 0 ? <> against <b>{fmt(Math.round(peakRow.loadShed))} MW</b> of load shedding.</> : ' with no load shedding recorded.'}
         </>
+      ) : isNum(s.eveningPeakDemand) && s.eveningPeakDemand > 0 ? (
+        // Same fix as OverviewPanel: the day's own figure, so the sentence cannot deny a
+        // number the page prints elsewhere (2026-11-23).
+        <>
+          {' '}PGCB reported an evening-peak demand of <b>{fmt(Math.round(s.eveningPeakDemand))} MW</b>; this report carries no hourly load-shedding figures.
+        </>
       ) : (
         ' This report does not publish an evening-peak demand or load-shedding figure.'
       )}

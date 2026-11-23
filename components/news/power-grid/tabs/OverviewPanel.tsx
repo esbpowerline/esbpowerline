@@ -336,6 +336,13 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
                         ' with no load shedding recorded.'
                       )}
                     </>
+                  ) : systemStats.eveningPeakDemand > 0 ? (
+                    // The day's own evening-peak demand, when no hourly row carries one. The
+                    // blanket "does not publish" line contradicted the Peak Demand tile above
+                    // it on 2016-03-10, which shows 7,456 MW from the same report (2026-11-23).
+                    <>
+                      {' '}PGCB reported an evening-peak demand of <span className="font-bold text-foreground tabular-nums">{formatNumber(Math.round(systemStats.eveningPeakDemand))} MW</span>; this report carries no hourly load-shedding figures.
+                    </>
                   ) : (
                     ' This report does not publish an evening-peak demand or load-shedding figure.'
                   )}

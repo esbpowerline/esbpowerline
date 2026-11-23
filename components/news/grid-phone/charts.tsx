@@ -153,8 +153,7 @@ function useScrub(n: number, f: Frame | null, onScrub?: (i: number | null) => vo
  * call sites need not change; a chart without axes (a sparkline) keeps `minH`.
  */
 export const CHART_H = 200;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const heightFor = (_w: number, _aspect: number, _min: number, _max: number) => CHART_H;
+const heightFor = (..._ignored: [w: number, aspect: number, min: number, max: number]) => CHART_H;
 
 export function LineChart({
   labels,
