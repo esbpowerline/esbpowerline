@@ -301,22 +301,8 @@ export async function getMediaLibrary(): Promise<MediaLibraryItem[]> {
   return mapped;
 }
 
-export async function createMedia(data: {
-  name: string;
-  url: string;
-  type: string;
-  mimeType?: string;
-  size?: number;
-  altText?: string;
-}) {
-  const user = await requireAuth();
-  const media = await prisma.media.create({
-    data: { ...data, uploadedById: user.id },
-  });
-  revalidatePath('/cms/media');
-  revalidatePath('/admin/media');
-  return media;
-}
+// createMedia moved to lib/media-records.ts (recordUploadedMedia): as an exported server
+// action it accepted any url, and deleteMedia deletes whatever object that url names.
 
 export async function updateMedia(
   id: string,

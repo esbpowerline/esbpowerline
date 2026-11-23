@@ -228,6 +228,8 @@ export async function getEditorialWorkspaceSnapshot() {
   };
 }
 
+const ARTICLE_FLAGS = new Set<string>(['isFeatured', 'isPinned', 'isBreaking']);
+
 export async function toggleArticleFlag(
   articleId: string,
   flag: 'isFeatured' | 'isPinned' | 'isBreaking',
@@ -236,6 +238,12 @@ export async function toggleArticleFlag(
   const session = await auth();
   if (!session?.user || !can(session.user.role, 'article.feature')) {
     throw new Error('Forbidden');
+  }
+  // A server action is a public endpoint and its TypeScript types are not checked at
+  // runtime: without this an EDITOR could send flag 'status' / 'content' / 'authorId' and
+  // write any article column, unsanitised, under a "Toggled" audit line (2026-11-23 audit).
+  if (!ARTICLE_FLAGS.has(flag) || typeof value !== 'boolean') {
+    throw new Error('Invalid flag');
   }
 
   const updates: Record<string, boolean> = { [flag]: value };

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { can } from '@/lib/constants';
-import { createMedia } from '@/lib/actions/media';
+import { recordUploadedMedia } from '@/lib/media-records';
 import { uploadMediaBuffer } from '@/lib/media-storage';
-import { isBlockedUploadMime } from '@/lib/upload-policy';
+import { isBlockedUploadMime, uploadMatchesDeclaredType } from '@/lib/upload-policy';
 import { checkRateLimitResponse } from '@/lib/security';
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -33,6 +33,9 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (!uploadMatchesDeclaredType(buffer, file.type || '')) {
+      return NextResponse.json({ error: 'This file type is not allowed.' }, { status: 400 });
+    }
     const stored = await uploadMediaBuffer({
       buffer,
       fileName: file.name,
@@ -40,7 +43,8 @@ export async function POST(request: NextRequest) {
       folder,
     });
 
-    await createMedia({
+    await recordUploadedMedia({
+      uploadedById: session.user.id,
       name: file.name,
       url: stored.url,
       type: file.type.startsWith('image/') ? 'image' : 'file',

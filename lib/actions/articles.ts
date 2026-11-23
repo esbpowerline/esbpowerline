@@ -37,6 +37,18 @@ function resolveArticleSlug(title: string, slug?: string, fallback?: string) {
   return `draft-${Date.now().toString(36)}`;
 }
 
+/**
+ * A live article (published or scheduled) is changed only by someone who could have put it
+ * live. Otherwise a CONTRIBUTOR could get clean text approved and then rewrite it on the site
+ * — by editing, by restoring an older revision, or by flipping it to draft/archived/trash in
+ * the list — with no review and, for trash, without delete rights (2026-11-23 audit).
+ */
+function assertCanChangeLiveArticle(user: ArticleUser, status: string | null | undefined) {
+  if (isLiveStatus(status) && !can(user.role, 'article.publish')) {
+    throw new Error('This article is live. Ask an editor to change it.');
+  }
+}
+
 function enforceArticlePermissions(
   user: ArticleUser,
   parsed: ArticleInput,
@@ -47,6 +59,11 @@ function enforceArticlePermissions(
     && (parsed.status === 'PUBLISHED' || parsed.status === 'SCHEDULED')
   ) {
     throw new Error('You do not have permission to publish or schedule articles');
+  }
+  if (existing) assertCanChangeLiveArticle(user, existing.status);
+  // Trash goes through the delete rules (deleteArticle), never a plain status edit.
+  if (parsed.status === 'TRASH' && existing?.status !== 'TRASH' && !can(user.role, 'article.delete_own')) {
+    throw new Error('You do not have permission to delete articles');
   }
 
   const result = { ...parsed };
@@ -901,6 +918,7 @@ export async function restoreArticleRevision(articleId: string, revisionId: stri
     ? can(user.role, 'article.edit_own')
     : can(user.role, 'article.edit_any');
   if (!canEdit) throw new Error('Forbidden');
+  assertCanChangeLiveArticle(user, article.status);
 
   await prisma.revision.create({
     data: { articleId, content: article.content, userId: user.id, note: 'Before restore' },
@@ -937,6 +955,10 @@ export async function bulkOwnArticleAction(
   }
   if (action === 'trash' && !can(user.role, 'article.delete_own')) {
     throw new Error('You do not have permission to delete');
+  }
+  // draft / archive / trash on a live story takes it off the site: publishers only.
+  if (action !== 'publish' && action !== 'schedule') {
+    for (const a of articles) assertCanChangeLiveArticle(user, a.status);
   }
 
   /* The same gate the edit form applies, because otherwise it is decorative:
