@@ -7,6 +7,7 @@
  * row with its P/D mark, the audit caveat and the source citation.
  */
 
+import { PEAK_SERVED_HINT, PEAK_SERVED_NOTE, peakDemandEqualsGeneration } from '@/lib/data/grid/peak-served';
 import type { ReactNode } from 'react';
 import { peakDeficitAtDemand, useGridOverviewContext } from '@/hooks/useGridOverviewContext';
 import { forecastStatesAvailability } from '@/lib/data/grid/forecast-curve';
@@ -172,6 +173,7 @@ export function TodayKpiStrip() {
             <>
               <Trend cur={s.eveningPeakDemand} base={baseline?.peakDemand} days={days} polarity="neutral" />
               <ForecastHint forecastMw={f?.maxDemandEveningMw ?? f?.maxDemandMw} actualMw={s.eveningPeakDemand} />
+              {peakDemandEqualsGeneration(s) && <span style={{ display: 'block' }}>{PEAK_SERVED_HINT}</span>}
             </>
           }
           onClick={() =>
@@ -186,6 +188,7 @@ export function TodayKpiStrip() {
                     ...(isNum(f?.maxDemandEveningMw ?? f?.maxDemandMw) ? [{ p: 'P' as const, label: 'PGCB’s same-morning forecast', value: `${fmt(f!.maxDemandEveningMw ?? f!.maxDemandMw)} MW` }] : []),
                   ]}
                 />
+                {peakDemandEqualsGeneration(s) && <p className="gp-taudit">{PEAK_SERVED_NOTE}</p>}
                 <p className="gp-taudit">{pub}</p>
                 <SourceRef label="PGCB Daily Report" part="P1 sheet" date={dateLabel} file={files?.pgcb} href={PGCB} />
                 {wk('Evening peak demand', 'MW', 0, (d) => d?.systemStats.eveningPeakDemand ?? null)}

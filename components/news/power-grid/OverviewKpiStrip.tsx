@@ -1,5 +1,6 @@
 'use client';
 
+import { PEAK_SERVED_HINT, PEAK_SERVED_NOTE, peakDemandEqualsGeneration } from '@/lib/data/grid/peak-served';
 import { memo, useEffect, useRef, useState } from 'react';
 import { Activity, Droplet, Factory, TrendingDown, Zap } from 'lucide-react';
 import { TakaIcon } from '@/components/news/power-grid/shared';
@@ -394,6 +395,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
               forecastMw={forecast?.maxDemandEveningMw ?? forecast?.maxDemandMw}
               actualMw={systemStats.eveningPeakDemand}
             />
+            {peakDemandEqualsGeneration(systemStats) && (
+              <span className="block mt-0.5">{PEAK_SERVED_HINT}</span>
+            )}
           </>
         }
         active={activeKpiTooltip === 'demand'}
@@ -420,6 +424,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
                 : `${formatNumber(Math.round(systemStats.dayPeakDemand))} MW`
             }
           />
+          {peakDemandEqualsGeneration(systemStats) && (
+            <GridKpiTooltipAudit>{PEAK_SERVED_NOTE}</GridKpiTooltipAudit>
+          )}
           {/* The deficit this demand implies is the Peak Deficit tile's headline. */}
           <GridKpiTooltipRow
             provenance="P"
