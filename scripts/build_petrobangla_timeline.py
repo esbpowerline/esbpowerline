@@ -19,7 +19,7 @@ QUARANTINE = {
 }
 
 
-def domestic_lng(fields: list, grand_gas=None) -> tuple[float, float]:
+def domestic_lng(fields: list, grand_gas=None, expected_fields=None) -> tuple[float, float]:
     """(domestic, R-LNG) MMCFD for one day.
 
     Domestic was always the sum of the non-RPGCL field rows, which is only as
@@ -28,14 +28,14 @@ def domestic_lng(fields: list, grand_gas=None) -> tuple[float, float]:
     1,591.5 on 22 Nov against the 1,600.6 the report prints (2,649.1 Grand
     Total less 1,048.5 R-LNG).
 
-    So when the field rows do not reconcile with the printed Grand Total (the
-    parser's own 5.0 MMCFD tolerance), domestic is taken as Grand Total minus
-    the R-LNG row, both as printed. On a day that reconciles the field sum is
-    kept, so the 2,330 days that already agreed do not move by their rounding
-    noise. Thirteen 2021-22 days also cross the tolerance with every field row
-    present: Petrobangla's subtotals add to its Grand Total there but its field
-    rows fall 5-9 MMCFD short of them, and the printed totals are what
-    Petrobangla states domestic supply was.
+    So when a field row is MISSING (fewer rows than that month's usual count,
+    `expected_fields`) and the rows do not reconcile with the printed Grand
+    Total (the parser's own 5.0 MMCFD tolerance), domestic is taken as Grand
+    Total minus the R-LNG row, both as printed. With every row present the
+    field sum is kept even when it disagrees -- that is the source disagreeing
+    with itself, reported, not repaired (owner's call, 2026-11-25). Thirteen
+    2021-22 days do qualify: they parse 23 rows in months that otherwise carry
+    24, and fall 5-9 MMCFD short of the printed total.
     """
     domestic = 0.0
     lng = 0.0
@@ -45,13 +45,30 @@ def domestic_lng(fields: list, grand_gas=None) -> tuple[float, float]:
             lng += g
         else:
             domestic += g
-    if isinstance(grand_gas, (int, float)) and abs(domestic + lng - float(grand_gas)) > 5.0:
+    missing = expected_fields is not None and len(fields) < expected_fields
+    if missing and isinstance(grand_gas, (int, float)) and abs(domestic + lng - float(grand_gas)) > 5.0:
         domestic = round(float(grand_gas) - lng, 1)
     return domestic, lng
 
 
+def modal_field_counts() -> dict:
+    """The usual number of field rows per month, to tell a dropped row from a layout."""
+    from collections import Counter
+    counts: dict = {}
+    for path in DAILY.glob("20*.json"):
+        if path.name.startswith("_"):
+            continue
+        try:
+            n = len(json.loads(path.read_text(encoding="utf-8")).get("production", {}).get("fields", []))
+        except Exception:
+            continue
+        counts.setdefault(path.stem[:7], Counter())[n] += 1
+    return {m: c.most_common(1)[0][0] for m, c in counts.items()}
+
+
 def main():
     rows = []
+    expected_by_month = modal_field_counts()
     for path in sorted(DAILY.glob("20*.json")):
         if path.name.startswith("_"):
             continue
@@ -65,7 +82,7 @@ def main():
         date = path.stem
         gt = data.get("production", {}).get("grand_total", {})
         fields = data.get("production", {}).get("fields", [])
-        dom, lng = domestic_lng(fields, (gt or {}).get("gas_mmcfd"))
+        dom, lng = domestic_lng(fields, (gt or {}).get("gas_mmcfd"), expected_by_month.get(date[:7]))
         major_names = ("Bibiyana", "Titas", "Jalalabad", "Habiganj", "Rashidpur", "Shahbazpur", "R-LNG Terminal", "Bangora")
         field_map = {n: next((float(f.get("gas_mmcfd") or 0) for f in fields if f.get("field") == n), 0.0) for n in major_names}
         bib = field_map.get("Bibiyana", 0.0)
