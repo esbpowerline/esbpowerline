@@ -109,6 +109,21 @@ describe('parseNldcGenerationHtml', () => {
     expect(sum).toBe(10112);
   });
 
+  it('matches the header as NLDC encodes it (য় as U+09DF), with a blank nuclear cell', () => {
+    // The first fix compared raw strings; NLDC's precomposed য় never matched the
+    // decomposed constant and every live row stayed shifted. Real 21 Nov 11:00 row.
+    const header = 'নিউক্লিয়ার';
+    const html = `<table><thead><tr><th>তারিখ</th><th>সময়</th><th>উৎপাদন(মেঃওঃ)</th>
+      <th>গ্যাস</th><th>তরল জ্বালানী</th><th>কয়লা</th><th>হাইড্রো</th><th>সৌর</th><th>বায়ু</th>
+      <th>${header}</th><th>ভারত</th><th>নেপাল</th><th>মন্তব্য</th></tr></thead><tbody><tr>
+      <td>২১-১১-২০২৬</td><td>১১:০০:০০</td><td>১০৬৩১</td>
+      <td>৪২৫০</td><td>২৮৪</td><td>৩৭৫৮</td><td>৪০</td><td>১৩৩</td><td>৩</td>
+      <td></td><td>৯৩১</td><td>৯৮</td><td>১১৩৪</td><td>০</td><td></td>
+    </tr></tbody></table>`;
+    const [r] = parseNldcGenerationHtml(html);
+    expect(r).toMatchObject({ nuclearMw: null, bheramaraMw: 931, tripuraMw: 98, adaniMw: 1134, nepalMw: 0 });
+  });
+
   it('infers the nuclear layout from an odd cell count when no header arrived', () => {
     const fragment = `<table><tr>
       <td>২৫-১১-২০২৬</td><td>০৯:০০:০০</td><td>১০১১২</td>

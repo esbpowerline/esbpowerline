@@ -162,9 +162,16 @@ export function parseNldcGenerationHtml(html: string): LiveGenerationRow[] {
   // The header decides when it is present, because it names the column; the
   // cell count decides only when no header reached us (a fragment). Odd counts
   // are the nuclear layouts: 14 base, +1 nuclear, +2 deficit/loadshed.
+  //
+  // Compared in NFD. NLDC writes the য় in নিউক্লিয়ার as the single code point
+  // U+09DF; typed here it is U+09AF + U+09BC, and NFC does not compose that
+  // pair (U+09DF is a composition exclusion). The first version matched raw
+  // strings, never saw the header on a real page, and kept shifting every
+  // import one column along for six more hours of production (2026-11-25).
+  // An odd cell count is the nuclear layout too, header or no header.
   const rawClean = html.replace(/<!--[\s\S]*?-->/g, '');
   const headerSeen = /<th[\s>]/i.test(rawClean);
-  const headerHasNuclear = rawClean.includes(NUCLEAR_HEADER);
+  const headerHasNuclear = rawClean.normalize('NFD').includes(NUCLEAR_HEADER.normalize('NFD'));
   for (const cells of tableRows(html)) {
     // Layouts, by cell count (deficit + loadshed are commented out today):
     //   14: date, time, total, gas, liquid, coal, hydro, solar, wind,
@@ -176,7 +183,7 @@ export function parseNldcGenerationHtml(html: string): LiveGenerationRow[] {
     if (cells.length < 14) continue;
     const at = toIsoLocal(cells[0], cells[1]);
     if (!at) continue;
-    const hasNuclear = headerSeen ? headerHasNuclear : cells.length % 2 === 1;
+    const hasNuclear = (headerSeen && headerHasNuclear) || cells.length % 2 === 1;
     const wide = cells.length - (hasNuclear ? 1 : 0) >= 16;
     const v = cells.slice(2).map(num);
     const total = v[0];
