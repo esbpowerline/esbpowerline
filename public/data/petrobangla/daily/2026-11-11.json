@@ -3,7 +3,7 @@
   "meta": {
     "schema_version": "1.0.0",
     "parser_version": "2.0.0-reconstructed",
-    "source_pdf": "/home/pi/esb-ingest/repo/scratch/downloads/Daily-Gas-Intake-Offtake-Report (13.11.26).pdf",
+    "source_pdf": "C:\\Users\\User\\esbpowerline\\scratch\\ge-1125\\pbpdf\\d\\2026-11-11\\Daily-Gas-Intake-Offtake-Report (13.11.26).pdf",
     "source_filename": "Daily-Gas-Intake-Offtake-Report (13.11.26).pdf",
     "parsed_at": null,
     "page_count": 1,
@@ -13,7 +13,7 @@
     "parse_status": "ok",
     "warnings": [],
     "content_sha256": "675809a17e9f2a2f33c0cd201e4f52f9f4787e831f98db40a05741fdb1e6caa4",
-    "agent_summary": "Petrobangla daily gas report for 11-12 Nov, 2026. 22 producing fields, 70 power plants tracked. Grand total gas production 2595.4 MMCFD.",
+    "agent_summary": "Petrobangla daily gas report for 11-12 Nov, 2026. 23 producing fields, 70 power plants tracked. Grand total gas production 2595.4 MMCFD.",
     "queryable_collections": [
       "production.fields",
       "production.subtotals",
@@ -268,15 +268,29 @@
       },
       {
         "record_type": "field",
-        "id": "bapex/begumganj-rupganj",
+        "id": "bapex/begumganj",
         "company": "3. BAPEX",
         "company_code": "BAPEX",
         "operator": null,
-        "field": "Begumganj Rupganj",
+        "field": "Begumganj",
+        "producing_wells": 2,
+        "capacity_mmcfd": 15.0,
+        "gas_mmcfd": 10.6,
+        "condensate_bbld": 2.5,
+        "pct_of_total_capacity": 0.3,
+        "pct_of_total_production": 0.4
+      },
+      {
+        "record_type": "field",
+        "id": "bapex/rupganj",
+        "company": "3. BAPEX",
+        "company_code": "BAPEX",
+        "operator": null,
+        "field": "Rupganj",
         "producing_wells": 0,
-        "capacity_mmcfd": 0.3,
+        "capacity_mmcfd": 0.0,
         "gas_mmcfd": 0.0,
-        "condensate_bbld": 0.4,
+        "condensate_bbld": 0.0,
         "pct_of_total_capacity": 0.0,
         "pct_of_total_production": 0.0
       },
@@ -451,7 +465,7 @@
       "pct_of_total_capacity": 67.1,
       "pct_of_total_production": 100.0
     },
-    "field_count": 22
+    "field_count": 23
   },
   "sgfl": {
     "products": {},
@@ -949,10 +963,10 @@
     "plant_count": 70
   },
   "validation": {
-    "field_gas_sum_mmcfd": 2584.7,
+    "field_gas_sum_mmcfd": 2595.3,
     "grand_total_gas_mmcfd": 2595.4,
-    "variance_mmcfd": 10.7,
-    "reconciled": false,
+    "variance_mmcfd": 0.1,
+    "reconciled": true,
     "distribution_reconciled": true
   },
   "entities": [
@@ -1118,13 +1132,23 @@
     },
     {
       "type": "gas_field",
-      "id": "bapex/begumganj-rupganj",
-      "name": "Begumganj Rupganj",
+      "id": "bapex/begumganj",
+      "name": "Begumganj",
+      "company_code": "BAPEX",
+      "operator": null,
+      "gas_mmcfd": 10.6,
+      "producing_wells": 2,
+      "capacity_mmcfd": 15.0
+    },
+    {
+      "type": "gas_field",
+      "id": "bapex/rupganj",
+      "name": "Rupganj",
       "company_code": "BAPEX",
       "operator": null,
       "gas_mmcfd": 0.0,
       "producing_wells": 0,
-      "capacity_mmcfd": 0.3
+      "capacity_mmcfd": 0.0
     },
     {
       "type": "gas_field",

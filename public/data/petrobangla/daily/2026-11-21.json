@@ -3,7 +3,7 @@
   "meta": {
     "schema_version": "1.0.0",
     "parser_version": "2.0.0-reconstructed",
-    "source_pdf": "/home/pi/esb-ingest/repo/scratch/downloads/Daily-Gas-Intake-Offtake-Report (23.11.26).pdf",
+    "source_pdf": "C:\\Users\\User\\esbpowerline\\scratch\\ge-1125\\pbpdf\\d\\2026-11-21\\Daily-Gas-Intake-Offtake-Report (23.11.26).pdf",
     "source_filename": "Daily-Gas-Intake-Offtake-Report (23.11.26).pdf",
     "parsed_at": null,
     "page_count": 1,
@@ -13,7 +13,7 @@
     "parse_status": "ok",
     "warnings": [],
     "content_sha256": "65b4742e3215758f0ada1f6583c06461be169353eeb462f2df025d04891e636e",
-    "agent_summary": "Petrobangla daily gas report for 21-22 Nov, 2026. 21 producing fields, 70 power plants tracked. Grand total gas production 2623.2 MMCFD.",
+    "agent_summary": "Petrobangla daily gas report for 21-22 Nov, 2026. 23 producing fields, 70 power plants tracked. Grand total gas production 2623.2 MMCFD.",
     "queryable_collections": [
       "production.fields",
       "production.subtotals",
@@ -268,6 +268,34 @@
       },
       {
         "record_type": "field",
+        "id": "/begumganj",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Begumganj",
+        "producing_wells": 2,
+        "capacity_mmcfd": 15.0,
+        "gas_mmcfd": 7.1,
+        "condensate_bbld": 2.0,
+        "pct_of_total_capacity": 0.2,
+        "pct_of_total_production": 0.3
+      },
+      {
+        "record_type": "field",
+        "id": "/rupganj",
+        "company": null,
+        "company_code": null,
+        "operator": null,
+        "field": "Rupganj",
+        "producing_wells": 0,
+        "capacity_mmcfd": 0.0,
+        "gas_mmcfd": 0.0,
+        "condensate_bbld": 0.0,
+        "pct_of_total_capacity": 0.0,
+        "pct_of_total_production": 0.0
+      },
+      {
+        "record_type": "field",
         "id": "chevron/jalalabad",
         "company": "4. CHEVRON",
         "company_code": "CHEVRON",
@@ -368,17 +396,17 @@
       },
       {
         "record_type": "subtotal",
-        "id": "/begumganj-upga-j-sub-total",
+        "id": "/sub-total",
         "company": null,
         "company_code": null,
         "operator": null,
         "field": "Sub-Total",
-        "producing_wells": 2,
-        "capacity_mmcfd": 0.0,
-        "gas_mmcfd": 3.3,
-        "condensate_bbld": 0.3,
-        "pct_of_total_capacity": 0.0,
-        "pct_of_total_production": 0.0
+        "producing_wells": 18,
+        "capacity_mmcfd": 164.0,
+        "gas_mmcfd": 85.8,
+        "condensate_bbld": 28.7,
+        "pct_of_total_capacity": 2.2,
+        "pct_of_total_production": 3.3
       },
       {
         "record_type": "subtotal",
@@ -437,7 +465,7 @@
       "pct_of_total_capacity": 67.8,
       "pct_of_total_production": 100.0
     },
-    "field_count": 21
+    "field_count": 23
   },
   "sgfl": {
     "products": {},
@@ -935,10 +963,10 @@
     "plant_count": 70
   },
   "validation": {
-    "field_gas_sum_mmcfd": 2616.2,
+    "field_gas_sum_mmcfd": 2623.3,
     "grand_total_gas_mmcfd": 2623.2,
-    "variance_mmcfd": 7.0,
-    "reconciled": false,
+    "variance_mmcfd": 0.1,
+    "reconciled": true,
     "distribution_reconciled": true
   },
   "entities": [
@@ -1101,6 +1129,26 @@
       "gas_mmcfd": 9.2,
       "producing_wells": 5,
       "capacity_mmcfd": 18.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/begumganj",
+      "name": "Begumganj",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 7.1,
+      "producing_wells": 2,
+      "capacity_mmcfd": 15.0
+    },
+    {
+      "type": "gas_field",
+      "id": "/rupganj",
+      "name": "Rupganj",
+      "company_code": null,
+      "operator": null,
+      "gas_mmcfd": 0.0,
+      "producing_wells": 0,
+      "capacity_mmcfd": 0.0
     },
     {
       "type": "gas_field",

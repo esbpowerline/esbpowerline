@@ -27,5 +27,5 @@ export const macroGasData: readonly MacroGasYear[] = [
   { year: '2023', domestic: 2121, lng: 655, days: 362, partial: false },
   { year: '2024', domestic: 1983, lng: 705, days: 354, partial: false },
   { year: '2025', domestic: 1809, lng: 899, days: 360, partial: false },
-  { year: '2026', domestic: 1645, lng: 870, days: 323, partial: true },
+  { year: '2026', domestic: 1646, lng: 870, days: 323, partial: true },
 ] as const;
