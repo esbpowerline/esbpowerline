@@ -19,7 +19,24 @@ QUARANTINE = {
 }
 
 
-def domestic_lng(fields: list) -> tuple[float, float]:
+def domestic_lng(fields: list, grand_gas=None) -> tuple[float, float]:
+    """(domestic, R-LNG) MMCFD for one day.
+
+    Domestic was always the sum of the non-RPGCL field rows, which is only as
+    good as the parse: when the parser dropped Begumganj from 51 days
+    (2026-10-04..11-23) domestic quietly fell by the missing 7-12 MMCFD —
+    1,591.5 on 22 Nov against the 1,600.6 the report prints (2,649.1 Grand
+    Total less 1,048.5 R-LNG).
+
+    So when the field rows do not reconcile with the printed Grand Total (the
+    parser's own 5.0 MMCFD tolerance), domestic is taken as Grand Total minus
+    the R-LNG row, both as printed. On a day that reconciles the field sum is
+    kept, so the 2,330 days that already agreed do not move by their rounding
+    noise. Thirteen 2021-22 days also cross the tolerance with every field row
+    present: Petrobangla's subtotals add to its Grand Total there but its field
+    rows fall 5-9 MMCFD short of them, and the printed totals are what
+    Petrobangla states domestic supply was.
+    """
     domestic = 0.0
     lng = 0.0
     for f in fields:
@@ -28,6 +45,8 @@ def domestic_lng(fields: list) -> tuple[float, float]:
             lng += g
         else:
             domestic += g
+    if isinstance(grand_gas, (int, float)) and abs(domestic + lng - float(grand_gas)) > 5.0:
+        domestic = round(float(grand_gas) - lng, 1)
     return domestic, lng
 
 
@@ -46,7 +65,7 @@ def main():
         date = path.stem
         gt = data.get("production", {}).get("grand_total", {})
         fields = data.get("production", {}).get("fields", [])
-        dom, lng = domestic_lng(fields)
+        dom, lng = domestic_lng(fields, (gt or {}).get("gas_mmcfd"))
         major_names = ("Bibiyana", "Titas", "Jalalabad", "Habiganj", "Rashidpur", "Shahbazpur", "R-LNG Terminal", "Bangora")
         field_map = {n: next((float(f.get("gas_mmcfd") or 0) for f in fields if f.get("field") == n), 0.0) for n in major_names}
         bib = field_map.get("Bibiyana", 0.0)

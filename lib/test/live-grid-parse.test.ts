@@ -76,6 +76,50 @@ describe('parseNldcGenerationHtml', () => {
    * 86,880 for Nepal, 73,572 for wind and 21,897 for solar where the source
    * printed none.
    */
+  /**
+   * The 2026-11 layout: NLDC added নিউক্লিয়ার after Wind, so rows carry 15 cells.
+   * Values are the 25 Nov 2026 09:00 row as served (header spans reproduced).
+   * Read by position, the old parser put Adani's 827 into Nepal and halved the
+   * India total while the import sum stayed right.
+   */
+  it('reads the 2026-11 nuclear layout without shifting the import lines', () => {
+    const era2026nuclear = `<table><thead>
+      <tr><th rowspan="2">তারিখ</th><th rowspan="2">সময়</th><th rowspan="2">উৎপাদন(মেঃওঃ)</th>
+        <th rowspan="2">গ্যাস</th><th rowspan="2">তরল জ্বালানী</th><th rowspan="2">কয়লা</th>
+        <th rowspan="2">হাইড্রো</th><th rowspan="2">সৌর</th><th rowspan="2">বায়ু</th>
+        <th rowspan="2">নিউক্লিয়ার</th><th colspan="3">ভারত</th><th rowspan="2">নেপাল</th>
+        <th rowspan="2">মন্তব্য</th></tr>
+      <tr><th>ভেড়ামারা এইচভিডিসি</th><th>ত্রিপুরা</th><th>আদানি</th></tr>
+      </thead><tbody><tr>
+      <td>২৫-১১-২০২৬</td><td>০৯:০০:০০</td><td>১০১১২</td>
+      <td>৪২১৪</td><td>১৫৮</td><td>৩৪৪৬</td><td>৪০</td><td>৪২৯</td><td>৩৭</td>
+      <td>০</td><td>৮৬৭</td><td>৯৪</td><td>৮২৭</td><td>০</td><td></td>
+    </tr></tbody></table>`;
+    const [r] = parseNldcGenerationHtml(era2026nuclear);
+    expect(r).toMatchObject({
+      at: '2026-11-25T09:00:00',
+      totalMw: 10112, gasMw: 4214, liquidMw: 158, coalMw: 3446,
+      hydroMw: 40, solarMw: 429, windMw: 37, nuclearMw: 0,
+      bheramaraMw: 867, tripuraMw: 94, adaniMw: 827, nepalMw: 0,
+    });
+    // NLDC's own total reconciles with the components once they are in place.
+    const sum = [r.gasMw, r.liquidMw, r.coalMw, r.hydroMw, r.solarMw, r.windMw,
+      r.nuclearMw, r.bheramaraMw, r.tripuraMw, r.adaniMw, r.nepalMw]
+      .reduce<number>((a, v) => a + (v ?? 0), 0);
+    expect(sum).toBe(10112);
+  });
+
+  it('infers the nuclear layout from an odd cell count when no header arrived', () => {
+    const fragment = `<table><tr>
+      <td>২৫-১১-২০২৬</td><td>০৯:০০:০০</td><td>১০১১২</td>
+      <td>৪২১৪</td><td>১৫৮</td><td>৩৪৪৬</td><td>৪০</td><td>৪২৯</td><td>৩৭</td>
+      <td>০</td><td>৮৬৭</td><td>৯৪</td><td>৮২৭</td><td>০</td><td></td>
+    </tr></table>`;
+    const [r] = parseNldcGenerationHtml(fragment);
+    expect(r.nepalMw).toBe(0);
+    expect(r.adaniMw).toBe(827);
+  });
+
   it('keeps a blank cell absent and a printed zero zero', () => {
     const era2015 = `<table><tr>
       <td>০৩-০৫-২০১৫</td><td>২৩:০০:০০</td><td>৬৮২৩</td>

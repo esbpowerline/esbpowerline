@@ -123,9 +123,11 @@ describe('power supply scenario timestamps (P1)', () => {
     // The stamp is read from cells to the right of the value, so a scan that
     // ran too far would pick up the neighbouring block's time. Only these six
     // figures carry one.
+    // `zoneTable` is the hour the zone table's caption states, read from the
+    // caption itself (2026-11-25), not from a cell beside a value.
     const allowed = new Set([
       'dayPeakGen', 'dayPeakDemand', 'eveningPeakGen',
-      'eveningPeakDemand', 'minGen', 'maxGen',
+      'eveningPeakDemand', 'minGen', 'maxGen', 'zoneTable',
     ]);
     for (const { date, data } of withPeakTimes) {
       for (const key of Object.keys(data.systemStats.peakTimes!)) {

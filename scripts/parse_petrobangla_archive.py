@@ -39,6 +39,52 @@ def rows_in(words, x0, x1, y0, y1, tol=2.5):
     return out
 
 
+def split_merged_rows(rows, tol=2.5):
+    """Undo rows_in() chaining two or three printed rows into one cluster.
+
+    rows_in() joins any words whose y-gap is <= tol, and it chains: a gap of 2.2
+    then 1.6 then 1.8 joins words 5.6 apart. From the 05.10.26 report onward
+    Petrobangla prints "Rupganj" between Begumganj and the BAPEX Sub-Total with
+    its name ~1.8 above its own (all-zero) figures, which bridges the three
+    rows. The merged cluster held 18 numerics and `nums[-6:]` took the trailing
+    six, so Begumganj (9.1 MMCFD, 2 wells on the 22-23 Nov 2026 report) vanished
+    from 51 consecutive days (2026-10-04..11-23), every one of them failing
+    reconciliation by 9-12 MMCFD while reporting status 'ok'; on some days the
+    Sub-Total row was swallowed too and BAPEX's subtotal was stored as 3.7/3.9 —
+    its "% T.Prod" cell, not its gas.
+
+    The figures of one printed row share a baseline to within ~0.4, and two
+    rows' figures sit >= 3.5 apart, so the numerics are re-split on a gap > tol
+    and each label word goes to the figure line nearest it. A cluster whose
+    figures form a single line is returned untouched — that is every row on
+    every report before October 2026, which is what keeps them unchanged.
+    """
+    out = []
+    for y, ws in rows:
+        nums = sorted((w for w in ws if NUM.match(w[4])), key=lambda w: w[1])
+        lines, cur = [], []
+        for w in nums:
+            if cur and w[1] - cur[-1][1] > tol:
+                lines.append(cur)
+                cur = []
+            cur.append(w)
+        if cur:
+            lines.append(cur)
+        if len(lines) < 2:
+            out.append((y, ws))
+            continue
+        centres = [sum(w[1] for w in ln) / len(ln) for ln in lines]
+        groups = [list(ln) for ln in lines]
+        for w in ws:
+            if NUM.match(w[4]):
+                continue
+            i = min(range(len(centres)), key=lambda k: abs(centres[k] - w[1]))
+            groups[i].append(w)
+        for c, g in zip(centres, groups):
+            out.append((round(c), sorted(g, key=lambda w: w[0])))
+    return out
+
+
 def slug(s):
     return re.sub(r'[^a-z0-9]+', '-', s.lower()).strip('-')
 
@@ -65,7 +111,21 @@ def field_name(name, company_code):
     # on field names rather than on `company_code`.
     codes = '|'.join(re.escape(c) for c in list(COMPANY_HEADERS) + ['IOC'])
     cleaned = re.sub(rf'^(?:{codes})\b\s*', '', cleaned, flags=re.IGNORECASE)
-    return cleaned.strip() or name
+    cleaned = cleaned.strip()
+    return GLYPH_DAMAGED_NAMES.get(cleaned, cleaned) or name
+
+
+# Names whose text layer is damaged in the PDF itself, not misread by us. On 16
+# of the 51 reports for windows 2026-10-04..11-23 (e.g. 16-17 Oct, 13-14 Nov)
+# the font subset carrying the Rupganj label has no ToUnicode entry for 'R' and
+# maps 'n' to a space, so the row extracts as "upga j" — rawdict shows the glyph
+# positions (R at x=129.5, n at 142.8) with nothing behind them. It is the same
+# printed row that reads "Rupganj" on the other 35 reports, between Begumganj
+# and the BAPEX Sub-Total, all-zero. Left as extracted it is a field no reserve
+# statement knows, and build_reserve_model.py refuses the whole archive over it.
+# A label is mapped here only when the glyph loss is proven like this; never a
+# figure.
+GLYPH_DAMAGED_NAMES = {'upga j': 'Rupganj'}
 
 
 # The production block's horizontal extent on the layout these coordinates were
@@ -135,7 +195,7 @@ def parse_production(words):
     company_code = None
     company_label = None
     operator = None
-    for y, ws in rows_in(words, prod_x0, prod_x1, titas_y - 10, grand_y + 6):
+    for y, ws in split_merged_rows(rows_in(words, prod_x0, prod_x1, titas_y - 10, grand_y + 6)):
         toks = [w[4] for w in ws]
         upper = [t.upper().rstrip('.') for t in toks]
         # company header line (e.g. "1. BGFCL", "CHEVRON", "TULLOW", "5. RPGCL (R-LNG)")
@@ -524,8 +584,22 @@ def main():
                      requested_energy_day=energy_iso,
                      window_source=window_source,
                      window_matches_request=(ed == requested),
-                     parse_status=('ok' if not dist_warnings else 'partial'),
-                     warnings=dist_warnings,
+                     # A production table that does not add up to its own
+                     # printed Grand Total is not 'ok', whatever the
+                     # distribution side says. Begumganj fell out of 51
+                     # consecutive days (2026-10-04..11-23), each failing by
+                     # 9-12 MMCFD with `reconciled: false` in this very file,
+                     # and every one shipped as 'ok' because only distribution
+                     # warnings could lower the status — so the timeline, the
+                     # reserve model and the live week all took them in.
+                     # 'partial' is the status the publish chain already
+                     # accepts (deploy_petrobangla, validate_grid) while the
+                     # aggregates, which read 'ok' only, leave the day out.
+                     parse_status=('ok' if reconciled and not dist_warnings else 'partial'),
+                     warnings=(dist_warnings if reconciled else dist_warnings + [
+                         f"production does not reconcile: field rows sum to {field_gas_sum} "
+                         f"against a printed Grand Total of {grand_gas} MMCFD "
+                         f"(variance {variance}, tolerance 5.0)"]),
                      content_sha256=hashlib.sha256(raw).hexdigest(),
                      agent_summary=f"Petrobangla daily gas report for {label}. {len(fields)} producing fields, {plant_count} power plants tracked. Grand total gas production {grand_gas} MMCFD.",
                      queryable_collections=['production.fields', 'production.subtotals',

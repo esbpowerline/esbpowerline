@@ -62,6 +62,11 @@ export type LiveGenerationRow = {
   tripuraMw: number | null;
   adaniMw: number | null;
   nepalMw: number | null;
+  /**
+   * Rooppur, from the নিউক্লিয়ার column NLDC added between 2026-09 and 2026-11.
+   * Null on every row of the older layouts, which carry no such column.
+   */
+  nuclearMw?: number | null;
   loadShedMw: number | null;
   remark: string;
 };
@@ -141,23 +146,45 @@ const num = (cell: string): number | null => {
   return Number.isFinite(n) ? n : null;
 };
 
+/** NLDC's header label for the Rooppur column. */
+const NUCLEAR_HEADER = 'নিউক্লিয়ার';
+
 export function parseNldcGenerationHtml(html: string): LiveGenerationRow[] {
   const out: LiveGenerationRow[] = [];
+  // NLDC inserted a Nuclear column after Wind (seen 2026-11-25; not in the
+  // 2026-09 fixture). The parser read rows by fixed position and knew only 14
+  // and 16 cells, so on the 15-cell rows every import moved one place along:
+  // Bheramara read the nuclear 0, Tripura read Bheramara's 867, Adani read
+  // Tripura's 94 and Nepal read Adani's 827. The site then said Nepal was
+  // sending 827 MW when NLDC printed 0, and halved the India total (961 for
+  // 1,788) while the import sum stayed right — so no total check could see it.
+  //
+  // The header decides when it is present, because it names the column; the
+  // cell count decides only when no header reached us (a fragment). Odd counts
+  // are the nuclear layouts: 14 base, +1 nuclear, +2 deficit/loadshed.
+  const rawClean = html.replace(/<!--[\s\S]*?-->/g, '');
+  const headerSeen = /<th[\s>]/i.test(rawClean);
+  const headerHasNuclear = rawClean.includes(NUCLEAR_HEADER);
   for (const cells of tableRows(html)) {
-    // Current layout (deficit + loadshed columns commented out, 14 cells):
-    //   date, time, total, gas, liquid, coal, hydro, solar, wind,
-    //   bheramara, tripura, adani, nepal, remark
-    // If PGCB re-enables the two columns (16 cells), deficit and loadshed sit
-    // between total and gas; the deficit column prints the negated total and
-    // is discarded either way.
+    // Layouts, by cell count (deficit + loadshed are commented out today):
+    //   14: date, time, total, gas, liquid, coal, hydro, solar, wind,
+    //       bheramara, tripura, adani, nepal, remark
+    //   15: as 14 with nuclear after wind                (2026-11)
+    //   16: as 14 with deficit, loadshed after total     (if re-enabled)
+    //   17: as 15 with deficit, loadshed after total
+    // The deficit column prints the negated total and is discarded either way.
     if (cells.length < 14) continue;
     const at = toIsoLocal(cells[0], cells[1]);
     if (!at) continue;
-    const wide = cells.length >= 16;
+    const hasNuclear = headerSeen ? headerHasNuclear : cells.length % 2 === 1;
+    const wide = cells.length - (hasNuclear ? 1 : 0) >= 16;
     const v = cells.slice(2).map(num);
     const total = v[0];
     const loadShed = wide ? v[2] : null;
-    const [gas, liquid, coal, hydro, solar, wind, bheramara, tripura, adani, nepal] = v.slice(wide ? 3 : 1);
+    const rest = v.slice(wide ? 3 : 1);
+    const [gas, liquid, coal, hydro, solar, wind] = rest;
+    const nuclear = hasNuclear ? rest[6] : null;
+    const [bheramara, tripura, adani, nepal] = rest.slice(hasNuclear ? 7 : 6);
     if (total === null || gas === null || coal === null) continue;
     out.push({
       at,
@@ -173,6 +200,7 @@ export function parseNldcGenerationHtml(html: string): LiveGenerationRow[] {
       tripuraMw: tripura,
       adaniMw: adani,
       nepalMw: nepal,
+      nuclearMw: nuclear,
       loadShedMw: loadShed,
       remark: cells[cells.length - 1] ?? '',
     });
@@ -376,6 +404,8 @@ export type LiveGridHour = {
     hydroMw: number | null;
     solarMw: number | null;
     windMw: number | null;
+    /** Absent (undefined) on layouts before NLDC added the column; null when blank. */
+    nuclearMw?: number | null;
   };
   /** The four interconnectors as reported; `indiaMw` and `totalMw` are DERIVED
    *  sums over whichever of them the source printed. */
@@ -482,6 +512,7 @@ export function buildLiveGridSnapshot(
       byFuel: {
         gasMw: g.gasMw, liquidMw: g.liquidMw, coalMw: g.coalMw,
         hydroMw: g.hydroMw, solarMw: g.solarMw, windMw: g.windMw,
+        ...(g.nuclearMw !== undefined ? { nuclearMw: g.nuclearMw } : {}),
       },
       imports: {
         bheramaraMw: g.bheramaraMw, tripuraMw: g.tripuraMw, adaniMw: g.adaniMw,
@@ -501,7 +532,7 @@ export function buildLiveGridSnapshot(
   // prevent. If nothing at all was reported there is no sum to compare, and the
   // hour is simply not reconcilable.
   const componentSum = sumReported(
-    f.gasMw, f.liquidMw, f.coalMw, f.hydroMw, f.solarMw, f.windMw, latest.imports.totalMw,
+    f.gasMw, f.liquidMw, f.coalMw, f.hydroMw, f.solarMw, f.windMw, f.nuclearMw ?? null, latest.imports.totalMw,
   );
 
   const date = latest.at.slice(0, 10);

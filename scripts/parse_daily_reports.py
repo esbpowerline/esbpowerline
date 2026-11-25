@@ -216,11 +216,19 @@ def labelled_value(block, pattern, reject=None):
     return labelled_quantity(block, pattern, reject)[0]
 
 
-def labelled_quantity(block, pattern, reject=None):
+def labelled_quantity(block, pattern, reject=None, allow_zero=False):
     """`labelled_value`, plus the unit cell PGCB prints right after the number.
 
     Returns (value, unit): unit is the next cell's text, or '' when the row
     ends at the number. Same anchoring and rejection rules as above.
+
+    `allow_zero` is for figures where 0 is a statement, not a filler. Energy
+    Unserved is the one: P1 prints "Energy Unserverd | 0 | MKWHr." on every day
+    PGCB served the whole load, and the `> 0` rule below read that as nothing
+    — so 18, 22 and 23 Nov 2026 published "Energy unserved: not published"
+    beside a P1 that published it. With the flag, the first cell that is
+    literally a number is the answer, zero included; a blank or a word is
+    still skipped.
     """
     for line in block.split('\n'):
         cells = split_cells(line)
@@ -230,6 +238,9 @@ def labelled_quantity(block, pattern, reject=None):
                 continue
             if re.search(pattern, text):
                 for j in range(idx + 1, len(cells)):
+                    if allow_zero and NUMERIC_CELL.match(cells[j].replace(',', '').strip()):
+                        unit = cells[j + 1].strip() if j + 1 < len(cells) else ''
+                        return clean_float(cells[j]), unit
                     val = clean_float(cells[j])
                     if val > 0.0:
                         unit = cells[j + 1].strip() if j + 1 < len(cells) else ''
@@ -238,7 +249,7 @@ def labelled_quantity(block, pattern, reject=None):
     return None, ''
 
 
-def energy_mkwh(block, pattern):
+def energy_mkwh(block, pattern, allow_zero=False):
     """An energy figure from P1, in MKWh whatever unit the sheet printed it in.
 
     P1 prints its unit in the cell after each energy figure, and PGCB has used
@@ -252,7 +263,7 @@ def energy_mkwh(block, pattern):
     assume it. A row with no unit keeps the figure as it stands: MKWh is what
     every other layout prints.
     """
-    val, unit = labelled_quantity(block, pattern)
+    val, unit = labelled_quantity(block, pattern, allow_zero=allow_zero)
     if val is None:
         return None
     if re.sub(r'[^a-z]', '', unit.lower()).startswith('mwh'):
@@ -419,8 +430,12 @@ def hourly_shed_from_yesterday_gen(content):
 ENERGY_CURVE_FUELS = (
     'Gas-Public', 'Gas-Pvt', 'HVDC', 'Nepal', 'Tripura', 'Adani', 'Hydro',
     'Coal', 'Solar', 'HFO-Public', 'HFO-Pvt', 'HSD-Public', 'HSD-Pvt',
-    'Oil-Public', 'Oil-Pvt', 'Wind', 'Shortage',
+    'Oil-Public', 'Oil-Pvt', 'Wind', 'Nuclear', 'Shortage',
 )
+# Nuclear: Rooppur Unit 1 synchronised in November 2026 and the En-Curve sheet
+# gained a Nuclear column (240.73 MW at 18:30 on 23 Nov). Unlisted, the column was
+# dropped and the stack peaked at 12,872 MW against P1's 13,112.74 — a 1.8% hole
+# the 5% median guard below was too coarse to see.
 
 # What each layout calls those series. PGCB has renamed this sheet's columns
 # three times, and matching only the current names is not a safe failure: the
@@ -462,7 +477,7 @@ ENERGY_CURVE_ALIASES = {
 # zero. A count-based rule cannot tell them apart, and set anywhere sensible it
 # separated 2021-01-01 (42 of 48 rows exact) from 2021-01-04 (44 of 48) as though
 # they were different in kind.
-ENERGY_CURVE_MAX_MEDIAN_GAP = 0.05
+ENERGY_CURVE_MAX_MEDIAN_GAP = 0.01
 ENERGY_CURVE_MIN_CHECKED_ROWS = 12
 
 def parse_energy_curve(content):
@@ -508,6 +523,12 @@ def parse_energy_curve(content):
 
     idx_of = {}
     rows = []
+
+    # Nuclear is listed only where the sheet has the column: every curve before
+    # Rooppur would otherwise carry an all-null series the source never printed,
+    # and re-parsing a shipped day would stop reproducing its stored curve.
+    def fuels_out():
+        return [f for f in ENERGY_CURVE_FUELS if f != 'Nuclear' or 'Nuclear' in idx_of]
     for line in curve.split('\n'):
         if '|' not in line:
             continue
@@ -529,7 +550,7 @@ def parse_energy_curve(content):
         if not m or m.group(1) == '24:00':
             continue
         mw = []
-        for fuel in ENERGY_CURVE_FUELS:
+        for fuel in fuels_out():
             i = idx_of.get(fuel)
             # None, not 0: a column this workbook does not carry is unknown,
             # and charting it as zero output would be a claim the source
@@ -547,7 +568,7 @@ def parse_energy_curve(content):
 
     # The stack must reproduce the load curve. Shortage is unserved load, not
     # generation, so it is left out of the sum.
-    shortage_at = ENERGY_CURVE_FUELS.index('Shortage')
+    shortage_at = fuels_out().index('Shortage')
     series = lcurve_total_series(content)
     if series:
         gaps = []
@@ -563,7 +584,7 @@ def parse_energy_curve(content):
             if median > ENERGY_CURVE_MAX_MEDIAN_GAP:
                 return None
 
-    return {'fuels': list(ENERGY_CURVE_FUELS), 'rows': rows}
+    return {'fuels': fuels_out(), 'rows': rows}
 
 
 # The three corridors the East-West Interconnector runs over. Named here rather
@@ -574,6 +595,8 @@ EWIC_CORRIDORS = ('Ishurdi-Ghorashal', 'Sirajganj-Sreepur', 'Gopalganj-Aminbazar
 # How far a corridor's own MW curve may sit from the circuit energies printed
 # beside it before the row is called out. Integrating an hourly curve against a
 # metered total will not agree exactly; a factor of two is not rounding.
+# A curve carrying more than this over the day cannot be a corridor at rest (kWh).
+EWIC_ZERO_METER_FLOOR_KWH = 100_000
 EWIC_ENERGY_TOLERANCE = 0.08
 
 
@@ -680,6 +703,19 @@ def parse_ewic(content):
         integral *= 1000                              # MWh -> kWh
         metered = sum(c['energyKwh'] or 0 for c in circuits
                       if c['circuit'].startswith(corridor) and c['direction'] == 'Export')
+        # A corridor metered at 0 against a curve carrying power all day is the
+        # meter, not the corridor. `if metered and ...` skipped exactly that case:
+        # on 23 Nov 2026 both Gopalganj-Aminbazar circuits were metered 0 while
+        # the curve held ~1,700 MW all day, so the card published 9.23 MKWh
+        # "transferred, 3.4% of national generation" for a flow of ~54 MKWh with
+        # no reconciliation note. 42 corridor-days of 2026 are like that.
+        if metered == 0 and integral > EWIC_ZERO_METER_FLOOR_KWH:
+            checks.append({
+                'scope': corridor,
+                'message': (f'{corridor}: the curve integrates to {integral / 1e6:,.2f} MKWh, '
+                            f'but its circuits are metered at 0 kWh.'),
+            })
+            continue
         if metered and abs(integral - metered) / metered > EWIC_ENERGY_TOLERANCE:
             checks.append({
                 'scope': corridor,
@@ -1061,7 +1097,7 @@ def published_demand_stats(p1, forecast):
     block = p1 + "\n" + forecast_reported_section(forecast)
     return {
         'dayPeakDemand': labelled_value(block, r'^day peak demand'),
-        'totalEnergyUnserved': energy_mkwh(block, r'^energy unserve'),
+        'totalEnergyUnserved': energy_mkwh(block, r'^energy unserve', allow_zero=True),
         'totalEnergyDemand': energy_mkwh(block, r'^energy demand'),
         # "probable" is tomorrow's forecast and sits in the same block.
         'maxTemp': labelled_value(block, r'^max(imum)?\.? temp', reject=r'probable|forecast'),
@@ -1121,8 +1157,14 @@ def split_event_text(desc, load_cell=None):
         if verb in padded:
             plant_val = padded.split(verb, 1)[0]
             break
+    # The lost load comes from the load cell. The description is read only for
+    # a figure it states AS load ("... 12 MW load interrupted"): the bare "N MW"
+    # fallback took the MW in the asset's NAME, so "Payra 1320 MW ... Synchronized"
+    # published 1,320 MW of lost load, in red, tagged as PGCB's -- 18 rows across
+    # 6, 10, 18, 20, 22 and 23 Nov 2026 alone (Bibiyana-III 400, Matarbari 600,
+    # Sylhet 225, the Gopalganj 100 MW line ...), every one with a blank load cell.
     load_match = re.search(r'(\d+(?:\.\d+)?\s*MW)', load_cell or '', re.IGNORECASE) \
-        or re.search(r'(\d+(?:\.\d+)?\s*MW)', desc, re.IGNORECASE)
+        or re.search(r'(\d+(?:\.\d+)?\s*MW)(?=\s*(?:of\s+)?load\b)', desc, re.IGNORECASE)
     return (
         plant_val.strip(),
         reason_val.strip() if reason_val else desc.strip(),
@@ -1755,14 +1797,20 @@ def published_fuel_costs(p1):
 FUEL_ALIASES = {
     'gas': 'Gas', 'coal': 'Coal', 'hfo': 'HFO', 'hsd': 'HSD',
     'hydro': 'Hydro', 'solar': 'Solar', 'import': 'Imports', 'wind': 'Wind',
+    # P1's production-cost and zone tables gained a Nuclear column with Rooppur
+    # (3.181818 MKWh, cost 0, on 23 Nov 2026). Without this alias the fuel mix
+    # summed to 269.84 against the 273.03 P1 prints, the Rajshahi row to 36.49
+    # against its own 39.67 total, and the page blamed the gap on PGCB.
+    'nuclear': 'Nuclear',
 }
 FUEL_COLORS = {
     'Gas': '#0ea5e9', 'Coal': '#64748b', 'HFO': '#f97316', 'Hydro': '#06b6d4',
     'Solar': '#eab308', 'Imports': '#a855f7', 'HSD': '#ef4444', 'Wind': '#22c55e',
+    'Nuclear': '#7c3aed',
 }
 # Order the site has always rendered these in; Wind is appended because it only
 # appears in the newer layout.
-FUEL_ORDER = ['Gas', 'Coal', 'HFO', 'Hydro', 'Solar', 'Imports', 'HSD', 'Wind']
+FUEL_ORDER = ['Gas', 'Coal', 'HFO', 'Hydro', 'Solar', 'Imports', 'HSD', 'Wind', 'Nuclear']
 
 # Both spellings of the four renamed cities appear across the corpus, so the
 # older ones map forward rather than becoming zones of their own. Longest
@@ -1894,6 +1942,16 @@ def parse_pgcb_file(filepath, op_date):
             peak_times[key] = stamp
 
     stats_content = p1 + "\n" + forecast_reported_section(forecast)
+
+    # The zone table states its own hour in its caption: "Zone-wise Load-shed and
+    # Demand Summary (MW) at evening peak Hour (21:00 Hr.)". The page labelled the
+    # table with the evening-peak DEMAND stamp instead, which on a shedding day is
+    # a different hour -- 19:30 on 20 Aug 2026, where the caption says 21:00.
+    zone_caption = re.search(
+        r'zone-wise load-shed and demand summary[^|\n]*?\((\d{1,2}):(\d{2})\s*hr',
+        p1, re.IGNORECASE)
+    if zone_caption:
+        peak_times['zoneTable'] = f"{int(zone_caption.group(1)):02d}:{zone_caption.group(2)}"
     for line in stats_content.split('\n'):
         line_lower = line.lower()
         parts = [p.strip() for p in line.split('|') if p.strip()]
@@ -1953,8 +2011,14 @@ def parse_pgcb_file(filepath, op_date):
                 if 'total' in cell_lower:
                     if idx + 1 < len(parts): total_daily_cost = clean_float(parts[idx+1])
 
+    # A report that prints no evening-peak demand has none. This used to copy the
+    # evening-peak GENERATION into it, so a missing figure became a claim that
+    # demand equalled generation -- that no load went unserved at the peak --
+    # under PGCB's name. Every layout sampled 2014-2026 prints the row ("E.P.
+    # Demand (at gen end)" before 2025), so this is rare; when it happens the
+    # day says nothing, and the page prints a dash.
     if evening_peak_demand == 0.0:
-        evening_peak_demand = evening_peak_gen
+        evening_peak_demand = None
 
     # Regional loadshedding — and the demand PGCB prints beside it.
     #
@@ -2149,8 +2213,16 @@ def parse_pgcb_file(filepath, op_date):
     # believe, and a disagreement means one of them is not this day's.
     shed_rows = parse_hourly_shed(content) or hourly_shed_from_yesterday_gen(content)
     if shed_rows and lcurve_series:
+        # On the hour only. P4's 18:30/19:30 rows are PGCB's peak samples and
+        # the L-Curve's half hours are a different reading of the same minute:
+        # on 22 and 23 Nov 2026 P4 18:30 printed 13,112.74 (P1's evening peak,
+        # exactly) against an L-Curve 18:30 of 12,981.7, while every :00 row
+        # agreed. Checking the half hours threw away the whole P4 sheet, so the
+        # page said "this report carries no hourly load-shedding figures" over a
+        # P4 that printed 0 MW shed for all 26 rows.
         shared = [(r['generation'], lcurve_series[r['time']])
-                  for r in shed_rows if r['time'] in lcurve_series]
+                  for r in shed_rows
+                  if r['time'].endswith(':00') and r['time'] in lcurve_series]
         agrees = bool(shared) and all(abs(a - b) <= 1.0 for a, b in shared)
         if not agrees:
             shed_rows = []
@@ -2274,6 +2346,26 @@ def parse_pgcb_file(filepath, op_date):
                     fuels[canon] = round(clean_float(cells[h_idx + 1]) / energy_div, 6)
             printed_total = (round(clean_float(cells[total_col + 1]) / energy_div, 6)
                              if 0 <= total_col < len(cells) - 1 else None)
+            # PGCB widened the zone rows by one column before it labelled it.
+            # From 2026-10-25 each zone row carries a tenth number between Wind
+            # and Total while the header (and the Total row) still name nine —
+            # Rooppur's column, headed "Nuclear" only from later sheets. Read by
+            # header position, every zone's Total came out as that empty column:
+            # Dhaka 0.0 where PGCB prints 49.961575, all nine zones summing to 0
+            # against 334.16 national. The shifted cell is taken as the total
+            # only when it equals the row's own figures summed, so a real
+            # mismatch between parts and total is still published as filed.
+            unlabelled = None
+            if 0 <= total_col and total_col + 2 < len(cells):
+                nums = [clean_float(c) for c in cells[1:total_col + 2]]
+                shifted = clean_float(cells[total_col + 2])
+                if (printed_total is not None
+                        and isinstance(shifted, (int, float)) and shifted > 0
+                        and all(isinstance(n, (int, float)) for n in nums)
+                        and abs(sum(nums) - shifted) < 0.01
+                        and abs(sum(fuels.values()) * energy_div - printed_total * energy_div) > 0.01):
+                    unlabelled = round(nums[-1] / energy_div, 6)
+                    printed_total = round(shifted / energy_div, 6)
             zone_generation_data.append({
                 'zone': zone,
                 'fuels': fuels,
@@ -2282,6 +2374,8 @@ def parse_pgcb_file(filepath, op_date):
                 # the published figure and the discrepancy stays visible.
                 'total': printed_total if printed_total is not None
                          else round(sum(fuels.values()), 6),
+                # The header names no fuel for it, so it is kept under no fuel.
+                **({'unlabelledColumn': unlabelled} if unlabelled else {}),
             })
 
     if not parsed_via_table:
@@ -2420,6 +2514,24 @@ def parse_pgcb_file(filepath, op_date):
     avg_production_cost = 0.0
     if total_energy_gen > 0.0:
         avg_production_cost = total_daily_cost / (total_energy_gen * 1000000.0)
+    # The 2025+ P1 prints its own rate beside Maximum Generation: "Production
+    # Cost per KWHr | 6.084789564982523 | Tk." on 23 Nov 2026. It was never read,
+    # so the site carried our quotient (6.085) and every surface had to call it
+    # derived. Read it where printed; older layouts print no rate (none of eight
+    # 2020-2023 workbooks sampled on 2026-11-25 carries the label), and there the
+    # quotient stays, flagged as ours.
+    avg_production_cost_stated = False
+    for line in (p1 or '').split('\n'):
+        m = re.search(r'production\s+cost\s+per\s+kwh\w*\s*\|(.*)', line, re.I)
+        if not m:
+            continue
+        for cell in m.group(1).split('|'):
+            cell = cell.strip()
+            if re.fullmatch(r'\d+(?:\.\d+)?', cell) and float(cell) > 0:
+                avg_production_cost = float(cell)
+                avg_production_cost_stated = True
+                break
+        break
         
     # Fuel costs come from P1's own "Production Cost (Tk.)" block. They used to
     # be generation x a hardcoded tariff, which is why the site showed gas at a
@@ -2436,14 +2548,18 @@ def parse_pgcb_file(filepath, op_date):
     for name in FUEL_ORDER:
         gen = float(fuel_gen.get(name) or 0.0)
         cost = published_costs.get(name)
-        if gen <= 0.0 and not cost and name in ('Wind', 'HSD'):
+        if gen <= 0.0 and not cost and name in ('Wind', 'HSD', 'Nuclear'):
             # Only carried when the layout reports them at all.
             if name not in fuel_gen and name not in published_costs:
                 continue
         unit = round(cost / (gen * 1000000.0), 4) if (cost and gen > 0.0) else None
         generation_data.append({
             'name': name,
-            'gen': round(gen, 2),
+            # Two decimals rounded Wind to nothing: P1 printed 0.00384 MKWh on
+            # 22 Nov 2026 and the page showed "0.00 MKWh" beside a Tk 57,292 bill
+            # and a 14.92 Tk/kWh rate. Small figures keep four places; the rest
+            # keep the two the archive has always carried.
+            'gen': round(gen, 4) if 0.0 < gen < 1.0 else round(gen, 2),
             'cost': int(cost) if cost is not None else None,
             'unitCost': unit,
             'color': FUEL_COLORS[name],
@@ -2479,7 +2595,8 @@ def parse_pgcb_file(filepath, op_date):
             # constant 32.8, shown identically on every day since 2013.
             'maxTemp': published['maxTemp'],
             'totalGasSuppliedPower': total_gas_supplied_power,
-            'avgProductionCost': round(avg_production_cost, 3),
+            'avgProductionCost': round(avg_production_cost, 4 if avg_production_cost_stated else 3),
+            'avgProductionCostStated': avg_production_cost_stated,
             'totalDailyCost': int(total_daily_cost),
             # The hour P1 stamps against each figure above. Only the keys the
             # sheet actually stamped are present — an absent key means the
