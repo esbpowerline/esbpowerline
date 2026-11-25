@@ -1,7 +1,13 @@
 'use server';
 
 import { headers } from 'next/headers';
-import { revalidatePath } from 'next/cache';
+// refresh(), not revalidatePath('/', 'layout'). Public pages are ISR and read
+// no session (the header gets it client-side from auth-context), yet every
+// sign-in and sign-out purged the whole site's cache, so one staff login made
+// every page a crawler or reader touched regenerate: ISR Writes were the
+// largest Vercel line in Nov 2026 ($4.04 of $8.46 in 12 days, on course to
+// pass Pro's $20 credit). refresh() re-renders only this browser's router.
+import { refresh } from 'next/cache';
 import { authContinuePath, needsAuthHandoff } from '@/lib/auth-handoff';
 import { registerMemberAction } from '@/lib/actions/member-register';
 import { ensureDemoMemberAccount } from '@/lib/ensure-demo-accounts';
@@ -145,7 +151,7 @@ export async function memberLoginAction(
     const authError = await establishMemberSession(identifier, password);
     if (authError) return authError;
 
-    revalidatePath('/', 'layout');
+    refresh();
 
     const callbackUrl = safeCallbackUrl(readField(formData, 'callbackUrl'));
     const destination = callbackUrl ?? '/members';
@@ -194,7 +200,7 @@ export async function memberSignUpAction(
     const authError = await establishMemberSession(registerResult.email, password);
     if (authError) return authError;
 
-    revalidatePath('/', 'layout');
+    refresh();
 
     const callbackUrl = safeCallbackUrl(readField(formData, 'callbackUrl'));
     const destination = callbackUrl ?? '/members';

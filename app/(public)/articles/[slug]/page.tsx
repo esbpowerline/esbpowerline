@@ -33,7 +33,11 @@ import { ArticleTextSize } from '@/components/news/ArticleTextSize';
 import { QuickEditButton } from '@/components/editor/QuickEditButton';
 import prisma from '@/lib/prisma';
 
-export const revalidate = 600;
+// An hour, not ten minutes. Saving or publishing an article already purges its
+// own path (lib/actions/articles.ts, /api/cms/revalidate), so this window only
+// governs the related/popular rails — and at 600 s every crawled article was
+// an ISR write six times an hour (ISR Writes: largest Vercel line, Nov 2026).
+export const revalidate = 3600;
 
 /**
  * Prerender the newest published English articles at build time; the rest
