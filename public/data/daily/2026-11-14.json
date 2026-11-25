@@ -8,13 +8,15 @@
     "minGen": 9064.92,
     "maxGen": 13564.41,
     "totalEnergyGen": 262.08111438,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 262.081,
     "maxTemp": 30.1,
     "totalGasSuppliedPower": 794.41,
-    "avgProductionCost": 6.353,
+    "avgProductionCost": 6.3531,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1665037063,
     "peakTimes": {
+      "zoneTable": "18:30",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:30",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.98,
+      "gen": 0.984,
       "cost": 98400,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.02,
+      "gen": 0.0182,
       "cost": 272140,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.193908,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 32.731399
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.984,
         "Solar": 0.030228,
         "Imports": 0.0,
-        "Wind": 0.01824
+        "Wind": 0.01824,
+        "Nuclear": 0.0
       },
       "total": 41.962446
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.446827,
         "Imports": 1.91424,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 33.171913
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.424104,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 3.120144
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.05798,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 26.019084
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.48096,
         "Imports": 23.296,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 46.760485
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.003438,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 44.245476
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 1.317784,
         "Imports": 20.743855,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 32.371592
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 1.395131,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 1.698576
     }
@@ -842,21 +860,21 @@
     {
       "time": "21:47",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-"
     },
     {
       "time": "22:18",
       "plant": "Aminbazar- Manikganj 162 MW PP ckt 02",
-      "load": "162 MW",
+      "load": "HT Outage",
       "reason": "Aminbazar- Manikganj 162 MW PP ckt 02 was switched on",
       "full_desc": "Aminbazar- Manikganj 162 MW PP ckt 02 was switched on"
     },
     {
       "time": "00:19",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-"
     },
@@ -871,8 +889,8 @@
       "time": "05:25",
       "plant": "Keraniganj-Sreenagar 132kV Ckt-1 Tripped from Keranigonj 230/132/33kV end showing Trip Relay 86.1 relays",
       "load": "HT Outage",
-      "reason": "Due to EF distance showing 21.2KM and from Srinagar 132/33kV end showing Distance protection p443 relays Due to \u099f\u09be\u0993\u09df\u09be\u09b0 \u09a8\u0982-\u09e7\u09eb \u098f\u09b0 \u0989\u09aa\u09b0\u09c7 C \u09ab\u09c7\u099c\u09c7 \u09aa\u09be\u0996\u09bf \u09ac\u09be\u09b8\u09be \u0995\u09b0\u09be\u09df",
-      "full_desc": "Keraniganj-Sreenagar 132kV Ckt-1 Tripped from Keranigonj 230/132/33kV end showing Trip Relay 86.1 relays Due to EF distance showing 21.2KM and from Srinagar 132/33kV end showing Distance protection p443 relays Due to \u099f\u09be\u0993\u09df\u09be\u09b0 \u09a8\u0982-\u09e7\u09eb \u098f\u09b0 \u0989\u09aa\u09b0\u09c7 C \u09ab\u09c7\u099c\u09c7 \u09aa\u09be\u0996\u09bf \u09ac\u09be\u09b8\u09be \u0995\u09b0\u09be\u09df"
+      "reason": "Due to EF distance showing 21.2KM and from Srinagar 132/33kV end showing Distance protection p443 relays Due to টাওয়ার নং-১৫ এর উপরে C ফেজে পাখি বাসা করায়",
+      "full_desc": "Keraniganj-Sreenagar 132kV Ckt-1 Tripped from Keranigonj 230/132/33kV end showing Trip Relay 86.1 relays Due to EF distance showing 21.2KM and from Srinagar 132/33kV end showing Distance protection p443 relays Due to টাওয়ার নং-১৫ এর উপরে C ফেজে পাখি বাসা করায়"
     },
     {
       "time": "06:51",

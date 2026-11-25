@@ -8,13 +8,15 @@
     "minGen": 9187.27,
     "maxGen": 12341.36,
     "totalEnergyGen": 263.59325277,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 263.593,
     "maxTemp": 25.3,
     "totalGasSuppliedPower": 787.16,
     "avgProductionCost": 6.19,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1631650330,
     "peakTimes": {
+      "zoneTable": "18:00",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:00",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.97,
+      "gen": 0.972,
       "cost": 97200,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.3,
+      "gen": 0.3019,
       "cost": 4504646,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.04945,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 28.952702
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.972,
         "Solar": 0.03807,
         "Imports": 0.0,
-        "Wind": 0.30192
+        "Wind": 0.30192,
+        "Nuclear": 0.0
       },
       "total": 42.807413
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.138418,
         "Imports": 2.42688,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 35.432091
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.152248,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 2.193928
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.015484,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 28.479998
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.07056,
         "Imports": 22.414545,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 47.689943
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.000609,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 39.002119
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.39431,
         "Imports": 26.5748,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 37.565627
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 1.261999,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 1.469431
     }
@@ -290,7 +308,7 @@
     {
       "time": "08:07",
       "plant": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-1",
-      "load": "120 MW",
+      "load": "HT Outage",
       "reason": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-1",
       "full_desc": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-1"
     },
@@ -402,7 +420,7 @@
     {
       "time": "08:40 - 17:27",
       "plant": "Kodda 132/33kV S/S RPCL 100 MW PS Scheduled",
-      "load": "100 MW",
+      "load": "HT Outage",
       "reason": "Due to Annual maintenance",
       "full_desc": "Kodda 132/33kV S/S RPCL 100 MW PS Scheduled S/D Due to Annual maintenance"
     },
@@ -507,7 +525,7 @@
     {
       "time": "09:24",
       "plant": "Shajibazar 330 MW CCPP Synchronized with remarks:- GT1",
-      "load": "330 MW",
+      "load": "HT Outage",
       "reason": "Shajibazar 330 MW CCPP Synchronized with remarks:- GT1",
       "full_desc": "Shajibazar 330 MW CCPP Synchronized with remarks:- GT1"
     },
@@ -577,7 +595,7 @@
     {
       "time": "11:00",
       "plant": "Shajibazar 330 MW CCPP Synchronized with remarks:- STG",
-      "load": "330 MW",
+      "load": "HT Outage",
       "reason": "Shajibazar 330 MW CCPP Synchronized with remarks:- STG",
       "full_desc": "Shajibazar 330 MW CCPP Synchronized with remarks:- STG"
     },
@@ -759,14 +777,14 @@
     {
       "time": "01:42",
       "plant": "Ashuganj 450 MW CCPP(North) GT Shutdown with remarks:- None",
-      "load": "450 MW",
+      "load": "HT Outage",
       "reason": "Ashuganj 450 MW CCPP(North) GT Shutdown with remarks:- None",
       "full_desc": "Ashuganj 450 MW CCPP(North) GT Shutdown with remarks:- None"
     },
     {
       "time": "01:42",
       "plant": "Ashuganj 450 MW CCPP(North) Shutdown with remarks:- GT",
-      "load": "450 MW",
+      "load": "HT Outage",
       "reason": "Ashuganj 450 MW CCPP(North) Shutdown with remarks:- GT",
       "full_desc": "Ashuganj 450 MW CCPP(North) Shutdown with remarks:- GT"
     },

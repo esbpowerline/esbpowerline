@@ -8,13 +8,15 @@
     "minGen": 9395.47,
     "maxGen": 13096.04,
     "totalEnergyGen": 272.70043344,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 272.7,
     "maxTemp": 30.5,
     "totalGasSuppliedPower": 823.06,
     "avgProductionCost": 6.232,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1699473202,
     "peakTimes": {
+      "zoneTable": "18:00",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:00",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.97,
+      "gen": 0.972,
       "cost": 97200,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.1,
+      "gen": 0.1003,
       "cost": 1496774,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 2.02,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.129648,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 32.765745
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.972,
         "Solar": 0.125671,
         "Imports": 0.0,
-        "Wind": 0.10032
+        "Wind": 0.10032,
+        "Nuclear": 0.0
       },
       "total": 43.659821
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.370927,
         "Imports": 2.87424,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 37.273535
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.346475,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 2.890715
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.051746,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 26.097185
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.44856,
         "Imports": 22.458182,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 48.74375
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.000157,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 46.028266
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.841508,
         "Imports": 20.678181,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 2.018181
       },
       "total": 34.42925
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 0.529501,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 0.812167
     }
@@ -472,7 +490,7 @@
     {
       "time": "09:16 - 10:20",
       "plant": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Scheduled",
-      "load": "100MW",
+      "load": "HT Outage",
       "reason": "Due to For Gas refilling at PT chamber at Confidence SS end.",
       "full_desc": "Mithapukur-Rangpur Confidence( 100MW ) 132kV Ckt-1 Scheduled S/D from Mithapukur 132/33kV end Due to For Gas refilling at PT chamber at Confidence SS end."
     },
@@ -787,7 +805,7 @@
     {
       "time": "21:07",
       "plant": "Patuakhali 1320 MW (RNPL) unit-2",
-      "load": "1320 MW",
+      "load": "HT Outage",
       "reason": "due to flashing in generator side CT secondary terminal.",
       "full_desc": "Patuakhali 1320 MW (RNPL) unit-2 was forced shutdown due to flashing in generator side CT secondary terminal."
     },
@@ -815,7 +833,7 @@
     {
       "time": "06:57",
       "plant": "Bibiyana South 400 MW Synchronized with remarks:- ST",
-      "load": "400 MW",
+      "load": "HT Outage",
       "reason": "Bibiyana South 400 MW Synchronized with remarks:- ST",
       "full_desc": "Bibiyana South 400 MW Synchronized with remarks:- ST"
     },

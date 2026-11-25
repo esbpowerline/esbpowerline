@@ -8,13 +8,15 @@
     "minGen": 9300.23,
     "maxGen": 13112.74,
     "totalEnergyGen": 273.02955249,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 273.03,
     "maxTemp": 30.0,
     "totalGasSuppliedPower": 817.02,
-    "avgProductionCost": 6.085,
+    "avgProductionCost": 6.0848,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1661327371,
     "peakTimes": {
+      "zoneTable": "18:30",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:30",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.97,
+      "gen": 0.972,
       "cost": 97200,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.06,
+      "gen": 0.0638,
       "cost": 952492,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 3.18,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.118929,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 33.564542
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.972,
         "Solar": 0.100082,
         "Imports": 0.0,
-        "Wind": 0.06384
+        "Wind": 0.06384,
+        "Nuclear": 0.0
       },
       "total": 44.940178
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.362145,
         "Imports": 2.57376,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 35.14896
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.203174,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 2.490734
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.035971,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 28.062464
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.39816,
         "Imports": 21.884364,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 45.548838
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.003609,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 42.408351
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.818884,
         "Imports": 25.504727,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 3.181818
       },
       "total": 39.671453
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 1.020242,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 1.194032
     }
@@ -514,14 +532,14 @@
     {
       "time": "09:06",
       "plant": "Sylhet 225 MW CCPP Synchronized with remarks:- GT",
-      "load": "225 MW",
+      "load": "HT Outage",
       "reason": "Sylhet 225 MW CCPP Synchronized with remarks:- GT",
       "full_desc": "Sylhet 225 MW CCPP Synchronized with remarks:- GT"
     },
     {
       "time": "09:06",
       "plant": "Sylhet 225 MW CCPP GT Synchronized with remarks:- None",
-      "load": "225 MW",
+      "load": "HT Outage",
       "reason": "Sylhet 225 MW CCPP GT Synchronized with remarks:- None",
       "full_desc": "Sylhet 225 MW CCPP GT Synchronized with remarks:- None"
     },
@@ -738,7 +756,7 @@
     {
       "time": "13:37",
       "plant": "Bibiyana-III 400 MW CCPP Shutdown with remarks:- GT",
-      "load": "400 MW",
+      "load": "HT Outage",
       "reason": "Bibiyana-III 400 MW CCPP Shutdown with remarks:- GT",
       "full_desc": "Bibiyana-III 400 MW CCPP Shutdown with remarks:- GT"
     },
@@ -829,14 +847,14 @@
     {
       "time": "22:42",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-"
     },
     {
       "time": "00:45",
       "plant": "Payra 1320 MW Synchronized with remarks:- unit-1",
-      "load": "1320 MW",
+      "load": "HT Outage",
       "reason": "Payra 1320 MW Synchronized with remarks:- unit-1",
       "full_desc": "Payra 1320 MW Synchronized with remarks:- unit-1"
     },
@@ -922,146 +940,158 @@
     {
       "time": "00:00",
       "generation": 11243.64,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11243.64
     },
     {
       "time": "01:00",
       "generation": 10445.52,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10445.52
     },
     {
       "time": "02:00",
       "generation": 10034.92,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10034.92
     },
     {
       "time": "03:00",
       "generation": 9675.2,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 9675.2
     },
     {
       "time": "04:00",
       "generation": 9428.23,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 9428.23
     },
     {
       "time": "05:00",
       "generation": 9300.23,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 9300.23
     },
     {
       "time": "06:00",
       "generation": 9416.72,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 9416.72
     },
     {
       "time": "07:00",
       "generation": 10400.43,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10400.43
     },
     {
       "time": "08:00",
       "generation": 11174.06,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11174.06
     },
     {
       "time": "09:00",
       "generation": 11102.71,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11102.71
     },
     {
       "time": "10:00",
       "generation": 10979.54,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10979.54
     },
     {
       "time": "11:00",
       "generation": 11210.59,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11210.59
     },
     {
       "time": "12:00",
       "generation": 11932.66,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11932.66
     },
     {
       "time": "13:00",
       "generation": 12132.73,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12132.73
     },
     {
       "time": "14:00",
       "generation": 11996.43,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11996.43
     },
     {
       "time": "15:00",
       "generation": 11682.53,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11682.53
     },
     {
       "time": "16:00",
       "generation": 11628.42,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11628.42
     },
     {
       "time": "17:00",
       "generation": 11889.65,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11889.65
     },
     {
       "time": "18:00",
       "generation": 13105.15,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 13105.15
+    },
+    {
+      "time": "18:30",
+      "generation": 13112.74,
+      "loadShed": 0.0,
+      "demand": 13112.74
     },
     {
       "time": "19:00",
       "generation": 12858.28,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12858.28
+    },
+    {
+      "time": "19:30",
+      "generation": 12587.72,
+      "loadShed": 0.0,
+      "demand": 12587.72
     },
     {
       "time": "20:00",
       "generation": 12447.79,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12447.79
     },
     {
       "time": "21:00",
       "generation": 12175.75,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12175.75
     },
     {
       "time": "22:00",
       "generation": 11941.46,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11941.46
     },
     {
       "time": "23:00",
       "generation": 11486.72,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11486.72
     }
   ],
   "ewicData": {
@@ -1480,6 +1510,10 @@
       {
         "scope": "Sirajganj-Sreepur",
         "message": "Sirajganj-Sreepur: the MW curve integrates to 9,810,000 kWh but its circuits are metered at 4,830,000 kWh (2.03x). Both are reproduced as published."
+      },
+      {
+        "scope": "Gopalganj-Aminbazar",
+        "message": "Gopalganj-Aminbazar: the curve integrates to 40.08 MKWh, but its circuits are metered at 0 kWh."
       }
     ]
   },

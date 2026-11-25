@@ -8,13 +8,15 @@
     "minGen": 9487.62,
     "maxGen": 13676.8,
     "totalEnergyGen": 281.69427631,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 281.694,
     "maxTemp": 30.0,
     "totalGasSuppliedPower": 810.05,
-    "avgProductionCost": 6.569,
+    "avgProductionCost": 6.5686,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1850336480,
     "peakTimes": {
+      "zoneTable": "18:00",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:00",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.98,
+      "gen": 0.976,
       "cost": 97600,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.11,
+      "gen": 0.1056,
       "cost": 1575552,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.14445,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 34.207548
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.976,
         "Solar": 0.144483,
         "Imports": 0.0,
-        "Wind": 0.1056
+        "Wind": 0.1056,
+        "Nuclear": 0.0
       },
       "total": 44.512697
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.402291,
         "Imports": 2.00256,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 37.644122
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.407069,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 3.210989
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.057018,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 24.411043
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.40752,
         "Imports": 24.218182,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 50.31147
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.003175,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 47.14378
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.96637,
         "Imports": 21.190182,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 38.294105
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 1.068982,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 1.958523
     }
@@ -338,7 +356,7 @@
     {
       "time": "08:16",
       "plant": "Bibiyana South 400 MW Synchronized with remarks:- ST",
-      "load": "400 MW",
+      "load": "HT Outage",
       "reason": "Bibiyana South 400 MW Synchronized with remarks:- ST",
       "full_desc": "Bibiyana South 400 MW Synchronized with remarks:- ST"
     },
@@ -821,7 +839,7 @@
     {
       "time": "16:00",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-"
     },
@@ -891,7 +909,7 @@
     {
       "time": "20:06",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-"
     },

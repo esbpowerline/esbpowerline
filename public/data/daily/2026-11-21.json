@@ -8,13 +8,15 @@
     "minGen": 7838.92,
     "maxGen": 12184.81,
     "totalEnergyGen": 247.46154533,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 247.462,
     "maxTemp": 26.5,
     "totalGasSuppliedPower": 762.49,
-    "avgProductionCost": 6.247,
+    "avgProductionCost": 6.2473,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1545976140,
     "peakTimes": {
+      "zoneTable": "18:00",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:00",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.94,
+      "gen": 0.936,
       "cost": 93600,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.15,
+      "gen": 0.1493,
       "cost": 2227257,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.055091,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 31.713899
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.936,
         "Solar": 0.029101,
         "Imports": 0.0,
-        "Wind": 0.14928
+        "Wind": 0.14928,
+        "Nuclear": 0.0
       },
       "total": 38.071386
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.116464,
         "Imports": 2.15904,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 23.83956
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.093725,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 2.465405
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.020792,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 26.872945
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.17136,
         "Imports": 22.496,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 45.731713
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.000651,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 41.624972
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.382734,
         "Imports": 26.058634,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 36.81756
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 0.189016,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 0.324104
     }
@@ -605,14 +623,14 @@
     {
       "time": "14:23 - 20:55",
       "plant": "Bhangura 132/33kV S/S Tr-2(413T) HT Scheduled",
-      "load": "50 MW",
+      "load": "HT Outage",
       "reason": "Due to Annual Black Start Drill of Baghabari 50 MW Peaking Power Plant",
       "full_desc": "Bhangura 132/33kV S/S Tr-2(413T) HT Scheduled S/D Due to Annual Black Start Drill of Baghabari 50 MW Peaking Power Plant"
     },
     {
       "time": "15:12",
       "plant": "Chandpur 132/33kV S/S 50MW(ST) Power Plant Incomer(T3)",
-      "load": "50MW",
+      "load": "HT Outage",
       "reason": "Chandpur 132/33kV S/S 50MW(ST) Power Plant Incomer(T3) is restored.",
       "full_desc": "Chandpur 132/33kV S/S 50MW(ST) Power Plant Incomer(T3) is restored."
     },
@@ -724,21 +742,21 @@
     {
       "time": "23:05",
       "plant": "Barisal 307 MW Shutdown with remarks:- None",
-      "load": "307 MW",
+      "load": "HT Outage",
       "reason": "Barisal 307 MW Shutdown with remarks:- None",
       "full_desc": "Barisal 307 MW Shutdown with remarks:- None"
     },
     {
       "time": "23:05",
       "plant": "Barisal 307 MW Shutdown",
-      "load": "307 MW",
+      "load": "HT Outage",
       "reason": "Barisal 307 MW Shutdown",
       "full_desc": "Barisal 307 MW Shutdown"
     },
     {
       "time": "03:05",
       "plant": "Ashuganj 450 MW CCPP(North) Synchronized with remarks:- GT",
-      "load": "450 MW",
+      "load": "HT Outage",
       "reason": "Ashuganj 450 MW CCPP(North) Synchronized with remarks:- GT",
       "full_desc": "Ashuganj 450 MW CCPP(North) Synchronized with remarks:- GT"
     },

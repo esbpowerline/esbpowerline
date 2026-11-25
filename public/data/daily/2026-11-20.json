@@ -8,13 +8,15 @@
     "minGen": 8639.66,
     "maxGen": 11667.69,
     "totalEnergyGen": 238.82949512,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 238.829,
     "maxTemp": 24.0,
     "totalGasSuppliedPower": 737.67,
-    "avgProductionCost": 5.855,
+    "avgProductionCost": 5.8547,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1398276422,
     "peakTimes": {
+      "zoneTable": "18:00",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:00",
@@ -47,14 +49,14 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.97,
+      "gen": 0.972,
       "cost": 97200,
       "unitCost": 0.1,
       "color": "#06b6d4"
     },
     {
       "name": "Solar",
-      "gen": 0.87,
+      "gen": 0.8665,
       "cost": 14173731,
       "unitCost": 16.3584,
       "color": "#eab308"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.11,
+      "gen": 0.1133,
       "cost": 1690137,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.026297,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 25.118093
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.972,
         "Solar": 0.065402,
         "Imports": 0.0,
-        "Wind": 0.11328
+        "Wind": 0.11328,
+        "Nuclear": 0.0
       },
       "total": 36.448195
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.088027,
         "Imports": 1.93152,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 25.228667
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.064008,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 1.831368
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.01305,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 29.013101
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.0684,
         "Imports": 22.473455,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 43.386764
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.000597,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 41.674799
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.223778,
         "Imports": 25.077367,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 35.731754
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 0.316892,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 0.396754
     }
@@ -290,7 +308,7 @@
     {
       "time": "08:16",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-"
     },
@@ -430,7 +448,7 @@
     {
       "time": "18:22",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is ON with remarks:-"
     },
@@ -479,7 +497,7 @@
     {
       "time": "01:58",
       "plant": "Siddhirgonj 2*120 MW GTPP Shutdown with remarks:- GT-2",
-      "load": "120 MW",
+      "load": "HT Outage",
       "reason": "Siddhirgonj 2*120 MW GTPP Shutdown with remarks:- GT-2",
       "full_desc": "Siddhirgonj 2*120 MW GTPP Shutdown with remarks:- GT-2"
     },
@@ -1174,7 +1192,12 @@
       "export": 44641381.82,
       "import": 0.0
     },
-    "checks": []
+    "checks": [
+      {
+        "scope": "Sirajganj-Sreepur",
+        "message": "Sirajganj-Sreepur: the curve integrates to 9.58 MKWh, but its circuits are metered at 0 kWh."
+      }
+    ]
   },
   "gasProductionData": [
     {

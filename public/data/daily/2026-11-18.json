@@ -8,13 +8,15 @@
     "minGen": 9126.9,
     "maxGen": 13183.24,
     "totalEnergyGen": 266.85827739,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 266.858,
     "maxTemp": 28.0,
     "totalGasSuppliedPower": 820.7,
-    "avgProductionCost": 6.449,
+    "avgProductionCost": 6.4493,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1721042882,
     "peakTimes": {
+      "zoneTable": "18:00",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:00",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.98,
+      "gen": 0.984,
       "cost": 98400,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.17,
+      "gen": 0.1651,
       "cost": 2463590,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.107278,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 34.293279
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.984,
         "Solar": 0.041444,
         "Imports": 0.0,
-        "Wind": 0.16512
+        "Wind": 0.16512,
+        "Nuclear": 0.0
       },
       "total": 44.079825
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.159745,
         "Imports": 2.54112,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 37.403715
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.396643,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 2.909203
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.066706,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 26.877078
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.29448,
         "Imports": 22.346909,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 49.447368
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.000456,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 36.693369
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 0.86808,
         "Imports": 20.836364,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 33.324054
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 1.195772,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 1.830386
     }
@@ -570,7 +588,7 @@
     {
       "time": "09:30 - 15:26",
       "plant": "Khulna(S)-PDB 330MW CCPP 230kV Ckt-1 Scheduled",
-      "load": "330MW",
+      "load": "HT Outage",
       "reason": "Due to Annual maintenance work",
       "full_desc": "Khulna(S)-PDB 330MW CCPP 230kV Ckt-1 Scheduled S/D from Khulna(S) 230/132kV end Due to Annual maintenance work"
     },
@@ -829,7 +847,7 @@
     {
       "time": "06:51",
       "plant": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-2",
-      "load": "120 MW",
+      "load": "HT Outage",
       "reason": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-2",
       "full_desc": "Siddhirgonj 2*120 MW GTPP Synchronized with remarks:- GT-2"
     },
@@ -885,7 +903,7 @@
     {
       "time": "07:29",
       "plant": "Shajibazar 330 MW CCPP Tripped with remarks:- GT1",
-      "load": "330 MW",
+      "load": "HT Outage",
       "reason": "Shajibazar 330 MW CCPP Tripped with remarks:- GT1",
       "full_desc": "Shajibazar 330 MW CCPP Tripped with remarks:- GT1"
     },

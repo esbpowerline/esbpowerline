@@ -8,13 +8,15 @@
     "minGen": 8747.46,
     "maxGen": 13083.62,
     "totalEnergyGen": 268.49872225,
-    "totalEnergyUnserved": null,
+    "totalEnergyUnserved": 0.0,
     "totalEnergyDemand": 268.499,
     "maxTemp": 30.4,
     "totalGasSuppliedPower": 806.29,
-    "avgProductionCost": 6.207,
+    "avgProductionCost": 6.2071,
+    "avgProductionCostStated": true,
     "totalDailyCost": 1666608903,
     "peakTimes": {
+      "zoneTable": "18:30",
       "dayPeakGen": "12:00",
       "dayPeakDemand": "12:00",
       "eveningPeakGen": "18:30",
@@ -47,7 +49,7 @@
     },
     {
       "name": "Hydro",
-      "gen": 0.97,
+      "gen": 0.972,
       "cost": 97200,
       "unitCost": 0.1,
       "color": "#06b6d4"
@@ -75,10 +77,17 @@
     },
     {
       "name": "Wind",
-      "gen": 0.0,
+      "gen": 0.0038,
       "cost": 57292,
       "unitCost": 14.92,
       "color": "#22c55e"
+    },
+    {
+      "name": "Nuclear",
+      "gen": 0.0,
+      "cost": 0,
+      "unitCost": null,
+      "color": "#7c3aed"
     }
   ],
   "zoneGenerationData": [
@@ -92,7 +101,8 @@
         "Hydro": 0.0,
         "Solar": 0.133887,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 33.488072
     },
@@ -106,7 +116,8 @@
         "Hydro": 0.972,
         "Solar": 0.091203,
         "Imports": 0.0,
-        "Wind": 0.00384
+        "Wind": 0.00384,
+        "Nuclear": 0.0
       },
       "total": 46.862984
     },
@@ -120,7 +131,8 @@
         "Hydro": 0.0,
         "Solar": 0.225818,
         "Imports": 2.36544,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 31.756764
     },
@@ -134,7 +146,8 @@
         "Hydro": 0.0,
         "Solar": 0.210935,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 2.715575
     },
@@ -148,7 +161,8 @@
         "Hydro": 0.0,
         "Solar": 0.046223,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 28.381987
     },
@@ -162,7 +176,8 @@
         "Hydro": 0.0,
         "Solar": 0.2952,
         "Imports": 22.507636,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 46.322341
     },
@@ -176,7 +191,8 @@
         "Hydro": 0.0,
         "Solar": 0.001545,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 40.309253
     },
@@ -190,7 +206,8 @@
         "Hydro": 0.0,
         "Solar": 1.01197,
         "Imports": 26.571541,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 38.233938
     },
@@ -204,7 +221,8 @@
         "Hydro": 0.0,
         "Solar": 0.155611,
         "Imports": 0.0,
-        "Wind": 0.0
+        "Wind": 0.0,
+        "Nuclear": 0.0
       },
       "total": 0.427808
     }
@@ -640,7 +658,7 @@
     {
       "time": "13:55",
       "plant": "Matarbari 2*600 MW (CPGCBL), FGMO",
-      "load": "600 MW",
+      "load": "HT Outage",
       "reason": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-",
       "full_desc": "Matarbari 2*600 MW (CPGCBL), FGMO is OFF with remarks:-"
     },
@@ -717,42 +735,42 @@
     {
       "time": "02:29",
       "plant": "Bibiana-II 341 MW CCPP (Summit) GT Synchronized with remarks:- None",
-      "load": "341 MW",
+      "load": "HT Outage",
       "reason": "Bibiana-II 341 MW CCPP (Summit) GT Synchronized with remarks:- None",
       "full_desc": "Bibiana-II 341 MW CCPP (Summit) GT Synchronized with remarks:- None"
     },
     {
       "time": "02:29",
       "plant": "Bibiana-II 341 MW CCPP (Summit) Synchronized with remarks:- GT",
-      "load": "341 MW",
+      "load": "HT Outage",
       "reason": "Bibiana-II 341 MW CCPP (Summit) Synchronized with remarks:- GT",
       "full_desc": "Bibiana-II 341 MW CCPP (Summit) Synchronized with remarks:- GT"
     },
     {
       "time": "05:32",
       "plant": "Sylhet 225 MW CCPP GT Tripped with remarks:- None",
-      "load": "225 MW",
+      "load": "HT Outage",
       "reason": "Sylhet 225 MW CCPP GT Tripped with remarks:- None",
       "full_desc": "Sylhet 225 MW CCPP GT Tripped with remarks:- None"
     },
     {
       "time": "05:32",
       "plant": "Sylhet 225 MW CCPP Tripped with remarks:- GT",
-      "load": "225 MW",
+      "load": "HT Outage",
       "reason": "Sylhet 225 MW CCPP Tripped with remarks:- GT",
       "full_desc": "Sylhet 225 MW CCPP Tripped with remarks:- GT"
     },
     {
       "time": "06:40",
       "plant": "Bibiana-II 341 MW CCPP (Summit) ST Synchronized with remarks:- None",
-      "load": "341 MW",
+      "load": "HT Outage",
       "reason": "Bibiana-II 341 MW CCPP (Summit) ST Synchronized with remarks:- None",
       "full_desc": "Bibiana-II 341 MW CCPP (Summit) ST Synchronized with remarks:- None"
     },
     {
       "time": "06:40",
       "plant": "Bibiana-II 341 MW CCPP (Summit) Synchronized with remarks:- ST",
-      "load": "341 MW",
+      "load": "HT Outage",
       "reason": "Bibiana-II 341 MW CCPP (Summit) Synchronized with remarks:- ST",
       "full_desc": "Bibiana-II 341 MW CCPP (Summit) Synchronized with remarks:- ST"
     },
@@ -810,146 +828,158 @@
     {
       "time": "00:00",
       "generation": 10345.33,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10345.33
     },
     {
       "time": "01:00",
       "generation": 9851.73,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 9851.73
     },
     {
       "time": "02:00",
       "generation": 9299.76,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 9299.76
     },
     {
       "time": "03:00",
       "generation": 8992.24,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 8992.24
     },
     {
       "time": "04:00",
       "generation": 8827.03,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 8827.03
     },
     {
       "time": "05:00",
       "generation": 8747.46,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 8747.46
     },
     {
       "time": "06:00",
       "generation": 8939.2,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 8939.2
     },
     {
       "time": "07:00",
       "generation": 10075.43,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10075.43
     },
     {
       "time": "08:00",
       "generation": 11019.27,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11019.27
     },
     {
       "time": "09:00",
       "generation": 11144.67,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11144.67
     },
     {
       "time": "10:00",
       "generation": 10916.36,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 10916.36
     },
     {
       "time": "11:00",
       "generation": 11234.02,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11234.02
     },
     {
       "time": "12:00",
       "generation": 11836.25,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11836.25
     },
     {
       "time": "13:00",
       "generation": 12289.07,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12289.07
     },
     {
       "time": "14:00",
       "generation": 12088.43,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12088.43
     },
     {
       "time": "15:00",
       "generation": 11702.24,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11702.24
     },
     {
       "time": "16:00",
       "generation": 11544.88,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11544.88
     },
     {
       "time": "17:00",
       "generation": 11889.69,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11889.69
     },
     {
       "time": "18:00",
       "generation": 13072.7,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 13072.7
+    },
+    {
+      "time": "18:30",
+      "generation": 13083.62,
+      "loadShed": 0.0,
+      "demand": 13083.62
     },
     {
       "time": "19:00",
       "generation": 12799.77,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12799.77
+    },
+    {
+      "time": "19:30",
+      "generation": 12609.63,
+      "loadShed": 0.0,
+      "demand": 12609.63
     },
     {
       "time": "20:00",
       "generation": 12459.05,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12459.05
     },
     {
       "time": "21:00",
       "generation": 12347.66,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 12347.66
     },
     {
       "time": "22:00",
       "generation": 11988.54,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11988.54
     },
     {
       "time": "23:00",
       "generation": 11605.29,
-      "loadShed": null,
-      "demand": null
+      "loadShed": 0.0,
+      "demand": 11605.29
     }
   ],
   "ewicData": {
