@@ -563,6 +563,13 @@ function MethodView({
   const held = model.fields.filter(
     (f) => f.rate_now_mmcfd > 0 && f.decline_basis !== 'exponential-fit',
   );
+  // Read from the model, never typed. This paragraph carried the 2026-08-18 fit
+  // as literals (Titas 7.7/7.3, Bibiyana 11.9/27.9) and drifted from the field
+  // table beside it as the archive grew — by as_of 2026-10-03 the model said
+  // 7.53/7.35 and 12.2/28.13. Same one decimal the field table prints.
+  const titas = model.fields.find((f) => f.field === 'Titas');
+  const bibiyana = model.fields.find((f) => f.field === 'Bibiyana');
+  const pctYr = (v: number | null | undefined) => (v == null ? '—' : `${v.toFixed(1)}%`);
 
   return (
     <div className="reserve-method">
@@ -625,9 +632,9 @@ function MethodView({
           D<sub>required</sub> = q&#8320; &times; 365.25 &divide; remaining reserve
         </code>
         <p>
-          Comparing the two is the whole model. Titas is falling at 7.7% a year and its reserve implies
-          7.3% — two separate statements about the same rock, agreeing. Bibiyana is falling at 11.9%
-          and its reserve implies 27.9%. Something there has to give, and rather than pick, the chart
+          Comparing the two is the whole model. Titas is falling at {pctYr(titas?.decline_pct_yr)} a year and its reserve implies{' '}
+          {pctYr(titas?.decline_required_by_2p_pct_yr)} — two separate statements about the same rock, agreeing. Bibiyana is falling at {pctYr(bibiyana?.decline_pct_yr)}{' '}
+          and its reserve implies {pctYr(bibiyana?.decline_required_by_2p_pct_yr)}. Something there has to give, and rather than pick, the chart
           draws both endings.
         </p>
       </section>

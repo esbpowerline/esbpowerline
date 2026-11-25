@@ -125,7 +125,7 @@ export function DailyCostCard({
                             </div>
                             <div className="space-y-2 text-[11px] md:text-xs">
                               <div className="flex justify-between">
-                                <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Total Daily Cost:</span>
+                                <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Daily cost:</span>
                                 <span className="font-bold text-foreground">{cr} Crore BDT</span>
                               </div>
                               <div className="flex justify-between">
@@ -141,7 +141,11 @@ export function DailyCostCard({
                               PGCB publishes this fuel&apos;s cost and its generation. Unit rate = cost ÷ (gen × 10⁶), calculated here.
                             </div>
                             <div className="mt-2 pt-1.5 border-t border-border/20 text-[8px] md:text-[9px] text-muted-foreground flex flex-col gap-0.5">
-                              <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB daily report</a>, &ldquo;Cost of the Consumed Fuel&rdquo; block</div>
+                              {/* "Total Daily Cost" above was one fuel's figure read as
+                                  the day's bill; and the block is "Production Cost (Tk.)"
+                                  on the 2025+ P1 — "Cost of the Consumed Fuel (PDB+Pvt)"
+                                  is the older sheet's heading (sampled 2024 vs 2025 workbooks). */}
+                              <div><strong>Source:</strong> <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">PGCB daily report</a>, P1 &ldquo;Production Cost (Tk.)&rdquo; block (&ldquo;Cost of the Consumed Fuel (PDB+Pvt)&rdquo; on pre-2025 reports)</div>
                               <div>Restates BPDB fuel economics. Not audited by ESB PowerLine.</div>
                             </div>
                           </div>

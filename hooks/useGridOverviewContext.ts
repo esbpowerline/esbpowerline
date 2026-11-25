@@ -50,6 +50,63 @@ export interface GridOverviewContext {
 
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
 
+export interface PeakDeficit {
+  /** Demand less generation at one instant, floored at zero; null when no single instant carries both. */
+  mw: number | null;
+  /** The clock time both figures belong to, where P1 stamps one. */
+  at: string | null;
+  /** The generation figure subtracted — P1's evening peak, or the hourly row at the demand stamp. */
+  generationMw: number | null;
+  /** Why `mw` is null, in a phrase a tile can print. */
+  note: string | null;
+}
+
+/**
+ * Evening-peak demand less generation at the SAME instant.
+ *
+ * P1 stamps its two evening-peak figures separately, and they need not share
+ * a time. On 20 Aug 2026 demand was 17,893.27 MW at 19:30 and generation
+ * 16,174.37 MW at 21:00; subtracting them gave 1,719 MW "at the evening peak"
+ * — two instants ninety minutes apart. P4's 19:30 row has generation at
+ * 16,035.26 MW, so the deficit at the demand peak was 1,858. Where the stamps
+ * differ, the generation is read from the hourly row at the demand stamp; with
+ * no such row the subtraction is refused rather than made across instants.
+ * Equal or both-absent stamps (the older layouts print none) keep P1's pair.
+ */
+export function peakDeficitAtDemand(
+  stats: Pick<GridSystemStats, 'eveningPeakDemand' | 'eveningPeakGen' | 'peakTimes'>,
+  hourly: GridDailyData['hourlyLoadData'] | null | undefined,
+): PeakDeficit {
+  const demand = stats.eveningPeakDemand;
+  if (typeof demand !== 'number' || !Number.isFinite(demand)) {
+    return { mw: null, at: null, generationMw: null, note: 'PGCB printed no evening-peak demand' };
+  }
+  const demandAt = stats.peakTimes?.eveningPeakDemand ?? null;
+  const genAt = stats.peakTimes?.eveningPeakGen ?? null;
+  if (demandAt === genAt) {
+    const gen = stats.eveningPeakGen;
+    if (typeof gen !== 'number' || !Number.isFinite(gen)) {
+      return { mw: null, at: demandAt, generationMw: null, note: 'PGCB printed no evening-peak generation' };
+    }
+    return { mw: Math.max(0, Math.round(demand - gen)), at: demandAt, generationMw: gen, note: null };
+  }
+  const row = demandAt ? (hourly ?? []).find((h) => h.time === demandAt) : undefined;
+  if (row && typeof row.generation === 'number' && Number.isFinite(row.generation)) {
+    return {
+      mw: Math.max(0, Math.round(demand - row.generation)),
+      at: demandAt,
+      generationMw: row.generation,
+      note: null,
+    };
+  }
+  return {
+    mw: null,
+    at: demandAt,
+    generationMw: null,
+    note: `demand peaked at ${demandAt ?? 'an unstamped time'}, generation at ${genAt ?? 'an unstamped time'}; no hourly generation for the demand peak`,
+  };
+}
+
 /**
  * The two things the Overview strip needs that the day's own report does not
  * carry: what the fleet could have produced, and what the days before it did.
@@ -108,13 +165,12 @@ export function useGridOverviewContext(
 
       // Peak deficit is demand minus what was generated at that same peak — the
       // day's own subtraction, repeated per day so the mean compares like with
-      // like rather than averaging two independently-averaged series.
-      const deficits = stats
-        .map((s) =>
-          typeof s.eveningPeakDemand === 'number' && typeof s.eveningPeakGen === 'number'
-            ? Math.max(0, s.eveningPeakDemand - s.eveningPeakGen)
-            : null,
-        )
+      // like rather than averaging two independently-averaged series. Same
+      // same-instant rule as the headline (20 Aug 2026: 1,858 MW at 19:30, not
+      // 1,719 across 19:30 and 21:00); a day with no common instant drops out.
+      const deficits = payloads
+        .filter((d) => d.systemStats)
+        .map((d) => peakDeficitAtDemand(d.systemStats, d.hourlyLoadData).mw)
         .filter((n): n is number => n != null);
 
       const unitCosts = stats

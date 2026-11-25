@@ -12,7 +12,7 @@ const systemStatsSchema = z.object({
   dayPeakGen: z.number(),
   eveningPeakGen: z.number(),
   dayPeakDemand: z.number().nullable(),
-  eveningPeakDemand: z.number(),
+  eveningPeakDemand: z.number().nullable(),
   // Nullable across the board: every one of these is read from the source
   // report, and a layout that does not publish one reports null rather than
   // an estimate dressed as a measurement.
@@ -24,6 +24,7 @@ const systemStatsSchema = z.object({
   maxTemp: z.number().nullable(),
   totalGasSuppliedPower: z.number(),
   avgProductionCost: z.number(),
+  avgProductionCostStated: z.boolean().optional(),
   totalDailyCost: z.number(),
 });
 

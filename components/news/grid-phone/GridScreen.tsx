@@ -45,7 +45,7 @@ function ZonesView() {
     return (
       <Empty
         title="Zone-wise Demand & Load-Shedding Data"
-        why={<>No official records are available for the selected date. Zone-wise demand and load-shedding tracking officially started on December 31, 2013.<br />Official Backlog Start Date: December 31, 2013</>}
+        why={<>No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.<br />Archive starts: 31 Dec 2013</>}
       />
     );
   }

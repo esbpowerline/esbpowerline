@@ -79,7 +79,7 @@ export function FuelView() {
       title: 'Cost Briefing',
       rows: [
         { kind: 'P', label: 'Fuel & import bill:', value: isNum(costNet) ? `${fmt(costNet / 1e7, 2)} Crore BDT` : '—' },
-        { kind: 'D', label: 'Avg production cost:', value: ss.avgProductionCost > 0 ? `${fmt(ss.avgProductionCost, 3)} Tk/kWh` : '—', note: 'The parser divides the bill by the day’s energy; PGCB’s printed cell is not read.' },
+        { kind: ss.avgProductionCostStated ? 'P' : 'D', label: 'Avg production cost:', value: ss.avgProductionCost > 0 ? `${fmt(ss.avgProductionCost, 3)} Tk/kWh` : '—', note: ss.avgProductionCostStated ? 'P1’s printed “Production Cost per KWHr”.' : 'This day’s report prints no per-kWh rate; the bill divided by the day’s energy.' },
       ],
       audit: 'Fuel and imports only. Capacity payments, debt service and O&M are not on this report at all, so this is what the day’s electricity cost to fuel, not what it cost to supply.',
       ref: ref('P1 sheet — production-cost block'),
@@ -248,11 +248,12 @@ export function FuelView() {
             <p>The columns that do compare fairly are the two beside each other: <b>Generation Share against Cost Share</b>. A fuel taking a larger share of the bill than of the electricity is the one raising the average — which is the question the rate column is usually being asked, and cannot answer.</p>
           </How>
           <How title="How the unit cost is derived" label="How unit cost is derived · what 2× and flat mean">
-            <p style={{ marginTop: 0 }}><b>How the unit cost is arrived at.</b> No agency publishes a Tk/kWh rate. PGCB publishes a production cost in Taka and an energy total in MKWh for each fuel; the rate here is the first divided by the second, which is why it is marked D. The marker beside each rate says what independent evidence supports it:</p>
+            <p style={{ marginTop: 0 }}><b>How the unit cost is arrived at.</b> No agency publishes a Tk/kWh rate per fuel; PGCB prints only the system-wide “Production Cost per KWHr”. For each fuel it publishes a production cost in Taka and an energy total in MKWh; the rate here is the first divided by the second, which is why it is marked D. The marker beside each rate says what independent evidence supports it:</p>
             <p><b>Why the columns may not divide exactly.</b> The rate is computed from the energy PGCB publishes at full precision, while the Generation column is rounded to two decimals to read cleanly. On small fuels the two printed columns therefore divide to something slightly different — Wind shows 0.31 MKWh against an actual 0.30624 — so the rate shown is the more precise one, not the one the visible columns produce.</p>
             <div className="gp-rows">
               <Row name={<Pill tone="good">2×</Pill>} wrap sub="BPDB publishes the same cost and the same energy in a separate report with its own control totals, and the rate derived from those agrees. Re-measured across every witnessed day from 2025-01-01 to 2026-06-24: gas agrees on 274 of 274 days, coal on 274 of 274, imports on 273 of 274 — the exception being 2026-04-03, where BPDB’s own page overstates imported energy by exactly 188.00 MKWh while PGCB’s three interconnectors sum to its own total." top />
-              <Row name={<Pill tone="warn">flat</Pill>} wrap sub="A flat rate the publisher applies rather than measures. Through 2026 PGCB prints Wind at 14.7100 Tk/kWh unchanged, and Hydro at 0.1000 except for 2026-06-30 to 07-15, when it stepped to 3.8100 and back. Rates that hold to four decimals for weeks and then jump are tariffs in force, not daily costs." top />
+              {/* The frozen "PGCB prints Wind at 14.7100 Tk/kWh unchanged" is gone: the rate is our cost ÷ energy, not PGCB's, and it moved (14.82, 14.92 in Nov 2026). */}
+              <Row name={<Pill tone="warn">flat</Pill>} wrap sub="A rate that behaves like a tariff applied rather than a cost measured: the quotient of the fuel’s printed cost and energy holds to four decimals for weeks and then jumps. Hydro’s held at 0.1000 except for 2026-06-30 to 07-15, when it stepped to 3.8100 and back. The rate is still ours; the marker describes its pattern." top />
               <Row name={<Pill tone="bad">!=</Pill>} wrap sub="Both agencies state the inputs and they disagree by more than their printing precision allows. Neither figure is altered." top />
               <Row name={<Pill>1×</Pill>} wrap sub="Correctly derived, but only one agency publishes the inputs, so there is no second witness." top />
               <Row name={<Pill>1× dashed</Pill>} wrap sub={`Correctly derived, and the cross-check has not been run for this day yet. The BPDB comparison is a periodic export${auth.witnessThrough ? ` covering days through ${auth.witnessThrough}` : ''}; a day past that is unchecked, which is not the same as unconfirmed.`} top />
@@ -267,7 +268,8 @@ export function FuelView() {
         title="Power Supply Scenario"
         desc={<>PGCB’s summary block as printed · {coverageLabel('fuelMix')}</>}
         meta={<span className="gp-tag">Daily</span>}
-        source={<span>Source: PGCB Daily Report — P1 sheet and the reported-day Forecast block; Nepal from the En-Curve stack · {file ? <code style={{ fontSize: 11 }}>{file}</code> : null} · As published by PGCB. Not audited. · Reporting period: System Summary (Date: {ss.date})</span>}
+        // No figure on this card is Nepal's or from En-Curve; the attribution said otherwise (see GenerationPanel).
+        source={<span>Source: PGCB Daily Report — P1 sheet (supply summary, production-cost block, gas supplied) and the reported-day Forecast block · {file ? <code style={{ fontSize: 11 }}>{file}</code> : null} · As published by PGCB. Not audited. · Reporting period: System Summary (Date: {ss.date})</span>}
       >
         <div className="gp-group-label" style={{ marginTop: 0 }}>Load-shedding &amp; demand</div>
         <div className="gp-rows">

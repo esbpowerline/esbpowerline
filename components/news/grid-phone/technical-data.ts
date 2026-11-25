@@ -29,8 +29,8 @@ export const PD_NOTE = {
 
 export const BEFORE_2013 = {
   title: 'PGCB Transmission Grid Data',
-  why: 'No official records are available for the selected date. PGCB transmission outages and substation tracking officially started on December 31, 2013.',
-  start: 'Official Backlog Start Date: December 31, 2013',
+  why: 'No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.',
+  start: 'Archive starts: 31 Dec 2013',
 };
 
 /* ── Power Transmission ─────────────────────────────────────────────── */
@@ -214,10 +214,12 @@ export const REGISTER = {
     ', so its 260 rows cover 227 distinct stations; the row count is shown as rows rather than as a station count for that reason. ',
     'Filtered Capacity sums only the MVA-rated transformers',
     ': the HVDC back-to-back blocks are rated in MW, a different quantity, and adding them to an MVA total would be arithmetic on mismatched units, so they are excluded. ',
-    'This station list is the April 2026 collection and has not been re-collected since.',
+    'This station list was collected on May 24, 2026 and reflects the grid as at April 2026; it has not been re-collected since.',
     ' Summed whole it comes to 89,155 MVA, which matched PGCB’s April total exactly; PGCB has since published 91,512 MVA for June, so the list now trails the summary tables above by 2,357 MVA.',
   ],
-  asAt: 'Register as at: April 2026',
+  // Collected 24 May 2026 (the tag above); April 2026 is the state it records —
+  // its 89,155 MVA matches PGCB's April total. Two dates, two different claims.
+  asAt: 'Register as at: April 2026 · collected May 24, 2026',
   zoneList: ['Dhaka', 'Khulna', 'Barishal', 'Cumilla', 'Sylhet', 'Rajshahi', 'Chattogram', 'Rangpur', 'Mymensingh'],
   ownerList: ['POWER GRID', 'APSCL', 'BIFPCL', 'RNPP', 'Bulk', 'BPDB', 'DESCO', 'DPDC', 'MoST', 'DMTCL'],
   voltages: [

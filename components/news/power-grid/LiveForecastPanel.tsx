@@ -197,7 +197,7 @@ export function LiveForecastPanel({
   // marks it — PGCB's projected hour, since no audited one exists yet.
   const peakRow = comparison.rows.reduce<ForecastVsLiveRow | null>(
     (best, r) =>
-      r.forecastGenMw != null && (best?.forecastGenMw == null || r.forecastGenMw > best.forecastGenMw)
+      r.forecastMw != null && (best?.forecastMw == null || r.forecastMw > best.forecastMw)
         ? r
         : best,
     null,
@@ -254,18 +254,18 @@ export function LiveForecastPanel({
             dayIsOver
               ? `Dhaka is into ${clock ? friendlyHour(clock.hourKey) : 'the next day'} of the following day; the audited workbook follows this morning`
               : now && nowRow
-                ? nowRow.actualGenMw != null
-                  ? `NLDC posted ${fmt(nowRow.actualGenMw)} MW against ${fmt(nowRow.forecastGenMw)} forecast`
-                  : `PGCB forecast ${fmt(nowRow.forecastGenMw)} MW; this hour is not posted yet`
+                ? nowRow.actualMw != null
+                  ? `NLDC posted ${fmt(nowRow.actualMw)} MW against ${fmt(nowRow.forecastMw)} forecast`
+                  : `PGCB forecast ${fmt(nowRow.forecastMw)} MW; this hour is not posted yet`
                 : 'waiting for the clock'
           }
         >
           {dayIsOver ? (
             <span className="text-muted-foreground text-xs font-semibold">complete</span>
           ) : now && nowRow ? (
-            nowRow.genGapMw != null ? (
+            nowRow.gapMw != null ? (
               <>
-                <Gap mw={nowRow.genGapMw} />
+                <Gap mw={nowRow.gapMw} />
                 <span className="text-muted-foreground/70 font-normal ml-1 text-[10px]">MW</span>
               </>
             ) : (
@@ -280,11 +280,11 @@ export function LiveForecastPanel({
           index={1}
           foot={
             latest
-              ? `${fmt(latest.forecastGenMw)} forecast, ${fmt(latest.actualGenMw)} posted`
+              ? `${fmt(latest.forecastMw)} forecast, ${fmt(latest.actualMw)} posted`
               : undefined
           }
         >
-          <Gap mw={latest?.genGapMw ?? null} />
+          <Gap mw={latest?.gapMw ?? null} />
           <span className="text-muted-foreground/70 font-normal ml-1 text-[10px]">MW</span>
         </Stat>
         <Stat
@@ -292,7 +292,7 @@ export function LiveForecastPanel({
           index={2}
           foot={`across ${comparison.coverage.scored} hours forecast ahead of the clock`}
         >
-          <Gap mw={comparison.meanGenGapMw} />
+          <Gap mw={comparison.meanGapMw} />
           <span className="text-muted-foreground/70 font-normal ml-1 text-[10px]">MW</span>
         </Stat>
         <Stat
@@ -319,8 +319,8 @@ export function LiveForecastPanel({
         <ForecastCurveCanvas
           points={comparison.rows.map((r) => ({
             time: r.time,
-            forecastMw: r.forecastGenMw,
-            actualMw: r.actualGenMw,
+            forecastMw: r.forecastMw,
+            actualMw: r.actualMw,
             beforeIssue: r.beforeIssue,
           }))}
           forecastColor={chartTheme.accent}
@@ -357,16 +357,16 @@ export function LiveForecastPanel({
               <th>Hour</th>
               <th className="text-left">When</th>
               <th className="text-left">
-                Forecast gen <GridProvenanceTag kind="P" />
+                Forecast demand <GridProvenanceTag kind="P" />
               </th>
               <th className="text-left">
-                Posted gen <GridProvenanceTag kind="P" />
+                Posted demand <GridProvenanceTag kind="P" />
               </th>
               <th className="text-left">
                 Difference <GridProvenanceTag kind="D" />
               </th>
               <th className="text-left">
-                Demand gap <GridProvenanceTag kind="D" />
+                Load shed posted <GridProvenanceTag kind="P" />
               </th>
             </tr>
           </thead>
@@ -396,19 +396,19 @@ export function LiveForecastPanel({
                           ? 'still to come'
                           : row.beforeIssue
                             ? 'before the forecast was filed'
-                            : row.actualGenMw != null
+                            : row.actualMw != null
                               ? 'posted'
                               : 'due, not posted yet'}
                     </span>
                   </td>
                   <td className="tabular-nums">
-                    {fmt(row.forecastGenMw)}
+                    {fmt(row.forecastMw)}
                     <span className="text-muted-foreground/70 ml-1">MW</span>
                   </td>
                   <td className="tabular-nums">
-                    {row.actualGenMw != null ? (
+                    {row.actualMw != null ? (
                       <>
-                        {fmt(row.actualGenMw)}
+                        {fmt(row.actualMw)}
                         <span className="text-muted-foreground/70 ml-1">MW</span>
                       </>
                     ) : (
@@ -422,10 +422,13 @@ export function LiveForecastPanel({
                     )}
                   </td>
                   <td>
-                    <Gap mw={row.genGapMw} />
+                    <Gap mw={row.gapMw} />
                   </td>
-                  <td>
-                    <Gap mw={row.demandGapMw} />
+                  {/* This column held the demand gap while the one before it held the
+                      generation gap. The headline moved to demand (2026-11-25), so
+                      the slot carries the shedding NLDC posted beside it instead. */}
+                  <td className="tabular-nums">
+                    {row.actualLoadShedMw != null ? fmt(row.actualLoadShedMw) : '—'}
                   </td>
                 </tr>
               );

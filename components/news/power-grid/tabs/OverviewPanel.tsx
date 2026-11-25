@@ -74,6 +74,18 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
   // hidden and both cards sit side by side as before (rules in
   // app/grid-explorer-charts.css, .ge-ov-*).
   const [pairView, setPairView] = useState<'mix' | 'cost'>('mix');
+  // How many rows carry demand, so the captions describe this day's data and
+  // not a layout. "Published for the evening peak hour only" was written for
+  // the pre-P4 layouts; with P4 surviving the parser a day can carry demand on
+  // every row, or on most of them, and the blanket line then denied a curve
+  // drawn directly above it.
+  const demandRows = hourlyLoadData.filter((h) => h.demand != null).length;
+  const demandScope =
+    demandRows === 0
+      ? 'no hourly demand published'
+      : demandRows === 1
+        ? 'demand as published for the evening peak hour'
+        : `demand as published for ${demandRows} of the ${hourlyLoadData.length} readings`;
   return (
     selectedDate < '2013-12-31' ? (
           <div className="grid-explorer-panel space-y-6">
@@ -83,10 +95,10 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
               </div>
               <h4 className="text-base font-bold text-foreground">PGCB Grid Overview Data</h4>
               <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                No official records are available for the selected date. PGCB data tracking officially started on December 31, 2013.
+                No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.
               </p>
               <div className="text-[10px] text-muted-foreground tabular-nums">
-                Official Backlog Start Date: December 31, 2013
+                Archive starts: 31 Dec 2013
               </div>
             </div>
           </div>
@@ -111,8 +123,10 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
                   {curveIsHourly
                     ? <>Generation, demand and load shedding for every hour PGCB publishes, from the NLDC hourly report (Date: {systemStats.date})</>
                     : sheddingIsHourly
-                      ? <>Hourly generation and load shedding from the NLDC hourly report; demand as published for the evening peak hour (Date: {systemStats.date})</>
-                      : <>Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date})</>}
+                      ? <>Hourly generation and load shedding from the NLDC hourly report; {demandScope} (Date: {systemStats.date})</>
+                      : demandRows === 1
+                        ? <>Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour (Date: {systemStats.date})</>
+                        : <>Hourly generation from the NLDC load curve; {demandScope} (Date: {systemStats.date})</>}
                   {' • '}<span className="text-primary font-semibold text-xs">
                     {coverageLabel(curveIsHourly || sheddingIsHourly ? 'hourlyShedding' : 'loadCurve')}
                   </span>
@@ -184,7 +198,12 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
             // the evening peak hour only, so this reports that hour rather than
             // the maximum of a series that used to be filled in across
             // 18:00-23:00.
-            const peakRow = hourlyLoadData.find((h) => h.demand != null || h.loadShed != null) ?? null;
+            // With demand on several rows the first such row is just the first
+            // hour, so the row at P1's evening-peak demand stamp is used instead.
+            const peakRow =
+              demandRows <= 1
+                ? hourlyLoadData.find((h) => h.demand != null || h.loadShed != null) ?? null
+                : hourlyLoadData.find((h) => h.time === systemStats.peakTimes?.eveningPeakDemand) ?? null;
 
             // Whole hours only. PGCB adds the evening-peak half hour (19:30) as
             // a 25th row — and on the pre-2019 layouts 18:30 as well — so a row
@@ -198,15 +217,24 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
 
             // With an hourly sheet the interesting figures are the day's own
             // extremes, not one nominated hour.
-            const shedHours = wholeHourRows.filter((h) => (h.loadShed ?? 0) > 0);
-            const worstShed = shedHours.length
-              ? [...shedHours].sort((a, b) => (b.loadShed ?? 0) - (a.loadShed ?? 0))[0]
-              : null;
+            //
+            // Counts are of whole hours whose shed figure was printed: 23 Nov
+            // 2026 had a null shed column in all 24 rows, and a count over
+            // every row reads that as 24 measured zeros. The worst reading is
+            // taken across ALL rows, 19:30 included — on 20 Aug 2026 the
+            // whole-hours filter said "worst at 15:00 Hr with 1,774 MW" while
+            // the chart key above it said "worst 1,778 MW · 19:30".
+            const shedPublishedHours = wholeHourRows.filter((h) => h.loadShed != null);
+            const shedHours = shedPublishedHours.filter((h) => (h.loadShed ?? 0) > 0);
+            const worstShed = hourlyLoadData.reduce<HourlyLoadItem | null>(
+              (acc, h) => (h.loadShed != null && h.loadShed > 0 && (acc == null || h.loadShed > (acc.loadShed ?? 0)) ? h : acc),
+              null,
+            );
             // A day total is only honest where the hours it sums are the day.
             // 71 archived days publish 23 hourly rows rather than 24, so the
             // figure is withheld there instead of being presented as the day.
             const shedTotalMwh =
-              sheddingIsHourly && wholeHourRows.length >= 24
+              sheddingIsHourly && shedPublishedHours.length >= 24
                 ? wholeHourRows.reduce((sum, h) => sum + (h.loadShed ?? 0), 0)
                 : 0;
 
@@ -295,8 +323,13 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
                       <div>
                         <dt style={{ color: SAMPLE_1930_COLOR }}>19:30 sample</dt>
                         <dd>
-                          The gold bar. PGCB takes one extra reading half an hour before the
-                          evening-peak hour, so it sits closer to its neighbours than the rest.
+                          {/* Was "half an hour before the evening-peak hour". The
+                              19:30 row is fixed; the evening peak itself moves
+                              (18:00 on 18 Nov 2026, 18:30 on 23 Nov, 21:00 for
+                              generation on 20 Aug), so the reading is tied to the
+                              clock, not to the peak. */}
+                          The gold bar. PGCB&apos;s fixed extra reading at 19:30, between the
+                          19:00 and 20:00 hours, so it sits closer to its neighbours than the rest.
                           It is a reading like any other, not a separate series &mdash; marked only
                           so its spacing does not read as a mistake.
                         </dd>
@@ -306,7 +339,13 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
                 ) : sheddingIsHourly ? (
                   <p className="leading-relaxed">The <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is read from PGCB&apos;s hourly station log, which carries a national total and a shortage figure at every hourly stamp{showShedding
                     ? <>; the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding</span> strip along the foot is that shortage column, sized against the day's worst hour.</>
-                    : <>, and records no shortage in any hour of this day.</>} That sheet publishes no demand column, so <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is the evening-peak figure from the report&apos;s front page and appears as a single marked point rather than a curve.</p>
+                    : <>, and records no shortage in any hour of this day.</>}{demandRows > 1
+                    ? <> <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is published for {demandRows} of the {hourlyLoadData.length} readings, and the shortfall band is drawn only where both were.</>
+                    : <> That sheet publishes no demand column, so <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is the evening-peak figure from the report&apos;s front page and appears as a single marked point rather than a curve.</>}</p>
+                ) : demandRows !== 1 ? (
+                  <p className="leading-relaxed">The hourly <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is the NLDC load-curve sheet.{demandRows > 1
+                    ? <> <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is published for {demandRows} of the {hourlyLoadData.length} readings, and the shortfall band is drawn only where both were.</>
+                    : <> No hourly <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Demand</span> is published for this day; P1&apos;s evening-peak figure, where printed, is in the strip above.</>}{' '}Hourly load shedding is not published for this day.</p>
                 ) : (
                   <p className="leading-relaxed">The hourly <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.generation }}>Actual Generation</span> curve is the NLDC load-curve sheet, logged every half hour. <span className="font-semibold" style={{ color: LOAD_CURVE_COLORS.demand }}>Total Demand</span>{showShedding
                     ? <> and the <span className="font-semibold" style={{ color: chartTheme.destructive }}>Load Shedding Deficit</span> are published for the evening peak hour only on this report&apos;s layout, so they appear as single marks rather than continuous lines, and the shortfall band is drawn only where both were measured.</>
@@ -318,15 +357,17 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
                   <strong>Operational Insights <GridProvenanceTag kind="D" /></strong>: The load curve illustrates the shape of generation across this day.
                   {(curveIsHourly || sheddingIsHourly) && worstShed ? (
                     <>
-                      {' '}Load was shed in <span className="font-semibold text-primary">{shedHours.length} of the {wholeHourRows.length} published hours</span>, worst at{' '}
-                      <span className="font-semibold text-primary">{worstShed.time} Hr</span> with{' '}
-                      <span className="font-bold text-destructive tabular-nums">{formatNumber(Math.round(worstShed.loadShed ?? 0))} MW</span> unserved
+                      {' '}Load was shed in <span className="font-semibold text-primary">{shedHours.length} of the {shedPublishedHours.length} published hours</span>; the worst reading was{' '}
+                      <span className="font-bold text-destructive tabular-nums">{formatNumber(Math.round(worstShed.loadShed ?? 0))} MW</span> at{' '}
+                      <span className="font-semibold text-primary">{worstShed.time} Hr</span>
                       {shedTotalMwh > 0 && (
                         <> — around <span className="font-bold text-foreground tabular-nums">{formatNumber(Math.round(shedTotalMwh))} MWh</span> across the day, taking each hourly figure as the rate for that hour.</>
                       )}
                     </>
-                  ) : curveIsHourly || sheddingIsHourly ? (
-                    ' No load shedding was recorded in any published hour of this day.'
+                  ) : (curveIsHourly || sheddingIsHourly) && shedPublishedHours.length > 0 ? (
+                    ' No load was shed in any published hour of this day.'
+                  ) : curveIsHourly ? (
+                    ' Hourly load shedding is not published for this day.'
                   ) : peakRow && peakRow.demand != null ? (
                     <>
                       {' '}At the evening peak (<span className="font-semibold text-primary tabular-nums">{peakRow.time} Hr</span>) PGCB reported demand of <span className="font-bold text-foreground">{formatNumber(Math.round(peakRow.demand))} MW</span>
@@ -336,7 +377,7 @@ export function OverviewPanel({ day, derived, ui, actions, slots }: OverviewPane
                         ' with no load shedding recorded.'
                       )}
                     </>
-                  ) : systemStats.eveningPeakDemand > 0 ? (
+                  ) : systemStats.eveningPeakDemand != null && systemStats.eveningPeakDemand > 0 ? (
                     // The day's own evening-peak demand, when no hourly row carries one. The
                     // blanket "does not publish" line contradicted the Peak Demand tile above
                     // it on 2016-03-10, which shows 7,456 MW from the same report (2026-11-23).

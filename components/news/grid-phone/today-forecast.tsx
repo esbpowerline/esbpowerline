@@ -15,6 +15,7 @@ import { fmt, niceTicks } from './charts';
 import { usePhone } from './context';
 import { isNum, Prov, Section, Stat, useSheet } from './shared';
 import { dayLabel, Foot, Gap, HowTo, nextDay, useBox } from './today-util';
+import { buildForecastCurve, forecastStatesAvailability } from '@/lib/data/grid/forecast-curve';
 
 const POLL_MS = 15 * 60 * 1000;
 type LiveGridResponse = { asOf?: string; today?: { date?: string }; hours?: LiveHourLike[] };
@@ -245,29 +246,32 @@ function SettledPanel({ toggle }: { toggle: ReactNode }) {
   const issuedClock = fc.issuedAt ? fc.issuedAt.slice(11, 16) : null;
   const issuedHour = issuedClock ? Number(issuedClock.slice(0, 2)) : null;
   const lead = issuedHour == null ? null : Math.max(0, 20 - issuedHour);
-  const actualBy = new Map(hoursAll.map((h) => [h.time, h]));
-  const rows: CurveRow[] = (fc.hourly ?? []).map((r) => ({
+  // Forecast demand against measured demand — see lib/data/grid/forecast-curve.ts
+  // for why the Generation column (availability in a surplus season) is not used.
+  const rows: CurveRow[] = buildForecastCurve(fc.hourly, hoursAll, s, issuedHour).map((r) => ({
     time: r.time,
-    forecast: r.generationMw,
-    actual: actualBy.get(r.time)?.generation ?? null,
-    before: issuedHour != null && Number(r.time.slice(0, 2)) < issuedHour,
+    forecast: r.forecastMw,
+    actual: r.actualMw,
+    before: r.beforeIssue,
   }));
+  const statesAvailability = forecastStatesAvailability(fc);
   const scored = rows.filter((r) => !r.before && isNum(r.actual) && isNum(r.forecast));
   const absMean = scored.length ? scored.reduce((a, r) => a + Math.abs((r.actual as number) - (r.forecast as number)), 0) / scored.length : null;
   const worst = scored.length ? scored.reduce((a, b) => (Math.abs((b.actual as number) - (b.forecast as number)) > Math.abs((a.actual as number) - (a.forecast as number)) ? b : a)) : null;
   const worstGap = worst ? (worst.actual as number) - (worst.forecast as number) : null;
 
   const cmp: Cmp[] = [
-    { label: 'Peak generation, evening', unit: 'MW', forecast: fc.maxGenEveningMw, actual: s.eveningPeakGen, dp: 0 },
     { label: 'Peak demand, evening', unit: 'MW', forecast: fc.maxDemandEveningMw, actual: s.eveningPeakDemand, dp: 0 },
+    { label: 'Peak generation, evening', unit: 'MW', forecast: fc.maxGenEveningMw, actual: s.eveningPeakGen, dp: 0, note: statesAvailability ? 'PGCB forecast more generation than demand, so this states generation available, not expected output; the gap is unused capacity, not a miss.' : undefined },
     { label: 'Peak demand, day', unit: 'MW', forecast: fc.maxDemandDayMw, actual: s.dayPeakDemand, dp: 0 },
     { label: 'Peak demand (undifferentiated)', unit: 'MW', forecast: fc.maxDemandMw, actual: s.eveningPeakDemand, dp: 0, note: 'The 2014 layout forecast a single peak demand without naming day or evening; the actual shown is the evening peak.' },
-    { label: 'Total energy generated', unit: 'MKWh', forecast: fc.totalEnergyGenMkwh, actual: s.totalEnergyGen, dp: 2 },
+    { label: 'Total energy generated', unit: 'MKWh', forecast: fc.totalEnergyGenMkwh, actual: s.totalEnergyGen, dp: 2, note: statesAvailability ? 'Summed from the same availability column, so it runs above what the grid needed to generate.' : undefined },
     { label: 'Maximum temperature, Dhaka', unit: '°C', forecast: fc.maxTempC, actual: s.maxTemp, dp: 1, note: 'Published on the 2025 layout only.' },
   ].filter((r) => r.forecast != null || r.actual != null);
   if (!cmp.length && !rows.length) return null;
 
-  const evening = cmp[0]?.label === 'Peak generation, evening' ? cmp[0] : null;
+  // Demand, not generation: like for like in every season (see the curve above).
+  const evening = cmp[0]?.label === 'Peak demand, evening' ? cmp[0] : null;
   const eveGap = evening && isNum(evening.forecast) && isNum(evening.actual) ? evening.actual - evening.forecast : null;
   const energy = cmp.find((c) => c.label === 'Total energy generated');
   const energyGap = energy && isNum(energy.forecast) && isNum(energy.actual) ? energy.actual - energy.forecast : null;
@@ -347,15 +351,15 @@ function SettledPanel({ toggle }: { toggle: ReactNode }) {
       {toggle}
       <div className="gp-stats gp-stats--first">
         <Stat
-          label="Evening peak vs forecast"
+          label="Evening peak demand vs forecast"
           value={eveGap}
           unit="MW"
           prov="D"
-          note="Actual evening-peak generation minus PGCB’s forecast of it."
+          note="Actual evening-peak demand minus PGCB’s forecast of it."
           detail={evening && isNum(evening.forecast) ? `${fmt(evening.actual)} actual · ${fmt(evening.forecast)} forecast${eveGap != null && evening.forecast ? ` (${eveGap >= 0 ? '+' : '−'}${Math.abs((eveGap / evening.forecast) * 100).toFixed(1)}%)` : ''}` : 'not forecast'}
         />
         {absMean != null ? (
-          <Stat label="Average hourly miss" value={absMean} unit="MW" prov="D" note="Mean of |measured − forecast| over the hours forecast ahead of the clock." detail={worst && worstGap != null ? `widest at ${worst.time} (${worstGap >= 0 ? '+' : '−'}${fmt(Math.abs(worstGap))} MW)` : undefined} />
+          <Stat label="Average hourly demand miss" value={absMean} unit="MW" prov="D" note="Mean of |measured − forecast| over the hours forecast ahead of the clock." detail={worst && worstGap != null ? `widest at ${worst.time} (${worstGap >= 0 ? '+' : '−'}${fmt(Math.abs(worstGap))} MW)` : undefined} />
         ) : (
           <Stat label="Energy vs forecast" value={energyGap} unit="MKWh" dp={2} prov="D" note="Energy generated minus PGCB’s forecast of it." detail={energy && isNum(energy.forecast) ? `${fmt(energy.actual, 2)} actual · ${fmt(energy.forecast, 2)} forecast` : 'not forecast'} />
         )}
@@ -368,7 +372,7 @@ function SettledPanel({ toggle }: { toggle: ReactNode }) {
 
       {rows.length > 0 && (
         <div className="gp-tsub">
-          <h3>Forecast curve against the measured one</h3>
+          <h3>Forecast demand against measured demand</h3>
           <p>
             {absMean != null ? (
               <>Mean absolute miss <b style={{ color: 'var(--gp-on)' }}>{fmt(absMean)} MW</b> across {scored.length} forecast hours <Prov kind="D" note="Mean of |measured − forecast| over hours forecast ahead of the clock. Hours before the stamp are excluded." />{worst && worstGap != null ? <> · widest at {worst.time} ({worstGap >= 0 ? '+' : '−'}{fmt(Math.abs(worstGap))} MW)</> : null}</>
@@ -376,7 +380,7 @@ function SettledPanel({ toggle }: { toggle: ReactNode }) {
               'No hour was both forecast ahead of the clock and measured, so no miss is computed.'
             )}
           </p>
-          <ForecastCurve rows={rows} issuedClock={issuedClock} peakTime={s.peakTimes?.eveningPeakGen ?? null} aria="PGCB's forecast generation curve against the measured one, hour by hour" />
+          <ForecastCurve rows={rows} issuedClock={issuedClock} peakTime={s.peakTimes?.eveningPeakGen ?? null} aria="PGCB's forecast demand curve against measured demand, hour by hour" />
         </div>
       )}
 
@@ -416,8 +420,8 @@ function LivePanel({ cmp, forward, toggle }: { cmp: ForecastVsLive; forward: For
   const nowRow = now ? cmp.rows.find((r) => r.time === now.hourKey) ?? null : null;
   const latest = cmp.latestMatched;
   const rowsSorted = [...cmp.rows].reverse();
-  const curveRows: CurveRow[] = cmp.rows.map((r) => ({ time: r.time, forecast: r.forecastGenMw, actual: r.actualGenMw, before: r.beforeIssue }));
-  const peak = cmp.rows.reduce<{ t: string; v: number } | null>((b, r) => (isNum(r.forecastGenMw) && (!b || r.forecastGenMw > b.v) ? { t: r.time, v: r.forecastGenMw } : b), null);
+  const curveRows: CurveRow[] = cmp.rows.map((r) => ({ time: r.time, forecast: r.forecastMw, actual: r.actualMw, before: r.beforeIssue }));
+  const peak = cmp.rows.reduce<{ t: string; v: number } | null>((b, r) => (isNum(r.forecastMw) && (!b || r.forecastMw > b.v) ? { t: r.time, v: r.forecastMw } : b), null);
 
   const table = () =>
     open(
@@ -434,21 +438,20 @@ function LivePanel({ cmp, forward, toggle }: { cmp: ForecastVsLive; forward: For
                 <b>{r.time}</b>
                 <div>
                   {friendlyHour(r.time)}
-                  <small>{isNow ? 'happening now' : ahead ? 'still to come' : r.beforeIssue ? 'before the forecast was filed' : r.actualGenMw != null ? 'posted' : 'due, not posted yet'}</small>
+                  <small>{isNow ? 'happening now' : ahead ? 'still to come' : r.beforeIssue ? 'before the forecast was filed' : r.actualMw != null ? 'posted' : 'due, not posted yet'}</small>
                 </div>
                 <div className="gp-trow__v">
-                  {fmt(r.forecastGenMw)}
-                  <small>{r.actualGenMw != null ? fmt(r.actualGenMw) : ahead ? 'awaiting' : 'not posted'}</small>
+                  {fmt(r.forecastMw)}
+                  <small>{r.actualMw != null ? fmt(r.actualMw) : ahead ? 'awaiting' : 'not posted'}</small>
                 </div>
                 <div className="gp-trow__v">
-                  <Gap mw={r.genGapMw} />
-                  <small>demand <Gap mw={r.demandGapMw} /></small>
+                  <Gap mw={r.gapMw} />
                 </div>
               </div>
             );
           })}
         </div>
-        <p className="gp-taudit">Forecast and posted generation are published (P); the differences are ours (D): posted minus forecast, signed, for generation and for demand.</p>
+        <p className="gp-taudit">Forecast and posted demand are published (P); the difference is ours (D): posted minus forecast, signed. Demand, not generation: in a surplus season PGCB’s Generation column states availability, not expected output.</p>
       </>,
     );
 
@@ -466,14 +469,14 @@ function LivePanel({ cmp, forward, toggle }: { cmp: ForecastVsLive; forward: For
       <div className="gp-stats gp-stats--first">
         <Stat
           label={dayIsOver ? 'This day has ended' : now ? `Right now · ${friendlyHour(now.hourKey)}` : 'Right now'}
-          value={!dayIsOver && nowRow ? nowRow.genGapMw : null}
-          unit={!dayIsOver && nowRow && nowRow.genGapMw != null ? 'MW' : undefined}
+          value={!dayIsOver && nowRow ? nowRow.gapMw : null}
+          unit={!dayIsOver && nowRow && nowRow.gapMw != null ? 'MW' : undefined}
           prov="D"
-          note="Posted generation minus PGCB’s forecast for this hour."
-          detail={dayIsOver ? 'complete — Dhaka is into the following day; the audited workbook follows this morning' : now && nowRow ? (nowRow.actualGenMw != null ? `NLDC posted ${fmt(nowRow.actualGenMw)} MW against ${fmt(nowRow.forecastGenMw)} forecast` : `not posted yet · PGCB forecast ${fmt(nowRow.forecastGenMw)} MW`) : 'waiting for the clock'}
+          note="Posted demand minus PGCB’s demand forecast for this hour."
+          detail={dayIsOver ? 'complete — Dhaka is into the following day; the audited workbook follows this morning' : now && nowRow ? (nowRow.actualMw != null ? `NLDC posted ${fmt(nowRow.actualMw)} MW against ${fmt(nowRow.forecastMw)} forecast` : `not posted yet · PGCB forecast ${fmt(nowRow.forecastMw)} MW`) : 'waiting for the clock'}
         />
-        <Stat label={`Newest posted hour · ${latest ? friendlyHour(latest.time) : '—'}`} value={latest?.genGapMw ?? null} unit="MW" prov="D" note="Posted minus forecast for the newest hour that has both." detail={latest ? `${fmt(latest.forecastGenMw)} forecast, ${fmt(latest.actualGenMw)} posted` : undefined} />
-        <Stat label="Mean gap so far" value={cmp.meanGenGapMw} unit="MW" dp={1} prov="D" note="Mean signed gap over hours forecast ahead of the clock. Hours before the stamp are excluded." detail={`across ${cmp.coverage.scored} hours forecast ahead of the clock`} />
+        <Stat label={`Newest posted hour · ${latest ? friendlyHour(latest.time) : '—'}`} value={latest?.gapMw ?? null} unit="MW" prov="D" note="Posted minus forecast for the newest hour that has both." detail={latest ? `${fmt(latest.forecastMw)} forecast, ${fmt(latest.actualMw)} posted` : undefined} />
+        <Stat label="Mean gap so far" value={cmp.meanGapMw} unit="MW" dp={1} prov="D" note="Mean signed gap over hours forecast ahead of the clock. Hours before the stamp are excluded." detail={`across ${cmp.coverage.scored} hours forecast ahead of the clock`} />
         <Stat
           label="Day so far"
           value={cmp.coverage.matched}

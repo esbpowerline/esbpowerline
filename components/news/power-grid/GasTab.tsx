@@ -15,6 +15,7 @@ import {
   GridProvenanceTag,
 } from './GridExplorerUI';
 import { PetrobanglaGasKpiStrip } from './PetrobanglaGasKpiStrip';
+import { distributorDisplayLabel } from '@/lib/data/petrobangla/distributor-labels';
 import {
   DISTRIBUTOR_COLORS,
   DistributionCompanyDetail,
@@ -183,9 +184,10 @@ export function GasTab({
           </span>
           <h4 className="text-base font-bold text-foreground">Petrobangla Gas Production &amp; Distribution Data</h4>
           <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-            No official records are available for the selected date. Petrobangla gas production tracking officially started on January 12, 2020.
+            {/* About this archive's holdings, not Petrobangla's history: it reported gas
+                long before 2020, and "tracking officially started" claimed otherwise. */}
+            No Petrobangla report is held for the selected date. This archive&apos;s Petrobangla daily reports begin 12 Jan 2020.
           </p>
-          <div className="text-[10px] tabular-nums text-muted-foreground">Official Backlog Start Date: January 12, 2020</div>
         </div>
       </div>
     );
@@ -392,7 +394,7 @@ export function GasTab({
               <Figure label="Gas (MMCFD)" className="text-primary">
                 {formatNumber(productionTotalGas, 1)}
               </Figure>
-              <Figure label="Condensate (BBL)">
+              <Figure label="Condensate (BBLD)">
                 {formatNumber(productionTotalCondensate, 1)}
               </Figure>
               <Figure label="National share">100.0%</Figure>
@@ -589,7 +591,7 @@ export function GasTab({
                           aria-hidden="true"
                         />
                       )}
-                      <span className="truncate">{gd.company}</span>
+                      <span className="truncate">{distributorDisplayLabel(gd.company)}</span>
                     </span>
                     <Figure label="Power grid">{gd.power.toFixed(1)}</Figure>
                     <Figure label="Fertilizer">{gd.fertilizer.toFixed(1)}</Figure>
@@ -619,7 +621,7 @@ export function GasTab({
                           <DistributionCompanyDetail
                             company={detailCompany}
                             distributorKey={distributorKey}
-                            label={gd.company}
+                            label={distributorDisplayLabel(gd.company)}
                             inline
                           />
                         )}

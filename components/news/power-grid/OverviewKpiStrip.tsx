@@ -15,7 +15,8 @@ import {
 } from '@/components/news/power-grid/GridExplorerUI';
 import { formatNumber } from '@/lib/utils';
 import { renewableGridSharePct } from '@/lib/data/companies/sreda';
-import { useGridOverviewContext } from '@/hooks/useGridOverviewContext';
+import { peakDeficitAtDemand, useGridOverviewContext } from '@/hooks/useGridOverviewContext';
+import { forecastStatesAvailability } from '@/lib/data/grid/forecast-curve';
 import type { GridDailyData, GridForecast, GridSystemStats } from '@/lib/data/grid/types';
 
 type KpiId = 'gen' | 'demand' | 'gas' | 'shed' | 'capacity' | 'cost';
@@ -52,6 +53,12 @@ export interface OverviewKpiStripProps {
    * difference, never a grade, matching the Forecast against Outturn card.
    */
   forecast?: GridForecast | null;
+  /**
+   * The day's hourly rows, so Peak Deficit can read generation at P1's
+   * demand stamp when the two evening-peak stamps differ. Without it such a
+   * day shows a dash rather than a subtraction across two instants.
+   */
+  hourlyLoadData?: GridDailyData['hourlyLoadData'];
 }
 
 /** "1 Sep" — short enough for a 10px hint line, explicit enough to date a figure. */
@@ -75,11 +82,26 @@ function formatGasDay(iso: string): string {
 function ForecastHint({
   forecastMw,
   actualMw,
+  statesAvailability = false,
 }: {
   forecastMw: number | null | undefined;
   actualMw: number | null | undefined;
+  /**
+   * PGCB's "Probable Maximum Generation" above its own forecast demand: in a
+   * surplus season the figure is availability, not expected output. On 23 Nov
+   * 2026 it was 13,732 MW against forecast demand of 13,670, and this line
+   * read "forecast 13,732 · outturn −620 MW" — capacity that was never asked
+   * to run, presented as a generation miss. Named for what it is, with no
+   * delta (see forecastStatesAvailability).
+   */
+  statesAvailability?: boolean;
 }) {
   if (forecastMw == null || !Number.isFinite(forecastMw)) return null;
+  if (statesAvailability) {
+    return (
+      <span className="block mt-0.5">stated available {formatNumber(Math.round(forecastMw))} MW</span>
+    );
+  }
   const gap =
     actualMw != null && Number.isFinite(actualMw) ? Math.round(actualMw - forecastMw) : null;
   return (
@@ -117,6 +139,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   totalCapacityRenewables,
   isoDate,
   forecast,
+  hourlyLoadData,
 }: OverviewKpiStripProps) {
   const [activeKpiTooltip, setActiveKpiTooltip] = useState<KpiId | null>(null);
   const kpiStripRef = useRef<HTMLDivElement>(null);
@@ -180,18 +203,26 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   // The full label is far too long for a 10px hint in a 190px tile.
   const gasDayLabel = gasWindowLabel ? gasWindowLabel.split(' · ')[0] : null;
 
+  // Generation tile only: the demand tile's forecast is a demand forecast and
+  // its signed difference stands.
+  const genForecastIsAvailability = forecastStatesAvailability(forecast);
+
   // Demand and supply at the same instant, so the difference is the shortfall at
   // the moment the grid was most stretched. The strip used to headline the day's
   // energy averaged over 24 hours next to this peak; the two are not comparable,
   // and readers subtracted them anyway. The average now sits in the supply
   // briefing, named as an average.
-  const peakDeficitMw = Math.max(
-    0,
-    Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen),
-  );
+  //
+  // "The same instant" is enforced, not assumed: P1 stamps demand and
+  // generation separately (19:30 and 21:00 on 20 Aug 2026, which printed
+  // 1,719 MW here against the 1,858 P4's 19:30 row gives). See
+  // peakDeficitAtDemand. A null demand (P1 printed none) is a dash, never 0.
+  const peakDeficit = peakDeficitAtDemand(systemStats, hourlyLoadData);
+  const peakDeficitMw = peakDeficit.mw;
+  const eveningDemand = systemStats.eveningPeakDemand;
   const shedSharePct =
-    systemStats.eveningPeakDemand > 0
-      ? (peakDeficitMw / systemStats.eveningPeakDemand) * 100
+    peakDeficitMw != null && eveningDemand != null && eveningDemand > 0
+      ? (peakDeficitMw / eveningDemand) * 100
       : null;
 
   // Idle capacity is measured against the plant sheet's own installed ratings,
@@ -204,25 +235,25 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
   // "Production Cost (Tk.)" total row — a number PGCB states — so it is what
   // this tile headlines.
   //
-  // `avgProductionCost` used to hold that slot, and it is NOT the printed
-  // "Production Cost per KWHr" cell: parse_daily_reports.py:1890-1892 computes
-  // it as total_daily_cost / total_energy_gen and never reads the rate PGCB
-  // prints. The tile still claimed `provenance="P"` for it while its own
-  // tooltip row underneath marked the same field D — the mark was corrected in
-  // the label fidelity pass and the headline was not. The derived rate keeps
-  // its place in the briefing below, under a D, where it can be read against
-  // the bill it came from.
+  // `avgProductionCost` used to hold that slot. The briefing below then said
+  // PGCB states no per-kWh rate, which is false: P1 prints "Production Cost
+  // per KWHr" beside Maximum Generation — 6.084789564982523 Tk on 23 Nov 2026,
+  // 7.74641779933969 on 20 Aug — and `avgProductionCost` carries it (the
+  // stored 6.085 and 7.746 agree to the third decimal). So the rate is shown
+  // as published, under a P. What is ours is the cross-check: the fuel rows'
+  // costs over their generation, shown only when it disagrees. Per-fuel rates
+  // remain ours — PGCB prints a cost and an energy per fuel, never a rate.
   const publishedDailyCost =
     typeof systemStats.totalDailyCost === 'number' && systemStats.totalDailyCost > 0
       ? systemStats.totalDailyCost
       : null;
-  const derivedUnitCost =
+  const publishedUnitCost =
     typeof systemStats.avgProductionCost === 'number' && systemStats.avgProductionCost > 0
       ? systemStats.avgProductionCost
       : null;
   const unitCostGap =
-    derivedUnitCost != null && hasPublishedFuelCost
-      ? Math.abs(derivedUnitCost - avgCostPerKwh)
+    publishedUnitCost != null && hasPublishedFuelCost
+      ? Math.abs(publishedUnitCost - avgCostPerKwh)
       : null;
 
   // The page-level strip: its briefings drop over the tab content below, so it
@@ -264,6 +295,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <ForecastHint
               forecastMw={forecast?.maxGenEveningMw}
               actualMw={systemStats.eveningPeakGen}
+              statesAvailability={genForecastIsAvailability}
             />
           </>
         }
@@ -317,7 +349,11 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           {forecast?.maxGenEveningMw != null && (
             <GridKpiTooltipRow
               provenance="P"
-              label="PGCB's same-morning forecast:"
+              label={
+                genForecastIsAvailability
+                  ? "PGCB's same-morning stated available:"
+                  : "PGCB's same-morning forecast:"
+              }
               value={`${formatNumber(Math.round(forecast.maxGenEveningMw))} MW`}
             />
           )}
@@ -344,7 +380,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <DailyBadge />
           </>
         }
-        value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
+        // Null where P1 printed no evening-peak demand. The parser used to copy
+        // generation into it, which made Peak Deficit read 0 MW by construction.
+        value={eveningDemand == null ? '— MW' : `${formatNumber(Math.round(eveningDemand))} MW`}
         hint={
           <>
             <GridKpiTrend
@@ -371,7 +409,7 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           <GridKpiTooltipRow
             provenance="P"
             label="Evening Peak Demand:"
-            value={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}
+            value={eveningDemand == null ? 'not published for this day' : `${formatNumber(Math.round(eveningDemand))} MW`}
           />
           <GridKpiTooltipRow
             provenance="P"
@@ -408,8 +446,9 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
 
       <GridKpiCell
         icon={TrendingDown}
-        // "Load Shedding" named a figure this is not. The value is
-        // eveningPeakDemand - eveningPeakGen, which is why it carries a D: PGCB
+        // "Load Shedding" named a figure this is not. The value is evening-peak
+        // demand less generation at that instant (peakDeficitAtDemand), which
+        // is why it carries a D: PGCB
         // prints load shedding of its own, zone by zone, and on 2026-08-14 that
         // printed figure summed to 396 MW against the 414 MW this subtraction
         // gives. Two different measures reading as one contradiction, because
@@ -423,14 +462,19 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             <DailyBadge />
           </>
         }
-        value={`${formatNumber(peakDeficitMw)} MW`}
+        value={peakDeficitMw == null ? '— MW' : `${formatNumber(peakDeficitMw)} MW`}
         hint={
-          <GridKpiTrend
-            current={peakDeficitMw}
-            baseline={baseline?.peakDeficit}
-            days={baseline?.days ?? 0}
-            polarity="down-good"
-          />
+          peakDeficitMw == null ? (
+            peakDeficit.note ? <span className="text-muted-foreground">{peakDeficit.note}</span> : null
+          ) : (
+            <GridKpiTrend
+              current={peakDeficitMw}
+              baseline={baseline?.peakDeficit}
+              days={baseline?.days ?? 0}
+              polarity="down-good"
+              absoluteBelow={{ floor: 50, unit: 'MW' }}
+            />
+          )
         }
         active={activeKpiTooltip === 'shed'}
         // PGCB prints the demand and the generation; the shortfall between them
@@ -445,10 +489,21 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
         <GridKpiTooltipBody>
           <GridKpiTooltipRow
             provenance="D"
-            label="At the evening peak:"
-            value={`${formatNumber(peakDeficitMw)} MW`}
+            label={peakDeficit.at ? `At the demand peak (${peakDeficit.at}):` : 'At the evening peak:'}
+            value={peakDeficitMw == null ? '—' : `${formatNumber(peakDeficitMw)} MW`}
             valueClass="text-destructive"
           />
+          {/* Named only when it is not P1's evening-peak generation, so a
+              reader can see which generation figure was subtracted. */}
+          {peakDeficitMw != null &&
+            peakDeficit.generationMw != null &&
+            peakDeficit.generationMw !== systemStats.eveningPeakGen && (
+              <GridKpiTooltipRow
+                provenance="P"
+                label={`Generation at ${peakDeficit.at} (P4):`}
+                value={`${formatNumber(Math.round(peakDeficit.generationMw))} MW`}
+              />
+            )}
           <GridKpiTooltipRow
             provenance="D"
             label="Share of peak demand:"
@@ -469,13 +524,15 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             value={unservedAvgMw == null ? '—' : `${formatNumber(Math.round(unservedAvgMw))} MW`}
           />
           <GridKpiTooltipAudit>
-            The headline is peak demand less peak generation at the same hour. PGCB&rsquo;s own
+            The headline is evening-peak demand less generation at the same instant: P1&rsquo;s
+            evening-peak generation when both share a time stamp, otherwise the hourly reading
+            at the demand stamp, and a dash where no such reading exists. PGCB&rsquo;s own
             unserved-energy figure is the day&rsquo;s total and is listed above beside it —
             the two measure different things and are not expected to match.
           </GridKpiTooltipAudit>
           <GridKpiTooltipRef
             refLabel="PGCB Daily Report"
-            part="P1 sheet — demand, generation and unserved energy"
+            part="P1 sheet — demand, generation and unserved energy; P4 where the stamps differ"
             sourceFile={sourceFiles?.pgcb}
             refHref="https://www.pgcb.gov.bd/"
             dateLabel={`Date: ${systemStats.date}`}
@@ -741,16 +798,15 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
             }
             valueClass="text-primary"
           />
-          {/* The parenthetical said "(bill ÷ energy)". The note at the foot of
-              this panel already explains that this rate is ours and how it is
-              worked out, so the label repeated it a thumb away. */}
+          {/* P1's own "Production Cost per KWHr" cell — see publishedUnitCost. */}
           <GridKpiTooltipRow
-            provenance="D"
-            label="Average production cost:"
-            value={derivedUnitCost == null ? 'not published for this day' : `${derivedUnitCost.toFixed(3)} Tk/kWh`}
+            provenance={systemStats.avgProductionCostStated ? 'P' : 'D'}
+            label="Production cost per kWh:"
+            value={publishedUnitCost == null ? 'not published for this day' : `${publishedUnitCost.toFixed(3)} Tk/kWh`}
           />
-          {/* Shown only when it disagrees with the published rate. Agreement is
-              the normal case and a second identical number teaches nothing. */}
+          {/* Our check on it, shown only when it disagrees with the published
+              rate. Agreement is the normal case and a second identical number
+              teaches nothing. */}
           {unitCostGap != null && unitCostGap >= 0.005 && (
             <GridKpiTooltipRow
               provenance="D"
@@ -762,10 +818,10 @@ export const OverviewKpiStrip = memo(function OverviewKpiStrip({
           <GridKpiTooltipRow provenance="D" label="HFO generation cost:" value={fuelUnitRate('HFO')} valueClass="text-destructive" />
           <GridKpiTooltipRow provenance="D" label="Cross-border imports:" value={fuelUnitRate('Imports')} />
           <GridKpiTooltipAudit>
-            The headline is the production-cost total PGCB prints on P1. The average rate
-            beneath it is ours — the bill divided by the day&rsquo;s energy, not the rate the
-            report states. The per-fuel rates below are not published tariffs either: each is
-            that fuel&rsquo;s cost divided by its generation, and the import rate in particular
+            The headline is the production-cost total PGCB prints on P1, and the rate per kWh
+            beneath it is P1&rsquo;s own &ldquo;Production Cost per KWHr&rdquo;. PGCB prints no
+            rate per fuel: the per-fuel rates below are ours, each that fuel&rsquo;s cost divided
+            by its generation, not published tariffs, and the import rate in particular
             is a blended settlement figure rather than a contracted price, so read it as an
             indication.
             <br />

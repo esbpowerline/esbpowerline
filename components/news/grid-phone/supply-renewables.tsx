@@ -196,7 +196,7 @@ export function RenewablesView() {
               />
             </div>
             <How title="What does the flat mark mean?" label="What does the flat mark mean?">
-              <p style={{ marginTop: 0 }}>Hydro and Wind carry a <b>flat</b> mark because PGCB applies a fixed rate to them — 0.1000 and 14.7100 Tk/kWh on essentially every day of 2026 — rather than reporting a measured cost. A rate no agency prints is derived either way.</p>
+              <p style={{ marginTop: 0 }}>Hydro and Wind carry a <b>flat</b> mark because their rate (PGCB’s cost ÷ their energy) is a tariff that moves only in steps, not a measured cost — Wind held at 14.71 Tk/kWh until September 2026 and has since read 14.82–14.92. A rate no agency prints is derived either way.</p>
             </How>
           </>
         )}

@@ -602,20 +602,31 @@ export function GridKpiTrend({
   days,
   unit = '',
   polarity = 'neutral',
+  absoluteBelow,
 }: {
   current: number | null | undefined;
   baseline: number | null | undefined;
   days: number;
   unit?: string;
   polarity?: 'up-good' | 'down-good' | 'neutral';
+  /**
+   * Below this |baseline| the change is stated in `unit` rather than as a
+   * percentage. Peak Deficit read "▼100.0% vs 7-day avg" on 18 Nov 2026: 0 MW
+   * against a mean of 1.4 MW, a headline-sized fall out of a rounding-sized
+   * number. Large baselines are unaffected.
+   */
+  absoluteBelow?: { floor: number; unit: string };
 }) {
-  if (current == null || baseline == null || !Number.isFinite(current) || !Number.isFinite(baseline) || baseline === 0) {
+  if (current == null || baseline == null || !Number.isFinite(current) || !Number.isFinite(baseline)) {
     return null;
   }
   const diff = current - baseline;
-  const pct = (diff / Math.abs(baseline)) * 100;
-  // Under half a percent the arrow would be noise dressed as a signal.
-  const flat = Math.abs(pct) < 0.5;
+  const absolute = absoluteBelow != null && Math.abs(baseline) < absoluteBelow.floor;
+  if (!absolute && baseline === 0) return null;
+  const pct = absolute ? 0 : (diff / Math.abs(baseline)) * 100;
+  // Under half a percent the arrow would be noise dressed as a signal; in
+  // absolute mode, under half a unit.
+  const flat = absolute ? Math.abs(diff) < 0.5 : Math.abs(pct) < 0.5;
   const good = polarity === 'neutral' ? null : (diff > 0) === (polarity === 'up-good');
   const tone = flat || good == null ? 'text-muted-foreground' : good ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive';
   const arrow = flat ? '→' : diff > 0 ? '▲' : '▼';
@@ -627,7 +638,11 @@ export function GridKpiTrend({
       )}
     >
       <span aria-hidden>{arrow}</span>
-      {flat ? 'level' : `${Math.abs(pct).toFixed(1)}%`}
+      {flat
+        ? 'level'
+        : absolute
+          ? `${Math.round(Math.abs(diff)).toLocaleString('en-IN')} ${absoluteBelow!.unit}`
+          : `${Math.abs(pct).toFixed(1)}%`}
       <span className="font-normal text-muted-foreground">
         vs {days}-day avg{unit ? ` (${Math.round(baseline).toLocaleString('en-IN')}${unit})` : ''}
       </span>

@@ -217,8 +217,10 @@ export function GenerationKpiStrip({
               which is what made the two easy to tag alike. OverviewKpiStrip
               carried the same mistake on its own tile and had it corrected;
               this second surface kept it until 2026-09-04. */}
+          {/* P since 2026-11-25 where the parser read P1's printed rate
+              (`avgProductionCostStated`); D on layouts that print none. */}
           <GridKpiTooltipRow
-            provenance="D"
+            provenance={systemStats.avgProductionCostStated ? 'P' : 'D'}
             label="Avg production cost:"
             value={systemStats.avgProductionCost > 0 ? `${systemStats.avgProductionCost.toFixed(3)} Tk/kWh` : '—'}
           />

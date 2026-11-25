@@ -71,10 +71,10 @@ export function RegionalPanel({ day, derived, ui, actions }: RegionalPanelProps)
               </div>
               <h4 className="text-base font-bold text-foreground">Zone-wise Demand &amp; Load-Shedding Data</h4>
               <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                No official records are available for the selected date. Zone-wise demand and load-shedding tracking officially started on December 31, 2013.
+                No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.
               </p>
               <div className="text-[10px] text-muted-foreground tabular-nums">
-                Official Backlog Start Date: December 31, 2013
+                Archive starts: 31 Dec 2013
               </div>
             </div>
           </div>
@@ -436,7 +436,12 @@ export function RegionalPanel({ day, derived, ui, actions }: RegionalPanelProps)
                     <p className="grid-explorer-chart-card__sub">
                       Hourly flow across the three corridors joining the western and eastern grids
                       {ewicTotalMkwh != null ? (
-                        <> • {ewicTotalMkwh.toFixed(2)} MKWh transferred <GridProvenanceTag kind="P" />
+                        <> • {ewicTotalMkwh.toFixed(2)} MKWh metered <GridProvenanceTag kind="P" />
+                          {(ewic.checks?.length ?? 0) > 0 && !ewicExceedsGeneration ? (
+                            <span className="text-amber-600 dark:text-amber-500 font-semibold">
+                              {' '}· disagrees with the hourly curve — see the reconciliation note
+                            </span>
+                          ) : null}
                           {ewicShareOfGen != null ? <> · {ewicShareOfGen.toFixed(1)}% of national generation <GridProvenanceTag kind="D" /></> : null}
                           {ewicExceedsGeneration ? (
                             <span className="text-amber-600 dark:text-amber-500 font-semibold">
@@ -457,9 +462,10 @@ export function RegionalPanel({ day, derived, ui, actions }: RegionalPanelProps)
                     is unreadable without it — so it is stated, not buried. */}
                 <p className="text-[11px] text-muted-foreground mb-3">
                   Positive MW is flow from <strong>West to East</strong>; negative is East to West.
-                  Every reading in the archive so far has been positive — the western grid has
-                  exported to the eastern one on every hour on record, and Total Import has been
-                  zero on every day.
+                  {/* This said every reading on record was positive and Total
+                      Import always zero. Neither holds: 20 corridor-days of 2026
+                      carry negative readings (2026-05-28, Ishurdi-Ghorashal, ten
+                      hours) and 24 days a non-zero Total Import. */}
                 </p>
 
                 {/* Corridor names appear on the lanes and again on the bands

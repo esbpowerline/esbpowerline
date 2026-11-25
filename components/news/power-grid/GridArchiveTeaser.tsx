@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import Link from 'next/link';
 import { Lock, Calendar, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,11 @@ import { getTierStatusMessage } from '@/lib/membership/grid-access-messaging';
 type GridArchiveTeaserProps = {
   access: GridTierAccessState;
   totalArchiveDays: number;
+  /**
+   * The catalogue itself, so the headline can count only the days this visitor
+   * cannot open. Optional while the caller still passes the count alone.
+   */
+  archiveDates?: readonly string[];
   onExploreLocked: () => void;
   className?: string;
 };
@@ -16,10 +22,21 @@ type GridArchiveTeaserProps = {
 export function GridArchiveTeaser({
   access,
   totalArchiveDays,
+  archiveDates,
   onExploreLocked,
   className,
 }: GridArchiveTeaserProps) {
+  // "4,4xx days of grid data — locked for you" counted the whole catalogue,
+  // including the 7 (visitor) or 30 (member) newest days the same visitor can
+  // open from the picker above it. Locked means outside their window.
+  const { canAccessDate } = access;
+  const lockedDays = useMemo(
+    () => (archiveDates ? archiveDates.filter((d) => !canAccessDate(d)).length : null),
+    [archiveDates, canAccessDate],
+  );
+
   if (access.loading || access.tier === 'plan_999') return null;
+  if (lockedDays === 0) return null;
 
   const status = getTierStatusMessage(access.tier, totalArchiveDays);
 
@@ -44,7 +61,9 @@ export function GridArchiveTeaser({
               Historical archive
             </p>
             <h3 className="mt-1 text-base font-bold text-foreground md:text-lg">
-              {totalArchiveDays.toLocaleString()} days of grid data — locked for you
+              {lockedDays != null
+                ? `${lockedDays.toLocaleString()} days of grid data — locked for you`
+                : `${totalArchiveDays.toLocaleString()} days in the full archive`}
             </h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               {status.upgradeLine}

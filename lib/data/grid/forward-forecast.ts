@@ -53,6 +53,19 @@ export type LiveHourLike = {
 export type ForecastVsLiveRow = {
   /** "21:00" — Dhaka wall-clock, the key both sides are stated in. */
   time: string;
+  /**
+   * The headline comparison: forecast DEMAND against NLDC's posted demand.
+   *
+   * It was generation against generation until 2026-11-25. PGCB's hourly
+   * Generation column is dispatch in a shortage season but AVAILABILITY in a
+   * surplus one — flat across the day and thousands of MW above the demand it
+   * forecasts beside it (23 Nov 2026, 10:00: 13,995 against 10,940) — so the
+   * "gap" the card headlined was spare capacity. Demand means the same thing
+   * in every season. See lib/data/grid/forecast-curve.ts for the archive half.
+   */
+  forecastMw: number | null;
+  actualMw: number | null;
+  gapMw: number | null;
   forecastGenMw: number | null;
   actualGenMw: number | null;
   /** actual − forecast. Null unless both sides are present. */
@@ -90,8 +103,12 @@ export type ForecastVsLive = {
      */
     unmatched: number;
   };
-  /** The newest hour that has both halves, which is what a headline quotes. */
+  /** The newest hour that has both demand halves, which is what a headline quotes. */
   latestMatched: ForecastVsLiveRow | null;
+  /** Mean signed DEMAND gap over scored hours — the headline figure. */
+  meanGapMw: number | null;
+  /** Widest signed demand gap so far, by absolute size, among scored hours. */
+  widestGap: ForecastVsLiveRow | null;
   /** Mean signed generation gap over SCORED hours, or null with none. */
   meanGenGapMw: number | null;
   /** Widest signed generation gap so far, by absolute size, among scored hours. */
@@ -156,6 +173,9 @@ export function compareForecastToLive(
     const actualDemandMw = actual ? finite(actual.demandMw) : null;
     return {
       time: f.time,
+      forecastMw: forecastDemandMw,
+      actualMw: actualDemandMw,
+      gapMw: gap(actualDemandMw, forecastDemandMw),
       forecastGenMw,
       actualGenMw,
       genGapMw: gap(actualGenMw, forecastGenMw),
@@ -169,9 +189,13 @@ export function compareForecastToLive(
   });
   rows.sort((a, b) => a.time.localeCompare(b.time));
 
-  const matchedRows = rows.filter((r) => r.genGapMw !== null);
+  // Coverage and the headline follow the demand comparison; the generation
+  // pair is kept on each row and summarised separately below.
+  const matchedRows = rows.filter((r) => r.gapMw !== null);
   const scoredRows = matchedRows.filter((r) => !r.beforeIssue);
-  const gaps = scoredRows.map((r) => r.genGapMw as number);
+  const demandGaps = scoredRows.map((r) => r.gapMw as number);
+  const genScored = rows.filter((r) => r.genGapMw !== null && !r.beforeIssue);
+  const gaps = genScored.map((r) => r.genGapMw as number);
 
   return {
     day,
@@ -184,11 +208,19 @@ export function compareForecastToLive(
       unmatched: rows.length - matchedRows.length,
     },
     latestMatched: matchedRows.length ? matchedRows[matchedRows.length - 1] : null,
+    meanGapMw: demandGaps.length
+      ? Math.round((demandGaps.reduce((a, b) => a + b, 0) / demandGaps.length) * 10) / 10
+      : null,
+    widestGap: scoredRows.length
+      ? scoredRows.reduce((worst, r) =>
+          Math.abs(r.gapMw as number) > Math.abs(worst.gapMw as number) ? r : worst,
+        )
+      : null,
     meanGenGapMw: gaps.length
       ? Math.round((gaps.reduce((a, b) => a + b, 0) / gaps.length) * 10) / 10
       : null,
-    widestGenGap: scoredRows.length
-      ? scoredRows.reduce((worst, r) =>
+    widestGenGap: genScored.length
+      ? genScored.reduce((worst, r) =>
           Math.abs(r.genGapMw as number) > Math.abs(worst.genGapMw as number) ? r : worst,
         )
       : null,

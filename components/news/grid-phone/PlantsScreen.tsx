@@ -70,7 +70,16 @@ export function PlantsScreen() {
 function Overview({ ctx, all }: { ctx: Ctx; all: PlantActual[] }) {
   const { day, pal } = ctx;
   const open = useSheet();
-  const list = useMemo(() => all.filter((p) => isNum(p.installedMw) && p.installedMw > 0), [all]);
+  // Every station with a figure, not just those with an installed rating above 0.
+  // PGCB prints installed 0 for stations it has not rated yet — Rooppur, JERA
+  // Meghnaghat (718 MW present), Rupsha (440 MW present) — and the old filter
+  // dropped all eight on 23 Nov 2026, taking Rooppur's 240.73 MW out of the
+  // fleet's evening sum (340.73 MW short of P1's 13,112.74) and JERA out of
+  // "large stations switched off".
+  const list = useMemo(
+    () => all.filter((p) => [p.installedMw, p.presentCapacityMw, p.eveningPeakMw].some((v) => isNum(v) && v > 0)),
+    [all],
+  );
   const k = useMemo(() => {
     const rated = all.filter((p) => isNum(p.installedMw));
     const read = all.filter((p) => isNum(p.eveningPeakMw));
@@ -142,7 +151,7 @@ function Funnel({ ctx, list, pal }: { ctx: Ctx; list: PlantActual[]; pal: Record
   const idleMax = sums.idle[0]?.[1] ?? 1;
   return (
     <>
-      <Section title="Capacity against what ran" meta={`${list.length} rated stations`} source={<>PGCB daily report · station table<Prov kind="D" note="Sums of every rated station’s installed, present and evening-peak figures. Stations PGCB left blank are excluded, never counted as zero." /></>}>
+      <Section title="Capacity against what ran" meta={`${list.length} stations`} source={<>PGCB daily report · station table<Prov kind="D" note="Sums of every station’s installed, present and evening-peak figures. A blank cell is excluded, never counted as zero; a station PGCB rates at 0 installed still counts for what it had present and generated." /></>}>
         <div className="gp-funnel">
           {([
             ['Installed', sums.installed, 'var(--gp-line)'],
@@ -184,7 +193,7 @@ function Funnel({ ctx, list, pal }: { ctx: Ctx; list: PlantActual[]; pal: Record
 
       <Section title="Biggest stations tonight" desc="Output at the evening peak against what was available">
         <div className="gp-rows">{top.map((p) => <PlantRow key={p.name} p={p} ctx={ctx} />)}</div>
-        <button className="gp-more" onClick={() => open(<PlantList title="All stations" plants={list} ctx={ctx} search />)}>All {list.length} rated stations · search</button>
+        <button className="gp-more" onClick={() => open(<PlantList title="All stations" plants={list} ctx={ctx} search />)}>All {list.length} stations · search</button>
       </Section>
 
       {off.length > 0 && (

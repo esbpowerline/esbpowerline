@@ -432,7 +432,15 @@ export function LoadCurveCanvas({
    * the caveat attached. A key is the wrong place for a number that needs one.
    */
   const summary = useMemo(() => {
-    const hoursShed = data.filter((d) => (d.loadShed ?? 0) > 0).length;
+    // Counted on whole hours whose shed figure PGCB actually printed. Counting
+    // every row put "Load was shed in 0 of 24 published hours, worst at 23:00
+    // with 0 MW unserved" on 23 Nov 2026, a day whose P4 shed column was null
+    // in all 24 rows: nothing was published, and the sentence reported a
+    // measured zero and named a worst hour that does not exist. The worst
+    // reading is still taken across every row, 19:30 included, so the key and
+    // the card's prose name the same figure (1,778 MW at 19:30 on 20 Aug 2026).
+    const shedHoursPublished = data.filter((d) => !isHalfHour(d.time) && d.loadShed != null);
+    const hoursShed = shedHoursPublished.filter((d) => (d.loadShed ?? 0) > 0).length;
     const peakOf = (pick: (d: (typeof data)[number]) => number | null) =>
       data.reduce<{ v: number; time: string } | null>((acc, d) => {
         const v = pick(d);
@@ -441,7 +449,7 @@ export function LoadCurveCanvas({
 
     return {
       hoursShed,
-      total: data.length,
+      total: shedHoursPublished.length,
       genPeak: peakOf((d) => d.generation),
       demPeak: peakOf((d) => d.demand),
       worstShed: peakOf((d) => d.loadShed),
@@ -753,14 +761,17 @@ export function LoadCurveCanvas({
               )}
               {/* Where this hour sat in the day, so a figure is not read in
                   isolation — 16,190 MW means little until you know it is the
-                  day's highest. */}
+                  day's highest. The denominator is the highest reading on this
+                  curve, not P1's printed Day Peak (a 12:00 figure), so it is
+                  named as the day's maximum; "share of day peak" claimed the
+                  printed figure. */}
               {active.generation != null && model.dayMaxGen > 0 && (
                 <div className="load-curve__readout-gap">
-                  <dt><GridProvenanceTag kind="D" className="mr-1" />Share of day peak</dt>
+                  <dt><GridProvenanceTag kind="D" className="mr-1" />Share of the day&rsquo;s maximum</dt>
                   <dd>
                     {((active.generation / model.dayMaxGen) * 100).toFixed(1)}%
                     <span className="load-curve__sub">
-                      peak {formatNumber(Math.round(model.dayMaxGen))} MW
+                      max {formatNumber(Math.round(model.dayMaxGen))} MW
                     </span>
                   </dd>
                 </div>
@@ -876,9 +887,11 @@ export function LoadCurveCanvas({
         </tbody>
       </table>
       <p className="sr-only">
-        Load was shed in {summary.hoursShed} of {summary.total} published hours, worst at{' '}
-        {model?.worstShed?.time ?? 'an unpublished hour'} with{' '}
-        {formatNumber(Math.round(summary.peakShed))} MW unserved.
+        {summary.worstShed == null
+          ? 'Hourly load shedding is not published for this day.'
+          : summary.worstShed.v <= 0
+            ? `No load was shed in any of the ${summary.total} published hours.`
+            : `Load was shed in ${summary.hoursShed} of ${summary.total} published hours; the worst reading was ${formatNumber(Math.round(summary.worstShed.v))} MW at ${summary.worstShed.time}.`}
       </p>
     </figure>
   );

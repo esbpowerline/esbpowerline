@@ -103,11 +103,14 @@ export function TodayCostCard() {
         <h3>{g.name} daily cost</h3>
         <p className="gp-sheet__sub">Published cost · {s.date}</p>
         <div className="gp-rows">
-          <Row name={<>Total daily cost <span className="gp-u">P</span></>} value={(g.cost! / 1e7).toFixed(2)} small="Crore BDT" />
+          {/* One fuel's cost — "Total daily cost" read as the day's whole bill. */}
+          <Row name={<>Daily cost <span className="gp-u">P</span></>} value={(g.cost! / 1e7).toFixed(2)} small="Crore BDT" />
           {isNum(g.unitCost) && <Row name={<>Average unit rate <span className="gp-u">D</span></>} value={formatUnitRate(g.unitCost)} small="Tk/kWh" />}
         </div>
-        <p>Unit rate = cost ÷ (gen × 10⁶), calculated here.</p>
-        <p className="gp-taudit">PGCB daily report, “Cost of the Consumed Fuel” block · Restates BPDB fuel economics. Not audited by ESB PowerLine.</p>
+        <p>Unit rate = cost ÷ (gen × 10⁶), calculated here. PGCB prints a cost per fuel, not a rate per fuel.</p>
+        {/* The block is "Production Cost (Tk.)" on the 2025+ P1 (row 44 of the 23 Nov 2026
+            sheet); the older sheet prints it as "Cost of the Consumed Fuel (PDB+Pvt)". */}
+        <p className="gp-taudit">PGCB daily report, P1 “Production Cost (Tk.)” block (“Cost of the Consumed Fuel (PDB+Pvt)” on pre-2025 reports) · Restates BPDB fuel economics. Not audited by ESB PowerLine.</p>
       </>,
     );
 
@@ -161,14 +164,14 @@ export function TodayCostCard() {
         </>
       )}
       <div className="gp-stats" style={{ marginTop: 16 }}>
-        <Stat label="Avg production cost" value={isNum(s.avgProductionCost) && s.avgProductionCost > 0 ? s.avgProductionCost : null} unit="Tk/kWh" dp={2} prov="D" note="The day’s fuel bill divided by its energy. PGCB prints the bill, not this rate." />
+        <Stat label="Production cost per kWh" value={isNum(s.avgProductionCost) && s.avgProductionCost > 0 ? s.avgProductionCost : null} unit="Tk/kWh" dp={2} prov={s.avgProductionCostStated ? 'P' : 'D'} note={s.avgProductionCostStated ? 'P1’s own “Production Cost per KWHr” (6.0848 Tk on 23 Nov 2026). The per-fuel rates above are ours: PGCB prints no rate per fuel.' : 'This day’s report prints no per-kWh rate; the bill divided by the day’s energy. The per-fuel rates above are ours too.'} />
         <Stat label="Total gas to power" value={s.totalGasSuppliedPower > 0 ? s.totalGasSuppliedPower : null} unit="MMCFD" dp={2} prov="P" detail="the power sector’s share, not national supply" />
       </div>
       <Foot
         lead="Source: PGCB Daily Report — P1 sheet, production-cost block and gas-supplied line"
         rest={[
           files?.pgcb ? <>Read from: PGCB <code>{files.pgcb}</code></> : null,
-          'Restates BPDB fuel economics. Unit rates are ours. Not independently audited.',
+          'Restates BPDB fuel economics. Per-fuel unit rates are ours. Not independently audited.',
           `Reporting Date: ${s.date}`,
         ]}
       />

@@ -54,10 +54,10 @@ export function ImportsPanel({ day, derived, actions, slots }: ImportsPanelProps
               </div>
               <h4 className="text-base font-bold text-foreground">Cross-Border Power Imports Data</h4>
               <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                No official records are available for the selected date. PGCB import data tracking officially started on December 31, 2013.
+                No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.
               </p>
               <div className="text-[10px] text-muted-foreground tabular-nums">
-                Official Backlog Start Date: December 31, 2013
+                Archive starts: 31 Dec 2013
               </div>
             </div>
           </div>
@@ -147,7 +147,7 @@ export function ImportsPanel({ day, derived, actions, slots }: ImportsPanelProps
                         {derivedRow && (
                           <span
                             className="ml-1.5 inline-block px-1.5 py-px rounded border text-[9px] font-bold align-middle bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20"
-                            title="PGCB does not list this line in its production-cost interconnector block. Its energy and peak are computed here from the half-hourly generation curve PGCB publishes — the day's samples summed and halved, and their maximum."
+                            title="PGCB does not list this line in P1's E-W Interconnector & Import Scenario block. Its energy and peak are computed here from the half-hourly generation curve PGCB publishes — the day's samples summed and halved, and their maximum."
                           >
                             from curve
                           </span>
@@ -198,18 +198,20 @@ export function ImportsPanel({ day, derived, actions, slots }: ImportsPanelProps
                 the tariff of any of them, so no per-unit rate is published here.
                 {importsEnergyMkwh != null && borderImportsData.length > 0 && (() => {
                   const lineSum = borderImportsData.reduce((sum, i) => sum + i.energy, 0);
-                  // PGCB states import energy in two places and they disagree,
-                  // which matters for reading the cost against the line total.
+                  // The fuel table's Import includes Nepal (11-06: 45.989 against
+                  // 45.077 for the three P1 lines, the gap being Nepal's ~0.91).
+                  // This used to call that PGCB disagreeing with itself.
                   return Math.abs(lineSum - importsEnergyMkwh) > 0.05 ? (
                     <> The cost above covers the {importsEnergyMkwh.toFixed(2)} MKWh the fuel table
-                    reports, which differs from the {lineSum.toFixed(2)} MKWh these lines add up to — PGCB
-                    states import energy in two places and they do not always agree.</>
+                    reports as Import; these lines add up to {lineSum.toFixed(2)} MKWh. The fuel table
+                    counts Nepal with the Indian lines, and the Nepal row here is read from the
+                    half-hourly curve, so the two need not match to the decimal.</>
                   ) : null;
                 })()}
               </p>
               <p>
                 <strong>The lines:</strong> Adani Cross-Border Interconnector (Godda Coal Power) provides dedicated
-                base-load supply directly to the northern grid interface. HVDC Bheramara is the main synchronous
+                base-load supply directly to the northern grid interface. HVDC Bheramara is the main asynchronous (back-to-back)
                 link with the Indian National Grid (NTPC/PowerGrid).
               </p>
             </div></MobileFold>

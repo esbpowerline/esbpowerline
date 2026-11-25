@@ -49,6 +49,9 @@ const SECTOR_BY_CODE: Record<string, ProducerSector> = {
   CPGCL: 'government',
   BPDBRPCL: 'government',
   PDBRPCL: 'government',
+  // Nuclear Power Plant Company Bangladesh Ltd, Rooppur's state-owned operator
+  // (Nuclear Power Plant Act 2015); first on P2 from 2026-11-17.
+  NPCBL: 'government',
 
   // Private producers, by contract type or by name.
   IPP: 'private',

@@ -15,7 +15,7 @@ import { A, Foot, Key, KV, Readout, TablePill, useFuelColor, useSeriesColor } fr
 
 type Metric = 'peaks' | 'energy' | 'fuels';
 type FuelKey = 'gas' | 'coal' | 'hfo' | 'diesel' | 'import';
-const FUELS: [FuelKey, string, string][] = [['gas', 'Gas', 'Gas'], ['coal', 'Coal', 'Coal'], ['hfo', 'Furnace Oil (HFO)', 'Furnace Oil (HFO)'], ['diesel', 'Diesel', 'Diesel'], ['import', 'Imports', 'India Imports']];
+const FUELS: [FuelKey, string, string][] = [['gas', 'Gas', 'Gas'], ['coal', 'Coal', 'Coal'], ['hfo', 'Furnace Oil (HFO)', 'Furnace Oil (HFO)'], ['diesel', 'Diesel', 'Diesel'], ['import', 'Imports', 'Imports']];
 
 const pct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`;
 // The desktop tooltip's month length (MacroTrendsTab.tsx:1829), kept as written.
@@ -87,15 +87,18 @@ export function MonthlyTrend({ local, series, selectedKey }: { local: PgcbMonthl
     const val = d.generation_by_fuel[fuel] ?? 0;
     const prevVal = prev ? prev.generation_by_fuel[fuel] || 0 : 0;
     const fYoY = prevVal > 0 ? ((val - prevVal) / prevVal) * 100 : null;
-    const share = d.total_net_generation > 0 ? (val / d.total_net_generation) * 100 : 0;
+    // Over the month's fuel rows (imports included), the donut's base — not `total_net_generation`,
+    // which excludes imports and put August 2026's mix at 118.5%.
+    const monthMix = Object.values(d.generation_by_fuel).reduce((s, v) => s + (v > 0 ? v : 0), 0);
+    const share = monthMix > 0 ? (val / monthMix) * 100 : 0;
     head = <Readout kicker={`${d.month} ${d.year} · ${fuelLabel}`} value={formatNumber(val, 1)} unit="MKWh" />;
     chart = <LineChart ariaLabel="PGCB monthly generation by fuel, chart" labels={labels} onScrub={onScrub} marker={marker} min={0} series={[{ values: local.map((m) => m.generation_by_fuel[fuel] ?? 0), color: fc, width: 2.5 }]} />;
     key = <Key items={[{ label: `${fuelLabel} Generation Trend (MKWh)`, color: fc, line: true }]} />;
     rows = (
       <>
         <KV label={fuelLabel} value={`${formatNumber(val, 1)} MKWh`} sw={fc} sub={fYoY != null && <>YoY Growth: <span className={`gpm-t-${tone(fYoY)}`}>{pct(fYoY)}</span></>} />
-        <KV label="Share of Month Mix" prov="D" note="This fuel’s generation over the month’s total net generation." value={`${share.toFixed(1)}%`} />
-        <KV label="Total Month Net" prov="P" value={`${formatNumber(d.total_net_generation, 1)} MKWh`} />
+        <KV label="Share of Month Mix" prov="D" note="This fuel’s generation over the sum of the month’s fuel rows, imports included." value={`${share.toFixed(1)}%`} />
+        <KV label="Month Net (excl. imports)" prov="P" value={`${formatNumber(d.total_net_generation, 1)} MKWh`} />
       </>
     );
     table = <TablePill label="All months" title={`Monthly generation from ${fuel}`} sub="MKWh, as PGCB printed it" head={['Month', { label: `${fuel} generation`, unit: 'MKWh' }]} rows={[...local].reverse().map((m) => [m.date_key, formatNumber(m.generation_by_fuel[fuel] ?? 0, 1)])} />;

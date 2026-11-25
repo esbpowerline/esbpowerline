@@ -202,10 +202,10 @@ export function TechnicalInfoTab({
               </div>
               <h4 className="text-base font-bold text-foreground">PGCB Transmission Grid Data</h4>
               <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                No official records are available for the selected date. PGCB transmission outages and substation tracking officially started on December 31, 2013.
+                No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.
               </p>
               <div className="text-[10px] text-muted-foreground tabular-nums">
-                Official Backlog Start Date: December 31, 2013
+                Archive starts: 31 Dec 2013
               </div>
             </div>
           </div>
@@ -1047,13 +1047,13 @@ export function TechnicalInfoTab({
                       MVA-rated transformers</strong>: the HVDC back-to-back blocks are rated in
                       MW, a different quantity, and adding them to an MVA total would be
                       arithmetic on mismatched units, so they are excluded.{' '}
-                      <strong className="text-foreground">This station list is the April 2026
-                      collection and has not been re-collected since.</strong> Summed whole it
-                      comes to 89,155 MVA, which matched PGCB&apos;s April total exactly; PGCB
+                      <strong className="text-foreground">This station list was collected on May 24,
+                      2026 and reflects the grid as at April 2026; it has not been re-collected
+                      since.</strong> Summed whole it comes to 89,155 MVA, which matched PGCB&apos;s April total exactly; PGCB
                       has since published 91,512 MVA for June, so the list now trails the
                       summary tables above by 2,357 MVA.
                     </span>
-                    <span className="font-medium">Register as at: April 2026</span>
+                    <span className="font-medium">Register as at: April 2026 · collected May 24, 2026</span>
                   </GridCardFooter>
                 </div>
               </div>

@@ -118,7 +118,12 @@ export default async function PowerGridExplorerPage() {
       : getLatestAvailableDate();
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://esbpowerline.com';
-  const recentDates = availableDates.slice(-7).reverse();
+  // Bundled catalogue plus the days published since the deploy. The bundled list
+  // alone froze this nav at the last build: on 2026-11-25 it offered 11-05..11-11
+  // while the newest published day was 11-23.
+  const allDates = Array.from(new Set([...availableDates, ...runtimeDates])).sort();
+  const newestDate = allDates[allDates.length - 1];
+  const recentDates = allDates.slice(-7).reverse();
   // Filled from the catalogue rather than hardcoded, so the coverage a crawler
   // is told about is the coverage that actually shipped.
   const earliest = availableDates[0];
@@ -288,7 +293,9 @@ export default async function PowerGridExplorerPage() {
             <span>
               {' '}
               — every day PGCB and Petrobangla published
-              {availableDates[0] ? `, from ${availableDates[0]}` : ''} to today, one page each.
+              {availableDates[0] ? `, from ${availableDates[0]}` : ''}
+              {newestDate ? ` to ${newestDate}` : ''}, one page each. Petrobangla&apos;s daily
+              gas reports in this archive begin 2020-01-12.
             </span>
           </li>
           {latestDate && (

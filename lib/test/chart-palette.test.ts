@@ -65,8 +65,9 @@ describe('grid chart palette', () => {
   it('falls back to a neutral rather than an arbitrary hue for an unmet fuel', () => {
     // A new fuel in the archive should look obviously unstyled, not borrow the
     // identity of a fuel that is already on the chart.
-    const fallback = resolveFuelColor('Nuclear', 'light');
-    expect(isKnownFuel('Nuclear')).toBe(false);
+    // (Nuclear was the example until Rooppur reached the archive on 2026-11-17.)
+    const fallback = resolveFuelColor('Tidal', 'light');
+    expect(isKnownFuel('Tidal')).toBe(false);
     for (const fuel of FUEL_DISPLAY_ORDER) {
       expect(resolveFuelColor(fuel, 'light')).not.toBe(fallback);
     }

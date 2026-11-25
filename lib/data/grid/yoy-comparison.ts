@@ -439,6 +439,10 @@ async function figures(
     return { ok: false, reason: `${iso} publishes no daily energy total` };
   }
 
+  if (s.eveningPeakDemand === null || s.eveningPeakDemand === undefined) {
+    return { ok: false, reason: `${iso} publishes no evening-peak demand` };
+  }
+
   const values: Figures = {
     evD: s.eveningPeakDemand,
     evG: s.eveningPeakGen,

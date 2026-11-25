@@ -988,8 +988,14 @@ export function PowerGridExplorer({
    */
   const ewicExceedsGeneration =
     ewicTotalMkwh != null && totalGenMkwhr > 0 && ewicTotalMkwh > totalGenMkwhr;
+  // Also withheld when the sheet fails its own reconciliation. On 23 Nov 2026
+  // both Gopalganj-Aminbazar circuits were metered at 0 while the curve carried
+  // ~1,700 MW all day, and the card announced "3.4% of national generation" for
+  // a transfer nearer 20%. The metered total is still shown, as metered; the
+  // share is our arithmetic and should not stand on a number the sheet disputes.
+  const ewicMeterDisputed = (ewic?.checks?.length ?? 0) > 0;
   const ewicShareOfGen =
-    ewicTotalMkwh != null && totalGenMkwhr > 0 && !ewicExceedsGeneration
+    ewicTotalMkwh != null && totalGenMkwhr > 0 && !ewicExceedsGeneration && !ewicMeterDisputed
       ? (ewicTotalMkwh / totalGenMkwhr) * 100
       : null;
   /**
@@ -1167,9 +1173,14 @@ export function PowerGridExplorer({
   // P1's own stamp for the hour the evening peak was measured. Not claimed on
   // BPDB-sourced days: that zone table is a different publisher's reading and
   // PGCB's stamp does not describe it.
+  //
+  // The table's own caption hour first. The evening-peak DEMAND stamp is a
+  // different hour on a shedding day (19:30 against the caption's 21:00 on
+  // 20 Aug 2026); without a caption, the generation stamp, which is the hour the
+  // parser files the zone shedding under (evening_peak_hour).
   const eveningPeakStamp = regionalDemandSource === 'bpdb-published'
     ? null
-    : systemStats.peakTimes?.eveningPeakDemand ?? null;
+    : systemStats.peakTimes?.zoneTable ?? systemStats.peakTimes?.eveningPeakGen ?? null;
 
   // Zone-wise generation columns: the fuels this day actually published, in
   // FUEL_DISPLAY_ORDER so the sequence holds across report layouts. Driven from
@@ -1516,10 +1527,21 @@ export function PowerGridExplorer({
       >
       <GridTopFold
         collapse={activeTab !== 'overview'}
-        summary={`${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW evening peak · ${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW deficit`}
+        // The deficit is subtracted only when PGCB stamped demand and generation at
+        // the same instant. On 20 Aug 2026 demand peaked at 19:30 and generation at
+        // 21:00, and the difference of the two printed 1,719 MW as "the" deficit.
+        summary={
+          systemStats.eveningPeakDemand == null
+            ? `${formatNumber(Math.round(systemStats.eveningPeakGen))} MW evening peak generation`
+            : `${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW evening peak` +
+              ((systemStats.peakTimes?.eveningPeakDemand ?? null) === (systemStats.peakTimes?.eveningPeakGen ?? null)
+                ? ` · ${formatNumber(Math.max(0, Math.round(systemStats.eveningPeakDemand - systemStats.eveningPeakGen)))} MW deficit`
+                : '')
+        }
       >
       <OverviewKpiStrip
         systemStats={systemStats}
+        hourlyLoadData={hourlyLoadData}
         sourceFiles={sourceFiles}
         generationData={generationData}
         totalGasSupply={totalGasSupply}
@@ -1636,7 +1658,7 @@ export function PowerGridExplorer({
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-2 pt-2 border-t border-border/10 leading-relaxed tabular-nums">
                     Peak Gen: {formatNumber(latestCachedReport.systemStats.eveningPeakGen, 1)} MW / Demand:{' '}
-                    {formatNumber(latestCachedReport.systemStats.eveningPeakDemand, 1)} MW / Energy:{' '}
+                    {latestCachedReport.systemStats.eveningPeakDemand == null ? '—' : formatNumber(latestCachedReport.systemStats.eveningPeakDemand, 1)} MW / Energy:{' '}
                     {latestCachedReport.systemStats.totalEnergyGen == null ? '—' : formatNumber(latestCachedReport.systemStats.totalEnergyGen, 1)} MKWh
                   </div>
                 </div>
@@ -1756,6 +1778,7 @@ export function PowerGridExplorer({
         <GridArchiveTeaser
           access={gridAccess}
           totalArchiveDays={availableDatesList.length}
+          archiveDates={availableDatesList}
           onExploreLocked={previewLockedArchiveDate}
         />
       )}

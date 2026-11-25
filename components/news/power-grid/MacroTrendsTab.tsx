@@ -68,6 +68,7 @@ import { DailyBadge, GridCardFooter, GridProvenanceTag, GridSourceFiles, Monthly
 import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { ChartDataTable, columnOf } from '@/components/news/power-grid/ChartDataTable';
 import { FuelImportCostCard, MacroPressureCard } from '@/components/news/power-grid/MacroPricingDriverCards';
+import { fuelMixTotal as sumFuelMix, sharePct } from '@/lib/data/macro/fuel-mix';
 import {
   SERIES_COLORS,
   SERIES_UNMAPPED,
@@ -246,7 +247,7 @@ export function MacroTrendsTab({
       coal: 'Coal',
       hfo: 'Furnace Oil (HFO)',
       diesel: 'Diesel',
-      import: 'India Imports',
+      import: 'Imports', // not "India Imports": includes Nepal (24.5 of Aug 2026's 1,643.7 GWh)
       hydro: 'Hydro',
       solar: 'Solar',
       wind: 'Wind',
@@ -828,7 +829,7 @@ export function MacroTrendsTab({
                     <li><strong className="text-primary">Average Bulk Tariff:</strong> what BPDB earned per unit sold to the distributors. BPDB prints it for FY 2022-23 only; other years are left blank rather than derived.</li>
                   </ul>
                   <p className="mt-2 pt-2 border-t border-border/30 font-medium">
-                    <strong>Analytical Insight:</strong> In FY {LATEST_BPDB_AUDIT.fy} BPDB&apos;s supply cost was {LATEST_BPDB_AUDIT.cost?.toFixed(2) ?? '—'} Tk/kWh against an average bulk tariff of {LATEST_BPDB_AUDIT.tariff?.toFixed(2) ?? '—'}, and its accounts record a government subsidy of Tk {LATEST_BPDB_AUDIT.subsidyCrore == null ? '—' : formatNumber(LATEST_BPDB_AUDIT.subsidyCrore, 2)} crore for that year. Later years are not yet published by BPDB.
+                    <strong>Analytical Insight:</strong> In FY {LATEST_BPDB_AUDIT.fy} BPDB&apos;s supply cost was {LATEST_BPDB_AUDIT.cost?.toFixed(2) ?? '—'} Tk/kWh against an average bulk tariff of {LATEST_BPDB_AUDIT.tariff?.toFixed(2) ?? '—'}, and its accounts record a government subsidy of Tk {LATEST_BPDB_AUDIT.subsidyCrore == null ? '—' : formatNumber(LATEST_BPDB_AUDIT.subsidyCrore, 2)} crore for that year. Later years are not yet held in this archive.
                   </p>
                 </div></MobileFold>
 
@@ -1165,6 +1166,7 @@ export function MacroTrendsTab({
               {/* Month/Year Selection Control Panel */}
               {(() => {
                 const currentMonthlyData = localPgcbMonthlyData.find(d => d.date_key === selectedMonthlyKey) || localPgcbMonthlyData[localPgcbMonthlyData.length - 1];
+                const fuelMixTotal = sumFuelMix(currentMonthlyData?.generation_by_fuel); // imports included; see fuel-mix.ts
 
                 // The period pickers list the WHOLE archive, not just the tier's window, so a
                 // visitor can see how far the data actually goes. Periods outside their window
@@ -1303,7 +1305,7 @@ export function MacroTrendsTab({
                           Max Peak Generation
                           <GridProvenanceTag kind="P" />
                         </div>
-                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since January 2013</div>
                         <div className="text-2xl font-bold mt-1 text-primary tabular-nums">
                           {currentMonthlyData ? formatNumber(currentMonthlyData.max_evening_peak_gen) : 0} <span className="text-xs font-medium text-muted-foreground">MW</span>
                         </div>
@@ -1312,7 +1314,7 @@ export function MacroTrendsTab({
 
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider inline-flex items-center gap-1">Estimated Peak Demand<GridProvenanceTag kind="P" /></div>
-                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since January 2013</div>
                         <div className="text-2xl font-bold mt-1 text-foreground tabular-nums">
                           {currentMonthlyData ? formatNumber(currentMonthlyData.max_evening_peak_demand) : 0} <span className="text-xs font-medium text-muted-foreground">MW</span>
                         </div>
@@ -1321,7 +1323,7 @@ export function MacroTrendsTab({
 
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider inline-flex items-center gap-1">Peak Deficit / Load Shed<GridProvenanceTag kind="D" /></div>
-                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since January 2013</div>
                         <div className="text-2xl font-bold mt-1 text-destructive tabular-nums">
                           {currentMonthlyData && currentMonthlyData.max_evening_peak_demand > currentMonthlyData.max_evening_peak_gen
                             ? formatNumber(Math.round(currentMonthlyData.max_evening_peak_demand - currentMonthlyData.max_evening_peak_gen))
@@ -1333,7 +1335,7 @@ export function MacroTrendsTab({
 
                       <div className="bg-muted/15 border border-border/50 rounded-2xl p-4 shadow-sm flex flex-col justify-between items-center text-center">
                         <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider inline-flex items-center gap-1">Total Net Energy<GridProvenanceTag kind="P" /></div>
-                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
+                        <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since January 2013</div>
                         <div className="text-2xl font-bold mt-1 text-amber-500 tabular-nums">
                           {currentMonthlyData ? formatNumber(currentMonthlyData.total_net_generation, 1) : 0}{' '}
                           <span className="text-xs font-medium text-muted-foreground">MKWh<sup className="text-[9px] font-bold ml-0.5">r</sup></span>
@@ -1349,9 +1351,9 @@ export function MacroTrendsTab({
                       <div className="grid-explorer-chart-card card">
                         <div className="mb-4">
                           <h3 className="grid-explorer-chart-card__title">Energy Fuel Mix<MonthlyBadge /></h3>
-                    <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since 2014</div>
+                    <div className="text-primary font-semibold text-xs mt-0.5 select-none">Tracked since January 2013</div>
                           <p className="grid-explorer-chart-card__sub text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                            Net generation by fuel source in {currentMonthlyData?.month} {currentMonthlyData?.year} (MKWh)
+                            Net generation by fuel source, plus imports, in {currentMonthlyData?.month} {currentMonthlyData?.year} (MKWh)
                           </p>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
@@ -1396,8 +1398,7 @@ export function MacroTrendsTab({
                                     content={({ active, payload }) => {
                                       if (!active || !payload?.length) return null;
                                       const data = payload[0].payload;
-                                      const total = currentMonthlyData ? currentMonthlyData.total_net_generation : 1;
-                                      const pct = (data.value / total) * 100;
+                                      const pct = fuelMixTotal > 0 ? (data.value / fuelMixTotal) * 100 : 0;
                                       return (
                                         <div className="p-3 text-card-foreground border border-border/80 rounded-xl shadow-lg bg-card/95 backdrop-blur-md text-xs z-50">
                                           <div className="font-bold mb-1.5 flex items-center gap-1.5 border-b border-border/40 pb-1">
@@ -1428,7 +1429,7 @@ export function MacroTrendsTab({
                                       className="fill-foreground font-sans font-bold"
                                       style={{ fontSize: '24px', letterSpacing: '-0.02em' }}
                                     >
-                                      {currentMonthlyData ? formatNumber(currentMonthlyData.total_net_generation, 0) : '0'}
+                                      {currentMonthlyData ? formatNumber(fuelMixTotal, 0) : '—'}
                                     </text>
                                     <text
                                       x={100}
@@ -1438,7 +1439,7 @@ export function MacroTrendsTab({
                                       className="ge-donut-label fill-muted-foreground font-sans font-semibold uppercase"
                                       style={{ fontSize: '9.5px', letterSpacing: '0.1em' }}
                                     >
-                                      MKWh Net
+                                      MKWh incl. imports
                                     </text>
                                   </g>
                                 </PieChart>
@@ -1466,8 +1467,7 @@ export function MacroTrendsTab({
                                 {currentMonthlyData &&
                                   Object.entries(currentMonthlyData.generation_by_fuel)
                                     .map(([name, val]) => {
-                                      const total = currentMonthlyData.total_net_generation || 1;
-                                      const pct = (val / total) * 100;
+                                      const pct = fuelMixTotal > 0 ? (val / fuelMixTotal) * 100 : 0;
                                       return { name, val, pct, color: getFuelColor(name) };
                                     })
                                     .filter(d => d.val > 0)
@@ -1476,7 +1476,7 @@ export function MacroTrendsTab({
                                       <tr key={idx} className="hover:bg-muted/10">
                                         <td className="py-2.5 flex items-center gap-1.5 font-medium">
                                           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: f.color }} />
-                                          <span className="capitalize">{f.name === 'hfo' ? 'Furnace Oil (HFO)' : f.name === 'import' ? 'India Imports' : f.name}</span>
+                                          <span className="capitalize">{f.name === 'hfo' ? 'Furnace Oil (HFO)' : f.name === 'import' ? 'Imports' : f.name}</span>
                                         </td>
                                         <td className="py-2.5 text-left tabular-nums font-semibold">{formatNumber(f.val, 1)}</td>
                                         <td className="py-2.5 text-left tabular-nums text-muted-foreground">{f.pct.toFixed(1)}%</td>
@@ -1494,7 +1494,7 @@ export function MacroTrendsTab({
                           <h3 className="grid-explorer-chart-card__title">Regional Maximum Peak Supply<MonthlyBadge /></h3>
                     <p className="grid-explorer-chart-card__sub">
                             Substation peak loads served by grid zone in {currentMonthlyData?.month} {currentMonthlyData?.year} (MW)
-                           — <span className="text-primary font-semibold text-xs">Tracked since 2014</span></p>
+                           — <span className="text-primary font-semibold text-xs">Tracked since January 2013</span></p>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
                           {/* Left Column: Chart */}
@@ -1907,7 +1907,7 @@ export function MacroTrendsTab({
                                 ? ((fuelVal - prevFuelVal) / prevFuelVal) * 100
                                 : null;
                                 
-                              const share = d.total_net_generation > 0 ? (fuelVal / d.total_net_generation) * 100 : 0;
+                              const share = sharePct(fuelVal, sumFuelMix(d.generation_by_fuel as Record<string, number>)); // same base as the donut
                               const fuelLabel = getFuelLabel(selectedFuelTrend);
                               
                               return (
@@ -1941,7 +1941,7 @@ export function MacroTrendsTab({
                                         <span className="font-bold text-foreground tabular-nums">{share.toFixed(1)}%</span>
                                       </div>
                                       <div className="flex justify-between gap-4 items-center mt-1">
-                                        <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Total Month Net:</span>
+                                        <span className="text-muted-foreground inline-flex items-center gap-1"><GridProvenanceTag kind="P" />Month Net (excl. imports):</span>
                                         <span className="font-bold text-foreground/80 tabular-nums">{formatNumber(d.total_net_generation, 1)} MKWh</span>
                                       </div>
                                     </div>

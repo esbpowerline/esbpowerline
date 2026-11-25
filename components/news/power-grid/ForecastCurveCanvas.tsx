@@ -614,19 +614,19 @@ export function ForecastCurveCanvas({
       <figcaption className="mt-1.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] max-lg:text-[11px] text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded" style={{ background: forecastColor }} />
-          Forecast
+          Forecast demand
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-0.5 w-4 rounded" style={{ background: actualColor }} />
-          Measured
+          Measured demand
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-3 rounded-sm" style={{ background: shortColor, opacity: 0.45 }} />
-          Grid fell short of forecast
+          Demand below forecast
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-3 rounded-sm" style={{ background: overColor, opacity: 0.45 }} />
-          Grid beat forecast
+          Demand above forecast
         </span>
         {nowMinutes != null && (
           <span className="inline-flex items-center gap-1.5">

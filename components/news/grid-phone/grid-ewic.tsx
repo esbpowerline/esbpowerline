@@ -28,7 +28,9 @@ export function EwicSection({ day }: { day: GridDailyData }) {
   const genMk = (day.generationData ?? []).reduce((a, g) => a + (isNum(g.gen) ? g.gen : 0), 0);
   const totalMk = isNum(ewic.totals?.export) ? ewic.totals.export / 1e6 : null;
   const exceeds = totalMk != null && genMk > 0 && totalMk > genMk;
-  const share = totalMk != null && genMk > 0 && !exceeds ? (totalMk / genMk) * 100 : null;
+  // Withheld when the sheet disputes its own metering (see PowerGridExplorer's ewicShareOfGen).
+  const disputed = (ewic.checks?.length ?? 0) > 0;
+  const share = totalMk != null && genMk > 0 && !exceeds && !disputed ? (totalMk / genMk) * 100 : null;
   const at = i ?? Math.max(0, m.peak);
   const row = m.rows[at];
   const tot = m.sums[at];
@@ -67,7 +69,7 @@ export function EwicSection({ day }: { day: GridDailyData }) {
     open(
       <>
         <h3>About the interconnector</h3>
-        <p>Positive MW is flow from <b>West to East</b>; negative is East to West. Every reading in the archive so far has been positive — the western grid has exported to the eastern one on every hour on record, and Total Import has been zero on every day.</p>
+        <p>Positive MW is flow from <b>West to East</b>; negative is East to West.</p>
         <p>The chart stacks the corridors; each corridor’s reading is published (P) and the sum is ours (D).</p>
         <div className="gz-sheet-h">Source</div>
         <p>

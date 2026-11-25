@@ -108,7 +108,7 @@ export function MacroBudget({ win }: { win: MacroWindow }) {
             <li><strong>BPDB Supply Cost:</strong> BPDB&apos;s printed cost per unit sold in bulk — its own generation plus power bought from IPPs, rentals and imports, including <strong>capacity charges</strong> — from each year&apos;s annual report.</li>
             <li><strong>Average Bulk Tariff:</strong> what BPDB earned per unit sold to the distributors. BPDB prints it for FY 2022-23 only; other years are left blank rather than derived.</li>
           </ul>
-          <p><strong>Analytical Insight:</strong> In FY {L.fy} BPDB&apos;s supply cost was {L.cost?.toFixed(2) ?? '—'} Tk/kWh against an average bulk tariff of {L.tariff?.toFixed(2) ?? '—'}, and its accounts record a government subsidy of Tk {L.subsidyCrore == null ? '—' : formatNumber(L.subsidyCrore, 2)} crore for that year. Later years are not yet published by BPDB.</p>
+          <p><strong>Analytical Insight:</strong> In FY {L.fy} BPDB&apos;s supply cost was {L.cost?.toFixed(2) ?? '—'} Tk/kWh against an average bulk tariff of {L.tariff?.toFixed(2) ?? '—'}, and its accounts record a government subsidy of Tk {L.subsidyCrore == null ? '—' : formatNumber(L.subsidyCrore, 2)} crore for that year. Later years are not yet held in this archive.</p>
         </>}
         foot={<>
           <span>Source: <A href="https://www.berc.org.bd/">BERC Tariff Orders</A> &amp; <A href="https://www.bpdb.gov.bd/">BPDB Annual Reports</A></span>

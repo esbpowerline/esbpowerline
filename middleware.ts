@@ -306,13 +306,25 @@ export async function middleware(request: NextRequest) {
     const isPastShippedArchive = !!isoDate && !!latestDate && isoDate > latestDate;
     const isBeyondShippedArchive = isPastShippedArchive && ageDays >= -1 && ageDays <= 9;
 
+    // The visitor window for a day INSIDE the shipped catalog is measured from
+    // whichever is later: the catalog's newest day, or today less the usual
+    // two-day reporting lag. Measured from the catalog alone it froze at the last
+    // deploy: on 2026-11-25 production's catalog ended 2026-11-11, so 05-11 Nov
+    // stayed open to anyone without an account — seven days the tier sells —
+    // while the true public window had moved on to 17-23 Nov.
+    const visitorAnchorMs = Math.max(
+      latestDate ? Date.parse(latestDate) : 0,
+      Date.parse(todayDhaka) - 2 * 86_400_000,
+    );
+    const visitorAnchor = new Date(visitorAnchorMs).toISOString().slice(0, 10);
+
     const isPublicDate =
       !isoDate ||
       !latestDate ||
       isPublicSampleDate(isoDate) ||
       isBeyondShippedArchive ||
       inPetrobanglaPublicWindow ||
-      isDateAllowedForTier(isoDate, 'visitor', latestDate);
+      (!isPastShippedArchive && isDateAllowedForTier(isoDate, 'visitor', visitorAnchor));
 
     if (isPublicDate) {
       const publicResponse = NextResponse.next({ request });
@@ -345,7 +357,7 @@ export async function middleware(request: NextRequest) {
     // A day past the shipped catalog is measured from today instead:
     // isDateAllowedForTier refuses anything newer than its anchor, which on a
     // stale build would lock members out of days they are entitled to.
-    const tierAnchor = isPastShippedArchive ? todayDhaka : latestDate!;
+    const tierAnchor = isPastShippedArchive ? todayDhaka : visitorAnchor;
     if (!isDateAllowedForTier(isoDate!, tier, tierAnchor)) {
       return denyDailyJson('Subscription required for historical grid data access.');
     }

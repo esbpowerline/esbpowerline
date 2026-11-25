@@ -62,6 +62,8 @@ export const FUEL_COLORS: Readonly<Record<string, ModalColor>> = {
   Solar: { light: '#eda100', dark: '#c98500' },
   Wind: { light: '#008300', dark: '#008300' },
   Imports: { light: '#e87ba4', dark: '#d55181' },
+  // Rooppur, from 23 Nov 2026. Without an entry it drew in the unknown grey.
+  Nuclear: { light: '#7c3aed', dark: '#a78bfa' },
 } as const;
 
 /**
@@ -91,6 +93,7 @@ export const FUEL_DISPLAY_ORDER = [
   'Hydro',
   'Solar',
   'Wind',
+  'Nuclear',
   'Imports',
 ] as const;
 

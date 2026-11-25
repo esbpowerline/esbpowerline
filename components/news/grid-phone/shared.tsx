@@ -204,7 +204,7 @@ export function Row({ sw, name, sub, value, small, meter, wrap, top, onClick, ch
 
 /** Fuel colours — the day's own palette where it carries one. */
 export function fuelPalette(day: GridDailyData | null | undefined): Record<string, string> {
-  const p: Record<string, string> = { Gas: '#0ea5e9', Coal: '#64748b', HFO: '#f97316', HSD: '#ef4444', Hydro: '#06b6d4', Solar: '#eab308', Imports: '#a855f7', Wind: '#22c55e', Oil: '#f97316', Renewables: '#22c55e' };
+  const p: Record<string, string> = { Gas: '#0ea5e9', Coal: '#64748b', HFO: '#f97316', HSD: '#ef4444', Hydro: '#06b6d4', Solar: '#eab308', Imports: '#a855f7', Wind: '#22c55e', Nuclear: '#7c3aed', Oil: '#f97316', Renewables: '#22c55e' };
   for (const g of day?.generationData ?? []) if (g.color) p[g.name] = g.color;
   return p;
 }

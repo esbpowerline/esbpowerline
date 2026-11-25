@@ -162,7 +162,8 @@ export function ZoneDemand({ day }: { day: GridDailyData }) {
   const s = zoneStats(all);
   const bpdb = src === 'bpdb-published';
   const derived = src === 'derived-served-plus-shed';
-  const stamp = bpdb ? null : day.systemStats.peakTimes?.eveningPeakDemand ?? null;
+  // Caption hour first; see eveningPeakStamp in PowerGridExplorer.tsx.
+  const stamp = bpdb ? null : day.systemStats.peakTimes?.zoneTable ?? day.systemStats.peakTimes?.eveningPeakGen ?? null;
     const how = () =>
     open(
       <>

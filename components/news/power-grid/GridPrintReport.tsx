@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Zap, Droplet, Cable, Info, ChevronDown } from 'lucide-react';
 import { cn, formatNumber, formatUnitRate } from '@/lib/utils';
 import type { GridDailyData } from '@/lib/data/grid/types';
+import { distributorDisplayLabel } from '@/lib/data/petrobangla/distributor-labels';
 
 /**
  * The print-only "National Power Grid Audit Report".
@@ -64,7 +65,7 @@ export function GridPrintReport({
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="border border-border/60 p-3 rounded-lg bg-muted/5">
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Evening Peak Demand</span>
-          <div className="text-lg font-bold text-foreground mt-1">{formatNumber(Math.round(systemStats.eveningPeakDemand))} MW</div>
+          <div className="text-lg font-bold text-foreground mt-1">{systemStats.eveningPeakDemand == null ? '—' : `${formatNumber(Math.round(systemStats.eveningPeakDemand))} MW`}</div>
         </div>
         <div className="border border-border/60 p-3 rounded-lg bg-muted/5">
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold">Evening Peak Gen</span>
@@ -161,7 +162,7 @@ export function GridPrintReport({
               <tbody>
                 {gasDistributionData.map((gd, idx) => (
                   <tr key={idx} className="border-b border-border/40">
-                    <td className="py-1 px-2 font-medium">{gd.company}</td>
+                    <td className="py-1 px-2 font-medium">{distributorDisplayLabel(gd.company)}</td>
                     <td className="text-right py-1 px-2 tabular-nums">{gd.power.toFixed(1)}</td>
                     <td className="text-right py-1 px-2 tabular-nums">{gd.others.toFixed(1)}</td>
                     <td className="text-right py-1 px-2 tabular-nums font-semibold">{gd.total.toFixed(1)}</td>

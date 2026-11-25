@@ -43,7 +43,11 @@ export function TodayScreen() {
     const v = (d?.ewicData?.rows ?? []).map(ewicTot).filter(isNum);
     return v.length ? Math.max(...v) : null;
   };
-  const fcByHour = new Map((day.forecast?.hourly ?? []).map((h) => [h.time, h.generationMw]));
+  // PGCB's DEMAND forecast. Its Generation column is availability in a surplus
+  // season (23 Nov 2026: ~13,700 MW flat all day against a 9,500-13,670 MW load),
+  // so drawing it as "PGCB forecast" beside generation showed a gap that was
+  // spare capacity. See lib/data/grid/forecast-curve.ts.
+  const fcByHour = new Map((day.forecast?.hourly ?? []).map((h) => [h.time, h.demandMw]));
 
   const M: Record<Metric, { tab: string; unit: string; value: number | null; prev: number | null; kicker: string; goodUp: boolean; show: boolean }> = {
     gen: { tab: '24 hours', unit: 'MW', value: s.eveningPeakGen ?? null, prev: prev?.systemStats.eveningPeakGen ?? null, kicker: `Evening peak${s.peakTimes?.eveningPeakGen ? ` · ${s.peakTimes.eveningPeakGen}` : ''}`, goodUp: true, show: true },
@@ -65,7 +69,10 @@ export function TodayScreen() {
     ];
     const vis = series.map((x) => (hidden.has(x.key) ? { ...x, values: x.values.map(() => null) } : x));
     const peakT = s.peakTimes?.eveningPeakGen;
-    const peakIdx = peakT ? Math.max(hours.findIndex((h) => h.time === peakT), hours.findIndex((h) => h.time === `${peakT.slice(0, 2)}:00`)) : -1;
+    // Exact row only. The fallback to HH:00 put "evening peak" on 18:00 on
+    // 23 Nov 2026, when P1 stamps the peak at 18:30 — a row this whole-hour
+    // chart does not plot. No marker beats a marker on the wrong hour.
+    const peakIdx = peakT ? hours.findIndex((h) => h.time === peakT) : -1;
     const shedVals = hours.map((h) => (isNum(h.loadShed) ? h.loadShed : null));
     const anyShed = shedVals.some(isNum);
     chart = hours.length === 0 ? (
@@ -99,12 +106,14 @@ export function TodayScreen() {
               sub: (
                 <>
                   {isNum(h.demand) ? <>Demand <b>{fmt(h.demand)}</b></> : 'Demand not published'}
-                  {isNum(f) ? <> · forecast <b>{fmt(f)}</b></> : null}
+                  {isNum(f) ? <> · forecast demand <b>{fmt(f)}</b></> : null}
                   <br />
                   {isNum(h.loadShed) ? (h.loadShed > 0 ? <b style={{ color: 'var(--gp-bad)' }}>{fmt(h.loadShed)} shed</b> : 'no shedding') : 'shed not published'}
                   {unmet != null ? <> · unmet <b>{fmt(Math.max(0, Math.round(unmet)))}</b></> : null}
                   {met != null ? <> · {met.toFixed(1)}% met</> : null}
-                  {isNum(dayMax) && dayMax > 0 && isNum(h.generation) ? <> · {((h.generation / dayMax) * 100).toFixed(0)}% of day peak</> : null}
+                  {/* Against P1's Maximum Generation of the Day, not its Day Peak
+                      (a 12:00 figure) — so named for the maximum. */}
+                  {isNum(dayMax) && dayMax > 0 && isNum(h.generation) ? <> · {((h.generation / dayMax) * 100).toFixed(0)}% of the day’s maximum</> : null}
                 </>
               ),
             });
@@ -126,7 +135,7 @@ export function TodayScreen() {
           items={[
             { key: 'gen', label: 'Generation', color: 'var(--gp-primary)', line: true },
             ...(hasDemand ? [{ key: 'dem', label: 'Demand', color: 'var(--gp-demand)', line: true }] : []),
-            ...(fcByHour.size ? [{ key: 'fc', label: 'PGCB forecast', color: 'var(--gp-fc)', dash: true }] : []),
+            ...(fcByHour.size ? [{ key: 'fc', label: 'PGCB demand forecast', color: 'var(--gp-fc)', dash: true }] : []),
           ]}
         />
         {shed != null && (
@@ -236,7 +245,7 @@ export function TodayScreen() {
           <Stat label="Energy not supplied" value={s.totalEnergyUnserved} unit="MKWh" dp={2} prov="P" detail={<Delta cur={s.totalEnergyUnserved ?? null} prev={prev?.systemStats.totalEnergyUnserved ?? null} goodUp={false} dp={2} vs={vs} />} onClick={week7({ l: 'Energy not supplied', v: (d) => d?.systemStats.totalEnergyUnserved ?? null, u: 'MKWh', dp: 2 })} />
           <Stat label="Lowest generation" value={s.minGen} unit="MW" prov="P" detail={`overnight trough${at(s.peakTimes?.minGen)}`} onClick={week7({ l: 'Lowest generation', v: (d) => d?.systemStats.minGen ?? null, u: 'MW', dp: 0 })} />
           <Stat label="Hottest in Dhaka" value={s.maxTemp} unit="°C" dp={1} prov="P" onClick={week7({ l: 'Hottest in Dhaka', v: (d) => d?.systemStats.maxTemp ?? null, u: '°C', dp: 1 })} />
-          <Stat label="Cost per unit" value={s.avgProductionCost > 0 ? s.avgProductionCost : null} unit="Tk/kWh" dp={2} prov="D" note="PGCB’s fuel bill divided by the day’s energy. PGCB prints the bill, not this rate." detail={<Delta cur={s.avgProductionCost ?? null} prev={prev?.systemStats.avgProductionCost ?? null} goodUp={false} dp={2} vs={vs} />} onClick={week7({ l: 'Cost per unit', v: (d) => d?.systemStats.avgProductionCost ?? null, u: 'Tk/kWh', dp: 2 })} />
+          <Stat label="Cost per unit" value={s.avgProductionCost > 0 ? s.avgProductionCost : null} unit="Tk/kWh" dp={2} prov={s.avgProductionCostStated ? 'P' : 'D'} note={s.avgProductionCostStated ? 'P1’s own “Production Cost per KWHr” (6.0848 Tk on 23 Nov 2026). PGCB prints no rate per fuel; those are ours.' : 'This day’s report prints no per-kWh rate; the bill divided by the day’s energy.'} detail={<Delta cur={s.avgProductionCost ?? null} prev={prev?.systemStats.avgProductionCost ?? null} goodUp={false} dp={2} vs={vs} />} onClick={week7({ l: 'Cost per unit', v: (d) => d?.systemStats.avgProductionCost ?? null, u: 'Tk/kWh', dp: 2 })} />
           <Stat label="Stations at the peak" value={ps.length ? ran : null} unit={ps.length ? `of ${ps.length}` : undefined} prov="D" note="Stations whose evening-peak output PGCB printed as more than zero, out of every station with installed capacity." detail={ps.length ? undefined : 'no station sheet for this day'} />
         </div>
         <div className="gp-hint">Tap a figure for the last {weekDates.length} days</div>

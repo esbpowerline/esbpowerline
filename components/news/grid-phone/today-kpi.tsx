@@ -8,7 +8,8 @@
  */
 
 import type { ReactNode } from 'react';
-import { useGridOverviewContext } from '@/hooks/useGridOverviewContext';
+import { peakDeficitAtDemand, useGridOverviewContext } from '@/hooks/useGridOverviewContext';
+import { forecastStatesAvailability } from '@/lib/data/grid/forecast-curve';
 import { formatWindow, petrobanglaGasDay } from '@/lib/data/grid/observation-window';
 import { renewableGridSharePct, totalCapacityRenewables } from '@/lib/data/companies/sreda';
 import { fmt } from './charts';
@@ -18,24 +19,37 @@ import { BriefRows, dayLabel, SourceRef, WeekBars, type BRow } from './today-uti
 
 type Polarity = 'up-good' | 'down-good' | 'neutral';
 
-/** "▲ 1.2% vs 7-day avg". Hidden without a baseline; "level" inside half a percent. */
-function Trend({ cur, base, days, polarity }: { cur: number | null | undefined; base: number | null | undefined; days: number; polarity: Polarity }) {
-  if (!isNum(cur) || !isNum(base) || base === 0) return null;
-  const pct = ((cur - base) / Math.abs(base)) * 100;
+/**
+ * "▲ 1.2% vs 7-day avg". Hidden without a baseline; "level" inside half a percent.
+ * With `absBelow`, a baseline under that magnitude is compared in MW instead:
+ * Peak Deficit read "▼100.0%" on 18 Nov 2026 for 0 MW against a 1.4 MW mean.
+ */
+function Trend({ cur, base, days, polarity, absBelow }: { cur: number | null | undefined; base: number | null | undefined; days: number; polarity: Polarity; absBelow?: number }) {
+  if (!isNum(cur) || !isNum(base)) return null;
+  const absolute = absBelow != null && Math.abs(base) < absBelow;
+  if (!absolute && base === 0) return null;
+  const diff = cur - base;
+  const pct = absolute ? 0 : (diff / Math.abs(base)) * 100;
   const vs = <span style={{ color: 'var(--gp-muted)', fontWeight: 400 }}> vs {days}-day avg</span>;
-  if (Math.abs(pct) < 0.5) return <span className="gp-delta flat">→ level{vs}</span>;
-  const up = pct > 0;
+  if (absolute ? Math.abs(diff) < 0.5 : Math.abs(pct) < 0.5) return <span className="gp-delta flat">→ level{vs}</span>;
+  const up = diff > 0;
   const cls = polarity === 'neutral' ? 'flat' : (polarity === 'up-good' ? up : !up) ? 'good' : 'bad';
   return (
     <span className={`gp-delta ${cls}`}>
-      {up ? '▲' : '▼'} {Math.abs(pct).toFixed(1)}%{vs}
+      {up ? '▲' : '▼'} {absolute ? `${fmt(Math.round(Math.abs(diff)))} MW` : `${Math.abs(pct).toFixed(1)}%`}{vs}
     </span>
   );
 }
 
-/** "forecast 17,360 · outturn +186 MW", grey on purpose: a forecast miss is never graded. */
-function ForecastHint({ forecastMw, actualMw }: { forecastMw: number | null | undefined; actualMw: number | null | undefined }) {
+/**
+ * "forecast 17,360 · outturn +186 MW", grey on purpose: a forecast miss is never graded.
+ * `available`: PGCB's Probable Maximum Generation sits above its forecast demand, so it
+ * states availability — 13,732 against 13,670 on 23 Nov 2026, which printed "outturn
+ * −620 MW" for capacity never asked to run. Named as such, with no delta.
+ */
+function ForecastHint({ forecastMw, actualMw, available = false }: { forecastMw: number | null | undefined; actualMw: number | null | undefined; available?: boolean }) {
   if (!isNum(forecastMw)) return null;
+  if (available) return <span style={{ display: 'block' }}>stated available {fmt(Math.round(forecastMw))} MW</span>;
   const gap = isNum(actualMw) ? Math.round(actualMw - forecastMw) : null;
   return (
     <span style={{ display: 'block' }}>
@@ -67,8 +81,14 @@ export function TodayKpiStrip() {
 
   // ── derived figures, as the desktop strip computes them ──────────────────
   const avgMw = (mkwh: number | null) => (isNum(mkwh) ? (mkwh * 1000) / 24 : null);
-  const deficit = isNum(s.eveningPeakDemand) && isNum(s.eveningPeakGen) ? Math.max(0, Math.round(s.eveningPeakDemand - s.eveningPeakGen)) : null;
-  const shedShare = deficit != null && s.eveningPeakDemand > 0 ? (deficit / s.eveningPeakDemand) * 100 : null;
+  // Same instant enforced, as on the desktop strip: 20 Aug 2026 stamped demand at
+  // 19:30 and generation at 21:00, and "at the same hour" printed 1,719 MW where
+  // P4's 19:30 row gives 1,858. See peakDeficitAtDemand.
+  const pd = peakDeficitAtDemand(s, day.hourlyLoadData);
+  const deficit = pd.mw;
+  const demand = s.eveningPeakDemand;
+  const shedShare = deficit != null && isNum(demand) && demand > 0 ? (deficit / demand) * 100 : null;
+  const genFcAvailable = forecastStatesAvailability(f);
   const installed = capacity?.installedMw ?? null;
   const idleMw = installed == null ? null : Math.max(0, installed - s.eveningPeakGen);
   const idlePct = installed && installed > 0 ? ((idleMw ?? 0) / installed) * 100 : null;
@@ -116,7 +136,7 @@ export function TodayKpiStrip() {
           detail={
             <>
               <Trend cur={s.eveningPeakGen} base={baseline?.peakSupply} days={days} polarity="up-good" />
-              <ForecastHint forecastMw={f?.maxGenEveningMw} actualMw={s.eveningPeakGen} />
+              <ForecastHint forecastMw={f?.maxGenEveningMw} actualMw={s.eveningPeakGen} available={genFcAvailable} />
             </>
           }
           onClick={() =>
@@ -131,7 +151,7 @@ export function TodayKpiStrip() {
                     { p: 'P', label: 'Total energy gen', value: isNum(s.totalEnergyGen) ? `${s.totalEnergyGen.toFixed(2)} MKWh` : none },
                     { p: 'P', label: 'Max generation of the day', value: isNum(s.maxGen) ? `${fmt(s.maxGen)} MW` : '—' },
                     { p: 'P', label: 'Min generation of the day', value: isNum(s.minGen) ? `${fmt(s.minGen)} MW` : '—' },
-                    ...(isNum(f?.maxGenEveningMw) ? [{ p: 'P' as const, label: 'PGCB’s same-morning forecast', value: `${fmt(f!.maxGenEveningMw)} MW` }] : []),
+                    ...(isNum(f?.maxGenEveningMw) ? [{ p: 'P' as const, label: genFcAvailable ? 'PGCB’s same-morning stated available' : 'PGCB’s same-morning forecast', value: `${fmt(f!.maxGenEveningMw)} MW` }] : []),
                   ]}
                 />
                 <p className="gp-taudit">{pub}</p>
@@ -160,7 +180,7 @@ export function TodayKpiStrip() {
               <>
                 <BriefRows
                   rows={[
-                    { p: 'P', label: 'Evening peak demand', value: `${fmt(s.eveningPeakDemand)} MW` },
+                    { p: 'P', label: 'Evening peak demand', value: isNum(demand) ? `${fmt(demand)} MW` : none, sub: isNum(demand) && s.peakTimes?.eveningPeakDemand ? `at ${s.peakTimes.eveningPeakDemand}` : undefined },
                     { p: 'P', label: 'Day peak demand', value: isNum(s.dayPeakDemand) ? `${fmt(s.dayPeakDemand)} MW` : '—' },
                     { p: 'P', label: 'Max temperature', value: isNum(s.maxTemp) ? `${s.maxTemp.toFixed(1)} °C` : '—' },
                     ...(isNum(f?.maxDemandEveningMw ?? f?.maxDemandMw) ? [{ p: 'P' as const, label: 'PGCB’s same-morning forecast', value: `${fmt(f!.maxDemandEveningMw ?? f!.maxDemandMw)} MW` }] : []),
@@ -180,22 +200,23 @@ export function TodayKpiStrip() {
           value={deficit}
           unit="MW"
           prov="D"
-          note="Evening-peak demand less evening-peak generation, at the same hour. Our subtraction; PGCB prints neither this nor a deficit."
-          detail={<Trend cur={deficit} base={baseline?.peakDeficit} days={days} polarity="down-good" />}
+          note="Evening-peak demand less generation at the same instant: P1’s evening-peak generation when both share a time stamp, otherwise the hourly reading at the demand stamp. Our subtraction; PGCB prints no deficit."
+          detail={deficit == null ? (pd.note ?? undefined) : <Trend cur={deficit} base={baseline?.peakDeficit} days={days} polarity="down-good" absBelow={50} />}
           onClick={() =>
             sheet(
               'Shortfall briefing',
               <>
                 <BriefRows
                   rows={[
-                    { p: 'D', label: 'At the evening peak', value: deficit == null ? '—' : `${fmt(deficit)} MW`, bad: (deficit ?? 0) > 0 },
+                    { p: 'D', label: pd.at ? `At the demand peak (${pd.at})` : 'At the evening peak', value: deficit == null ? '—' : `${fmt(deficit)} MW`, bad: (deficit ?? 0) > 0, note: deficit == null ? pd.note ?? undefined : undefined },
+                    ...(deficit != null && isNum(pd.generationMw) && pd.generationMw !== s.eveningPeakGen ? [{ p: 'P' as const, label: `Generation at ${pd.at} (P4)`, value: `${fmt(pd.generationMw)} MW` }] : []),
                     { p: 'D', label: 'Share of peak demand', value: shedShare == null ? '—' : `${shedShare.toFixed(1)}%` },
                     { p: 'P', label: 'Energy unserved (day)', value: isNum(s.totalEnergyUnserved) ? `${s.totalEnergyUnserved.toFixed(2)} MKWh` : none },
                     { p: 'D', label: 'That, averaged over 24h', value: isNum(s.totalEnergyUnserved) ? `${fmt(avgMw(s.totalEnergyUnserved), 0)} MW` : '—' },
                   ]}
                 />
                 <p className="gp-taudit">
-                  The headline is peak demand less peak generation at the same hour. PGCB’s own unserved-energy figure is the day’s total and is listed above beside it — the two measure different things and are not expected to match.
+                  The headline is evening-peak demand less generation at the same instant — P1’s pair when both share a time stamp, otherwise the hourly reading at the demand stamp, and a dash where there is none. PGCB’s own unserved-energy figure is the day’s total and is listed above beside it — the two measure different things and are not expected to match.
                 </p>
                 <SourceRef label="PGCB Daily Report" part="P1 sheet — demand, generation and unserved energy" date={dateLabel} file={files?.pgcb} href={PGCB} />
                 {wk('Energy not supplied', 'MKWh', 2, (d) => d?.systemStats.totalEnergyUnserved ?? null)}
@@ -307,7 +328,7 @@ export function TodayKpiStrip() {
                 <BriefRows
                   rows={[
                     { p: 'P', label: 'Fuel bill for the day', value: cost == null ? none : `${(cost / 1e7).toFixed(2)} Crore BDT` },
-                    { p: 'D', label: 'Average production cost', value: unit == null ? none : `${unit.toFixed(3)} Tk/kWh`, note: 'The day’s fuel bill divided by its energy; PGCB prints the bill, not this rate.' },
+                    { p: s.avgProductionCostStated ? 'P' : 'D', label: 'Production cost per kWh', value: unit == null ? none : `${unit.toFixed(3)} Tk/kWh`, note: s.avgProductionCostStated ? 'P1’s own “Production Cost per KWHr” (6.0848 Tk on 23 Nov 2026).' : 'This day’s report prints no per-kWh rate; the bill divided by the day’s energy.' },
                     ...(unitGap != null && unitGap >= 0.005 && billPerKwh != null ? [{ p: 'D' as const, label: 'Bill ÷ generation', value: `${billPerKwh.toFixed(3)} Tk/kWh` }] : []),
                     { p: 'D', label: 'Gas generation cost', value: fuelRate('Gas') },
                     { p: 'D', label: 'HFO generation cost', value: fuelRate('HFO'), bad: true },
@@ -315,7 +336,7 @@ export function TodayKpiStrip() {
                   ]}
                 />
                 <p className="gp-taudit">
-                  The headline is the production-cost total PGCB prints on P1. The average rate beneath it is ours — the bill divided by the day’s energy, not the rate the report states. The per-fuel rates are not published tariffs either: each is that fuel’s cost divided by its generation, and the import rate in particular is a blended settlement figure rather than a contracted price, so read it as an indication.
+                  The headline is the production-cost total PGCB prints on P1, and the rate per kWh beneath it is P1’s own “Production Cost per KWHr”. PGCB prints no rate per fuel: the per-fuel rates are ours, each that fuel’s cost divided by its generation, not published tariffs, and the import rate in particular is a blended settlement figure rather than a contracted price, so read it as an indication.
                 </p>
                 <p className="gp-taudit">
                   Fuel and import bills only: capacity payments, debt service and O&amp;M appear nowhere on this report, so the true cost of running the grid is higher than any rate here. Restates BPDB fuel economics. Not audited.

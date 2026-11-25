@@ -70,7 +70,7 @@ export function ImportsView() {
     });
 
   const nepalNote = () =>
-    note('From the curve', <p style={{ marginTop: 0 }}>PGCB does not list this line in its production-cost interconnector block. Its energy and peak are computed here from the half-hourly generation curve — the half-hour MW readings summed and halved for the energy, and their maximum for the peak.</p>);
+    note('From the curve', <p style={{ marginTop: 0 }}>PGCB does not list this line in P1’s E-W Interconnector & Import Scenario block. Its energy and peak are computed here from the half-hourly generation curve — the half-hour MW readings summed and halved for the energy, and their maximum for the peak.</p>);
 
   const lineSumGap = importedMkwh != null && Math.abs(linkSum - importedMkwh) > 0.05;
 
@@ -120,9 +120,9 @@ export function ImportsView() {
           <How title="Why cost is shown once, and the lines" label="Why cost is shown once, and the lines">
             <p style={{ marginTop: 0 }}>
               <b>Why cost is shown once, and no rate at all:</b> PGCB reports energy and peak flow for each interconnector, but prices imports as a single line in its production-cost table — one figure covering all of them. Bheramara, Adani Godda and Tripura are separate contracts at different prices, and the report does not say what those prices are. Dividing the one cost by the one energy would give a single average across all three, which is not the tariff of any of them, so no per-unit rate is published here.
-              {importedMkwh != null && lineSumGap && <> The cost above covers the {fmt(importedMkwh, 2)} MKWh the fuel table reports, which differs from the {fmt(linkSum, 2)} MKWh these lines add up to — PGCB states import energy in two places and they do not always agree.</>}
+              {importedMkwh != null && lineSumGap && <> The cost above covers the {fmt(importedMkwh, 2)} MKWh the fuel table reports, which differs from the {fmt(linkSum, 2)} MKWh these lines add up to — the fuel table counts Nepal with the Indian lines, and the Nepal row here is read from the half-hourly curve, so the two need not match to the decimal.</>}
             </p>
-            <p><b>The lines:</b> Adani Cross-Border Interconnector (Godda Coal Power) provides dedicated base-load supply directly to the northern grid interface. HVDC Bheramara is the main synchronous link with the Indian National Grid (NTPC/PowerGrid).</p>
+            <p><b>The lines:</b> Adani Cross-Border Interconnector (Godda Coal Power) provides dedicated base-load supply directly to the northern grid interface. HVDC Bheramara is the main asynchronous (back-to-back) link with the Indian National Grid (NTPC/PowerGrid).</p>
           </How>
         </Section>
       ) : (

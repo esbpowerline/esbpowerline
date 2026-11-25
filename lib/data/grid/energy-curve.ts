@@ -37,6 +37,8 @@ export const ENERGY_CURVE_GROUPS: { name: string; color: string; columns: string
   { name: 'HSD', color: '#ef4444', columns: ['HSD-Public', 'HSD-Pvt'] },
   { name: 'Hydro', color: '#06b6d4', columns: ['Hydro'] },
   { name: 'Solar', color: '#eab308', columns: ['Solar'] },
+  // Rooppur's column on the sheet from 23 Nov 2026 (see ENERGY_CURVE_FUELS).
+  { name: 'Nuclear', color: '#7c3aed', columns: ['Nuclear'] },
 ];
 
 /** The column the chart never stacks — shedding, not generation. */

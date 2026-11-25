@@ -19,7 +19,8 @@ import { Cell, InfoPill, useFuelColor, type MacroWindow } from './macro-kit';
 import { MonthlyTrend } from './macro-monthly-trend';
 import { MacroMonthlyDetail } from './macro-monthly-detail';
 
-const fuelName = (k: string) => (k === 'hfo' ? 'Furnace Oil (HFO)' : k === 'import' ? 'India Imports' : k.charAt(0).toUpperCase() + k.slice(1));
+// 'Imports', not 'India Imports': PGCB's import row also carries Nepal (24.5 GWh of August 2026's 1,643.7).
+const fuelName = (k: string) => (k === 'hfo' ? 'Furnace Oil (HFO)' : k === 'import' ? 'Imports' : k.charAt(0).toUpperCase() + k.slice(1));
 
 export function MacroMonthly({ win }: { win: MacroWindow }) {
   const { series, loading } = usePgcbMonthlySeries(true);
@@ -44,7 +45,10 @@ export function MacroMonthly({ win }: { win: MacroWindow }) {
   const months = series.filter((d) => d.year === cur?.year);
   const stale = staleRowsFor(key);
 
-  const fuels = cur ? Object.entries(cur.generation_by_fuel).map(([name, val]) => ({ name, val, pct: (val / (cur.total_net_generation || 1)) * 100, color: fuelColor(name) })).filter((d) => d.val > 0).sort((a, b) => b.val - a.val) : [];
+  // Shares are of the fuel rows' own sum, imports included. Over `total_net_generation` (PGCB's
+  // "Excluding Import" row) August 2026 summed to 118.5% — 10,792.7 of slices over 9,111.0.
+  const fuelMixTotal = cur ? Object.values(cur.generation_by_fuel).reduce((s, v) => s + (v > 0 ? v : 0), 0) : 0;
+  const fuels = cur ? Object.entries(cur.generation_by_fuel).map(([name, val]) => ({ name, val, pct: fuelMixTotal > 0 ? (val / fuelMixTotal) * 100 : 0, color: fuelColor(name) })).filter((d) => d.val > 0).sort((a, b) => b.val - a.val) : [];
   // Zones come from the month's own file; never the previous month's while a new pick loads.
   const reg = record && record.date_key === cur?.date_key ? record : null;
   const zones = reg ? Object.entries(reg.regional_supply).map(([k, value]) => ({ k, name: k.charAt(0).toUpperCase() + k.slice(1), value, color: REGIONAL_ZONE_COLORS[k.toLowerCase()] ?? SERIES_UNMAPPED.light })).sort((a, b) => b.value - a.value) : [];
@@ -87,7 +91,7 @@ export function MacroMonthly({ win }: { win: MacroWindow }) {
         </div>
       )}
 
-      <Section title={period} desc="Headline figures of the month" meta="Tracked since 2014">
+      <Section title={period} desc="Headline figures of the month" meta="Tracked since January 2013">
         <div className="gp-stats">
           <Cell label="Max Peak Generation" prov="P" value={cur ? formatNumber(cur.max_evening_peak_gen) : 0} unit="MW" detail="Evening peak generation recorded" tone="primary" />
           <Cell label="Estimated Peak Demand" prov="P" value={cur ? formatNumber(cur.max_evening_peak_demand) : 0} unit="MW" detail="System operational peak demand" />
@@ -96,18 +100,18 @@ export function MacroMonthly({ win }: { win: MacroWindow }) {
         </div>
       </Section>
 
-      <Section title="Energy Fuel Mix" desc={<>Net generation by fuel source in {period} (MKWh)</>} meta="Monthly">
-        <div className="gp-hero gp-hero--md"><b>{cur ? formatNumber(cur.total_net_generation, 0) : '0'}</b><small>MKWh Net</small></div>
+      <Section title="Energy Fuel Mix" desc={<>Net generation by fuel source, plus imports, in {period} (MKWh)</>} meta="Monthly">
+        <div className="gp-hero gp-hero--md"><b>{cur ? formatNumber(fuelMixTotal, 0) : '—'}</b><small>MKWh incl. imports</small></div>
         <div style={{ margin: '10px 0 14px' }}><StackBar height={12} parts={fuels.map((f) => ({ key: f.name, value: f.val, color: f.color }))} /></div>
         <div className="gpm-shares">
-          <div className="gpm-colhead"><span>Fuel Type</span><span>MKWh<Prov kind="P" /></span><span>Share<Prov kind="D" note="Each fuel’s generation over the month’s total net generation, as PGCB printed both." /></span></div>
+          <div className="gpm-colhead"><span>Fuel Type</span><span>MKWh<Prov kind="P" /></span><span>Share<Prov kind="D" note="Each fuel’s generation over the sum of the month’s fuel rows, imports included, as PGCB printed them." /></span></div>
           {fuels.map((f) => (
             <div key={f.name} className="gpm-share"><span><i style={{ background: f.color }} />{fuelName(f.name)}</span><b>{formatNumber(f.val, 1)}</b><em>{f.pct.toFixed(1)}%</em></div>
           ))}
         </div>
       </Section>
 
-      <Section title="Regional Maximum Peak Supply" desc={<>Substation peak loads served by grid zone in {period} (MW) — Tracked since 2014</>} meta="Monthly">
+      <Section title="Regional Maximum Peak Supply" desc={<>Substation peak loads served by grid zone in {period} (MW) — Tracked since January 2013</>} meta="Monthly">
         {zones.length ? (
           <div className="gpm-hbars">
             <div className="gpm-colhead"><span>Grid Zone</span><span /><span>MW<Prov kind="P" /></span><span>Share<Prov kind="D" note="Each zone’s peak load over the sum of the zones shown." /></span></div>

@@ -67,10 +67,10 @@ export function GenerationPanel({ day, derived, ui, actions, slots }: Generation
               </div>
               <h4 className="text-base font-bold text-foreground">PGCB Fuel Mix &amp; Generation Cost Data</h4>
               <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
-                No official records are available for the selected date. PGCB generation and cost data tracking officially started on December 31, 2013.
+                No PGCB report is held for the selected date. This archive’s PGCB daily reports begin 31 Dec 2013.
               </p>
               <div className="text-[10px] text-muted-foreground tabular-nums">
-                Official Backlog Start Date: December 31, 2013
+                Archive starts: 31 Dec 2013
               </div>
             </div>
           </div>
@@ -115,7 +115,8 @@ export function GenerationPanel({ day, derived, ui, actions, slots }: Generation
                   <tr>
                     <th>Fuel / Source</th>
                     {/* Generation and cost are printed by PGCB. The unit rate is
-                        not — no agency publishes a Tk/kWh figure — so it is the
+                        not — no agency publishes a per-fuel Tk/kWh figure (P1's
+                        "Production Cost per KWHr" is system-wide) — so it is the
                         quotient of the two columns to its left and is tagged D,
                         with a marker saying what independent evidence supports
                         that particular quotient. */}
@@ -363,8 +364,13 @@ export function GenerationPanel({ day, derived, ui, actions, slots }: Generation
                 <MobileFold title="How the unit cost is derived, and what the 2× / flat markers mean">
                 <p className="mb-1.5">
                   <strong className="text-foreground">How the unit cost is arrived at.</strong>{' '}
-                  No agency publishes a Tk/kWh rate. PGCB publishes a production cost in Taka
-                  and an energy total in MKWh for each fuel; the rate here is the first divided
+                  {/* Was "No agency publishes a Tk/kWh rate". PGCB does print one
+                      for the system — P1's "Production Cost per KWHr", 6.0848 Tk on
+                      23 Nov 2026 — so the claim is restricted to per-fuel rates,
+                      which is where it is true. */}
+                  No agency publishes a Tk/kWh rate per fuel; PGCB prints only the system-wide
+                  &ldquo;Production Cost per KWHr&rdquo;. For each fuel it publishes a production
+                  cost in Taka and an energy total in MKWh; the rate here is the first divided
                   by the second, which is why it is marked{' '}
                   <GridProvenanceTag kind="D" />. The marker beside each rate says what
                   independent evidence supports it:
@@ -407,10 +413,15 @@ export function GenerationPanel({ day, derived, ui, actions, slots }: Generation
                   */}
                   <li>
                     <UnitCostBadge static fact={{ status: 'administered' } as UnitCostFact} className="ml-0" />{' '}
-                    a flat rate the publisher applies rather than measures. Through 2026 PGCB
-                    prints Wind at 14.7100 Tk/kWh unchanged, and Hydro at 0.1000 except for
-                    2026-06-30 to 07-15, when it stepped to 3.8100 and back. Rates that hold to
-                    four decimals for weeks and then jump are tariffs in force, not daily costs.
+                    {/* "Through 2026 PGCB prints Wind at 14.7100 Tk/kWh unchanged" was
+                        wrong twice: PGCB prints Wind's cost and energy, the rate is
+                        our quotient, and it has moved (14.82, 14.92 in Nov 2026).
+                        A frozen figure in prose goes stale; it is gone. */}
+                    a rate that behaves like a tariff applied rather than a cost measured: the
+                    quotient of the fuel&rsquo;s printed cost and energy holds to four decimals for
+                    weeks and then jumps. Hydro&rsquo;s held at 0.1000 except for 2026-06-30 to
+                    07-15, when it stepped to 3.8100 and back. The rate is still ours; the marker
+                    describes its pattern.
                   </li>
                   <li>
                     <UnitCostBadge static fact={{ status: 'disagreement' } as UnitCostFact} className="ml-0" />{' '}
@@ -488,7 +499,9 @@ export function GenerationPanel({ day, derived, ui, actions, slots }: Generation
                 {/* All three are printed by PGCB's P1 sheet. */}
                 <div className="ge-kv grid grid-cols-2 gap-y-2 text-xs leading-relaxed">
                   <span>Peak Demand:<GridProvenanceTag kind="P" className="ml-1" /></span>
-                  <span className="font-bold text-foreground text-left tabular-nums">{systemStats.eveningPeakDemand.toFixed(1)} MW</span>
+                  <span className="font-bold text-foreground text-left tabular-nums">
+                    {systemStats.eveningPeakDemand == null ? '—' : `${systemStats.eveningPeakDemand.toFixed(1)} MW`}
+                  </span>
                   <span>Peak Generation:<GridProvenanceTag kind="P" className="ml-1" /></span>
                   <span className="font-bold text-foreground text-left tabular-nums">{systemStats.eveningPeakGen.toFixed(1)} MW</span>
                   <span>Unserved Energy:<GridProvenanceTag kind="P" className="ml-1" /></span>
@@ -565,10 +578,13 @@ export function GenerationPanel({ day, derived, ui, actions, slots }: Generation
               Forecast block — including "Total Gas Supplied", which is PGCB's
               number rather than Petrobangla's, so the Petrobangla credit was
               wrong. The "Audited by NLDC Operators & Petrobangla Billing" line
-              went with it: nothing here has opened an audit.
+              went with it: nothing here has opened an audit. "Nepal from the
+              En-Curve stack" went too (2026-11-25): no figure on this card is
+              Nepal's or comes from En-Curve. The gas cost and rate are P1's
+              production-cost block, now named.
             */}
             <GridCardFooter>
-              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet and the reported-day Forecast block; Nepal from the En-Curve stack</span>
+              <span>Source: <a href="https://www.pgcb.gov.bd/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">PGCB Daily Report</a> — P1 sheet (supply summary, production-cost block, gas supplied) and the reported-day Forecast block</span>
               {sourceFiles?.pgcb ? <GridSourceFiles files={[{ label: 'PGCB', name: sourceFiles.pgcb }]} /> : null}
               <span>As published by PGCB. Not audited.</span>
               <span className="font-medium">Reporting Period: System Summary (Date: {systemStats.date})</span>

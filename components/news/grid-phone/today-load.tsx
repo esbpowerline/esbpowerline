@@ -42,18 +42,35 @@ export function TodayLoadNotes() {
   const worstShed = maxOf(all, (r) => r.loadShed);
   const anyShedPublished = all.some((r) => isNum(r.loadShed));
   const showShedding = (worstShed?.v ?? 0) > 0;
-  const peakRow = all.find((r) => isNum(r.demand) || isNum(r.loadShed)) ?? null;
+  // Captions follow the day's data, not the layout (see OverviewPanel): with P4
+  // surviving the parser, demand can sit on every row or most of them.
+  const demandRows = all.filter((r) => isNum(r.demand)).length;
+  const demandScope =
+    demandRows === 0
+      ? 'no hourly demand published'
+      : demandRows === 1
+        ? 'demand as published for the evening peak hour'
+        : `demand as published for ${demandRows} of the ${all.length} readings`;
+  const peakRow =
+    demandRows <= 1
+      ? all.find((r) => isNum(r.demand) || isNum(r.loadShed)) ?? null
+      : all.find((r) => r.time === s.peakTimes?.eveningPeakDemand) ?? null;
 
-  // Whole hours only, so the count, the denominator and the MWh total describe the same thing.
-  const shedHours = hours.filter((h) => (h.loadShed ?? 0) > 0);
-  const worstWhole = shedHours.length ? [...shedHours].sort((a, b) => (b.loadShed ?? 0) - (a.loadShed ?? 0))[0] : null;
-  const shedMwh = sheddingIsHourly && hours.length >= 24 ? hours.reduce((a, h) => a + (h.loadShed ?? 0), 0) : 0;
+  // Counts and the MWh total: whole hours whose shed figure was printed, so a
+  // null column (all 24 rows on 23 Nov 2026) is not counted as 24 zeros. The
+  // worst reading is `worstShed` above, across every row — the whole-hours pick
+  // said 1,774 MW at 15:00 on 20 Aug 2026 beside a key reading 1,778 at 19:30.
+  const shedPublished = hours.filter((h) => isNum(h.loadShed));
+  const shedHours = shedPublished.filter((h) => (h.loadShed ?? 0) > 0);
+  const shedMwh = sheddingIsHourly && shedPublished.length >= 24 ? shedPublished.reduce((a, h) => a + (h.loadShed ?? 0), 0) : 0;
 
   const sub = curveIsHourly
     ? 'Generation, demand and load shedding for every hour PGCB publishes, from the NLDC hourly report'
     : sheddingIsHourly
-      ? 'Hourly generation and load shedding from the NLDC hourly report; demand as published for the evening peak hour'
-      : 'Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour';
+      ? `Hourly generation and load shedding from the NLDC hourly report; ${demandScope}`
+      : demandRows === 1
+        ? 'Hourly generation from the NLDC load curve; demand and load shedding as published for the evening peak hour'
+        : `Hourly generation from the NLDC load curve; ${demandScope}`;
 
   if (all.length === 0) {
     return (
@@ -72,13 +89,15 @@ export function TodayLoadNotes() {
   const insight = (
     <>
       The load curve illustrates the shape of generation across this day.
-      {(curveIsHourly || sheddingIsHourly) && worstWhole ? (
+      {(curveIsHourly || sheddingIsHourly) && showShedding && worstShed ? (
         <>
-          {' '}Load was shed in <b>{shedHours.length} of the {hours.length} published hours</b>, worst at <b>{worstWhole.time} Hr</b> with <b>{fmt(Math.round(worstWhole.loadShed ?? 0))} MW</b> unserved
+          {' '}Load was shed in <b>{shedHours.length} of the {shedPublished.length} published hours</b>; the worst reading was <b>{fmt(Math.round(worstShed.v))} MW</b> at <b>{worstShed.r.time} Hr</b>
           {shedMwh > 0 && <> — around <b>{fmt(Math.round(shedMwh))} MWh</b> across the day, taking each hourly figure as the rate for that hour.</>}
         </>
-      ) : curveIsHourly || sheddingIsHourly ? (
-        ' No load shedding was recorded in any published hour of this day.'
+      ) : (curveIsHourly || sheddingIsHourly) && shedPublished.length > 0 ? (
+        ' No load was shed in any published hour of this day.'
+      ) : curveIsHourly ? (
+        ' Hourly load shedding is not published for this day.'
       ) : peakRow && isNum(peakRow.demand) ? (
         <>
           {' '}At the evening peak (<b>{peakRow.time} Hr</b>) PGCB reported demand of <b>{fmt(Math.round(peakRow.demand))} MW</b>
@@ -109,7 +128,7 @@ export function TodayLoadNotes() {
           top
           sw="var(--gp-demand)"
           name={<>Demand <Prov kind="P" /></>}
-          sub={peakDem ? `${curveIsHourly ? 'peak' : 'evening peak only,'} ${fmt(peakDem.v)} MW · ${peakDem.r.time}` : 'not published'}
+          sub={peakDem ? `${demandRows > 1 ? 'peak' : 'evening peak only,'} ${fmt(peakDem.v)} MW · ${peakDem.r.time}` : 'not published'}
         />
         <Row
           top
@@ -176,14 +195,26 @@ export function TodayLoadNotes() {
                 <Term name="Load shed, by hour" color="var(--gp-bad)">Nothing to show: this report states no load shedding in any hour of this day, which is why the two curves meet all the way across.</Term>
               )}
               <Term name="19:30 sample" color="#b58900">
-                The gold reading. PGCB takes one extra reading half an hour before the evening-peak hour, so it sits closer to its neighbours than the rest. It is a reading like any other, not a separate series — listed apart here so its spacing does not read as a mistake.
+                {/* Was "half an hour before the evening-peak hour"; the row is fixed at 19:30 while the peak moves (18:00 on 18 Nov 2026, 18:30 on 23 Nov). */}
+                The gold reading. PGCB’s fixed extra reading at 19:30, between the 19:00 and 20:00 hours, so it sits closer to its neighbours than the rest. It is a reading like any other, not a separate series — listed apart here so its spacing does not read as a mistake.
               </Term>
             </dl>
           </>
         ) : sheddingIsHourly ? (
           <p>
             The <b>generation</b> curve is read from PGCB’s hourly station log, which carries a national total and a shortage figure at every hourly stamp
-            {showShedding ? <>; the <b>load shedding</b> strip along the foot is that shortage column, sized against the day’s worst hour.</> : <>, and records no shortage in any hour of this day.</>} That sheet publishes no demand column, so <b>demand</b> is the evening-peak figure from the report’s front page and appears as a single reading rather than a curve.
+            {showShedding ? <>; the <b>load shedding</b> strip along the foot is that shortage column, sized against the day’s worst hour.</> : <>, and records no shortage in any hour of this day.</>}
+            {demandRows > 1
+              ? <> <b>Demand</b> is published for {demandRows} of the {all.length} readings, and the shortfall band is drawn only where both were.</>
+              : <> That sheet publishes no demand column, so <b>demand</b> is the evening-peak figure from the report’s front page and appears as a single reading rather than a curve.</>}
+          </p>
+        ) : demandRows !== 1 ? (
+          <p>
+            The hourly <b>generation</b> curve is the NLDC load-curve sheet.
+            {demandRows > 1
+              ? <> <b>Demand</b> is published for {demandRows} of the {all.length} readings, and the shortfall band is drawn only where both were.</>
+              : <> No hourly <b>demand</b> is published for this day; P1’s evening-peak figure, where printed, is in the headline figures above.</>}{' '}
+            Hourly load shedding is not published for this day.
           </p>
         ) : (
           <p>

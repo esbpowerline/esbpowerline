@@ -12,6 +12,7 @@ import {
 } from '@/components/news/power-grid/GridExplorerUI';
 import { MobileFold } from '@/components/news/power-grid/MobileFold';
 import { ForecastCurveCanvas } from '@/components/news/power-grid/ForecastCurveCanvas';
+import { buildForecastCurve, forecastStatesAvailability } from '@/lib/data/grid/forecast-curve';
 
 /**
  * What PGCB said the day would be, next to what it was.
@@ -203,21 +204,13 @@ export function ForecastVsActualPanel({
   // generated are marked rather than dropped: PGCB published them, so they
   // belong on the page, but they had already happened and scoring them as
   // predictions would invent an accuracy the forecast never claimed.
-  const actualByHour = new Map((hourlyLoadData ?? []).map((h) => [h.time, h]));
-  const hourly = (forecast?.hourly ?? []).map((row) => {
-    const actual = actualByHour.get(row.time);
-    const gap =
-      row.generationMw != null && actual?.generation != null
-        ? actual.generation - row.generationMw
-        : null;
-    const hour = Number(row.time.slice(0, 2));
-    return {
-      ...row,
-      actualMw: actual?.generation ?? null,
-      gap,
-      beforeIssue: issuedHour != null && hour < issuedHour,
-    };
-  });
+  //
+  // Forecast DEMAND against measured demand, not the Generation column: in a
+  // surplus season that column is availability, and setting it against output
+  // reported 1,930 MW of "miss" on 23 Nov 2026 that was spare capacity. See
+  // lib/data/grid/forecast-curve.ts.
+  const hourly = buildForecastCurve(forecast?.hourly, hourlyLoadData, systemStats, issuedHour);
+  const statesAvailability = forecastStatesAvailability(forecast);
   const scored = hourly.filter((h) => !h.beforeIssue && h.gap != null);
   const meanAbsGap = scored.length
     ? scored.reduce((sum, h) => sum + Math.abs(h.gap!), 0) / scored.length
@@ -235,6 +228,9 @@ export function ForecastVsActualPanel({
       forecast: forecast.maxGenEveningMw,
       actual: systemStats.eveningPeakGen,
       dp: 0,
+      note: statesAvailability
+        ? 'PGCB forecast more generation than demand, so this states generation available, not expected output; the gap is unused capacity, not a miss.'
+        : undefined,
     },
     {
       label: 'Peak demand, evening',
@@ -268,6 +264,9 @@ export function ForecastVsActualPanel({
       forecast: forecast.totalEnergyGenMkwh,
       actual: systemStats.totalEnergyGen,
       dp: 2,
+      note: statesAvailability
+        ? 'Summed from the same availability column, so it runs above what the grid needed to generate.'
+        : undefined,
     },
     {
       label: 'Maximum temperature, Dhaka',
@@ -329,7 +328,10 @@ export function ForecastVsActualPanel({
           table below it. Desktop hides these tiles and shows the table open
           (MobileFold is display: contents there). */}
       {(() => {
-        const peak = rows.find((r) => r.label === 'Peak generation, evening' && r.forecast != null && r.actual != null);
+        // Demand, not generation: in a surplus season PGCB's "Probable Maximum
+        // Generation" is availability, so the generation gap is unused capacity.
+        // Demand is forecast and reported on the same basis in every season.
+        const peak = rows.find((r) => r.label === 'Peak demand, evening' && r.forecast != null && r.actual != null);
         const energy = rows.find((r) => r.label === 'Total energy generated' && r.forecast != null && r.actual != null);
         const signed = (n: number, dp: number) => `${n > 0 ? '+' : n < 0 ? '−' : ''}${fmt(Math.abs(n), dp)}`;
         const tiles: { label: string; value: string; sub: string }[] = [];
@@ -337,14 +339,14 @@ export function ForecastVsActualPanel({
           const gap = peak.actual! - peak.forecast!;
           const pct = peak.forecast ? (gap / Math.abs(peak.forecast)) * 100 : null;
           tiles.push({
-            label: 'Evening peak vs forecast',
+            label: 'Evening peak demand vs forecast',
             value: `${signed(gap, 0)} MW`,
             sub: `${fmt(peak.actual, 0)} actual · ${fmt(peak.forecast, 0)} forecast${pct != null ? ` (${signed(pct, 1)}%)` : ''}`,
           });
         }
         if (meanAbsGap != null) {
           tiles.push({
-            label: 'Average hourly miss',
+            label: 'Average hourly demand miss',
             value: `${fmt(Math.round(meanAbsGap), 0)} MW`,
             sub: worst ? `widest at ${worst.time} (${signed(Math.round(worst.gap!), 0)} MW)` : `${scored.length} forecast hours`,
           });
@@ -519,7 +521,7 @@ export function ForecastVsActualPanel({
           <div className="grid-explorer-chart-card__head grid-explorer-chart-card__head--border">
             <div className="min-w-0">
               <h4 className="text-sm font-bold text-foreground">
-                Forecast curve against the measured one
+                Forecast demand against measured demand
               </h4>
               {meanAbsGap != null && (
                 <p className="grid-explorer-chart-card__sub">
@@ -549,7 +551,7 @@ export function ForecastVsActualPanel({
           <ForecastCurveCanvas
             points={hourly.map((h) => ({
               time: h.time,
-              forecastMw: h.generationMw,
+              forecastMw: h.forecastMw,
               actualMw: h.actualMw,
               beforeIssue: h.beforeIssue,
             }))}

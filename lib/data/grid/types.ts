@@ -5,7 +5,7 @@ export interface GridSystemStats {
   dayPeakGen: number;
   eveningPeakGen: number;
   dayPeakDemand: number | null;
-  eveningPeakDemand: number;
+  eveningPeakDemand: number | null;
   /**
    * The day's own generation extremes, as PGCB defines them: `maxGen` is the
    * peak of the daily load curve, `minGen` the 08:00 morning trough.
@@ -39,11 +39,13 @@ export interface GridSystemStats {
    */
   totalGasSuppliedPower: number;
   /**
-   * Derived, not P1's printed "Production Cost per KWHr": the parser divides
-   * `totalDailyCost` by `totalEnergyGen` (parse_daily_reports.py:1890) and
-   * never reads the printed cell. Every surface must mark it D.
+   * P1's printed "Production Cost per KWHr" where the layout has one (2025+),
+   * else our `totalDailyCost / totalEnergyGen`. `avgProductionCostStated` says
+   * which; a surface marks it P only when that flag is true. Days parsed before
+   * 2026-11-25 carry no flag and are therefore D.
    */
   avgProductionCost: number;
+  avgProductionCostStated?: boolean;
   /** P1 "Production Cost (Tk.)" total row, in Taka. */
   totalDailyCost: number;
   /**
@@ -63,6 +65,8 @@ export interface GridSystemStats {
     eveningPeakDemand?: string;
     minGen?: string;
     maxGen?: string;
+    /** The hour P1's zone-wise load-shed table states in its own caption. */
+    zoneTable?: string;
   };
 }
 

@@ -10,6 +10,7 @@ import { distributionCompanyForLabel, productionFieldsForLabel, cleanFieldName }
 import { coverageLabel } from '@/lib/data/grid/coverage';
 import { petrobanglaFiledAs, petrobanglaGasDay } from '@/lib/data/grid/observation-window';
 import { getDistributionGrandTotal } from '@/lib/data/petrobangla/compute';
+import { distributorDisplayLabel } from '@/lib/data/petrobangla/distributor-labels';
 
 type View = 'today' | 'production' | 'distribution';
 const Daily = () => <span className="gp-tag">Daily</span>;
@@ -31,7 +32,7 @@ export function GasScreen() {
   if (date < '2020-01-12') {
     return (
       <div className="gp-screen">
-        <Empty title="Petrobangla Gas Production & Distribution Data" why={<>No official records are available for the selected date. Petrobangla gas production tracking officially started on January 12, 2020.<br /><span className="gpg-sub">Official Backlog Start Date: January 12, 2020</span></>} />
+        <Empty title="Petrobangla Gas Production & Distribution Data" why="No Petrobangla report is held for the selected date. This archive’s Petrobangla daily reports begin 12 Jan 2020." />
       </div>
     );
   }
@@ -240,7 +241,7 @@ function Production({ feed }: { feed: GasFeed }) {
               />
             );
           })}
-          <Row top wrap name={<>Grand Total Production <Prov kind="P" /></>} sub={<>Condensate {fmt(feed.totalCond, 1)} BBL · 100.0%</>} value={<>{fmt(feed.totalGas, 1)} <span className="gp-u">MMCFD</span></>} />
+          <Row top wrap name={<>Grand Total Production <Prov kind="P" /></>} sub={<>Condensate {fmt(feed.totalCond, 1)} BBLD · 100.0%</>} value={<>{fmt(feed.totalGas, 1)} <span className="gp-u">MMCFD</span></>} />
         </div>
         {isNum(grand?.gas_mmcfd) && (() => {
           const d = feed.totalGas - grand!.gas_mmcfd;
@@ -310,12 +311,12 @@ function Distribution({ feed }: { feed: GasFeed }) {
           const c = distributionCompanyForLabel(a, g.company);
           const color = distColor(g.company);
           return (
-            <Row key={i} sw={color} wrap name={g.company}
+            <Row key={i} sw={color} wrap name={distributorDisplayLabel(g.company)}
               sub={<>Power {g.power.toFixed(1)} · Fertilizer {g.fertilizer.toFixed(1)} · Others {g.others.toFixed(1)}</>}
               value={<>{fmt(g.total, 1)} <span className="gp-u">MMCFD</span></>}
               small={grand > 0 ? `${((g.total / grand) * 100).toFixed(0)}% of total` : undefined}
               chevron={!!c}
-              onClick={c ? () => open(<DistributionSheet label={g.company} c={c} color={color} />) : undefined}
+              onClick={c ? () => open(<DistributionSheet label={distributorDisplayLabel(g.company)} c={c} color={color} />) : undefined}
               meter={grand > 0 ? <Meter value={g.total} max={grand} color={color} /> : undefined} />
           );
         })}
